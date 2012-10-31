@@ -1,8 +1,7 @@
 #ifndef CAMERA_DEVICE_BASE_HPP
 #define CAMERA_DEVICE_BASE_HPP
 
-#include <iostream>
-using namespace std;
+#include <string>
 
 namespace bias {
 
@@ -12,16 +11,13 @@ namespace bias {
     {
         public:
             CameraDevice_base() {};
-            CameraDevice_base(Guid guid) 
-            { 
-                cout << __PRETTY_FUNCTION__ << endl;
-                guid_ = guid;
-            };
+            CameraDevice_base(Guid guid) {guid_ = guid;};
             virtual ~CameraDevice_base() {};
             virtual CameraLib getCameraLib() {};
             virtual void connect() {};
             virtual void printInfo() {};
             virtual void printGuid() {};
+            virtual std::string toString() {return std::string("camera not defined");}
 
         protected:
             Guid guid_;

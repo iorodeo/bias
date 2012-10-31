@@ -3,13 +3,10 @@
 #define GUID_DEVICE_FC2_HPP
 
 #include <string>
-#include <iostream>
 #include <stdint.h>
 #include "C/FlyCapture2_C.h"
 #include "basic_types.hpp"
 #include "guid_device_base.hpp"
-
-using namespace std;
 
 namespace bias {
 
@@ -21,12 +18,12 @@ namespace bias {
             virtual ~GuidDevice_fc2() {};
             virtual CameraLib getCameraLib();
             virtual void printValue();
-            virtual string toString();
+            virtual std::string toString();
             fc2PGRGuid getValue();
 
         private:
             fc2PGRGuid value_;
-            virtual bool isEqual( GuidDevice_base &guid );
+            virtual bool isEqual(GuidDevice_base &guid);
 
     };
 }

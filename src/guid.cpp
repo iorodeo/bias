@@ -1,20 +1,32 @@
 #include "guid.hpp"
 
-using namespace std;
-
 namespace bias {
 
     // friend functions
     // ------------------------------------------------------------------------
-    ostream& operator<< (ostream &out, Guid &guid)
+    std::ostream& operator<< (std::ostream &out, Guid &guid)
     {
         out << guid.toString();
         return out;
     }
 
+    bool operator== (Guid &guid0, Guid &guid1) 
+    {
+        return *(guid0.guidDevicePtr_) ==  *(guid1.guidDevicePtr_);
+    }
+
+    bool operator!= (Guid &guid0, Guid &guid1)
+    {
+        return *(guid0.guidDevicePtr_) != *(guid1.guidDevicePtr_);
+    }
+
+    //  Methods
+    // ------------------------------------------------------------------------
+    
+
     Guid::Guid() 
     { 
-        shared_ptr<GuidDevice_base> tempPtr( new GuidDevice_base() );
+        std::shared_ptr<GuidDevice_base> tempPtr( new GuidDevice_base() );
         guidDevicePtr_ = tempPtr; 
     }
 
@@ -23,7 +35,7 @@ namespace bias {
         return guidDevicePtr_ -> getCameraLib();
     }
 
-    string Guid::toString()
+    std::string Guid::toString()
     {
         return guidDevicePtr_ -> toString();
     }
@@ -41,7 +53,7 @@ namespace bias {
 
     Guid::Guid(fc2PGRGuid guid)
     {
-        shared_ptr<GuidDevice_fc2> tempPtr( new GuidDevice_fc2(guid) );
+        std::shared_ptr<GuidDevice_fc2> tempPtr( new GuidDevice_fc2(guid) );
         guidDevicePtr_ = tempPtr;
     }
 
@@ -50,8 +62,8 @@ namespace bias {
         fc2PGRGuid rval;
         if ( getCameraLib() == CAMERA_LIB_FC2 ) 
         {
-            shared_ptr<GuidDevice_fc2> tempPtr; 
-            tempPtr = dyanamic_pointer_cast<GuidDevice_fc2>(guidDevicePtr_);
+            std::shared_ptr<GuidDevice_fc2> tempPtr; 
+            tempPtr = std::dynamic_pointer_cast<GuidDevice_fc2>(guidDevicePtr_);
             rval = tempPtr -> getValue();
         }
         else 
@@ -72,7 +84,7 @@ namespace bias {
 
     Guid::Guid(uint64_t guid)
     {
-        shared_ptr<GuidDevice_dc1394> tempPtr( new GuidDevice_dc1394(guid) );
+        std::shared_ptr<GuidDevice_dc1394> tempPtr( new GuidDevice_dc1394(guid) );
         guidDevicePtr_ =  tempPtr;
     }
 
@@ -81,8 +93,8 @@ namespace bias {
         uint64_t rval;
         if ( getCameraLib() == CAMERA_LIB_DC1394 )
         { 
-            shared_ptr<GuidDevice_dc1394> tempPtr; 
-            tempPtr = dynamic_pointer_cast<GuidDevice_dc1394>(guidDevicePtr_);
+            std::shared_ptr<GuidDevice_dc1394> tempPtr; 
+            tempPtr = std::dynamic_pointer_cast<GuidDevice_dc1394>(guidDevicePtr_);
             rval = tempPtr -> getValue();
         }
         else 

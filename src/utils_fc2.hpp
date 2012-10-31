@@ -2,12 +2,11 @@
 #ifndef UTILS_FC2_HPP
 #define UTILS_FC2_HPP
 
+#include <string>
 #include "C/FlyCapture2_C.h"
 
-using namespace std;
-
 namespace bias {
-    string getInterfaceTypeString_fc2(fc2InterfaceType ifaceType);
+    std::string getInterfaceTypeString_fc2(fc2InterfaceType ifaceType);
 }
 
 #endif

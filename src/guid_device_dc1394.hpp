@@ -3,7 +3,6 @@
 #define GUID_DEVICE_DC1394_HPP
 
 #include <string>
-#include <iostream>
 #include "basic_types.hpp"
 #include "guid_device_base.hpp"
 
@@ -18,7 +17,7 @@ namespace bias {
             virtual ~GuidDevice_dc1394() {};
             virtual CameraLib getCameraLib();
             virtual void printValue();
-            virtual string toString();
+            virtual std::string toString();
             uint64_t getValue();
 
         private:

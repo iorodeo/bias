@@ -18,6 +18,7 @@ namespace bias {
             virtual void connect() {};
             virtual void printInfo() {};
             virtual void printGuid() {};
+            virtual std::string toString();
 
     };
 

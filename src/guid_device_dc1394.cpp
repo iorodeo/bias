@@ -1,8 +1,8 @@
 #ifdef WITH_DC1394
-#include <sstream>
-#include "guid_device_dc1394.hpp"
 
-using namespace std;
+#include <sstream>
+#include <iostream>
+#include "guid_device_dc1394.hpp"
 
 namespace bias {
 
@@ -18,14 +18,14 @@ namespace bias {
 
     string GuidDevice_dc1394::toString()
     {
-        stringstream ss;
+        std::stringstream ss;
         ss << hex << value_ << dec << endl;
         return ss.str();
     }
 
     void GuidDevice_dc1394::printValue() 
     {
-        cout << "guid: " << toString() << endl;
+        std::cout << "guid: " << toString() << endl;
     }
 
     uint64_t GuidDevice_dc1394::getValue()

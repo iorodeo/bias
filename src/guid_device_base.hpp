@@ -5,8 +5,6 @@
 #include <iostream>
 #include "basic_types.hpp"
 
-using namespace std;
-
 namespace bias {
 
     class GuidDevice_base 
@@ -25,8 +23,8 @@ namespace bias {
             GuidDevice_base() {};
             virtual ~GuidDevice_base() {};
             virtual CameraLib getCameraLib() { return CAMERA_LIB_UNDEFINED; };
-            virtual void printValue() { cout << toString() << endl; };
-            virtual string toString() { return string("value not defined"); };
+            virtual void printValue() { std::cout << toString() << std::endl; };
+            virtual std::string toString() { return std::string("guid value not defined"); };
 
         private:
             virtual bool isEqual(GuidDevice_base &guid) 

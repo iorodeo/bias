@@ -16,7 +16,6 @@
 #include "guid_device_dc1394.hpp"
 #endif
 
-using namespace std;
 
 namespace bias {
     
@@ -30,17 +29,17 @@ namespace bias {
         
         friend bool operator== (Guid &guid0, Guid &guid1);
         friend bool operator!= (Guid &guid0, Guid &guid1);
-        friend ostream& operator<< (ostream &out, Guid &guid);
+        friend std::ostream& operator<< (std::ostream &out, Guid &guid);
 
         public:
             Guid();
             ~Guid() {};
             CameraLib getCameraLib();
             void printValue();
-            string toString();
+            std::string toString();
 
         private:
-            shared_ptr<GuidDevice_base> guidDevicePtr_;
+            std::shared_ptr<GuidDevice_base> guidDevicePtr_;
 
 #ifdef WITH_FC2
         // FlyCapture2 specific features

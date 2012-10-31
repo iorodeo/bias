@@ -2,10 +2,11 @@
 #ifndef CAMERADEV_FC2_HPP
 #define CAMERADEV_FC2_HPP
 
-#include "C/FlyCapture2_C.h"
+#include <string>
 #include "guid.hpp"
 #include "basic_types.hpp"
 #include "camera_device_base.hpp"
+#include "C/FlyCapture2_C.h"
 
 namespace bias {
 
@@ -19,6 +20,7 @@ namespace bias {
             virtual void connect();
             virtual void printInfo();
             virtual void printGuid();
+            virtual std::string toString();
 
         private:
             fc2Context context_;

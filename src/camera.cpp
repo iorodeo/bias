@@ -1,4 +1,3 @@
-#include <iostream>
 #include "camera.hpp"
 #ifdef WITH_FC2
 #include "camera_device_fc2.hpp"
@@ -7,29 +6,27 @@
 #include "camera_device_dc1394.hpp"
 #endif
 
-using namespace std;
-
 namespace bias {
 
 
     Camera::Camera() { 
-        shared_ptr<CameraDevice_base> tempPtr( new CameraDevice_base );
+        std::shared_ptr<CameraDevice_base> tempPtr( new CameraDevice_base );
         cameraDevicePtr_ = tempPtr; 
     }
 
     Camera::Camera(Guid guid) 
     {
-        cout << __PRETTY_FUNCTION__ << endl;
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
 
         switch ( guid.getCameraLib() )
         {
             case CAMERA_LIB_FC2:
-                cout << "  case CAMERA_LIB_FC2" << endl;
+                std::cout << "  case CAMERA_LIB_FC2" << std::endl;
                 createCameraDevice_fc2(guid);
                 break;
 
             case CAMERA_LIB_DC1394:
-                cout << "  case CAMERA_LIB_DC1394" << endl;
+                std::cout << "  case CAMERA_LIB_DC1394" << std::endl;
                 createCameraDevice_dc1394(guid);
 
             case CAMERA_LIB_UNDEFINED:
@@ -56,8 +53,8 @@ namespace bias {
 
     void Camera::createCameraDevice_fc2(Guid guid)
     { 
-        cout << __PRETTY_FUNCTION__ << endl;
-        shared_ptr<CameraDevice_fc2> tempPtr( new CameraDevice_fc2(guid) );
+        std::cout << __PRETTY_FUNCTION__ << std::endl; 
+        std::shared_ptr<CameraDevice_fc2> tempPtr( new CameraDevice_fc2(guid) );
         cameraDevicePtr_ = tempPtr;
     }
 
@@ -79,8 +76,8 @@ namespace bias {
 
     void Camera::createCameraDevice_dc1394(Guid guid)
     { 
-        cout << __PRETTY_FUNCTION__ << endl;
-        shared_ptr<CameraDevice_dc1394> tempPtr( new CameraDevice_dc1394(guid) );
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        std::shared_ptr<CameraDevice_dc1394> tempPtr( new CameraDevice_dc1394(guid) );
         cameraDevicePtr_ = tempPtr;
     }
 

@@ -1,32 +1,30 @@
 #ifdef WITH_FC2
+#include <sstream>
 #include <iostream>
 #include "camera_device_fc2.hpp"
 #include "utils_fc2.hpp"
-
-using namespace std;
 
 namespace bias {
 
     CameraDevice_fc2::CameraDevice_fc2(Guid guid) 
         : CameraDevice_base(guid)
     {
-        cout << __PRETTY_FUNCTION__ << endl;
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
         fc2Error error= fc2CreateContext(&context_);
         if ( error != FC2_ERROR_OK) {
-            cout << "Error: fc2CreateContext" << endl;
+            std::cout << "Error: fc2CreateContext" << std::endl;
             // TO DO ... throw some kind of error
         }
     }
 
-
     void CameraDevice_fc2::connect() 
     {
-        cout << "CameraDevice_fc2::connect" << endl;
+        std::cout << "CameraDevice_fc2::connect" << std::endl;
         fc2PGRGuid guid = getGuid_fc2();
 
         fc2Error error = fc2Connect(context_, &guid);
         if ( error != FC2_ERROR_OK ) {
-            cout << "Error: fc2Connect" << endl;
+            std::cout << "Error: fc2Connect" << std::endl;
             // TO DO ... throw some kind of error
         }
     }
@@ -38,37 +36,46 @@ namespace bias {
 
     void CameraDevice_fc2::printInfo()
     {
-        fc2Error error;
-        fc2CameraInfo camInfo;
-        error = fc2GetCameraInfo( context_, &camInfo );
-        if ( error != FC2_ERROR_OK ) {
-            printf( "Error: unable to get camera info\n" );
-            // TO DO ... throw some kind of error
-            return;
-        }
-
-        cout << endl;
-        cout << " ------------------ " << endl;
-        cout << " CAMERA INFORMATION " << endl;
-        cout << " ------------------ " << endl;
-        cout << endl;
-
-        cout << " Guid:           " << guid_ << endl;
-        cout << " Serial number:  " << camInfo.serialNumber << endl;
-        cout << " Camera model:   " << camInfo.modelName << endl;
-        cout << " Camera vendor:  " << camInfo.vendorName << endl;
-        cout << " Sensor          " << endl;
-        cout << "   Type:         " << camInfo.sensorInfo << endl;
-        cout << "   Resolution:   " << camInfo.sensorResolution << endl;
-        cout << " Firmware        " << endl;     
-        cout << "   Version:      " << camInfo.firmwareVersion << endl;
-        cout << "   Build time:   " << camInfo.firmwareBuildTime << endl;
-        cout << " Color camera:   " << boolalpha << (bool) camInfo.isColorCamera << endl;
-        cout << " Interface:      " << getInterfaceTypeString_fc2(camInfo.interfaceType) << endl;
-        cout << endl;
+        std::cout << toString();
     }
 
     void CameraDevice_fc2::printGuid() { guid_.printValue(); }
+
+
+    std::string CameraDevice_fc2::toString()
+    {
+        std::stringstream ss; 
+        fc2Error error;
+        fc2CameraInfo camInfo;
+        error = fc2GetCameraInfo( context_, &camInfo );
+        if ( error != FC2_ERROR_OK ) 
+        {
+            ss << "Error: unable to get camera info";
+        }
+        else
+        {
+            ss << std::endl;
+            ss << " ------------------ " << std::endl;
+            ss << " CAMERA INFORMATION " << std::endl;
+            ss << " ------------------ " << std::endl;
+            ss << std::endl;
+
+            ss << " Guid:           " << guid_ << std::endl;
+            ss << " Serial number:  " << camInfo.serialNumber << std::endl;
+            ss << " Camera model:   " << camInfo.modelName << std::endl;
+            ss << " Camera vendor:  " << camInfo.vendorName << std::endl;
+            ss << " Sensor          " << std::endl;
+            ss << "   Type:         " << camInfo.sensorInfo << std::endl;
+            ss << "   Resolution:   " << camInfo.sensorResolution << std::endl;
+            ss << " Firmware        " << std::endl;     
+            ss << "   Version:      " << camInfo.firmwareVersion << std::endl;
+            ss << "   Build time:   " << camInfo.firmwareBuildTime << std::endl;
+            ss << " Color camera:   " << std::boolalpha << (bool) camInfo.isColorCamera << std::endl;
+            ss << " Interface:      " << getInterfaceTypeString_fc2(camInfo.interfaceType) << std::endl;
+            ss << std::endl;
+        }
+        return ss.str();
+    };
 
     // Private methods
     // ---------------------------------------------------------------------------

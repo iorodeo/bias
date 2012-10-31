@@ -76,8 +76,11 @@ int main(int argc, char** argv)
         return 0;
     }    
 
+
+
     guidObj = Guid(guid);
     cout << "guidObj: " << guidObj << endl;
+
     camera = Camera(guid);
     camera.printGuid();
     camera.connect();

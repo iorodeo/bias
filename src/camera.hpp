@@ -2,11 +2,10 @@
 #define CAMERA_HPP
 
 #include <memory>
+#include <iostream>
 #include "guid.hpp"
 #include "basic_types.hpp"
 #include "camera_device_base.hpp"
-
-using namespace std;
 
 namespace bias {
 
@@ -17,6 +16,8 @@ namespace bias {
         // which are accessed via different underlying libraries e.g. libdc1394, 
         // flycapture2, etc.
         // --------------------------------------------------------------------
+       
+        friend std::ostream& operator<< (std::ostream &out, Camera &camera);
 
         public:
             Camera();
@@ -27,7 +28,7 @@ namespace bias {
             void printGuid();
 
         private:
-            shared_ptr<CameraDevice_base> cameraDevicePtr_;
+            std::shared_ptr<CameraDevice_base> cameraDevicePtr_;
             void createCameraDevice_fc2(Guid guid);
             void createCameraDevice_dc1394(Guid guid);
 

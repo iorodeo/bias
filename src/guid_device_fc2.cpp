@@ -1,8 +1,8 @@
 #ifdef WITH_FC2
-#include <sstream>
-#include "guid_device_fc2.hpp"
 
-using namespace std;
+#include <sstream>
+#include <iostream>
+#include "guid_device_fc2.hpp"
 
 namespace bias {
 
@@ -16,19 +16,19 @@ namespace bias {
         return CAMERA_LIB_FC2; 
     }
 
-    string GuidDevice_fc2::toString() 
+    std::string GuidDevice_fc2::toString() 
     {
-        stringstream ss;
+        std::stringstream ss;
         for ( int i=0; i<4; i++ ) {
-            ss << hex << value_.value[i];
+            ss << std::hex << value_.value[i];
         }
-        ss << dec;
+        ss << std::dec;
         return ss.str();
     }
 
     void GuidDevice_fc2::printValue() 
     {
-        cout << "guid: " << toString() << endl;
+        std::cout << "guid: " << toString() << std::endl;
     }
     
     fc2PGRGuid GuidDevice_fc2::getValue() { return value_; }
