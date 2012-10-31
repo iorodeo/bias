@@ -13,7 +13,6 @@ namespace bias {
 
 
     Camera::Camera() { 
-        ///cameraDevicePtr_ = NULL;
         shared_ptr<CameraDevice_base> tempPtr( new CameraDevice_base );
         cameraDevicePtr_ = tempPtr; 
     }
@@ -58,8 +57,6 @@ namespace bias {
     void Camera::createCameraDevice_fc2(Guid guid)
     { 
         cout << __PRETTY_FUNCTION__ << endl;
-        //cameraDevice_fc2_ = CameraDevice_fc2(guid); 
-        //cameraDevicePtr_ = (CameraDevice_base*) &cameraDevice_fc2_;
         shared_ptr<CameraDevice_fc2> tempPtr( new CameraDevice_fc2(guid) );
         cameraDevicePtr_ = tempPtr;
     }
@@ -83,8 +80,6 @@ namespace bias {
     void Camera::createCameraDevice_dc1394(Guid guid)
     { 
         cout << __PRETTY_FUNCTION__ << endl;
-        //cameraDevice_dc1394_ = CameraDevice_dc1394(guid); 
-        //cameraDevicePtr_ = (CameraDevice_base*) &cameraDevice_dc1394_;
         shared_ptr<CameraDevice_dc1394> tempPtr( new CameraDevice_dc1394(guid) );
         cameraDevicePtr_ = tempPtr;
     }
