@@ -16,16 +16,16 @@ namespace bias {
         return CAMERA_LIB_DC1394;
     }
 
-    string GuidDevice_dc1394::toString()
+    std::string GuidDevice_dc1394::toString()
     {
         std::stringstream ss;
-        ss << hex << value_ << dec << endl;
+        ss << std::hex << value_ << std::dec << std::endl;
         return ss.str();
     }
 
     void GuidDevice_dc1394::printValue() 
     {
-        std::cout << "guid: " << toString() << endl;
+        std::cout << "guid: " << toString() << std::endl;
     }
 
     uint64_t GuidDevice_dc1394::getValue()
