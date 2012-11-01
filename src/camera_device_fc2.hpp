@@ -5,12 +5,12 @@
 #include <string>
 #include "guid.hpp"
 #include "basic_types.hpp"
-#include "camera_device_base.hpp"
+#include "camera_device.hpp"
 #include "C/FlyCapture2_C.h"
 
 namespace bias {
 
-    class CameraDevice_fc2 : public CameraDevice_base
+    class CameraDevice_fc2 : public CameraDevice
     {
         public:
             CameraDevice_fc2() {};

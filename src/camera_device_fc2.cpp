@@ -7,7 +7,7 @@
 namespace bias {
 
     CameraDevice_fc2::CameraDevice_fc2(Guid guid) 
-        : CameraDevice_base(guid)
+        : CameraDevice(guid)
     {
         std::cout << __PRETTY_FUNCTION__ << std::endl;
         fc2Error error= fc2CreateContext(&context_);

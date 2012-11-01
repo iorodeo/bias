@@ -4,11 +4,11 @@
 
 #include "guid.hpp"
 #include "basic_types.hpp"
-#include "camera_device_base.hpp"
+#include "camera_device.hpp"
 
 namespace bias {
 
-    class CameraDevice_dc1394 : public CameraDevice_base
+    class CameraDevice_dc1394 : public CameraDevice
     {
         public:
             CameraDevice_dc1394() {};

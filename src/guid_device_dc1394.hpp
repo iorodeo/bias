@@ -4,11 +4,11 @@
 
 #include <string>
 #include "basic_types.hpp"
-#include "guid_device_base.hpp"
+#include "guid_device.hpp"
 
 namespace bias {
 
-    class GuidDevice_dc1394 : public GuidDevice_base
+    class GuidDevice_dc1394 : public GuidDevice
     {
 
         public:
@@ -22,7 +22,7 @@ namespace bias {
 
         private:
             uint64_t value_;
-            virtual bool isEqual( GuidDevice_base &guid );
+            virtual bool isEqual( GuidDevice &guid );
 
     };
 }

@@ -5,7 +5,7 @@
 #include <memory>
 #include <stdint.h>
 #include "basic_types.hpp"
-#include "guid_device_base.hpp"
+#include "guid_device.hpp"
 
 #ifdef WITH_FC2
 #include "C/FlyCapture2_C.h"
@@ -39,7 +39,7 @@ namespace bias {
             std::string toString();
 
         private:
-            std::shared_ptr<GuidDevice_base> guidDevicePtr_;
+            std::shared_ptr<GuidDevice> guidDevicePtr_;
 
 #ifdef WITH_FC2
         // FlyCapture2 specific features

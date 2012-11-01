@@ -6,11 +6,11 @@
 #include <stdint.h>
 #include "C/FlyCapture2_C.h"
 #include "basic_types.hpp"
-#include "guid_device_base.hpp"
+#include "guid_device.hpp"
 
 namespace bias {
 
-    class GuidDevice_fc2 : public GuidDevice_base 
+    class GuidDevice_fc2 : public GuidDevice 
     {
         public:
             GuidDevice_fc2() {};
@@ -23,7 +23,7 @@ namespace bias {
 
         private:
             fc2PGRGuid value_;
-            virtual bool isEqual(GuidDevice_base &guid);
+            virtual bool isEqual(GuidDevice &guid);
 
     };
 }

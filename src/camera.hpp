@@ -5,7 +5,7 @@
 #include <iostream>
 #include "guid.hpp"
 #include "basic_types.hpp"
-#include "camera_device_base.hpp"
+#include "camera_device.hpp"
 
 namespace bias {
 
@@ -28,7 +28,7 @@ namespace bias {
             void printGuid();
 
         private:
-            std::shared_ptr<CameraDevice_base> cameraDevicePtr_;
+            std::shared_ptr<CameraDevice> cameraDevicePtr_;
             void createCameraDevice_fc2(Guid guid);
             void createCameraDevice_dc1394(Guid guid);
 

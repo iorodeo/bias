@@ -10,7 +10,7 @@ namespace bias {
 
 
     Camera::Camera() { 
-        std::shared_ptr<CameraDevice_base> tempPtr( new CameraDevice_base );
+        std::shared_ptr<CameraDevice> tempPtr( new CameraDevice );
         cameraDevicePtr_ = tempPtr; 
     }
 

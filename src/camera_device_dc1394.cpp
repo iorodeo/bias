@@ -5,7 +5,7 @@
 namespace bias {
 
     CameraDevice_dc1394::CameraDevice_dc1394(Guid guid) 
-        : CameraDevice_base(guid)
+        : CameraDevice(guid)
     {
         std::cout << __PRETTY_FUNCTION__ << std::endl;
 

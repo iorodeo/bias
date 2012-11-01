@@ -33,7 +33,7 @@ namespace bias {
         return value_;
     }
 
-    bool GuidDevice_dc1394::isEqual(GuidDevice_base &guid)
+    bool GuidDevice_dc1394::isEqual(GuidDevice &guid)
     {
         bool rval = false;
         if ( guid.getCameraLib() != CAMERA_LIB_DC1394 ) 

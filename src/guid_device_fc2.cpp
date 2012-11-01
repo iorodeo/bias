@@ -33,7 +33,7 @@ namespace bias {
     
     fc2PGRGuid GuidDevice_fc2::getValue() { return value_; }
 
-    bool GuidDevice_fc2::isEqual(GuidDevice_base &guid)
+    bool GuidDevice_fc2::isEqual(GuidDevice &guid)
     {
         bool rval = false;
         GuidDevice_fc2 *guidPtr;

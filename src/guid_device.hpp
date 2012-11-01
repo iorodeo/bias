@@ -1,5 +1,5 @@
-#ifndef GUID_DEVICE_BASE_HPP
-#define GUID_DEVICE_BASE_HPP
+#ifndef GUID_DEVICE_HPP
+#define GUID_DEVICE_HPP
 
 #include <string>
 #include <iostream>
@@ -7,33 +7,33 @@
 
 namespace bias {
 
-    class GuidDevice_base 
+    class GuidDevice 
     {
-        friend bool operator== (GuidDevice_base &guid0, GuidDevice_base &guid1)
+        friend bool operator== (GuidDevice &guid0, GuidDevice &guid1)
         {
             return guid0.isEqual(guid1);
         };
         
-        friend bool operator!= (GuidDevice_base &guid0, GuidDevice_base &guid1)
+        friend bool operator!= (GuidDevice &guid0, GuidDevice &guid1)
         {
             return !(guid0.isEqual(guid1));
         };
         
         public:
-            GuidDevice_base() {};
-            virtual ~GuidDevice_base() {};
+            GuidDevice() {};
+            virtual ~GuidDevice() {};
             virtual CameraLib getCameraLib() { return CAMERA_LIB_UNDEFINED; };
             virtual void printValue() { std::cout << toString() << std::endl; };
             virtual std::string toString() { return std::string("guid value not defined"); };
 
         private:
-            virtual bool isEqual(GuidDevice_base &guid) 
+            virtual bool isEqual(GuidDevice &guid) 
             { 
                 return false; 
             };
-    }; // class GuidDevice_base
+    }; // class GuidDevice
 
 } // namespace bias
 
 
-#endif // #ifndef GUID_DEVICE_BASE_HPP
+#endif // #ifndef GUID_DEVICE_HPP

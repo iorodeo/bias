@@ -26,7 +26,7 @@ namespace bias {
 
     Guid::Guid() 
     { 
-        std::shared_ptr<GuidDevice_base> tempPtr( new GuidDevice_base() );
+        std::shared_ptr<GuidDevice> tempPtr( new GuidDevice() );
         guidDevicePtr_ = tempPtr; 
     }
 
