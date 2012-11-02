@@ -9,15 +9,10 @@ namespace bias {
 
     class GuidDevice 
     {
-        friend bool operator== (GuidDevice &guid0, GuidDevice &guid1)
-        {
-            return guid0.isEqual(guid1);
-        };
-        
-        friend bool operator!= (GuidDevice &guid0, GuidDevice &guid1)
-        {
-            return !(guid0.isEqual(guid1));
-        };
+        // --------------------------------------------------------------------
+        // Base clase for device (library) specific guid's
+        // --------------------------------------------------------------------
+
         
         public:
             GuidDevice() {};
@@ -26,11 +21,41 @@ namespace bias {
             virtual void printValue() { std::cout << toString() << std::endl; };
             virtual std::string toString() { return std::string("guid value not defined"); };
 
-        private:
-            virtual bool isEqual(GuidDevice &guid) 
-            { 
-                return false; 
+            friend bool operator== (GuidDevice &guid0, GuidDevice &guid1)
+            {
+                return guid0.isEqual(guid1);
             };
+            
+            friend bool operator!= (GuidDevice &guid0, GuidDevice &guid1)
+            {
+                return !(guid0.isEqual(guid1));
+            };
+
+            friend bool operator< (GuidDevice &guid0, GuidDevice &guid1)
+            {
+                return guid0.lessThan(guid1);
+            };
+
+            friend bool operator<= (GuidDevice guid0, GuidDevice &guid1)
+            {
+                return guid0.lessThanEqual(guid1);
+            };
+
+            friend bool operator> (GuidDevice &guid0, GuidDevice &guid1)
+            {
+                return !(guid0.lessThanEqual(guid1));
+            };
+
+            friend bool operator>= (GuidDevice guid0, GuidDevice &guid1)
+            {
+                return !(guid0.lessThan(guid1));
+            };
+
+        private:
+            virtual bool isEqual(GuidDevice &guid) { return false; };
+            virtual bool lessThan(GuidDevice &guid) { return false; };
+            virtual bool lessThanEqual(GuidDevice &guid) { return false; };
+
     }; // class GuidDevice
 
 } // namespace bias

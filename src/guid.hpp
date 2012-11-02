@@ -27,16 +27,23 @@ namespace bias {
         // underlying libraries  e.g. libdc1394, flycapture2, etc.
         // --------------------------------------------------------------------
         
-        friend bool operator== (Guid &guid0, Guid &guid1);
-        friend bool operator!= (Guid &guid0, Guid &guid1);
-        friend std::ostream& operator<< (std::ostream &out, Guid &guid);
 
         public:
             Guid();
-            ~Guid() {};
+            ~Guid();
             CameraLib getCameraLib();
             void printValue();
             std::string toString();
+
+            friend bool operator== (Guid &guid0, Guid &guid1);
+            friend bool operator!= (Guid &guid0, Guid &guid1);
+            friend bool operator<  (Guid &guid0, Guid &guid1);
+            friend bool operator<= (Guid &guid0, Guid &guid1);
+            friend bool operator>  (Guid &guid0, Guid &guid1);
+            friend bool operator>= (Guid &guid0, Guid &guid1);
+
+            friend std::ostream& operator<< (std::ostream &out, Guid &guid);
+
 
         private:
             std::shared_ptr<GuidDevice> guidDevicePtr_;
@@ -56,6 +63,22 @@ namespace bias {
            
     };
 
-}
+
+    class GuidPtrCmp 
+        : public std::binary_function< std::shared_ptr<Guid>, std::shared_ptr<Guid>, bool >
+    {
+        // -------------------------------------------------------------------------------
+        // Comparison function for shared_ptrs to Guid objects. For use when created sets
+        // or maps of Guids. 
+        // -------------------------------------------------------------------------------
+        public:
+            bool operator() (
+                    const std::shared_ptr<Guid> &guidPtr0, 
+                    const std::shared_ptr<Guid> &guidPtr1
+                    );
+    };
+
+
+} // namespase bias
 
 #endif // #ifndef GUID_HPP

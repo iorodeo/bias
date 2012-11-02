@@ -2,33 +2,14 @@
 
 namespace bias {
 
-    // friend functions
-    // ------------------------------------------------------------------------
-    std::ostream& operator<< (std::ostream &out, Guid &guid)
-    {
-        out << guid.toString();
-        return out;
-    }
-
-    bool operator== (Guid &guid0, Guid &guid1) 
-    {
-        return *(guid0.guidDevicePtr_) ==  *(guid1.guidDevicePtr_);
-    }
-
-    bool operator!= (Guid &guid0, Guid &guid1)
-    {
-        return *(guid0.guidDevicePtr_) != *(guid1.guidDevicePtr_);
-    }
-
-    //  Methods
-    // ------------------------------------------------------------------------
-    
 
     Guid::Guid() 
     { 
-        std::shared_ptr<GuidDevice> tempPtr( new GuidDevice() );
+        std::shared_ptr<GuidDevice> tempPtr(new GuidDevice());
         guidDevicePtr_ = tempPtr; 
     }
+
+    Guid::~Guid() {};
 
     CameraLib Guid::getCameraLib() 
     {
@@ -46,14 +27,52 @@ namespace bias {
         
     }
 
+    // friend functions
+    // ------------------------------------------------------------------------
+    std::ostream& operator<< (std::ostream &out, Guid &guid)
+    {
+        out << guid.toString();
+        return out;
+    }
+
+    bool operator== (Guid &guid0, Guid &guid1) 
+    {
+        return *(guid0.guidDevicePtr_) == *(guid1.guidDevicePtr_);
+    }
+
+    bool operator!= (Guid &guid0, Guid &guid1)
+    {
+        return *(guid0.guidDevicePtr_) != *(guid1.guidDevicePtr_);
+    }
+
+    bool operator<  (Guid &guid0, Guid &guid1)
+    {
+        return *(guid0.guidDevicePtr_) < *(guid1.guidDevicePtr_);
+    }
+
+    bool operator<= (Guid &guid0, Guid &guid1)
+    {
+        return *(guid0.guidDevicePtr_) <= *(guid1.guidDevicePtr_);
+    }
+
+    bool operator>  (Guid &guid0, Guid &guid1)
+    {
+        return *(guid0.guidDevicePtr_) > *(guid1.guidDevicePtr_);
+    }
+
+    bool operator>= (Guid &guid0, Guid &guid1)
+    {
+        return *(guid0.guidDevicePtr_) >= *(guid1.guidDevicePtr_);
+    }
+
 #ifdef WITH_FC2
 
-    // FlyCapture2 specific features
+    // FlyCapture2 specific methods 
     // ------------------------------------------------------------------------
 
     Guid::Guid(fc2PGRGuid guid)
     {
-        std::shared_ptr<GuidDevice_fc2> tempPtr( new GuidDevice_fc2(guid) );
+        std::shared_ptr<GuidDevice_fc2> tempPtr(new GuidDevice_fc2(guid));
         guidDevicePtr_ = tempPtr;
     }
 
@@ -79,12 +98,12 @@ namespace bias {
 
 #ifdef WITH_DC1394
 
-    // Libdc1394 specific features
+    // Libdc1394 specific methods 
     // ------------------------------------------------------------------------
 
     Guid::Guid(uint64_t guid)
     {
-        std::shared_ptr<GuidDevice_dc1394> tempPtr( new GuidDevice_dc1394(guid) );
+        std::shared_ptr<GuidDevice_dc1394> tempPtr(new GuidDevice_dc1394(guid));
         guidDevicePtr_ =  tempPtr;
     }
 
@@ -105,6 +124,23 @@ namespace bias {
     }
 
 #endif
+
+    // Shared pointer comparison operator - for use in sets, maps, etc.
+    //-------------------------------------------------------------------------
+
+    bool GuidPtrCmp::operator() (
+            const std::shared_ptr<Guid> &guidPtr0, 
+            const std::shared_ptr<Guid> &guidPtr1
+            ) 
+    {
+        if (*guidPtr0 == *guidPtr1) {
+            return false;
+        }
+        else {
+            bool rval = (*guidPtr0 < *guidPtr1);
+            return rval;
+        }
+    };
 
 } // namespace bias
 
