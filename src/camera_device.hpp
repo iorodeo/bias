@@ -2,6 +2,9 @@
 #define CAMERA_DEVICE_HPP
 
 #include <string>
+#include <memory>
+#include "basic_types.hpp"
+#include "guid.hpp"
 
 namespace bias {
 
@@ -18,10 +21,13 @@ namespace bias {
             virtual void printInfo() {};
             virtual void printGuid() {};
             virtual std::string toString() {return std::string("camera not defined");}
+            Guid getGuid() {return guid_;};
 
         protected:
             Guid guid_;
     };
+
+    typedef std::shared_ptr<CameraDevice> CameraDevicePtr;
 }
 
 

@@ -1,6 +1,6 @@
 #ifdef WITH_DC1394
-#include <sstream>
 #include "camera_device_dc1394.hpp"
+#include <sstream>
 
 namespace bias {
 

@@ -1,7 +1,7 @@
 #ifdef WITH_FC2
+#include "camera_device_fc2.hpp"
 #include <sstream>
 #include <iostream>
-#include "camera_device_fc2.hpp"
 #include "utils_fc2.hpp"
 
 namespace bias {
@@ -9,7 +9,6 @@ namespace bias {
     CameraDevice_fc2::CameraDevice_fc2(Guid guid) 
         : CameraDevice(guid)
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
         fc2Error error= fc2CreateContext(&context_);
         if ( error != FC2_ERROR_OK) {
             std::cout << "Error: fc2CreateContext" << std::endl;
@@ -19,7 +18,6 @@ namespace bias {
 
     void CameraDevice_fc2::connect() 
     {
-        std::cout << "CameraDevice_fc2::connect" << std::endl;
         fc2PGRGuid guid = getGuid_fc2();
 
         fc2Error error = fc2Connect(context_, &guid);

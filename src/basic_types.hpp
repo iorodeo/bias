@@ -10,6 +10,7 @@ namespace bias {
         CAMERA_LIB_UNDEFINED
     };
 
+
 }
 
 #endif

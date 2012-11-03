@@ -5,8 +5,7 @@ namespace bias {
 
     Guid::Guid() 
     { 
-        std::shared_ptr<GuidDevice> tempPtr(new GuidDevice());
-        guidDevicePtr_ = tempPtr; 
+        guidDevicePtr_ = GuidDevicePtr(new GuidDevice()); 
     }
 
     Guid::~Guid() {};
@@ -72,8 +71,8 @@ namespace bias {
 
     Guid::Guid(fc2PGRGuid guid)
     {
-        std::shared_ptr<GuidDevice_fc2> tempPtr(new GuidDevice_fc2(guid));
-        guidDevicePtr_ = tempPtr;
+        guidDevicePtr_ = GuidDevicePtr_fc2(new GuidDevice_fc2(guid));
+
     }
 
     fc2PGRGuid Guid::getValue_fc2()
@@ -81,7 +80,7 @@ namespace bias {
         fc2PGRGuid rval;
         if ( getCameraLib() == CAMERA_LIB_FC2 ) 
         {
-            std::shared_ptr<GuidDevice_fc2> tempPtr; 
+            GuidDevicePtr_fc2 tempPtr; 
             tempPtr = std::dynamic_pointer_cast<GuidDevice_fc2>(guidDevicePtr_);
             rval = tempPtr -> getValue();
         }
@@ -103,8 +102,7 @@ namespace bias {
 
     Guid::Guid(uint64_t guid)
     {
-        std::shared_ptr<GuidDevice_dc1394> tempPtr(new GuidDevice_dc1394(guid));
-        guidDevicePtr_ =  tempPtr;
+        guidDevicePtr_ = GuidDevicePtr_dc1394(new GuidDevice_dc1394);
     }
 
     uint64_t Guid::getValue_dc1394()
@@ -112,7 +110,7 @@ namespace bias {
         uint64_t rval;
         if ( getCameraLib() == CAMERA_LIB_DC1394 )
         { 
-            std::shared_ptr<GuidDevice_dc1394> tempPtr; 
+            GuidDevicePtr_dc1394 tempPtr; 
             tempPtr = std::dynamic_pointer_cast<GuidDevice_dc1394>(guidDevicePtr_);
             rval = tempPtr -> getValue();
         }
@@ -128,10 +126,7 @@ namespace bias {
     // Shared pointer comparison operator - for use in sets, maps, etc.
     //-------------------------------------------------------------------------
 
-    bool GuidPtrCmp::operator() (
-            const std::shared_ptr<Guid> &guidPtr0, 
-            const std::shared_ptr<Guid> &guidPtr1
-            ) 
+    bool GuidPtrCmp::operator() (const GuidPtr &guidPtr0, const GuidPtr &guidPtr1) 
     {
         if (*guidPtr0 == *guidPtr1) {
             return false;

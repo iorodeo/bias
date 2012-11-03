@@ -3,6 +3,7 @@
 #define GUID_DEVICE_DC1394_HPP
 
 #include <string>
+#include <memory>
 #include "basic_types.hpp"
 #include "guid_device.hpp"
 
@@ -29,6 +30,8 @@ namespace bias {
             virtual bool lessThan(GuidDevice &guid);
             virtual bool lessThanEqual(GuidDevice &guid);
     };
+
+    typedef std::shared_ptr<GuidDevice_dc1394> GuidDevicePtr_dc1394;
 }
 
 #endif // #ifndef GUID_DEVICE_DC1394

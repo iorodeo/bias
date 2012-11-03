@@ -1,7 +1,10 @@
 #ifndef GUID_HPP
 #define GUID_HPP
+
 #include <string>
 #include <iostream>
+#include <set>
+#include <list>
 #include <memory>
 #include <stdint.h>
 #include "basic_types.hpp"
@@ -46,7 +49,7 @@ namespace bias {
 
 
         private:
-            std::shared_ptr<GuidDevice> guidDevicePtr_;
+            GuidDevicePtr guidDevicePtr_;
 
 #ifdef WITH_FC2
         // FlyCapture2 specific features
@@ -64,20 +67,19 @@ namespace bias {
     };
 
 
-    class GuidPtrCmp 
-        : public std::binary_function< std::shared_ptr<Guid>, std::shared_ptr<Guid>, bool >
+    // ------------------------------------------------------------------------
+    
+    typedef std::shared_ptr<Guid> GuidPtr;
+
+    class GuidPtrCmp : public std::binary_function<GuidPtr, GuidPtr, bool>
     {
-        // -------------------------------------------------------------------------------
-        // Comparison function for shared_ptrs to Guid objects. For use when created sets
-        // or maps of Guids. 
-        // -------------------------------------------------------------------------------
+        // Comparison object for shared_ptrs to Guid objects  
         public:
-            bool operator() (
-                    const std::shared_ptr<Guid> &guidPtr0, 
-                    const std::shared_ptr<Guid> &guidPtr1
-                    );
+            bool operator() (const GuidPtr &guidPtr0, const GuidPtr &guidPtr1);
     };
 
+    typedef std::set<GuidPtr,GuidPtrCmp> GuidPtrSet;
+    typedef std::list<GuidPtr> GuidPtrList;
 
 } // namespase bias
 

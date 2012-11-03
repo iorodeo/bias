@@ -1,8 +1,8 @@
 #ifdef WITH_FC2
 
+#include "guid_device_fc2.hpp"
 #include <sstream>
 #include <iostream>
-#include "guid_device_fc2.hpp"
 
 namespace bias {
 

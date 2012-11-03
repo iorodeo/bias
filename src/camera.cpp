@@ -10,23 +10,18 @@ namespace bias {
 
 
     Camera::Camera() { 
-        std::shared_ptr<CameraDevice> tempPtr( new CameraDevice );
-        cameraDevicePtr_ = tempPtr; 
+        cameraDevicePtr_ = CameraDevicePtr(new CameraDevice);
     }
 
     Camera::Camera(Guid guid) 
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-
         switch ( guid.getCameraLib() )
         {
             case CAMERA_LIB_FC2:
-                std::cout << "  case CAMERA_LIB_FC2" << std::endl;
                 createCameraDevice_fc2(guid);
                 break;
 
             case CAMERA_LIB_DC1394:
-                std::cout << "  case CAMERA_LIB_DC1394" << std::endl;
                 createCameraDevice_dc1394(guid);
 
             case CAMERA_LIB_UNDEFINED:
@@ -41,11 +36,30 @@ namespace bias {
 
     Camera::~Camera() { }
 
-    void Camera::connect() { cameraDevicePtr_ -> connect(); }
+    void Camera::connect() 
+    { 
+        cameraDevicePtr_ -> connect(); 
+    }
 
-    void Camera::printInfo() { cameraDevicePtr_ -> printInfo(); }
+    void Camera::printInfo() 
+    { 
+        cameraDevicePtr_ -> printInfo(); 
+    }
 
-    void Camera::printGuid() { cameraDevicePtr_ -> printGuid(); }
+    void Camera::printGuid() 
+    { 
+        cameraDevicePtr_ -> printGuid(); 
+    }
+
+    CameraLib Camera::getCameraLib() 
+    { 
+        return cameraDevicePtr_ -> getCameraLib(); 
+    }
+
+    Guid Camera::getGuid()
+    {
+        return cameraDevicePtr_ -> getGuid();
+    }
 
 // FlyCapture2 specific methods
 // ------------------------------------------------------------------------
@@ -53,9 +67,7 @@ namespace bias {
 
     void Camera::createCameraDevice_fc2(Guid guid)
     { 
-        std::cout << __PRETTY_FUNCTION__ << std::endl; 
-        std::shared_ptr<CameraDevice_fc2> tempPtr( new CameraDevice_fc2(guid) );
-        cameraDevicePtr_ = tempPtr;
+        cameraDevicePtr_ = CameraDevicePtr(new CameraDevice_fc2(guid));
     }
 
 #else
@@ -76,9 +88,7 @@ namespace bias {
 
     void Camera::createCameraDevice_dc1394(Guid guid)
     { 
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-        std::shared_ptr<CameraDevice_dc1394> tempPtr( new CameraDevice_dc1394(guid) );
-        cameraDevicePtr_ = tempPtr;
+        cameraDevicePtr_ = CameraDevicePtr(new CameraDevice_dc1394(guid));
     }
 
 #else
@@ -92,5 +102,22 @@ namespace bias {
     }
 
 #endif
+
+    // Shared pointer comparison operator - for use in sets, maps, etc.
+    //-------------------------------------------------------------------------
+
+    bool CameraPtrCmp::operator() (const CameraPtr &camPtr0, const CameraPtr &camPtr1) 
+    {
+        // Order cameras based on guid order
+        Guid guid0 = camPtr0 -> getGuid();
+        Guid guid1 = camPtr1 -> getGuid();
+        if (guid0 == guid1) {
+            return false;
+        }
+        else {
+            bool rval = (guid0 < guid1);
+            return rval;
+        }
+    };
 
 } // namespace bias

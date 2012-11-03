@@ -2,9 +2,9 @@
 #ifndef CAMERA_DEVICE_DC1394_HPP 
 #define CAMERA_DEVICE_DC1394_HPP
 
+#include "camera_device.hpp"
 #include "guid.hpp"
 #include "basic_types.hpp"
-#include "camera_device.hpp"
 
 namespace bias {
 
@@ -21,6 +21,8 @@ namespace bias {
             virtual std::string toString();
 
     };
+
+    typedef std::shared_ptr<CameraDevice_dc1394> CameraDevicePtr_dc1394;
 
 }
 

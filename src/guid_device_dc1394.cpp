@@ -1,8 +1,8 @@
 #ifdef WITH_DC1394
 
+#include "guid_device_dc1394.hpp"
 #include <sstream>
 #include <iostream>
-#include "guid_device_dc1394.hpp"
 
 namespace bias {
 

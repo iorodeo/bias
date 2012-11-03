@@ -3,8 +3,6 @@
 #define CAMERADEV_FC2_HPP
 
 #include <string>
-#include "guid.hpp"
-#include "basic_types.hpp"
 #include "camera_device.hpp"
 #include "C/FlyCapture2_C.h"
 
@@ -26,6 +24,8 @@ namespace bias {
             fc2Context context_;
             fc2PGRGuid getGuid_fc2();
     };
+
+    typedef std::shared_ptr<CameraDevice_fc2> CameraDevicePtr_fc2;
 
 }
 

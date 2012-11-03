@@ -3,6 +3,7 @@
 
 #include <string>
 #include <iostream>
+#include <memory>
 #include "basic_types.hpp"
 
 namespace bias {
@@ -57,6 +58,8 @@ namespace bias {
             virtual bool lessThanEqual(GuidDevice &guid) { return false; };
 
     }; // class GuidDevice
+
+    typedef std::shared_ptr<GuidDevice> GuidDevicePtr;
 
 } // namespace bias
 

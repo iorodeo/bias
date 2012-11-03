@@ -1,6 +1,6 @@
-#include <iostream>
 #include "camera_finder.hpp"
-
+#include <iostream>
+#include <sstream>
 
 namespace bias {
 
@@ -18,7 +18,7 @@ namespace bias {
 
     void CameraFinder::update() 
     {
-        guidSet_.clear();
+        guidPtrSet_.clear();
         update_fc2();
         update_dc1394();
     }
@@ -30,15 +30,57 @@ namespace bias {
         std::cout << " CameraFinder Guid List" << std::endl;
         std::cout << "-----------------------" << std::endl;
         std::cout << std::endl;
-
-        int count;
-        std::set<std::shared_ptr<Guid>>::iterator it;
-        for (it=guidSet_.begin(), count=0; it!=guidSet_.end(); it++, count++) 
-        {
-            std::cout << "[" << count << "] " << **it << std::endl;
-        }
-        std::cout << std::endl;
+        std::cout << getGuidListAsString();
     }
+
+    std::string CameraFinder::getGuidListAsString()
+    {
+        int count;
+        std::stringstream ss;
+        GuidPtrSet::iterator it;
+
+        for (it=guidPtrSet_.begin(), count=0; it!=guidPtrSet_.end(); it++, count++) 
+        {
+            ss << "[" << count << "] " << **it << std::endl;
+        }
+        ss << std::endl;
+        return ss.str();
+    }
+
+    unsigned int CameraFinder::numberOfCameras() 
+    {
+        return guidPtrSet_.size();
+    }
+
+    Guid CameraFinder::getGuidByIndex(unsigned int index)
+    {
+        if (index >= guidPtrSet_.size()) {
+            // TO DO ... throw some kind of error
+            std::cout << "guid index out of range" << std::endl;
+            return Guid();
+        }
+        GuidPtrSet::iterator it = guidPtrSet_.begin();
+        std::advance(it,index);
+        return **it;
+    }
+
+    GuidPtrSet CameraFinder::getGuidPtrSet()
+    {
+        return guidPtrSet_;
+    }
+
+    GuidPtrList CameraFinder::getGuidPtrList()
+    {
+        GuidPtrList guidPtrList;
+        std::copy(
+                guidPtrSet_.begin(), 
+                guidPtrSet_.end(), 
+                std::back_inserter(guidPtrList)
+                ); 
+        return guidPtrList;
+        
+    }
+
 
 #ifdef WITH_FC2
 
@@ -90,13 +132,10 @@ namespace bias {
             }
             else 
             {
-                std::shared_ptr<Guid> guidPtr(new Guid(guid_fc2));
-                guidSet_.insert(guidPtr);
+                GuidPtr guidPtr(new Guid(guid_fc2));
+                guidPtrSet_.insert(guidPtr);
             }
         }
-
-        printGuid();
-
     }
 
 #else

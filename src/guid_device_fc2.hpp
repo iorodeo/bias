@@ -3,10 +3,10 @@
 #define GUID_DEVICE_FC2_HPP
 
 #include <string>
-#include <stdint.h>
-#include "C/FlyCapture2_C.h"
+#include <memory>
 #include "basic_types.hpp"
 #include "guid_device.hpp"
+#include "C/FlyCapture2_C.h"
 
 namespace bias {
 
@@ -30,6 +30,8 @@ namespace bias {
             virtual bool lessThan(GuidDevice &guid);
             virtual bool lessThanEqual(GuidDevice &guid);
     };
+
+    typedef std::shared_ptr<GuidDevice_fc2> GuidDevicePtr_fc2;
 }
 
 #endif // #ifndef GUID_DEVICE_FC2_HPP
