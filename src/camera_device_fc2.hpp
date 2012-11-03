@@ -11,14 +11,19 @@ namespace bias {
     class CameraDevice_fc2 : public CameraDevice
     {
         public:
-            CameraDevice_fc2() {};
+            CameraDevice_fc2(); 
             CameraDevice_fc2(Guid guid);
-            virtual ~CameraDevice_fc2() {};
+            virtual ~CameraDevice_fc2();
             virtual CameraLib getCameraLib();
-            virtual void connect();
+            virtual std::string toString();
             virtual void printInfo();
             virtual void printGuid();
-            virtual std::string toString();
+
+            virtual void connect();
+            virtual void disconnect();
+            
+            virtual void startCapture();
+            virtual void stopCapture();
 
         private:
             fc2Context context_;

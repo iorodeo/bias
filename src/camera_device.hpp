@@ -15,13 +15,17 @@ namespace bias {
         public:
             CameraDevice() {};
             CameraDevice(Guid guid) {guid_ = guid;};
+            Guid getGuid() {return guid_;};
             virtual ~CameraDevice() {};
             virtual CameraLib getCameraLib() {};
             virtual void connect() {};
+            virtual void disconnect() {};
             virtual void printInfo() {};
             virtual void printGuid() {};
             virtual std::string toString() {return std::string("camera not defined");}
-            Guid getGuid() {return guid_;};
+            virtual void startCapture() {};
+            virtual void stopCapture() {};
+
 
         protected:
             Guid guid_;

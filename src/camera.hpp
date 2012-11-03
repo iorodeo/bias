@@ -25,11 +25,15 @@ namespace bias {
             Camera();
             Camera(Guid guid);
             ~Camera();
-            void connect();
             void printInfo();
             void printGuid();
             CameraLib getCameraLib();
             Guid getGuid();
+
+            void connect();
+            void disconnect();      
+            void startCapture(); 
+            void stopCapture();
 
         private:
             CameraDevicePtr cameraDevicePtr_;

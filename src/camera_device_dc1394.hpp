@@ -15,10 +15,13 @@ namespace bias {
             CameraDevice_dc1394(Guid guid);
             virtual ~CameraDevice_dc1394() {};
             virtual CameraLib getCameraLib();
-            virtual void connect() {};
-            virtual void printInfo() {};
-            virtual void printGuid() {};
-            virtual std::string toString();
+            virtual void connect() {};      // TO DO //
+            virtual void disconnect() {};   // TO DO //
+            virtual void printInfo() {};    // TO DO //
+            virtual void printGuid() {};    // TO DO //
+            virtual std::string toString(); // TO DO //
+            virtual void startCapture() {}; // TO DO // 
+            virtual void stopCapture() {};  // TO DO //
 
     };
 

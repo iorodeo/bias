@@ -36,10 +36,6 @@ namespace bias {
 
     Camera::~Camera() { }
 
-    void Camera::connect() 
-    { 
-        cameraDevicePtr_ -> connect(); 
-    }
 
     void Camera::printInfo() 
     { 
@@ -59,6 +55,26 @@ namespace bias {
     Guid Camera::getGuid()
     {
         return cameraDevicePtr_ -> getGuid();
+    }
+
+    void Camera::connect() 
+    { 
+        cameraDevicePtr_ -> connect(); 
+    }
+
+    void Camera::disconnect() 
+    {
+        cameraDevicePtr_ -> disconnect();
+    }
+
+    void Camera::startCapture()
+    {
+        cameraDevicePtr_ -> startCapture();
+    }
+
+    void Camera::stopCapture()
+    {
+        cameraDevicePtr_ -> stopCapture();
     }
 
 // FlyCapture2 specific methods

@@ -20,8 +20,8 @@ int main(int argc, char** argv)
     cameraFinder.update();
     guidPtrList = cameraFinder.getGuidPtrList();
 
-    // Create and connect cameras
     {
+        cout << "Creating and connecting to cameras" << endl;
         GuidPtrList::iterator it;
         for (it=guidPtrList.begin(); it!=guidPtrList.end(); it++) 
         {
@@ -32,14 +32,46 @@ int main(int argc, char** argv)
         }
     }
 
-    // Print camera information
     {
+        cout << "Printing camera information" << endl;
+        int cnt;
         CameraPtrList::iterator it;
-        for( it=cameraPtrList.begin(); it!=cameraPtrList.end(); it++) 
+        for( it=cameraPtrList.begin(), cnt=0; it!=cameraPtrList.end(); it++, cnt++) 
         {
+            cout << endl << "Camera " << cnt << endl;
             Camera camera = **it;
             camera.printInfo();
         }
+    }
+
+    {
+        cout << "Starting capture on cameras: ";
+        int cnt;
+        CameraPtrList::iterator it;
+        for( it=cameraPtrList.begin(), cnt=0; it!=cameraPtrList.end(); it++, cnt++) 
+        {
+            cout << cnt << " ";
+            Camera camera = **it;
+            camera.startCapture();
+        }
+        cout << "done" << endl;
+    }
+
+    cout << "Sleeping ... ";
+    Sleep(2000);
+    cout << "done" << endl;
+
+    {
+        cout << "Stopping capture on cameras: ";
+        int cnt;
+        CameraPtrList::iterator it;
+        for( it=cameraPtrList.begin(), cnt=0; it!=cameraPtrList.end(); it++, cnt++) 
+        {
+            cout << cnt << " "; 
+            Camera camera = **it;
+            camera.stopCapture();
+        }
+        cout << "done" << endl;
     }
 
 
