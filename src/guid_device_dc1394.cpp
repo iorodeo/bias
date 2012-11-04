@@ -6,7 +6,13 @@
 
 namespace bias {
 
+    GuidDevice_dc1394::GuidDevice_dc1394() 
+    {
+        value_ = 0;
+    }
+
     GuidDevice_dc1394::GuidDevice_dc1394(uint64_t guid_dc1394)
+        : GuidDevice()
     {
         value_ = guid_dc1394;
     }

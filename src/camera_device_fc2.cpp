@@ -8,13 +8,12 @@
 
 namespace bias {
 
-    CameraDevice_fc2::CameraDevice_fc2() 
+    CameraDevice_fc2::CameraDevice_fc2() : CameraDevice()
     {
         rawImageCreated_ = false;
     }
 
-    CameraDevice_fc2::CameraDevice_fc2(Guid guid) 
-        : CameraDevice(guid)
+    CameraDevice_fc2::CameraDevice_fc2(Guid guid) : CameraDevice(guid)
     {
         fc2Error error= fc2CreateContext(&context_);
         if (error != FC2_ERROR_OK) 

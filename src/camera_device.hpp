@@ -18,7 +18,12 @@ namespace bias {
                 connected_ = false;
                 capturing_ = false;
             };
-            explicit CameraDevice(Guid guid) {guid_ = guid;};
+            explicit CameraDevice(Guid guid)  
+            {
+                guid_ = guid;
+                connected_ = false;
+                capturing_ = false;
+            };
             Guid getGuid() {return guid_;};
             virtual ~CameraDevice() {};
             virtual CameraLib getCameraLib() {};

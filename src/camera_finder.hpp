@@ -9,8 +9,8 @@
 #ifdef WITH_FC2
 #include "C/FlyCapture2_C.h"
 #endif
-#ifdef With_DC1394
-// include dc1394 headers
+#ifdef WITH_DC1394
+#include <dc1394/dc1394.h> 
 #endif
 
 namespace bias {
@@ -44,7 +44,7 @@ namespace bias {
 #endif
 #ifdef WITH_DC1394
         private:
-            //dc1394 queryContext_dc1394_;
+            dc1394_t *queryContext_dc1394_;
 #endif
     };
 

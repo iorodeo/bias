@@ -6,6 +6,13 @@
 
 namespace bias {
 
+    GuidDevice_fc2::GuidDevice_fc2() 
+    {
+        for (int=0; i<4; i++) {
+            value_.value[i] = 0;
+        }
+    }
+
     GuidDevice_fc2::GuidDevice_fc2(fc2PGRGuid guid_fc2) 
     { 
         value_ = guid_fc2; 

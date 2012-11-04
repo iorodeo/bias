@@ -16,7 +16,7 @@ namespace bias {
         // Provides representation of Flycapture2 specific camera guids
         // ---------------------------------------------------------------------
         public:
-            GuidDevice_fc2() {};
+            GuidDevice_fc2();
             explicit GuidDevice_fc2( fc2PGRGuid guid_fc2 );
             virtual ~GuidDevice_fc2() {};
             virtual CameraLib getCameraLib();

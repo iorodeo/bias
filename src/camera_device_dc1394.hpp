@@ -5,15 +5,16 @@
 #include "camera_device.hpp"
 #include "guid.hpp"
 #include "basic_types.hpp"
+#include <dc1394/dc1394.h>
 
 namespace bias {
 
     class CameraDevice_dc1394 : public CameraDevice
     {
         public:
-            CameraDevice_dc1394() {};
+            CameraDevice_dc1394();
             explicit CameraDevice_dc1394(Guid guid);
-            virtual ~CameraDevice_dc1394() {};
+            virtual ~CameraDevice_dc1394();
             virtual CameraLib getCameraLib();
             virtual void printInfo() {};    // TO DO //
             virtual void printGuid() {};    // TO DO //
@@ -25,6 +26,9 @@ namespace bias {
             virtual void startCapture() {}; // TO DO // 
             virtual void stopCapture() {};  // TO DO //
             virtual void grabImage() {};    // TO DO //
+
+        private:
+            dc1394_t *context_;
 
     };
 

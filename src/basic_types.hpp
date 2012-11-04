@@ -30,7 +30,10 @@ namespace bias {
         ERROR_FC2_GET_CAMERA_FROM_INDEX,
 
         // Libdc1394 specific errors
-        ERROR_NO_DC1394
+        ERROR_NO_DC1394,
+        ERROR_DC1394_CREATE_CONTEXT,
+        ERROR_DC1394_NULL_POINTER,
+
 
     };
 

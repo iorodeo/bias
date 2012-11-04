@@ -1,23 +1,15 @@
 #include <iostream>
+#include <stdint.h>
 #include "guid.hpp"
 #include "camera.hpp"
+#include "camera_finder.hpp"
 
 using namespace std;
 using namespace bias;
 
 int main(int argc, char *argv[]) 
 {
-    uint64_t guidRaw = 12345678910111213ULL;
-    Guid guid;
-    Camera camera;
+    CameraFinder cameraFinder;
+    cameraFinder.update();
 
-    cout << "guid: " << guid << endl;
-    guid = Guid(guidRaw);
-    cout << "guid: " << guid << endl;
-
-    camera = Camera(guid);
-    cout << "guid: " << guid << endl;
-
-
-    return 0; 
 }

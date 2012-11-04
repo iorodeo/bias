@@ -71,8 +71,8 @@ namespace bias {
 
     Guid::Guid(fc2PGRGuid guid)
     {
-        guidDevicePtr_ = GuidDevicePtr_fc2(new GuidDevice_fc2(guid));
-
+        //guidDevicePtr_ = GuidDevicePtr_fc2(new GuidDevice_fc2(guid));
+        guidDevicePtr_ = std::make_shared<GuidDevice_fc2>(guid);
     }
 
     fc2PGRGuid Guid::getValue_fc2()
@@ -102,7 +102,8 @@ namespace bias {
 
     Guid::Guid(uint64_t guid)
     {
-        guidDevicePtr_ = GuidDevicePtr_dc1394(new GuidDevice_dc1394);
+        //guidDevicePtr_ = GuidDevicePtr_dc1394(new GuidDevice_dc1394(guid));
+        guidDevicePtr_ = std::make_shared<GuidDevice_dc1394>(guid);
     }
 
     uint64_t Guid::getValue_dc1394()

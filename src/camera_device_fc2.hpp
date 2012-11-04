@@ -36,7 +36,6 @@ namespace bias {
             void destroyRawImage();
     };
 
-
     typedef std::shared_ptr<CameraDevice_fc2> CameraDevicePtr_fc2;
 
 }

@@ -139,7 +139,8 @@ namespace bias {
             }
             else 
             {
-                GuidPtr guidPtr(new Guid(guid_fc2));
+                //GuidPtr guidPtr(new Guid(guid_fc2));
+                GuidPtr guidPtr = std::make_shared<Guid>(guid_fc2);
                 guidPtrSet_.insert(guidPtr);
             }
         }
@@ -162,14 +163,43 @@ namespace bias {
     // ------------------------------------------------------------------------
     void CameraFinder::createQueryContext_dc1394()
     {
+        queryContext_dc1394_ = NULL;
+        queryContext_dc1394_ = dc1394_new();
+        if ( !queryContext_dc1394_ ) 
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error creating dc1394_t" << std::endl;
+            throw RuntimeError(ERROR_DC1394_CREATE_CONTEXT, ssError.str());
+        }
     }
 
     void CameraFinder::destroyQueryContext_dc1394() 
     {
+        dc1394_free(queryContext_dc1394_);
+        queryContext_dc1394_ = NULL;
     }
 
     void CameraFinder::update_dc1394()
     {
+        dc1394error_t error;
+        dc1394camera_list_t *cameraList;
+
+        if ( !queryContext_dc1394_ ) 
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error updating dc1394 context is NULL" << std::endl;
+            throw RuntimeError(ERROR_DC1394_NULL_POINTER, ssError.str());
+        }
+        error = dc1394_camera_enumerate(queryContext_dc1394_, &cameraList);
+        ///////////////////////////////////////////////////////////////////
+        // TO DO ...Check error 
+        ///////////////////////////////////////////////////////////////////
+        std::cout << "number dc1394 cameras: " << cameraList -> num << std::endl;
+
+        dc1394_camera_free_list(cameraList);
+
     }
 
 

@@ -3,6 +3,7 @@
 #endif
 #include <windows.h>
 #include <iostream>
+#include <memory>
 #include "guid.hpp"
 #include "camera.hpp"
 #include "camera_finder.hpp"
@@ -26,7 +27,8 @@ int main(int argc, char** argv)
         for (it=guidPtrList.begin(); it!=guidPtrList.end(); it++) 
         {
             Guid guid = **it;
-            CameraPtr camPtr(new Camera(guid));
+            //CameraPtr camPtr(new Camera(guid));
+            CameraPtr camPtr = std::make_shared<Camera>(guid);
             camPtr -> connect();
             cameraPtrList.push_back(camPtr);
         }

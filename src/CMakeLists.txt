@@ -4,8 +4,8 @@ PROJECT(bais)
 
 # Camera libraries
 # -----------------------------------------------------------------------------
-SET(with_fc2 true)
-SET(with_dc1394 false)
+SET(with_fc2 false)
+SET(with_dc1394 true)
 
 
 # FlyCapture2 library location
@@ -34,9 +34,9 @@ If(with_dc1394)
         bias_src ${bias_src} 
         guid_device_dc1394.cpp
         camera_device_dc1394.cpp 
-        )
-        #test_dc1394.cpp
         #)
+        test_dc1394.cpp
+        )
 ENDIF()
 
 
@@ -64,9 +64,15 @@ ENDIF()
 
 ADD_EXECUTABLE(test ${bias_src})
 
-
 # Link libraries
+# -----------------------------------------------------------------------------
+# Note, this currently won't handle case when both libraries are present
+# might need to put libraries in variable using SET. 
 # -----------------------------------------------------------------------------
 IF(with_fc2)
     TARGET_LINK_LIBRARIES(test ${flycapture2_c_lib})
 ENDIF()
+IF(with_dc1394)
+    TARGET_LINK_LIBRARIES(test dc1394)
+ENDIF()
+
