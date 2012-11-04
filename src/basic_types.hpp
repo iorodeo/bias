@@ -1,5 +1,5 @@
-#ifndef BASIC_TYPES_HPP
-#define BASIC_TYPES_HPP
+#ifndef BIAS_BASIC_TYPES_HPP
+#define BIAS_BASIC_TYPES_HPP
 
 namespace bias {
 
@@ -10,7 +10,6 @@ namespace bias {
         CAMERA_LIB_UNDEFINED
     };
 
-
 }
 
-#endif
+#endif // #ifndef BIAS_BASIC_TYPES_HPP

@@ -1,6 +1,6 @@
 #ifdef WITH_FC2
-#ifndef CAMERADEV_FC2_HPP
-#define CAMERADEV_FC2_HPP
+#ifndef BIAS_CAMERA_DEVICE_FC2_HPP
+#define BIAS_CAMERA_DEVICE_FC2_HPP
 
 #include <string>
 #include "camera_device.hpp"
@@ -41,5 +41,5 @@ namespace bias {
 
 }
 
-#endif
-#endif
+#endif // #ifndef BIAS_CAMERA_DEVICE_FC2_HPP
+#endif // #ifdef WITH_FC2

@@ -1,6 +1,6 @@
 #ifdef WITH_FC2
-#ifndef GUID_DEVICE_FC2_HPP
-#define GUID_DEVICE_FC2_HPP
+#ifndef BIAS_GUID_DEVICE_FC2_HPP
+#define BIAS_GUID_DEVICE_FC2_HPP
 
 #include <string>
 #include <memory>
@@ -34,5 +34,5 @@ namespace bias {
     typedef std::shared_ptr<GuidDevice_fc2> GuidDevicePtr_fc2;
 }
 
-#endif // #ifndef GUID_DEVICE_FC2_HPP
+#endif // #ifndef BIAS_GUID_DEVICE_FC2_HPP
 #endif // #ifdef  WITH_FC2

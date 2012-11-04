@@ -1,5 +1,5 @@
-#ifndef GUID_HPP
-#define GUID_HPP
+#ifndef BIAS_GUID_HPP
+#define BIAS_GUID_HPP
 
 #include <string>
 #include <iostream>
@@ -83,4 +83,4 @@ namespace bias {
 
 } // namespase bias
 
-#endif // #ifndef GUID_HPP
+#endif // #ifndef BIAS_GUID_HPP

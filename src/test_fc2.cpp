@@ -59,7 +59,7 @@ int main(int argc, char** argv)
 
     {
         int camCount;
-        int numImage = 1000;
+        int numImage = 100;
         CameraPtrList::iterator it;
         cout << "Grabing images" << endl;
         for (int i=0; i<numImage; i++) 

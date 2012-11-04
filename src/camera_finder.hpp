@@ -1,5 +1,5 @@
-#ifndef CAMERA_FINDER_HPP
-#define CAMERA_FINDER_HPP
+#ifndef BIAS_CAMERA_FINDER_HPP
+#define BIAS_CAMERA_FINDER_HPP
 
 #include <set>
 #include <string>
@@ -50,4 +50,4 @@ namespace bias {
 
 }
 
-#endif // #ifndef CAMERA_FINDER_HPP
+#endif // #ifndef BIAS_CAMERA_FINDER_HPP

@@ -1,5 +1,5 @@
-#ifndef GUID_DEVICE_HPP
-#define GUID_DEVICE_HPP
+#ifndef BIAS_GUID_DEVICE_HPP
+#define BIAS_GUID_DEVICE_HPP
 
 #include <string>
 #include <iostream>
@@ -63,5 +63,4 @@ namespace bias {
 
 } // namespace bias
 
-
-#endif // #ifndef GUID_DEVICE_HPP
+#endif // #ifndef BIAS_GUID_DEVICE_HPP

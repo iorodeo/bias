@@ -1,5 +1,5 @@
-#ifndef CAMERA_DEVICE_HPP
-#define CAMERA_DEVICE_HPP
+#ifndef BIAS_CAMERA_DEVICE_HPP
+#define BIAS_CAMERA_DEVICE_HPP
 
 #include <string>
 #include <memory>
@@ -42,4 +42,4 @@ namespace bias {
 }
 
 
-#endif
+#endif // #ifndef BIAS_CAMERA_DEVICE_HPP

@@ -1,6 +1,6 @@
 #ifdef WITH_DC1394
-#ifndef GUID_DEVICE_DC1394_HPP
-#define GUID_DEVICE_DC1394_HPP
+#ifndef BIAS_GUID_DEVICE_DC1394_HPP
+#define BIAS_GUID_DEVICE_DC1394_HPP
 
 #include <string>
 #include <memory>
@@ -34,5 +34,5 @@ namespace bias {
     typedef std::shared_ptr<GuidDevice_dc1394> GuidDevicePtr_dc1394;
 }
 
-#endif // #ifndef GUID_DEVICE_DC1394
+#endif // #ifndef BIAS_GUID_DEVICE_DC1394
 #endif // #ifdef  WITH_DC1394

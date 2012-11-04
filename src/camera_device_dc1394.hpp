@@ -1,6 +1,6 @@
 #ifdef WITH_DC1394
-#ifndef CAMERA_DEVICE_DC1394_HPP 
-#define CAMERA_DEVICE_DC1394_HPP
+#ifndef BIAS_CAMERA_DEVICE_DC1394_HPP 
+#define BIAS_CAMERA_DEVICE_DC1394_HPP
 
 #include "camera_device.hpp"
 #include "guid.hpp"
@@ -32,5 +32,5 @@ namespace bias {
 
 }
 
-#endif
-#endif
+#endif // #ifndef BIAS_CAMERA_DEVICE_DC1394_HPP
+#endif // #ifdef WITH_DC1394
