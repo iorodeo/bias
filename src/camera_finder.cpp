@@ -176,5 +176,4 @@ namespace bias {
 
 #endif
 
-
-}
+} // namespace bias

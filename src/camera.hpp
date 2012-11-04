@@ -32,8 +32,10 @@ namespace bias {
 
             void connect();
             void disconnect();      
+
             void startCapture(); 
             void stopCapture();
+            void grabImage();
 
         private:
             CameraDevicePtr cameraDevicePtr_;

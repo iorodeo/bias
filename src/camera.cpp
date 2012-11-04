@@ -77,6 +77,11 @@ namespace bias {
         cameraDevicePtr_ -> stopCapture();
     }
 
+    void Camera::grabImage()
+    {
+        cameraDevicePtr_ -> grabImage();
+    }
+
 // FlyCapture2 specific methods
 // ------------------------------------------------------------------------
 #ifdef WITH_FC2

@@ -13,7 +13,11 @@ namespace bias {
     class CameraDevice
     {
         public:
-            CameraDevice() {};
+            CameraDevice() 
+            {
+                connected_ = false;
+                capturing_ = false;
+            };
             CameraDevice(Guid guid) {guid_ = guid;};
             Guid getGuid() {return guid_;};
             virtual ~CameraDevice() {};
@@ -25,10 +29,13 @@ namespace bias {
             virtual std::string toString() {return std::string("camera not defined");}
             virtual void startCapture() {};
             virtual void stopCapture() {};
+            virtual void grabImage() {};
 
 
         protected:
             Guid guid_;
+            bool connected_;
+            bool capturing_;
     };
 
     typedef std::shared_ptr<CameraDevice> CameraDevicePtr;

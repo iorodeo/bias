@@ -36,7 +36,7 @@ int main(int argc, char** argv)
         cout << "Printing camera information" << endl;
         int cnt;
         CameraPtrList::iterator it;
-        for( it=cameraPtrList.begin(), cnt=0; it!=cameraPtrList.end(); it++, cnt++) 
+        for(it=cameraPtrList.begin(), cnt=0; it!=cameraPtrList.end(); it++, cnt++) 
         {
             cout << endl << "Camera " << cnt << endl;
             Camera camera = **it;
@@ -48,7 +48,7 @@ int main(int argc, char** argv)
         cout << "Starting capture on cameras: ";
         int cnt;
         CameraPtrList::iterator it;
-        for( it=cameraPtrList.begin(), cnt=0; it!=cameraPtrList.end(); it++, cnt++) 
+        for(it=cameraPtrList.begin(), cnt=0; it!=cameraPtrList.end(); it++, cnt++) 
         {
             cout << cnt << " ";
             Camera camera = **it;
@@ -57,9 +57,22 @@ int main(int argc, char** argv)
         cout << "done" << endl;
     }
 
-    cout << "Sleeping ... ";
-    Sleep(2000);
-    cout << "done" << endl;
+    {
+        int camCount;
+        int numImage = 1000;
+        CameraPtrList::iterator it;
+        cout << "Grabing images" << endl;
+        for (int i=0; i<numImage; i++) 
+        {
+            for ( it=cameraPtrList.begin(), camCount=0; it!=cameraPtrList.end(); it++, camCount++)
+            {
+                Camera camera = **it;
+                cout << "  image: " << i << " camera: " << camCount << endl;
+                camera.grabImage();
+            } 
+            cout << endl;
+        }
+    }
 
     {
         cout << "Stopping capture on cameras: ";

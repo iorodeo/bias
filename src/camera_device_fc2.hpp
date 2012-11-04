@@ -24,11 +24,18 @@ namespace bias {
             
             virtual void startCapture();
             virtual void stopCapture();
+            virtual void grabImage();
 
         private:
             fc2Context context_;
+            fc2Image rawImage_;
+            bool rawImageCreated_;
             fc2PGRGuid getGuid_fc2();
+
+            void createRawImage();
+            void destroyRawImage();
     };
+
 
     typedef std::shared_ptr<CameraDevice_fc2> CameraDevicePtr_fc2;
 
