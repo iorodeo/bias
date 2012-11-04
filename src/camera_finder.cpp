@@ -122,8 +122,8 @@ namespace bias {
         {
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
-            ssError << ": unable to get number of FlyCapture2 cameras";
-            throw RuntimeError(ERROR_FC2_GET_NUMBER_OF_CAMERAS, ssError.str());
+            ssError << ": unable to enumerate FlyCapture2 cameras";
+            throw RuntimeError(ERROR_FC2_ENUMERATE_CAMERAS, ssError.str());
         }
 
         // Get attached camera guids - add to guid set 
@@ -192,16 +192,26 @@ namespace bias {
             ssError << ": error updating dc1394 context is NULL" << std::endl;
             throw RuntimeError(ERROR_DC1394_NULL_POINTER, ssError.str());
         }
+        
+        // Get number of attached cameras
         error = dc1394_camera_enumerate(queryContext_dc1394_, &cameraList);
-        ///////////////////////////////////////////////////////////////////
-        // TO DO ...Check error 
-        ///////////////////////////////////////////////////////////////////
-        std::cout << "number dc1394 cameras: " << cameraList -> num << std::endl;
+        if (error != DC1394_SUCCESS)  
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to enumerate dc1394 camears, error code ";
+            ssError << error  << std::endl;
+            throw RuntimeError(ERROR_DC1394_ENUMERATE_CAMERAS, ssError.str());
+        }
 
+        // Add attached camera guids to the guid set.
+        for (int i=0; i<(cameraList->num); i++) 
+        {
+            GuidPtr guidPtr = std::make_shared<Guid>(cameraList->ids[i].guid);
+            guidPtrSet_.insert(guidPtr);
+        }
         dc1394_camera_free_list(cameraList);
-
     }
-
 
 #else
     // Dummy methods for when libdc1394 is not included

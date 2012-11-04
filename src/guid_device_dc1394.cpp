@@ -25,7 +25,7 @@ namespace bias {
     std::string GuidDevice_dc1394::toString()
     {
         std::stringstream ss;
-        ss << std::hex << value_ << std::dec << std::endl;
+        ss << std::hex << value_ << std::dec;
         return ss.str();
     }
 
