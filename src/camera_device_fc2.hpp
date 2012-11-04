@@ -12,7 +12,7 @@ namespace bias {
     {
         public:
             CameraDevice_fc2(); 
-            CameraDevice_fc2(Guid guid);
+            explicit CameraDevice_fc2(Guid guid);
             virtual ~CameraDevice_fc2();
             virtual CameraLib getCameraLib();
             virtual std::string toString();

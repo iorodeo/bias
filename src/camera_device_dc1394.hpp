@@ -12,7 +12,7 @@ namespace bias {
     {
         public:
             CameraDevice_dc1394() {};
-            CameraDevice_dc1394(Guid guid);
+            explicit CameraDevice_dc1394(Guid guid);
             virtual ~CameraDevice_dc1394() {};
             virtual CameraLib getCameraLib();
             virtual void printInfo() {};    // TO DO //

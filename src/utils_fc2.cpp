@@ -1,6 +1,6 @@
 #ifdef WITH_FC2
-#include <iostream>
 #include "utils_fc2.hpp"
+#include <iostream>
 
 namespace bias {
 
@@ -34,5 +34,7 @@ namespace bias {
                 break;
         }
     }
+
+    
 }
 #endif

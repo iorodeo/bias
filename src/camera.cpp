@@ -1,4 +1,6 @@
 #include "camera.hpp"
+#include "exception.hpp"
+#include <sstream>
 #ifdef WITH_FC2
 #include "camera_device_fc2.hpp"
 #endif
@@ -15,6 +17,7 @@ namespace bias {
 
     Camera::Camera(Guid guid) 
     {
+        std::stringstream ssError;
         switch ( guid.getCameraLib() )
         {
             case CAMERA_LIB_FC2:
@@ -23,14 +26,19 @@ namespace bias {
 
             case CAMERA_LIB_DC1394:
                 createCameraDevice_dc1394(guid);
+                break;
 
             case CAMERA_LIB_UNDEFINED:
-                // TO DO ... some kind of error
-                break;
-            default:
-                // TO DO ... some kind of error
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": camera library is not defined";
+                throw RuntimeError(ERROR_CAMERA_LIB_UNDEFINED, ssError.str()); 
                 break;
 
+            default:
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": camera library unknown";
+                throw RuntimeError(ERROR_CAMERA_LIB_UNKNOWN, ssError.str());
+                break;
         }
     }
 
@@ -98,7 +106,7 @@ namespace bias {
 
     void Camera::createCameraDevice_fc2(Guid guid)
     {
-        // TO DO ... throw some kind or error
+        throw_ERROR_NO_FC2(std::string(__PRETTY_FUNCTION__));
     }
 
 #endif
@@ -119,7 +127,7 @@ namespace bias {
 
     void Camera::createCameraDevice_dc1394(Guid guid)
     {
-        // TO DO ... throw some kinde of error
+        throw_ERROR_NO_DC1394(std::string(__PRETTY_FUNCTION__));
     }
 
 #endif

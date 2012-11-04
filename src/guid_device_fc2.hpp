@@ -17,7 +17,7 @@ namespace bias {
         // ---------------------------------------------------------------------
         public:
             GuidDevice_fc2() {};
-            GuidDevice_fc2( fc2PGRGuid guid_fc2 );
+            explicit GuidDevice_fc2( fc2PGRGuid guid_fc2 );
             virtual ~GuidDevice_fc2() {};
             virtual CameraLib getCameraLib();
             virtual void printValue();

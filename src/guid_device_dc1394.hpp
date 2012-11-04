@@ -17,7 +17,7 @@ namespace bias {
 
         public:
             GuidDevice_dc1394() {};
-            GuidDevice_dc1394( uint64_t guid_dc1394 );
+            explicit GuidDevice_dc1394( uint64_t guid_dc1394 );
             virtual ~GuidDevice_dc1394() {};
             virtual CameraLib getCameraLib();
             virtual void printValue();

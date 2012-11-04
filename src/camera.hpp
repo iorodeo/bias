@@ -19,11 +19,9 @@ namespace bias {
         // flycapture2, etc.
         // --------------------------------------------------------------------
        
-        friend std::ostream& operator<< (std::ostream &out, Camera &camera);
-
         public:
             Camera();
-            Camera(Guid guid);
+            explicit Camera(Guid guid);
             ~Camera();
             void printInfo();
             void printGuid();
@@ -36,6 +34,8 @@ namespace bias {
             void startCapture(); 
             void stopCapture();
             void grabImage();
+
+            friend std::ostream& operator<< (std::ostream &out, Camera &camera);
 
         private:
             CameraDevicePtr cameraDevicePtr_;

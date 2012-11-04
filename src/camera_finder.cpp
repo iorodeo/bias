@@ -1,4 +1,5 @@
 #include "camera_finder.hpp"
+#include "exception.hpp"
 #include <iostream>
 #include <sstream>
 
@@ -55,9 +56,10 @@ namespace bias {
     Guid CameraFinder::getGuidByIndex(unsigned int index)
     {
         if (index >= guidPtrSet_.size()) {
-            // TO DO ... throw some kind of error
-            std::cout << "guid index out of range" << std::endl;
-            return Guid();
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get FlyCapture2 guid by index";
+            throw RuntimeError(ERROR_FC2_GET_GUID, ssError.str());
         }
         GuidPtrSet::iterator it = guidPtrSet_.begin();
         std::advance(it,index);
@@ -78,9 +80,7 @@ namespace bias {
                 std::back_inserter(guidPtrList)
                 ); 
         return guidPtrList;
-        
     }
-
 
 #ifdef WITH_FC2
 
@@ -91,8 +91,10 @@ namespace bias {
         fc2Error error = fc2CreateContext(&queryContext_fc2_);
         if (error != FC2_ERROR_OK) 
         {
-            // TO DO ... throw some kind of error
-            std::cout << "Error creating fc2 query context" << std::endl;
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to create FlyCapture2 context";
+            throw RuntimeError(ERROR_FC2_CREATE_CONTEXT, ssError.str());
         }
     }
 
@@ -101,8 +103,10 @@ namespace bias {
         fc2Error error = fc2DestroyContext(queryContext_fc2_);
         if (error != FC2_ERROR_OK) 
         {
-            // TO DO ... throw some kind of error
-            std::cout << "Error destroying fc2 query context" << std::endl;
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to destroy FlyCapture2 context";
+            throw RuntimeError(ERROR_FC2_DESTROY_CONTEXT, ssError.str());
         }
     }
 
@@ -116,9 +120,10 @@ namespace bias {
         error = fc2GetNumOfCameras(queryContext_fc2_, &numCameras);
         if (error != FC2_ERROR_OK) 
         {
-            // TO DO ... throw some kind of error
-            std::cout << "Error getting number of fc2 cameras" << std::endl;
-            return;
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get number of FlyCapture2 cameras";
+            throw RuntimeError(ERROR_FC2_GET_NUMBER_OF_CAMERAS, ssError.str());
         }
 
         // Get attached camera guids - add to guid set 
@@ -127,8 +132,10 @@ namespace bias {
             error = fc2GetCameraFromIndex(queryContext_fc2_, i, &guid_fc2);
             if (error != FC2_ERROR_OK) 
             {
-                // TO DO ... throw some kind of error (maybe ... or maybe ignore?)
-                std::cout << "Error getting fc2 camera guid from index" << std::endl;
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to get FlyCapture2 camera guid from index";
+                throw RuntimeError(ERROR_FC2_GET_CAMERA_FROM_INDEX, ssError.str());
             }
             else 
             {
@@ -143,9 +150,9 @@ namespace bias {
     // Dummy methods for when FlyCapture2 is not included
     // ------------------------------------------------------------------------
 
-    void CameraFinder::createQueryContecxt_fc2() {};
-    void CameraFinder::destroyQueryContext_dc1394 {};
-    void CamrerFinder::update_fc2() {};
+    void CameraFinder::createQueryContext_fc2() {};
+    void CameraFinder::destroyQueryContext_fc2() {};
+    void CameraFinder::update_fc2() {};
 
 #endif
 
@@ -157,7 +164,7 @@ namespace bias {
     {
     }
 
-    void CameraFinder::destroyQueryConext_dc1394() 
+    void CameraFinder::destroyQueryContext_dc1394() 
     {
     }
 

@@ -1,8 +1,10 @@
 #ifdef WITH_FC2
 #include "camera_device_fc2.hpp"
+#include "utils_fc2.hpp"
+#include "exception.hpp"
 #include <sstream>
 #include <iostream>
-#include "utils_fc2.hpp"
+
 
 namespace bias {
 
@@ -17,9 +19,10 @@ namespace bias {
         fc2Error error= fc2CreateContext(&context_);
         if (error != FC2_ERROR_OK) 
         {
-            std::cout << "Error: fc2CreateContext" << std::endl;
-            // TO DO ... throw some kind of error
-            return;
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to create FlyCapture2 context"; 
+            throw RuntimeError(ERROR_FC2_CREATE_CONTEXT, ssError.str());
         }
         rawImageCreated_ = false;
     }
@@ -35,10 +38,11 @@ namespace bias {
         fc2Error error = fc2DestroyContext(context_);
         if ( error != FC2_ERROR_OK ) 
         {
-            std::cout << "Error: fc2DestroyContext" << std::endl;
-            // TO DO ... throw some kind of error;
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to destroy FlyCapture2 context";
+            throw RuntimeError(ERROR_FC2_DESTROY_CONTEXT, ssError.str());
         }
-
     }
 
     void CameraDevice_fc2::connect() 
@@ -49,9 +53,10 @@ namespace bias {
             fc2Error error = fc2Connect(context_, &guid);
             if (error != FC2_ERROR_OK) 
             {
-                std::cout << "Error: fc2Connect" << std::endl;
-                // TO DO ... throw some kind of error
-                return;
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unabled to connect ot FlyCapture2 device";
+                throw RuntimeError(ERROR_FC2_CONNECT, ssError.str());
             }
             connected_ = true;
         }
@@ -64,9 +69,10 @@ namespace bias {
             fc2Error error = fc2Disconnect(context_);
             if (error != FC2_ERROR_OK) 
             {
-                std::cout << "Error: fc2Disconnect" << std::endl;
-                // TO DO ... throw some kind of error
-                return;
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to disconnect from FlyCapture2 device";
+                throw RuntimeError(ERROR_FC2_DISCONNECT, ssError.str());
             }
             connected_ = false;
         }
@@ -82,9 +88,10 @@ namespace bias {
             fc2Error error = fc2StartCapture(context_);
             if (error != FC2_ERROR_OK) 
             {
-                std::cout << "Error: fc2StartCapture" << std::endl;
-                // TO DO ... throw some kind of error
-                return;
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to start FlyCapture2 capture";
+                throw RuntimeError(ERROR_FC2_START_CAPTURE, ssError.str());
             }
             capturing_ = true;
         }
@@ -98,8 +105,11 @@ namespace bias {
             fc2Error error = fc2StopCapture(context_);
             if (error != FC2_ERROR_OK) 
             { 
-                std::cout << "Error: fc2StopCapture" << std::endl;
-                // TO DO ... throw some kind of error
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError <<": unable to stop FlyCapture2 capture";
+                throw RuntimeError(ERROR_FC2_STOP_CAPTURE, ssError.str());
+
             }
             capturing_ = false;
         }
@@ -110,11 +120,11 @@ namespace bias {
         fc2Error error = fc2RetrieveBuffer(context_, &rawImage_);
         if ( error != FC2_ERROR_OK ) 
         {
-            std::cout << "Error: grabbing image w/ fc2RetrieveBuffer";
-            std::cout << std::endl;
-            // TO DO ... throw some kind of error
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to retrieve image from buffer";
+            throw RuntimeError(ERROR_FC2_RETRIEVE_BUFFER, ssError.str());
         }
-
     }
 
     CameraLib CameraDevice_fc2::getCameraLib()
@@ -184,10 +194,10 @@ namespace bias {
         fc2Error error = fc2CreateImage(&rawImage_);
         if (error != FC2_ERROR_OK) 
         {
-            std::cout << "Error creating image" << std::endl;
-            // TO DO ... throw some kind of error 
-            return;
-
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to create FlyCapture2 image";
+            throw RuntimeError(ERROR_FC2_CREATE_IMAGE, ssError.str());
         }
         rawImageCreated_ = true;
     }
@@ -199,9 +209,10 @@ namespace bias {
             fc2Error error = fc2DestroyImage(&rawImage_);
             if (error != FC2_ERROR_OK) 
             {
-                std::cout << "Error destroying image" << std::endl;
-                // TO DO ... throw some kinde of error
-                return;
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to destroy FlyCapture2 image";
+                throw RuntimeError(ERROR_FC2_DESTROY_IMAGE, ssError.str());
             }
             rawImageCreated_ = false;
         }
