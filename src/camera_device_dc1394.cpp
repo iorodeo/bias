@@ -30,6 +30,7 @@ namespace bias {
 
     CameraDevice_dc1394::~CameraDevice_dc1394()
     {
+        if ( capturing_ ) { stopCapture(); } 
         if ( connected_ ) { disconnect(); }
         dc1394_free(context_dc1394_);
     }
