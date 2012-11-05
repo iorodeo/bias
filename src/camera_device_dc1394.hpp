@@ -11,24 +11,30 @@ namespace bias {
 
     class CameraDevice_dc1394 : public CameraDevice
     {
+        static const unsigned int DEFAULT_NUM_DMA_BUFFER=5;
+
         public:
             CameraDevice_dc1394();
             explicit CameraDevice_dc1394(Guid guid);
             virtual ~CameraDevice_dc1394();
             virtual CameraLib getCameraLib();
-            virtual void printInfo() {};    // TO DO //
-            virtual void printGuid() {};    // TO DO //
-            virtual std::string toString(); // TO DO //
 
-            virtual void connect() {};      // TO DO //
-            virtual void disconnect() {};   // TO DO //
+            virtual void connect();    
+            virtual void disconnect(); 
 
-            virtual void startCapture() {}; // TO DO // 
-            virtual void stopCapture() {};  // TO DO //
-            virtual void grabImage() {};    // TO DO //
+            virtual void startCapture();  
+            virtual void stopCapture();  
+            virtual void grabImage();  
+
+            virtual std::string toString();
+            virtual void printGuid();
+            virtual void printInfo();  
 
         private:
-            dc1394_t *context_;
+            unsigned int numDMABuffer_;
+            dc1394_t *context_dc1394_;
+            dc1394camera_t *camera_dc1394_;
+            dc1394video_frame_t *frame_dc1394_;
 
     };
 

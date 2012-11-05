@@ -116,13 +116,15 @@ namespace bias {
 
     void CameraDevice_fc2::grabImage()
     {
-        fc2Error error = fc2RetrieveBuffer(context_, &rawImage_);
-        if ( error != FC2_ERROR_OK ) 
-        {
-            std::stringstream ssError;
-            ssError << __PRETTY_FUNCTION__;
-            ssError << ": unable to retrieve image from buffer";
-            throw RuntimeError(ERROR_FC2_RETRIEVE_BUFFER, ssError.str());
+        if ( capturing_ ) {
+            fc2Error error = fc2RetrieveBuffer(context_, &rawImage_);
+            if ( error != FC2_ERROR_OK ) 
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to retrieve image from buffer";
+                throw RuntimeError(ERROR_FC2_RETRIEVE_BUFFER, ssError.str());
+            }
         }
     }
 
@@ -151,8 +153,8 @@ namespace bias {
 
             ss << " Guid:           " << guid_ << std::endl;
             ss << " Serial number:  " << camInfo.serialNumber << std::endl;
-            ss << " Camera model:   " << camInfo.modelName << std::endl;
             ss << " Camera vendor:  " << camInfo.vendorName << std::endl;
+            ss << " Camera model:   " << camInfo.modelName << std::endl;
             ss << " Sensor          " << std::endl;
             ss << "   Type:         " << camInfo.sensorInfo << std::endl;
             ss << "   Resolution:   " << camInfo.sensorResolution << std::endl;
@@ -166,14 +168,14 @@ namespace bias {
         return ss.str();
     };
 
-    void CameraDevice_fc2::printInfo()
-    {
-        std::cout << toString();
-    }
-
     void CameraDevice_fc2::printGuid() 
     { 
         guid_.printValue(); 
+    }
+
+    void CameraDevice_fc2::printInfo()
+    {
+        std::cout << toString();
     }
        
     // Private methods
