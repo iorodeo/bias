@@ -8,7 +8,7 @@ namespace bias {
 
     GuidDevice_fc2::GuidDevice_fc2() 
     {
-        for (int=0; i<4; i++) {
+        for (int i=0; i<4; i++) {
             value_.value[i] = 0;
         }
     }

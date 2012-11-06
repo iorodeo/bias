@@ -69,7 +69,7 @@ int main(int argc, char** argv)
             for ( it=cameraPtrList.begin(), camCount=0; it!=cameraPtrList.end(); it++, camCount++)
             {
                 Camera camera = **it;
-                cout << "  image: " << i << " camera: " << camCount << endl;
+                cout << "  image: " << (i+1) << "/" << numImage << " camera: " << camCount << endl;
                 camera.grabImage();
             } 
             cout << endl;

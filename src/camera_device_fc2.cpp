@@ -125,6 +125,9 @@ namespace bias {
                 ssError << ": unable to retrieve image from buffer";
                 throw RuntimeError(ERROR_FC2_RETRIEVE_BUFFER, ssError.str());
             }
+
+            printImageInfo_fc2(rawImage_);
+            std::cout << std::flush;
         }
     }
 
