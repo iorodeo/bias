@@ -13,7 +13,26 @@ namespace bias {
 
     std::string getBayerTileFormatString_fc2(fc2BayerTileFormat bayerFormat);
 
+    std::string getVideoModeString_fc2(fc2VideoMode videoMode);
+
+    std::string getFrameRateString_fc2(fc2FrameRate frameRate);
+
+    std::string getModeString_fc2(fc2Mode mode);
+
     void printImageInfo_fc2(fc2Image &image);
+
+    void printFormat7ImageSettings_fc2(fc2Format7ImageSettings &imageSettings);
+
+    void printFormat7PacketSettings_fc2(unsigned int packetSize, float percentage);
+
+    void printFormat7Configuration_fc2(
+            fc2Format7ImageSettings &imageSettings,
+            unsigned int packetSize,
+            float percentage
+            );
+
+    void printFormat7Info_fc2(fc2Format7Info &format7Info);
+
 }
 
 #endif // #ifndef BIAS_UTILS_FC2_HPP

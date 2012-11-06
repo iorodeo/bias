@@ -30,11 +30,15 @@ namespace bias {
         private:
             fc2Context context_;
             fc2Image rawImage_;
-            bool rawImageCreated_;
+            fc2Image convertedImage_;
+            bool workingImagesCreated_;
             fc2PGRGuid getGuid_fc2();
 
-            void createRawImage();
-            void destroyRawImage();
+            void createWorkingImages();
+            void destroyWorkingImages();
+
+            // Temporary 
+            void setVideoMode_Format7Mode0();
     };
 
     typedef std::shared_ptr<CameraDevice_fc2> CameraDevicePtr_fc2;

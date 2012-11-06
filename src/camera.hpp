@@ -23,9 +23,8 @@ namespace bias {
             Camera();
             explicit Camera(Guid guid);
             ~Camera();
-            void printInfo();
-            void printGuid();
             CameraLib getCameraLib();
+
             Guid getGuid();
 
             void connect();
@@ -34,6 +33,18 @@ namespace bias {
             void startCapture(); 
             void stopCapture();
             void grabImage();
+
+            bool isConnected();
+            bool isCapturing();
+
+            void setVideoMode() {}; // TO DO //
+            void setFrameRate() {}; // TO DO //
+
+            //VideoModeList getAllowedVideoModes(); // TO DO //
+            //FrameRateList getAllowedFrameRates(); // TO DO //
+                
+            void printInfo();
+            void printGuid();
 
             friend std::ostream& operator<< (std::ostream &out, Camera &camera);
 

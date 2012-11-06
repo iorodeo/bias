@@ -12,7 +12,6 @@ namespace bias {
 
 
     Camera::Camera() { 
-        //cameraDevicePtr_ = CameraDevicePtr(new CameraDevice);
         cameraDevicePtr_ = std::make_shared<CameraDevice>();
     }
 
@@ -90,13 +89,22 @@ namespace bias {
         cameraDevicePtr_ -> grabImage();
     }
 
+    bool Camera::isConnected()
+    {
+        cameraDevicePtr_ -> isConnected();
+    }
+
+    bool Camera::isCapturing() 
+    { 
+        cameraDevicePtr_ -> isCapturing();
+    }
+
 // FlyCapture2 specific methods
 // ------------------------------------------------------------------------
 #ifdef WITH_FC2
 
     void Camera::createCameraDevice_fc2(Guid guid)
     { 
-        //cameraDevicePtr_ = CameraDevicePtr(new CameraDevice_fc2(guid));
         cameraDevicePtr_ = std::make_shared<CameraDevice_fc2>(guid);
     }
 
@@ -118,7 +126,6 @@ namespace bias {
 
     void Camera::createCameraDevice_dc1394(Guid guid)
     { 
-        //cameraDevicePtr_ = CameraDevicePtr(new CameraDevice_dc1394(guid));
         cameraDevicePtr_ = std::make_shared<CameraDevice_dc1394>(guid);
     }
 

@@ -10,7 +10,7 @@ namespace bias {
 
     CameraDevice_fc2::CameraDevice_fc2() : CameraDevice()
     {
-        rawImageCreated_ = false;
+        workingImagesCreated_ = false;
     }
 
     CameraDevice_fc2::CameraDevice_fc2(Guid guid) : CameraDevice(guid)
@@ -23,14 +23,14 @@ namespace bias {
             ssError << ": unable to create FlyCapture2 context"; 
             throw RuntimeError(ERROR_FC2_CREATE_CONTEXT, ssError.str());
         }
-        rawImageCreated_ = false;
+        workingImagesCreated_ = false;
     }
 
     CameraDevice_fc2::~CameraDevice_fc2() 
     {
         if ( capturing_ ) { stopCapture(); }
         
-        if ( rawImageCreated_ ) { destroyRawImage(); }
+        if ( workingImagesCreated_ ) { destroyWorkingImages(); }
 
         if ( connected_ ) { disconnect(); }
 
@@ -79,12 +79,18 @@ namespace bias {
 
     void CameraDevice_fc2::startCapture()
     {
+        fc2Error error;
+
         if ( connected_ && !capturing_ ) 
         {
-            createRawImage(); // destroys any existing raw image
+            createWorkingImages(); // destroys any existing raw image
+
+            // Temporary - for now just pick a video mode and frame rate 
+            // which works.
+            setVideoMode_Format7Mode0();
 
             // Start image capture
-            fc2Error error = fc2StartCapture(context_);
+            error = fc2StartCapture(context_);
             if (error != FC2_ERROR_OK) 
             {
                 std::stringstream ssError;
@@ -116,8 +122,20 @@ namespace bias {
 
     void CameraDevice_fc2::grabImage()
     {
+        fc2Error error;
         if ( capturing_ ) {
-            fc2Error error = fc2RetrieveBuffer(context_, &rawImage_);
+
+            // ----------------------------------------------------------------------------
+            //fc2VideoMode videoMode;
+            //fc2FrameRate frameRate;
+            //fc2GetVideoModeAndFrameRate(context_, &videoMode, &frameRate);
+            //std::cout << "videoMode: " << getVideoModeString_fc2(videoMode) << std::endl;
+            //std::cout << "frameRate: " << getFrameRateString_fc2(frameRate) << std::endl;
+            //std::cout << std::endl;
+            // -----------------------------------------------------------------------------
+
+            // Retrieve image from buffer
+            error = fc2RetrieveBuffer(context_, &rawImage_);
             if ( error != FC2_ERROR_OK ) 
             {
                 std::stringstream ssError;
@@ -126,8 +144,26 @@ namespace bias {
                 throw RuntimeError(ERROR_FC2_RETRIEVE_BUFFER, ssError.str());
             }
 
-            printImageInfo_fc2(rawImage_);
-            std::cout << std::flush;
+            //printImageInfo_fc2(rawImage_);
+            //std::cout << std::flush;
+
+            // Temporary - convert image to mono8 format. Need to figure out 
+            // how to do this automatically.  
+            error = fc2ConvertImageTo(
+                    FC2_PIXEL_FORMAT_MONO8, 
+                    &rawImage_, 
+                    &convertedImage_
+                    );
+            if ( error != FC2_ERROR_OK ) 
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to convert image";
+                throw RuntimeError(ERROR_FC2_CONVERT_IMAGE, ssError.str());
+
+            }
+            //printImageInfo_fc2(convertedImage_);
+            //std::cout << std::flush;
         }
     }
 
@@ -189,13 +225,15 @@ namespace bias {
         return guid_.getValue_fc2();
     }
 
-    void CameraDevice_fc2::createRawImage()
+    void CameraDevice_fc2::createWorkingImages()
     { 
-        // Destroy any pre-existing images
-        if ( rawImageCreated_ ) { destroyRawImage(); }
+        fc2Error error;
 
-        // Create new rawImage
-        fc2Error error = fc2CreateImage(&rawImage_);
+        // Destroy any pre-existing images
+        if ( workingImagesCreated_ ) { destroyWorkingImages(); }
+
+        // Create new rawImage_
+        error = fc2CreateImage(&rawImage_);
         if (error != FC2_ERROR_OK) 
         {
             std::stringstream ssError;
@@ -203,14 +241,25 @@ namespace bias {
             ssError << ": unable to create FlyCapture2 image";
             throw RuntimeError(ERROR_FC2_CREATE_IMAGE, ssError.str());
         }
-        rawImageCreated_ = true;
+
+        // Create new convertedImage_
+        error = fc2CreateImage(&convertedImage_);
+        if (error != FC2_ERROR_OK) 
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to create FlyCapture2 image";
+            throw RuntimeError(ERROR_FC2_CREATE_IMAGE, ssError.str());
+        }
+        workingImagesCreated_ = true;
     }
 
-    void CameraDevice_fc2::destroyRawImage()
+    void CameraDevice_fc2::destroyWorkingImages()
     {
-        if ( rawImageCreated_ ) 
+        fc2Error error;
+        if ( workingImagesCreated_ ) 
         {
-            fc2Error error = fc2DestroyImage(&rawImage_);
+            error = fc2DestroyImage(&rawImage_);
             if (error != FC2_ERROR_OK) 
             {
                 std::stringstream ssError;
@@ -218,10 +267,87 @@ namespace bias {
                 ssError << ": unable to destroy FlyCapture2 image";
                 throw RuntimeError(ERROR_FC2_DESTROY_IMAGE, ssError.str());
             }
-            rawImageCreated_ = false;
+
+            error = fc2DestroyImage(&convertedImage_);
+            if (error != FC2_ERROR_OK) 
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to destroy FlyCapture2 image";
+                throw RuntimeError(ERROR_FC2_DESTROY_IMAGE, ssError.str());
+            }
+            workingImagesCreated_ = false;
         }
     }
 
+    // Temporary methods
+    void CameraDevice_fc2::setVideoMode_Format7Mode0()
+    {
+        fc2Error error;
+        fc2Format7Info format7Info;
+        fc2Format7ImageSettings imageSettings;
+        unsigned int packetSize;
+        float percentage; 
+        BOOL supported;
+
+        // Get the format 7 info
+        format7Info.mode = FC2_MODE_0;
+        error = fc2GetFormat7Info(context_, &format7Info, &supported);
+        if (error != FC2_ERROR_OK) 
+        {
+            std::stringstream ssError; 
+            ssError << __PRETTY_FUNCTION__; 
+            ssError << ": unable to get FlyCapture2 format7 information"; 
+            throw RuntimeError(ERROR_FC2_GET_FORMAT7_INFO, ssError.str());
+        }
+        if ( !supported )
+        {
+            std::stringstream ssError; 
+            ssError << __PRETTY_FUNCTION__; 
+            ssError << ": unsupported FlyCapture2 video mode, "; 
+            ssError << getModeString_fc2(format7Info.mode);
+            throw RuntimeError(ERROR_FC2_UNSUPPORTED_VIDEO_MODE, ssError.str());
+        }
+
+        if (1) // Print format7 information for selected mode
+        {
+            std::cout << std::endl << std::endl;
+            std::cout << "Supported: " << std::boolalpha << bool(supported); 
+            std::cout << std::noboolalpha << std::endl << std::endl;
+            printFormat7Info_fc2(format7Info);
+        }
+
+        // Get Current format7 settings
+        error = fc2GetFormat7Configuration(
+                context_, 
+                &imageSettings,
+                &packetSize,
+                &percentage
+                );
+        if (error != FC2_ERROR_OK)
+        { 
+            std::stringstream ssError; 
+            ssError << __PRETTY_FUNCTION__; 
+            ssError << ": unable to get FlyCapture2 format7 configuration"; 
+            throw RuntimeError( ERROR_FC2_GET_FORMAT7_CONFIGURATION, ssError.str());
+        }
+
+        if (1) // Print current configuration settings
+        {
+            std::cout << std::endl;
+            printFormat7Configuration_fc2(imageSettings,packetSize,percentage);
+            std::cout << std::endl;
+        }
+
+        // Desired format7 configuration
+        imageSettings.mode = format7Info.mode;
+        imageSettings.offsetX = 0;
+        imageSettings.offsetY = 0;
+        imageSettings.width = format7Info.maxWidth;
+        imageSettings.height = format7Info.maxHeight;
+        imageSettings.pixelFormat = FC2_PIXEL_FORMAT_RAW8;
+
+    }
 }
 #endif
 

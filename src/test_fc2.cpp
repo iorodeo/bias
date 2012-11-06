@@ -27,7 +27,6 @@ int main(int argc, char** argv)
         for (it=guidPtrList.begin(); it!=guidPtrList.end(); it++) 
         {
             Guid guid = **it;
-            //CameraPtr camPtr(new Camera(guid));
             CameraPtr camPtr = std::make_shared<Camera>(guid);
             camPtr -> connect();
             cameraPtrList.push_back(camPtr);
@@ -57,13 +56,15 @@ int main(int argc, char** argv)
             camera.startCapture();
         }
         cout << "done" << endl;
+        cout << endl;
     }
 
     {
         int camCount;
-        int numImage = 100;
+        int numImage = 5;
         CameraPtrList::iterator it;
         cout << "Grabing images" << endl;
+        cout << endl;
         for (int i=0; i<numImage; i++) 
         {
             for ( it=cameraPtrList.begin(), camCount=0; it!=cameraPtrList.end(); it++, camCount++)

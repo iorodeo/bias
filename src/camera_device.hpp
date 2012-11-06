@@ -27,15 +27,21 @@ namespace bias {
             Guid getGuid() {return guid_;};
             virtual ~CameraDevice() {};
             virtual CameraLib getCameraLib() {};
+
+
             virtual void connect() {};
             virtual void disconnect() {};
-            virtual void printInfo() {};
-            virtual void printGuid() {};
-            virtual std::string toString() {return std::string("camera not defined");}
+
             virtual void startCapture() {};
             virtual void stopCapture() {};
             virtual void grabImage() {};
 
+            virtual bool isConnected() { return connected_; }
+            virtual bool isCapturing() { return capturing_; }
+
+            virtual std::string toString() {return std::string("camera not defined");}
+            virtual void printInfo() {};
+            virtual void printGuid() {};
 
         protected:
             Guid guid_;
