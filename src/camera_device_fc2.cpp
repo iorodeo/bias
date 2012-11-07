@@ -44,20 +44,37 @@ namespace bias {
         }
     }
 
+    CameraLib CameraDevice_fc2::getCameraLib()
+    {
+        return guid_.getCameraLib();
+    }
+
     void CameraDevice_fc2::connect() 
     {
         if ( !connected_ ) 
         { 
+            // Connect to camera
             fc2PGRGuid guid = getGuid_fc2();
             fc2Error error = fc2Connect(context_, &guid);
             if (error != FC2_ERROR_OK) 
             {
                 std::stringstream ssError;
                 ssError << __PRETTY_FUNCTION__;
-                ssError << ": unabled to connect ot FlyCapture2 device";
+                ssError << ": unabled to connect to FlyCapture2 device";
                 throw RuntimeError(ERROR_FC2_CONNECT, ssError.str());
             }
             connected_ = true;
+
+            // Get Camera information
+            error = fc2GetCameraInfo( context_, &cameraInfo_ );
+            if (error != FC2_ERROR_OK) 
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unabled to got FlyCapture2 camera info";
+                throw RuntimeError(ERROR_FC2_GET_CAMERA_INFO, ssError.str());
+            }
+
         }
     }
 
@@ -125,15 +142,6 @@ namespace bias {
         fc2Error error;
         if ( capturing_ ) {
 
-            // ----------------------------------------------------------------------------
-            //fc2VideoMode videoMode;
-            //fc2FrameRate frameRate;
-            //fc2GetVideoModeAndFrameRate(context_, &videoMode, &frameRate);
-            //std::cout << "videoMode: " << getVideoModeString_fc2(videoMode) << std::endl;
-            //std::cout << "frameRate: " << getFrameRateString_fc2(frameRate) << std::endl;
-            //std::cout << std::endl;
-            // -----------------------------------------------------------------------------
-
             // Retrieve image from buffer
             error = fc2RetrieveBuffer(context_, &rawImage_);
             if ( error != FC2_ERROR_OK ) 
@@ -167,42 +175,42 @@ namespace bias {
         }
     }
 
-    CameraLib CameraDevice_fc2::getCameraLib()
+    bool CameraDevice_fc2::isColor()
     {
-        return guid_.getCameraLib();
+        return bool(cameraInfo_.isColorCamera);
     }
+
 
     std::string CameraDevice_fc2::toString()
     {
-        std::stringstream ss; 
         fc2Error error;
-        fc2CameraInfo camInfo;
-        error = fc2GetCameraInfo( context_, &camInfo );
-        if ( error != FC2_ERROR_OK ) 
-        {
-            ss << "Error: unable to get camera info";
-        }
-        else
-        {
-            ss << std::endl;
-            ss << " ------------------ " << std::endl;
-            ss << " CAMERA INFORMATION " << std::endl;
-            ss << " ------------------ " << std::endl;
-            ss << std::endl;
+        std::stringstream ss; 
 
+        ss << std::endl;
+        ss << " ------------------ " << std::endl;
+        ss << " CAMERA INFORMATION " << std::endl;
+        ss << " ------------------ " << std::endl;
+        ss << std::endl;
+
+        if ( connected_ ) { 
             ss << " Guid:           " << guid_ << std::endl;
-            ss << " Serial number:  " << camInfo.serialNumber << std::endl;
-            ss << " Camera vendor:  " << camInfo.vendorName << std::endl;
-            ss << " Camera model:   " << camInfo.modelName << std::endl;
+            ss << " Serial number:  " << cameraInfo_.serialNumber << std::endl;
+            ss << " Camera vendor:  " << cameraInfo_.vendorName << std::endl;
+            ss << " Camera model:   " << cameraInfo_.modelName << std::endl;
             ss << " Sensor          " << std::endl;
-            ss << "   Type:         " << camInfo.sensorInfo << std::endl;
-            ss << "   Resolution:   " << camInfo.sensorResolution << std::endl;
+            ss << "   Type:         " << cameraInfo_.sensorInfo << std::endl;
+            ss << "   Resolution:   " << cameraInfo_.sensorResolution << std::endl;
             ss << " Firmware        " << std::endl;     
-            ss << "   Version:      " << camInfo.firmwareVersion << std::endl;
-            ss << "   Build time:   " << camInfo.firmwareBuildTime << std::endl;
-            ss << " Color camera:   " << std::boolalpha << (bool) camInfo.isColorCamera << std::endl;
-            ss << " Interface:      " << getInterfaceTypeString_fc2(camInfo.interfaceType) << std::endl;
+            ss << "   Version:      " << cameraInfo_.firmwareVersion << std::endl;
+            ss << "   Build time:   " << cameraInfo_.firmwareBuildTime << std::endl;
+            ss << " Color camera:   " << std::boolalpha << (bool) cameraInfo_.isColorCamera << std::endl;
+            ss << " Interface:      " << getInterfaceTypeString_fc2(cameraInfo_.interfaceType) << std::endl;
             ss << std::endl;
+        }
+        else 
+        {
+            ss << " Camera not connected " << std::endl;
+            
         }
         return ss.str();
     };
@@ -286,9 +294,12 @@ namespace bias {
         fc2Error error;
         fc2Format7Info format7Info;
         fc2Format7ImageSettings imageSettings;
+        fc2Format7PacketInfo packetInfo;
+        fc2PixelFormat defaultPixelFormat;
         unsigned int packetSize;
         float percentage; 
         BOOL supported;
+        BOOL settingsAreValid;
 
         // Get the format 7 info
         format7Info.mode = FC2_MODE_0;
@@ -311,9 +322,6 @@ namespace bias {
 
         if (1) // Print format7 information for selected mode
         {
-            std::cout << std::endl << std::endl;
-            std::cout << "Supported: " << std::boolalpha << bool(supported); 
-            std::cout << std::noboolalpha << std::endl << std::endl;
             printFormat7Info_fc2(format7Info);
         }
 
@@ -328,25 +336,79 @@ namespace bias {
         { 
             std::stringstream ssError; 
             ssError << __PRETTY_FUNCTION__; 
-            ssError << ": unable to get FlyCapture2 format7 configuration"; 
-            throw RuntimeError( ERROR_FC2_GET_FORMAT7_CONFIGURATION, ssError.str());
+            ssError << ": unable to get FlyCapture2 format 7 configuration"; 
+            throw RuntimeError(ERROR_FC2_GET_FORMAT7_CONFIGURATION, ssError.str());
         }
 
         if (1) // Print current configuration settings
         {
-            std::cout << std::endl;
             printFormat7Configuration_fc2(imageSettings,packetSize,percentage);
-            std::cout << std::endl;
         }
 
-        // Desired format7 configuration
+        //// Get default pixel format
+        //error = fc2GetDefaultOutputFormat(&defaultPixelFormat);
+        //if (error != FC2_ERROR_OK)
+        //{
+        //    std::stringstream ssError; 
+        //    ssError << __PRETTY_FUNCTION__; 
+        //    ssError << ": unable to get FlyCapture2 default Pixel format"; 
+        //    throw RuntimeError(ERROR_FC2_GET_DEFAULT_OUTPUT_FORMAT, ssError.str());
+        //}
+
+        //if (1) // Print default pixel format 
+        //{
+        //    std::cout << std::endl;
+        //    std::cout << "defaulPixelFormat: " << getPixelFormatString_fc2(defaultPixelFormat) << std::endl;
+        //    std::cout << std::endl;
+        //}
+
+        // Create desired format7 configuration
         imageSettings.mode = format7Info.mode;
         imageSettings.offsetX = 0;
         imageSettings.offsetY = 0;
         imageSettings.width = format7Info.maxWidth;
         imageSettings.height = format7Info.maxHeight;
         imageSettings.pixelFormat = FC2_PIXEL_FORMAT_RAW8;
+        //imageSettings.pixelFormat = FC2_PIXEL_FORMAT_MONO8;
+        //imageSettings.pixelFormat = FC2_PIXEL_FORMAT_MONO16;
 
+        // Check that settings are valid and get packet info
+        error = fc2ValidateFormat7Settings(
+                context_, 
+                &imageSettings, 
+                &settingsAreValid,
+                &packetInfo
+                );
+        if (error != FC2_ERROR_OK)
+        {
+            std::stringstream ssError; 
+            ssError << __PRETTY_FUNCTION__; 
+            ssError << ": unable to validate FlyCapture2 format 7 settings"; 
+            throw RuntimeError(ERROR_FC2_VALIDATE_FORMAT7_SETTINGS, ssError.str());
+        }
+        if (!settingsAreValid)
+        {
+            std::stringstream ssError; 
+            ssError << __PRETTY_FUNCTION__; 
+            ssError << ": unable to validate FlyCapture2 format 7 settings"; 
+            throw RuntimeError(ERROR_FC2_INVALID_FORMAT7_SETTINGS, ssError.str());
+        }
+
+        if (1)  // Print packet info
+        {
+            printFormat7ImageSettings_fc2(imageSettings);
+            printFormat7PacketInfo_fc2(packetInfo);
+        }
+
+        // Set format 7 configuration settings
+        error = fc2SetFormat7Configuration(context_, &imageSettings, 100);
+        if (error != FC2_ERROR_OK)
+        {
+            std::stringstream ssError; 
+            ssError << __PRETTY_FUNCTION__; 
+            ssError << ": unable to sete FlyCapture2 format 7 configuration"; 
+            throw RuntimeError(ERROR_FC2_SET_FORMAT7_CONFIGURATION, ssError.str());
+        }
     }
 }
 #endif

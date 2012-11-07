@@ -29,6 +29,7 @@ int main(int argc, char** argv)
             Guid guid = **it;
             CameraPtr camPtr = std::make_shared<Camera>(guid);
             camPtr -> connect();
+            cout << "isColor: " << boolalpha << (camPtr -> isColor()) << noboolalpha << endl;
             cameraPtrList.push_back(camPtr);
         }
     }
@@ -61,7 +62,7 @@ int main(int argc, char** argv)
 
     {
         int camCount;
-        int numImage = 5;
+        int numImage = 3;
         CameraPtrList::iterator it;
         cout << "Grabing images" << endl;
         cout << endl;

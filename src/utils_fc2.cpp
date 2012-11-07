@@ -5,6 +5,119 @@
 
 namespace bias {
 
+
+    void printImageInfo_fc2(fc2Image &image)
+    {
+        std::cout << std::endl;
+        std::cout << "----------------------" << std::endl;
+        std::cout << "FlyCapture2 Image Info" << std::endl;
+        std::cout << "----------------------" << std::endl;
+        std::cout << std::endl;
+        std::cout << " rows:             " << image.rows << std::endl;
+        std::cout << " cols:             " << image.cols << std::endl;
+        std::cout << " stride:           " << image.stride << std::endl;
+        std::cout << " dataSize:         " << image.dataSize << std::endl;
+        std::cout << " receivedDataSize: " << image.receivedDataSize << std::endl;
+        std::cout << " format            " << std::endl;
+        std::cout << "   Code:           " << "0x" << std::hex << image.format << std::dec << std::endl;
+        std::cout << "   String:         " << getPixelFormatString_fc2(image.format) << std::endl;
+        std::cout << " bayerFormat       " << std::endl;
+        std::cout << "   code:           " << "0x" << std::hex << image.bayerFormat << std::dec << std::endl;
+        std::cout << "   string:         " << getBayerTileFormatString_fc2(image.bayerFormat) << std::endl;
+        std::cout << std::endl;
+    }
+
+    void printFormat7ImageSettings_fc2(fc2Format7ImageSettings &imageSettings)
+    {
+        std::cout << std::endl;
+        std::cout << "------------------------------------" << std::endl;
+        std::cout << "FlyCatpure2 Format 7 Image settings " << std::endl;
+        std::cout << "------------------------------------" << std::endl;
+        std::cout << std::endl;
+        std::cout << " mode:         " << getModeString_fc2(imageSettings.mode) << std::endl;
+        std::cout << " offsetX:      " << imageSettings.offsetX << std::endl;
+        std::cout << " offsetY:      " << imageSettings.offsetY << std::endl;
+        std::cout << " width:        " << imageSettings.width << std::endl; 
+        std::cout << " height:       " << imageSettings.height << std::endl;
+        std::cout << " pixelFormat:  " << getPixelFormatString_fc2(imageSettings.pixelFormat) << std::endl;
+        std::cout << " reserved:     " << std::endl;
+        for (int i=0; i<8; i++) 
+        {
+            std::cout << "   [" << i << "] = " << std::hex << "0x" << imageSettings.reserved[i];
+            std::cout << std::dec << std::endl;
+        }
+        std::cout << std::endl;
+    }
+
+    void printFormat7PacketSettings_fc2(unsigned int packetSize, float percentage)
+    {
+        std::cout << std::endl;
+        std::cout << "------------------------------------" << std::endl;
+        std::cout << "FlyCapture2 Format 7 Packet settings" << std::endl;
+        std::cout << "------------------------------------" << std::endl;
+        std::cout << std::endl;
+        std::cout << " percentage:   " << percentage << std::endl;
+        std::cout << " packetSize:   " << packetSize << std::endl;
+        std::cout << std::endl;
+    }
+
+    void printFormat7Configuration_fc2(
+            fc2Format7ImageSettings &imageSettings,
+            unsigned int packetSize,
+            float percentage 
+            )
+    {
+        printFormat7ImageSettings_fc2(imageSettings);
+        printFormat7PacketSettings_fc2(packetSize, percentage);
+    }
+
+    void printFormat7Info_fc2(fc2Format7Info &format7Info)
+    {
+        std::cout << std::endl;
+        std::cout << "-------------------------" << std::endl;
+        std::cout << "FlyCapture2 Format 7 Info" << std::endl;
+        std::cout << "-------------------------" << std::endl;
+        std::cout << std::endl;
+        std::cout << " mode:                      " << getModeString_fc2(format7Info.mode) << std::endl;
+        std::cout << " maxWidth:                  " << format7Info.maxWidth << std::endl;
+        std::cout << " maxHeight:                 " << format7Info.maxHeight << std::endl;
+        std::cout << " offsetHStepSize:           " << format7Info.offsetHStepSize << std::endl;
+        std::cout << " offsetVStepSize:           " << format7Info.offsetVStepSize << std::endl;
+        std::cout << " imageHStepSize:            " << format7Info.imageHStepSize << std::endl;
+        std::cout << " imageVStepSize:            " << format7Info.imageVStepSize << std:: endl;
+        std::cout << " pixelFormatBitField:       " << format7Info.pixelFormatBitField << std::endl;
+        std::cout << " pixelFormatBitField:       " << std::bitset<32>(format7Info.pixelFormatBitField) << std::endl;
+        std::cout << " vendorPixelFormatBitField: " << format7Info.vendorPixelFormatBitField << std::endl;
+        std::cout << " vendorPixelFormatBitField: " << std::bitset<32>(format7Info.vendorPixelFormatBitField) << std::endl;
+        std::cout << " packetSize:                " << format7Info.packetSize << std::endl;
+        std::cout << " minPacketSize:             " << format7Info.minPacketSize << std::endl;
+        std::cout << " maxPacketSize:             " << format7Info.maxPacketSize << std::endl;
+        std::cout << std::endl;
+    }
+
+    void printFormat7PacketInfo_fc2(fc2Format7PacketInfo &packetInfo)
+    {
+        std::cout << std::endl;
+        std::cout << "--------------------------------" << std::endl;
+        std::cout << "FlyCapture2 Format 7 Packet Info" << std::endl;
+        std::cout << "--------------------------------" << std::endl;
+        std::cout << std::endl;
+        std::cout << " recommendedBytesPerPacket:  " << packetInfo.recommendedBytesPerPacket << std::endl;
+        std::cout << " maxBytesPerPacket:          " << packetInfo.maxBytesPerPacket << std::endl;
+        std::cout << " unitBytesPerPacket:         " << packetInfo.unitBytesPerPacket << std::endl;
+        std::cout << " reseverd                    " << std::endl;
+        for (int i=0; i<8; i++) 
+        {
+            std::cout << "   [i] = " << packetInfo.reserved[i] << std::endl;
+        }
+        std::cout << std::endl;
+    }
+
+
+    // Functions for converting FlyCapture2 enumerations to strings   
+    // Mostly autogenerated. 
+    // ------------------------------------------------------------------------
+
     std::string getInterfaceTypeString_fc2(fc2InterfaceType ifaceType)
     {
         switch (ifaceType) 
@@ -452,95 +565,6 @@ namespace bias {
 
         }
 
-    }
-
-    void printImageInfo_fc2(fc2Image &image)
-    {
-        std::cout << std::endl;
-        std::cout << "----------------------" << std::endl;
-        std::cout << "FlyCapture2 Image Info" << std::endl;
-        std::cout << "----------------------" << std::endl;
-        std::cout << std::endl;
-        std::cout << " Rows:             " << image.rows << std::endl;
-        std::cout << " Cols:             " << image.cols << std::endl;
-        std::cout << " Stride:           " << image.stride << std::endl;
-        std::cout << " DataSize:         " << image.dataSize << std::endl;
-        std::cout << " ReceivedDataSize: " << image.receivedDataSize << std::endl;
-        std::cout << " Format            " << std::endl;
-        std::cout << "   Code:           " << "0x" << std::hex << image.format << std::dec << std::endl;
-        std::cout << "   String:         " << getPixelFormatString_fc2(image.format) << std::endl;
-        std::cout << " BayerFormat       " << std::endl;
-        std::cout << "   Code:           " << "0x" << std::hex << image.bayerFormat << std::dec << std::endl;
-        std::cout << "   String:         " << getBayerTileFormatString_fc2(image.bayerFormat) << std::endl;
-        std::cout << std::endl;
-    }
-
-    void printFormat7ImageSettings_fc2(fc2Format7ImageSettings &imageSettings)
-    {
-        std::cout << std::endl;
-        std::cout << "------------------------------------" << std::endl;
-        std::cout << "FlyCatpure2 Format 7 Image settings " << std::endl;
-        std::cout << "------------------------------------" << std::endl;
-        std::cout << std::endl;
-        std::cout << " Mode:         " << getModeString_fc2(imageSettings.mode) << std::endl;
-        std::cout << " OffsetX:      " << imageSettings.offsetX << std::endl;
-        std::cout << " OffsetY:      " << imageSettings.offsetY << std::endl;
-        std::cout << " Width:        " << imageSettings.width << std::endl; 
-        std::cout << " Height:       " << imageSettings.height << std::endl;
-        std::cout << " Pixel Format: " << getPixelFormatString_fc2(imageSettings.pixelFormat) << std::endl;
-        std::cout << " Reserved:     " << std::endl;
-        for (int i=0; i<8; i++) 
-        {
-            std::cout << "   [" << i << "] = " << std::hex << "0x" << imageSettings.reserved[i];
-            std::cout << std::dec << std::endl;
-        }
-        std::cout << std::endl;
-    }
-
-    void printFormat7PacketSettings_fc2(unsigned int packetSize, float percentage)
-    {
-        std::cout << std::endl;
-        std::cout << "------------------------------------" << std::endl;
-        std::cout << "FlyCapture2 Format 7 Packet settings" << std::endl;
-        std::cout << "------------------------------------" << std::endl;
-        std::cout << std::endl;
-        std::cout << " Percentage:   " << percentage << std::endl;
-        std::cout << " Packet Size:  " << packetSize << std::endl;
-        std::cout << std::endl;
-    }
-
-    void printFormat7Configuration_fc2(
-            fc2Format7ImageSettings &imageSettings,
-            unsigned int packetSize,
-            float percentage 
-            )
-    {
-        printFormat7ImageSettings_fc2(imageSettings);
-        printFormat7PacketSettings_fc2(packetSize, percentage);
-    }
-
-    void printFormat7Info_fc2(fc2Format7Info &format7Info)
-    {
-        std::cout << std::endl;
-        std::cout << "-------------------------" << std::endl;
-        std::cout << "FlyCapture2 Format 7 Info" << std::endl;
-        std::cout << "-------------------------" << std::endl;
-        std::cout << std::endl;
-        std::cout << " Mode:                      " << getModeString_fc2(format7Info.mode) << std::endl;
-        std::cout << " Max Width:                 " << format7Info.maxWidth << std::endl;
-        std::cout << " Max Height:                " << format7Info.maxHeight << std::endl;
-        std::cout << " OffsetHStepSize:           " << format7Info.offsetHStepSize << std::endl;
-        std::cout << " OffsetVStepSize:           " << format7Info.offsetVStepSize << std::endl;
-        std::cout << " ImageHStepSize:            " << format7Info.imageHStepSize << std::endl;
-        std::cout << " ImageVStepSize:            " << format7Info.imageVStepSize << std:: endl;
-        std::cout << " PixelFormatBitField:       " << format7Info.pixelFormatBitField << std::endl;
-        std::cout << " PixelFormatBitField:       " << std::bitset<32>(format7Info.pixelFormatBitField) << std::endl;
-        std::cout << " VendorPixelFormatBitField: " << format7Info.vendorPixelFormatBitField << std::endl;
-        std::cout << " VendorPixelFormatBitField: " << std::bitset<32>(format7Info.vendorPixelFormatBitField) << std::endl;
-        std::cout << " Packet Size:               " << format7Info.packetSize << std::endl;
-        std::cout << " MinPacketSize:             " << format7Info.minPacketSize << std::endl;
-        std::cout << " MaxPacketSize:             " << format7Info.maxPacketSize << std::endl;
-        std::cout << std::endl;
     }
 }
 #endif

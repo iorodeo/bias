@@ -91,12 +91,17 @@ namespace bias {
 
     bool Camera::isConnected()
     {
-        cameraDevicePtr_ -> isConnected();
+        return cameraDevicePtr_ -> isConnected();
     }
 
     bool Camera::isCapturing() 
     { 
-        cameraDevicePtr_ -> isCapturing();
+        return cameraDevicePtr_ -> isCapturing();
+    }
+
+    bool Camera::isColor()
+    {
+        return cameraDevicePtr_ -> isColor();
     }
 
 // FlyCapture2 specific methods

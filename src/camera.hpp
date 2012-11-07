@@ -36,6 +36,7 @@ namespace bias {
 
             bool isConnected();
             bool isCapturing();
+            bool isColor();
 
             void setVideoMode() {}; // TO DO //
             void setFrameRate() {}; // TO DO //

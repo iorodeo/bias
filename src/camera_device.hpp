@@ -38,6 +38,7 @@ namespace bias {
 
             virtual bool isConnected() { return connected_; }
             virtual bool isCapturing() { return capturing_; }
+            virtual bool isColor() { return false; };
 
             virtual std::string toString() {return std::string("camera not defined");}
             virtual void printInfo() {};

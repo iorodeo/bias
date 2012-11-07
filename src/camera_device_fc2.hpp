@@ -22,6 +22,8 @@ namespace bias {
             virtual void startCapture();
             virtual void stopCapture();
             virtual void grabImage();
+
+            virtual bool isColor();
             
             virtual std::string toString();
             virtual void printGuid();
@@ -29,11 +31,12 @@ namespace bias {
 
         private:
             fc2Context context_;
+            fc2CameraInfo cameraInfo_;
             fc2Image rawImage_;
             fc2Image convertedImage_;
             bool workingImagesCreated_;
-            fc2PGRGuid getGuid_fc2();
 
+            fc2PGRGuid getGuid_fc2();
             void createWorkingImages();
             void destroyWorkingImages();
 

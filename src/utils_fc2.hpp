@@ -7,17 +7,6 @@
 
 namespace bias {
 
-    std::string getInterfaceTypeString_fc2(fc2InterfaceType ifaceType);
-
-    std::string getPixelFormatString_fc2(fc2PixelFormat foramt);
-
-    std::string getBayerTileFormatString_fc2(fc2BayerTileFormat bayerFormat);
-
-    std::string getVideoModeString_fc2(fc2VideoMode videoMode);
-
-    std::string getFrameRateString_fc2(fc2FrameRate frameRate);
-
-    std::string getModeString_fc2(fc2Mode mode);
 
     void printImageInfo_fc2(fc2Image &image);
 
@@ -32,6 +21,21 @@ namespace bias {
             );
 
     void printFormat7Info_fc2(fc2Format7Info &format7Info);
+
+    void printFormat7PacketInfo_fc2(fc2Format7PacketInfo &packetInfo);
+
+    // Convert enumeration values to human readable strings
+    std::string getInterfaceTypeString_fc2(fc2InterfaceType ifaceType);
+
+    std::string getPixelFormatString_fc2(fc2PixelFormat foramt);
+
+    std::string getBayerTileFormatString_fc2(fc2BayerTileFormat bayerFormat);
+
+    std::string getVideoModeString_fc2(fc2VideoMode videoMode);
+
+    std::string getFrameRateString_fc2(fc2FrameRate frameRate);
+
+    std::string getModeString_fc2(fc2Mode mode);
 
 }
 
