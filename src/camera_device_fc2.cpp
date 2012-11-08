@@ -15,6 +15,7 @@ namespace bias {
 
     CameraDevice_fc2::CameraDevice_fc2(Guid guid) : CameraDevice(guid)
     {
+        workingImagesCreated_ = false;
         fc2Error error= fc2CreateContext(&context_);
         if (error != FC2_ERROR_OK) 
         {
@@ -23,7 +24,6 @@ namespace bias {
             ssError << ": unable to create FlyCapture2 context"; 
             throw RuntimeError(ERROR_FC2_CREATE_CONTEXT, ssError.str());
         }
-        workingImagesCreated_ = false;
     }
 
     CameraDevice_fc2::~CameraDevice_fc2() 
