@@ -49,6 +49,8 @@ namespace bias {
         ERROR_DC1394_CAPTURE_SETUP,
         ERROR_DC1394_SET_VIDEO_TRANSMISSION,
         ERROR_DC1394_CAPTURE_DEQUEUE,
+        ERROR_DC1394_START_CAPTURE,
+        ERROR_DC1394_GRAB_IMAGE,
     };
 
 } // namespace bias

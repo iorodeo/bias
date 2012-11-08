@@ -4,8 +4,8 @@ PROJECT(bais)
 
 # Camera libraries
 # -----------------------------------------------------------------------------
-SET(with_fc2 true)
-SET(with_dc1394 false)
+SET(with_fc2 false)
+SET(with_dc1394 true)
 
 
 # FlyCapture2 library location
@@ -34,7 +34,6 @@ If(with_dc1394)
         bias_src ${bias_src} 
         guid_device_dc1394.cpp
         camera_device_dc1394.cpp 
-        #)
         test_dc1394.cpp
         )
 ENDIF()

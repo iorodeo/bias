@@ -48,14 +48,14 @@ namespace bias {
         }
     }
 
-    CameraLib CameraDevice_fc2::getCameraLib()
-    {
-        return guid_.getCameraLib();
+    CameraLib CameraDevice_fc2::getCameraLib() 
+    { 
+        return guid_.getCameraLib(); 
     }
 
     void CameraDevice_fc2::connect() 
     {
-        if ( !connected_ ) 
+        if (!connected_) 
         { 
             // Connect to camera
             fc2PGRGuid guid = getGuid_fc2();
@@ -84,7 +84,8 @@ namespace bias {
 
     void CameraDevice_fc2::disconnect()
     {
-        if ( connected_ ) 
+        if (capturing_) { stopCapture(); }
+        if (connected_) 
         {
             fc2Error error = fc2Disconnect(context_);
             if (error != FC2_ERROR_OK) 
@@ -108,7 +109,7 @@ namespace bias {
             throw RuntimeError(ERROR_FC2_START_CAPTURE, ssError.str());
         }
 
-        if (!capturing_ ) 
+        if (!capturing_) 
         {
             createRawImage();
             createConvertedImage();
@@ -131,7 +132,7 @@ namespace bias {
 
     void CameraDevice_fc2::stopCapture()
     {
-        if ( capturing_ ) 
+        if (capturing_) 
         {
             // Stop capture
             fc2Error error = fc2StopCapture(context_);
@@ -377,23 +378,6 @@ namespace bias {
             printFormat7Configuration_fc2(imageSettings,packetSize,percentage);
         }
 
-        //// Get default pixel format
-        //error = fc2GetDefaultOutputFormat(&defaultPixelFormat);
-        //if (error != FC2_ERROR_OK)
-        //{
-        //    std::stringstream ssError; 
-        //    ssError << __PRETTY_FUNCTION__; 
-        //    ssError << ": unable to get FlyCapture2 default Pixel format"; 
-        //    throw RuntimeError(ERROR_FC2_GET_DEFAULT_OUTPUT_FORMAT, ssError.str());
-        //}
-
-        //if (1) // Print default pixel format 
-        //{
-        //    std::cout << std::endl;
-        //    std::cout << "defaulPixelFormat: " << getPixelFormatString_fc2(defaultPixelFormat) << std::endl;
-        //    std::cout << std::endl;
-        //}
-
         // Create desired format7 configuration
         imageSettings.mode = format7Info.mode;
         imageSettings.offsetX = 0;
@@ -402,7 +386,6 @@ namespace bias {
         imageSettings.height = format7Info.maxHeight;
         imageSettings.pixelFormat = FC2_PIXEL_FORMAT_RAW8;
         //imageSettings.pixelFormat = FC2_PIXEL_FORMAT_MONO8;
-        //imageSettings.pixelFormat = FC2_PIXEL_FORMAT_MONO16;
 
         // Check that settings are valid and get packet info
         error = fc2ValidateFormat7Settings(

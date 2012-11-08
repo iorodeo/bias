@@ -19,7 +19,7 @@ namespace bias {
         numDMABuffer_ = DEFAULT_NUM_DMA_BUFFER; 
 
         context_dc1394_ = dc1394_new();
-        if ( !context_dc1394_ ) 
+        if (!context_dc1394_) 
         {
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
@@ -30,8 +30,8 @@ namespace bias {
 
     CameraDevice_dc1394::~CameraDevice_dc1394()
     {
-        if ( capturing_ ) { stopCapture(); } 
-        if ( connected_ ) { disconnect(); }
+        if (capturing_) { stopCapture(); } 
+        if (connected_) { disconnect(); }
         dc1394_free(context_dc1394_);
     }
 
@@ -42,7 +42,7 @@ namespace bias {
 
     void CameraDevice_dc1394::connect() 
     {
-        if ( !connected_ ) 
+        if (!connected_) 
         {
             // Create new dc1394 camera object
             camera_dc1394_ = dc1394_camera_new( 
@@ -62,7 +62,8 @@ namespace bias {
 
     void CameraDevice_dc1394::disconnect()
     {
-        if ( connected_ ) 
+        if (capturing_) { stopCapture(); }
+        if (connected_) 
         {
             dc1394_camera_free(camera_dc1394_);
             connected_ = false;
@@ -72,8 +73,15 @@ namespace bias {
     void CameraDevice_dc1394::startCapture()
     {
         dc1394error_t error;
+        if (!connected_)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to start dc1394 capture - not connected";
+            throw RuntimeError(ERROR_DC1394_START_CAPTURE, ssError.str());
+        }
 
-        if ( connected_ && !capturing_ ) {
+        if (!capturing_) {
 
             // Temporary - just pick a video mode which works.
             error = dc1394_video_set_mode(
@@ -129,31 +137,37 @@ namespace bias {
 
     void CameraDevice_dc1394::grabImage()
     {
-        if ( capturing_ ) {
-            dc1394error_t error;
-            error = dc1394_capture_dequeue(
-                    camera_dc1394_, 
-                    DC1394_CAPTURE_POLICY_WAIT, 
-                    &frame_dc1394_
-                    );
-
-            // Get frame  
-            if (error != DC1394_SUCCESS) 
-            { 
-                std::stringstream ssError;
-                ssError << __PRETTY_FUNCTION__;
-                ssError << ": unable to dequeue dc1394 frame, error code ";
-                ssError << error << std::endl;
-                throw RuntimeError(ERROR_DC1394_CAPTURE_DEQUEUE, ssError.str());
-            }
-
-            // ----------------------------------------------------------------
-            // TO DO ...need to copy image out of DMA buffer here
-            // ----------------------------------------------------------------
-
-            // Put frame back 
-            error = dc1394_capture_enqueue(camera_dc1394_, frame_dc1394_);
+        if (!capturing_)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to grab dc1394 image - not capturing";
+            throw RuntimeError(ERROR_DC1394_GRAB_IMAGE, ssError.str());
         }
+
+        dc1394error_t error;
+        error = dc1394_capture_dequeue(
+                camera_dc1394_, 
+                DC1394_CAPTURE_POLICY_WAIT, 
+                &frame_dc1394_
+                );
+
+        // Get frame  
+        if (error != DC1394_SUCCESS) 
+        { 
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to dequeue dc1394 frame, error code ";
+            ssError << error << std::endl;
+            throw RuntimeError(ERROR_DC1394_CAPTURE_DEQUEUE, ssError.str());
+        }
+
+        // ----------------------------------------------------------------
+        // TO DO ...need to copy image out of DMA buffer here
+        // ----------------------------------------------------------------
+
+        // Put frame back 
+        error = dc1394_capture_enqueue(camera_dc1394_, frame_dc1394_);
     }
 
     std::string CameraDevice_dc1394::toString()

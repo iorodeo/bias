@@ -26,8 +26,7 @@ namespace bias {
             virtual void stopCapture();  
             virtual void grabImage();  
 
-            virtual bool isColor() {return false}; // TO DO //
-
+            virtual bool isColor() {return false;} // TO DO //
 
             virtual std::string toString();
             virtual void printGuid();
