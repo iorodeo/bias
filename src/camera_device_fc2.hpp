@@ -34,11 +34,17 @@ namespace bias {
             fc2CameraInfo cameraInfo_;
             fc2Image rawImage_;
             fc2Image convertedImage_;
-            bool workingImagesCreated_;
+
+            bool rawImageCreated_;
+            bool convertedImageCreated_;
 
             fc2PGRGuid getGuid_fc2();
-            void createWorkingImages();
-            void destroyWorkingImages();
+
+            void createRawImage();
+            void destroyRawImage();
+
+            void createConvertedImage();
+            void destroyConvertedImage();
 
             // Temporary 
             void setVideoMode_Format7Mode0();

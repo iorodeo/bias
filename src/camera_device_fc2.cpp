@@ -10,12 +10,14 @@ namespace bias {
 
     CameraDevice_fc2::CameraDevice_fc2() : CameraDevice()
     {
-        workingImagesCreated_ = false;
+        rawImageCreated_ = false;
+        convertedImageCreated_ = false;
     }
 
     CameraDevice_fc2::CameraDevice_fc2(Guid guid) : CameraDevice(guid)
     {
-        workingImagesCreated_ = false;
+        rawImageCreated_ = false;
+        convertedImageCreated_ = false;
         fc2Error error= fc2CreateContext(&context_);
         if (error != FC2_ERROR_OK) 
         {
@@ -28,11 +30,13 @@ namespace bias {
 
     CameraDevice_fc2::~CameraDevice_fc2() 
     {
-        if ( capturing_ ) { stopCapture(); }
-        
-        if ( workingImagesCreated_ ) { destroyWorkingImages(); }
+        if (capturing_) { stopCapture(); }
 
-        if ( connected_ ) { disconnect(); }
+        if (convertedImageCreated_) { destroyConvertedImage(); }
+
+        if (rawImageCreated_) { destroyRawImage(); }
+
+        if (connected_) { disconnect(); }
 
         fc2Error error = fc2DestroyContext(context_);
         if ( error != FC2_ERROR_OK ) 
@@ -96,18 +100,24 @@ namespace bias {
 
     void CameraDevice_fc2::startCapture()
     {
-        fc2Error error;
+        if (!connected_) 
+        { 
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to start FlyCapture2 capture - not connected";
+            throw RuntimeError(ERROR_FC2_START_CAPTURE, ssError.str());
+        }
 
-        if ( connected_ && !capturing_ ) 
+        if (!capturing_ ) 
         {
-            createWorkingImages(); // destroys any existing raw image
+            createRawImage();
+            createConvertedImage();
 
-            // Temporary - for now just pick a video mode and frame rate 
-            // which works.
+            // Temporary - for now just pick a video mode which works.
             setVideoMode_Format7Mode0();
 
             // Start image capture
-            error = fc2StartCapture(context_);
+            fc2Error error = fc2StartCapture(context_);
             if (error != FC2_ERROR_OK) 
             {
                 std::stringstream ssError;
@@ -140,39 +150,46 @@ namespace bias {
     void CameraDevice_fc2::grabImage()
     {
         fc2Error error;
-        if ( capturing_ ) {
 
-            // Retrieve image from buffer
-            error = fc2RetrieveBuffer(context_, &rawImage_);
-            if ( error != FC2_ERROR_OK ) 
-            {
-                std::stringstream ssError;
-                ssError << __PRETTY_FUNCTION__;
-                ssError << ": unable to retrieve image from buffer";
-                throw RuntimeError(ERROR_FC2_RETRIEVE_BUFFER, ssError.str());
-            }
-
-            //printImageInfo_fc2(rawImage_);
-            //std::cout << std::flush;
-
-            // Temporary - convert image to mono8 format. Need to figure out 
-            // how to do this automatically.  
-            error = fc2ConvertImageTo(
-                    FC2_PIXEL_FORMAT_MONO8, 
-                    &rawImage_, 
-                    &convertedImage_
-                    );
-            if ( error != FC2_ERROR_OK ) 
-            {
-                std::stringstream ssError;
-                ssError << __PRETTY_FUNCTION__;
-                ssError << ": unable to convert image";
-                throw RuntimeError(ERROR_FC2_CONVERT_IMAGE, ssError.str());
-
-            }
-            //printImageInfo_fc2(convertedImage_);
-            //std::cout << std::flush;
+        if (!capturing_) 
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to grab Image - not capturing";
+            throw RuntimeError(ERROR_FC2_GRAB_IMAGE, ssError.str());
         }
+
+        // Retrieve image from buffer
+        error = fc2RetrieveBuffer(context_, &rawImage_);
+        if ( error != FC2_ERROR_OK ) 
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to retrieve image from buffer";
+            throw RuntimeError(ERROR_FC2_RETRIEVE_BUFFER, ssError.str());
+        }
+
+        //printImageInfo_fc2(rawImage_);
+        //std::cout << std::flush;
+
+        // Temporary - convert image to mono8 format. Need to figure out 
+        // how to do this automatically.  
+        error = fc2ConvertImageTo(
+                FC2_PIXEL_FORMAT_MONO8, 
+                &rawImage_, 
+                &convertedImage_
+                );
+        if ( error != FC2_ERROR_OK ) 
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to convert image";
+            throw RuntimeError(ERROR_FC2_CONVERT_IMAGE, ssError.str());
+
+        }
+
+        //printImageInfo_fc2(convertedImage_);
+        //std::cout << std::flush;
     }
 
     bool CameraDevice_fc2::isColor()
@@ -233,15 +250,12 @@ namespace bias {
         return guid_.getValue_fc2();
     }
 
-    void CameraDevice_fc2::createWorkingImages()
-    { 
-        fc2Error error;
+    void CameraDevice_fc2::createRawImage()
+    {
+        if (rawImageCreated_) { destroyRawImage(); }
 
-        // Destroy any pre-existing images
-        if ( workingImagesCreated_ ) { destroyWorkingImages(); }
+        fc2Error error = fc2CreateImage(&rawImage_);
 
-        // Create new rawImage_
-        error = fc2CreateImage(&rawImage_);
         if (error != FC2_ERROR_OK) 
         {
             std::stringstream ssError;
@@ -250,24 +264,32 @@ namespace bias {
             throw RuntimeError(ERROR_FC2_CREATE_IMAGE, ssError.str());
         }
 
-        // Create new convertedImage_
-        error = fc2CreateImage(&convertedImage_);
-        if (error != FC2_ERROR_OK) 
-        {
-            std::stringstream ssError;
-            ssError << __PRETTY_FUNCTION__;
-            ssError << ": unable to create FlyCapture2 image";
-            throw RuntimeError(ERROR_FC2_CREATE_IMAGE, ssError.str());
-        }
-        workingImagesCreated_ = true;
+        rawImageCreated_ = true;
     }
 
-    void CameraDevice_fc2::destroyWorkingImages()
+    void CameraDevice_fc2::createConvertedImage()
     {
-        fc2Error error;
-        if ( workingImagesCreated_ ) 
+        if (convertedImageCreated_) {destroyConvertedImage();}
+
+        fc2Error error = fc2CreateImage(&convertedImage_);
+
+        if (error != FC2_ERROR_OK) 
         {
-            error = fc2DestroyImage(&rawImage_);
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to create FlyCapture2 image";
+            throw RuntimeError(ERROR_FC2_CREATE_IMAGE, ssError.str());
+        }
+
+        convertedImageCreated_ = true;
+    }
+
+    void CameraDevice_fc2::destroyRawImage()
+    {
+        if (rawImageCreated_) 
+        { 
+            fc2Error error = fc2DestroyImage(&rawImage_);
+
             if (error != FC2_ERROR_OK) 
             {
                 std::stringstream ssError;
@@ -276,7 +298,16 @@ namespace bias {
                 throw RuntimeError(ERROR_FC2_DESTROY_IMAGE, ssError.str());
             }
 
-            error = fc2DestroyImage(&convertedImage_);
+            rawImageCreated_ = false;
+        }
+    }
+
+    void CameraDevice_fc2::destroyConvertedImage()
+    {
+        if (convertedImageCreated_) 
+        {
+            fc2Error error = fc2DestroyImage(&convertedImage_);
+
             if (error != FC2_ERROR_OK) 
             {
                 std::stringstream ssError;
@@ -284,7 +315,8 @@ namespace bias {
                 ssError << ": unable to destroy FlyCapture2 image";
                 throw RuntimeError(ERROR_FC2_DESTROY_IMAGE, ssError.str());
             }
-            workingImagesCreated_ = false;
+            
+            convertedImageCreated_ = false;
         }
     }
 
