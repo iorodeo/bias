@@ -5,7 +5,7 @@ namespace bias {
 
     enum CameraLib 
     {
-        CAMERA_LIB_FC2,
+        CAMERA_LIB_FC2=0,
         CAMERA_LIB_DC1394,
         CAMERA_LIB_UNDEFINED,
         NUMBER_OF_CAMERA_LIB,
@@ -41,8 +41,12 @@ namespace bias {
         ERROR_FC2_SET_FORMAT7_CONFIGURATION,
         ERROR_FC2_GET_DEFAULT_OUTPUT_FORMAT,
         ERROR_FC2_GET_CAMERA_INFO,
+        ERROR_FC2_GET_PROPERTY_INFO,
+
         ERROR_FC2_CONVERT_PROPERTY_TYPE,
         ERROR_FC2_CONVERT_FRAMERATE,
+        ERROR_FC2_CONVERT_VIDEOMODE,
+        ERROR_FC2_CONVERT_IMAGING_MODE,
 
         // Libdc1394 specific errors
         ERROR_NO_DC1394,
@@ -57,14 +61,12 @@ namespace bias {
         ERROR_DC1394_START_CAPTURE,
         ERROR_DC1394_GRAB_IMAGE,
 
-        // Conversion error
-
         NUMBER_OF_ERROR,
     }; 
     
     enum PropertyType 
     { 
-        PROPERTY_BRIGHTNESS, 
+        PROPERTY_BRIGHTNESS=0, 
         PROPERTY_AUTO_EXPOSURE,
         PROPERTY_SHARPNESS,
         PROPERTY_WHITE_BALANCE,
@@ -88,7 +90,7 @@ namespace bias {
 
     enum FrameRate
     {
-        FRAMERATE_1_875, 
+        FRAMERATE_1_875=0, 
         FRAMERATE_3_75, 
         FRAMERATE_7_5, 
         FRAMERATE_15, 
@@ -103,7 +105,7 @@ namespace bias {
 
     enum VideoMode 
     {
-        VIDEOMODE_160x120YUV444, 
+        VIDEOMODE_160x120YUV444=0, 
         VIDEOMODE_320x240YUV422, 
         VIDEOMODE_640x480YUV411, 
         VIDEOMODE_640x480YUV422, 
@@ -131,6 +133,43 @@ namespace bias {
         NUMBER_OF_VIDEOMODE,
     };
 
+    enum ImagingMode 
+    {
+        IMAGING_MODE_0=0,
+        IMAGING_MODE_1,
+        IMAGING_MODE_2,
+        IMAGING_MODE_3,
+        IMAGING_MODE_4,
+        IMAGING_MODE_5,
+        IMAGING_MODE_6,
+        IMAGING_MODE_7,
+        IMAGING_MODE_8,
+        IMAGING_MODE_9,
+        IMAGING_MODE_10,
+        IMAGING_MODE_11,
+        IMAGING_MODE_12,
+        IMAGING_MODE_13,
+        IMAGING_MODE_14,
+        IMAGING_MODE_15,
+        IMAGING_MODE_16,
+        IMAGING_MODE_17,
+        IMAGING_MODE_18,
+        IMAGING_MODE_19,
+        IMAGING_MODE_20,
+        IMAGING_MODE_21,
+        IMAGING_MODE_22,
+        IMAGING_MODE_23,
+        IMAGING_MODE_24,
+        IMAGING_MODE_25,
+        IMAGING_MODE_26,
+        IMAGING_MODE_27,
+        IMAGING_MODE_28,
+        IMAGING_MODE_29,
+        IMAGING_MODE_30,
+        IMAGING_MODE_31,
+
+        NUMBER_OF_IMAGING_MODE, 
+    };  
 
 } // namespace bias
 

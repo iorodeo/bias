@@ -175,15 +175,22 @@ namespace bias {
         std::stringstream ss;
         ss << std::endl;
         ss << " ------------------ " << std::endl;
-        ss << " CAMERA INFORMATION " << std::endl;
+        ss << " Camera Information " << std::endl;
         ss << " ------------------ " << std::endl;
         ss << std::endl;
+        if (connected_)
+        {
 
-        ss << " Guid:        " << guid_ << std::endl;
-        ss << " Vendor Name: " << camera_dc1394_ -> vendor << std::endl;
-        ss << " Vendor Id:   " << std::hex << camera_dc1394_ -> vendor_id  << std::dec << std::endl;
-        ss << " Model Name:  " << std::hex << camera_dc1394_ -> model << std::dec << std::endl;
-        ss << " Model Id:    " << camera_dc1394_ -> model_id << std::endl;
+            ss << " guid:        " << guid_ << std::endl;
+            ss << " vendor Name: " << camera_dc1394_ -> vendor << std::endl;
+            ss << " vendor Id:   " << std::hex << camera_dc1394_ -> vendor_id  << std::dec << std::endl;
+            ss << " model Name:  " << std::hex << camera_dc1394_ -> model << std::dec << std::endl;
+            ss << " model Id:    " << camera_dc1394_ -> model_id << std::endl;
+        }
+        else 
+        {
+            ss << " camera not connected" << std::endl;
+        }
         ss << std::endl;
         return ss.str();
     }

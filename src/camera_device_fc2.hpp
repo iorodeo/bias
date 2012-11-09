@@ -29,6 +29,7 @@ namespace bias {
             virtual void printGuid();
             virtual void printInfo();
 
+            // Temporary
             void getPropertyInfo();
 
         private:

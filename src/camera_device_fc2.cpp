@@ -80,6 +80,10 @@ namespace bias {
             }
 
         }
+
+        // Temporary
+        getPropertyInfo();
+
     }
 
     void CameraDevice_fc2::disconnect()
@@ -205,29 +209,29 @@ namespace bias {
         std::stringstream ss; 
 
         ss << std::endl;
-        ss << " ------------------ " << std::endl;
-        ss << " CAMERA INFORMATION " << std::endl;
-        ss << " ------------------ " << std::endl;
+        ss << "------------------ " << std::endl;
+        ss << "Camera Information " << std::endl;
+        ss << "------------------ " << std::endl;
         ss << std::endl;
 
         if ( connected_ ) { 
-            ss << " Guid:           " << guid_ << std::endl;
-            ss << " Serial number:  " << cameraInfo_.serialNumber << std::endl;
-            ss << " Camera vendor:  " << cameraInfo_.vendorName << std::endl;
-            ss << " Camera model:   " << cameraInfo_.modelName << std::endl;
-            ss << " Sensor          " << std::endl;
-            ss << "   Type:         " << cameraInfo_.sensorInfo << std::endl;
-            ss << "   Resolution:   " << cameraInfo_.sensorResolution << std::endl;
-            ss << " Firmware        " << std::endl;     
-            ss << "   Version:      " << cameraInfo_.firmwareVersion << std::endl;
-            ss << "   Build time:   " << cameraInfo_.firmwareBuildTime << std::endl;
-            ss << " Color camera:   " << std::boolalpha << (bool) cameraInfo_.isColorCamera << std::endl;
-            ss << " Interface:      " << getInterfaceTypeString_fc2(cameraInfo_.interfaceType) << std::endl;
+            ss << " guid:           " << guid_ << std::endl;
+            ss << " serial number:  " << cameraInfo_.serialNumber << std::endl;
+            ss << " camera vendor:  " << cameraInfo_.vendorName << std::endl;
+            ss << " camera model:   " << cameraInfo_.modelName << std::endl;
+            ss << " sensor          " << std::endl;
+            ss << "   type:         " << cameraInfo_.sensorInfo << std::endl;
+            ss << "   resolution:   " << cameraInfo_.sensorResolution << std::endl;
+            ss << " firmware        " << std::endl;     
+            ss << "   version:      " << cameraInfo_.firmwareVersion << std::endl;
+            ss << "   build time:   " << cameraInfo_.firmwareBuildTime << std::endl;
+            ss << " color camera:   " << std::boolalpha << (bool) cameraInfo_.isColorCamera << std::endl;
+            ss << " interface:      " << getInterfaceTypeString_fc2(cameraInfo_.interfaceType) << std::endl;
             ss << std::endl;
         }
         else 
         {
-            ss << " Camera not connected " << std::endl;
+            ss << " Camera not connected " << std::endl << std::endl;
             
         }
         return ss.str();
@@ -241,6 +245,29 @@ namespace bias {
     void CameraDevice_fc2::printInfo()
     {
         std::cout << toString();
+    }
+
+
+    void CameraDevice_fc2::getPropertyInfo()
+    {
+        // --------------------------------------------------------------------
+        // TO DO ... finish
+        // --------------------------------------------------------------------
+        fc2Error error;
+        fc2PropertyInfo propInfo;
+        propInfo.type = FC2_SHUTTER;
+
+        error = fc2GetPropertyInfo(context_, &propInfo);
+        if (error != FC2_ERROR_OK)  
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError < ": unable to get FlyCapture2 propertyInfo";
+            throw RuntimeError(ERROR_FC2_GET_PROPERTY_INFO, ssError.str());
+        }
+
+        printPropertyInfo_fc2(propInfo);
+
     }
        
     // Private methods

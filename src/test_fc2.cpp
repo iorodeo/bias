@@ -31,8 +31,6 @@ int main(int argc, char** argv)
             GuidPtr guidPtr = *it;
             CameraPtr cameraPtr = std::make_shared<Camera>(*guidPtr);
             cameraPtr -> connect();
-            cout << "isColor: " << boolalpha << (cameraPtr -> isColor()); 
-            cout << noboolalpha << endl;
             cameraPtrList.push_back(cameraPtr);
         }
     }

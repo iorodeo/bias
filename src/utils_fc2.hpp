@@ -15,6 +15,10 @@ namespace bias {
 
     fc2FrameRate getFrameRate_fc2(FrameRate frameRate);
 
+    fc2VideoMode getVideoMode_fc2(VideoMode videoMode);
+
+    fc2Mode getImageMode_fc2(ImagingMode mode);
+
 
     // Print functions for FlyCapture2 configurations, settings and info
     //-------------------------------------------------------------------------
@@ -35,6 +39,8 @@ namespace bias {
 
     void printFormat7PacketInfo_fc2(fc2Format7PacketInfo &packetInfo);
 
+    void printPropertyInfo_fc2(fc2PropertyInfo &propInfo);
+
 
     // FlyCapture2 enumeration to string converstions
     // ------------------------------------------------------------------------
@@ -50,6 +56,8 @@ namespace bias {
     std::string getFrameRateString_fc2(fc2FrameRate frameRate);
 
     std::string getModeString_fc2(fc2Mode mode);
+
+    std::string getPropertyTypeString_fc2(fc2PropertyType propType);
 
 }
 
