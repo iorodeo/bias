@@ -353,7 +353,7 @@ namespace bias {
             throw RuntimeError(ERROR_FC2_UNSUPPORTED_VIDEO_MODE, ssError.str());
         }
 
-        if (1) // Print format7 information for selected mode
+        if (0) // Print format7 information for selected mode
         {
             printFormat7Info_fc2(format7Info);
         }
@@ -373,7 +373,7 @@ namespace bias {
             throw RuntimeError(ERROR_FC2_GET_FORMAT7_CONFIGURATION, ssError.str());
         }
 
-        if (1) // Print current configuration settings
+        if (0) // Print current configuration settings
         {
             printFormat7Configuration_fc2(imageSettings,packetSize,percentage);
         }
@@ -409,7 +409,7 @@ namespace bias {
             throw RuntimeError(ERROR_FC2_INVALID_FORMAT7_SETTINGS, ssError.str());
         }
 
-        if (1)  // Print packet info
+        if (0)  // Print packet info
         {
             printFormat7ImageSettings_fc2(imageSettings);
             printFormat7PacketInfo_fc2(packetInfo);

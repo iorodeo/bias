@@ -29,6 +29,8 @@ namespace bias {
             virtual void printGuid();
             virtual void printInfo();
 
+            void getPropertyInfo();
+
         private:
             fc2Context context_;
             fc2CameraInfo cameraInfo_;

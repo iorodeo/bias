@@ -20,20 +20,26 @@ int main(int argc, char** argv)
 
     cameraFinder.update();
     guidPtrList = cameraFinder.getGuidPtrList();
-
+    
+    // Create cameras and connect
+    // ------------------------------------------------------------------------
     {
         cout << "Creating and connecting to cameras" << endl;
         GuidPtrList::iterator it;
         for (it=guidPtrList.begin(); it!=guidPtrList.end(); it++) 
         {
-            Guid guid = **it;
-            CameraPtr camPtr = std::make_shared<Camera>(guid);
-            camPtr -> connect();
-            cout << "isColor: " << boolalpha << (camPtr -> isColor()) << noboolalpha << endl;
-            cameraPtrList.push_back(camPtr);
+            GuidPtr guidPtr = *it;
+            CameraPtr cameraPtr = std::make_shared<Camera>(*guidPtr);
+            cameraPtr -> connect();
+            cout << "isColor: " << boolalpha << (cameraPtr -> isColor()); 
+            cout << noboolalpha << endl;
+            cameraPtrList.push_back(cameraPtr);
         }
     }
 
+
+    // Print camera information
+    // ------------------------------------------------------------------------
     {
         cout << "Printing camera information" << endl;
         int cnt;
@@ -41,11 +47,14 @@ int main(int argc, char** argv)
         for(it=cameraPtrList.begin(), cnt=0; it!=cameraPtrList.end(); it++, cnt++) 
         {
             cout << endl << "Camera " << cnt << endl;
-            Camera camera = **it;
-            camera.printInfo();
+            CameraPtr cameraPtr = *it;
+            cameraPtr -> printInfo();
         }
     }
 
+
+    // Start capture on cameras
+    // ------------------------------------------------------------------------
     {
         cout << "Starting capture on cameras: ";
         int cnt;
@@ -53,42 +62,50 @@ int main(int argc, char** argv)
         for(it=cameraPtrList.begin(), cnt=0; it!=cameraPtrList.end(); it++, cnt++) 
         {
             cout << cnt << " ";
-            Camera camera = **it;
-            camera.startCapture();
+            CameraPtr cameraPtr = *it;
+            cameraPtr -> startCapture();
         }
         cout << "done" << endl;
         cout << endl;
     }
 
+
+    // Grab images
+    // ------------------------------------------------------------------------
     {
         int camCount;
-        int numImage = 3;
+        int numImage = 10;
         CameraPtrList::iterator it;
         cout << "Grabing images" << endl;
         cout << endl;
         for (int i=0; i<numImage; i++) 
         {
-            for ( it=cameraPtrList.begin(), camCount=0; it!=cameraPtrList.end(); it++, camCount++)
+            cout << "  image: " << (i+1) << "/" << numImage << " camera: ";
+            for (it=cameraPtrList.begin(), camCount=0; it!=cameraPtrList.end(); it++, camCount++)
             {
-                Camera camera = **it;
-                cout << "  image: " << (i+1) << "/" << numImage << " camera: " << camCount << endl;
-                camera.grabImage();
+                CameraPtr cameraPtr = *it;
+                cameraPtr -> grabImage();
+                cout << camCount << " ";
             } 
             cout << endl;
         }
     }
 
+
+    // Stop capture on cameras
+    // ------------------------------------------------------------------------
     {
+        cout << endl;
         cout << "Stopping capture on cameras: ";
         int cnt;
         CameraPtrList::iterator it;
-        for( it=cameraPtrList.begin(), cnt=0; it!=cameraPtrList.end(); it++, cnt++) 
+        for(it=cameraPtrList.begin(), cnt=0; it!=cameraPtrList.end(); it++, cnt++) 
         {
             cout << cnt << " "; 
-            Camera camera = **it;
-            camera.stopCapture();
+            CameraPtr cameraPtr = *it;
+            cameraPtr -> stopCapture();
         }
-        cout << "done" << endl;
+        cout << "done" << endl << endl;
     }
 
 	return 0;

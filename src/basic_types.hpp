@@ -7,10 +7,13 @@ namespace bias {
     {
         CAMERA_LIB_FC2,
         CAMERA_LIB_DC1394,
-        CAMERA_LIB_UNDEFINED
+        CAMERA_LIB_UNDEFINED,
+        NUMBER_OF_CAMERA_LIB,
     };
 
     enum ErrorCode {
+
+        // Camera library errors
         ERROR_CAMERA_LIB_UNKNOWN=1,
         ERROR_CAMERA_LIB_UNDEFINED,
 
@@ -38,6 +41,8 @@ namespace bias {
         ERROR_FC2_SET_FORMAT7_CONFIGURATION,
         ERROR_FC2_GET_DEFAULT_OUTPUT_FORMAT,
         ERROR_FC2_GET_CAMERA_INFO,
+        ERROR_FC2_CONVERT_PROPERTY_TYPE,
+        ERROR_FC2_CONVERT_FRAMERATE,
 
         // Libdc1394 specific errors
         ERROR_NO_DC1394,
@@ -51,7 +56,81 @@ namespace bias {
         ERROR_DC1394_CAPTURE_DEQUEUE,
         ERROR_DC1394_START_CAPTURE,
         ERROR_DC1394_GRAB_IMAGE,
+
+        // Conversion error
+
+        NUMBER_OF_ERROR,
+    }; 
+    
+    enum PropertyType 
+    { 
+        PROPERTY_BRIGHTNESS, 
+        PROPERTY_AUTO_EXPOSURE,
+        PROPERTY_SHARPNESS,
+        PROPERTY_WHITE_BALANCE,
+        PROPERTY_HUE,
+        PROPERTY_SATURATION,
+        PROPERTY_GAMMA,
+        PROPERTY_IRIS,
+        PROPERTY_FOCUS,
+        PROPERTY_ZOOM,
+        PROPERTY_PAN,
+        PROPERTY_TILT,
+        PROPERTY_SHUTTER,
+        PROPERTY_GAIN,
+        PROPERTY_TRIGGER_MODE,
+        PROPERTY_TRIGGER_DELAY,
+        PROPERTY_FRAME_RATE,
+        PROPERTY_TEMPERATURE,
+
+        NUMBER_OF_PROPERTY,
     };
+
+    enum FrameRate
+    {
+        FRAMERATE_1_875, 
+        FRAMERATE_3_75, 
+        FRAMERATE_7_5, 
+        FRAMERATE_15, 
+        FRAMERATE_30, 
+        FRAMERATE_60, 
+        FRAMERATE_120, 
+        FRAMERATE_240, 
+        FRAMERATE_FORMAT7, 
+
+        NUMBER_OF_FRAMERATE,
+    };
+
+    enum VideoMode 
+    {
+        VIDEOMODE_160x120YUV444, 
+        VIDEOMODE_320x240YUV422, 
+        VIDEOMODE_640x480YUV411, 
+        VIDEOMODE_640x480YUV422, 
+        VIDEOMODE_640x480RGB, 
+        VIDEOMODE_640x480Y8, 
+        VIDEOMODE_640x480Y16, 
+        VIDEOMODE_800x600YUV422, 
+        VIDEOMODE_800x600RGB, 
+        VIDEOMODE_800x600Y8, 
+        VIDEOMODE_800x600Y16, 
+        VIDEOMODE_1024x768YUV422, 
+        VIDEOMODE_1024x768RGB, 
+        VIDEOMODE_1024x768Y8, 
+        VIDEOMODE_1024x768Y16, 
+        VIDEOMODE_1280x960YUV422, 
+        VIDEOMODE_1280x960RGB, 
+        VIDEOMODE_1280x960Y8, 
+        VIDEOMODE_1280x960Y16, 
+        VIDEOMODE_1600x1200YUV422, 
+        VIDEOMODE_1600x1200RGB, 
+        VIDEOMODE_1600x1200Y8, 
+        VIDEOMODE_1600x1200Y16, 
+        VIDEOMODE_FORMAT7, 
+
+        NUMBER_OF_VIDEOMODE,
+    };
+
 
 } // namespace bias
 

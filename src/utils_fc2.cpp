@@ -1,11 +1,159 @@
 #ifdef WITH_FC2
 #include "utils_fc2.hpp"
+#include "exception.hpp"
 #include <iostream>
+#include <sstream>
 #include <bitset>
 
 namespace bias {
+    
+    // Conversion from BIAS enumeration types to FlyCapture2 enumerations
+    // ------------------------------------------------------------------------
 
+    fc2PropertyType getPropertyType_fc2(PropertyType propertyType)
+    {
+        switch (propertyType)
+        {
+            case PROPERTY_BRIGHTNESS: 
+                return FC2_BRIGHTNESS;
+                break;
 
+            case PROPERTY_AUTO_EXPOSURE:
+                return FC2_AUTO_EXPOSURE;
+                break;
+
+            case PROPERTY_SHARPNESS:
+                return FC2_SHARPNESS;
+                break;
+
+            case PROPERTY_WHITE_BALANCE:
+                return FC2_WHITE_BALANCE;
+                break;
+
+            case PROPERTY_HUE:
+                return FC2_HUE;
+                break;
+
+            case PROPERTY_SATURATION:
+                return FC2_SATURATION;
+                break;
+
+            case PROPERTY_GAMMA:
+                return FC2_GAMMA;
+                break;
+
+            case PROPERTY_IRIS:
+                return FC2_IRIS;
+                break;
+
+            case PROPERTY_FOCUS:
+                return FC2_FOCUS;
+                break;
+
+            case PROPERTY_ZOOM:
+                return FC2_ZOOM;
+                break;
+
+            case PROPERTY_PAN:
+                return FC2_PAN;
+                break;
+
+            case PROPERTY_TILT:
+                return FC2_TILT;
+                break;
+
+            case PROPERTY_SHUTTER:
+                return FC2_SHUTTER;
+                break;
+
+            case PROPERTY_GAIN:
+                return FC2_GAIN;
+                break;
+
+            case PROPERTY_TRIGGER_MODE:
+                return FC2_TRIGGER_MODE;
+                break;
+
+            case PROPERTY_TRIGGER_DELAY:
+                return FC2_TRIGGER_DELAY;
+                break;
+
+            case PROPERTY_FRAME_RATE:
+                return FC2_FRAME_RATE;
+                break;
+
+            case PROPERTY_TEMPERATURE:
+                return FC2_TEMPERATURE;
+                break;
+
+            default:
+                {
+                    std::stringstream ssError;
+                    ssError << __PRETTY_FUNCTION__;
+                    ssError << ": unable to convert property to FlyCaptuer2 property";
+                    throw RuntimeError(ERROR_FC2_CONVERT_PROPERTY_TYPE, ssError.str());
+                } 
+                break;
+
+        }
+        return FC2_UNSPECIFIED_PROPERTY_TYPE;
+    }
+
+    fc2FrameRate getFrameRate_fc2(FrameRate frameRate)
+    {
+        switch (frameRate)
+        {
+            case FRAMERATE_1_875: 
+                return FC2_FRAMERATE_1_875;
+                break;
+
+            case FRAMERATE_3_75: 
+                return FC2_FRAMERATE_3_75;
+                break;
+
+            case FRAMERATE_7_5: 
+                return FC2_FRAMERATE_7_5;
+                break;
+
+            case FRAMERATE_15: 
+                return FC2_FRAMERATE_15;
+                break;
+
+            case FRAMERATE_30: 
+                return FC2_FRAMERATE_30;
+                break;
+
+            case FRAMERATE_60: 
+                return FC2_FRAMERATE_60;
+                break;
+
+            case FRAMERATE_120: 
+                return FC2_FRAMERATE_120;
+                break;
+
+            case FRAMERATE_240: 
+                return FC2_FRAMERATE_240;
+                break;
+
+            case FRAMERATE_FORMAT7: 
+                return FC2_FRAMERATE_FORMAT7;
+                break;
+
+            default:
+                {
+                    std::stringstream ssError;
+                    ssError << __PRETTY_FUNCTION__;
+                    ssError << ": unable to convert framerate to fc2 frame rate";
+                    throw RuntimeError(ERROR_FC2_CONVERT_FRAMERATE, ssError.str());
+                }
+                break;
+
+        }
+        return FC2_NUM_FRAMERATES;
+    }
+
+    // Functions for printing information
+    // --------------------------------------------------------------
     void printImageInfo_fc2(fc2Image &image)
     {
         std::cout << std::endl;
