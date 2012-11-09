@@ -83,6 +83,7 @@ namespace bias {
 
         // Temporary
         getPropertyInfo();
+        getProperty();
 
     }
 
@@ -255,6 +256,7 @@ namespace bias {
         // --------------------------------------------------------------------
         fc2Error error;
         fc2PropertyInfo propInfo;
+
         propInfo.type = FC2_SHUTTER;
 
         error = fc2GetPropertyInfo(context_, &propInfo);
@@ -269,9 +271,31 @@ namespace bias {
         printPropertyInfo_fc2(propInfo);
 
     }
+
+    void CameraDevice_fc2::getProperty()
+    {
+        // --------------------------------------------------------------------
+        // TO DO ... finish
+        // --------------------------------------------------------------------
+        fc2Error error;
+        fc2Property property;
+
+        property.type = FC2_SHUTTER;
+
+        error = fc2GetProperty(context_, &property);
+        if (error != FC2_ERROR_OK)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get FlyCapture2 property";
+            throw RuntimeError(ERROR_FC2_GET_PROPERTY, ssError.str());
+        }
+
+        printProperty_fc2(property);
+    }
        
     // Private methods
-    // ---------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     fc2PGRGuid CameraDevice_fc2::getGuid_fc2()
     {

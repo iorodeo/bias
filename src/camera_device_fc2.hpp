@@ -30,7 +30,9 @@ namespace bias {
             virtual void printInfo();
 
             // Temporary
+            // --------------------------------------------
             void getPropertyInfo();
+            void getProperty();
 
         private:
             fc2Context context_;
@@ -50,6 +52,7 @@ namespace bias {
             void destroyConvertedImage();
 
             // Temporary 
+            // --------------------------------------------
             void setVideoMode_Format7Mode0();
     };
 

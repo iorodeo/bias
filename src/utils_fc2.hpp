@@ -41,6 +41,8 @@ namespace bias {
 
     void printPropertyInfo_fc2(fc2PropertyInfo &propInfo);
 
+    void printProperty_fc2(fc2Property &property);
+
 
     // FlyCapture2 enumeration to string converstions
     // ------------------------------------------------------------------------
