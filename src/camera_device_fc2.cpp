@@ -244,7 +244,7 @@ namespace bias {
         VideoMode videoMode;
         FrameRate frameRate;
         ImageMode imageMode;
-        bool supportedFlag;
+        bool supported;
 
         // Test for non-format7 videoModes
         // -------------------------------
@@ -257,22 +257,23 @@ namespace bias {
                 continue; 
             }
 
-            supportedFlag = false;
+            supported = false;
             for (int j=0; j<int(NUMBER_OF_FRAMERATE); j++)
             {
                 frameRate = FrameRate(j);
                 try
                 {
-                    supportedFlag |= isSupported(videoMode, frameRate);
+                    supported |= isSupported(videoMode, frameRate);
                 }
                 catch (RuntimeError &runtimeError)
                 {
-                    // Device query somtimes fail for some combinations of 
-                    // videoMode and frameRate - handle failure gracefully.                      
+                    // Device query can sometimes fail for some combinations of 
+                    // videoMode and frameRate - handle failure gracefully by
+                    // continuing to examine videoMode and frameRate combinations.                      
                     continue;
                 }
             } 
-            if (supportedFlag == TRUE) 
+            if (supported) 
             { 
                 list.push_back(videoMode); 
             }
@@ -280,14 +281,14 @@ namespace bias {
 
         // Test for format7 videoMode
         // --------------------------
-        supportedFlag = false;
+        supported = false;
         for (int i=0; i<int(NUMBER_OF_IMAGEMODE); i++)
         {
             imageMode = ImageMode(i);
-            supportedFlag |= isSupported(imageMode);
+            supported |= isSupported(imageMode);
             try
             {
-                supportedFlag != isSupported(imageMode);
+                supported != isSupported(imageMode);
             }
             catch (RuntimeError &runtimeError)
             {
@@ -295,7 +296,7 @@ namespace bias {
                 // from the device fails.  
                 continue;
             }
-            if (supportedFlag) 
+            if (supported) 
             { 
                 // Only nee to validate support for on imageMode.
                 list.push_back(VIDEOMODE_FORMAT7);
