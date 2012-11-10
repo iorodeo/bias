@@ -60,12 +60,18 @@ int main(int argc, char** argv)
             VideoModeList vmList = cameraPtr -> getAllowedVideoModes();
             VideoModeList::iterator vit;
             cout << endl;
-            cout << "Allowed Video Modes" << endl;
+            cout << "Allowed VideoModes and FrameRates" << endl << endl;
             for (vit=vmList.begin(); vit!=vmList.end(); vit++) 
             {
-                cout << " " << *vit << " " << getVideoModeString(*vit) << endl; 
+                cout <<  " " << getVideoModeString(*vit) <<  endl; 
+                FrameRateList frList = cameraPtr -> getAllowedFrameRates(*vit);
+                FrameRateList::iterator fit;
+                for (fit=frList.begin(); fit!=frList.end(); fit++)
+                {
+                    cout << "   " << getFrameRateString(*fit) << endl;
+                }
+                cout << endl;
             }
-            cout << endl;
         }
     }
 

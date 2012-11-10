@@ -246,8 +246,8 @@ namespace bias {
         ImageMode imageMode;
         bool supportedFlag;
 
-        
-        // Test non format7 modes
+        // Test for non-format7 videoModes
+        // -------------------------------
         for (int i=0; i<int(NUMBER_OF_VIDEOMODE); i++)
         {
             videoMode = VideoMode(i);
@@ -267,14 +267,10 @@ namespace bias {
                 }
                 catch (RuntimeError &runtimeError)
                 {
-                    // The query for information can somtimes fail for some 
-                    // combinations of videoMode and frameRate depending on 
-                    // camera model handle this gracefully by ignoring errors 
-                    // and continuing to try and generate the list of supported 
-                    // video modes.
+                    // Device query somtimes fail for some combinations of 
+                    // videoMode and frameRate - handle failure gracefully.                      
                     continue;
                 }
-
             } 
             if (supportedFlag == TRUE) 
             { 
@@ -282,7 +278,8 @@ namespace bias {
             }
         }
 
-        // Test format7 modes
+        // Test for format7 videoMode
+        // --------------------------
         supportedFlag = false;
         for (int i=0; i<int(NUMBER_OF_IMAGEMODE); i++)
         {
@@ -298,17 +295,45 @@ namespace bias {
                 // from the device fails.  
                 continue;
             }
-            if (supportedFlag == TRUE) 
-            {
-                break;
+            if (supportedFlag) 
+            { 
+                // Only nee to validate support for on imageMode.
+                list.push_back(VIDEOMODE_FORMAT7);
+                break; 
             }
         }
+        return list;
+    }
 
-        if (supportedFlag == TRUE)
+    FrameRateList CameraDevice_fc2::getAllowedFrameRates(VideoMode videoMode)
+    {
+        FrameRate frameRate;
+        FrameRateList list;
+        bool supported;
+
+        if (videoMode == VIDEOMODE_FORMAT7) {
+            list.push_back(FRAMERATE_FORMAT7);
+        } 
+        else
         {
-            list.push_back(VIDEOMODE_FORMAT7);
+            for (int i=0; i<int(NUMBER_OF_FRAMERATE); i++)
+            {
+                frameRate = FrameRate(i);
+                try
+                {
+                    supported = isSupported(videoMode, frameRate);
+                }
+                catch (RuntimeError &runtimeError)
+                {
+                    // Continue checking is case where - device query fails
+                    continue;
+                }
+                if (supported) 
+                {
+                    list.push_back(frameRate);
+                }
+            }
         }
-
         return list;
     }
 
@@ -359,7 +384,7 @@ namespace bias {
 
     bool CameraDevice_fc2::isSupported(ImageMode imageMode)
     {
-        fc2Error error_fc2;
+        fc2Error error;
         fc2Mode mode_fc2;
         fc2Format7Info info_fc2;
         BOOL supported;
@@ -375,8 +400,8 @@ namespace bias {
         }
 
         info_fc2.mode = mode_fc2;
-        error_fc2 = fc2GetFormat7Info(context_, &info_fc2, &supported);
-        if (error_fc2 != FC2_ERROR_OK)
+        error = fc2GetFormat7Info(context_, &info_fc2, &supported);
+        if (error != FC2_ERROR_OK)
         {   
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;

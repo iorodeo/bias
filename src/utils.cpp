@@ -110,7 +110,61 @@ namespace bias
             default:
                 {
                     std::stringstream ssMsg;
-                    ssMsg << "uknown video mode: " << videoMode;
+                    ssMsg << "uknown videoMode: " << videoMode;
+                    return ssMsg.str();
+                }
+                break;
+        }
+    }
+
+    std::string getFrameRateString(FrameRate frameRate)
+    {
+        switch (frameRate)
+        {
+            case FRAMERATE_1_875: 
+                return std::string("FRAMERATE_1_875");
+                break;
+
+            case FRAMERATE_3_75: 
+                return std::string("FRAMERATE_3_75");
+                break;
+
+            case FRAMERATE_7_5: 
+                return std::string("FRAMERATE_7_5");
+                break;
+
+            case FRAMERATE_15: 
+                return std::string("FRAMERATE_15");
+                break;
+
+            case FRAMERATE_30: 
+                return std::string("FRAMERATE_30");
+                break;
+
+            case FRAMERATE_60: 
+                return std::string("FRAMERATE_60");
+                break;
+
+            case FRAMERATE_120: 
+                return std::string("FRAMERATE_120");
+                break;
+
+            case FRAMERATE_240: 
+                return std::string("FRAMERATE_240");
+                break;
+
+            case FRAMERATE_FORMAT7: 
+                return std::string("FRAMERATE_FORMAT7");
+                break;
+
+            case FRAMERATE_UNSPECIFIED:
+                return std::string("FRAMERATE_UNSPECIFIED");
+                break;
+
+            default:
+                {
+                    std::stringstream ssMsg;
+                    ssMsg << "uknown frameRate: " << frameRate;
                     return ssMsg.str();
                 }
                 break;
