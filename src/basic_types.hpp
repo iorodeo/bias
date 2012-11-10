@@ -1,6 +1,9 @@
 #ifndef BIAS_BASIC_TYPES_HPP
 #define BIAS_BASIC_TYPES_HPP
 
+#include <set>
+#include <list>
+
 namespace bias {
 
     enum CameraLib 
@@ -11,10 +14,15 @@ namespace bias {
         NUMBER_OF_CAMERA_LIB,
     };
 
+    typedef std::list<CameraLib> CameraLibList;
+    typedef std::set<CameraLib> CameraLibSet;
+
     enum ErrorCode {
 
+        ERROR_OK = 0,
+
         // Camera library errors
-        ERROR_CAMERA_LIB_UNKNOWN=1,
+        ERROR_CAMERA_LIB_UNKNOWN,
         ERROR_CAMERA_LIB_UNDEFINED,
 
         // FlyCapture2 specific errors
@@ -32,9 +40,11 @@ namespace bias {
         ERROR_FC2_GET_GUID,
         ERROR_FC2_ENUMERATE_CAMERAS,
         ERROR_FC2_GET_CAMERA_FROM_INDEX,
+        ERROR_FC2_GET_VIDEOMODE_FRAMERATE_INFO,
         ERROR_FC2_CONVERT_IMAGE,
         ERROR_FC2_GET_FORMAT7_INFO,
         ERROR_FC2_GET_FORMAT7_CONFIGURATION,
+        ERROR_FC2_GET_VIDEOMODE_AND_FRAMERATE,
         ERROR_FC2_UNSUPPORTED_VIDEO_MODE,
         ERROR_FC2_VALIDATE_FORMAT7_SETTINGS,
         ERROR_FC2_INVALID_FORMAT7_SETTINGS,
@@ -47,7 +57,7 @@ namespace bias {
         ERROR_FC2_CONVERT_PROPERTY_TYPE,
         ERROR_FC2_CONVERT_FRAMERATE,
         ERROR_FC2_CONVERT_VIDEOMODE,
-        ERROR_FC2_CONVERT_IMAGING_MODE,
+        ERROR_FC2_CONVERT_IMAGEMODE,
 
         // Libdc1394 specific errors
         ERROR_NO_DC1394,
@@ -64,6 +74,9 @@ namespace bias {
 
         NUMBER_OF_ERROR,
     }; 
+
+    typedef std::list<ErrorCode> ErrorCodeList;
+    typedef std::set<ErrorCode> ErrorCodeSet;
     
     enum PropertyType 
     { 
@@ -89,6 +102,9 @@ namespace bias {
         NUMBER_OF_PROPERTY,
     };
 
+    typedef std::list<PropertyType> PropertyTypeList;
+    typedef std::set<PropertyType> PropertyTypeSet;
+
     enum FrameRate
     {
         FRAMERATE_1_875=0, 
@@ -100,9 +116,12 @@ namespace bias {
         FRAMERATE_120, 
         FRAMERATE_240, 
         FRAMERATE_FORMAT7, 
-
         NUMBER_OF_FRAMERATE,
+        FRAMERATE_UNSPECIFIED,
     };
+
+    typedef std::list<FrameRate> FrameRateList;
+    typedef std::set<FrameRate> FrameRateSet;
 
     enum VideoMode 
     {
@@ -130,47 +149,53 @@ namespace bias {
         VIDEOMODE_1600x1200Y8, 
         VIDEOMODE_1600x1200Y16, 
         VIDEOMODE_FORMAT7, 
-
         NUMBER_OF_VIDEOMODE,
+        VIDEOMODE_UNSPECIFIED,
     };
 
-    enum ImagingMode 
-    {
-        IMAGING_MODE_0=0,
-        IMAGING_MODE_1,
-        IMAGING_MODE_2,
-        IMAGING_MODE_3,
-        IMAGING_MODE_4,
-        IMAGING_MODE_5,
-        IMAGING_MODE_6,
-        IMAGING_MODE_7,
-        IMAGING_MODE_8,
-        IMAGING_MODE_9,
-        IMAGING_MODE_10,
-        IMAGING_MODE_11,
-        IMAGING_MODE_12,
-        IMAGING_MODE_13,
-        IMAGING_MODE_14,
-        IMAGING_MODE_15,
-        IMAGING_MODE_16,
-        IMAGING_MODE_17,
-        IMAGING_MODE_18,
-        IMAGING_MODE_19,
-        IMAGING_MODE_20,
-        IMAGING_MODE_21,
-        IMAGING_MODE_22,
-        IMAGING_MODE_23,
-        IMAGING_MODE_24,
-        IMAGING_MODE_25,
-        IMAGING_MODE_26,
-        IMAGING_MODE_27,
-        IMAGING_MODE_28,
-        IMAGING_MODE_29,
-        IMAGING_MODE_30,
-        IMAGING_MODE_31,
+    typedef std::list<VideoMode> VideoModeList;
+    typedef std::set<VideoMode> VideoModeSet;
 
-        NUMBER_OF_IMAGING_MODE, 
+    enum ImageMode 
+    {
+        IMAGEMODE_0=0,
+        IMAGEMODE_1,
+        IMAGEMODE_2,
+        IMAGEMODE_3,
+        IMAGEMODE_4,
+        IMAGEMODE_5,
+        IMAGEMODE_6,
+        IMAGEMODE_7,
+        IMAGEMODE_8,
+        IMAGEMODE_9,
+        IMAGEMODE_10,
+        IMAGEMODE_11,
+        IMAGEMODE_12,
+        IMAGEMODE_13,
+        IMAGEMODE_14,
+        IMAGEMODE_15,
+        IMAGEMODE_16,
+        IMAGEMODE_17,
+        IMAGEMODE_18,
+        IMAGEMODE_19,
+        IMAGEMODE_20,
+        IMAGEMODE_21,
+        IMAGEMODE_22,
+        IMAGEMODE_23,
+        IMAGEMODE_24,
+        IMAGEMODE_25,
+        IMAGEMODE_26,
+        IMAGEMODE_27,
+        IMAGEMODE_28,
+        IMAGEMODE_29,
+        IMAGEMODE_30,
+        IMAGEMODE_31,
+        NUMBER_OF_IMAGEMODE, 
+        IMAGEMODE_UNSPECIFIED,
     };  
+
+    typedef std::list<ImageMode> ImageModeList;
+    typedef std::set<ImageMode> ImageModeSet;
 
 } // namespace bias
 

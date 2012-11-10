@@ -19,7 +19,16 @@ ENDIF()
 
 # Source files
 # -----------------------------------------------------------------------------
-SET(bias_src guid.cpp camera.cpp camera_finder.cpp exception.cpp)
+SET(
+    bias_src 
+    utils.cpp
+    guid.cpp 
+    camera_device.cpp 
+    camera.cpp 
+    camera_finder.cpp 
+    exception.cpp
+    )
+
 IF(with_fc2) 
     SET(
         bias_src ${bias_src} 

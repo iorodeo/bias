@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <iostream>
 #include <memory>
+#include "utils.hpp"
 #include "guid.hpp"
 #include "camera.hpp"
 #include "camera_finder.hpp"
@@ -47,9 +48,26 @@ int main(int argc, char** argv)
             cout << endl << "Camera " << cnt << endl;
             CameraPtr cameraPtr = *it;
             cameraPtr -> printInfo();
+
+            VideoMode videoMode = cameraPtr -> getVideoMode();
+            FrameRate frameRate = cameraPtr -> getFrameRate();
+            ImageMode imagingMode = cameraPtr -> getImageMode();
+            cout << "VideoMode: " << videoMode << endl;
+            cout << "FrameRate: " << frameRate << endl;
+            cout << "ImageMode: " << imagingMode << endl;
+            cout << endl;
+
+            VideoModeList vmList = cameraPtr -> getAllowedVideoModes();
+            VideoModeList::iterator vit;
+            cout << endl;
+            cout << "Allowed Video Modes" << endl;
+            for (vit=vmList.begin(); vit!=vmList.end(); vit++) 
+            {
+                cout << " " << *vit << " " << getVideoModeString(*vit) << endl; 
+            }
+            cout << endl;
         }
     }
-
 
     // Start capture on cameras
     // ------------------------------------------------------------------------

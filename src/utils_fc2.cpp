@@ -7,10 +7,10 @@
 
 namespace bias {
     
-    // Conversion from BIAS enumeration types to FlyCapture2 enumerations
+    // Conversion from BIAS enumeration types to FlyCapture2 enumeration types
     // ------------------------------------------------------------------------
 
-    fc2PropertyType getPropertyType_fc2(PropertyType propertyType)
+    fc2PropertyType convertPropertyType_to_fc2(PropertyType propertyType)
     {
         switch (propertyType)
         {
@@ -99,7 +99,7 @@ namespace bias {
         return FC2_UNSPECIFIED_PROPERTY_TYPE;
     }
 
-    fc2FrameRate getFrameRate_fc2(FrameRate frameRate)
+    fc2FrameRate convertFrameRate_to_fc2(FrameRate frameRate)
     {
         switch (frameRate)
         {
@@ -152,7 +152,7 @@ namespace bias {
         return FC2_NUM_FRAMERATES;
     }
 
-    fc2VideoMode getVideoMode_fc2(VideoMode videoMode)
+    fc2VideoMode convertVideoMode_to_fc2(VideoMode videoMode)
     {
         switch(videoMode)
         {
@@ -264,135 +264,135 @@ namespace bias {
         return FC2_NUM_VIDEOMODES;
     }
 
-    fc2Mode getImageMode_fc2(ImagingMode mode)
+    fc2Mode convertImageMode_to_fc2(ImageMode mode)
     {
         switch(mode)
         {
-            case IMAGING_MODE_0:
+            case IMAGEMODE_0:
                 return FC2_MODE_0;
                 break;
 
-            case IMAGING_MODE_1:
+            case IMAGEMODE_1:
                 return FC2_MODE_1;
                 break;
 
-            case IMAGING_MODE_2:
+            case IMAGEMODE_2:
                 return FC2_MODE_2;
                 break;
 
-            case IMAGING_MODE_3:
+            case IMAGEMODE_3:
                 return FC2_MODE_3;
                 break;
 
-            case IMAGING_MODE_4:
+            case IMAGEMODE_4:
                 return FC2_MODE_4;
                 break;
 
-            case IMAGING_MODE_5:
+            case IMAGEMODE_5:
                 return FC2_MODE_5;
                 break;
 
-            case IMAGING_MODE_6:
+            case IMAGEMODE_6:
                 return FC2_MODE_6;
                 break;
 
-            case IMAGING_MODE_7:
+            case IMAGEMODE_7:
                 return FC2_MODE_7;
                 break;
 
-            case IMAGING_MODE_8:
+            case IMAGEMODE_8:
                 return FC2_MODE_8;
                 break;
 
-            case IMAGING_MODE_9:
+            case IMAGEMODE_9:
                 return FC2_MODE_9;
                 break;
 
-            case IMAGING_MODE_10:
+            case IMAGEMODE_10:
                 return FC2_MODE_10;
                 break;
 
-            case IMAGING_MODE_11:
+            case IMAGEMODE_11:
                 return FC2_MODE_11;
                 break;
 
-            case IMAGING_MODE_12:
+            case IMAGEMODE_12:
                 return FC2_MODE_12;
                 break;
 
-            case IMAGING_MODE_13:
+            case IMAGEMODE_13:
                 return FC2_MODE_13;
                 break;
 
-            case IMAGING_MODE_14:
+            case IMAGEMODE_14:
                 return FC2_MODE_14;
                 break;
 
-            case IMAGING_MODE_15:
+            case IMAGEMODE_15:
                 return FC2_MODE_15;
                 break;
 
-            case IMAGING_MODE_16:
+            case IMAGEMODE_16:
                 return FC2_MODE_16;
                 break;
 
-            case IMAGING_MODE_17:
+            case IMAGEMODE_17:
                 return FC2_MODE_17;
                 break;
 
-            case IMAGING_MODE_18:
+            case IMAGEMODE_18:
                 return FC2_MODE_18;
                 break;
 
-            case IMAGING_MODE_19:
+            case IMAGEMODE_19:
                 return FC2_MODE_19;
                 break;
 
-            case IMAGING_MODE_20:
+            case IMAGEMODE_20:
                 return FC2_MODE_20;
                 break;
 
-            case IMAGING_MODE_21:
+            case IMAGEMODE_21:
                 return FC2_MODE_21;
                 break;
 
-            case IMAGING_MODE_22:
+            case IMAGEMODE_22:
                 return FC2_MODE_22;
                 break;
 
-            case IMAGING_MODE_23:
+            case IMAGEMODE_23:
                 return FC2_MODE_23;
                 break;
 
-            case IMAGING_MODE_24:
+            case IMAGEMODE_24:
                 return FC2_MODE_24;
                 break;
 
-            case IMAGING_MODE_25:
+            case IMAGEMODE_25:
                 return FC2_MODE_25;
                 break;
 
-            case IMAGING_MODE_26:
+            case IMAGEMODE_26:
                 return FC2_MODE_26;
                 break;
 
-            case IMAGING_MODE_27:
+            case IMAGEMODE_27:
                 return FC2_MODE_27;
                 break;
 
-            case IMAGING_MODE_28:
+            case IMAGEMODE_28:
                 return FC2_MODE_28;
                 break;
 
-            case IMAGING_MODE_29:
+            case IMAGEMODE_29:
                 return FC2_MODE_29;
                 break;
 
-            case IMAGING_MODE_30:
+            case IMAGEMODE_30:
                 return FC2_MODE_30;
                 break;
 
-            case IMAGING_MODE_31:
+            case IMAGEMODE_31:
                 return FC2_MODE_31;
                 break;
 
@@ -402,12 +402,326 @@ namespace bias {
                     ssError << __PRETTY_FUNCTION__;
                     ssError << ": unable to convert image mode to FlyCapture2 ";
                     ssError << "imaging mode";
-                    throw RuntimeError(ERROR_FC2_CONVERT_IMAGING_MODE, ssError.str());
+                    throw RuntimeError(ERROR_FC2_CONVERT_IMAGEMODE, ssError.str());
                 }
                 break;
 
         }
         return FC2_NUM_MODES;
+    }
+
+    // Conversion from FlyCapture2 enumeration types to BIAS enumeration types
+    // ------------------------------------------------------------------------
+
+    VideoMode convertVideoMode_from_fc2(fc2VideoMode videoMode_fc2)
+    {
+        switch (videoMode_fc2)
+        {
+            case FC2_VIDEOMODE_160x120YUV444:
+                return VIDEOMODE_160x120YUV444;
+                break;
+
+            case FC2_VIDEOMODE_320x240YUV422:
+                return VIDEOMODE_320x240YUV422;
+                break;
+
+            case FC2_VIDEOMODE_640x480YUV411:
+                return VIDEOMODE_640x480YUV411;
+                break;
+
+            case FC2_VIDEOMODE_640x480YUV422:
+                return VIDEOMODE_640x480YUV422;
+                break;
+
+            case FC2_VIDEOMODE_640x480RGB:
+                return VIDEOMODE_640x480RGB;
+                break;
+
+            case FC2_VIDEOMODE_640x480Y8:
+                return VIDEOMODE_640x480Y8;
+                break;
+
+            case FC2_VIDEOMODE_640x480Y16:
+                return VIDEOMODE_640x480Y16;
+                break;
+
+            case FC2_VIDEOMODE_800x600YUV422:
+                return VIDEOMODE_800x600YUV422;
+                break;
+
+            case FC2_VIDEOMODE_800x600RGB:
+                return VIDEOMODE_800x600RGB;
+                break;
+
+            case FC2_VIDEOMODE_800x600Y8:
+                return VIDEOMODE_800x600Y8;
+                break;
+
+            case FC2_VIDEOMODE_800x600Y16:
+                return VIDEOMODE_800x600Y16;
+                break;
+
+            case FC2_VIDEOMODE_1024x768YUV422:
+                return VIDEOMODE_1024x768YUV422;
+                break;
+
+            case FC2_VIDEOMODE_1024x768RGB:
+                return VIDEOMODE_1024x768RGB;
+                break;
+
+            case FC2_VIDEOMODE_1024x768Y8:
+                return VIDEOMODE_1024x768Y8;
+                break;
+
+            case FC2_VIDEOMODE_1024x768Y16:
+                return VIDEOMODE_1024x768Y16;
+                break;
+
+            case FC2_VIDEOMODE_1280x960YUV422:
+                return VIDEOMODE_1280x960YUV422;
+                break;
+
+            case FC2_VIDEOMODE_1280x960RGB:
+                return VIDEOMODE_1280x960RGB;
+                break;
+
+            case FC2_VIDEOMODE_1280x960Y8:
+                return VIDEOMODE_1280x960Y8;
+                break;
+
+            case FC2_VIDEOMODE_1280x960Y16:
+                return VIDEOMODE_1280x960Y16;
+                break;
+
+            case FC2_VIDEOMODE_1600x1200YUV422:
+                return VIDEOMODE_1600x1200YUV422;
+                break;
+
+            case FC2_VIDEOMODE_1600x1200RGB:
+                return VIDEOMODE_1600x1200RGB;
+                break;
+
+            case FC2_VIDEOMODE_1600x1200Y8:
+                return VIDEOMODE_1600x1200Y8;
+                break;
+
+            case FC2_VIDEOMODE_1600x1200Y16:
+                return VIDEOMODE_1600x1200Y16;
+                break;
+
+            case FC2_VIDEOMODE_FORMAT7:
+                return VIDEOMODE_FORMAT7;
+                break;
+
+            default:
+                {
+                    std::stringstream ssError;
+                    ssError << __PRETTY_FUNCTION__;
+                    ssError << ": unable to convert FlyCapture2 VideoMode";
+                    throw RuntimeError(ERROR_FC2_CONVERT_VIDEOMODE, ssError.str());
+                }
+                break;
+
+        }
+        return NUMBER_OF_VIDEOMODE;
+    }
+
+    FrameRate convertFrameRate_from_fc2(fc2FrameRate frameRate_fc2)
+    {
+        switch (frameRate_fc2)
+        {
+            case FC2_FRAMERATE_1_875:
+                return FRAMERATE_1_875;
+                break;
+
+            case FC2_FRAMERATE_3_75:
+                return FRAMERATE_3_75;
+                break;
+
+            case FC2_FRAMERATE_7_5:
+                return FRAMERATE_7_5;
+                break;
+
+            case FC2_FRAMERATE_15:
+                return FRAMERATE_15;
+                break;
+
+            case FC2_FRAMERATE_30:
+                return FRAMERATE_30;
+                break;
+
+            case FC2_FRAMERATE_60:
+                return FRAMERATE_60;
+                break;
+
+            case FC2_FRAMERATE_120:
+                return FRAMERATE_120;
+                break;
+
+            case FC2_FRAMERATE_240:
+                return FRAMERATE_240;
+                break;
+
+            case FC2_FRAMERATE_FORMAT7:
+                return FRAMERATE_FORMAT7;
+                break;
+
+            default:
+                {
+                    std::stringstream ssError;
+                    ssError << __PRETTY_FUNCTION__;
+                    ssError << ": unable to convert FlyCapture2 FrameRate";
+                    throw RuntimeError(ERROR_FC2_CONVERT_VIDEOMODE, ssError.str());
+                }
+                break;
+
+        }
+        return NUMBER_OF_FRAMERATE;
+    }
+
+    ImageMode convertImageMode_from_fc2(fc2Mode mode_fc2)
+    {
+        switch(mode_fc2) 
+        {
+            case FC2_MODE_0:
+                return IMAGEMODE_0;
+                break;
+
+            case FC2_MODE_1:
+                return IMAGEMODE_1;
+                break;
+
+            case FC2_MODE_2:
+                return IMAGEMODE_2;
+                break;
+
+            case FC2_MODE_3:
+                return IMAGEMODE_3;
+                break;
+
+            case FC2_MODE_4:
+                return IMAGEMODE_4;
+                break;
+
+            case FC2_MODE_5:
+                return IMAGEMODE_5;
+                break;
+
+            case FC2_MODE_6:
+                return IMAGEMODE_6;
+                break;
+
+            case FC2_MODE_7:
+                return IMAGEMODE_7;
+                break;
+
+            case FC2_MODE_8:
+                return IMAGEMODE_8;
+                break;
+
+            case FC2_MODE_9:
+                return IMAGEMODE_9;
+                break;
+
+            case FC2_MODE_10:
+                return IMAGEMODE_10;
+                break;
+
+            case FC2_MODE_11:
+                return IMAGEMODE_11;
+                break;
+
+            case FC2_MODE_12:
+                return IMAGEMODE_12;
+                break;
+
+            case FC2_MODE_13:
+                return IMAGEMODE_13;
+                break;
+
+            case FC2_MODE_14:
+                return IMAGEMODE_14;
+                break;
+
+            case FC2_MODE_15:
+                return IMAGEMODE_15;
+                break;
+
+            case FC2_MODE_16:
+                return IMAGEMODE_16;
+                break;
+
+            case FC2_MODE_17:
+                return IMAGEMODE_17;
+                break;
+
+            case FC2_MODE_18:
+                return IMAGEMODE_18;
+                break;
+
+            case FC2_MODE_19:
+                return IMAGEMODE_19;
+                break;
+
+            case FC2_MODE_20:
+                return IMAGEMODE_20;
+                break;
+
+            case FC2_MODE_21:
+                return IMAGEMODE_21;
+                break;
+
+            case FC2_MODE_22:
+                return IMAGEMODE_22;
+                break;
+
+            case FC2_MODE_23:
+                return IMAGEMODE_23;
+                break;
+
+            case FC2_MODE_24:
+                return IMAGEMODE_24;
+                break;
+
+            case FC2_MODE_25:
+                return IMAGEMODE_25;
+                break;
+
+            case FC2_MODE_26:
+                return IMAGEMODE_26;
+                break;
+
+            case FC2_MODE_27:
+                return IMAGEMODE_27;
+                break;
+
+            case FC2_MODE_28:
+                return IMAGEMODE_28;
+                break;
+
+            case FC2_MODE_29:
+                return IMAGEMODE_29;
+                break;
+
+            case FC2_MODE_30:
+                return IMAGEMODE_30;
+                break;
+
+            case FC2_MODE_31:
+                return IMAGEMODE_31;
+                break;
+
+            default:
+                {
+                    std::stringstream ssError;
+                    ssError << __PRETTY_FUNCTION__;
+                    ssError << ": unable to convert FlyCapture2 Mode";
+                    throw RuntimeError(ERROR_FC2_CONVERT_VIDEOMODE, ssError.str());
+                }
+                break;
+
+        }
+        return NUMBER_OF_IMAGEMODE;
     }
 
     // Functions for printing information
@@ -573,18 +887,6 @@ namespace bias {
         }
         std::cout << std::endl; 
     }
-
-    //fc2PropertyType   type;
-    //BOOL present;
-    //BOOL absControl;
-    //BOOL onePush;
-    //BOOL onOff;
-    //BOOL autoManualMode;
-    //unsigned int valueA;  
-    //unsigned int valueB; //Applies only to the white balance blue value. Use
-    ////Value A for the red value.
-    //float absValue;
-    //unsigned int reserved[8];
 
     // Functions for converting FlyCapture2 enumerations to strings   
     // Mostly autogenerated. 

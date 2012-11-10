@@ -38,11 +38,15 @@ namespace bias {
             bool isCapturing();
             bool isColor();
 
+            VideoMode getVideoMode();
+            FrameRate getFrameRate();
+            ImageMode getImageMode();
+
             void setVideoMode() {}; // TO DO //
             void setFrameRate() {}; // TO DO //
 
-            //VideoModeList getAllowedVideoModes(); // TO DO //
-            //FrameRateList getAllowedFrameRates(); // TO DO //
+            VideoModeList getAllowedVideoModes();
+            FrameRateList getAllowedFrameRates(VideoMode videoMode);
                 
             void printInfo();
             void printGuid();

@@ -8,6 +8,13 @@
 
 namespace bias {
 
+    struct fc2Format7Configuration 
+    {
+        fc2Format7ImageSettings imageSettings;
+        unsigned int packetSize;
+        float percentage; 
+    };
+
     class CameraDevice_fc2 : public CameraDevice
     {
         public:
@@ -24,15 +31,21 @@ namespace bias {
             virtual void grabImage();
 
             virtual bool isColor();
+            virtual bool isSupported(VideoMode videoMode, FrameRate frameRate);
+            virtual bool isSupported(ImageMode imageMode);
+
+            virtual VideoMode getVideoMode();
+            virtual FrameRate getFrameRate();
+            virtual ImageMode getImageMode();
+            virtual VideoModeList getAllowedVideoModes();
+
+            virtual void setVideoMode(VideoMode videoMode);
+            virtual void setFrameRate(FrameRate frameRate);
+            virtual void setImageMode(ImageMode imageMode);
             
             virtual std::string toString();
             virtual void printGuid();
             virtual void printInfo();
-
-            // Temporary
-            // --------------------------------------------
-            void getPropertyInfo();
-            void getProperty();
 
         private:
             fc2Context context_;
@@ -51,9 +64,16 @@ namespace bias {
             void createConvertedImage();
             void destroyConvertedImage();
 
+            void getVideoModeAndFrameRate(fc2VideoMode &videoMode, fc2FrameRate &frameRate);
+
+            fc2PropertyInfo getPropertyInfo_fc2(fc2PropertyType propType);
+            fc2Property getProperty_fc2(fc2PropertyType propType);
+            fc2Format7Configuration getFormat7Configuration();
+
             // Temporary 
             // --------------------------------------------
             void setVideoMode_Format7Mode0();
+
     };
 
     typedef std::shared_ptr<CameraDevice_fc2> CameraDevicePtr_fc2;

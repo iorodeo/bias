@@ -28,6 +28,14 @@ namespace bias {
 
             virtual bool isColor() {return false;} // TO DO //
 
+            virtual VideoMode getVideoMode() {}; // TO DO //
+            virtual FrameRate getFrameRate() {}; // TO DO //
+            virtual ImageMode getImageMode() {}; // TO DO //
+
+            virtual void setVideoMode(VideoMode videoMode) {}; // TO DO //
+            virtual void setFrameRate(FrameRate frameRate) {}; // TO DO //
+            virtual void setImageMode(ImageMode imageMode) {}; // TO DO //
+
             virtual std::string toString();
             virtual void printGuid();
             virtual void printInfo();  

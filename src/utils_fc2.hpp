@@ -8,16 +8,25 @@
 
 namespace bias {
 
-    // Conversion from BIAS enumeration types to FlyCapture2 enumerations
+    // Conversion from BIAS enumeration types to FlyCapture2 enumeration types
     // ------------------------------------------------------------------------
     
-    fc2PropertyType getPropertyType_fc2(PropertyType propertyType);
+    fc2PropertyType convertPropertyType_to_fc2(PropertyType propertyType);
 
-    fc2FrameRate getFrameRate_fc2(FrameRate frameRate);
+    fc2FrameRate convertFrameRate_to_fc2(FrameRate frameRate);
 
-    fc2VideoMode getVideoMode_fc2(VideoMode videoMode);
+    fc2VideoMode convertVideoMode_to_fc2(VideoMode videoMode);
 
-    fc2Mode getImageMode_fc2(ImagingMode mode);
+    fc2Mode convertImageMode_to_fc2(ImageMode imageMode);
+
+    // Conversion from FlyCapture2 enumeration types to BIAS enumeration types
+    // ------------------------------------------------------------------------
+
+    VideoMode convertVideoMode_from_fc2(fc2VideoMode videoMode_fc2);
+
+    FrameRate convertFrameRate_from_fc2(fc2FrameRate frameRate_fc2);
+
+    ImageMode convertImageMode_from_fc2(fc2Mode mode_fc2);
 
 
     // Print functions for FlyCapture2 configurations, settings and info

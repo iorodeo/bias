@@ -104,6 +104,31 @@ namespace bias {
         return cameraDevicePtr_ -> isColor();
     }
 
+    VideoMode Camera::getVideoMode()
+    {
+        return cameraDevicePtr_ -> getVideoMode();
+    }
+
+    FrameRate Camera::getFrameRate()
+    {
+        return cameraDevicePtr_ -> getFrameRate();
+    }
+
+    ImageMode Camera::getImageMode()
+    {
+        return cameraDevicePtr_ -> getImageMode();
+    }
+
+    VideoModeList Camera::getAllowedVideoModes()
+    {
+        return cameraDevicePtr_ -> getAllowedVideoModes();
+    }
+
+    FrameRateList Camera::getAllowedFrameRates(VideoMode vidMode)
+    {
+        return cameraDevicePtr_ -> getAllowedFrameRates(vidMode);
+    }
+
 // FlyCapture2 specific methods
 // ------------------------------------------------------------------------
 #ifdef WITH_FC2
