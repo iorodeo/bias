@@ -139,6 +139,12 @@ namespace bias {
         return cameraDevicePtr_ -> getProperty(propertyType);
     }
 
+    PropertyInfo Camera::getPropertyInfo(PropertyType propertyType)
+    {
+        return cameraDevicePtr_ -> getPropertyInfo(propertyType);
+    }
+
+
 // FlyCapture2 specific methods
 // ------------------------------------------------------------------------
 #ifdef WITH_FC2

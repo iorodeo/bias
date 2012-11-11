@@ -814,31 +814,36 @@ namespace bias {
         return NUMBER_OF_IMAGEMODE;
     }
 
-    Property convertProperty_from_fc2(
-            fc2Property property_fc2, 
-            fc2PropertyInfo propertyInfo_fc2
-            )
+    Property convertProperty_from_fc2(fc2Property property_fc2)
     {
         Property property;
         property.type = convertPropertyType_from_fc2(property_fc2.type);
+        property.present = bool(property_fc2.present);
         property.on = bool(property_fc2.onOff);
         property.autoActive = bool(property_fc2.autoManualMode);
         property.value = property_fc2.valueA;
         property.absoluteValue = property_fc2.absValue;
-        property.units = std::string(propertyInfo_fc2.pUnits);
-        property.unitsAbbr = std::string(propertyInfo_fc2.pUnitAbbr);
-        property.present = bool(propertyInfo_fc2.present);
-        property.autoCapable = bool(propertyInfo_fc2.autoSupported);
-        property.manualCapable = bool(propertyInfo_fc2.manualSupported);
-        property.absoluteCapable = bool(propertyInfo_fc2.absValSupported);
-        property.onePushCapable = bool(propertyInfo_fc2.onePushSupported);
-        property.onOffCapable = bool(propertyInfo_fc2.onOffSupported);
-        property.haveUnits =  bool(property.units.length());
-        property.minValue = propertyInfo_fc2.min;
-        property.maxValue = propertyInfo_fc2.max;
-        property.minAbsoluteValue = propertyInfo_fc2.absMin;
-        property.maxAbsoluteValue = propertyInfo_fc2.absMax;
         return property;
+    }
+    
+    PropertyInfo convertPropertyInfo_from_fc2(fc2PropertyInfo propertyInfo_fc2) 
+    {
+        PropertyInfo propertyInfo;
+        propertyInfo.type = convertPropertyType_from_fc2(propertyInfo_fc2.type);
+        propertyInfo.present = bool(propertyInfo_fc2.present);
+        propertyInfo.autoCapable = bool(propertyInfo_fc2.autoSupported);
+        propertyInfo.manualCapable = bool(propertyInfo_fc2.manualSupported);
+        propertyInfo.absoluteCapable = bool(propertyInfo_fc2.absValSupported);
+        propertyInfo.onePushCapable = bool(propertyInfo_fc2.onePushSupported);
+        propertyInfo.onOffCapable = bool(propertyInfo_fc2.onOffSupported);
+        propertyInfo.minValue = propertyInfo_fc2.min;
+        propertyInfo.maxValue = propertyInfo_fc2.max;
+        propertyInfo.minAbsoluteValue = propertyInfo_fc2.absMin;
+        propertyInfo.maxAbsoluteValue = propertyInfo_fc2.absMax;
+        propertyInfo.units = std::string(propertyInfo_fc2.pUnits);
+        propertyInfo.unitsAbbr = std::string(propertyInfo_fc2.pUnitAbbr);
+        propertyInfo.haveUnits =  bool(propertyInfo.units.length());
+        return propertyInfo;
     }
 
 

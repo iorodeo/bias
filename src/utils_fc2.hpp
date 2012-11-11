@@ -31,10 +31,9 @@ namespace bias {
 
     ImageMode convertImageMode_from_fc2(fc2Mode mode_fc2);
 
-    Property convertProperty_from_fc2(
-            fc2Property property_fc2, 
-            fc2PropertyInfo propertyInfo_fc2
-            ); 
+    Property convertProperty_from_fc2(fc2Property property_fc2); 
+
+    PropertyInfo convertPropertyInfo_from_fc2(fc2PropertyInfo propertyInfo_fc2); 
 
 
     // Print functions for FlyCapture2 configurations, settings and info

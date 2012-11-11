@@ -80,8 +80,11 @@ int main(int argc, char** argv)
             {
                 PropertyType propType = *pit;
                 Property property = cameraPtr -> getProperty(propType);
+                PropertyInfo propertyInfo = cameraPtr -> getPropertyInfo(propType);
                 cout << "-----------------------------------------" << endl;
                 property.print(); 
+                cout << endl;
+                propertyInfo.print();
                 cout << "-----------------------------------------" << endl;
             }
 

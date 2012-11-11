@@ -375,16 +375,25 @@ namespace bias {
     Property CameraDevice_fc2::getProperty(PropertyType propertyType)
     {
         fc2PropertyType propertyType_fc2;
-        fc2PropertyInfo propertyInfo_fc2;
         fc2Property property_fc2;
         Property property;
 
         propertyType_fc2 = convertPropertyType_to_fc2(propertyType);
-        propertyInfo_fc2 = getPropertyInfo_fc2(propertyType_fc2);
         property_fc2 = getProperty_fc2(propertyType_fc2);
-        property = convertProperty_from_fc2(property_fc2, propertyInfo_fc2);
-
+        property = convertProperty_from_fc2(property_fc2);
         return property;
+    }
+
+    PropertyInfo CameraDevice_fc2::getPropertyInfo(PropertyType propertyType)
+    {
+        fc2PropertyType propertyType_fc2;
+        fc2PropertyInfo propertyInfo_fc2;
+        PropertyInfo propertyInfo;
+
+        propertyType_fc2 = convertPropertyType_to_fc2(propertyType);
+        propertyInfo_fc2 = getPropertyInfo_fc2(propertyType_fc2);
+        propertyInfo =  convertPropertyInfo_from_fc2(propertyInfo_fc2);
+        return propertyInfo;
     }
 
 

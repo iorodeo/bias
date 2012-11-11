@@ -31,10 +31,11 @@ namespace bias {
             virtual VideoMode getVideoMode() {}; // TO DO //
             virtual FrameRate getFrameRate() {}; // TO DO //
             virtual ImageMode getImageMode() {}; // TO DO //
-
             virtual VideoModeList getAllowedVideoModes();  // TO DO //
             virtual FrameRateList getAllowedFrameRates(VideoMode videoMode);  // TO DO //
             virtual ImageModeList getAllowedImageModes();  // TO DO //
+            virtual Property getProperty(PropertyType propertyType) {}; // TO DO //
+            virtual PropertyInfo getPropertyInfo(PropertyType propertyType) {}; // TO DO //
 
             virtual void setVideoMode(VideoMode videoMode) {}; // TO DO //
             virtual void setFrameRate(FrameRate frameRate) {}; // TO DO //

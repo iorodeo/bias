@@ -80,6 +80,11 @@ namespace bias
         return Property();
     }
 
+    PropertyInfo CameraDevice::getPropertyInfo(PropertyType propertyType)
+    {
+        return PropertyInfo();
+    }
+
     std::string CameraDevice::toString() 
     {
         return std::string("camera not defined");

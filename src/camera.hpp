@@ -46,6 +46,7 @@ namespace bias {
             FrameRateList getAllowedFrameRates(VideoMode videoMode);
             ImageModeList getAllowedImageModes();
             Property getProperty(PropertyType propertyType);
+            PropertyInfo getPropertyInfo(PropertyType propertyType);
             
             void setVideoMode() {}; // TO DO //
             void setFrameRate() {}; // TO DO //
