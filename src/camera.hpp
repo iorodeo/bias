@@ -7,6 +7,7 @@
 #include <iostream>
 #include "guid.hpp"
 #include "basic_types.hpp"
+#include "property.hpp"
 #include "camera_device.hpp"
 
 namespace bias {
@@ -41,12 +42,13 @@ namespace bias {
             VideoMode getVideoMode();
             FrameRate getFrameRate();
             ImageMode getImageMode();
-
-            void setVideoMode() {}; // TO DO //
-            void setFrameRate() {}; // TO DO //
-
             VideoModeList getAllowedVideoModes();
             FrameRateList getAllowedFrameRates(VideoMode videoMode);
+            ImageModeList getAllowedImageModes();
+            Property getProperty(PropertyType propertyType);
+            
+            void setVideoMode() {}; // TO DO //
+            void setFrameRate() {}; // TO DO //
                 
             void printInfo();
             void printGuid();

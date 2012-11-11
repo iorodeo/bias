@@ -3,12 +3,13 @@
 #define BIAS_UTILS_FC2_HPP
 
 #include "basic_types.hpp"
+#include "property.hpp"
 #include <string>
 #include "C/FlyCapture2_C.h"
 
 namespace bias {
 
-    // Conversion from BIAS enumeration types to FlyCapture2 enumeration types
+    // Conversion from BIAS types to FlyCapture2  types
     // ------------------------------------------------------------------------
     
     fc2PropertyType convertPropertyType_to_fc2(PropertyType propertyType);
@@ -19,14 +20,21 @@ namespace bias {
 
     fc2Mode convertImageMode_to_fc2(ImageMode imageMode);
 
-    // Conversion from FlyCapture2 enumeration types to BIAS enumeration types
+    // Conversion from FlyCapture2 types to BIAS types
     // ------------------------------------------------------------------------
+
+    PropertyType convertPropertyType_from_fc2(fc2PropertyType propertyType_fc2);
 
     VideoMode convertVideoMode_from_fc2(fc2VideoMode videoMode_fc2);
 
     FrameRate convertFrameRate_from_fc2(fc2FrameRate frameRate_fc2);
 
     ImageMode convertImageMode_from_fc2(fc2Mode mode_fc2);
+
+    Property convertProperty_from_fc2(
+            fc2Property property_fc2, 
+            fc2PropertyInfo propertyInfo_fc2
+            ); 
 
 
     // Print functions for FlyCapture2 configurations, settings and info

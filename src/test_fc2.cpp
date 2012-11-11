@@ -6,6 +6,7 @@
 #include <memory>
 #include "utils.hpp"
 #include "guid.hpp"
+#include "property.hpp"
 #include "camera.hpp"
 #include "camera_finder.hpp"
 
@@ -72,6 +73,18 @@ int main(int argc, char** argv)
                 }
                 cout << endl;
             }
+
+            PropertyTypeList propTypeList = getListOfPropertyTypes();
+            PropertyTypeList::iterator pit;
+            for (pit=propTypeList.begin(); pit!=propTypeList.end(); pit++)
+            {
+                PropertyType propType = *pit;
+                Property property = cameraPtr -> getProperty(propType);
+                cout << "-----------------------------------------" << endl;
+                property.print(); 
+                cout << "-----------------------------------------" << endl;
+            }
+
         }
     }
 
@@ -129,6 +142,22 @@ int main(int argc, char** argv)
         }
         cout << "done" << endl << endl;
     }
+
+
+    // Print property types.
+    // ------------------------------------------------------------------------
+    {
+        PropertyTypeList propTypeList = getListOfPropertyTypes();
+        PropertyTypeList::iterator it;
+
+        cout << "Property Types" << endl << endl;
+        for (it=propTypeList.begin(); it!=propTypeList.end(); it++)
+        {
+            cout << getPropertyTypeString(*it) << endl;
+        }
+        cout << endl;
+    }
+
 
 	return 0;
 }

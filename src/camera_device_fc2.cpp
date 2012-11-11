@@ -240,27 +240,30 @@ namespace bias {
 
     VideoModeList CameraDevice_fc2::getAllowedVideoModes()
     {
-        VideoModeList list;
-        VideoMode videoMode;
-        FrameRate frameRate;
-        ImageMode imageMode;
+        VideoModeList allowedVideoModes;
         bool supported;
 
         // Test for non-format7 videoModes
-        // -------------------------------
-        for (int i=0; i<int(NUMBER_OF_VIDEOMODE); i++)
+        // --------------------------------------------------------------------
+        VideoModeList allVideoModes = getListOfVideoModes();
+        VideoModeList::iterator vit;
+
+        for (vit=allVideoModes.begin(); vit!=allVideoModes.end(); vit++)
         {
-            videoMode = VideoMode(i);
+            VideoMode videoMode = *vit;
             if (videoMode == VIDEOMODE_FORMAT7) 
             { 
                 // Skip format7 modes ... as we need a separate test for them.
                 continue; 
             }
 
+            FrameRateList allFrameRates = getListOfFrameRates();
+            FrameRateList::iterator fit;
             supported = false;
-            for (int j=0; j<int(NUMBER_OF_FRAMERATE); j++)
+
+            for (fit=allFrameRates.begin(); fit!=allFrameRates.end(); fit++)
             {
-                frameRate = FrameRate(j);
+                FrameRate frameRate = *fit; 
                 try
                 {
                     supported |= isSupported(videoMode, frameRate);
@@ -275,17 +278,19 @@ namespace bias {
             } 
             if (supported) 
             { 
-                list.push_back(videoMode); 
+                allowedVideoModes.push_back(videoMode); 
             }
         }
 
         // Test for format7 videoMode
-        // --------------------------
+        // --------------------------------------------------------------------
+        ImageModeList allImageModes = getListOfImageModes();
+        ImageModeList::iterator it;
         supported = false;
-        for (int i=0; i<int(NUMBER_OF_IMAGEMODE); i++)
+
+        for (it=allImageModes.begin(); it!=allImageModes.end(); it++)
         {
-            imageMode = ImageMode(i);
-            supported |= isSupported(imageMode);
+            ImageMode imageMode = *it;
             try
             {
                 supported != isSupported(imageMode);
@@ -299,44 +304,89 @@ namespace bias {
             if (supported) 
             { 
                 // Only nee to validate support for on imageMode.
-                list.push_back(VIDEOMODE_FORMAT7);
+                allowedVideoModes.push_back(VIDEOMODE_FORMAT7);
                 break; 
             }
         }
-        return list;
+        return allowedVideoModes;
     }
 
     FrameRateList CameraDevice_fc2::getAllowedFrameRates(VideoMode videoMode)
     {
-        FrameRate frameRate;
-        FrameRateList list;
+        FrameRateList allowedFramesRates;
         bool supported;
 
         if (videoMode == VIDEOMODE_FORMAT7) {
-            list.push_back(FRAMERATE_FORMAT7);
+            allowedFramesRates.push_back(FRAMERATE_FORMAT7);
         } 
         else
         {
-            for (int i=0; i<int(NUMBER_OF_FRAMERATE); i++)
+            FrameRateList allFrameRates = getListOfFrameRates();
+            FrameRateList::iterator it;
+
+            for (it=allFrameRates.begin(); it!=allFrameRates.end(); it++)  
             {
-                frameRate = FrameRate(i);
+                FrameRate frameRate = *it; 
                 try
                 {
                     supported = isSupported(videoMode, frameRate);
                 }
                 catch (RuntimeError &runtimeError)
                 {
-                    // Continue checking is case where - device query fails
+                    // Continue checking even in case where device query fails
                     continue;
                 }
                 if (supported) 
                 {
-                    list.push_back(frameRate);
+                    allowedFramesRates.push_back(frameRate);
                 }
             }
         }
-        return list;
+        return allowedFramesRates;
     }
+
+    ImageModeList CameraDevice_fc2::getAllowedImageModes()
+    {
+        ImageModeList allowedImageModes;
+        ImageModeList allImageModes = getListOfImageModes();
+        ImageModeList::iterator it;
+        bool supported;
+
+        for (it=allImageModes.begin(); it!=allImageModes.end(); it++)
+        {
+            ImageMode imageMode = *it;
+            try
+            {
+                supported = isSupported(imageMode);
+            }
+            catch (RuntimeError &runtimeError)
+            {
+                // Continue checking even is case where device query fails.
+                continue;
+            }
+            if (supported)
+            {
+                allowedImageModes.push_back(imageMode);
+            }
+        }
+        return allowedImageModes;
+    }
+
+    Property CameraDevice_fc2::getProperty(PropertyType propertyType)
+    {
+        fc2PropertyType propertyType_fc2;
+        fc2PropertyInfo propertyInfo_fc2;
+        fc2Property property_fc2;
+        Property property;
+
+        propertyType_fc2 = convertPropertyType_to_fc2(propertyType);
+        propertyInfo_fc2 = getPropertyInfo_fc2(propertyType_fc2);
+        property_fc2 = getProperty_fc2(propertyType_fc2);
+        property = convertProperty_from_fc2(property_fc2, propertyInfo_fc2);
+
+        return property;
+    }
+
 
     bool CameraDevice_fc2::isSupported(VideoMode videoMode, FrameRate frameRate)
     {
@@ -627,6 +677,7 @@ namespace bias {
         }
         return config;
     }
+
 
     // Temporary methods
     // ------------------------------------------------------------------------

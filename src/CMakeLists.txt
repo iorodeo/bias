@@ -27,6 +27,7 @@ SET(
     camera.cpp 
     camera_finder.cpp 
     exception.cpp
+    property.cpp
     )
 
 IF(with_fc2) 

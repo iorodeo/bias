@@ -32,6 +32,10 @@ namespace bias {
             virtual FrameRate getFrameRate() {}; // TO DO //
             virtual ImageMode getImageMode() {}; // TO DO //
 
+            virtual VideoModeList getAllowedVideoModes();  // TO DO //
+            virtual FrameRateList getAllowedFrameRates(VideoMode videoMode);  // TO DO //
+            virtual ImageModeList getAllowedImageModes();  // TO DO //
+
             virtual void setVideoMode(VideoMode videoMode) {}; // TO DO //
             virtual void setFrameRate(FrameRate frameRate) {}; // TO DO //
             virtual void setImageMode(ImageMode imageMode) {}; // TO DO //

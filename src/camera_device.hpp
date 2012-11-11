@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include "basic_types.hpp"
+#include "property.hpp"
 #include "guid.hpp"
 
 namespace bias 
@@ -36,10 +37,10 @@ namespace bias
             virtual VideoMode getVideoMode(); 
             virtual FrameRate getFrameRate(); 
             virtual ImageMode getImageMode(); 
-
             virtual VideoModeList getAllowedVideoModes(); 
             virtual FrameRateList getAllowedFrameRates(VideoMode videoMode); 
             virtual ImageModeList getAllowedImageModes();
+            virtual Property getProperty(PropertyType propertyType);
 
             virtual void setVideoMode(VideoMode videoMode) {};
             virtual void setFrameRate(FrameRate frameRate) {};

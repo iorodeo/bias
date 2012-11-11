@@ -3,7 +3,9 @@
 #define BIAS_CAMERA_DEVICE_FC2_HPP
 
 #include <string>
+#include "utils.hpp"
 #include "camera_device.hpp"
+#include "property.hpp"
 #include "C/FlyCapture2_C.h"
 
 namespace bias {
@@ -18,6 +20,7 @@ namespace bias {
     class CameraDevice_fc2 : public CameraDevice
     {
         public:
+
             CameraDevice_fc2(); 
             explicit CameraDevice_fc2(Guid guid);
             virtual ~CameraDevice_fc2();
@@ -39,6 +42,8 @@ namespace bias {
             virtual ImageMode getImageMode();
             virtual VideoModeList getAllowedVideoModes();
             virtual FrameRateList getAllowedFrameRates(VideoMode videoMode);
+            virtual ImageModeList getAllowedImageModes();
+            virtual Property getProperty(PropertyType propertyType);
 
             virtual void setVideoMode(VideoMode videoMode);
             virtual void setFrameRate(FrameRate frameRate);
@@ -49,6 +54,7 @@ namespace bias {
             virtual void printInfo();
 
         private:
+
             fc2Context context_;
             fc2CameraInfo cameraInfo_;
             fc2Image rawImage_;
@@ -65,8 +71,9 @@ namespace bias {
             void createConvertedImage();
             void destroyConvertedImage();
 
-            void getVideoModeAndFrameRate(fc2VideoMode &videoMode, fc2FrameRate &frameRate);
+            void createPropertyMap();
 
+            void getVideoModeAndFrameRate(fc2VideoMode &videoMode, fc2FrameRate &frameRate);
             fc2PropertyInfo getPropertyInfo_fc2(fc2PropertyType propType);
             fc2Property getProperty_fc2(fc2PropertyType propType);
             fc2Format7Configuration getFormat7Configuration();

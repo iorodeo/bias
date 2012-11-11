@@ -129,6 +129,16 @@ namespace bias {
         return cameraDevicePtr_ -> getAllowedFrameRates(vidMode);
     }
 
+    ImageModeList Camera::getAllowedImageModes()
+    {
+        return cameraDevicePtr_ -> getAllowedImageModes();
+    }
+
+    Property Camera::getProperty(PropertyType propertyType)
+    {
+        return cameraDevicePtr_ -> getProperty(propertyType);
+    }
+
 // FlyCapture2 specific methods
 // ------------------------------------------------------------------------
 #ifdef WITH_FC2

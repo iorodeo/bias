@@ -7,82 +7,82 @@
 
 namespace bias {
     
-    // Conversion from BIAS enumeration types to FlyCapture2 enumeration types
+    // Conversion from BIAS types to FlyCapture2 types
     // ------------------------------------------------------------------------
 
     fc2PropertyType convertPropertyType_to_fc2(PropertyType propertyType)
     {
         switch (propertyType)
         {
-            case PROPERTY_BRIGHTNESS: 
+            case PROPERTY_TYPE_BRIGHTNESS: 
                 return FC2_BRIGHTNESS;
                 break;
 
-            case PROPERTY_AUTO_EXPOSURE:
+            case PROPERTY_TYPE_AUTO_EXPOSURE:
                 return FC2_AUTO_EXPOSURE;
                 break;
 
-            case PROPERTY_SHARPNESS:
+            case PROPERTY_TYPE_SHARPNESS:
                 return FC2_SHARPNESS;
                 break;
 
-            case PROPERTY_WHITE_BALANCE:
+            case PROPERTY_TYPE_WHITE_BALANCE:
                 return FC2_WHITE_BALANCE;
                 break;
 
-            case PROPERTY_HUE:
+            case PROPERTY_TYPE_HUE:
                 return FC2_HUE;
                 break;
 
-            case PROPERTY_SATURATION:
+            case PROPERTY_TYPE_SATURATION:
                 return FC2_SATURATION;
                 break;
 
-            case PROPERTY_GAMMA:
+            case PROPERTY_TYPE_GAMMA:
                 return FC2_GAMMA;
                 break;
 
-            case PROPERTY_IRIS:
+            case PROPERTY_TYPE_IRIS:
                 return FC2_IRIS;
                 break;
 
-            case PROPERTY_FOCUS:
+            case PROPERTY_TYPE_FOCUS:
                 return FC2_FOCUS;
                 break;
 
-            case PROPERTY_ZOOM:
+            case PROPERTY_TYPE_ZOOM:
                 return FC2_ZOOM;
                 break;
 
-            case PROPERTY_PAN:
+            case PROPERTY_TYPE_PAN:
                 return FC2_PAN;
                 break;
 
-            case PROPERTY_TILT:
+            case PROPERTY_TYPE_TILT:
                 return FC2_TILT;
                 break;
 
-            case PROPERTY_SHUTTER:
+            case PROPERTY_TYPE_SHUTTER:
                 return FC2_SHUTTER;
                 break;
 
-            case PROPERTY_GAIN:
+            case PROPERTY_TYPE_GAIN:
                 return FC2_GAIN;
                 break;
 
-            case PROPERTY_TRIGGER_MODE:
+            case PROPERTY_TYPE_TRIGGER_MODE:
                 return FC2_TRIGGER_MODE;
                 break;
 
-            case PROPERTY_TRIGGER_DELAY:
+            case PROPERTY_TYPE_TRIGGER_DELAY:
                 return FC2_TRIGGER_DELAY;
                 break;
 
-            case PROPERTY_FRAME_RATE:
+            case PROPERTY_TYPE_FRAME_RATE:
                 return FC2_FRAME_RATE;
                 break;
 
-            case PROPERTY_TEMPERATURE:
+            case PROPERTY_TYPE_TEMPERATURE:
                 return FC2_TEMPERATURE;
                 break;
 
@@ -410,8 +410,98 @@ namespace bias {
         return FC2_NUM_MODES;
     }
 
-    // Conversion from FlyCapture2 enumeration types to BIAS enumeration types
+    // Conversion from FlyCapture2 types to BIAS types
     // ------------------------------------------------------------------------
+
+    PropertyType convertPropertyType_from_fc2(fc2PropertyType propertyType_fc2)
+    {
+        switch(propertyType_fc2)
+        {
+            case FC2_BRIGHTNESS:
+                return PROPERTY_TYPE_BRIGHTNESS;
+                break;
+
+            case FC2_AUTO_EXPOSURE:
+                return PROPERTY_TYPE_AUTO_EXPOSURE;
+                break;
+
+            case FC2_SHARPNESS:
+                return PROPERTY_TYPE_SHARPNESS;
+                break;
+
+            case FC2_WHITE_BALANCE:
+                return PROPERTY_TYPE_WHITE_BALANCE;
+                break;
+
+            case FC2_HUE:
+                return PROPERTY_TYPE_HUE;
+                break;
+
+            case FC2_SATURATION:
+                return PROPERTY_TYPE_SATURATION;
+                break;
+
+            case FC2_GAMMA:
+                return PROPERTY_TYPE_GAMMA;
+                break;
+
+            case FC2_IRIS:
+                return PROPERTY_TYPE_IRIS;
+                break;
+
+            case FC2_FOCUS:
+                return PROPERTY_TYPE_FOCUS;
+                break;
+
+            case FC2_ZOOM:
+                return PROPERTY_TYPE_ZOOM;
+                break;
+
+            case FC2_PAN:
+                return PROPERTY_TYPE_PAN;
+                break;
+
+            case FC2_TILT:
+                return PROPERTY_TYPE_TILT;
+                break;
+
+            case FC2_SHUTTER:
+                return PROPERTY_TYPE_SHUTTER;
+                break;
+
+            case FC2_GAIN:
+                return PROPERTY_TYPE_GAIN;
+                break;
+
+            case FC2_TRIGGER_MODE:
+                return PROPERTY_TYPE_TRIGGER_MODE;
+                break;
+
+            case FC2_TRIGGER_DELAY:
+                return PROPERTY_TYPE_TRIGGER_DELAY;
+                break;
+
+            case FC2_FRAME_RATE:
+                return PROPERTY_TYPE_FRAME_RATE;
+                break;
+
+            case FC2_TEMPERATURE:
+                return PROPERTY_TYPE_TEMPERATURE;
+                break;
+
+            default:
+                {
+                    std::stringstream ssError;
+                    ssError << __PRETTY_FUNCTION__;
+                    ssError << ": unable to convert FlyCapture2 PropertyType";
+                    throw RuntimeError(ERROR_FC2_CONVERT_PROPERTY_TYPE, ssError.str());
+                }
+                break;
+
+
+        }
+        return PROPERTY_TYPE_UNSPECIFIED;
+    }
 
     VideoMode convertVideoMode_from_fc2(fc2VideoMode videoMode_fc2)
     {
@@ -724,6 +814,34 @@ namespace bias {
         return NUMBER_OF_IMAGEMODE;
     }
 
+    Property convertProperty_from_fc2(
+            fc2Property property_fc2, 
+            fc2PropertyInfo propertyInfo_fc2
+            )
+    {
+        Property property;
+        property.type = convertPropertyType_from_fc2(property_fc2.type);
+        property.on = bool(property_fc2.onOff);
+        property.autoActive = bool(property_fc2.autoManualMode);
+        property.value = property_fc2.valueA;
+        property.absoluteValue = property_fc2.absValue;
+        property.units = std::string(propertyInfo_fc2.pUnits);
+        property.unitsAbbr = std::string(propertyInfo_fc2.pUnitAbbr);
+        property.present = bool(propertyInfo_fc2.present);
+        property.autoCapable = bool(propertyInfo_fc2.autoSupported);
+        property.manualCapable = bool(propertyInfo_fc2.manualSupported);
+        property.absoluteCapable = bool(propertyInfo_fc2.absValSupported);
+        property.onePushCapable = bool(propertyInfo_fc2.onePushSupported);
+        property.onOffCapable = bool(propertyInfo_fc2.onOffSupported);
+        property.haveUnits =  bool(property.units.length());
+        property.minValue = propertyInfo_fc2.min;
+        property.maxValue = propertyInfo_fc2.max;
+        property.minAbsoluteValue = propertyInfo_fc2.absMin;
+        property.maxAbsoluteValue = propertyInfo_fc2.absMax;
+        return property;
+    }
+
+
     // Functions for printing information
     // --------------------------------------------------------------
     void printImageInfo_fc2(fc2Image &image)
@@ -844,6 +962,7 @@ namespace bias {
         std::cout << std::boolalpha;
         std::cout << " present:             " << bool(propInfo.present) << std::endl;
         std::cout << " autoSupported:       " << bool(propInfo.autoSupported) << std::endl;
+        std::cout << " manualSupported:     " << bool(propInfo.manualSupported) << std::endl;
         std::cout << " onOffSupported:      " << bool(propInfo.onOffSupported) << std::endl;
         std::cout << " onePushSupported:    " << bool(propInfo.onePushSupported) << std::endl;
         std::cout << " absValSupported:     " << bool(propInfo.absValSupported) << std::endl;

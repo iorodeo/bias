@@ -3,6 +3,52 @@
 
 namespace bias
 {
+    // Functions which return lists of enumeration types
+    // ------------------------------------------------------------------------
+    
+    VideoModeList getListOfVideoModes() 
+    {
+        VideoModeList list;
+        for (int i=0; i<int(NUMBER_OF_VIDEOMODE); i++) 
+        {
+            list.push_back(VideoMode(i));
+        }
+        return list;
+    }
+
+    FrameRateList getListOfFrameRates()
+    {
+        FrameRateList list;
+        for (int i=0; i<int(NUMBER_OF_FRAMERATE); i++) 
+        {
+            list.push_back(FrameRate(i));
+        }
+        return list;
+    }
+
+    ImageModeList getListOfImageModes()
+    {
+        ImageModeList list;
+        for (int i=0; i< int(NUMBER_OF_IMAGEMODE); i++)
+        {
+            list.push_back(ImageMode(i));
+        }
+        return list;
+    }
+
+    PropertyTypeList getListOfPropertyTypes()
+    {
+        PropertyTypeList list;
+        for (int i=0; i< int(NUMBER_OF_PROPERTY_TYPE); i++)
+        {
+            list.push_back(PropertyType(i));
+        }
+        return list;
+    }
+
+    // Functions for converting enumerations to strings
+    // ------------------------------------------------------------------------
+
     std::string getVideoModeString(VideoMode videoMode)
     {
         switch (videoMode)
@@ -115,6 +161,7 @@ namespace bias
                 }
                 break;
         }
+        return std::string("error: getVideoModeString()");
     }
 
     std::string getFrameRateString(FrameRate frameRate)
@@ -169,8 +216,94 @@ namespace bias
                 }
                 break;
         }
+        return std::string("error: getFrameRateString()");
     }
 
+    std::string getPropertyTypeString(PropertyType propertyType)
+    {
+        switch(propertyType)
+        {
+            case PROPERTY_TYPE_BRIGHTNESS: 
+                return std::string("PROPERTY_TYPE_BRIGHTNESS");
+                break;
+
+            case PROPERTY_TYPE_AUTO_EXPOSURE:
+                return std::string("PROPERTY_TYPE_AUTO_EXPOSURE");
+                break;
+
+            case PROPERTY_TYPE_SHARPNESS:
+                return std::string("PROPERTY_TYPE_SHARPNESS");
+                break;
+
+            case PROPERTY_TYPE_WHITE_BALANCE:
+                return std::string("PROPERTY_TYPE_WHITE_BALANCE");
+                break;
+
+            case PROPERTY_TYPE_HUE:
+                return std::string("PROPERTY_TYPE_HUE");
+                break;
+
+            case PROPERTY_TYPE_SATURATION:
+                return std::string("PROPERTY_TYPE_SATURATION");
+                break;
+
+            case PROPERTY_TYPE_GAMMA:
+                return std::string("PROPERTY_TYPE_GAMMA");
+                break;
+
+            case PROPERTY_TYPE_IRIS:
+                return std::string("PROPERTY_TYPE_IRIS");
+                break;
+
+            case PROPERTY_TYPE_FOCUS:
+                return std::string("PROPERTY_TYPE_FOCUS");
+                break;
+
+            case PROPERTY_TYPE_ZOOM:
+                return std::string("PROPERTY_TYPE_ZOOM");
+                break;
+
+            case PROPERTY_TYPE_PAN:
+                return std::string("PROPERTY_TYPE_PAN");
+                break;
+
+            case PROPERTY_TYPE_TILT:
+                return std::string("PROPERTY_TYPE_TILT");
+                break;
+
+            case PROPERTY_TYPE_SHUTTER:
+                return std::string("PROPERTY_TYPE_SHUTTER");
+                break;
+
+            case PROPERTY_TYPE_GAIN:
+                return std::string("PROPERTY_TYPE_GAIN");
+                break;
+
+            case PROPERTY_TYPE_TRIGGER_MODE:
+                return std::string("PROPERTY_TYPE_TRIGGER_MODE");
+                break;
+
+            case PROPERTY_TYPE_TRIGGER_DELAY:
+                return std::string("PROPERTY_TYPE_TRIGGER_DELAY");
+                break;
+
+            case PROPERTY_TYPE_FRAME_RATE:
+                return std::string("PROPERTY_TYPE_FRAME_RATE");
+                break;
+
+            case PROPERTY_TYPE_TEMPERATURE:
+                return std::string("PROPERTY_TYPE_TEMPERATURE");
+                break;
+            default:
+                {
+                    std::stringstream ssMsg;
+                    ssMsg << ": unknown PropertyType " << propertyType;
+                    return ssMsg.str();
+                }
+                break;
+        }
+        return std::string("error: getPropertyTypeStrint()");
+    }
 
 
 } // namespase bias

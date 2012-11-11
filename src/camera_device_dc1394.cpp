@@ -170,6 +170,21 @@ namespace bias {
         error = dc1394_capture_enqueue(camera_dc1394_, frame_dc1394_);
     }
 
+    VideoModeList CameraDevice_dc1394::getAllowedVideoModes()
+    {
+        return VideoModeList();
+    }
+
+    FrameRateList CameraDevice_dc1394::getAllowedFrameRates(VideoMode videoMode) 
+    { 
+        return FrameRateList(); 
+    } 
+
+    ImageModeList CameraDevice_dc1394::getAllowedImageModes()
+    {
+        return ImageModeList();
+    }
+
     std::string CameraDevice_dc1394::toString()
     {
         std::stringstream ss;
