@@ -34,32 +34,32 @@ namespace bias {
         return out;
     }
 
-    bool operator== (Guid &guid0, Guid &guid1) 
+    bool operator== (const Guid &guid0, const Guid &guid1) 
     {
         return *(guid0.guidDevicePtr_) == *(guid1.guidDevicePtr_);
     }
 
-    bool operator!= (Guid &guid0, Guid &guid1)
+    bool operator!= (const Guid &guid0, const Guid &guid1)
     {
         return *(guid0.guidDevicePtr_) != *(guid1.guidDevicePtr_);
     }
 
-    bool operator<  (Guid &guid0, Guid &guid1)
+    bool operator<  (const Guid &guid0, const Guid &guid1)
     {
         return *(guid0.guidDevicePtr_) < *(guid1.guidDevicePtr_);
     }
 
-    bool operator<= (Guid &guid0, Guid &guid1)
+    bool operator<= (const Guid &guid0, const Guid &guid1)
     {
         return *(guid0.guidDevicePtr_) <= *(guid1.guidDevicePtr_);
     }
 
-    bool operator>  (Guid &guid0, Guid &guid1)
+    bool operator>  (const Guid &guid0, const Guid &guid1)
     {
         return *(guid0.guidDevicePtr_) > *(guid1.guidDevicePtr_);
     }
 
-    bool operator>= (Guid &guid0, Guid &guid1)
+    bool operator>= (const Guid &guid0, const Guid &guid1)
     {
         return *(guid0.guidDevicePtr_) >= *(guid1.guidDevicePtr_);
     }
@@ -71,7 +71,6 @@ namespace bias {
 
     Guid::Guid(fc2PGRGuid guid)
     {
-        //guidDevicePtr_ = GuidDevicePtr_fc2(new GuidDevice_fc2(guid));
         guidDevicePtr_ = std::make_shared<GuidDevice_fc2>(guid);
     }
 
@@ -102,7 +101,6 @@ namespace bias {
 
     Guid::Guid(uint64_t guid)
     {
-        //guidDevicePtr_ = GuidDevicePtr_dc1394(new GuidDevice_dc1394(guid));
         guidDevicePtr_ = std::make_shared<GuidDevice_dc1394>(guid);
     }
 
@@ -123,18 +121,32 @@ namespace bias {
     }
 
 #endif
+    
+    // Guid comparison operator
+    // ------------------------------------------------------------------------
+    bool GuidCmp::operator() (const Guid &guid0, const Guid &guid1)
+    {
+        if (guid0 == guid1) {
+            return false;
+        }
+        else 
+        {
+            return (guid0 < guid1);
+        }
+    }
 
     // Shared pointer comparison operator - for use in sets, maps, etc.
     //-------------------------------------------------------------------------
 
     bool GuidPtrCmp::operator() (const GuidPtr &guidPtr0, const GuidPtr &guidPtr1) 
     {
-        if (*guidPtr0 == *guidPtr1) {
+        if (*guidPtr0 == *guidPtr1) 
+        {
             return false;
         }
-        else {
-            bool rval = (*guidPtr0 < *guidPtr1);
-            return rval;
+        else 
+        {
+            return (*guidPtr0 < *guidPtr1);
         }
     };
 

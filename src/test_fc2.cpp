@@ -17,16 +17,48 @@ using namespace bias;
 int main(int argc, char** argv)
 {        
     CameraFinder cameraFinder;
-    GuidPtrList guidPtrList; 
     CameraPtrList cameraPtrList;
 
+    // new version
+    // ---------------------------
+    //GuidList guidList;
+    // ---------------------------
+
+    // old version
+    // --------------------------
+    GuidPtrList guidPtrList; 
+    //---------------------------
+
     cameraFinder.update();
+    // new version
+    // -------------------------------------------
+    //guidList = cameraFinder.getGuidList();
+    // --------------------------------------------
+
+    // old version
+    // ------------------------------------------- 
     guidPtrList = cameraFinder.getGuidPtrList();
+    // -------------------------------------------
     
     // Create cameras and connect
     // ------------------------------------------------------------------------
     {
         cout << "Creating and connecting to cameras" << endl;
+       
+        // new version
+        // -------------------------------------------------------------
+        //GuidList::iterator it;
+        //for (it=guidList.begin(); it!=guidList.end(); it++) 
+        //{
+        //    Guid guid = *it;
+        //    CameraPtr cameraPtr = std::make_shared<Camera>(guid);
+        //    cameraPtr -> connect();
+        //    cameraPtrList.push_back(cameraPtr);
+        //}
+        // -------------------------------------------------------------
+
+        // old version
+        // -------------------------------------------------------------
         GuidPtrList::iterator it;
         for (it=guidPtrList.begin(); it!=guidPtrList.end(); it++) 
         {
@@ -35,6 +67,7 @@ int main(int argc, char** argv)
             cameraPtr -> connect();
             cameraPtrList.push_back(cameraPtr);
         }
+        // --------------------------------------------------------------
     }
 
 
@@ -160,7 +193,6 @@ int main(int argc, char** argv)
         }
         cout << endl;
     }
-
 
 	return 0;
 }

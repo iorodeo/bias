@@ -29,7 +29,6 @@ namespace bias {
         // a unified interface for the camera guids which are used by different 
         // underlying libraries  e.g. libdc1394, flycapture2, etc.
         // --------------------------------------------------------------------
-        
 
         public:
             Guid();
@@ -38,15 +37,13 @@ namespace bias {
             void printValue();
             std::string toString();
 
-            friend bool operator== (Guid &guid0, Guid &guid1);
-            friend bool operator!= (Guid &guid0, Guid &guid1);
-            friend bool operator<  (Guid &guid0, Guid &guid1);
-            friend bool operator<= (Guid &guid0, Guid &guid1);
-            friend bool operator>  (Guid &guid0, Guid &guid1);
-            friend bool operator>= (Guid &guid0, Guid &guid1);
-
+            friend bool operator== (const Guid &guid0, const Guid &guid1);
+            friend bool operator!= (const Guid &guid0, const Guid &guid1);
+            friend bool operator<  (const Guid &guid0, const Guid &guid1);
+            friend bool operator<= (const Guid &guid0, const Guid &guid1);
+            friend bool operator>  (const Guid &guid0, const Guid &guid1);
+            friend bool operator>= (const Guid &guid0, const Guid &guid1);
             friend std::ostream& operator<< (std::ostream &out, Guid &guid);
-
 
         private:
             GuidDevicePtr guidDevicePtr_;
@@ -68,18 +65,26 @@ namespace bias {
 
 
     // ------------------------------------------------------------------------
-    
-    typedef std::shared_ptr<Guid> GuidPtr;
 
+    class GuidCmp : public std::binary_function<Guid, Guid, bool>
+    {
+        // Comparision object for Guid objects
+        public:
+            bool operator() (const Guid &guid0, const Guid &guid1);
+    };
+    typedef std::list<Guid> GuidList;
+    typedef std::set<Guid, GuidCmp> GuidSet;
+
+
+    typedef std::shared_ptr<Guid> GuidPtr;
     class GuidPtrCmp : public std::binary_function<GuidPtr, GuidPtr, bool>
     {
         // Comparison object for shared_ptrs to Guid objects  
         public:
             bool operator() (const GuidPtr &guidPtr0, const GuidPtr &guidPtr1);
     };
-
-    typedef std::set<GuidPtr,GuidPtrCmp> GuidPtrSet;
     typedef std::list<GuidPtr> GuidPtrList;
+    typedef std::set<GuidPtr, GuidPtrCmp> GuidPtrSet;
 
 } // namespase bias
 

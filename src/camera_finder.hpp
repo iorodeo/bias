@@ -26,11 +26,31 @@ namespace bias {
 
             unsigned int numberOfCameras();
             Guid getGuidByIndex(unsigned int index);
+
+            // new version
+            // ----------------------------
+            //GuidSet getGuidSet();
+            //GuidList getGuidList();
+            // ----------------------------
+            
+            // old version
+            // ---------------------------
             GuidPtrSet getGuidPtrSet();
             GuidPtrList getGuidPtrList();
+            // ---------------------------
+
 
         private:
+            // new version
+            // ----------------------------
+            //GuidSet guidSet_;
+            // ----------------------------
+
+            // old version
+            // ---------------------------
             GuidPtrSet guidPtrSet_;
+            // ----------------------------
+            
             void createQueryContext_fc2();
             void destroyQueryContext_fc2();
             void createQueryContext_dc1394();

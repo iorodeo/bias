@@ -17,16 +17,39 @@ int main(int argc, char *argv[])
     cout << "number of cameras: " << cameraFinder.numberOfCameras() << endl;
 
     // Get and print list of camera guids
+
+    // new version
+    // -------------------------------------------------------
+    //GuidList = cameraFinder.getGuidList(); 
+    // --------------------------------------------------------
+    
+    // old version
+    // -------------------------------------------------------
     GuidPtrList guidPtrList = cameraFinder.getGuidPtrList();
+    //--------------------------------------------------------
     {
         cout << endl;
         cout << "printing guid list" << endl;
         int cnt;
-        GuidPtrList::iterator it;
-        for (it=guidPtrList.begin(), cnt=0; it!=guidPtrList.end(); it++, cnt++)
-        {
-            cout  << "  [" << cnt << "] guid " << **it << endl;
-        }
+
+        // new version
+        // ----------------------------------------------------------------------
+        //GuidList::iterator it;
+        //for (it=guidList.begin(), cnt=0; it!=guidList.end(); it++, cnt++)
+        //{
+        //    Guid guid = *it;
+        //    cout  << "  [" << cnt << "] guid " << guid << endl;
+        //}
+        // -----------------------------------------------------------------------
+
+        // old version
+        // ----------------------------------------------------------------------
+        //GuidPtrList::iterator it;
+        //for (it=guidPtrList.begin(), cnt=0; it!=guidPtrList.end(); it++, cnt++)
+        //{
+        //    cout  << "  [" << cnt << "] guid " << **it << endl;
+        //}
+        // -----------------------------------------------------------------------
     }
 
     // Create, connect and add cameras to camera list
@@ -35,14 +58,28 @@ int main(int argc, char *argv[])
         cout << endl;
         cout << "creating & connecting cameras" << endl;
         int cnt;
-        GuidPtrList::iterator it;
-        for (it=guidPtrList.begin(), cnt=0; it!=guidPtrList.end(); it++, cnt++)
+        GuidList::iterator it;
+        for (it=guidList.begin(), cnt=0; it!=guidList.end(); it++, cnt++)
         {
-            cout  << "  [" << cnt << "] guid " << **it << endl;
+            Guid guid = *it;
+            cout  << "  [" << cnt << "] guid " << guid << endl;
             CameraPtr cameraPtr = std::make_shared<Camera>(**it);
             cameraPtr -> connect();
             cameraPtrList.push_back(cameraPtr);
         }
+
+
+        // old version
+        // ---------------------------------------------------------------------
+        //GuidPtrList::iterator it;
+        //for (it=guidPtrList.begin(), cnt=0; it!=guidPtrList.end(); it++, cnt++)
+        //{
+        //    cout  << "  [" << cnt << "] guid " << **it << endl;
+        //    CameraPtr cameraPtr = std::make_shared<Camera>(**it);
+        //    cameraPtr -> connect();
+        //    cameraPtrList.push_back(cameraPtr);
+        //}
+        // --------------------------------------------------------------------
     }
 
     // Print camera information
