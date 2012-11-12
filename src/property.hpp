@@ -58,7 +58,7 @@ namespace bias
 
     typedef std::list<PropertyInfo> PropertyInfoList;
     typedef std::set<PropertyInfo> PropertyInfoSet;
-    typedef std::map<PropertyType, Property> PropertyInfoMap;
+    typedef std::map<PropertyType, PropertyInfo> PropertyInfoMap;
 
 }
 

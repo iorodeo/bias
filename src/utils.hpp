@@ -19,11 +19,11 @@ namespace bias
 
     // Functions for converting enumerations to strings
     // ------------------------------------------------------------------------
-    std::string getVideoModeString(VideoMode videoMode);
+    std::string getVideoModeString(VideoMode vidMode);
 
-    std::string getFrameRateString(FrameRate frameRate);
+    std::string getFrameRateString(FrameRate frmRate);
 
-    std::string getPropertyTypeString(PropertyType propertyType);
+    std::string getPropertyTypeString(PropertyType propType);
 
 }
 

@@ -4,6 +4,7 @@
 
 #include "camera_device.hpp"
 #include "guid.hpp"
+#include "property.hpp"
 #include "basic_types.hpp"
 #include <dc1394/dc1394.h>
 
@@ -32,15 +33,15 @@ namespace bias {
             virtual FrameRate getFrameRate() {}; // TO DO //
             virtual ImageMode getImageMode() {}; // TO DO //
             virtual VideoModeList getAllowedVideoModes();  // TO DO //
-            virtual FrameRateList getAllowedFrameRates(VideoMode videoMode);  // TO DO //
+            virtual FrameRateList getAllowedFrameRates(VideoMode vidMode);  // TO DO //
             virtual ImageModeList getAllowedImageModes();  // TO DO //
-            virtual Property getProperty(PropertyType propertyType) {}; // TO DO //
-            virtual PropertyInfo getPropertyInfo(PropertyType propertyType) {}; // TO DO //
+            virtual Property getProperty(PropertyType propType) {}; // TO DO //
+            virtual PropertyInfo getPropertyInfo(PropertyType propType) {}; // TO DO //
 
-            virtual void setProperty(Property property) {}; // TO DO //
-            virtual void setVideoMode(VideoMode videoMode) {}; // TO DO //
-            virtual void setFrameRate(FrameRate frameRate) {}; // TO DO //
-            virtual void setImageMode(ImageMode imageMode) {}; // TO DO //
+            virtual void setProperty(Property prop) {}; // TO DO //
+            virtual void setVideoMode(VideoMode vidMode) {}; // TO DO //
+            virtual void setFrameRate(FrameRate frmRate) {}; // TO DO //
+            virtual void setImageMode(ImageMode imgMode) {}; // TO DO //
 
             virtual std::string toString();
             virtual void printGuid();

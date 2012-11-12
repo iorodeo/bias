@@ -12,30 +12,30 @@ namespace bias {
     // Conversion from BIAS types to FlyCapture2  types
     // ------------------------------------------------------------------------
     
-    fc2PropertyType convertPropertyType_to_fc2(PropertyType propertyType);
+    fc2PropertyType convertPropertyType_to_fc2(PropertyType propType);
 
-    fc2FrameRate convertFrameRate_to_fc2(FrameRate frameRate);
+    fc2FrameRate convertFrameRate_to_fc2(FrameRate frmRate);
 
-    fc2VideoMode convertVideoMode_to_fc2(VideoMode videoMode);
+    fc2VideoMode convertVideoMode_to_fc2(VideoMode vidMode);
 
-    fc2Mode convertImageMode_to_fc2(ImageMode imageMode);
+    fc2Mode convertImageMode_to_fc2(ImageMode imgMode);
 
-    fc2Property convertProperty_to_fc2(Property property);
+    fc2Property convertProperty_to_fc2(Property prop);
 
     // Conversion from FlyCapture2 types to BIAS types
     // ------------------------------------------------------------------------
 
-    PropertyType convertPropertyType_from_fc2(fc2PropertyType propertyType_fc2);
+    PropertyType convertPropertyType_from_fc2(fc2PropertyType propType_fc2);
 
-    VideoMode convertVideoMode_from_fc2(fc2VideoMode videoMode_fc2);
+    VideoMode convertVideoMode_from_fc2(fc2VideoMode vidMode_fc2);
 
-    FrameRate convertFrameRate_from_fc2(fc2FrameRate frameRate_fc2);
+    FrameRate convertFrameRate_from_fc2(fc2FrameRate frmRate_fc2);
 
     ImageMode convertImageMode_from_fc2(fc2Mode mode_fc2);
 
-    Property convertProperty_from_fc2(fc2Property property_fc2); 
+    Property convertProperty_from_fc2(fc2Property prop_fc2); 
 
-    PropertyInfo convertPropertyInfo_from_fc2(fc2PropertyInfo propertyInfo_fc2); 
+    PropertyInfo convertPropertyInfo_from_fc2(fc2PropertyInfo propInfo_fc2); 
 
 
     // Print functions for FlyCapture2 configurations, settings and info
@@ -59,7 +59,7 @@ namespace bias {
 
     void printPropertyInfo_fc2(fc2PropertyInfo &propInfo);
 
-    void printProperty_fc2(fc2Property &property);
+    void printProperty_fc2(fc2Property &prop);
 
 
     // FlyCapture2 enumeration to string converstions
@@ -71,9 +71,9 @@ namespace bias {
 
     std::string getBayerTileFormatString_fc2(fc2BayerTileFormat bayerFormat);
 
-    std::string getVideoModeString_fc2(fc2VideoMode videoMode);
+    std::string getVideoModeString_fc2(fc2VideoMode vidMode);
 
-    std::string getFrameRateString_fc2(fc2FrameRate frameRate);
+    std::string getFrameRateString_fc2(fc2FrameRate frmRate);
 
     std::string getModeString_fc2(fc2Mode mode);
 

@@ -175,7 +175,7 @@ namespace bias {
         return VideoModeList();
     }
 
-    FrameRateList CameraDevice_dc1394::getAllowedFrameRates(VideoMode videoMode) 
+    FrameRateList CameraDevice_dc1394::getAllowedFrameRates(VideoMode vidMode) 
     { 
         return FrameRateList(); 
     } 

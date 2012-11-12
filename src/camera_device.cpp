@@ -35,12 +35,12 @@ namespace bias
     { 
         return false; 
     }
-    bool CameraDevice::isSupported(VideoMode videoMode, FrameRate frameRate)
+    bool CameraDevice::isSupported(VideoMode vidMode, FrameRate frmRate)
     {
         return false;
     }
 
-    bool CameraDevice::isSupported(ImageMode imageMode)
+    bool CameraDevice::isSupported(ImageMode imgMode)
     {
         return false;
     }
@@ -65,7 +65,7 @@ namespace bias
         return VideoModeList();
     }
 
-    FrameRateList CameraDevice::getAllowedFrameRates(VideoMode videoMode) 
+    FrameRateList CameraDevice::getAllowedFrameRates(VideoMode vidMode) 
     { 
         return FrameRateList(); 
     } 
@@ -75,12 +75,12 @@ namespace bias
         return ImageModeList();
     }
 
-    Property CameraDevice::getProperty(PropertyType propertyType)
+    Property CameraDevice::getProperty(PropertyType propType)
     {
         return Property();
     }
 
-    PropertyInfo CameraDevice::getPropertyInfo(PropertyType propertyType)
+    PropertyInfo CameraDevice::getPropertyInfo(PropertyType propType)
     {
         return PropertyInfo();
     }

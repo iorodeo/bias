@@ -38,6 +38,9 @@ namespace bias {
             bool isConnected();
             bool isCapturing();
             bool isColor();
+            bool isPropertyPresent(PropertyType propType);
+            bool isPropertyAutoCapable(PropertyType propType);
+
 
             VideoMode getVideoMode();
             FrameRate getFrameRate();
@@ -45,25 +48,26 @@ namespace bias {
             VideoModeList getAllowedVideoModes();
             FrameRateList getAllowedFrameRates(VideoMode videoMode);
             ImageModeList getAllowedImageModes();
-            Property getProperty(PropertyType propertyType);
-            PropertyInfo getPropertyInfo(PropertyType propertyType);
 
-            unsigned int getPropertyValue(PropertyType propertyType);
-            unsigned int getPropertyMinValue(PropertyType propertyType);
-            unsigned int getPropertyMaxValue(PropertyType propertyType);
+            Property getProperty(PropertyType propType);
+            PropertyMap getMapOfProperties();
+            PropertyList getListOfProperties();
 
-            float getPropertyAbsoluteValue(PropertyType propertyType);
-            float getPropertyMinAbsoluteValue(PropertyType propertyType);
-            float getPropertyMaxAbsoluteValue(PropertyType propertyType);
+            PropertyInfo getPropertyInfo(PropertyType propType);
+            PropertyInfoMap getMapOfPropertyInfos();
+            PropertyInfoList getListOfPropertyInfos();
+
+            unsigned int getPropertyValue(PropertyType propType);
+            unsigned int getPropertyMinValue(PropertyType propType);
+            unsigned int getPropertyMaxValue(PropertyType propType);
+
+            float getPropertyAbsoluteValue(PropertyType propType);
+            float getPropertyMinAbsoluteValue(PropertyType propType);
+            float getPropertyMaxAbsoluteValue(PropertyType propType);
             
             void setProperty(Property property);
-            void setPropertyValue(PropertyType propertyType, unsigned int value);
-            void setPropertyAbsoluteValue(PropertyType propertyType, float absoluteValue);
-
-            unsigned int getBrightness();
-            unsigned int getMinBrightness();
-            unsigned int getMaxBrightness();
-            void setBrightness(unsigned int brightness);
+            void setPropertyValue(PropertyType propType, unsigned int value);
+            void setPropertyAbsoluteValue(PropertyType propType, float absValue);
             
             void setVideoMode(VideoMode videoMode) {}; // TO DO //
             void setFrameRate(FrameRate frameRate) {}; // TO DO //

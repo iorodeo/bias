@@ -192,38 +192,42 @@ int main(int argc, char** argv)
         cout << endl;
     }
 
-    //
-    // -----------------------------------------------------------------------
+
+    // Get property and propertyInfo maps
+    if (1)
     {
         CameraPtr cameraPtr = cameraPtrList.front();
-        unsigned int minBrightness;
-        unsigned int maxBrightness;
-        unsigned int brightness;
+        PropertyMap propMap = cameraPtr -> getMapOfProperties();
 
-        minBrightness = cameraPtr->getMinBrightness();
-        maxBrightness = cameraPtr->getMaxBrightness();
-        brightness = cameraPtr -> getBrightness();
-        cout << "minBrightness: " << minBrightness << endl;
-        cout << "maxBrightness: " << maxBrightness << endl;
-        cout << "brightness: " << brightness << endl;
+        for (PropertyMap::iterator it=propMap.begin(); it!=propMap.end(); it++)
+        {
+            PropertyType propType = (*it).first;
+            Property prop = (*it).second;
 
-        cameraPtr -> setBrightness(25);
-        minBrightness = cameraPtr->getMinBrightness();
-        maxBrightness = cameraPtr->getMaxBrightness();
-        brightness = cameraPtr -> getBrightness();
-        cout << "minBrightness: " << minBrightness << endl;
-        cout << "maxBrightness: " << maxBrightness << endl;
-        cout << "brightness: " << brightness << endl;
-
+            cout << getPropertyTypeString(propType) << endl;
+            cout << prop.toString() << endl;
+            cout << endl;
+        }
+        cout << endl;
     }
 
+    if (1)
     {
+
         CameraPtr cameraPtr = cameraPtrList.front();
-        Property prop = cameraPtr -> getProperty(PROPERTY_TYPE_GAIN);
-        PropertyInfo propInfo = cameraPtr -> getPropertyInfo(PROPERTY_TYPE_GAIN);
-        cout << prop.toString() << endl;
-        cout << endl;
-        cout << propInfo.toString() << endl;
+        PropertyInfoMap propInfoMap = cameraPtr -> getMapOfPropertyInfos();
+
+        cout << "size: " << propInfoMap.size() << endl;
+
+        for (PropertyInfoMap::iterator it=propInfoMap.begin(); it!=propInfoMap.end(); it++)
+        {
+            PropertyType propType = (*it).first;
+            PropertyInfo propInfo = (*it).second;
+
+            cout << getPropertyTypeString(propType) << endl;
+            cout << propInfo.toString() << endl;
+            cout << endl;
+        }
     }
 
 	return 0;

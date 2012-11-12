@@ -34,22 +34,24 @@ namespace bias {
             virtual void grabImage();
 
             virtual bool isColor();
-            virtual bool isSupported(VideoMode videoMode, FrameRate frameRate);
-            virtual bool isSupported(ImageMode imageMode);
+            virtual bool isSupported(VideoMode vidMode, FrameRate frmRate);
+            virtual bool isSupported(ImageMode imgMode);
 
             virtual VideoMode getVideoMode();
             virtual FrameRate getFrameRate();
             virtual ImageMode getImageMode();
-            virtual VideoModeList getAllowedVideoModes();
-            virtual FrameRateList getAllowedFrameRates(VideoMode videoMode);
-            virtual ImageModeList getAllowedImageModes();
-            virtual Property getProperty(PropertyType propertyType);
-            virtual PropertyInfo getPropertyInfo(PropertyType propertyType);
 
-            virtual void setProperty(Property property);
-            virtual void setVideoMode(VideoMode videoMode);
-            virtual void setFrameRate(FrameRate frameRate);
-            virtual void setImageMode(ImageMode imageMode);
+            virtual VideoModeList getAllowedVideoModes();
+            virtual FrameRateList getAllowedFrameRates(VideoMode vidMode);
+            virtual ImageModeList getAllowedImageModes();
+
+            virtual Property getProperty(PropertyType propType);
+            virtual PropertyInfo getPropertyInfo(PropertyType propType);
+
+            virtual void setProperty(Property prop);
+            virtual void setVideoMode(VideoMode vidMode);
+            virtual void setFrameRate(FrameRate frmRate);
+            virtual void setImageMode(ImageMode imgMode);
             
             virtual std::string toString();
             virtual void printGuid();
@@ -75,7 +77,7 @@ namespace bias {
 
             void createPropertyMap();
 
-            void getVideoModeAndFrameRate(fc2VideoMode &videoMode, fc2FrameRate &frameRate);
+            void getVideoModeAndFrameRate(fc2VideoMode &vidMode, fc2FrameRate &frmRate);
             fc2PropertyInfo getPropertyInfo_fc2(fc2PropertyType propType);
             fc2Property getProperty_fc2(fc2PropertyType propType);
             fc2Format7Configuration getFormat7Configuration();

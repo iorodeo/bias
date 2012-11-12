@@ -85,8 +85,8 @@ namespace bias {
         fc2PropertyInfo propInfo = getPropertyInfo_fc2(FC2_SHUTTER);
         printPropertyInfo_fc2(propInfo);
 
-        fc2Property property = getProperty_fc2(FC2_SHUTTER);
-        printProperty_fc2(property);
+        fc2Property prop = getProperty_fc2(FC2_SHUTTER);
+        printProperty_fc2(prop);
 
     }
 
@@ -125,7 +125,6 @@ namespace bias {
             // Temporary - for now just pick a video mode which works.
             setVideoMode_Format7Mode0();
 
-            // Start image capture
             fc2Error error = fc2StartCapture(context_);
             if (error != FC2_ERROR_OK) 
             {
@@ -142,7 +141,6 @@ namespace bias {
     {
         if (capturing_) 
         {
-            // Stop capture
             fc2Error error = fc2StopCapture(context_);
             if (error != FC2_ERROR_OK) 
             { 
@@ -208,25 +206,25 @@ namespace bias {
     
     VideoMode CameraDevice_fc2::getVideoMode() 
     {
-        fc2VideoMode videoMode_fc2;
+        fc2VideoMode vidMode_fc2;
         fc2FrameRate dummy;
-        getVideoModeAndFrameRate(videoMode_fc2, dummy);
-        return convertVideoMode_from_fc2(videoMode_fc2);
+        getVideoModeAndFrameRate(vidMode_fc2, dummy);
+        return convertVideoMode_from_fc2(vidMode_fc2);
     } 
 
     FrameRate CameraDevice_fc2::getFrameRate() 
     {
         fc2VideoMode dummy;
-        fc2FrameRate frameRate_fc2;
-        getVideoModeAndFrameRate(dummy, frameRate_fc2);
-        return convertFrameRate_from_fc2(frameRate_fc2);
+        fc2FrameRate frmRate_fc2;
+        getVideoModeAndFrameRate(dummy, frmRate_fc2);
+        return convertFrameRate_from_fc2(frmRate_fc2);
     }
 
     ImageMode CameraDevice_fc2::getImageMode()
     {
         ImageMode mode = IMAGEMODE_UNSPECIFIED;
-        VideoMode videoMode = getVideoMode();
-        if (videoMode == VIDEOMODE_FORMAT7)
+        VideoMode vidMode = getVideoMode();
+        if (vidMode == VIDEOMODE_FORMAT7)
         {
             fc2Format7Configuration f7config; 
             fc2Mode mode_fc2;
@@ -243,15 +241,15 @@ namespace bias {
         VideoModeList allowedVideoModes;
         bool supported;
 
-        // Test for non-format7 videoModes
+        // Test for non-format7 vidModes
         // --------------------------------------------------------------------
         VideoModeList allVideoModes = getListOfVideoModes();
         VideoModeList::iterator vit;
 
         for (vit=allVideoModes.begin(); vit!=allVideoModes.end(); vit++)
         {
-            VideoMode videoMode = *vit;
-            if (videoMode == VIDEOMODE_FORMAT7) 
+            VideoMode vidMode = *vit;
+            if (vidMode == VIDEOMODE_FORMAT7) 
             { 
                 // Skip format7 modes ... as we need a separate test for them.
                 continue; 
@@ -263,26 +261,26 @@ namespace bias {
 
             for (fit=allFrameRates.begin(); fit!=allFrameRates.end(); fit++)
             {
-                FrameRate frameRate = *fit; 
+                FrameRate frmRate = *fit; 
                 try
                 {
-                    supported |= isSupported(videoMode, frameRate);
+                    supported |= isSupported(vidMode, frmRate);
                 }
                 catch (RuntimeError &runtimeError)
                 {
                     // Device query can sometimes fail for some combinations of 
-                    // videoMode and frameRate - handle failure gracefully by
-                    // continuing to examine videoMode and frameRate combinations.                      
+                    // vidMode and frmRate - handle failure gracefully by
+                    // continuing to examine vidMode and frmRate combinations.                      
                     continue;
                 }
             } 
             if (supported) 
             { 
-                allowedVideoModes.push_back(videoMode); 
+                allowedVideoModes.push_back(vidMode); 
             }
         }
 
-        // Test for format7 videoMode
+        // Test for format7 vidMode
         // --------------------------------------------------------------------
         ImageModeList allImageModes = getListOfImageModes();
         ImageModeList::iterator it;
@@ -290,10 +288,10 @@ namespace bias {
 
         for (it=allImageModes.begin(); it!=allImageModes.end(); it++)
         {
-            ImageMode imageMode = *it;
+            ImageMode imgMode = *it;
             try
             {
-                supported != isSupported(imageMode);
+                supported != isSupported(imgMode);
             }
             catch (RuntimeError &runtimeError)
             {
@@ -311,12 +309,12 @@ namespace bias {
         return allowedVideoModes;
     }
 
-    FrameRateList CameraDevice_fc2::getAllowedFrameRates(VideoMode videoMode)
+    FrameRateList CameraDevice_fc2::getAllowedFrameRates(VideoMode vidMode)
     {
         FrameRateList allowedFramesRates;
         bool supported;
 
-        if (videoMode == VIDEOMODE_FORMAT7) {
+        if (vidMode == VIDEOMODE_FORMAT7) {
             allowedFramesRates.push_back(FRAMERATE_FORMAT7);
         } 
         else
@@ -326,10 +324,10 @@ namespace bias {
 
             for (it=allFrameRates.begin(); it!=allFrameRates.end(); it++)  
             {
-                FrameRate frameRate = *it; 
+                FrameRate frmRate = *it; 
                 try
                 {
-                    supported = isSupported(videoMode, frameRate);
+                    supported = isSupported(vidMode, frmRate);
                 }
                 catch (RuntimeError &runtimeError)
                 {
@@ -338,7 +336,7 @@ namespace bias {
                 }
                 if (supported) 
                 {
-                    allowedFramesRates.push_back(frameRate);
+                    allowedFramesRates.push_back(frmRate);
                 }
             }
         }
@@ -354,10 +352,10 @@ namespace bias {
 
         for (it=allImageModes.begin(); it!=allImageModes.end(); it++)
         {
-            ImageMode imageMode = *it;
+            ImageMode imgMode = *it;
             try
             {
-                supported = isSupported(imageMode);
+                supported = isSupported(imgMode);
             }
             catch (RuntimeError &runtimeError)
             {
@@ -366,69 +364,69 @@ namespace bias {
             }
             if (supported)
             {
-                allowedImageModes.push_back(imageMode);
+                allowedImageModes.push_back(imgMode);
             }
         }
         return allowedImageModes;
     }
 
-    Property CameraDevice_fc2::getProperty(PropertyType propertyType)
+    Property CameraDevice_fc2::getProperty(PropertyType propType)
     {
-        fc2PropertyType propertyType_fc2;
-        fc2Property property_fc2;
-        Property property;
+        fc2PropertyType propType_fc2;
+        fc2Property prop_fc2;
+        Property prop;
 
-        propertyType_fc2 = convertPropertyType_to_fc2(propertyType);
-        property_fc2 = getProperty_fc2(propertyType_fc2);
-        property = convertProperty_from_fc2(property_fc2);
-        return property;
+        propType_fc2 = convertPropertyType_to_fc2(propType);
+        prop_fc2 = getProperty_fc2(propType_fc2);
+        prop = convertProperty_from_fc2(prop_fc2);
+        return prop;
     }
 
-    PropertyInfo CameraDevice_fc2::getPropertyInfo(PropertyType propertyType)
+    PropertyInfo CameraDevice_fc2::getPropertyInfo(PropertyType propType)
     {
-        fc2PropertyType propertyType_fc2;
-        fc2PropertyInfo propertyInfo_fc2;
-        PropertyInfo propertyInfo;
+        fc2PropertyType propType_fc2;
+        fc2PropertyInfo propInfo_fc2;
+        PropertyInfo propInfo;
 
-        propertyType_fc2 = convertPropertyType_to_fc2(propertyType);
-        propertyInfo_fc2 = getPropertyInfo_fc2(propertyType_fc2);
-        propertyInfo =  convertPropertyInfo_from_fc2(propertyInfo_fc2);
-        return propertyInfo;
+        propType_fc2 = convertPropertyType_to_fc2(propType);
+        propInfo_fc2 = getPropertyInfo_fc2(propType_fc2);
+        propInfo =  convertPropertyInfo_from_fc2(propInfo_fc2);
+        return propInfo;
     }
 
-    void CameraDevice_fc2::setProperty(Property property)
+    void CameraDevice_fc2::setProperty(Property prop)
     {
-        fc2Property property_fc2;
+        fc2Property prop_fc2;
         fc2Error error;
 
-        property_fc2 = convertProperty_to_fc2(property);
-        printProperty_fc2(property_fc2);
+        prop_fc2 = convertProperty_to_fc2(prop);
+        printProperty_fc2(prop_fc2);
 
         
 
 
-        error = fc2SetProperty(context_, &property_fc2);
+        error = fc2SetProperty(context_, &prop_fc2);
         if (error != FC2_ERROR_OK) 
         { 
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
-            ssError << ": unable to set FlyCapture2 property";
+            ssError << ": unable to set FlyCapture2 prop";
             throw RuntimeError(ERROR_FC2_SET_PROPERTY, ssError.str());
         }
     }
 
 
-    bool CameraDevice_fc2::isSupported(VideoMode videoMode, FrameRate frameRate)
+    bool CameraDevice_fc2::isSupported(VideoMode vidMode, FrameRate frmRate)
     {
-        fc2VideoMode videoMode_fc2;
-        fc2FrameRate frameRate_fc2;
+        fc2VideoMode vidMode_fc2;
+        fc2FrameRate frmRate_fc2;
         BOOL supported;
         fc2Error error;
 
         try 
         {
-            videoMode_fc2 = convertVideoMode_to_fc2(videoMode);
-            frameRate_fc2 = convertFrameRate_to_fc2(frameRate);
+            vidMode_fc2 = convertVideoMode_to_fc2(vidMode);
+            frmRate_fc2 = convertFrameRate_to_fc2(frmRate);
         }
         catch (RuntimeError &runtimeError)
         {
@@ -438,8 +436,8 @@ namespace bias {
 
         error = fc2GetVideoModeAndFrameRateInfo(
                 context_, 
-                videoMode_fc2, 
-                frameRate_fc2, 
+                vidMode_fc2, 
+                frmRate_fc2, 
                 &supported
                 ); 
 
@@ -463,7 +461,7 @@ namespace bias {
         }
     }
 
-    bool CameraDevice_fc2::isSupported(ImageMode imageMode)
+    bool CameraDevice_fc2::isSupported(ImageMode imgMode)
     {
         fc2Error error;
         fc2Mode mode_fc2;
@@ -472,7 +470,7 @@ namespace bias {
 
         try 
         {
-            mode_fc2 = convertImageMode_to_fc2(imageMode);
+            mode_fc2 = convertImageMode_to_fc2(imgMode);
         }
         catch (RuntimeError &runtimeError)
         {
@@ -500,17 +498,17 @@ namespace bias {
         }
     }
 
-    void CameraDevice_fc2::setVideoMode(VideoMode videoMode) 
+    void CameraDevice_fc2::setVideoMode(VideoMode vidMode) 
     {
         // TO DO ...
     }
 
-    void CameraDevice_fc2::setFrameRate(FrameRate frameRate)
+    void CameraDevice_fc2::setFrameRate(FrameRate frmRate)
     {
         // TO DO ...
     }
 
-    void CameraDevice_fc2::setImageMode(ImageMode imageMode) 
+    void CameraDevice_fc2::setImageMode(ImageMode imgMode) 
     {
         // TO DO ...
     }
@@ -640,11 +638,11 @@ namespace bias {
     }
 
     void CameraDevice_fc2::getVideoModeAndFrameRate(
-            fc2VideoMode &videoMode, 
-            fc2FrameRate &frameRate
+            fc2VideoMode &vidMode, 
+            fc2FrameRate &frmRate
             )
     {
-        fc2Error error = fc2GetVideoModeAndFrameRate(context_, &videoMode, &frameRate);
+        fc2Error error = fc2GetVideoModeAndFrameRate(context_, &vidMode, &frmRate);
         if (error != FC2_ERROR_OK)
         {
             std::stringstream ssError;
@@ -665,7 +663,7 @@ namespace bias {
         {
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
-            ssError < ": unable to get FlyCapture2 propertyInfo";
+            ssError < ": unable to get FlyCapture2 properyInfo";
             throw RuntimeError(ERROR_FC2_GET_PROPERTY_INFO, ssError.str());
         }
         return propInfo;
@@ -674,10 +672,10 @@ namespace bias {
     fc2Property CameraDevice_fc2::getProperty_fc2(fc2PropertyType propType)
     {
         fc2Error error;
-        fc2Property property;
-        property.type = propType;
+        fc2Property prop;
+        prop.type = propType;
 
-        error = fc2GetProperty(context_, &property);
+        error = fc2GetProperty(context_, &prop);
         if (error != FC2_ERROR_OK)
         {
             std::stringstream ssError;
@@ -685,7 +683,7 @@ namespace bias {
             ssError << ": unable to get FlyCapture2 property";
             throw RuntimeError(ERROR_FC2_GET_PROPERTY, ssError.str());
         }
-        return property;
+        return prop;
     }
 
     fc2Format7Configuration CameraDevice_fc2::getFormat7Configuration()

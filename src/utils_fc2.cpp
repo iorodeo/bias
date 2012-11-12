@@ -10,9 +10,9 @@ namespace bias {
     // Conversion from BIAS types to FlyCapture2 types
     // ------------------------------------------------------------------------
 
-    fc2PropertyType convertPropertyType_to_fc2(PropertyType propertyType)
+    fc2PropertyType convertPropertyType_to_fc2(PropertyType propType)
     {
-        switch (propertyType)
+        switch (propType)
         {
             case PROPERTY_TYPE_BRIGHTNESS: 
                 return FC2_BRIGHTNESS;
@@ -99,9 +99,9 @@ namespace bias {
         return FC2_UNSPECIFIED_PROPERTY_TYPE;
     }
 
-    fc2FrameRate convertFrameRate_to_fc2(FrameRate frameRate)
+    fc2FrameRate convertFrameRate_to_fc2(FrameRate frmRate)
     {
-        switch (frameRate)
+        switch (frmRate)
         {
             case FRAMERATE_1_875: 
                 return FC2_FRAMERATE_1_875;
@@ -152,9 +152,9 @@ namespace bias {
         return FC2_NUM_FRAMERATES;
     }
 
-    fc2VideoMode convertVideoMode_to_fc2(VideoMode videoMode)
+    fc2VideoMode convertVideoMode_to_fc2(VideoMode vidMode)
     {
-        switch(videoMode)
+        switch(vidMode)
         {
             case VIDEOMODE_160x120YUV444: 
                 return FC2_VIDEOMODE_160x120YUV444;
@@ -264,9 +264,9 @@ namespace bias {
         return FC2_NUM_VIDEOMODES;
     }
 
-    fc2Mode convertImageMode_to_fc2(ImageMode mode)
+    fc2Mode convertImageMode_to_fc2(ImageMode imgMode)
     {
-        switch(mode)
+        switch(imgMode)
         {
             case IMAGEMODE_0:
                 return FC2_MODE_0;
@@ -410,30 +410,30 @@ namespace bias {
         return FC2_NUM_MODES;
     }
 
-    fc2Property convertProperty_to_fc2(Property property)
+    fc2Property convertProperty_to_fc2(Property prop)
     {
-        fc2Property property_fc2;
-        property_fc2.type = convertPropertyType_to_fc2(property.type);
-        property_fc2.present = (property.present) ? 1 : 0;
-        property_fc2.absControl = (property.absoluteControl) ? 1 : 0;
-        property_fc2.onePush = (property.onePush) ? 1 : 0;
-        property_fc2.onOff = (property.on) ? 1 : 0;
-        property_fc2.autoManualMode = (property.autoActive) ? 1 : 0;
-        property_fc2.valueA = property.value;
-        property_fc2.absValue = property.absoluteValue;
+        fc2Property prop_fc2;
+        prop_fc2.type = convertPropertyType_to_fc2(prop.type);
+        prop_fc2.present = (prop.present) ? 1 : 0;
+        prop_fc2.absControl = (prop.absoluteControl) ? 1 : 0;
+        prop_fc2.onePush = (prop.onePush) ? 1 : 0;
+        prop_fc2.onOff = (prop.on) ? 1 : 0;
+        prop_fc2.autoManualMode = (prop.autoActive) ? 1 : 0;
+        prop_fc2.valueA = prop.value;
+        prop_fc2.absValue = prop.absoluteValue;
         for (int i=0; i<8; i++) 
         {
-            property_fc2.reserved[i] = 0;
+            prop_fc2.reserved[i] = 0;
         }
-        return property_fc2;
+        return prop_fc2;
     }
 
         // Conversion from FlyCapture2 types to BIAS types
     // ------------------------------------------------------------------------
 
-    PropertyType convertPropertyType_from_fc2(fc2PropertyType propertyType_fc2)
+    PropertyType convertPropertyType_from_fc2(fc2PropertyType propType_fc2)
     {
-        switch(propertyType_fc2)
+        switch(propType_fc2)
         {
             case FC2_BRIGHTNESS:
                 return PROPERTY_TYPE_BRIGHTNESS;
@@ -521,9 +521,9 @@ namespace bias {
         return PROPERTY_TYPE_UNSPECIFIED;
     }
 
-    VideoMode convertVideoMode_from_fc2(fc2VideoMode videoMode_fc2)
+    VideoMode convertVideoMode_from_fc2(fc2VideoMode vidMode_fc2)
     {
-        switch (videoMode_fc2)
+        switch (vidMode_fc2)
         {
             case FC2_VIDEOMODE_160x120YUV444:
                 return VIDEOMODE_160x120YUV444;
@@ -634,9 +634,9 @@ namespace bias {
         return NUMBER_OF_VIDEOMODE;
     }
 
-    FrameRate convertFrameRate_from_fc2(fc2FrameRate frameRate_fc2)
+    FrameRate convertFrameRate_from_fc2(fc2FrameRate frmRate_fc2)
     {
-        switch (frameRate_fc2)
+        switch (frmRate_fc2)
         {
             case FC2_FRAMERATE_1_875:
                 return FRAMERATE_1_875;
@@ -687,9 +687,9 @@ namespace bias {
         return NUMBER_OF_FRAMERATE;
     }
 
-    ImageMode convertImageMode_from_fc2(fc2Mode mode_fc2)
+    ImageMode convertImageMode_from_fc2(fc2Mode imgMode_fc2)
     {
-        switch(mode_fc2) 
+        switch(imgMode_fc2) 
         {
             case FC2_MODE_0:
                 return IMAGEMODE_0;
@@ -832,38 +832,38 @@ namespace bias {
         return NUMBER_OF_IMAGEMODE;
     }
 
-    Property convertProperty_from_fc2(fc2Property property_fc2)
+    Property convertProperty_from_fc2(fc2Property prop_fc2)
     {
-        Property property;
-        property.type = convertPropertyType_from_fc2(property_fc2.type);
-        property.present = bool(property_fc2.present);
-        property.absoluteControl = bool(property_fc2.absControl);
-        property.onePush = bool(property_fc2.onePush);
-        property.on = bool(property_fc2.onOff);
-        property.autoActive = bool(property_fc2.autoManualMode);
-        property.value = property_fc2.valueA;
-        property.absoluteValue = property_fc2.absValue;
-        return property;
+        Property prop;
+        prop.type = convertPropertyType_from_fc2(prop_fc2.type);
+        prop.present = bool(prop_fc2.present);
+        prop.absoluteControl = bool(prop_fc2.absControl);
+        prop.onePush = bool(prop_fc2.onePush);
+        prop.on = bool(prop_fc2.onOff);
+        prop.autoActive = bool(prop_fc2.autoManualMode);
+        prop.value = prop_fc2.valueA;
+        prop.absoluteValue = prop_fc2.absValue;
+        return prop;
     }
     
-    PropertyInfo convertPropertyInfo_from_fc2(fc2PropertyInfo propertyInfo_fc2) 
+    PropertyInfo convertPropertyInfo_from_fc2(fc2PropertyInfo propInfo_fc2) 
     {
-        PropertyInfo propertyInfo;
-        propertyInfo.type = convertPropertyType_from_fc2(propertyInfo_fc2.type);
-        propertyInfo.present = bool(propertyInfo_fc2.present);
-        propertyInfo.autoCapable = bool(propertyInfo_fc2.autoSupported);
-        propertyInfo.manualCapable = bool(propertyInfo_fc2.manualSupported);
-        propertyInfo.absoluteCapable = bool(propertyInfo_fc2.absValSupported);
-        propertyInfo.onePushCapable = bool(propertyInfo_fc2.onePushSupported);
-        propertyInfo.onOffCapable = bool(propertyInfo_fc2.onOffSupported);
-        propertyInfo.minValue = propertyInfo_fc2.min;
-        propertyInfo.maxValue = propertyInfo_fc2.max;
-        propertyInfo.minAbsoluteValue = propertyInfo_fc2.absMin;
-        propertyInfo.maxAbsoluteValue = propertyInfo_fc2.absMax;
-        propertyInfo.units = std::string(propertyInfo_fc2.pUnits);
-        propertyInfo.unitsAbbr = std::string(propertyInfo_fc2.pUnitAbbr);
-        propertyInfo.haveUnits =  bool(propertyInfo.units.length());
-        return propertyInfo;
+        PropertyInfo propInfo;
+        propInfo.type = convertPropertyType_from_fc2(propInfo_fc2.type);
+        propInfo.present = bool(propInfo_fc2.present);
+        propInfo.autoCapable = bool(propInfo_fc2.autoSupported);
+        propInfo.manualCapable = bool(propInfo_fc2.manualSupported);
+        propInfo.absoluteCapable = bool(propInfo_fc2.absValSupported);
+        propInfo.onePushCapable = bool(propInfo_fc2.onePushSupported);
+        propInfo.onOffCapable = bool(propInfo_fc2.onOffSupported);
+        propInfo.minValue = propInfo_fc2.min;
+        propInfo.maxValue = propInfo_fc2.max;
+        propInfo.minAbsoluteValue = propInfo_fc2.absMin;
+        propInfo.maxAbsoluteValue = propInfo_fc2.absMax;
+        propInfo.units = std::string(propInfo_fc2.pUnits);
+        propInfo.unitsAbbr = std::string(propInfo_fc2.pUnitAbbr);
+        propInfo.haveUnits =  bool(propInfo.units.length());
+        return propInfo;
     }
 
 
@@ -1007,28 +1007,28 @@ namespace bias {
         std::cout << std::endl; 
     }
 
-    void printProperty_fc2(fc2Property &property)
+    void printProperty_fc2(fc2Property &prop)
     {
         std::cout << std::endl;
         std::cout << "--------------------" << std::endl;
         std::cout << "FlyCapture2 Property" << std::endl;
         std::cout << "--------------------" << std::endl;
         std::cout << std::endl;
-        std::cout << " type:            " << getPropertyTypeString_fc2(property.type) << std::endl;
+        std::cout << " type:            " << getPropertyTypeString_fc2(prop.type) << std::endl;
         std::cout << std::boolalpha << std::endl;
-        std::cout << " present:         " << bool(property.present) << std::endl; 
-        std::cout << " absControl:      " << bool(property.absControl) << std::endl;
-        std::cout << " onePush:         " << bool(property.onePush) << std::endl;
-        std::cout << " onOff:           " << bool(property.onOff) << std::endl;
-        std::cout << " autoManualMode:  " << bool(property.autoManualMode) << std::endl;
+        std::cout << " present:         " << bool(prop.present) << std::endl; 
+        std::cout << " absControl:      " << bool(prop.absControl) << std::endl;
+        std::cout << " onePush:         " << bool(prop.onePush) << std::endl;
+        std::cout << " onOff:           " << bool(prop.onOff) << std::endl;
+        std::cout << " autoManualMode:  " << bool(prop.autoManualMode) << std::endl;
         std::cout << std::noboolalpha;
-        std::cout << " valueA:          " << property.valueA << std::endl;
-        std::cout << " valueB:          " << property.valueB << std::endl;
-        std::cout << " absValue:        " << property.absValue << std::endl;
+        std::cout << " valueA:          " << prop.valueA << std::endl;
+        std::cout << " valueB:          " << prop.valueB << std::endl;
+        std::cout << " absValue:        " << prop.absValue << std::endl;
         std::cout << " reserved         " << std::endl;
         for (int i=0; i<8; i++)
         {
-            std::cout << "   [" << i << "] = " << property.reserved[i] << std::endl; 
+            std::cout << "   [" << i << "] = " << prop.reserved[i] << std::endl; 
         }
         std::cout << std::endl; 
     }
@@ -1193,9 +1193,9 @@ namespace bias {
         }
     }
 
-    std::string getVideoModeString_fc2(fc2VideoMode videoMode)
+    std::string getVideoModeString_fc2(fc2VideoMode vidMode)
     {
-        switch (videoMode) 
+        switch (vidMode) 
         {
             case FC2_VIDEOMODE_160x120YUV444:
                 return std::string("FC2_VIDEOMODE_160x120YUV444");
@@ -1299,9 +1299,9 @@ namespace bias {
         }
     }
 
-    std::string getFrameRateString_fc2(fc2FrameRate frameRate)
+    std::string getFrameRateString_fc2(fc2FrameRate frmRate)
     {
-        switch (frameRate) 
+        switch (frmRate) 
         {
            
             case FC2_FRAMERATE_1_875:
