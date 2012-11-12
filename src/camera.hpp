@@ -38,9 +38,6 @@ namespace bias {
             bool isConnected();
             bool isCapturing();
             bool isColor();
-            bool isPropertyPresent(PropertyType propType);
-            bool isPropertyAutoCapable(PropertyType propType);
-
 
             VideoMode getVideoMode();
             FrameRate getFrameRate();
@@ -57,17 +54,29 @@ namespace bias {
             PropertyInfoMap getMapOfPropertyInfos();
             PropertyInfoList getListOfPropertyInfos();
 
-            unsigned int getPropertyValue(PropertyType propType);
-            unsigned int getPropertyMinValue(PropertyType propType);
-            unsigned int getPropertyMaxValue(PropertyType propType);
+            unsigned int getValue(PropertyType propType);
+            unsigned int getMinValue(PropertyType propType);
+            unsigned int getMaxValue(PropertyType propType);
 
-            float getPropertyAbsoluteValue(PropertyType propType);
-            float getPropertyMinAbsoluteValue(PropertyType propType);
-            float getPropertyMaxAbsoluteValue(PropertyType propType);
-            
+            float getAbsoluteValue(PropertyType propType);
+            float getMinAbsoluteValue(PropertyType propType);
+            float getMaxAbsoluteValue(PropertyType propType);
+
+            bool isPresent(PropertyType propType);
+            bool isAutoCapable(PropertyType propType);
+            bool isManualCapable(PropertyType propType);
+            bool isAbsoluteCapable(PropertyType propType);
+            bool isOnePushCapable(PropertyType propType);
+            bool isOnOffCapable(PropertyType propType);
+            bool isReadOutCapable(PropertyType propType);
+            bool haveUnits(PropertyType propType);
+
+            std::string getUnits(PropertyType propType);
+            std::string getUnitsAbbr(PropertyType propType);
+
             void setProperty(Property property);
-            void setPropertyValue(PropertyType propType, unsigned int value);
-            void setPropertyAbsoluteValue(PropertyType propType, float absValue);
+            void setValue(PropertyType propType, unsigned int value);
+            void setAbsoluteValue(PropertyType propType, float absValue);
             
             void setVideoMode(VideoMode videoMode) {}; // TO DO //
             void setFrameRate(FrameRate frameRate) {}; // TO DO //

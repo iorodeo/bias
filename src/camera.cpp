@@ -104,19 +104,6 @@ namespace bias {
         return cameraDevicePtr_ -> isColor();
     }
 
-    bool Camera::isPropertyPresent(PropertyType propType)
-    {
-        PropertyInfo propInfo;
-        propInfo = getPropertyInfo(propType);
-        return propInfo.present;
-    }
-
-    bool isPropertyAutoCapable(PropertyType propType)
-    {
-        PropertyInfo propInfo;
-
-    }
-
     VideoMode Camera::getVideoMode()
     {
         return cameraDevicePtr_ -> getVideoMode();
@@ -230,41 +217,41 @@ namespace bias {
         return propInfoList;
     }
 
-   unsigned int Camera::getPropertyValue(PropertyType propType)
+   unsigned int Camera::getValue(PropertyType propType)
    {
        Property property;
        property = getProperty(propType);
        return property.value;
    }
 
-   unsigned int Camera::getPropertyMinValue(PropertyType propType)
+   unsigned int Camera::getMinValue(PropertyType propType)
    {
        PropertyInfo propInfo;
        propInfo = getPropertyInfo(propType);
        return propInfo.minValue;
    }
 
-   unsigned int Camera::getPropertyMaxValue(PropertyType propType)
+   unsigned int Camera::getMaxValue(PropertyType propType)
    {
        PropertyInfo propInfo;
        propInfo = getPropertyInfo(propType);
        return propInfo.maxValue;
    }
 
-   float Camera::getPropertyAbsoluteValue(PropertyType propType)
+   float Camera::getAbsoluteValue(PropertyType propType)
    {
        Property property;
        property = getProperty(propType);
        return property.absoluteValue;
    }
-   float Camera::getPropertyMinAbsoluteValue(PropertyType propType)
+   float Camera::getMinAbsoluteValue(PropertyType propType)
    {
        PropertyInfo propInfo;
        propInfo = getPropertyInfo(propType);
        return propInfo.minAbsoluteValue;
    }
 
-   float Camera::getPropertyMaxAbsoluteValue(PropertyType propType)
+   float Camera::getMaxAbsoluteValue(PropertyType propType)
    {
        PropertyInfo propInfo;
        propInfo = getPropertyInfo(propType);
@@ -276,7 +263,63 @@ namespace bias {
        cameraDevicePtr_ -> setProperty(property);
    } 
 
-   void Camera::setPropertyValue(PropertyType propType, unsigned int value)
+   bool Camera::isPresent(PropertyType propType)
+   {
+       PropertyInfo propInfo = getPropertyInfo(propType);
+       return propInfo.present;
+   }
+
+   bool Camera::isAutoCapable(PropertyType propType)
+   {
+       PropertyInfo propInfo = getPropertyInfo(propType);
+       return propInfo.autoCapable;
+   }
+
+   bool Camera::isManualCapable(PropertyType propType)
+   {
+       PropertyInfo propInfo = getPropertyInfo(propType);
+       return propInfo.manualCapable;
+   }
+
+   bool Camera::isAbsoluteCapable(PropertyType propType)
+   {
+       PropertyInfo propInfo = getPropertyInfo(propType);
+       return propInfo.absoluteCapable;
+   }
+
+   bool Camera::isOnePushCapable(PropertyType propType) 
+   {
+       PropertyInfo propInfo = getPropertyInfo(propType);
+       return propInfo.onePushCapable;
+   }
+
+   bool Camera::isOnOffCapable(PropertyType propType) 
+   {
+       PropertyInfo propInfo = getPropertyInfo(propType);
+       return propInfo.onOffCapable;
+   }
+
+   bool Camera::isReadOutCapable(PropertyType propType) 
+   {
+       PropertyInfo propInfo = getPropertyInfo(propType);
+       return propInfo.readOutCapable;
+   }
+
+   std::string Camera::getUnits(PropertyType propType)
+   {
+       PropertyInfo propInfo;
+       propInfo = getPropertyInfo(propType);
+       return propInfo.units;
+   }
+
+   std::string Camera::getUnitsAbbr(PropertyType propType)
+   {
+       PropertyInfo propInfo;
+       propInfo = getPropertyInfo(propType);
+       return propInfo.unitsAbbr;
+   }
+
+   void Camera::setValue(PropertyType propType, unsigned int value)
    {
        Property property;
        property = getProperty(propType);
@@ -284,7 +327,7 @@ namespace bias {
        setProperty(property);
    }
 
-   void Camera::setPropertyAbsoluteValue(PropertyType propType, float absValue)
+   void Camera::setAbsoluteValue(PropertyType propType, float absValue)
    {
        Property property;
        property = getProperty(propType);
