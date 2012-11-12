@@ -47,8 +47,24 @@ namespace bias {
             ImageModeList getAllowedImageModes();
             Property getProperty(PropertyType propertyType);
             PropertyInfo getPropertyInfo(PropertyType propertyType);
+
+            unsigned int getPropertyValue(PropertyType propertyType);
+            unsigned int getPropertyMinValue(PropertyType propertyType);
+            unsigned int getPropertyMaxValue(PropertyType propertyType);
+
+            float getPropertyAbsoluteValue(PropertyType propertyType);
+            float getPropertyMinAbsoluteValue(PropertyType propertyType);
+            float getPropertyMaxAbsoluteValue(PropertyType propertyType);
             
             void setProperty(Property property);
+            void setPropertyValue(PropertyType propertyType, unsigned int value);
+            void setPropertyAbsoluteValue(PropertyType propertyType, float absoluteValue);
+
+            unsigned int getBrightness();
+            unsigned int getMinBrightness();
+            unsigned int getMaxBrightness();
+            void setBrightness(unsigned int brightness);
+            
             void setVideoMode(VideoMode videoMode) {}; // TO DO //
             void setFrameRate(FrameRate frameRate) {}; // TO DO //
             void setImageMode(ImageMode imageMode) {}; // TO DO //

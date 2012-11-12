@@ -192,27 +192,38 @@ int main(int argc, char** argv)
         cout << endl;
     }
 
-    // Get/set brightness
+    //
     // -----------------------------------------------------------------------
     {
         CameraPtr cameraPtr = cameraPtrList.front();
-        Property property = cameraPtr -> getProperty(PROPERTY_TYPE_BRIGHTNESS);
-        PropertyInfo propertyInfo = cameraPtr -> getPropertyInfo(PROPERTY_TYPE_BRIGHTNESS);
+        unsigned int minBrightness;
+        unsigned int maxBrightness;
+        unsigned int brightness;
 
-        cout << property.toString() << endl;
-        cout << propertyInfo.toString() << endl;
+        minBrightness = cameraPtr->getMinBrightness();
+        maxBrightness = cameraPtr->getMaxBrightness();
+        brightness = cameraPtr -> getBrightness();
+        cout << "minBrightness: " << minBrightness << endl;
+        cout << "maxBrightness: " << maxBrightness << endl;
+        cout << "brightness: " << brightness << endl;
 
-        //property.value = (propertyInfo.minValue + propertyInfo.maxValue)/2;
-        property.value = 16; 
-        cout << property.toString() << endl;
-        cameraPtr -> setProperty(property);
+        cameraPtr -> setBrightness(25);
+        minBrightness = cameraPtr->getMinBrightness();
+        maxBrightness = cameraPtr->getMaxBrightness();
+        brightness = cameraPtr -> getBrightness();
+        cout << "minBrightness: " << minBrightness << endl;
+        cout << "maxBrightness: " << maxBrightness << endl;
+        cout << "brightness: " << brightness << endl;
 
-        property = cameraPtr -> getProperty(PROPERTY_TYPE_BRIGHTNESS);
-        propertyInfo = cameraPtr -> getPropertyInfo(PROPERTY_TYPE_BRIGHTNESS); 
+    }
 
-        cout << property.toString() << endl;
-        cout << propertyInfo.toString() << endl;
-
+    {
+        CameraPtr cameraPtr = cameraPtrList.front();
+        Property prop = cameraPtr -> getProperty(PROPERTY_TYPE_GAIN);
+        PropertyInfo propInfo = cameraPtr -> getPropertyInfo(PROPERTY_TYPE_GAIN);
+        cout << prop.toString() << endl;
+        cout << endl;
+        cout << propInfo.toString() << endl;
     }
 
 	return 0;

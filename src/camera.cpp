@@ -144,10 +144,86 @@ namespace bias {
         return cameraDevicePtr_ -> getPropertyInfo(propertyType);
     }
 
-    void Camera::setProperty(Property property)
-    {
-        cameraDevicePtr_ -> setProperty(property);
-    }
+   unsigned int Camera::getPropertyValue(PropertyType propertyType)
+   {
+       Property property;
+       property = getProperty(propertyType);
+       return property.value;
+   }
+
+   unsigned int Camera::getPropertyMinValue(PropertyType propertyType)
+   {
+       PropertyInfo propertyInfo;
+       propertyInfo = getPropertyInfo(propertyType);
+       return propertyInfo.minValue;
+   }
+
+   unsigned int Camera::getPropertyMaxValue(PropertyType propertyType)
+   {
+       PropertyInfo propertyInfo;
+       propertyInfo = getPropertyInfo(propertyType);
+       return propertyInfo.maxValue;
+   }
+
+   float Camera::getPropertyAbsoluteValue(PropertyType propertyType)
+   {
+       Property property;
+       property = getProperty(propertyType);
+       return property.absoluteValue;
+   }
+   float Camera::getPropertyMinAbsoluteValue(PropertyType propertyType)
+   {
+       PropertyInfo propertyInfo;
+       propertyInfo = getPropertyInfo(propertyType);
+       return propertyInfo.minAbsoluteValue;
+   }
+
+   float Camera::getPropertyMaxAbsoluteValue(PropertyType propertyType)
+   {
+       PropertyInfo propertyInfo;
+       propertyInfo = getPropertyInfo(propertyType);
+       return propertyInfo.maxAbsoluteValue;
+   } 
+   
+   void Camera::setProperty(Property property)
+   {
+       cameraDevicePtr_ -> setProperty(property);
+   } 
+
+   void Camera::setPropertyValue(PropertyType propertyType, unsigned int value)
+   {
+       Property property;
+       property = getProperty(propertyType);
+       property.value = value;
+       setProperty(property);
+   }
+
+   void Camera::setPropertyAbsoluteValue(PropertyType propertyType, float absoluteValue)
+   {
+       Property property;
+       property = getProperty(propertyType);
+       property.absoluteValue = absoluteValue;
+   }
+
+   unsigned int Camera::getBrightness()
+   {
+       return getPropertyValue(PROPERTY_TYPE_BRIGHTNESS);
+   }
+
+   unsigned int Camera::getMinBrightness()
+   {
+       return getPropertyMinValue(PROPERTY_TYPE_BRIGHTNESS);
+   }
+
+   unsigned int Camera::getMaxBrightness()
+   {
+       return getPropertyMaxValue(PROPERTY_TYPE_BRIGHTNESS);
+   }
+
+   void Camera::setBrightness(unsigned int brightness)
+   {
+       setPropertyValue(PROPERTY_TYPE_BRIGHTNESS, brightness);
+   }
 
 
 // FlyCapture2 specific methods
