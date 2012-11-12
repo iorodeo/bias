@@ -24,6 +24,7 @@ namespace bias
     std::string getFrameRateString(FrameRate frameRate);
 
     std::string getPropertyTypeString(PropertyType propertyType);
+
 }
 
 #endif // #ifndef BIAS_UTILS_HPP

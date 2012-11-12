@@ -48,8 +48,10 @@ namespace bias {
             Property getProperty(PropertyType propertyType);
             PropertyInfo getPropertyInfo(PropertyType propertyType);
             
-            void setVideoMode() {}; // TO DO //
-            void setFrameRate() {}; // TO DO //
+            void setProperty(Property property);
+            void setVideoMode(VideoMode videoMode) {}; // TO DO //
+            void setFrameRate(FrameRate frameRate) {}; // TO DO //
+            void setImageMode(ImageMode imageMode) {}; // TO DO //
                 
             void printInfo();
             void printGuid();

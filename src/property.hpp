@@ -13,6 +13,8 @@ namespace bias
     { 
         PropertyType type;
         bool present;
+        bool absoluteControl;
+        bool onePush;
         bool on;
         bool autoActive;
         unsigned int value;

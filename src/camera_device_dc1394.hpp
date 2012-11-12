@@ -37,6 +37,7 @@ namespace bias {
             virtual Property getProperty(PropertyType propertyType) {}; // TO DO //
             virtual PropertyInfo getPropertyInfo(PropertyType propertyType) {}; // TO DO //
 
+            virtual void setProperty(Property property) {}; // TO DO //
             virtual void setVideoMode(VideoMode videoMode) {}; // TO DO //
             virtual void setFrameRate(FrameRate frameRate) {}; // TO DO //
             virtual void setImageMode(ImageMode imageMode) {}; // TO DO //

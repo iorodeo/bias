@@ -396,6 +396,27 @@ namespace bias {
         return propertyInfo;
     }
 
+    void CameraDevice_fc2::setProperty(Property property)
+    {
+        fc2Property property_fc2;
+        fc2Error error;
+
+        property_fc2 = convertProperty_to_fc2(property);
+        printProperty_fc2(property_fc2);
+
+        
+
+
+        error = fc2SetProperty(context_, &property_fc2);
+        if (error != FC2_ERROR_OK) 
+        { 
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to set FlyCapture2 property";
+            throw RuntimeError(ERROR_FC2_SET_PROPERTY, ssError.str());
+        }
+    }
+
 
     bool CameraDevice_fc2::isSupported(VideoMode videoMode, FrameRate frameRate)
     {

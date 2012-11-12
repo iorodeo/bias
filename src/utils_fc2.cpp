@@ -410,7 +410,25 @@ namespace bias {
         return FC2_NUM_MODES;
     }
 
-    // Conversion from FlyCapture2 types to BIAS types
+    fc2Property convertProperty_to_fc2(Property property)
+    {
+        fc2Property property_fc2;
+        property_fc2.type = convertPropertyType_to_fc2(property.type);
+        property_fc2.present = (property.present) ? 1 : 0;
+        property_fc2.absControl = (property.absoluteControl) ? 1 : 0;
+        property_fc2.onePush = (property.onePush) ? 1 : 0;
+        property_fc2.onOff = (property.on) ? 1 : 0;
+        property_fc2.autoManualMode = (property.autoActive) ? 1 : 0;
+        property_fc2.valueA = property.value;
+        property_fc2.absValue = property.absoluteValue;
+        for (int i=0; i<8; i++) 
+        {
+            property_fc2.reserved[i] = 0;
+        }
+        return property_fc2;
+    }
+
+        // Conversion from FlyCapture2 types to BIAS types
     // ------------------------------------------------------------------------
 
     PropertyType convertPropertyType_from_fc2(fc2PropertyType propertyType_fc2)
@@ -819,6 +837,8 @@ namespace bias {
         Property property;
         property.type = convertPropertyType_from_fc2(property_fc2.type);
         property.present = bool(property_fc2.present);
+        property.absoluteControl = bool(property_fc2.absControl);
+        property.onePush = bool(property_fc2.onePush);
         property.on = bool(property_fc2.onOff);
         property.autoActive = bool(property_fc2.autoManualMode);
         property.value = property_fc2.valueA;
@@ -1005,6 +1025,7 @@ namespace bias {
         std::cout << " valueA:          " << property.valueA << std::endl;
         std::cout << " valueB:          " << property.valueB << std::endl;
         std::cout << " absValue:        " << property.absValue << std::endl;
+        std::cout << " reserved         " << std::endl;
         for (int i=0; i<8; i++)
         {
             std::cout << "   [" << i << "] = " << property.reserved[i] << std::endl; 

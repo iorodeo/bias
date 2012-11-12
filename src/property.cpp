@@ -24,6 +24,8 @@ namespace bias
         ss << std::endl;
         ss << "type:             " << getPropertyTypeString(type) << std::endl;
         ss << "present:          " << present << std::endl;
+        ss << "absoluteControl:  " << absoluteControl << std::endl;
+        ss << "onePush:          " << onePush << std::endl;
         ss << "on:               " << on << std::endl;
         ss << "autoActive:       " << autoActive << std::endl;
         ss << "value:            " << value << std::endl;

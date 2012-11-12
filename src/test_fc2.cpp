@@ -22,8 +22,7 @@ int main(int argc, char** argv)
     // new version
     // ---------------------------
     //GuidList guidList;
-    // ---------------------------
-
+    
     // old version
     // --------------------------
     GuidPtrList guidPtrList; 
@@ -179,7 +178,6 @@ int main(int argc, char** argv)
         cout << "done" << endl << endl;
     }
 
-
     // Print property types.
     // ------------------------------------------------------------------------
     {
@@ -192,6 +190,29 @@ int main(int argc, char** argv)
             cout << getPropertyTypeString(*it) << endl;
         }
         cout << endl;
+    }
+
+    // Get/set brightness
+    // -----------------------------------------------------------------------
+    {
+        CameraPtr cameraPtr = cameraPtrList.front();
+        Property property = cameraPtr -> getProperty(PROPERTY_TYPE_BRIGHTNESS);
+        PropertyInfo propertyInfo = cameraPtr -> getPropertyInfo(PROPERTY_TYPE_BRIGHTNESS);
+
+        cout << property.toString() << endl;
+        cout << propertyInfo.toString() << endl;
+
+        //property.value = (propertyInfo.minValue + propertyInfo.maxValue)/2;
+        property.value = 16; 
+        cout << property.toString() << endl;
+        cameraPtr -> setProperty(property);
+
+        property = cameraPtr -> getProperty(PROPERTY_TYPE_BRIGHTNESS);
+        propertyInfo = cameraPtr -> getPropertyInfo(PROPERTY_TYPE_BRIGHTNESS); 
+
+        cout << property.toString() << endl;
+        cout << propertyInfo.toString() << endl;
+
     }
 
 	return 0;
