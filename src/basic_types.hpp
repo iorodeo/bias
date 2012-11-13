@@ -78,7 +78,7 @@ namespace bias {
 
     typedef std::list<ErrorCode> ErrorCodeList;
     typedef std::set<ErrorCode> ErrorCodeSet;
-    
+
     enum PropertyType 
     { 
         PROPERTY_TYPE_BRIGHTNESS=0, 
@@ -199,6 +199,35 @@ namespace bias {
 
     typedef std::list<ImageMode> ImageModeList;
     typedef std::set<ImageMode> ImageModeSet;
+
+    enum PixelFormat
+    {
+        PIXEL_FORMAT_MONO8,
+        PIXEL_FORMAT_411YUV8,
+        PIXEL_FORMAT_422YUV8,
+        PIXEL_FORMAT_444YUV8,
+        PIXEL_FORMAT_RGB8,
+        PIXEL_FORMAT_MONO16,
+        PIXEL_FORMAT_RGB16,
+        PIXEL_FORMAT_S_MONO16,
+        PIXEL_FORMAT_S_RGB16,
+        PIXEL_FORMAT_RAW8,
+        PIXEL_FORMAT_RAW16,
+        PIXEL_FORMAT_MONO12,
+        PIXEL_FORMAT_RAW12,
+        PIXEL_FORMAT_BGR,
+        PIXEL_FORMAT_BGRU,
+        PIXEL_FORMAT_RGB,
+        PIXEL_FORMAT_RGBU,
+        PIXEL_FORMAT_BGR16,
+	    PIXEL_FORMAT_BGRU16,
+        PIXEL_FORMAT_422YUV8_JPEG,
+        NUMBER_OF_PIXEL_FORMAT,
+        PIXEL_FORMAT_UNSPECIFIED,
+    };
+
+    typedef std::list<PixelFormat> PixelFormatList;
+    typedef std::set<PixelFormat> PixleFormatSet;
 
 } // namespace bias
 

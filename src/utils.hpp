@@ -17,6 +17,8 @@ namespace bias
 
     PropertyTypeList getListOfPropertyTypes();
 
+    PixelFormatList getListOfPixelFormats();
+
     // Functions for converting enumerations to strings
     // ------------------------------------------------------------------------
     std::string getVideoModeString(VideoMode vidMode);
@@ -24,6 +26,8 @@ namespace bias
     std::string getFrameRateString(FrameRate frmRate);
 
     std::string getPropertyTypeString(PropertyType propType);
+
+    std::string getPixelFormatString(PixelFormat pixFormat);
 
 }
 

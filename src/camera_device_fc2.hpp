@@ -84,7 +84,7 @@ namespace bias {
 
             // Temporary 
             // --------------------------------------------
-            void setVideoMode_Format7Mode0();
+            void temp_SetVideoMode_Format7Mode0();
 
     };
 

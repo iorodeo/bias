@@ -9,7 +9,7 @@ namespace bias
     VideoModeList getListOfVideoModes() 
     {
         VideoModeList list;
-        for (int i=0; i<int(NUMBER_OF_VIDEOMODE); i++) 
+        for (int i=0; i < int(NUMBER_OF_VIDEOMODE); i++) 
         {
             list.push_back(VideoMode(i));
         }
@@ -19,7 +19,7 @@ namespace bias
     FrameRateList getListOfFrameRates()
     {
         FrameRateList list;
-        for (int i=0; i<int(NUMBER_OF_FRAMERATE); i++) 
+        for (int i=0; i < int(NUMBER_OF_FRAMERATE); i++) 
         {
             list.push_back(FrameRate(i));
         }
@@ -29,7 +29,7 @@ namespace bias
     ImageModeList getListOfImageModes()
     {
         ImageModeList list;
-        for (int i=0; i< int(NUMBER_OF_IMAGEMODE); i++)
+        for (int i=0; i < int(NUMBER_OF_IMAGEMODE); i++)
         {
             list.push_back(ImageMode(i));
         }
@@ -39,9 +39,19 @@ namespace bias
     PropertyTypeList getListOfPropertyTypes()
     {
         PropertyTypeList list;
-        for (int i=0; i< int(NUMBER_OF_PROPERTY_TYPE); i++)
+        for (int i=0; i < int(NUMBER_OF_PROPERTY_TYPE); i++)
         {
             list.push_back(PropertyType(i));
+        }
+        return list;
+    }
+
+    PixelFormatList getListOfPixelFormats()
+    {
+        PixelFormatList list;
+        for (int i=0; i< int(NUMBER_OF_PIXEL_FORMAT); i++)
+        {
+            list.push_back(PixelFormat(i));
         }
         return list;
     }
@@ -161,7 +171,9 @@ namespace bias
                 }
                 break;
         }
-        return std::string("error: getVideoModeString()");
+        std::stringstream ssMsg;
+        ssMsg << "error: " << __PRETTY_FUNCTION__ << " we shouldn't be here";
+        return ssMsg.str();
     }
 
     std::string getFrameRateString(FrameRate frmRate)
@@ -294,8 +306,10 @@ namespace bias
             case PROPERTY_TYPE_TEMPERATURE:
                 return std::string("Temperature");
                 break;
+
             case PROPERTY_TYPE_UNSPECIFIED:
                 return std::string("Unspecified");
+
             default:
                 {
                     std::stringstream ssMsg;
@@ -304,7 +318,110 @@ namespace bias
                 }
                 break;
         }
-        return std::string("error: getPropertyTypeStrint()");
+        std::stringstream ssMsg;
+        ssMsg << "error: " << __PRETTY_FUNCTION__ << " we shouldn't be here";
+        return ssMsg.str();
+    }
+
+    std::string getPixelFormatString(PixelFormat pixFormat)
+    {
+        switch(pixFormat)
+        {
+            case PIXEL_FORMAT_MONO8:
+                return std::string("MONO8");
+                break;
+
+            case PIXEL_FORMAT_411YUV8:
+                return std::string("411YUV8");
+                break;
+
+            case PIXEL_FORMAT_422YUV8:
+                return std::string("422YUV8");
+                break;
+
+            case PIXEL_FORMAT_444YUV8:
+                return std::string("444YUV8");
+                break;
+
+            case PIXEL_FORMAT_RGB8:
+                return std::string("RGB8");
+                break;
+
+            case PIXEL_FORMAT_MONO16:
+                return std::string("MONO16");
+                break;
+
+            case PIXEL_FORMAT_RGB16:
+                return std::string("RGB16");
+                break;
+
+            case PIXEL_FORMAT_S_MONO16:
+                return std::string("S_MONO16");
+                break;
+
+            case PIXEL_FORMAT_S_RGB16:
+                return std::string("S_RGB16");
+                break;
+
+            case PIXEL_FORMAT_RAW8:
+                return std::string("RAW8");
+                break;
+
+            case PIXEL_FORMAT_RAW16:
+                return std::string("RAW16");
+                break;
+
+            case PIXEL_FORMAT_MONO12:
+                return std::string("MONO12");
+                break;
+
+            case PIXEL_FORMAT_RAW12:
+                return std::string("RAW12");
+                break;
+
+            case PIXEL_FORMAT_BGR:
+                return std::string("BGR");
+                break;
+
+            case PIXEL_FORMAT_BGRU:
+                return std::string("BGRU");
+                break;
+
+            case PIXEL_FORMAT_RGB:
+                return std::string("RGB");
+                break;
+
+            case PIXEL_FORMAT_RGBU:
+                return std::string("RGBU");
+                break;
+
+            case PIXEL_FORMAT_BGR16:
+                return std::string("BGR16");
+                break;
+
+	        case PIXEL_FORMAT_BGRU16:
+                return std::string("BGRU16");
+                break;
+
+            case PIXEL_FORMAT_422YUV8_JPEG:
+                return std::string("422YUV8_JPEG");
+                break;
+
+            case PIXEL_FORMAT_UNSPECIFIED:
+                return std::string("Unspecified");
+                break;
+
+            default:
+                {
+                    std::stringstream ssMsg;
+                    ssMsg << ": unknown PixelFormat " << pixFormat;
+                    return ssMsg.str();
+                }
+                break;
+        }
+        std::stringstream ssMsg;
+        ssMsg << "error: " << __PRETTY_FUNCTION__ << " we shouldn't be here";
+        return ssMsg.str();
     }
 
 

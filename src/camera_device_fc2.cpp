@@ -115,7 +115,7 @@ namespace bias {
             createConvertedImage();
 
             // Temporary - for now just pick a video mode which works.
-            setVideoMode_Format7Mode0();
+            temp_SetVideoMode_Format7Mode0();
 
             fc2Error error = fc2StartCapture(context_);
             if (error != FC2_ERROR_OK) 
@@ -696,7 +696,7 @@ namespace bias {
 
     // Temporary methods
     // ------------------------------------------------------------------------
-    void CameraDevice_fc2::setVideoMode_Format7Mode0()
+    void CameraDevice_fc2::temp_SetVideoMode_Format7Mode0()
     {
         fc2Error error;
         fc2Format7Info format7Info;
@@ -727,7 +727,7 @@ namespace bias {
             throw RuntimeError(ERROR_FC2_UNSUPPORTED_VIDEO_MODE, ssError.str());
         }
 
-        if (0) // Print format7 information for selected mode
+        if (1) // Print format7 information for selected mode
         {
             printFormat7Info_fc2(format7Info);
         }
@@ -747,7 +747,7 @@ namespace bias {
             throw RuntimeError(ERROR_FC2_GET_FORMAT7_CONFIGURATION, ssError.str());
         }
 
-        if (0) // Print current configuration settings
+        if (1) // Print current configuration settings
         {
             printFormat7Configuration_fc2(imageSettings,packetSize,percentage);
         }
