@@ -9,6 +9,7 @@ namespace bias {
     {
         createQueryContext_fc2();
         createQueryContext_dc1394();
+        update();
     };
 
     CameraFinder::~CameraFinder() 
@@ -19,14 +20,10 @@ namespace bias {
 
     void CameraFinder::update() 
     {
-        // new version
-        // -------------------
-        //guidSet_.clear();
-        // -------------------
-
+        guidSet_.clear();
         // old version
         // -------------------
-        guidPtrSet_.clear();
+        //guidPtrSet_.clear();
         // -------------------
         update_fc2();
         update_dc1394();
@@ -47,105 +44,117 @@ namespace bias {
         int count;
         std::stringstream ss;
 
-        // new version
-        // ------------------------------------------------------------------------
-        //GuidSet::iterator it;
-        //for (it=guidSet_.begin(), count=0; it!=guidSet_.end(); it++, count++) 
-        //{
-        //    Guid guid = *it;
-        //    ss << "[" << count << "] " << guid << std::endl;
-        //}
-        //ss << std::endl;
-        //return ss.str();
-        // --------------------------------------------------------------------------
-
-        // old version
-        // --------------------------------------------------------------------------
-        GuidPtrSet::iterator it;
-        for (it=guidPtrSet_.begin(), count=0; it!=guidPtrSet_.end(); it++, count++) 
+        GuidSet::iterator it;
+        for (it=guidSet_.begin(), count=0; it!=guidSet_.end(); it++, count++) 
         {
-            ss << "[" << count << "] " << **it << std::endl;
+            Guid guid = *it;
+            ss << "[" << count << "] " << guid << std::endl;
         }
         ss << std::endl;
         return ss.str();
+
+        // old version
+        // --------------------------------------------------------------------------
+        //GuidPtrSet::iterator it;
+        //for (it=guidPtrSet_.begin(), count=0; it!=guidPtrSet_.end(); it++, count++) 
+        //{
+        //    ss << "[" << count << "] " << **it << std::endl;
+        //}
+        //ss << std::endl;
+        //return ss.str();
         //----------------------------------------------------------------------------
     }
 
     unsigned int CameraFinder::numberOfCameras() 
     {
-        // new version
-        // ----------------------------
-        //return guidSet_.size();
-        // ----------------------------
+        return guidSet_.size();
         
         // old version
         // ----------------------------
-        return guidPtrSet_.size();
+        //return guidPtrSet_.size();
         //-----------------------------
     }
 
     Guid CameraFinder::getGuidByIndex(unsigned int index)
     {
-        // new version
-        // ----------------------------------------------------------
-        //if (index >= guidSet_.size()) {
-        //    std::stringstream ssError;
-        //    ssError << __PRETTY_FUNCTION__;
-        //    ssError << ": unable to get FlyCapture2 guid by index";
-        //    throw RuntimeError(ERROR_FC2_GET_GUID, ssError.str());
-        //}
-        //GuidSet::iterator it = guidSet_.begin();
-        //std::advance(it,index);
-        //return *it;
-        // ----------------------------------------------------------
-
-        // old version
-        // ---------------------------------------------------------
-        if (index >= guidPtrSet_.size()) {
+        if (index >= guidSet_.size()) {
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
             ssError << ": unable to get FlyCapture2 guid by index";
             throw RuntimeError(ERROR_FC2_GET_GUID, ssError.str());
         }
-        GuidPtrSet::iterator it = guidPtrSet_.begin();
+        GuidSet::iterator it = guidSet_.begin();
         std::advance(it,index);
-        return **it;
+        return *it;
+
+        // old version
+        // ---------------------------------------------------------
+        //if (index >= guidPtrSet_.size()) {
+        //    std::stringstream ssError;
+        //    ssError << __PRETTY_FUNCTION__;
+        //    ssError << ": unable to get FlyCapture2 guid by index";
+        //    throw RuntimeError(ERROR_FC2_GET_GUID, ssError.str());
+        //}
+        //GuidPtrSet::iterator it = guidPtrSet_.begin();
+        //std::advance(it,index);
+        //return **it;
         // ----------------------------------------------------------
     }
 
+    GuidSet CameraFinder::getGuidSet()
+    {
+        update();
+        return guidSet_;
+    }
 
-    // new version
-    // ---------------------------------------------------------------
-    //GuidSet CameraFinder::getGuidSet()
-    //{
-    //    return guidSet_;
-    //}
+    GuidList CameraFinder::getGuidList()
+    {
+        GuidList guidList;
+        update();
+        std::copy(guidSet_.begin(), guidSet_.end(), std::back_inserter(guidList)); 
+        return guidList;
+    }
 
-    //GuidList CameraFinder::getGuidList()
-    //{
-    //    GuidList guidList;
-    //    std::copy(guidSet_.begin(), guidSet_.end(), std::back_inserter(guidList)); 
-    //    return guidList;
-    //}
-    // ----------------------------------------------------------------
+    CameraPtrSet CameraFinder::createCameraPtrSet()
+    {
+        CameraPtrSet camPtrSet;
+        for (GuidSet::iterator it=guidSet_.begin(); it!=guidSet_.end(); it++)
+        {
+            CameraPtr camPtr = std::make_shared<Camera>(*it);
+            camPtrSet.insert(camPtr);
+        }
+        return camPtrSet;
+    }
+
+    CameraPtrList CameraFinder::createCameraPtrList()
+    {
+        CameraPtrList camPtrList;
+        for (GuidSet::iterator it=guidSet_.begin(); it!=guidSet_.end(); it++)
+        {
+            CameraPtr camPtr = std::make_shared<Camera>(*it);
+            camPtrList.push_back(camPtr);
+        }
+        return camPtrList;
+    }
+
 
     // old version
     // --------------------------------------------------------------
-    GuidPtrSet CameraFinder::getGuidPtrSet()
-    {
-        return guidPtrSet_;
-    }
+    //GuidPtrSet CameraFinder::getGuidPtrSet()
+    //{
+    //    return guidPtrSet_;
+    //}
 
-    GuidPtrList CameraFinder::getGuidPtrList()
-    {
-        GuidPtrList guidPtrList;
-        std::copy(
-                guidPtrSet_.begin(), 
-                guidPtrSet_.end(), 
-                std::back_inserter(guidPtrList)
-                ); 
-        return guidPtrList;
-    }
+    //GuidPtrList CameraFinder::getGuidPtrList()
+    //{
+    //    GuidPtrList guidPtrList;
+    //    std::copy(
+    //            guidPtrSet_.begin(), 
+    //            guidPtrSet_.end(), 
+    //            std::back_inserter(guidPtrList)
+    //            ); 
+    //    return guidPtrList;
+    //}
     // ----------------------------------------------------------------
 
 #ifdef WITH_FC2
@@ -205,15 +214,12 @@ namespace bias {
             }
             else 
             {
-                // new version
-                // --------------------------------------------------
-                //guidSet_.insert(Guid(guid_fc2));
-                // --------------------------------------------------
+                guidSet_.insert(Guid(guid_fc2));
 
                 // old version
                 // --------------------------------------------------
-                GuidPtr guidPtr = std::make_shared<Guid>(guid_fc2);
-                guidPtrSet_.insert(guidPtr);
+                //GuidPtr guidPtr = std::make_shared<Guid>(guid_fc2);
+                //guidPtrSet_.insert(guidPtr);
                 // --------------------------------------------------
             }
         }
@@ -280,15 +286,12 @@ namespace bias {
         // Add attached camera guids to the guid set.
         for (int i=0; i<(cameraList->num); i++) 
         {
-            // new version
-            // ---------------------------------------------------------------
-            //guidSet_.insert(Guid( cameraList -> ids[i].guid));
-            // ---------------------------------------------------------------
+            guidSet_.insert(Guid( cameraList -> ids[i].guid));
 
             // old version 
             // ---------------------------------------------------------------
-            GuidPtr guidPtr = std::make_shared<Guid>(cameraList->ids[i].guid);
-            guidPtrSet_.insert(guidPtr);
+            //GuidPtr guidPtr = std::make_shared<Guid>(cameraList->ids[i].guid);
+            //guidPtrSet_.insert(guidPtr);
             // ---------------------------------------------------------------
         }
         dc1394_camera_free_list(cameraList);

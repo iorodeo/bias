@@ -71,6 +71,11 @@ namespace bias {
             bool isReadOutCapable(PropertyType propType);
             bool haveUnits(PropertyType propType);
 
+            bool isAbsoluteControlEnabled(PropertyType propType);
+            bool isOnePushEnabled(PropertyType propType);
+            bool isOn(PropertyType propType);
+            bool isAutoActive(PropertyType propType);
+
             std::string getUnits(PropertyType propType);
             std::string getUnitsAbbr(PropertyType propType);
 
@@ -81,9 +86,16 @@ namespace bias {
             void setVideoMode(VideoMode videoMode) {}; // TO DO //
             void setFrameRate(FrameRate frameRate) {}; // TO DO //
             void setImageMode(ImageMode imageMode) {}; // TO DO //
+
+            std::string getPropertyString(PropertyType propType);
+            std::string getPropertyInfoString(PropertyType propType);
                 
             void printInfo();
             void printGuid();
+            void printProperty(PropertyType propType);
+            void printPropertyInfo(PropertyType propType);
+            void printAllProperties();
+            void printAllPropertyInfos();
 
             friend std::ostream& operator<< (std::ostream &out, Camera &camera);
 
@@ -106,6 +118,5 @@ namespace bias {
     typedef std::set<CameraPtr> CameraPtrSet;
     typedef std::list<CameraPtr> CameraPtrList;
 }
-
 
 #endif // #ifndef BIAS_CAMERA_HPP

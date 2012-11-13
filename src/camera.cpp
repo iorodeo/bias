@@ -44,16 +44,6 @@ namespace bias {
 
     Camera::~Camera() { }
 
-    void Camera::printInfo() 
-    { 
-        cameraDevicePtr_ -> printInfo(); 
-    }
-
-    void Camera::printGuid() 
-    { 
-        cameraDevicePtr_ -> printGuid(); 
-    }
-
     CameraLib Camera::getCameraLib() 
     { 
         return cameraDevicePtr_ -> getCameraLib(); 
@@ -217,127 +207,210 @@ namespace bias {
         return propInfoList;
     }
 
-   unsigned int Camera::getValue(PropertyType propType)
-   {
-       Property property;
-       property = getProperty(propType);
-       return property.value;
-   }
+    unsigned int Camera::getValue(PropertyType propType)
+    {
+        Property property;
+        property = getProperty(propType);
+        return property.value;
+    }
 
-   unsigned int Camera::getMinValue(PropertyType propType)
-   {
-       PropertyInfo propInfo;
-       propInfo = getPropertyInfo(propType);
-       return propInfo.minValue;
-   }
+    unsigned int Camera::getMinValue(PropertyType propType)
+    {
+        PropertyInfo propInfo;
+        propInfo = getPropertyInfo(propType);
+        return propInfo.minValue;
+    }
 
-   unsigned int Camera::getMaxValue(PropertyType propType)
-   {
-       PropertyInfo propInfo;
-       propInfo = getPropertyInfo(propType);
-       return propInfo.maxValue;
-   }
+    unsigned int Camera::getMaxValue(PropertyType propType)
+    {
+        PropertyInfo propInfo;
+        propInfo = getPropertyInfo(propType);
+        return propInfo.maxValue;
+    }
 
-   float Camera::getAbsoluteValue(PropertyType propType)
-   {
-       Property property;
-       property = getProperty(propType);
-       return property.absoluteValue;
-   }
-   float Camera::getMinAbsoluteValue(PropertyType propType)
-   {
-       PropertyInfo propInfo;
-       propInfo = getPropertyInfo(propType);
-       return propInfo.minAbsoluteValue;
-   }
+    float Camera::getAbsoluteValue(PropertyType propType)
+    {
+        Property property;
+        property = getProperty(propType);
+        return property.absoluteValue;
+    }
+    float Camera::getMinAbsoluteValue(PropertyType propType)
+    {
+        PropertyInfo propInfo;
+        propInfo = getPropertyInfo(propType);
+        return propInfo.minAbsoluteValue;
+    }
 
-   float Camera::getMaxAbsoluteValue(PropertyType propType)
-   {
-       PropertyInfo propInfo;
-       propInfo = getPropertyInfo(propType);
-       return propInfo.maxAbsoluteValue;
-   } 
-   
-   void Camera::setProperty(Property property)
-   {
-       cameraDevicePtr_ -> setProperty(property);
-   } 
+    float Camera::getMaxAbsoluteValue(PropertyType propType)
+    {
+        PropertyInfo propInfo;
+        propInfo = getPropertyInfo(propType);
+        return propInfo.maxAbsoluteValue;
+    } 
 
-   bool Camera::isPresent(PropertyType propType)
-   {
-       PropertyInfo propInfo = getPropertyInfo(propType);
-       return propInfo.present;
-   }
+    void Camera::setProperty(Property property)
+    {
+        cameraDevicePtr_ -> setProperty(property);
+    } 
 
-   bool Camera::isAutoCapable(PropertyType propType)
-   {
-       PropertyInfo propInfo = getPropertyInfo(propType);
-       return propInfo.autoCapable;
-   }
+    bool Camera::isPresent(PropertyType propType)
+    {
+        PropertyInfo propInfo = getPropertyInfo(propType);
+        return propInfo.present;
+    }
 
-   bool Camera::isManualCapable(PropertyType propType)
-   {
-       PropertyInfo propInfo = getPropertyInfo(propType);
-       return propInfo.manualCapable;
-   }
+    bool Camera::isAutoCapable(PropertyType propType)
+    {
+        PropertyInfo propInfo = getPropertyInfo(propType);
+        return propInfo.autoCapable;
+    }
 
-   bool Camera::isAbsoluteCapable(PropertyType propType)
-   {
-       PropertyInfo propInfo = getPropertyInfo(propType);
-       return propInfo.absoluteCapable;
-   }
+    bool Camera::isManualCapable(PropertyType propType)
+    {
+        PropertyInfo propInfo = getPropertyInfo(propType);
+        return propInfo.manualCapable;
+    }
 
-   bool Camera::isOnePushCapable(PropertyType propType) 
-   {
-       PropertyInfo propInfo = getPropertyInfo(propType);
-       return propInfo.onePushCapable;
-   }
+    bool Camera::isAbsoluteCapable(PropertyType propType)
+    {
+        PropertyInfo propInfo = getPropertyInfo(propType);
+        return propInfo.absoluteCapable;
+    }
 
-   bool Camera::isOnOffCapable(PropertyType propType) 
-   {
-       PropertyInfo propInfo = getPropertyInfo(propType);
-       return propInfo.onOffCapable;
-   }
+    bool Camera::isOnePushCapable(PropertyType propType) 
+    {
+        PropertyInfo propInfo = getPropertyInfo(propType);
+        return propInfo.onePushCapable;
+    }
 
-   bool Camera::isReadOutCapable(PropertyType propType) 
-   {
-       PropertyInfo propInfo = getPropertyInfo(propType);
-       return propInfo.readOutCapable;
-   }
+    bool Camera::isOnOffCapable(PropertyType propType) 
+    {
+        PropertyInfo propInfo = getPropertyInfo(propType);
+        return propInfo.onOffCapable;
+    }
 
-   std::string Camera::getUnits(PropertyType propType)
-   {
-       PropertyInfo propInfo;
-       propInfo = getPropertyInfo(propType);
-       return propInfo.units;
-   }
+    bool Camera::isReadOutCapable(PropertyType propType) 
+    {
+        PropertyInfo propInfo = getPropertyInfo(propType);
+        return propInfo.readOutCapable;
+    }
 
-   std::string Camera::getUnitsAbbr(PropertyType propType)
-   {
-       PropertyInfo propInfo;
-       propInfo = getPropertyInfo(propType);
-       return propInfo.unitsAbbr;
-   }
+    bool Camera::isAbsoluteControlEnabled(PropertyType propType) 
+    {
+        Property prop = getProperty(propType);
+        return prop.absoluteControl;
+    }
 
-   void Camera::setValue(PropertyType propType, unsigned int value)
-   {
-       Property property;
-       property = getProperty(propType);
-       property.value = value;
-       setProperty(property);
-   }
+    bool Camera::isOnePushEnabled(PropertyType propType) 
+    {
+        Property prop = getProperty(propType);
+        return prop.onePush;
+    }
 
-   void Camera::setAbsoluteValue(PropertyType propType, float absValue)
-   {
-       Property property;
-       property = getProperty(propType);
-       property.absoluteValue = absValue;
-   }
+    bool Camera::isOn(PropertyType propType) 
+    {
+        Property prop = getProperty(propType);
+        return prop.on;
+    }
 
+    bool Camera::isAutoActive(PropertyType propType) 
+    {
+        Property prop = getProperty(propType);
+        return prop.autoActive;
+    }
 
+    std::string Camera::getUnits(PropertyType propType)
+    {
+        PropertyInfo propInfo;
+        propInfo = getPropertyInfo(propType);
+        return propInfo.units;
+    }
 
-// FlyCapture2 specific methods
-// ------------------------------------------------------------------------
+    std::string Camera::getUnitsAbbr(PropertyType propType)
+    {
+        PropertyInfo propInfo;
+        propInfo = getPropertyInfo(propType);
+        return propInfo.unitsAbbr;
+    }
+
+    void Camera::setValue(PropertyType propType, unsigned int value)
+    {
+        Property property;
+        property = getProperty(propType);
+        property.value = value;
+        setProperty(property);
+    }
+
+    void Camera::setAbsoluteValue(PropertyType propType, float absValue)
+    {
+        Property property;
+        property = getProperty(propType);
+        property.absoluteValue = absValue;
+    } 
+
+    std::string Camera::getPropertyString(PropertyType propType)
+    {
+        Property prop = getProperty(propType);
+        return prop.toString();
+        
+    }
+
+    std::string Camera::getPropertyInfoString(PropertyType propType) 
+    {
+        PropertyInfo propInfo = getPropertyInfo(propType);
+        return propInfo.toString();
+    }
+
+    void Camera::printInfo() 
+    { 
+        cameraDevicePtr_ -> printInfo(); 
+    }
+
+    void Camera::printGuid() 
+    { 
+        cameraDevicePtr_ -> printGuid(); 
+    }
+
+    void Camera::printProperty(PropertyType propType) 
+    {
+        std::cout << getPropertyString(propType) << std::endl;
+    }
+
+    void Camera::printPropertyInfo(PropertyType propType) 
+    {
+        std::cout << getPropertyInfoString(propType) << std::endl;
+    }
+
+    void Camera::printAllProperties()
+    {
+        PropertyTypeList propTypeList = getListOfPropertyTypes();
+        for (
+                PropertyTypeList::iterator it=propTypeList.begin();
+                it != propTypeList.end();
+                it++
+            )
+        {
+            PropertyType propType = *it;
+            printProperty(propType);
+        }
+    }
+
+    void Camera::printAllPropertyInfos() 
+    {
+        PropertyTypeList propTypeList = getListOfPropertyTypes();
+        for (
+                PropertyTypeList::iterator it=propTypeList.begin();
+                it != propTypeList.end();
+                it++
+            )
+        {
+            PropertyType propType = *it;
+            printPropertyInfo(propType);
+        }
+    }
+
+    // FlyCapture2 specific methods
+    // ------------------------------------------------------------------------
 #ifdef WITH_FC2
 
     void Camera::createCameraDevice_fc2(Guid guid)
@@ -357,8 +430,8 @@ namespace bias {
 
 #endif
 
-// Libdc1394 specific methods
-// ------------------------------------------------------------------------
+    // Libdc1394 specific methods
+    // ------------------------------------------------------------------------
 #ifdef WITH_DC1394
 
     void Camera::createCameraDevice_dc1394(Guid guid)

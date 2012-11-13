@@ -5,6 +5,7 @@
 #include <string>
 #include "basic_types.hpp"
 #include "guid.hpp"
+#include "camera.hpp"
 
 #ifdef WITH_FC2
 #include "C/FlyCapture2_C.h"
@@ -20,41 +21,39 @@ namespace bias {
         public:
             CameraFinder();
             ~CameraFinder();
-            void update();
-            void printGuid();
-            std::string getGuidListAsString();
 
             unsigned int numberOfCameras();
             Guid getGuidByIndex(unsigned int index);
 
-            // new version
-            // ----------------------------
-            //GuidSet getGuidSet();
-            //GuidList getGuidList();
-            // ----------------------------
-            
+            GuidSet getGuidSet();
+            GuidList getGuidList();
+
+            CameraPtrSet createCameraPtrSet();
+            CameraPtrList createCameraPtrList();
+
+            std::string getGuidListAsString();
+            void printGuid();
+
             // old version
             // ---------------------------
-            GuidPtrSet getGuidPtrSet();
-            GuidPtrList getGuidPtrList();
+            //GuidPtrSet getGuidPtrSet();
+            //GuidPtrList getGuidPtrList();
             // ---------------------------
 
 
         private:
-            // new version
-            // ----------------------------
-            //GuidSet guidSet_;
-            // ----------------------------
+            GuidSet guidSet_;
 
             // old version
             // ---------------------------
-            GuidPtrSet guidPtrSet_;
+            //GuidPtrSet guidPtrSet_;
             // ----------------------------
             
             void createQueryContext_fc2();
             void destroyQueryContext_fc2();
             void createQueryContext_dc1394();
             void destroyQueryContext_dc1394();
+            void update();
             void update_fc2();
             void update_dc1394();
 

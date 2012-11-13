@@ -80,14 +80,6 @@ namespace bias {
             }
 
         }
-
-        // Temporary
-        fc2PropertyInfo propInfo = getPropertyInfo_fc2(FC2_SHUTTER);
-        printPropertyInfo_fc2(propInfo);
-
-        fc2Property prop = getProperty_fc2(FC2_SHUTTER);
-        printProperty_fc2(prop);
-
     }
 
     void CameraDevice_fc2::disconnect()
@@ -400,11 +392,6 @@ namespace bias {
         fc2Error error;
 
         prop_fc2 = convertProperty_to_fc2(prop);
-        printProperty_fc2(prop_fc2);
-
-        
-
-
         error = fc2SetProperty(context_, &prop_fc2);
         if (error != FC2_ERROR_OK) 
         { 
