@@ -20,6 +20,10 @@ namespace bias
     {
         return guid_;
     }
+    cv::Mat CameraDevice::grabImage() 
+    {   
+        return cv::Mat(); 
+    };
 
     bool CameraDevice::isConnected() 
     { 

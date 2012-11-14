@@ -74,9 +74,14 @@ namespace bias {
         cameraDevicePtr_ -> stopCapture();
     }
 
-    void Camera::grabImage()
+    cv::Mat Camera::grabImage()
     {
-        cameraDevicePtr_ -> grabImage();
+        return cameraDevicePtr_ -> grabImage();
+    }
+
+    void Camera::grabImage(cv::Mat &image)
+    {
+        cameraDevicePtr_ -> grabImage(image);
     }
 
     bool Camera::isConnected()

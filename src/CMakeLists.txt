@@ -7,6 +7,15 @@ PROJECT(bais)
 SET(with_fc2 true)
 SET(with_dc1394 false)
 
+# Opencv library
+# -----------------------------------------------------------------------------
+FIND_PACKAGE( OpenCV REQUIRED )
+IF (${OpenCV_FOUND})
+    MESSAGE(STATUS "OpenCV found")
+ELSE (${OpenCV_FOUND})
+    MESSAGE(STATUS "OpenCv not found")
+ENDIF (${OpenCV_FOUND})
+
 
 # FlyCapture2 library location
 # -----------------------------------------------------------------------------
@@ -79,9 +88,9 @@ ADD_EXECUTABLE(test ${bias_src})
 # might need to put libraries in variable using SET. 
 # -----------------------------------------------------------------------------
 IF(with_fc2)
-    TARGET_LINK_LIBRARIES(test ${flycapture2_c_lib})
+    TARGET_LINK_LIBRARIES(test ${flycapture2_c_lib} ${OpenCV_LIBS})
 ENDIF()
 IF(with_dc1394)
-    TARGET_LINK_LIBRARIES(test dc1394)
+    TARGET_LINK_LIBRARIES(test dc1394 ${OpenCV_LIBS})
 ENDIF()
 

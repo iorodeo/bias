@@ -4,6 +4,7 @@
 #include "exception.hpp"
 #include <sstream>
 #include <iostream>
+#include <algorithm>
 
 
 namespace bias {
@@ -146,50 +147,42 @@ namespace bias {
         }
     }
 
-    void CameraDevice_fc2::grabImage()
+    cv::Mat CameraDevice_fc2::grabImage()
     {
-        fc2Error error;
-
-        if (!capturing_) 
-        {
-            std::stringstream ssError;
-            ssError << __PRETTY_FUNCTION__;
-            ssError << ": unable to grab Image - not capturing";
-            throw RuntimeError(ERROR_FC2_GRAB_IMAGE, ssError.str());
-        }
-
-        // Retrieve image from buffer
-        error = fc2RetrieveBuffer(context_, &rawImage_);
-        if ( error != FC2_ERROR_OK ) 
-        {
-            std::stringstream ssError;
-            ssError << __PRETTY_FUNCTION__;
-            ssError << ": unable to retrieve image from buffer";
-            throw RuntimeError(ERROR_FC2_RETRIEVE_BUFFER, ssError.str());
-        }
-
-        //printImageInfo_fc2(rawImage_);
-        //std::cout << std::flush;
-
-        // Temporary - convert image to mono8 format. Need to figure out 
-        // how to do this automatically.  
-        error = fc2ConvertImageTo(
-                FC2_PIXEL_FORMAT_MONO8, 
-                &rawImage_, 
-                &convertedImage_
-                );
-        if ( error != FC2_ERROR_OK ) 
-        {
-            std::stringstream ssError;
-            ssError << __PRETTY_FUNCTION__;
-            ssError << ": unable to convert image";
-            throw RuntimeError(ERROR_FC2_CONVERT_IMAGE, ssError.str());
-
-        }
-
-        //printImageInfo_fc2(convertedImage_);
-        //std::cout << std::flush;
+        cv::Mat image;  
+        grabImage(image);
+        return image;
     }
+
+    void CameraDevice_fc2::grabImage(cv::Mat &image)
+    {
+        bool resize = false;
+
+        grabImageCommon();
+
+        // Only create new image if the size is incorrect - might be a better
+        // way to do this. 
+        // --------------------------------------------------------------------
+        if ((image.cols != rawImage_.cols) | (image.rows != rawImage_.rows))
+        {
+            resize = true;
+        }
+        
+        // TO DO .. also test for image type.
+        // ---------------------------------------------------------------------
+
+        if (resize) {
+            // TO DO .. need to handle Pixel type conversions
+            image = cv::Mat(rawImage_.rows, rawImage_.cols, CV_8UC1);
+        }
+
+        // Copy data -- TO DO might be able to do this without copying.
+        // ---------------------------------------------------------------------
+        unsigned char *pData0 = rawImage_.pData;
+        unsigned char *pData1 = rawImage_.pData + rawImage_.dataSize - 1;
+        std::copy(pData0,pData1,image.data);
+    }
+
 
     bool CameraDevice_fc2::isColor()
     {
@@ -624,6 +617,53 @@ namespace bias {
         }
     }
 
+    void CameraDevice_fc2::grabImageCommon()
+    {
+        fc2Error error;
+
+        if (!capturing_) 
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to grab Image - not capturing";
+            throw RuntimeError(ERROR_FC2_GRAB_IMAGE, ssError.str());
+        }
+
+        // Retrieve image from buffer
+        error = fc2RetrieveBuffer(context_, &rawImage_);
+        if ( error != FC2_ERROR_OK ) 
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to retrieve image from buffer";
+            throw RuntimeError(ERROR_FC2_RETRIEVE_BUFFER, ssError.str());
+        }
+
+        // --------------------------------------------------------------
+        // Convert image ...
+        // --------------------------------------------------------------
+        //
+        //printImageInfo_fc2(rawImage_);
+        //std::cout << std::flush;
+        //
+        //error = fc2ConvertImageTo(
+        //        FC2_PIXEL_FORMAT_MONO8, 
+        //        &rawImage_, 
+        //        &convertedImage_
+        //        );
+        //if ( error != FC2_ERROR_OK ) 
+        //{
+        //    std::stringstream ssError;
+        //    ssError << __PRETTY_FUNCTION__;
+        //    ssError << ": unable to convert image";
+        //    throw RuntimeError(ERROR_FC2_CONVERT_IMAGE, ssError.str());
+        //}
+        //
+        //printImageInfo_fc2(convertedImage_);
+        //std::cout << std::flush;
+        //----------------------------------------------------------------
+    }
+
     void CameraDevice_fc2::getVideoModeAndFrameRate(
             fc2VideoMode &vidMode, 
             fc2FrameRate &frmRate
@@ -727,7 +767,7 @@ namespace bias {
             throw RuntimeError(ERROR_FC2_UNSUPPORTED_VIDEO_MODE, ssError.str());
         }
 
-        if (1) // Print format7 information for selected mode
+        if (0) // Print format7 information for selected mode
         {
             printFormat7Info_fc2(format7Info);
         }
@@ -747,7 +787,7 @@ namespace bias {
             throw RuntimeError(ERROR_FC2_GET_FORMAT7_CONFIGURATION, ssError.str());
         }
 
-        if (1) // Print current configuration settings
+        if (0) // Print current configuration settings
         {
             printFormat7Configuration_fc2(imageSettings,packetSize,percentage);
         }
@@ -758,8 +798,7 @@ namespace bias {
         imageSettings.offsetY = 0;
         imageSettings.width = format7Info.maxWidth;
         imageSettings.height = format7Info.maxHeight;
-        imageSettings.pixelFormat = FC2_PIXEL_FORMAT_RAW8;
-        //imageSettings.pixelFormat = FC2_PIXEL_FORMAT_MONO8;
+        imageSettings.pixelFormat = FC2_PIXEL_FORMAT_MONO8;
 
         // Check that settings are valid and get packet info
         error = fc2ValidateFormat7Settings(

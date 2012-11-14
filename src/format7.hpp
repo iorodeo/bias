@@ -4,6 +4,12 @@
 #include "basic_types.hpp"
 #include <string>
 
+
+//-----------------------------------------------------------------------------
+// TO DO ... not finished yet. Need to figure out what to do wih the pixel
+// format bitfields.
+// ----------------------------------------------------------------------------
+
 namespace bias
 {
     struct Format7Settings

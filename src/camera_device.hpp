@@ -3,6 +3,7 @@
 
 #include <string>
 #include <memory>
+#include <opencv2/core/core.hpp>
 #include "basic_types.hpp"
 #include "property.hpp"
 #include "guid.hpp"
@@ -26,7 +27,8 @@ namespace bias
 
             virtual void startCapture() {};
             virtual void stopCapture() {};
-            virtual void grabImage() {};
+            virtual cv::Mat grabImage();
+            virtual void grabImage(cv::Mat &image) {};
 
             virtual bool isConnected(); 
             virtual bool isCapturing();

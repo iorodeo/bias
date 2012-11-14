@@ -4,6 +4,12 @@
 #include <windows.h>
 #include <iostream>
 #include <memory>
+#include <sstream>
+#include <vector>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+
 #include "utils.hpp"
 #include "guid.hpp"
 #include "property.hpp"
@@ -16,11 +22,15 @@ using namespace bias;
 int main(int argc, char** argv)
 {        
     int cnt;
-    int numGrab = 10;
+    int numGrab = 2000;
     CameraFinder camFinder;
+    cv::Mat image;
+    cv::Mat imageScaled;
+    std::vector<std::string> windowNames;
 
     // Create and Connect cameras
     // ------------------------------------------------------------------------
+    cnt = 0;
     CameraPtrList camPtrList = camFinder.createCameraPtrList();
     for (
             CameraPtrList::iterator it=camPtrList.begin(); 
@@ -32,6 +42,19 @@ int main(int argc, char** argv)
         camPtr -> connect();
     }
 
+    // Create opencv named windows
+    // ------------------------------------------------------------------------
+    windowNames = std::vector<std::string>(camPtrList.size());
+    for ( cnt = 0; cnt < camPtrList.size(); cnt++)
+    {
+        std::stringstream ssName;
+        ssName << "Camera: " <<  cnt;
+        windowNames[cnt] = ssName.str();
+        cv::namedWindow(
+                windowNames[cnt],
+                CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED
+                );
+    }
 
     // Print camera information
     // ------------------------------------------------------------------------
@@ -112,7 +135,14 @@ int main(int argc, char** argv)
             )
         {
             CameraPtr cameraPtr = *it;
-            cameraPtr -> grabImage();
+            cameraPtr -> grabImage(image);
+
+            if (cnt%10 == 0) {
+                cv::resize(image,imageScaled, cv::Size(0,0), 0.5, 0.5);
+                cv::imshow(windowNames[cnt], imageScaled);
+                cv::waitKey(1);
+            }
+            
             cout << cnt << " ";
             cnt++;
         } 

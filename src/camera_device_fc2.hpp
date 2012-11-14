@@ -3,6 +3,7 @@
 #define BIAS_CAMERA_DEVICE_FC2_HPP
 
 #include <string>
+#include <opencv2/core/core.hpp>
 #include "utils.hpp"
 #include "camera_device.hpp"
 #include "property.hpp"
@@ -31,7 +32,8 @@ namespace bias {
             
             virtual void startCapture();
             virtual void stopCapture();
-            virtual void grabImage();
+            virtual cv::Mat grabImage();
+            virtual void grabImage(cv::Mat &image);
 
             virtual bool isColor();
             virtual bool isSupported(VideoMode vidMode, FrameRate frmRate);
@@ -71,6 +73,7 @@ namespace bias {
 
             void createRawImage();
             void destroyRawImage();
+            void grabImageCommon();
 
             void createConvertedImage();
             void destroyConvertedImage();
