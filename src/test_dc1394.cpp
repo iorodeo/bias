@@ -1,7 +1,11 @@
 #include <iostream>
+#include <vector>
 #include <stdint.h>
 #include <unistd.h>
 #include "guid.hpp"
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include "camera.hpp"
 #include "camera_finder.hpp"
 
@@ -10,46 +14,28 @@ using namespace bias;
 
 int main(int argc, char *argv[]) 
 {
+    cv::Mat image;
     CameraFinder cameraFinder;
+    std::vector<std::string> windowNames;
 
-    cameraFinder.update();
     cout << endl;
     cout << "number of cameras: " << cameraFinder.numberOfCameras() << endl;
 
     // Get and print list of camera guids
 
-    // new version
-    // -------------------------------------------------------
-    //GuidList = cameraFinder.getGuidList(); 
-    // --------------------------------------------------------
-    
-    // old version
-    // -------------------------------------------------------
-    GuidPtrList guidPtrList = cameraFinder.getGuidPtrList();
-    //--------------------------------------------------------
+    GuidList guidList = cameraFinder.getGuidList(); 
+
     {
         cout << endl;
         cout << "printing guid list" << endl;
         int cnt;
 
-        // new version
-        // ----------------------------------------------------------------------
-        //GuidList::iterator it;
-        //for (it=guidList.begin(), cnt=0; it!=guidList.end(); it++, cnt++)
-        //{
-        //    Guid guid = *it;
-        //    cout  << "  [" << cnt << "] guid " << guid << endl;
-        //}
-        // -----------------------------------------------------------------------
-
-        // old version
-        // ----------------------------------------------------------------------
-        //GuidPtrList::iterator it;
-        //for (it=guidPtrList.begin(), cnt=0; it!=guidPtrList.end(); it++, cnt++)
-        //{
-        //    cout  << "  [" << cnt << "] guid " << **it << endl;
-        //}
-        // -----------------------------------------------------------------------
+        GuidList::iterator it;
+        for (it=guidList.begin(), cnt=0; it!=guidList.end(); it++, cnt++)
+        {
+            Guid guid = *it;
+            cout  << "  [" << cnt << "] guid " << guid << endl;
+        }
     }
 
     // Create, connect and add cameras to camera list
@@ -63,23 +49,24 @@ int main(int argc, char *argv[])
         {
             Guid guid = *it;
             cout  << "  [" << cnt << "] guid " << guid << endl;
-            CameraPtr cameraPtr = std::make_shared<Camera>(**it);
+            CameraPtr cameraPtr = std::make_shared<Camera>(guid);
             cameraPtr -> connect();
             cameraPtrList.push_back(cameraPtr);
         }
+    }
 
-
-        // old version
-        // ---------------------------------------------------------------------
-        //GuidPtrList::iterator it;
-        //for (it=guidPtrList.begin(), cnt=0; it!=guidPtrList.end(); it++, cnt++)
-        //{
-        //    cout  << "  [" << cnt << "] guid " << **it << endl;
-        //    CameraPtr cameraPtr = std::make_shared<Camera>(**it);
-        //    cameraPtr -> connect();
-        //    cameraPtrList.push_back(cameraPtr);
-        //}
-        // --------------------------------------------------------------------
+    // Create opencv named windows
+    // ------------------------------------------------------------------------
+    windowNames = std::vector<std::string>(cameraPtrList.size());
+    for (int cnt = 0; cnt < cameraPtrList.size(); cnt++)
+    {
+        std::stringstream ssName;
+        ssName << "Camera: " <<  cnt;
+        windowNames[cnt] = ssName.str();
+        cv::namedWindow(
+                windowNames[cnt],
+                CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_NORMAL
+                );
     }
 
     // Print camera information
@@ -123,7 +110,7 @@ int main(int argc, char *argv[])
             {
                 cout << "    camera: " << cnt << endl;
                 CameraPtr cameraPtr = *it;
-                cameraPtr -> grabImage();
+                image = cameraPtr -> grabImage();
             }
         }
     }

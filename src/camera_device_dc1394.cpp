@@ -2,6 +2,7 @@
 #include "camera_device_dc1394.hpp"
 #include "exception.hpp"
 #include <sstream>
+#include <algorithm>
 
 namespace bias {
 
@@ -96,6 +97,21 @@ namespace bias {
                 ssError << error  << std::endl;
                 throw RuntimeError(ERROR_DC1394_SET_VIDEO_MODE, ssError.str());
             }
+        
+            // Temporary - set color coding to mono8
+            error = dc1394_format7_set_color_coding(
+                    camera_dc1394_,
+                    DC1394_VIDEO_MODE_FORMAT7_0,
+                    DC1394_COLOR_CODING_MONO8
+                    );
+            if (error != DC1394_SUCCESS)
+            { 
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to set dc1394 color_coding, error code ";
+                ssError << error  << std::endl;
+                throw RuntimeError(ERROR_DC1394_SET_VIDEO_MODE, ssError.str());
+            }
 
             // Set number of DMA buffers and capture flags
             error = dc1394_capture_setup(
@@ -135,7 +151,7 @@ namespace bias {
         }
     }
 
-    void CameraDevice_dc1394::grabImage()
+    void CameraDevice_dc1394::grabImage(cv::Mat &image)
     {
         if (!capturing_)
         {
@@ -162,12 +178,27 @@ namespace bias {
             throw RuntimeError(ERROR_DC1394_CAPTURE_DEQUEUE, ssError.str());
         }
 
-        // ----------------------------------------------------------------
-        // TO DO ...need to copy image out of DMA buffer here
-        // ----------------------------------------------------------------
+        // copy to cv image
+        // Temporary - assume mono8 format
+        // --------------------------------------------------------------------------
+        if ((image.rows*image.cols) != (frame_dc1394_->total_bytes)) 
+        {
+            image = cv::Mat( frame_dc1394_-> size[0], frame_dc1394_-> size[1], CV_8UC1); 
+        }
+
+        unsigned char *pData0 = frame_dc1394_ -> image;
+        unsigned char *pData1 = pData0 +  (frame_dc1394_ -> total_bytes);
+        std::copy(pData0, pData1, image.data);
 
         // Put frame back 
         error = dc1394_capture_enqueue(camera_dc1394_, frame_dc1394_);
+    }
+
+    cv::Mat CameraDevice_dc1394::grabImage()
+    {
+        cv::Mat image;
+        grabImage(image);
+        return image;
     }
 
     VideoModeList CameraDevice_dc1394::getAllowedVideoModes()

@@ -1,5 +1,6 @@
 #include "camera.hpp"
 #include "exception.hpp"
+#include "utils.hpp"
 #include <sstream>
 #ifdef WITH_FC2
 #include "camera_device_fc2.hpp"
