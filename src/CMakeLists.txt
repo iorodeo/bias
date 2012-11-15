@@ -4,8 +4,8 @@ PROJECT(bais)
 
 # Camera libraries
 # -----------------------------------------------------------------------------
-SET(with_fc2 true)
-SET(with_dc1394 false)
+SET(with_fc2 false)
+SET(with_dc1394 true)
 
 # Opencv library
 # -----------------------------------------------------------------------------

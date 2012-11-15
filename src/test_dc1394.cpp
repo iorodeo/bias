@@ -14,7 +14,9 @@ using namespace bias;
 
 int main(int argc, char *argv[]) 
 {
+    int numImage = 1000;
     cv::Mat image;
+    cv::Mat imageScaled;
     CameraFinder cameraFinder;
     std::vector<std::string> windowNames;
 
@@ -24,6 +26,12 @@ int main(int argc, char *argv[])
     // Get and print list of camera guids
 
     GuidList guidList = cameraFinder.getGuidList(); 
+
+    if (guidList.size() == 0) 
+    {
+        cout << "No cameas found" << endl;
+        return -1;
+    }
 
     {
         cout << endl;
@@ -100,7 +108,6 @@ int main(int argc, char *argv[])
     // Grab some frames
     {
         cout << "grabbing some images" << endl;
-        int numImage = 100;
         for (int i=0; i<numImage; i++) 
         {
             cout << "  image: " << i << "/" << numImage << endl;
@@ -111,6 +118,11 @@ int main(int argc, char *argv[])
                 cout << "    camera: " << cnt << endl;
                 CameraPtr cameraPtr = *it;
                 image = cameraPtr -> grabImage();
+                if (i%2 == 0) {
+                    cv::resize(image, imageScaled, cv::Size(0,0), 0.8, 0.8);
+                    cv::imshow(windowNames[cnt], imageScaled);
+                    cv::waitKey(10);
+                }
             }
         }
     }

@@ -142,7 +142,7 @@ int main(int argc, char** argv)
                 cv::imshow(windowNames[cnt], imageScaled);
                 cv::waitKey(1);
             }
-            
+
             cout << cnt << " ";
             cnt++;
         } 

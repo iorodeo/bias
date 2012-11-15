@@ -183,7 +183,7 @@ namespace bias {
         // --------------------------------------------------------------------------
         if ((image.rows*image.cols) != (frame_dc1394_->total_bytes)) 
         {
-            image = cv::Mat( frame_dc1394_-> size[0], frame_dc1394_-> size[1], CV_8UC1); 
+            image = cv::Mat( frame_dc1394_-> size[1], frame_dc1394_-> size[0], CV_8UC1); 
         }
 
         unsigned char *pData0 = frame_dc1394_ -> image;
