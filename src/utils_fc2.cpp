@@ -1,6 +1,7 @@
 #ifdef WITH_FC2
 #include "utils_fc2.hpp"
 #include "exception.hpp"
+#include <map>
 #include <iostream>
 #include <sstream>
 #include <bitset>
@@ -10,404 +11,185 @@ namespace bias {
     // Conversion from BIAS types to FlyCapture2 types
     // ------------------------------------------------------------------------
 
+    static std::map<PropertyType, fc2PropertyType> createPropertyTypeMap_to_fc2()
+    {
+        std::map<PropertyType, fc2PropertyType> map;
+        map[PROPERTY_TYPE_BRIGHTNESS]     =   FC2_BRIGHTNESS;
+        map[PROPERTY_TYPE_AUTO_EXPOSURE]  =   FC2_AUTO_EXPOSURE;
+        map[PROPERTY_TYPE_SHARPNESS]      =   FC2_SHARPNESS;
+        map[PROPERTY_TYPE_WHITE_BALANCE]  =   FC2_WHITE_BALANCE;
+        map[PROPERTY_TYPE_HUE]            =   FC2_HUE;
+        map[PROPERTY_TYPE_SATURATION]     =   FC2_SATURATION;
+        map[PROPERTY_TYPE_GAMMA]          =   FC2_GAMMA;
+        map[PROPERTY_TYPE_IRIS]           =   FC2_IRIS;
+        map[PROPERTY_TYPE_FOCUS]          =   FC2_FOCUS;
+        map[PROPERTY_TYPE_ZOOM]           =   FC2_ZOOM;
+        map[PROPERTY_TYPE_PAN]            =   FC2_PAN;
+        map[PROPERTY_TYPE_TILT]           =   FC2_TILT;
+        map[PROPERTY_TYPE_SHUTTER]        =   FC2_SHUTTER;
+        map[PROPERTY_TYPE_GAIN]           =   FC2_GAIN;
+        map[PROPERTY_TYPE_TRIGGER_MODE]   =   FC2_TRIGGER_MODE;
+        map[PROPERTY_TYPE_TRIGGER_DELAY]  =   FC2_TRIGGER_DELAY;
+        map[PROPERTY_TYPE_FRAME_RATE]     =   FC2_FRAME_RATE;
+        map[PROPERTY_TYPE_TEMPERATURE]    =   FC2_TEMPERATURE;
+        return map;
+    };
+
+    static std::map<PropertyType, fc2PropertyType> propertyTypeMap_to_fc2 = 
+        createPropertyTypeMap_to_fc2();
+
     fc2PropertyType convertPropertyType_to_fc2(PropertyType propType)
     {
-        switch (propType)
+        if (propertyTypeMap_to_fc2.count(propType) != 0)
         {
-            case PROPERTY_TYPE_BRIGHTNESS: 
-                return FC2_BRIGHTNESS;
-                break;
-
-            case PROPERTY_TYPE_AUTO_EXPOSURE:
-                return FC2_AUTO_EXPOSURE;
-                break;
-
-            case PROPERTY_TYPE_SHARPNESS:
-                return FC2_SHARPNESS;
-                break;
-
-            case PROPERTY_TYPE_WHITE_BALANCE:
-                return FC2_WHITE_BALANCE;
-                break;
-
-            case PROPERTY_TYPE_HUE:
-                return FC2_HUE;
-                break;
-
-            case PROPERTY_TYPE_SATURATION:
-                return FC2_SATURATION;
-                break;
-
-            case PROPERTY_TYPE_GAMMA:
-                return FC2_GAMMA;
-                break;
-
-            case PROPERTY_TYPE_IRIS:
-                return FC2_IRIS;
-                break;
-
-            case PROPERTY_TYPE_FOCUS:
-                return FC2_FOCUS;
-                break;
-
-            case PROPERTY_TYPE_ZOOM:
-                return FC2_ZOOM;
-                break;
-
-            case PROPERTY_TYPE_PAN:
-                return FC2_PAN;
-                break;
-
-            case PROPERTY_TYPE_TILT:
-                return FC2_TILT;
-                break;
-
-            case PROPERTY_TYPE_SHUTTER:
-                return FC2_SHUTTER;
-                break;
-
-            case PROPERTY_TYPE_GAIN:
-                return FC2_GAIN;
-                break;
-
-            case PROPERTY_TYPE_TRIGGER_MODE:
-                return FC2_TRIGGER_MODE;
-                break;
-
-            case PROPERTY_TYPE_TRIGGER_DELAY:
-                return FC2_TRIGGER_DELAY;
-                break;
-
-            case PROPERTY_TYPE_FRAME_RATE:
-                return FC2_FRAME_RATE;
-                break;
-
-            case PROPERTY_TYPE_TEMPERATURE:
-                return FC2_TEMPERATURE;
-                break;
-
-            default:
-                {
-                    std::stringstream ssError;
-                    ssError << __PRETTY_FUNCTION__;
-                    ssError << ": unable to convert property to FlyCaptuer2 property";
-                    throw RuntimeError(ERROR_FC2_CONVERT_PROPERTY_TYPE, ssError.str());
-                } 
-                break;
-
+            return propertyTypeMap_to_fc2[propType];
         }
-        return FC2_UNSPECIFIED_PROPERTY_TYPE;
+        else
+        { 
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to convert property to FlyCaptuer2 property";
+            throw RuntimeError(ERROR_FC2_CONVERT_PROPERTY_TYPE, ssError.str());
+        }
     }
+
+    static std::map<FrameRate, fc2FrameRate> createFrameRateMap_to_fc2()
+    {
+        std::map<FrameRate, fc2FrameRate> map;
+        map[FRAMERATE_1_875]    = FC2_FRAMERATE_1_875;
+        map[FRAMERATE_3_75]     = FC2_FRAMERATE_3_75;
+        map[FRAMERATE_7_5]      = FC2_FRAMERATE_7_5;
+        map[FRAMERATE_15]       = FC2_FRAMERATE_15;
+        map[FRAMERATE_30]       = FC2_FRAMERATE_30;
+        map[FRAMERATE_60]       = FC2_FRAMERATE_60;
+        map[FRAMERATE_120]      = FC2_FRAMERATE_120;
+        map[FRAMERATE_240]      = FC2_FRAMERATE_240;
+        map[FRAMERATE_FORMAT7]  = FC2_FRAMERATE_FORMAT7;
+        return map;
+    };
+
+    static std::map<FrameRate, fc2FrameRate> frameRateMap_to_fc2 = 
+        createFrameRateMap_to_fc2();
+
 
     fc2FrameRate convertFrameRate_to_fc2(FrameRate frmRate)
     {
-        switch (frmRate)
+        if (frameRateMap_to_fc2.count(frmRate) != 0)
         {
-            case FRAMERATE_1_875: 
-                return FC2_FRAMERATE_1_875;
-                break;
-
-            case FRAMERATE_3_75: 
-                return FC2_FRAMERATE_3_75;
-                break;
-
-            case FRAMERATE_7_5: 
-                return FC2_FRAMERATE_7_5;
-                break;
-
-            case FRAMERATE_15: 
-                return FC2_FRAMERATE_15;
-                break;
-
-            case FRAMERATE_30: 
-                return FC2_FRAMERATE_30;
-                break;
-
-            case FRAMERATE_60: 
-                return FC2_FRAMERATE_60;
-                break;
-
-            case FRAMERATE_120: 
-                return FC2_FRAMERATE_120;
-                break;
-
-            case FRAMERATE_240: 
-                return FC2_FRAMERATE_240;
-                break;
-
-            case FRAMERATE_FORMAT7: 
-                return FC2_FRAMERATE_FORMAT7;
-                break;
-
-            default:
-                {
-                    std::stringstream ssError;
-                    ssError << __PRETTY_FUNCTION__;
-                    ssError << ": unable to convert framerate to fc2 frame rate";
-                    throw RuntimeError(ERROR_FC2_CONVERT_FRAMERATE, ssError.str());
-                }
-                break;
-
+            return frameRateMap_to_fc2[frmRate];
         }
-        return FC2_NUM_FRAMERATES;
+        else
+        { 
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to convert framerate to fc2 frame rate";
+            throw RuntimeError(ERROR_FC2_CONVERT_FRAMERATE, ssError.str());
+        }
     }
+
+    static std::map<VideoMode, fc2VideoMode> createVideoModeMap_to_fc2()
+    {
+        std::map<VideoMode, fc2VideoMode> map;
+        map[VIDEOMODE_160x120YUV444]   =   FC2_VIDEOMODE_160x120YUV444;
+        map[VIDEOMODE_320x240YUV422]   =   FC2_VIDEOMODE_320x240YUV422;
+        map[VIDEOMODE_640x480YUV411]   =   FC2_VIDEOMODE_640x480YUV411;
+        map[VIDEOMODE_640x480YUV422]   =   FC2_VIDEOMODE_640x480YUV422;
+        map[VIDEOMODE_640x480RGB]      =   FC2_VIDEOMODE_640x480RGB;
+        map[VIDEOMODE_640x480Y8]       =   FC2_VIDEOMODE_640x480Y8;
+        map[VIDEOMODE_640x480Y16]      =   FC2_VIDEOMODE_640x480Y16;
+        map[VIDEOMODE_800x600YUV422]   =   FC2_VIDEOMODE_800x600YUV422;
+        map[VIDEOMODE_800x600RGB]      =   FC2_VIDEOMODE_800x600RGB;
+        map[VIDEOMODE_800x600Y8]       =   FC2_VIDEOMODE_800x600Y8;
+        map[VIDEOMODE_800x600Y16]      =   FC2_VIDEOMODE_800x600Y16;
+        map[VIDEOMODE_1024x768YUV422]  =   FC2_VIDEOMODE_1024x768YUV422;
+        map[VIDEOMODE_1024x768RGB]     =   FC2_VIDEOMODE_1024x768RGB;
+        map[VIDEOMODE_1024x768Y8]      =   FC2_VIDEOMODE_1024x768Y8;
+        map[VIDEOMODE_1024x768Y16]     =   FC2_VIDEOMODE_1024x768Y16;
+        map[VIDEOMODE_1280x960YUV422]  =   FC2_VIDEOMODE_1280x960YUV422;
+        map[VIDEOMODE_1280x960RGB]     =   FC2_VIDEOMODE_1280x960RGB;
+        map[VIDEOMODE_1280x960Y8]      =   FC2_VIDEOMODE_1280x960Y8;
+        map[VIDEOMODE_1280x960Y16]     =   FC2_VIDEOMODE_1280x960Y16;
+        map[VIDEOMODE_1600x1200YUV422] =   FC2_VIDEOMODE_1600x1200YUV422;
+        map[VIDEOMODE_1600x1200RGB]    =   FC2_VIDEOMODE_1600x1200RGB;
+        map[VIDEOMODE_1600x1200Y8]     =   FC2_VIDEOMODE_1600x1200Y8;
+        map[VIDEOMODE_1600x1200Y16]    =   FC2_VIDEOMODE_1600x1200Y16;
+        map[VIDEOMODE_FORMAT7]         =   FC2_VIDEOMODE_FORMAT7;
+        return map;
+    }
+
+    static std::map<VideoMode, fc2VideoMode> videoModeMap_to_fc2 = 
+        createVideoModeMap_to_fc2();
 
     fc2VideoMode convertVideoMode_to_fc2(VideoMode vidMode)
     {
-        switch(vidMode)
+        if (videoModeMap_to_fc2.count(vidMode) != 0)
         {
-            case VIDEOMODE_160x120YUV444: 
-                return FC2_VIDEOMODE_160x120YUV444;
-                break;
-
-            case VIDEOMODE_320x240YUV422: 
-                return FC2_VIDEOMODE_320x240YUV422;
-                break;
-
-            case VIDEOMODE_640x480YUV411: 
-                return FC2_VIDEOMODE_640x480YUV411;
-                break;
-
-            case VIDEOMODE_640x480YUV422: 
-                return FC2_VIDEOMODE_640x480YUV422;
-                break;
-
-            case VIDEOMODE_640x480RGB: 
-                return FC2_VIDEOMODE_640x480RGB;
-                break;
-
-            case VIDEOMODE_640x480Y8: 
-                return FC2_VIDEOMODE_640x480Y8;
-                break;
-
-            case VIDEOMODE_640x480Y16: 
-                return FC2_VIDEOMODE_640x480Y16;
-                break;
-
-            case VIDEOMODE_800x600YUV422: 
-                return FC2_VIDEOMODE_800x600YUV422;
-                break;
-
-            case VIDEOMODE_800x600RGB: 
-                return FC2_VIDEOMODE_800x600RGB;
-                break;
-
-            case VIDEOMODE_800x600Y8: 
-                return FC2_VIDEOMODE_800x600Y8;
-                break;
-
-            case VIDEOMODE_800x600Y16: 
-                return FC2_VIDEOMODE_800x600Y16;
-                break;
-
-            case VIDEOMODE_1024x768YUV422: 
-                return FC2_VIDEOMODE_1024x768YUV422;
-                break;
-
-            case VIDEOMODE_1024x768RGB: 
-                return FC2_VIDEOMODE_1024x768RGB;
-                break;
-
-            case VIDEOMODE_1024x768Y8: 
-                return FC2_VIDEOMODE_1024x768Y8;
-                break;
-
-            case VIDEOMODE_1024x768Y16: 
-                return FC2_VIDEOMODE_1024x768Y16;
-                break;
-
-            case VIDEOMODE_1280x960YUV422: 
-                return FC2_VIDEOMODE_1280x960YUV422;
-                break;
-
-            case VIDEOMODE_1280x960RGB: 
-                return FC2_VIDEOMODE_1280x960RGB;
-                break;
-
-            case VIDEOMODE_1280x960Y8: 
-                return FC2_VIDEOMODE_1280x960Y8;
-                break;
-
-            case VIDEOMODE_1280x960Y16: 
-                return FC2_VIDEOMODE_1280x960Y16;
-                break;
-
-            case VIDEOMODE_1600x1200YUV422: 
-                return FC2_VIDEOMODE_1600x1200YUV422;
-                break;
-
-            case VIDEOMODE_1600x1200RGB: 
-                return FC2_VIDEOMODE_1600x1200RGB;
-                break;
-
-            case VIDEOMODE_1600x1200Y8: 
-                return FC2_VIDEOMODE_1600x1200Y8;
-                break;
-
-            case VIDEOMODE_1600x1200Y16: 
-                return FC2_VIDEOMODE_1600x1200Y16;
-                break;
-
-            case VIDEOMODE_FORMAT7: 
-                return FC2_VIDEOMODE_FORMAT7;
-                break;
-
-            default:
-                {
-                    std::stringstream ssError;
-                    ssError << __PRETTY_FUNCTION__;
-                    ssError << ": unable to convert video mode to FlyCapture2 video mode";
-                    throw RuntimeError(ERROR_FC2_CONVERT_VIDEOMODE, ssError.str());
-                }
-                break;
+            return videoModeMap_to_fc2[vidMode];
         }
-        return FC2_NUM_VIDEOMODES;
+        else
+        { 
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to convert video mode to FlyCapture2 video mode";
+            throw RuntimeError(ERROR_FC2_CONVERT_VIDEOMODE, ssError.str());
+        }
     }
+
+    static std::map<ImageMode, fc2Mode> createImageModeMap_to_fc2()
+    {
+        std::map<ImageMode, fc2Mode> map;
+        map[IMAGEMODE_0]   =  FC2_MODE_0;
+        map[IMAGEMODE_1]   =  FC2_MODE_1;
+        map[IMAGEMODE_2]   =  FC2_MODE_2;
+        map[IMAGEMODE_3]   =  FC2_MODE_3;
+        map[IMAGEMODE_4]   =  FC2_MODE_4;
+        map[IMAGEMODE_5]   =  FC2_MODE_5;
+        map[IMAGEMODE_6]   =  FC2_MODE_6;
+        map[IMAGEMODE_7]   =  FC2_MODE_7;
+        map[IMAGEMODE_8]   =  FC2_MODE_8;
+        map[IMAGEMODE_9]   =  FC2_MODE_9;
+        map[IMAGEMODE_10]  =  FC2_MODE_10;
+        map[IMAGEMODE_11]  =  FC2_MODE_11;
+        map[IMAGEMODE_12]  =  FC2_MODE_12;
+        map[IMAGEMODE_13]  =  FC2_MODE_13;
+        map[IMAGEMODE_14]  =  FC2_MODE_14;
+        map[IMAGEMODE_15]  =  FC2_MODE_15;
+        map[IMAGEMODE_16]  =  FC2_MODE_16;
+        map[IMAGEMODE_17]  =  FC2_MODE_17;
+        map[IMAGEMODE_18]  =  FC2_MODE_18;
+        map[IMAGEMODE_19]  =  FC2_MODE_19;
+        map[IMAGEMODE_20]  =  FC2_MODE_20;
+        map[IMAGEMODE_21]  =  FC2_MODE_21;
+        map[IMAGEMODE_22]  =  FC2_MODE_22;
+        map[IMAGEMODE_23]  =  FC2_MODE_23;
+        map[IMAGEMODE_24]  =  FC2_MODE_24;
+        map[IMAGEMODE_25]  =  FC2_MODE_25;
+        map[IMAGEMODE_26]  =  FC2_MODE_26;
+        map[IMAGEMODE_27]  =  FC2_MODE_27;
+        map[IMAGEMODE_28]  =  FC2_MODE_28;
+        map[IMAGEMODE_29]  =  FC2_MODE_29;
+        map[IMAGEMODE_30]  =  FC2_MODE_30;
+        map[IMAGEMODE_31]  =  FC2_MODE_31;
+        return map;
+    }
+
+    static std::map<ImageMode, fc2Mode> imageModeMap_to_fc2 = 
+        createImageModeMap_to_fc2();
 
     fc2Mode convertImageMode_to_fc2(ImageMode imgMode)
     {
-        switch(imgMode)
+        if (imageModeMap_to_fc2.count(imgMode) != 0) 
         {
-            case IMAGEMODE_0:
-                return FC2_MODE_0;
-                break;
-
-            case IMAGEMODE_1:
-                return FC2_MODE_1;
-                break;
-
-            case IMAGEMODE_2:
-                return FC2_MODE_2;
-                break;
-
-            case IMAGEMODE_3:
-                return FC2_MODE_3;
-                break;
-
-            case IMAGEMODE_4:
-                return FC2_MODE_4;
-                break;
-
-            case IMAGEMODE_5:
-                return FC2_MODE_5;
-                break;
-
-            case IMAGEMODE_6:
-                return FC2_MODE_6;
-                break;
-
-            case IMAGEMODE_7:
-                return FC2_MODE_7;
-                break;
-
-            case IMAGEMODE_8:
-                return FC2_MODE_8;
-                break;
-
-            case IMAGEMODE_9:
-                return FC2_MODE_9;
-                break;
-
-            case IMAGEMODE_10:
-                return FC2_MODE_10;
-                break;
-
-            case IMAGEMODE_11:
-                return FC2_MODE_11;
-                break;
-
-            case IMAGEMODE_12:
-                return FC2_MODE_12;
-                break;
-
-            case IMAGEMODE_13:
-                return FC2_MODE_13;
-                break;
-
-            case IMAGEMODE_14:
-                return FC2_MODE_14;
-                break;
-
-            case IMAGEMODE_15:
-                return FC2_MODE_15;
-                break;
-
-            case IMAGEMODE_16:
-                return FC2_MODE_16;
-                break;
-
-            case IMAGEMODE_17:
-                return FC2_MODE_17;
-                break;
-
-            case IMAGEMODE_18:
-                return FC2_MODE_18;
-                break;
-
-            case IMAGEMODE_19:
-                return FC2_MODE_19;
-                break;
-
-            case IMAGEMODE_20:
-                return FC2_MODE_20;
-                break;
-
-            case IMAGEMODE_21:
-                return FC2_MODE_21;
-                break;
-
-            case IMAGEMODE_22:
-                return FC2_MODE_22;
-                break;
-
-            case IMAGEMODE_23:
-                return FC2_MODE_23;
-                break;
-
-            case IMAGEMODE_24:
-                return FC2_MODE_24;
-                break;
-
-            case IMAGEMODE_25:
-                return FC2_MODE_25;
-                break;
-
-            case IMAGEMODE_26:
-                return FC2_MODE_26;
-                break;
-
-            case IMAGEMODE_27:
-                return FC2_MODE_27;
-                break;
-
-            case IMAGEMODE_28:
-                return FC2_MODE_28;
-                break;
-
-            case IMAGEMODE_29:
-                return FC2_MODE_29;
-                break;
-
-            case IMAGEMODE_30:
-                return FC2_MODE_30;
-                break;
-
-            case IMAGEMODE_31:
-                return FC2_MODE_31;
-                break;
-
-            default:
-                {
-                    std::stringstream ssError;
-                    ssError << __PRETTY_FUNCTION__;
-                    ssError << ": unable to convert image mode to FlyCapture2 ";
-                    ssError << "imaging mode";
-                    throw RuntimeError(ERROR_FC2_CONVERT_IMAGEMODE, ssError.str());
-                }
-                break;
-
+            return imageModeMap_to_fc2[imgMode];
         }
-        return FC2_NUM_MODES;
+        else
+        { 
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to convert image mode to FlyCapture2 ";
+            ssError << "imaging mode";
+            throw RuntimeError(ERROR_FC2_CONVERT_IMAGEMODE, ssError.str());
+        }
     }
 
     fc2Property convertProperty_to_fc2(Property prop)
@@ -430,406 +212,185 @@ namespace bias {
 
         // Conversion from FlyCapture2 types to BIAS types
     // ------------------------------------------------------------------------
+     
+    static std::map<fc2PropertyType, PropertyType> createPropertyTypeMap_from_fc2()
+    {
+        std::map<fc2PropertyType, PropertyType> map;
+        map[FC2_BRIGHTNESS]     =   PROPERTY_TYPE_BRIGHTNESS;
+        map[FC2_AUTO_EXPOSURE]  =   PROPERTY_TYPE_AUTO_EXPOSURE;
+        map[FC2_SHARPNESS]      =   PROPERTY_TYPE_SHARPNESS;
+        map[FC2_WHITE_BALANCE]  =   PROPERTY_TYPE_WHITE_BALANCE;
+        map[FC2_HUE]            =   PROPERTY_TYPE_HUE;
+        map[FC2_SATURATION]     =   PROPERTY_TYPE_SATURATION;
+        map[FC2_GAMMA]          =   PROPERTY_TYPE_GAMMA;
+        map[FC2_IRIS]           =   PROPERTY_TYPE_IRIS;
+        map[FC2_FOCUS]          =   PROPERTY_TYPE_FOCUS;
+        map[FC2_ZOOM]           =   PROPERTY_TYPE_ZOOM;
+        map[FC2_PAN]            =   PROPERTY_TYPE_PAN;
+        map[FC2_TILT]           =   PROPERTY_TYPE_TILT;
+        map[FC2_SHUTTER]        =   PROPERTY_TYPE_SHUTTER;
+        map[FC2_GAIN]           =   PROPERTY_TYPE_GAIN;
+        map[FC2_TRIGGER_MODE]   =   PROPERTY_TYPE_TRIGGER_MODE;
+        map[FC2_TRIGGER_DELAY]  =   PROPERTY_TYPE_TRIGGER_DELAY;
+        map[FC2_FRAME_RATE]     =   PROPERTY_TYPE_FRAME_RATE;
+        map[FC2_TEMPERATURE]    =   PROPERTY_TYPE_TEMPERATURE;
+        return map;
+
+    }
+
+    static std::map<fc2PropertyType, PropertyType> propertyTypeMap_from_fc2 = 
+        createPropertyTypeMap_from_fc2();
 
     PropertyType convertPropertyType_from_fc2(fc2PropertyType propType_fc2)
     {
-        switch(propType_fc2)
+        if (propertyTypeMap_from_fc2.count(propType_fc2) != 0) 
         {
-            case FC2_BRIGHTNESS:
-                return PROPERTY_TYPE_BRIGHTNESS;
-                break;
-
-            case FC2_AUTO_EXPOSURE:
-                return PROPERTY_TYPE_AUTO_EXPOSURE;
-                break;
-
-            case FC2_SHARPNESS:
-                return PROPERTY_TYPE_SHARPNESS;
-                break;
-
-            case FC2_WHITE_BALANCE:
-                return PROPERTY_TYPE_WHITE_BALANCE;
-                break;
-
-            case FC2_HUE:
-                return PROPERTY_TYPE_HUE;
-                break;
-
-            case FC2_SATURATION:
-                return PROPERTY_TYPE_SATURATION;
-                break;
-
-            case FC2_GAMMA:
-                return PROPERTY_TYPE_GAMMA;
-                break;
-
-            case FC2_IRIS:
-                return PROPERTY_TYPE_IRIS;
-                break;
-
-            case FC2_FOCUS:
-                return PROPERTY_TYPE_FOCUS;
-                break;
-
-            case FC2_ZOOM:
-                return PROPERTY_TYPE_ZOOM;
-                break;
-
-            case FC2_PAN:
-                return PROPERTY_TYPE_PAN;
-                break;
-
-            case FC2_TILT:
-                return PROPERTY_TYPE_TILT;
-                break;
-
-            case FC2_SHUTTER:
-                return PROPERTY_TYPE_SHUTTER;
-                break;
-
-            case FC2_GAIN:
-                return PROPERTY_TYPE_GAIN;
-                break;
-
-            case FC2_TRIGGER_MODE:
-                return PROPERTY_TYPE_TRIGGER_MODE;
-                break;
-
-            case FC2_TRIGGER_DELAY:
-                return PROPERTY_TYPE_TRIGGER_DELAY;
-                break;
-
-            case FC2_FRAME_RATE:
-                return PROPERTY_TYPE_FRAME_RATE;
-                break;
-
-            case FC2_TEMPERATURE:
-                return PROPERTY_TYPE_TEMPERATURE;
-                break;
-
-            default:
-                {
-                    std::stringstream ssError;
-                    ssError << __PRETTY_FUNCTION__;
-                    ssError << ": unable to convert FlyCapture2 PropertyType";
-                    throw RuntimeError(ERROR_FC2_CONVERT_PROPERTY_TYPE, ssError.str());
-                }
-                break;
-
-
+            return propertyTypeMap_from_fc2[propType_fc2];
         }
-        return PROPERTY_TYPE_UNSPECIFIED;
+        else
+        { 
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to convert FlyCapture2 PropertyType";
+            throw RuntimeError(ERROR_FC2_CONVERT_PROPERTY_TYPE, ssError.str());
+        }
     }
+
+    static std::map<fc2VideoMode, VideoMode> createVideoModeMap_from_fc2()
+    {
+        std::map<fc2VideoMode, VideoMode> map;
+        map[FC2_VIDEOMODE_160x120YUV444]     =   VIDEOMODE_160x120YUV444;
+        map[FC2_VIDEOMODE_320x240YUV422]     =   VIDEOMODE_320x240YUV422;
+        map[FC2_VIDEOMODE_640x480YUV411]     =   VIDEOMODE_640x480YUV411;
+        map[FC2_VIDEOMODE_640x480YUV422]     =   VIDEOMODE_640x480YUV422;
+        map[FC2_VIDEOMODE_640x480RGB]        =   VIDEOMODE_640x480RGB;
+        map[FC2_VIDEOMODE_640x480Y8]         =   VIDEOMODE_640x480Y8;
+        map[FC2_VIDEOMODE_640x480Y16]        =   VIDEOMODE_640x480Y16;
+        map[FC2_VIDEOMODE_800x600YUV422]     =   VIDEOMODE_800x600YUV422;
+        map[FC2_VIDEOMODE_800x600RGB]        =   VIDEOMODE_800x600RGB;
+        map[FC2_VIDEOMODE_800x600Y8]         =   VIDEOMODE_800x600Y8;
+        map[FC2_VIDEOMODE_800x600Y16]        =   VIDEOMODE_800x600Y16;
+        map[FC2_VIDEOMODE_1024x768YUV422]    =   VIDEOMODE_1024x768YUV422;
+        map[FC2_VIDEOMODE_1024x768RGB]       =   VIDEOMODE_1024x768RGB;
+        map[FC2_VIDEOMODE_1024x768Y8]        =   VIDEOMODE_1024x768Y8;
+        map[FC2_VIDEOMODE_1024x768Y16]       =   VIDEOMODE_1024x768Y16;
+        map[FC2_VIDEOMODE_1280x960YUV422]    =   VIDEOMODE_1280x960YUV422;
+        map[FC2_VIDEOMODE_1280x960RGB]       =   VIDEOMODE_1280x960RGB;
+        map[FC2_VIDEOMODE_1280x960Y8]        =   VIDEOMODE_1280x960Y8;
+        map[FC2_VIDEOMODE_1280x960Y16]       =   VIDEOMODE_1280x960Y16;
+        map[FC2_VIDEOMODE_1600x1200YUV422]   =   VIDEOMODE_1600x1200YUV422;
+        map[FC2_VIDEOMODE_1600x1200RGB]      =   VIDEOMODE_1600x1200RGB;
+        map[FC2_VIDEOMODE_1600x1200Y8]       =   VIDEOMODE_1600x1200Y8;
+        map[FC2_VIDEOMODE_1600x1200Y16]      =   VIDEOMODE_1600x1200Y16;
+        map[FC2_VIDEOMODE_FORMAT7]           =   VIDEOMODE_FORMAT7;
+        return map;
+    }
+
+    static std::map<fc2VideoMode, VideoMode> videoModeMap_from_fc2 = 
+        createVideoModeMap_from_fc2();
 
     VideoMode convertVideoMode_from_fc2(fc2VideoMode vidMode_fc2)
     {
-        switch (vidMode_fc2)
+        if (videoModeMap_from_fc2.count(vidMode_fc2) != 0)
         {
-            case FC2_VIDEOMODE_160x120YUV444:
-                return VIDEOMODE_160x120YUV444;
-                break;
-
-            case FC2_VIDEOMODE_320x240YUV422:
-                return VIDEOMODE_320x240YUV422;
-                break;
-
-            case FC2_VIDEOMODE_640x480YUV411:
-                return VIDEOMODE_640x480YUV411;
-                break;
-
-            case FC2_VIDEOMODE_640x480YUV422:
-                return VIDEOMODE_640x480YUV422;
-                break;
-
-            case FC2_VIDEOMODE_640x480RGB:
-                return VIDEOMODE_640x480RGB;
-                break;
-
-            case FC2_VIDEOMODE_640x480Y8:
-                return VIDEOMODE_640x480Y8;
-                break;
-
-            case FC2_VIDEOMODE_640x480Y16:
-                return VIDEOMODE_640x480Y16;
-                break;
-
-            case FC2_VIDEOMODE_800x600YUV422:
-                return VIDEOMODE_800x600YUV422;
-                break;
-
-            case FC2_VIDEOMODE_800x600RGB:
-                return VIDEOMODE_800x600RGB;
-                break;
-
-            case FC2_VIDEOMODE_800x600Y8:
-                return VIDEOMODE_800x600Y8;
-                break;
-
-            case FC2_VIDEOMODE_800x600Y16:
-                return VIDEOMODE_800x600Y16;
-                break;
-
-            case FC2_VIDEOMODE_1024x768YUV422:
-                return VIDEOMODE_1024x768YUV422;
-                break;
-
-            case FC2_VIDEOMODE_1024x768RGB:
-                return VIDEOMODE_1024x768RGB;
-                break;
-
-            case FC2_VIDEOMODE_1024x768Y8:
-                return VIDEOMODE_1024x768Y8;
-                break;
-
-            case FC2_VIDEOMODE_1024x768Y16:
-                return VIDEOMODE_1024x768Y16;
-                break;
-
-            case FC2_VIDEOMODE_1280x960YUV422:
-                return VIDEOMODE_1280x960YUV422;
-                break;
-
-            case FC2_VIDEOMODE_1280x960RGB:
-                return VIDEOMODE_1280x960RGB;
-                break;
-
-            case FC2_VIDEOMODE_1280x960Y8:
-                return VIDEOMODE_1280x960Y8;
-                break;
-
-            case FC2_VIDEOMODE_1280x960Y16:
-                return VIDEOMODE_1280x960Y16;
-                break;
-
-            case FC2_VIDEOMODE_1600x1200YUV422:
-                return VIDEOMODE_1600x1200YUV422;
-                break;
-
-            case FC2_VIDEOMODE_1600x1200RGB:
-                return VIDEOMODE_1600x1200RGB;
-                break;
-
-            case FC2_VIDEOMODE_1600x1200Y8:
-                return VIDEOMODE_1600x1200Y8;
-                break;
-
-            case FC2_VIDEOMODE_1600x1200Y16:
-                return VIDEOMODE_1600x1200Y16;
-                break;
-
-            case FC2_VIDEOMODE_FORMAT7:
-                return VIDEOMODE_FORMAT7;
-                break;
-
-            default:
-                {
-                    std::stringstream ssError;
-                    ssError << __PRETTY_FUNCTION__;
-                    ssError << ": unable to convert FlyCapture2 VideoMode";
-                    throw RuntimeError(ERROR_FC2_CONVERT_VIDEOMODE, ssError.str());
-                }
-                break;
-
+            return videoModeMap_from_fc2[vidMode_fc2];
         }
-        return NUMBER_OF_VIDEOMODE;
+        else
+        { 
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to convert FlyCapture2 VideoMode";
+            throw RuntimeError(ERROR_FC2_CONVERT_VIDEOMODE, ssError.str());
+        }
     }
+
+    static std::map<fc2FrameRate, FrameRate> createFrameRateMap_from_fc2()
+    {
+        std::map<fc2FrameRate, FrameRate> map;
+        map[FC2_FRAMERATE_1_875]    =   FRAMERATE_1_875;
+        map[FC2_FRAMERATE_3_75]     =   FRAMERATE_3_75;
+        map[FC2_FRAMERATE_7_5]      =   FRAMERATE_7_5;
+        map[FC2_FRAMERATE_15]       =   FRAMERATE_15;
+        map[FC2_FRAMERATE_30]       =   FRAMERATE_30;
+        map[FC2_FRAMERATE_60]       =   FRAMERATE_60;
+        map[FC2_FRAMERATE_120]      =   FRAMERATE_120;
+        map[FC2_FRAMERATE_240]      =   FRAMERATE_240;
+        map[FC2_FRAMERATE_FORMAT7]  =   FRAMERATE_FORMAT7;
+        return map;
+    }
+
+    static std::map<fc2FrameRate, FrameRate> frameRateMap_from_fc2 = 
+        createFrameRateMap_from_fc2();
 
     FrameRate convertFrameRate_from_fc2(fc2FrameRate frmRate_fc2)
     {
-        switch (frmRate_fc2)
+        if (frameRateMap_from_fc2.count(frmRate_fc2) != 0)
         {
-            case FC2_FRAMERATE_1_875:
-                return FRAMERATE_1_875;
-                break;
-
-            case FC2_FRAMERATE_3_75:
-                return FRAMERATE_3_75;
-                break;
-
-            case FC2_FRAMERATE_7_5:
-                return FRAMERATE_7_5;
-                break;
-
-            case FC2_FRAMERATE_15:
-                return FRAMERATE_15;
-                break;
-
-            case FC2_FRAMERATE_30:
-                return FRAMERATE_30;
-                break;
-
-            case FC2_FRAMERATE_60:
-                return FRAMERATE_60;
-                break;
-
-            case FC2_FRAMERATE_120:
-                return FRAMERATE_120;
-                break;
-
-            case FC2_FRAMERATE_240:
-                return FRAMERATE_240;
-                break;
-
-            case FC2_FRAMERATE_FORMAT7:
-                return FRAMERATE_FORMAT7;
-                break;
-
-            default:
-                {
-                    std::stringstream ssError;
-                    ssError << __PRETTY_FUNCTION__;
-                    ssError << ": unable to convert FlyCapture2 FrameRate";
-                    throw RuntimeError(ERROR_FC2_CONVERT_VIDEOMODE, ssError.str());
-                }
-                break;
-
+            return frameRateMap_from_fc2[frmRate_fc2];
         }
-        return NUMBER_OF_FRAMERATE;
+        else
+        { 
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to convert FlyCapture2 FrameRate";
+            throw RuntimeError(ERROR_FC2_CONVERT_VIDEOMODE, ssError.str());
+        }
     }
+
+    static std::map<fc2Mode, ImageMode> createImageModeMap_from_fc2()
+    {
+        std::map<fc2Mode, ImageMode> map;
+        map[FC2_MODE_0]   =   IMAGEMODE_0;
+        map[FC2_MODE_1]   =   IMAGEMODE_1;
+        map[FC2_MODE_2]   =   IMAGEMODE_2;
+        map[FC2_MODE_3]   =   IMAGEMODE_3;
+        map[FC2_MODE_4]   =   IMAGEMODE_4;
+        map[FC2_MODE_5]   =   IMAGEMODE_5;
+        map[FC2_MODE_6]   =   IMAGEMODE_6;
+        map[FC2_MODE_7]   =   IMAGEMODE_7;
+        map[FC2_MODE_8]   =   IMAGEMODE_8;
+        map[FC2_MODE_9]   =   IMAGEMODE_9;
+        map[FC2_MODE_10]  =   IMAGEMODE_10;
+        map[FC2_MODE_11]  =   IMAGEMODE_11;
+        map[FC2_MODE_12]  =   IMAGEMODE_12;
+        map[FC2_MODE_13]  =   IMAGEMODE_13;
+        map[FC2_MODE_14]  =   IMAGEMODE_14;
+        map[FC2_MODE_15]  =   IMAGEMODE_15;
+        map[FC2_MODE_16]  =   IMAGEMODE_16;
+        map[FC2_MODE_17]  =   IMAGEMODE_17;
+        map[FC2_MODE_18]  =   IMAGEMODE_18;
+        map[FC2_MODE_19]  =   IMAGEMODE_19;
+        map[FC2_MODE_20]  =   IMAGEMODE_20;
+        map[FC2_MODE_21]  =   IMAGEMODE_21;
+        map[FC2_MODE_22]  =   IMAGEMODE_22;
+        map[FC2_MODE_23]  =   IMAGEMODE_23;
+        map[FC2_MODE_24]  =   IMAGEMODE_24;
+        map[FC2_MODE_25]  =   IMAGEMODE_25;
+        map[FC2_MODE_26]  =   IMAGEMODE_26;
+        map[FC2_MODE_27]  =   IMAGEMODE_27;
+        map[FC2_MODE_28]  =   IMAGEMODE_28;
+        map[FC2_MODE_29]  =   IMAGEMODE_29;
+        map[FC2_MODE_30]  =   IMAGEMODE_30;
+        map[FC2_MODE_31]  =   IMAGEMODE_31;
+        return map;
+    }
+
+    static std::map<fc2Mode, ImageMode> imageModeMap_from_fc2 = 
+        createImageModeMap_from_fc2();
 
     ImageMode convertImageMode_from_fc2(fc2Mode imgMode_fc2)
     {
-        switch(imgMode_fc2) 
+        if (imageModeMap_from_fc2.count(imgMode_fc2) != 0)
         {
-            case FC2_MODE_0:
-                return IMAGEMODE_0;
-                break;
-
-            case FC2_MODE_1:
-                return IMAGEMODE_1;
-                break;
-
-            case FC2_MODE_2:
-                return IMAGEMODE_2;
-                break;
-
-            case FC2_MODE_3:
-                return IMAGEMODE_3;
-                break;
-
-            case FC2_MODE_4:
-                return IMAGEMODE_4;
-                break;
-
-            case FC2_MODE_5:
-                return IMAGEMODE_5;
-                break;
-
-            case FC2_MODE_6:
-                return IMAGEMODE_6;
-                break;
-
-            case FC2_MODE_7:
-                return IMAGEMODE_7;
-                break;
-
-            case FC2_MODE_8:
-                return IMAGEMODE_8;
-                break;
-
-            case FC2_MODE_9:
-                return IMAGEMODE_9;
-                break;
-
-            case FC2_MODE_10:
-                return IMAGEMODE_10;
-                break;
-
-            case FC2_MODE_11:
-                return IMAGEMODE_11;
-                break;
-
-            case FC2_MODE_12:
-                return IMAGEMODE_12;
-                break;
-
-            case FC2_MODE_13:
-                return IMAGEMODE_13;
-                break;
-
-            case FC2_MODE_14:
-                return IMAGEMODE_14;
-                break;
-
-            case FC2_MODE_15:
-                return IMAGEMODE_15;
-                break;
-
-            case FC2_MODE_16:
-                return IMAGEMODE_16;
-                break;
-
-            case FC2_MODE_17:
-                return IMAGEMODE_17;
-                break;
-
-            case FC2_MODE_18:
-                return IMAGEMODE_18;
-                break;
-
-            case FC2_MODE_19:
-                return IMAGEMODE_19;
-                break;
-
-            case FC2_MODE_20:
-                return IMAGEMODE_20;
-                break;
-
-            case FC2_MODE_21:
-                return IMAGEMODE_21;
-                break;
-
-            case FC2_MODE_22:
-                return IMAGEMODE_22;
-                break;
-
-            case FC2_MODE_23:
-                return IMAGEMODE_23;
-                break;
-
-            case FC2_MODE_24:
-                return IMAGEMODE_24;
-                break;
-
-            case FC2_MODE_25:
-                return IMAGEMODE_25;
-                break;
-
-            case FC2_MODE_26:
-                return IMAGEMODE_26;
-                break;
-
-            case FC2_MODE_27:
-                return IMAGEMODE_27;
-                break;
-
-            case FC2_MODE_28:
-                return IMAGEMODE_28;
-                break;
-
-            case FC2_MODE_29:
-                return IMAGEMODE_29;
-                break;
-
-            case FC2_MODE_30:
-                return IMAGEMODE_30;
-                break;
-
-            case FC2_MODE_31:
-                return IMAGEMODE_31;
-                break;
-
-            default:
-                {
-                    std::stringstream ssError;
-                    ssError << __PRETTY_FUNCTION__;
-                    ssError << ": unable to convert FlyCapture2 Mode";
-                    throw RuntimeError(ERROR_FC2_CONVERT_VIDEOMODE, ssError.str());
-                }
-                break;
-
+            return imageModeMap_from_fc2[imgMode_fc2];
         }
-        return NUMBER_OF_IMAGEMODE;
+        else
+        { 
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to convert FlyCapture2 Mode";
+            throw RuntimeError(ERROR_FC2_CONVERT_VIDEOMODE, ssError.str());
+        }
     }
 
     Property convertProperty_from_fc2(fc2Property prop_fc2)
@@ -1037,536 +598,268 @@ namespace bias {
     // Mostly autogenerated. 
     // ------------------------------------------------------------------------
 
+    static std::map<fc2InterfaceType, std::string> createInterfaceTypeToStringMap_fc2()
+    {
+        std::map<fc2InterfaceType, std::string> map;
+        map[FC2_INTERFACE_IEEE1394]  =   std::string("FC2_INTERFACE_IEEE1394");
+        map[FC2_INTERFACE_USB_2]     =   std::string("FC2_INTERFACE_USB_2");
+        map[FC2_INTERFACE_USB_3]     =   std::string("FC2_INTERFACE_USB_3");
+        map[FC2_INTERFACE_GIGE]      =   std::string("FC2_INTERFACE_GIGE");
+        map[FC2_INTERFACE_UNKNOWN]   =   std::string("FC2_INTERFACE_UNKNOWN");
+        return map;
+    }
+
+    static std::map<fc2InterfaceType, std::string> interfaceTypeToStringMap_fc2 = 
+        createInterfaceTypeToStringMap_fc2();
+
     std::string getInterfaceTypeString_fc2(fc2InterfaceType ifaceType)
     {
-        switch (ifaceType) 
-        { 
-    
-            case FC2_INTERFACE_IEEE1394:
-                return std::string("FC2_INTERFACE_IEEE1394");
-                break;
-    
-            case FC2_INTERFACE_USB_2:
-                return std::string("FC2_INTERFACE_USB_2");
-                break;
-    
-            case FC2_INTERFACE_USB_3:
-                return std::string("FC2_INTERFACE_USB_3");
-                break;
-                
-            case FC2_INTERFACE_GIGE:
-                return std::string("FC2_INTERFACE_GIGE");
-                break;
-    
-            case FC2_INTERFACE_UNKNOWN:
-                return std::string("FC2_INTERFACE_UNKNOWN");
-                break;
-                
-            default:
-                return std::string("unknown fc2 interface value");
-                break;
+        if (interfaceTypeToStringMap_fc2.count(ifaceType) != 0)
+        {
+            return interfaceTypeToStringMap_fc2[ifaceType];
+        }
+        else
+        {
+            return std::string("unknown fc2 interface value");
         }
     }
 
+    static std::map<fc2PixelFormat, std::string> createPixelFormatToStringMap_fc2()
+    {
+        std::map<fc2PixelFormat, std::string> map;
+        map[FC2_PIXEL_FORMAT_MONO8] = std::string("FC2_PIXEL_FORMAT_MONO8");
+        map[FC2_PIXEL_FORMAT_411YUV8]      =   std::string("FC2_PIXEL_FORMAT_411YUV8");
+        map[FC2_PIXEL_FORMAT_422YUV8]      =   std::string("FC2_PIXEL_FORMAT_422YUV8");
+        map[FC2_PIXEL_FORMAT_444YUV8]      =   std::string("FC2_PIXEL_FORMAT_444YUV8");
+        map[FC2_PIXEL_FORMAT_RGB8]         =   std::string("FC2_PIXEL_FORMAT_RGB8");
+        map[FC2_PIXEL_FORMAT_MONO16]       =   std::string("FC2_PIXEL_FORMAT_MONO16");
+        map[FC2_PIXEL_FORMAT_RGB16]        =   std::string("FC2_PIXEL_FORMAT_RGB16");
+        map[FC2_PIXEL_FORMAT_S_MONO16]     =   std::string("FC2_PIXEL_FORMAT_S_MONO16");
+        map[FC2_PIXEL_FORMAT_S_RGB16]      =   std::string("FC2_PIXEL_FORMAT_S_RGB16");
+        map[FC2_PIXEL_FORMAT_RAW8]         =   std::string("FC2_PIXEL_FORMAT_RAW8");
+        map[FC2_PIXEL_FORMAT_RAW16]        =   std::string("FC2_PIXEL_FORMAT_RAW16");
+        map[FC2_PIXEL_FORMAT_MONO12]       =   std::string("FC2_PIXEL_FORMAT_MONO12");
+        map[FC2_PIXEL_FORMAT_RAW12]        =   std::string("FC2_PIXEL_FORMAT_RAW12");
+        map[FC2_PIXEL_FORMAT_BGR]          =   std::string("FC2_PIXEL_FORMAT_BGR");
+        map[FC2_PIXEL_FORMAT_BGRU]         =   std::string("FC2_PIXEL_FORMAT_BGRU");
+        map[FC2_PIXEL_FORMAT_RGBU]         =   std::string("FC2_PIXEL_FORMAT_RGBU");
+        map[FC2_PIXEL_FORMAT_BGR16]        =   std::string("FC2_PIXEL_FORMAT_BGR16");
+        map[FC2_PIXEL_FORMAT_BGRU16]       =   std::string("FC2_PIXEL_FORMAT_BGRU16");
+        map[FC2_PIXEL_FORMAT_422YUV8_JPEG] =   std::string("FC2_PIXEL_FORMAT_422YUV8_JPEG");
+        map[FC2_NUM_PIXEL_FORMATS]         =   std::string("FC2_NUM_PIXEL_FORMATS");
+        map[FC2_UNSPECIFIED_PIXEL_FORMAT]  =   std::string("FC2_UNSPECIFIED_PIXEL_FORMAT");
+        return map;
+    }
+
+    static std::map<fc2PixelFormat, std::string> pixelFormatToStringMap_fc2 = 
+        createPixelFormatToStringMap_fc2();
 
     std::string getPixelFormatString_fc2(fc2PixelFormat format)
     {
-        switch (format) 
+        if (pixelFormatToStringMap_fc2.count(format) != 0)
         {
-            case FC2_PIXEL_FORMAT_MONO8:
-                return std::string("FC2_PIXEL_FORMAT_MONO8");
-                break;
-
-            case FC2_PIXEL_FORMAT_411YUV8:		
-                return std::string("FC2_PIXEL_FORMAT_411YUV8");
-                break;
-
-            case FC2_PIXEL_FORMAT_422YUV8:		
-                return std::string("FC2_PIXEL_FORMAT_422YUV8");
-                break;
-
-            case FC2_PIXEL_FORMAT_444YUV8:
-                return std::string("FC2_PIXEL_FORMAT_444YUV8");
-                break;
-
-            case FC2_PIXEL_FORMAT_RGB8:
-                return std::string("FC2_PIXEL_FORMAT_RGB8");
-                break;
-
-            case FC2_PIXEL_FORMAT_MONO16:
-                return std::string("FC2_PIXEL_FORMAT_MONO16");
-                break;
-
-            case FC2_PIXEL_FORMAT_RGB16:
-                return std::string("FC2_PIXEL_FORMAT_RGB16");
-                break;
-
-            case FC2_PIXEL_FORMAT_S_MONO16:
-                return std::string("FC2_PIXEL_FORMAT_S_MONO16");
-                break;
-
-            case FC2_PIXEL_FORMAT_S_RGB16:
-                return std::string("FC2_PIXEL_FORMAT_S_RGB16");
-                break;
-
-            case FC2_PIXEL_FORMAT_RAW8:
-                return std::string("FC2_PIXEL_FORMAT_RAW8");
-                break;
-
-            case FC2_PIXEL_FORMAT_RAW16:
-                return std::string("FC2_PIXEL_FORMAT_RAW16");
-                break;
-
-            case FC2_PIXEL_FORMAT_MONO12:
-                return std::string("FC2_PIXEL_FORMAT_MONO12");
-                break;
-
-            case FC2_PIXEL_FORMAT_RAW12:
-                return std::string("FC2_PIXEL_FORMAT_RAW12");
-                break;
-
-            case FC2_PIXEL_FORMAT_BGR:
-                return std::string("FC2_PIXEL_FORMAT_BGR");
-                break;
-
-            case FC2_PIXEL_FORMAT_BGRU:
-                return std::string("FC2_PIXEL_FORMAT_BGRU");
-                break;
-
-            case FC2_PIXEL_FORMAT_RGBU:
-                return std::string("FC2_PIXEL_FORMAT_RGBU");
-                break;
-
-            case FC2_PIXEL_FORMAT_BGR16:
-                return std::string("FC2_PIXEL_FORMAT_BGR16");
-                break;
-
-            case FC2_PIXEL_FORMAT_BGRU16:
-                return std::string("FC2_PIXEL_FORMAT_BGRU16");
-                break;
-
-            case FC2_PIXEL_FORMAT_422YUV8_JPEG:
-                return std::string("FC2_PIXEL_FORMAT_422YUV8_JPEG");
-                break;
-
-            case FC2_NUM_PIXEL_FORMATS:
-                return std::string("FC2_NUM_PIXEL_FORMATS");
-                break;
-
-            case FC2_UNSPECIFIED_PIXEL_FORMAT:
-                return std::string("FC2_UNSPECIFIED_PIXEL_FORMAT");
-                break;
-
-            default:
-                return std::string("unknown fc2 pixel format");
-                break;
+            return pixelFormatToStringMap_fc2[format];
+        }
+        else
+        {
+            return std::string("unknown fc2 pixel format");
         }
     }
+
+    static std::map<fc2BayerTileFormat, std::string> createBayerTileFromatToStringMap_fc2()
+    {
+        std::map<fc2BayerTileFormat, std::string> map;
+        map[FC2_BT_NONE] = std::string("FC2_BT_NONE");
+        map[FC2_BT_RGGB] = std::string("FC2_BT_RGGB");
+        map[FC2_BT_GRBG] = std::string("FC2_BT_GRBG");
+        map[FC2_BT_GBRG] = std::string("FC2_BT_GBRG");
+        map[FC2_BT_BGGR] = std::string("FC2_BT_BGGR");
+        return map;
+    }
+
+    static std::map<fc2BayerTileFormat, std::string> bayerTileFormatToStringMap_fc2 = 
+        createBayerTileFromatToStringMap_fc2();
 
     std::string getBayerTileFormatString_fc2(fc2BayerTileFormat bayerFormat)
     {
-        switch (bayerFormat) 
+        if (bayerTileFormatToStringMap_fc2.count(bayerFormat) != 0)
         {
-            case FC2_BT_NONE: 
-                return std::string("FC2_BT_NONE");
-                break;
-
-            case FC2_BT_RGGB: 
-                return std::string("FC2_BT_RGGB");
-                break;
-
-            case FC2_BT_GRBG: 
-                return std::string("FC2_BT_GRBG");
-                break;
-
-            case FC2_BT_GBRG: 
-                return std::string("FC2_BT_GBRG");
-                break;
-
-            case FC2_BT_BGGR: 
-                return std::string("FC2_BT_BGGR");
-                break;
-
-            default:
-                return std::string("unknown fc2 bayer format");
-                break;
+            return bayerTileFormatToStringMap_fc2[bayerFormat];
+        }
+        else 
+        {
+            return std::string("unknown fc2 bayer format");
         }
     }
+
+    static std::map<fc2VideoMode, std::string> createVideoModeToStringMap_fc2()
+    {
+        std::map<fc2VideoMode, std::string> map;
+
+        map[FC2_VIDEOMODE_160x120YUV444]   =  std::string("FC2_VIDEOMODE_160x120YUV444");
+        map[FC2_VIDEOMODE_320x240YUV422]   =  std::string("FC2_VIDEOMODE_320x240YUV422");
+        map[FC2_VIDEOMODE_640x480YUV411]   =  std::string("FC2_VIDEOMODE_640x480YUV411");
+        map[FC2_VIDEOMODE_640x480YUV422]   =  std::string("FC2_VIDEOMODE_640x480YUV422");
+        map[FC2_VIDEOMODE_640x480RGB]      =  std::string("FC2_VIDEOMODE_640x480RGB");
+        map[FC2_VIDEOMODE_640x480Y8]       =  std::string("FC2_VIDEOMODE_640x480Y8");
+        map[FC2_VIDEOMODE_640x480Y16]      =  std::string("FC2_VIDEOMODE_640x480Y16");
+        map[FC2_VIDEOMODE_800x600YUV422]   =  std::string("FC2_VIDEOMODE_800x600YUV422");
+        map[FC2_VIDEOMODE_800x600RGB]      =  std::string("FC2_VIDEOMODE_800x600RGB");
+        map[FC2_VIDEOMODE_800x600Y8]       =  std::string("FC2_VIDEOMODE_800x600Y8");
+        map[FC2_VIDEOMODE_800x600Y16]      =  std::string("FC2_VIDEOMODE_800x600Y16");
+        map[FC2_VIDEOMODE_1024x768YUV422]  =  std::string("FC2_VIDEOMODE_1024x768YUV422");
+        map[FC2_VIDEOMODE_1024x768RGB]     =  std::string("FC2_VIDEOMODE_1024x768RGB");
+        map[FC2_VIDEOMODE_1024x768Y8]      =  std::string("FC2_VIDEOMODE_1024x768Y8");
+        map[FC2_VIDEOMODE_1024x768Y16]     =  std::string("FC2_VIDEOMODE_1024x768Y16");
+        map[FC2_VIDEOMODE_1280x960YUV422]  =  std::string("FC2_VIDEOMODE_1280x960YUV422");
+        map[FC2_VIDEOMODE_1280x960RGB]     =  std::string("FC2_VIDEOMODE_1280x960RGB");
+        map[FC2_VIDEOMODE_1280x960Y8]      =  std::string("FC2_VIDEOMODE_1280x960Y8");
+        map[FC2_VIDEOMODE_1280x960Y16]     =  std::string("FC2_VIDEOMODE_1280x960Y16");
+        map[FC2_VIDEOMODE_1600x1200YUV422] =  std::string("FC2_VIDEOMODE_1600x1200YUV422");
+        map[FC2_VIDEOMODE_1600x1200RGB]    =  std::string("FC2_VIDEOMODE_1600x1200RGB");
+        map[FC2_VIDEOMODE_1600x1200Y8]     =  std::string("FC2_VIDEOMODE_1600x1200Y8");
+        map[FC2_VIDEOMODE_1600x1200Y16]    =  std::string("FC2_VIDEOMODE_1600x1200Y16");
+        map[FC2_VIDEOMODE_FORMAT7]         =  std::string("FC2_VIDEOMODE_FORMAT7");
+        return map;
+    }
+
+    static std::map<fc2VideoMode, std::string> videoModeToStringMap_fc2 = 
+        createVideoModeToStringMap_fc2();
 
     std::string getVideoModeString_fc2(fc2VideoMode vidMode)
     {
-        switch (vidMode) 
+        if (videoModeToStringMap_fc2.count(vidMode) != 0)
         {
-            case FC2_VIDEOMODE_160x120YUV444:
-                return std::string("FC2_VIDEOMODE_160x120YUV444");
-                break;
-
-            case FC2_VIDEOMODE_320x240YUV422:
-                return std::string("FC2_VIDEOMODE_320x240YUV422");
-                break;
-
-            case FC2_VIDEOMODE_640x480YUV411:
-                return std::string("FC2_VIDEOMODE_640x480YUV411");
-                break;
-
-            case FC2_VIDEOMODE_640x480YUV422:
-                return std::string("FC2_VIDEOMODE_640x480YUV422");
-                break;
-
-            case FC2_VIDEOMODE_640x480RGB:
-                return std::string("FC2_VIDEOMODE_640x480RGB");
-                break;
-
-            case FC2_VIDEOMODE_640x480Y8:
-                return std::string("FC2_VIDEOMODE_640x480Y8");
-                break;
-
-            case FC2_VIDEOMODE_640x480Y16:
-                return std::string("FC2_VIDEOMODE_640x480Y16");
-                break;
-
-            case FC2_VIDEOMODE_800x600YUV422:
-                return std::string("FC2_VIDEOMODE_800x600YUV422");
-                break;
-
-            case FC2_VIDEOMODE_800x600RGB:
-                return std::string("FC2_VIDEOMODE_800x600RGB");
-                break;
-
-            case FC2_VIDEOMODE_800x600Y8:
-                return std::string("FC2_VIDEOMODE_800x600Y8");
-                break;
-
-            case FC2_VIDEOMODE_800x600Y16:
-                return std::string("FC2_VIDEOMODE_800x600Y16");
-                break;
-
-            case FC2_VIDEOMODE_1024x768YUV422:
-                return std::string("FC2_VIDEOMODE_1024x768YUV422");
-                break;
-
-            case FC2_VIDEOMODE_1024x768RGB:
-                return std::string("FC2_VIDEOMODE_1024x768RGB");
-                break;
-
-            case FC2_VIDEOMODE_1024x768Y8:
-                return std::string("FC2_VIDEOMODE_1024x768Y8");
-                break;
-
-            case FC2_VIDEOMODE_1024x768Y16:
-                return std::string("FC2_VIDEOMODE_1024x768Y16");
-                break;
-
-            case FC2_VIDEOMODE_1280x960YUV422:
-                return std::string("FC2_VIDEOMODE_1280x960YUV422");
-                break;
-
-            case FC2_VIDEOMODE_1280x960RGB:
-                return std::string("FC2_VIDEOMODE_1280x960RGB");
-                break;
-
-            case FC2_VIDEOMODE_1280x960Y8:
-                return std::string("FC2_VIDEOMODE_1280x960Y8");
-                break;
-
-            case FC2_VIDEOMODE_1280x960Y16:
-                return std::string("FC2_VIDEOMODE_1280x960Y16");
-                break;
-
-            case FC2_VIDEOMODE_1600x1200YUV422:
-                return std::string("FC2_VIDEOMODE_1600x1200YUV422");
-                break;
-
-            case FC2_VIDEOMODE_1600x1200RGB:
-                return std::string("FC2_VIDEOMODE_1600x1200RGB");
-                break;
-
-            case FC2_VIDEOMODE_1600x1200Y8:
-                return std::string("FC2_VIDEOMODE_1600x1200Y8");
-                break;
-
-            case FC2_VIDEOMODE_1600x1200Y16:
-                return std::string("FC2_VIDEOMODE_1600x1200Y16");
-                break;
-
-            case FC2_VIDEOMODE_FORMAT7:
-                return std::string("FC2_VIDEOMODE_FORMAT7");
-                break;
-
-            default:
-                return std::string("unknown fc2 video mode");
-                break;
+            return videoModeToStringMap_fc2[vidMode];
+        }
+        else
+        {
+            return std::string("unknown fc2 video mode");
         }
     }
+
+    static std::map<fc2FrameRate, std::string> createFrameRateToStringMap_fc2()
+    {
+        std::map<fc2FrameRate, std::string> map;
+        map[FC2_FRAMERATE_1_875]    =  std::string("FC2_FRAMERATE_1_875");
+        map[FC2_FRAMERATE_3_75]     =  std::string("FC2_FRAMERATE_3_75");
+        map[FC2_FRAMERATE_7_5]      =  std::string("FC2_FRAMERATE_7_5");
+        map[FC2_FRAMERATE_15]       =  std::string("FC2_FRAMERATE_15");
+        map[FC2_FRAMERATE_30]       =  std::string("FC2_FRAMERATE_30");
+        map[FC2_FRAMERATE_60]       =  std::string("FC2_FRAMERATE_60");
+        map[FC2_FRAMERATE_120]      =  std::string("FC2_FRAMERATE_120");
+        map[FC2_FRAMERATE_240]      =  std::string("FC2_FRAMERATE_240");
+        map[FC2_FRAMERATE_FORMAT7]  =  std::string("FC2_FRAMERATE_FORMAT7");
+        return map;
+    }
+
+    static std::map<fc2FrameRate, std::string> frameRateToStringMap_fc2 = 
+        createFrameRateToStringMap_fc2();
 
     std::string getFrameRateString_fc2(fc2FrameRate frmRate)
     {
-        switch (frmRate) 
+        if (frameRateToStringMap_fc2.count(frmRate) != 0) 
         {
-           
-            case FC2_FRAMERATE_1_875:
-                return std::string("FC2_FRAMERATE_1_875");
-                break;
-
-            case FC2_FRAMERATE_3_75:
-                return std::string("FC2_FRAMERATE_3_75");
-                break;
-
-            case FC2_FRAMERATE_7_5:
-                return std::string("FC2_FRAMERATE_7_5");
-                break;
-
-            case FC2_FRAMERATE_15:
-                return std::string("FC2_FRAMERATE_15");
-                break;
-
-            case FC2_FRAMERATE_30:
-                return std::string("FC2_FRAMERATE_30");
-                break;
-
-            case FC2_FRAMERATE_60:
-                return std::string("FC2_FRAMERATE_60");
-                break;
-
-            case FC2_FRAMERATE_120:
-                return std::string("FC2_FRAMERATE_120");
-                break;
-
-            case FC2_FRAMERATE_240:
-                return std::string("FC2_FRAMERATE_240");
-                break;
-
-            case FC2_FRAMERATE_FORMAT7:
-                return std::string("FC2_FRAMERATE_FORMAT7");
-                break;
-
-            default:
-                return std::string("unknown fc2 framerate");
-                break;
-
+            return frameRateToStringMap_fc2[frmRate];
+        }
+        else
+        {
+            return std::string("unknown fc2 framerate");
         }
     }
+
+    static std::map<fc2Mode, std::string> createImageModeToStringMap_fc2()
+    {
+        std::map<fc2Mode, std::string> map;
+        map[FC2_MODE_0]   =   std::string("FC2_MODE_0");
+        map[FC2_MODE_1]   =   std::string("FC2_MODE_1");
+        map[FC2_MODE_2]   =   std::string("FC2_MODE_2");
+        map[FC2_MODE_3]   =   std::string("FC2_MODE_3");
+        map[FC2_MODE_4]   =   std::string("FC2_MODE_4");
+        map[FC2_MODE_5]   =   std::string("FC2_MODE_5");
+        map[FC2_MODE_6]   =   std::string("FC2_MODE_6");
+        map[FC2_MODE_7]   =   std::string("FC2_MODE_7");
+        map[FC2_MODE_8]   =   std::string("FC2_MODE_8");
+        map[FC2_MODE_9]   =   std::string("FC2_MODE_9");
+        map[FC2_MODE_10]  =   std::string("FC2_MODE_10");
+        map[FC2_MODE_11]  =   std::string("FC2_MODE_11");
+        map[FC2_MODE_12]  =   std::string("FC2_MODE_12");
+        map[FC2_MODE_13]  =   std::string("FC2_MODE_13");
+        map[FC2_MODE_14]  =   std::string("FC2_MODE_14");
+        map[FC2_MODE_15]  =   std::string("FC2_MODE_15");
+        map[FC2_MODE_16]  =   std::string("FC2_MODE_16");
+        map[FC2_MODE_17]  =   std::string("FC2_MODE_17");
+        map[FC2_MODE_18]  =   std::string("FC2_MODE_18");
+        map[FC2_MODE_19]  =   std::string("FC2_MODE_19");
+        map[FC2_MODE_20]  =   std::string("FC2_MODE_20");
+        map[FC2_MODE_21]  =   std::string("FC2_MODE_21");
+        map[FC2_MODE_22]  =   std::string("FC2_MODE_22");
+        map[FC2_MODE_23]  =   std::string("FC2_MODE_23");
+        map[FC2_MODE_24]  =   std::string("FC2_MODE_24");
+        map[FC2_MODE_25]  =   std::string("FC2_MODE_25");
+        map[FC2_MODE_26]  =   std::string("FC2_MODE_26");
+        map[FC2_MODE_27]  =   std::string("FC2_MODE_27");
+        map[FC2_MODE_28]  =   std::string("FC2_MODE_28");
+        map[FC2_MODE_29]  =   std::string("FC2_MODE_29");
+        map[FC2_MODE_30]  =   std::string("FC2_MODE_30");
+        map[FC2_MODE_31]  =   std::string("FC2_MODE_31");
+        return map;
+    }
+
+    static std::map<fc2Mode, std::string> imageModeToStringMap_fc2 = 
+        createImageModeToStringMap_fc2();
 
     std::string getModeString_fc2(fc2Mode mode)
     {
-        switch( mode )
+
+        if (imageModeToStringMap_fc2.count(mode) != 0)
         {
-            case FC2_MODE_0:
-                return std::string("FC2_MODE_0");
-                break;
-
-            case FC2_MODE_1:
-                return std::string("FC2_MODE_1");
-                break;
-
-            case FC2_MODE_2:
-                return std::string("FC2_MODE_2");
-                break;
-
-            case FC2_MODE_3:
-                return std::string("FC2_MODE_3");
-                break;
-
-            case FC2_MODE_4:
-                return std::string("FC2_MODE_4");
-                break;
-
-            case FC2_MODE_5:
-                return std::string("FC2_MODE_5");
-                break;
-
-            case FC2_MODE_6:
-                return std::string("FC2_MODE_6");
-                break;
-
-            case FC2_MODE_7:
-                return std::string("FC2_MODE_7");
-                break;
-
-            case FC2_MODE_8:
-                return std::string("FC2_MODE_8");
-                break;
-
-            case FC2_MODE_9:
-                return std::string("FC2_MODE_9");
-                break;
-
-            case FC2_MODE_10:
-                return std::string("FC2_MODE_10");
-                break;
-
-            case FC2_MODE_11:
-                return std::string("FC2_MODE_11");
-                break;
-
-            case FC2_MODE_12:
-                return std::string("FC2_MODE_12");
-                break;
-
-            case FC2_MODE_13:
-                return std::string("FC2_MODE_13");
-                break;
-
-            case FC2_MODE_14:
-                return std::string("FC2_MODE_14");
-                break;
-
-            case FC2_MODE_15:
-                return std::string("FC2_MODE_15");
-                break;
-
-            case FC2_MODE_16:
-                return std::string("FC2_MODE_16");
-                break;
-
-            case FC2_MODE_17:
-                return std::string("FC2_MODE_17");
-                break;
-
-            case FC2_MODE_18:
-                return std::string("FC2_MODE_18");
-                break;
-
-            case FC2_MODE_19:
-                return std::string("FC2_MODE_19");
-                break;
-
-            case FC2_MODE_20:
-                return std::string("FC2_MODE_20");
-                break;
-
-            case FC2_MODE_21:
-                return std::string("FC2_MODE_21");
-                break;
-
-            case FC2_MODE_22:
-                return std::string("FC2_MODE_22");
-                break;
-
-            case FC2_MODE_23:
-                return std::string("FC2_MODE_23");
-                break;
-
-            case FC2_MODE_24:
-                return std::string("FC2_MODE_24");
-                break;
-
-            case FC2_MODE_25:
-                return std::string("FC2_MODE_25");
-                break;
-
-            case FC2_MODE_26:
-                return std::string("FC2_MODE_26");
-                break;
-
-            case FC2_MODE_27:
-                return std::string("FC2_MODE_27");
-                break;
-
-            case FC2_MODE_28:
-                return std::string("FC2_MODE_28");
-                break;
-
-            case FC2_MODE_29:
-                return std::string("FC2_MODE_29");
-                break;
-
-            case FC2_MODE_30:
-                return std::string("FC2_MODE_30");
-                break;
-
-            case FC2_MODE_31:
-                return std::string("FC2_MODE_31");
-                break;
-
-            default:
-                return std::string("uknown fc2 mode");
-
+            return imageModeToStringMap_fc2[mode];
         }
-
+        else {
+            return std::string("uknown fc2 mode");
+        }
     }
+
+    static std::map<fc2PropertyType, std::string> createPropertyTypeToStringMap_fc2()
+    {
+        std::map<fc2PropertyType, std::string> map;
+        map[FC2_BRIGHTNESS]     =   std::string("FC2_BRIGHTNESS");
+        map[FC2_AUTO_EXPOSURE]  =   std::string("FC2_AUTO_EXPOSURE");
+        map[FC2_SHARPNESS]      =   std::string("FC2_SHARPNESS");
+        map[FC2_WHITE_BALANCE]  =   std::string("FC2_WHITE_BALANCE");
+        map[FC2_HUE]            =   std::string("FC2_HUE");
+        map[FC2_SATURATION]     =   std::string("FC2_SATURATION");
+        map[FC2_GAMMA]          =   std::string("FC2_GAMMA");
+        map[FC2_IRIS]           =   std::string("FC2_IRIS");
+        map[FC2_FOCUS]          =   std::string("FC2_FOCUS");
+        map[FC2_ZOOM]           =   std::string("FC2_ZOOM");
+        map[FC2_PAN]            =   std::string("FC2_PAN");
+        map[FC2_TILT]           =   std::string("FC2_TILT");
+        map[FC2_SHUTTER]        =   std::string("FC2_SHUTTER");
+        map[FC2_GAIN]           =   std::string("FC2_GAIN");
+        map[FC2_TRIGGER_MODE]   =   std::string("FC2_TRIGGER_MODE");
+        map[FC2_TRIGGER_DELAY]  =   std::string("FC2_TRIGGER_DELAY");
+        map[FC2_FRAME_RATE]     =   std::string("FC2_FRAME_RATE");
+        map[FC2_TEMPERATURE]    =   std::string("FC2_TEMPERATURE");
+        return map;
+    }
+
+    static std::map<fc2PropertyType, std::string> propertyTypeToStringMap_fc2 =  
+        createPropertyTypeToStringMap_fc2();
 
     std::string getPropertyTypeString_fc2(fc2PropertyType propType)
     {
-        switch (propType)
+        if (propertyTypeToStringMap_fc2.count(propType) != 0)
         {
-            case FC2_BRIGHTNESS:
-                return std::string("FC2_BRIGHTNESS");
-                break;
-
-            case FC2_AUTO_EXPOSURE:
-                return std::string("FC2_AUTO_EXPOSURE");
-                break;
-
-            case FC2_SHARPNESS:
-                return std::string("FC2_SHARPNESS");
-                break;
-
-            case FC2_WHITE_BALANCE:
-                return std::string("FC2_WHITE_BALANCE");
-                break;
-
-            case FC2_HUE:
-                return std::string("FC2_HUE");
-                break;
-
-            case FC2_SATURATION:
-                return std::string("FC2_SATURATION");
-                break;
-
-            case FC2_GAMMA:
-                return std::string("FC2_GAMMA");
-                break;
-
-            case FC2_IRIS:
-                return std::string("FC2_IRIS");
-                break;
-
-            case FC2_FOCUS:
-                return std::string("FC2_FOCUS");
-                break;
-
-            case FC2_ZOOM:
-                return std::string("FC2_ZOOM");
-                break;
-
-            case FC2_PAN:
-                return std::string("FC2_PAN");
-                break;
-
-            case FC2_TILT:
-                return std::string("FC2_TILT");
-                break;
-
-            case FC2_SHUTTER:
-                return std::string("FC2_SHUTTER");
-                break;
-
-            case FC2_GAIN:
-                return std::string("FC2_GAIN");
-                break;
-
-            case FC2_TRIGGER_MODE:
-                return std::string("FC2_TRIGGER_MODE");
-                break;
-
-            case FC2_TRIGGER_DELAY:
-                return std::string("FC2_TRIGGER_DELAY");
-                break;
-
-            case FC2_FRAME_RATE:
-                return std::string("FC2_FRAME_RATE");
-                break;
-
-            case FC2_TEMPERATURE:
-                return std::string("FC2_TEMPERATURE");
-                break;
-
-            case FC2_UNSPECIFIED_PROPERTY_TYPE:
-                return std::string("FC2_UNSPECIFIED_PROPERTY_TYPE");
-                break;
+            return propertyTypeToStringMap_fc2[propType];
+        }
+        else
+        {
+            return std::string("unknown fc2 property type");
         }
     }
-}
+
+} // namespece bias
 
 #endif // #ifdef WITH_FC2

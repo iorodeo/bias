@@ -6,6 +6,7 @@
 #include <memory>
 #include <sstream>
 #include <vector>
+#include <map>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -19,10 +20,24 @@
 using namespace std;
 using namespace bias;
 
+
+//
+//std::map<int,int> createMap()
+//{
+//    std::map<int,int> m;
+//    for (int i=0; i< 10; i++) {
+//        m[i] = 2*i;
+//    }
+//    return m;
+//};
+//std::map<int,int> m = createMap(); 
+
+
+
 int main(int argc, char** argv)
 {        
     int cnt;
-    int numGrab = 2000;
+    int numGrab = 100;
     CameraFinder camFinder;
     cv::Mat image;
     cv::Mat imageScaled;
@@ -167,6 +182,11 @@ int main(int argc, char** argv)
         cnt++;
     }
     cout << "done" << endl << endl;
+
+
+
+
+
     
 
 	return 0;

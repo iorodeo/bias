@@ -1,4 +1,5 @@
 #include "utils.hpp"
+#include <map>
 #include <sstream>
 
 namespace bias
@@ -59,370 +60,173 @@ namespace bias
     // Functions for converting enumerations to strings
     // ------------------------------------------------------------------------
 
+    static std::map<VideoMode, std::string> createVideoModeToStringMap()
+    {
+        std::map<VideoMode, std::string> map;
+        map[VIDEOMODE_160x120YUV444]    =   std::string("160x120YUV444");
+        map[VIDEOMODE_320x240YUV422]    =   std::string("320x240YUV422");
+        map[VIDEOMODE_640x480YUV411]    =   std::string("640x480YUV411");
+        map[VIDEOMODE_640x480YUV422]    =   std::string("640x480YUV422");
+        map[VIDEOMODE_640x480RGB]       =   std::string("640x480RGB");
+        map[VIDEOMODE_640x480Y8]        =   std::string("640x480Y8");
+        map[VIDEOMODE_640x480Y16]       =   std::string("640x480Y16");
+        map[VIDEOMODE_800x600YUV422]    =   std::string("800x600YUV422");
+        map[VIDEOMODE_800x600RGB]       =   std::string("800x600RGB");
+        map[VIDEOMODE_800x600Y8]        =   std::string("800x600Y8");
+        map[VIDEOMODE_800x600Y16]       =   std::string("800x600Y16");
+        map[VIDEOMODE_1024x768YUV422]   =   std::string("1024x768YUV422");
+        map[VIDEOMODE_1024x768RGB]      =   std::string("1024x768RGB");
+        map[VIDEOMODE_1024x768Y8]       =   std::string("1024x768Y8");
+        map[VIDEOMODE_1024x768Y16]      =   std::string("1024x768Y16");
+        map[VIDEOMODE_1280x960YUV422]   =   std::string("1280x960YUV422");
+        map[VIDEOMODE_1280x960RGB]      =   std::string("1280x960RGB");
+        map[VIDEOMODE_1280x960Y8]       =   std::string("1280x960Y8");
+        map[VIDEOMODE_1280x960Y16]      =   std::string("1280x960Y16");
+        map[VIDEOMODE_1600x1200YUV422]  =   std::string("1600x1200YUV422");
+        map[VIDEOMODE_1600x1200RGB]     =   std::string("1600x1200RGB");
+        map[VIDEOMODE_1600x1200Y8]      =   std::string("1600x1200Y8");
+        map[VIDEOMODE_1600x1200Y16]     =   std::string("1600x1200Y16");
+        map[VIDEOMODE_FORMAT7]          =   std::string("Format7");
+        map[VIDEOMODE_UNSPECIFIED]      =   std::string("Unspecified");
+        return map;
+    };
+
+    static std::map<VideoMode, std::string> videoModeToStringMap = 
+        createVideoModeToStringMap();
+
     std::string getVideoModeString(VideoMode vidMode)
     {
-        switch (vidMode)
+        if (videoModeToStringMap.count(vidMode) != 0) 
         {
-            case VIDEOMODE_160x120YUV444: 
-                return std::string("160x120YUV444");
-                break;
-
-            case VIDEOMODE_320x240YUV422: 
-                return std::string("320x240YUV422");
-                break;
-
-            case VIDEOMODE_640x480YUV411: 
-                return std::string("640x480YUV411");
-                break;
-
-            case VIDEOMODE_640x480YUV422: 
-                return std::string("640x480YUV422");
-                break;
-
-            case VIDEOMODE_640x480RGB: 
-                return std::string("640x480RGB");
-                break;
-
-            case VIDEOMODE_640x480Y8: 
-                return std::string("640x480Y8");
-                break;
-
-            case VIDEOMODE_640x480Y16: 
-                return std::string("640x480Y16");
-                break;
-
-            case VIDEOMODE_800x600YUV422: 
-                return std::string("800x600YUV422");
-                break;
-
-            case VIDEOMODE_800x600RGB: 
-                return std::string("800x600RGB");
-                break;
-
-            case VIDEOMODE_800x600Y8: 
-                return std::string("800x600Y8");
-                break;
-
-            case VIDEOMODE_800x600Y16: 
-                return std::string("800x600Y16");
-                break;
-
-            case VIDEOMODE_1024x768YUV422: 
-                return std::string("1024x768YUV422");
-                break;
-
-            case VIDEOMODE_1024x768RGB: 
-                return std::string("1024x768RGB");
-                break;
-
-            case VIDEOMODE_1024x768Y8: 
-                return std::string("1024x768Y8");
-                break;
-
-            case VIDEOMODE_1024x768Y16: 
-                return std::string("1024x768Y16");
-                break;
-
-            case VIDEOMODE_1280x960YUV422: 
-                return std::string("1280x960YUV422");
-                break;
-
-            case VIDEOMODE_1280x960RGB: 
-                return std::string("1280x960RGB");
-                break;
-
-            case VIDEOMODE_1280x960Y8: 
-                return std::string("1280x960Y8");
-                break;
-
-            case VIDEOMODE_1280x960Y16: 
-                return std::string("1280x960Y16");
-                break;
-
-            case VIDEOMODE_1600x1200YUV422: 
-                return std::string("1600x1200YUV422");
-                break;
-
-            case VIDEOMODE_1600x1200RGB: 
-                return std::string("1600x1200RGB");
-                break;
-
-            case VIDEOMODE_1600x1200Y8: 
-                return std::string("1600x1200Y8");
-                break;
-
-            case VIDEOMODE_1600x1200Y16: 
-                return std::string("1600x1200Y16");
-                break;
-
-            case VIDEOMODE_FORMAT7: 
-                return std::string("Format7");
-                break;
-
-            case VIDEOMODE_UNSPECIFIED:
-                return std::string("Unspecified");
-                break;
-                
-            default:
-                {
-                    std::stringstream ssMsg;
-                    ssMsg << "uknown videoMode: " << vidMode;
-                    return ssMsg.str();
-                }
-                break;
+            return videoModeToStringMap[vidMode];
         }
-        std::stringstream ssMsg;
-        ssMsg << "error: " << __PRETTY_FUNCTION__ << " we shouldn't be here";
-        return ssMsg.str();
+        else 
+        { 
+            std::stringstream ssMsg;
+            ssMsg << "uknown videoMode: " << vidMode;
+            return ssMsg.str();
+        }
     }
+
+    static std::map<FrameRate, std::string> createFrameRateToStringMap()
+    {
+        std::map<FrameRate, std::string> map;
+
+        map[FRAMERATE_1_875]        =   std::string("1.875");
+        map[FRAMERATE_3_75]         =   std::string("3.75");
+        map[FRAMERATE_7_5]          =   std::string("7.5");
+        map[FRAMERATE_15]           =   std::string("15");
+        map[FRAMERATE_30]           =   std::string("30");
+        map[FRAMERATE_60]           =   std::string("60");
+        map[FRAMERATE_120]          =   std::string("120");
+        map[FRAMERATE_240]          =   std::string("240");
+        map[FRAMERATE_FORMAT7]      =   std::string("Format7");
+        map[FRAMERATE_UNSPECIFIED ] =   std::string("Unspecified");
+        return map;
+    };
+
+    static std::map<FrameRate, std::string> frameRateToStringMap = 
+        createFrameRateToStringMap();
 
     std::string getFrameRateString(FrameRate frmRate)
     {
-        switch (frmRate)
+        if (frameRateToStringMap.count(frmRate) != 0) 
         {
-            case FRAMERATE_1_875: 
-                return std::string("1.875");
-                break;
-
-            case FRAMERATE_3_75: 
-                return std::string("3.75");
-                break;
-
-            case FRAMERATE_7_5: 
-                return std::string("7.5");
-                break;
-
-            case FRAMERATE_15: 
-                return std::string("15");
-                break;
-
-            case FRAMERATE_30: 
-                return std::string("30");
-                break;
-
-            case FRAMERATE_60: 
-                return std::string("60");
-                break;
-
-            case FRAMERATE_120: 
-                return std::string("120");
-                break;
-
-            case FRAMERATE_240: 
-                return std::string("240");
-                break;
-
-            case FRAMERATE_FORMAT7: 
-                return std::string("Format7");
-                break;
-
-            case FRAMERATE_UNSPECIFIED:
-                return std::string("Unspecified");
-                break;
-
-            default:
-                {
-                    std::stringstream ssMsg;
-                    ssMsg << "uknown frmRate: " << frmRate;
-                    return ssMsg.str();
-                }
-                break;
+            return frameRateToStringMap[frmRate];
         }
-        return std::string("error: getFrameRateString()");
+        else
+        { 
+            std::stringstream ssMsg;
+            ssMsg << "uknown frmRate: " << frmRate;
+            return ssMsg.str();
+        }
     }
+
+
+    static std::map<PropertyType, std::string> createPropertyTypeToStringMap()
+    {
+        std::map<PropertyType, std::string> map;
+        map[PROPERTY_TYPE_BRIGHTNESS]     =  std::string("Brightness");
+        map[PROPERTY_TYPE_AUTO_EXPOSURE]  =  std::string("Auto Exposure");
+        map[PROPERTY_TYPE_SHARPNESS]      =  std::string("Sharpness");
+        map[PROPERTY_TYPE_WHITE_BALANCE]  =  std::string("White Balance");
+        map[PROPERTY_TYPE_HUE]            =  std::string("Hue");
+        map[PROPERTY_TYPE_SATURATION]     =  std::string("Saturation");
+        map[PROPERTY_TYPE_GAMMA]          =  std::string("Gamma");
+        map[PROPERTY_TYPE_IRIS]           =  std::string("Iris");
+        map[PROPERTY_TYPE_FOCUS]          =  std::string("Focus");
+        map[PROPERTY_TYPE_ZOOM]           =  std::string("Zoom");
+        map[PROPERTY_TYPE_PAN]            =  std::string("Pan");
+        map[PROPERTY_TYPE_TILT]           =  std::string("Tilt");
+        map[PROPERTY_TYPE_SHUTTER]        =  std::string("Shutter");
+        map[PROPERTY_TYPE_GAIN]           =  std::string("Gain");
+        map[PROPERTY_TYPE_TRIGGER_MODE]   =  std::string("Trigger Mode");
+        map[PROPERTY_TYPE_TRIGGER_DELAY]  =  std::string("Trigger Delay");
+        map[PROPERTY_TYPE_FRAME_RATE]     =  std::string("Frame Rate");
+        map[PROPERTY_TYPE_TEMPERATURE]    =  std::string("Temperature");
+        map[PROPERTY_TYPE_UNSPECIFIED]    =  std::string("Unspecified");
+        return map;
+    }
+
+    static std::map<PropertyType, std::string> propertyTypeToStringMap = 
+        createPropertyTypeToStringMap();
 
     std::string getPropertyTypeString(PropertyType propType)
     {
-        switch(propType)
+        if (propertyTypeToStringMap.count(propType) != 0)
         {
-            case PROPERTY_TYPE_BRIGHTNESS: 
-                return std::string("Brightness");
-                break;
-
-            case PROPERTY_TYPE_AUTO_EXPOSURE:
-                return std::string("Auto Exposure");
-                break;
-
-            case PROPERTY_TYPE_SHARPNESS:
-                return std::string("Sharpness");
-                break;
-
-            case PROPERTY_TYPE_WHITE_BALANCE:
-                return std::string("White Balance");
-                break;
-
-            case PROPERTY_TYPE_HUE:
-                return std::string("Hue");
-                break;
-
-            case PROPERTY_TYPE_SATURATION:
-                return std::string("Saturation");
-                break;
-
-            case PROPERTY_TYPE_GAMMA:
-                return std::string("Gamma");
-                break;
-
-            case PROPERTY_TYPE_IRIS:
-                return std::string("Iris");
-                break;
-
-            case PROPERTY_TYPE_FOCUS:
-                return std::string("Focus");
-                break;
-
-            case PROPERTY_TYPE_ZOOM:
-                return std::string("Zoom");
-                break;
-
-            case PROPERTY_TYPE_PAN:
-                return std::string("Pan");
-                break;
-
-            case PROPERTY_TYPE_TILT:
-                return std::string("Tilt");
-                break;
-
-            case PROPERTY_TYPE_SHUTTER:
-                return std::string("Shutter");
-                break;
-
-            case PROPERTY_TYPE_GAIN:
-                return std::string("Gain");
-                break;
-
-            case PROPERTY_TYPE_TRIGGER_MODE:
-                return std::string("Trigger Mode");
-                break;
-
-            case PROPERTY_TYPE_TRIGGER_DELAY:
-                return std::string("Trigger Delay");
-                break;
-
-            case PROPERTY_TYPE_FRAME_RATE:
-                return std::string("Frame Rate");
-                break;
-
-            case PROPERTY_TYPE_TEMPERATURE:
-                return std::string("Temperature");
-                break;
-
-            case PROPERTY_TYPE_UNSPECIFIED:
-                return std::string("Unspecified");
-
-            default:
-                {
-                    std::stringstream ssMsg;
-                    ssMsg << ": unknown PropertyType " << propType;
-                    return ssMsg.str();
-                }
-                break;
+            return propertyTypeToStringMap[propType];
+        } 
+        else
+        { 
+            std::stringstream ssMsg;
+            ssMsg << ": unknown PropertyType " << propType;
+            return ssMsg.str();
         }
-        std::stringstream ssMsg;
-        ssMsg << "error: " << __PRETTY_FUNCTION__ << " we shouldn't be here";
-        return ssMsg.str();
     }
+
+    static std::map<PixelFormat, std::string> createPixelFormatToStringMap()
+    {
+        std::map<PixelFormat, std::string> map;
+        map[PIXEL_FORMAT_MONO8]         =   std::string("MONO8");
+        map[PIXEL_FORMAT_411YUV8]       =   std::string("411YUV8");
+        map[PIXEL_FORMAT_422YUV8]       =   std::string("422YUV8");
+        map[PIXEL_FORMAT_444YUV8]       =   std::string("444YUV8");
+        map[PIXEL_FORMAT_RGB8]          =   std::string("RGB8");
+        map[PIXEL_FORMAT_MONO16]        =   std::string("MONO16");
+        map[PIXEL_FORMAT_RGB16]         =   std::string("RGB16");
+        map[PIXEL_FORMAT_S_MONO16]      =   std::string("S_MONO16");
+        map[PIXEL_FORMAT_S_RGB16]       =   std::string("S_RGB16");
+        map[PIXEL_FORMAT_RAW8]          =   std::string("RAW8");
+        map[PIXEL_FORMAT_RAW16]         =   std::string("RAW16");
+        map[PIXEL_FORMAT_MONO12]        =   std::string("MONO12");
+        map[PIXEL_FORMAT_RAW12]         =   std::string("RAW12");
+        map[PIXEL_FORMAT_BGR]           =   std::string("BGR");
+        map[PIXEL_FORMAT_BGRU]          =   std::string("BGRU");
+        map[PIXEL_FORMAT_RGB]           =   std::string("RGB");
+        map[PIXEL_FORMAT_RGBU]          =   std::string("RGBU");
+        map[PIXEL_FORMAT_BGR16]         =   std::string("BGR16");
+        map[PIXEL_FORMAT_BGRU16]        =   std::string("BGRU16");
+        map[PIXEL_FORMAT_422YUV8_JPEG]  =   std::string("422YUV8_JPEG");
+        map[PIXEL_FORMAT_UNSPECIFIED]   =   std::string("Unspecified");
+        return map;
+    };
+
+    static std::map<PixelFormat, std::string> pixelFormatToStringMap = 
+        createPixelFormatToStringMap();
 
     std::string getPixelFormatString(PixelFormat pixFormat)
     {
-        switch(pixFormat)
+        if (pixelFormatToStringMap.count(pixFormat) != 0) 
         {
-            case PIXEL_FORMAT_MONO8:
-                return std::string("MONO8");
-                break;
-
-            case PIXEL_FORMAT_411YUV8:
-                return std::string("411YUV8");
-                break;
-
-            case PIXEL_FORMAT_422YUV8:
-                return std::string("422YUV8");
-                break;
-
-            case PIXEL_FORMAT_444YUV8:
-                return std::string("444YUV8");
-                break;
-
-            case PIXEL_FORMAT_RGB8:
-                return std::string("RGB8");
-                break;
-
-            case PIXEL_FORMAT_MONO16:
-                return std::string("MONO16");
-                break;
-
-            case PIXEL_FORMAT_RGB16:
-                return std::string("RGB16");
-                break;
-
-            case PIXEL_FORMAT_S_MONO16:
-                return std::string("S_MONO16");
-                break;
-
-            case PIXEL_FORMAT_S_RGB16:
-                return std::string("S_RGB16");
-                break;
-
-            case PIXEL_FORMAT_RAW8:
-                return std::string("RAW8");
-                break;
-
-            case PIXEL_FORMAT_RAW16:
-                return std::string("RAW16");
-                break;
-
-            case PIXEL_FORMAT_MONO12:
-                return std::string("MONO12");
-                break;
-
-            case PIXEL_FORMAT_RAW12:
-                return std::string("RAW12");
-                break;
-
-            case PIXEL_FORMAT_BGR:
-                return std::string("BGR");
-                break;
-
-            case PIXEL_FORMAT_BGRU:
-                return std::string("BGRU");
-                break;
-
-            case PIXEL_FORMAT_RGB:
-                return std::string("RGB");
-                break;
-
-            case PIXEL_FORMAT_RGBU:
-                return std::string("RGBU");
-                break;
-
-            case PIXEL_FORMAT_BGR16:
-                return std::string("BGR16");
-                break;
-
-	        case PIXEL_FORMAT_BGRU16:
-                return std::string("BGRU16");
-                break;
-
-            case PIXEL_FORMAT_422YUV8_JPEG:
-                return std::string("422YUV8_JPEG");
-                break;
-
-            case PIXEL_FORMAT_UNSPECIFIED:
-                return std::string("Unspecified");
-                break;
-
-            default:
-                {
-                    std::stringstream ssMsg;
-                    ssMsg << ": unknown PixelFormat " << pixFormat;
-                    return ssMsg.str();
-                }
-                break;
+            return pixelFormatToStringMap[pixFormat];
         }
-        std::stringstream ssMsg;
-        ssMsg << "error: " << __PRETTY_FUNCTION__ << " we shouldn't be here";
-        return ssMsg.str();
+        else 
+        { 
+            std::stringstream ssMsg;
+            ssMsg << ": unknown PixelFormat " << pixFormat; 
+            return ssMsg.str();
+        }
     }
-
 
 } // namespase bias
