@@ -22,6 +22,8 @@ namespace bias {
 
     fc2Property convertProperty_to_fc2(Property prop);
 
+    fc2PixelFormat convertPixelFormat_to_fc2(PixelFormat pixFormat);
+
     // Conversion from FlyCapture2 types to BIAS types
     // ------------------------------------------------------------------------
 
@@ -36,6 +38,8 @@ namespace bias {
     Property convertProperty_from_fc2(fc2Property prop_fc2); 
 
     PropertyInfo convertPropertyInfo_from_fc2(fc2PropertyInfo propInfo_fc2); 
+
+    PixelFormat convertPixelFormat_from_fc2(fc2PixelFormat pixFormat_fc2);
 
 
     // Print functions for FlyCapture2 configurations, settings and info
@@ -61,6 +65,10 @@ namespace bias {
 
     void printProperty_fc2(fc2Property &prop);
 
+    void printTriggerMode_fc2(fc2TriggerMode &trigMode);
+
+    void printTriggerModeInfo_fc2(fc2TriggerModeInfo &trigModeInfo);
+
 
     // FlyCapture2 enumeration to string converstions
     // ------------------------------------------------------------------------
@@ -78,6 +86,7 @@ namespace bias {
     std::string getModeString_fc2(fc2Mode mode);
 
     std::string getPropertyTypeString_fc2(fc2PropertyType propType);
+
 
 }
 

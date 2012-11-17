@@ -49,11 +49,15 @@ namespace bias {
 
             virtual Property getProperty(PropertyType propType);
             virtual PropertyInfo getPropertyInfo(PropertyType propType);
+            virtual ImageInfo getImageInfo();
 
             virtual void setProperty(Property prop);
-            virtual void setVideoMode(VideoMode vidMode);
-            virtual void setFrameRate(FrameRate frmRate);
-            virtual void setImageMode(ImageMode imgMode);
+            virtual void setVideoMode(VideoMode vidMode, FrameRate frmRate);
+            virtual void setFormat7ImageMode(ImageMode imgMode); // TO DO //
+
+            virtual void setTriggerInternal();
+            virtual void setTriggerExternal();
+            virtual TriggerType getTriggerType();
             
             virtual std::string toString();
             virtual void printGuid();
@@ -69,7 +73,6 @@ namespace bias {
             bool rawImageCreated_;
             bool convertedImageCreated_;
 
-            fc2PGRGuid getGuid_fc2();
 
             void createRawImage();
             void destroyRawImage();
@@ -80,14 +83,25 @@ namespace bias {
 
             void createPropertyMap();
 
+            // fc2 get methods
+            // ---------------
+            fc2PGRGuid getGuid_fc2();
             void getVideoModeAndFrameRate(fc2VideoMode &vidMode, fc2FrameRate &frmRate);
             fc2PropertyInfo getPropertyInfo_fc2(fc2PropertyType propType);
             fc2Property getProperty_fc2(fc2PropertyType propType);
             fc2Format7Configuration getFormat7Configuration();
+            fc2TriggerMode getTriggerMode_fc2();
+            fc2TriggerModeInfo getTriggerModeInfo_fc2();
+
+            // fc2 set methods
+            // ---------------
+            void setProperty(fc2Property prop);
+            void setTriggerMode(fc2TriggerMode trigMode);
 
             // Temporary 
             // --------------------------------------------
-            void temp_SetVideoMode_Format7Mode0();
+            void setVideoModeToFormat7(ImageMode mode);
+            void setVideoModeToFormat7(fc2Mode mode);
 
     };
 

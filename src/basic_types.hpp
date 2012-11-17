@@ -25,6 +25,10 @@ namespace bias {
         ERROR_CAMERA_LIB_UNKNOWN,
         ERROR_CAMERA_LIB_UNDEFINED,
 
+        // 
+        ERROR_INVALID_FRAMERATE,
+        ERROR_NO_FRAMERATE_FOR_VIDEOMODE,
+
         // FlyCapture2 specific errors
         ERROR_NO_FC2,
         ERROR_FC2_CREATE_CONTEXT,
@@ -54,11 +58,17 @@ namespace bias {
         ERROR_FC2_GET_PROPERTY_INFO,
         ERROR_FC2_GET_PROPERTY,
         ERROR_FC2_SET_PROPERTY,
+        ERROR_FC2_SET_VIDEOMODE_AND_FRAMERATE,
+        ERROR_FC2_SET_VIDEOMODE_FORMAT7,
+        ERROR_FC2_GET_TRIGGER_MODE,
+        ERROR_FC2_GET_TRIGGER_MODE_INFO,
+        ERROR_FC2_SET_TRIGGER_MODE,
 
         ERROR_FC2_CONVERT_PROPERTY_TYPE,
         ERROR_FC2_CONVERT_FRAMERATE,
         ERROR_FC2_CONVERT_VIDEOMODE,
         ERROR_FC2_CONVERT_IMAGEMODE,
+        ERROR_FC2_CONVERT_PIXEL_FORMAT,
 
         // Libdc1394 specific errors
         ERROR_NO_DC1394,
@@ -228,6 +238,21 @@ namespace bias {
 
     typedef std::list<PixelFormat> PixelFormatList;
     typedef std::set<PixelFormat> PixleFormatSet;
+
+    struct ImageInfo 
+    {
+        unsigned int rows;
+        unsigned int cols;
+        unsigned int stride;
+        unsigned int dataSize;
+        PixelFormat pixelFormat;
+    };
+
+    enum TriggerType
+    {
+        TRIGGER_INTERNAL,
+        TRIGGER_EXTERNAL
+    };
 
 } // namespace bias
 

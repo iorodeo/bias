@@ -1,6 +1,8 @@
 #include "utils.hpp"
+#include "exception.hpp"
 #include <map>
 #include <sstream>
+#include <iostream>
 
 namespace bias
 {
@@ -226,6 +228,53 @@ namespace bias
             std::stringstream ssMsg;
             ssMsg << ": unknown PixelFormat " << pixFormat; 
             return ssMsg.str();
+        }
+    }
+
+    std::string getImageInfoString(ImageInfo imgInfo)
+    {
+        std::stringstream ss;
+        ss << "cols:         " << imgInfo.cols << std::endl;
+        ss << "rows:         " << imgInfo.rows << std::endl;
+        ss << "stride:       " << imgInfo.stride << std::endl;
+        ss << "dataSize:     " << imgInfo.dataSize << std::endl;
+        ss << "pixelFormat:  " << getPixelFormatString(imgInfo.pixelFormat);
+        ss << std::endl;
+        return ss.str();
+    }
+
+    // ------------------------------------------------------------------------
+    
+    static std::map<FrameRate, float> createFrameRateToFloatMap()
+    {
+        std::map<FrameRate, float> map;
+        map[FRAMERATE_1_875] =   1.875;
+        map[FRAMERATE_3_75]  =   3.75;
+        map[FRAMERATE_7_5]   =   7.5;
+        map[FRAMERATE_15]    =   15.0;
+        map[FRAMERATE_30]    =   30.0;
+        map[FRAMERATE_60]    =   60.0;
+        map[FRAMERATE_120]   =   120.0;
+        map[FRAMERATE_240]   =   240.0;
+        return map;
+    }
+
+    static std::map<FrameRate, float> frameRateToFloatMap = 
+        createFrameRateToFloatMap();
+
+    float getFrameRateAsFloat(FrameRate frmRate)
+    {
+        std::cout << frmRate << std::endl;
+        if (frameRateToFloatMap.count(frmRate)!=0)
+        {
+            return frameRateToFloatMap[frmRate];
+        }
+        else
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to convert FrameRate to float";
+            throw RuntimeError(ERROR_INVALID_FRAMERATE, ssError.str());
         }
     }
 

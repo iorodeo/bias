@@ -48,6 +48,8 @@ namespace bias {
             FrameRateList getAllowedFrameRates(VideoMode videoMode);
             ImageModeList getAllowedImageModes();
 
+            ImageInfo getImageInfo();
+
             Property getProperty(PropertyType propType);
             PropertyMap getMapOfProperties();
             PropertyList getListOfProperties();
@@ -85,9 +87,16 @@ namespace bias {
             void setValue(PropertyType propType, unsigned int value);
             void setAbsoluteValue(PropertyType propType, float absValue);
             
-            void setVideoMode(VideoMode videoMode) {}; // TO DO //
-            void setFrameRate(FrameRate frameRate) {}; // TO DO //
-            void setImageMode(ImageMode imageMode) {}; // TO DO //
+            void setVideoMode(VideoMode vidMode);
+            void setVideoMode(VideoMode vidMode, FrameRate frmRate);
+            void setFrameRate(FrameRate frmRate); 
+
+            void setTriggerInternal();
+            void setTriggerExternal();
+            TriggerType getTriggerType();
+
+            void setFormat7ImageMode(ImageMode imgMode) {}; // TO DO //
+            void setFormat7PixelFormat(PixelFormat pixFormat) {}; // TO DO //
 
             std::string getPropertyString(PropertyType propType);
             std::string getPropertyInfoString(PropertyType propType);
@@ -98,6 +107,7 @@ namespace bias {
             void printPropertyInfo(PropertyType propType);
             void printAllProperties();
             void printAllPropertyInfos();
+            void printImageInfo();
 
             friend std::ostream& operator<< (std::ostream &out, Camera &camera);
 

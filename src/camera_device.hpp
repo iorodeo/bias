@@ -46,11 +46,15 @@ namespace bias
 
             virtual Property getProperty(PropertyType propType);
             virtual PropertyInfo getPropertyInfo(PropertyType propType);
+            virtual ImageInfo getImageInfo();
 
             virtual void setProperty(Property prop) {};
-            virtual void setVideoMode(VideoMode vidMode) {};
-            virtual void setFrameRate(FrameRate frmRate) {};
-            virtual void setImageMode(ImageMode imgMode) {};
+            virtual void setVideoMode(VideoMode vidMode, FrameRate frmRate) {};
+            virtual void setFormat7ImageMode(ImageMode imgMode) {};
+
+            virtual void setTriggerInternal() {};
+            virtual void setTriggerExternal() {};
+            virtual TriggerType getTriggerType();
 
             virtual std::string toString(); 
 

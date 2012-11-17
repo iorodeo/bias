@@ -89,6 +89,16 @@ namespace bias
         return PropertyInfo();
     }
 
+    ImageInfo CameraDevice::getImageInfo()
+    {
+        return ImageInfo();
+    }
+
+    TriggerType CameraDevice::getTriggerType()
+    {
+        return TRIGGER_INTERNAL;
+    }
+
     std::string CameraDevice::toString() 
     {
         return std::string("camera not defined");

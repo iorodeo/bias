@@ -130,6 +130,11 @@ namespace bias {
         return cameraDevicePtr_ -> getAllowedImageModes();
     }
 
+    ImageInfo Camera::getImageInfo()
+    {
+        return cameraDevicePtr_ -> getImageInfo();
+    }
+
     Property Camera::getProperty(PropertyType propType)
     {
         return cameraDevicePtr_ -> getProperty(propType);
@@ -354,11 +359,75 @@ namespace bias {
         property.absoluteValue = absValue;
     } 
 
+
+    void Camera::setVideoMode(VideoMode vidMode) 
+    {
+        FrameRate frmRate;
+
+        if (vidMode == VIDEOMODE_FORMAT7) 
+        {
+            frmRate = FRAMERATE_FORMAT7;
+        }
+        else
+        {
+            // Get list of allowed frame rates for this video mode
+            FrameRateList frmRateList = getAllowedFrameRates(vidMode);
+            if (frmRateList.empty()) 
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to set Video mode, no allowed FrameRate";
+                throw RuntimeError(ERROR_NO_FRAMERATE_FOR_VIDEOMODE, ssError.str());
+            }
+
+            //find maximum frame rate possible for this video mode.
+            frmRate= frmRateList.front();
+            for (
+                    FrameRateList::iterator it = frmRateList.begin();
+                    it != frmRateList.end();
+                    it++
+                )
+            {
+                FrameRate itemFrmRate = *it;
+                if (itemFrmRate == FRAMERATE_FORMAT7) { continue; }
+                float itemValue = getFrameRateAsFloat(itemFrmRate);
+                float currValue = getFrameRateAsFloat(frmRate);
+                frmRate= itemValue >= currValue ? itemFrmRate : frmRate;
+            }
+        }
+        setVideoMode(vidMode,frmRate);
+    } 
+
+    void Camera::setVideoMode(VideoMode vidMode, FrameRate frmRate) 
+    {
+        cameraDevicePtr_ -> setVideoMode(vidMode, frmRate);
+    } 
+
+    void Camera::setFrameRate(FrameRate frmRate)
+    {
+        VideoMode vidMode = getVideoMode();
+        setVideoMode(vidMode, frmRate);
+    }
+
+    void Camera::setTriggerInternal()
+    {
+        cameraDevicePtr_ -> setTriggerInternal();
+    }
+
+    void Camera::setTriggerExternal()
+    {
+        cameraDevicePtr_ -> setTriggerExternal();
+    }
+
+    TriggerType Camera::getTriggerType()
+    {
+        return cameraDevicePtr_ -> getTriggerType();
+    }
+
     std::string Camera::getPropertyString(PropertyType propType)
     {
         Property prop = getProperty(propType);
         return prop.toString();
-        
     }
 
     std::string Camera::getPropertyInfoString(PropertyType propType) 
@@ -413,6 +482,17 @@ namespace bias {
             PropertyType propType = *it;
             printPropertyInfo(propType);
         }
+    }
+
+    void Camera::printImageInfo()
+    {
+        ImageInfo imgInfo = getImageInfo();
+        std::cout << std::endl;
+        std::cout << "-----------------" << std::endl;
+        std::cout << "Camera ImageInfo " << std::endl;
+        std::cout << "-----------------" << std::endl;
+        std::cout << std::endl;
+        std::cout << getImageInfoString(imgInfo);
     }
 
     // FlyCapture2 specific methods

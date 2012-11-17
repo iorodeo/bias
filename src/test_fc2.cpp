@@ -20,30 +20,18 @@
 using namespace std;
 using namespace bias;
 
-
-//
-//std::map<int,int> createMap()
-//{
-//    std::map<int,int> m;
-//    for (int i=0; i< 10; i++) {
-//        m[i] = 2*i;
-//    }
-//    return m;
-//};
-//std::map<int,int> m = createMap(); 
-
-
-
 int main(int argc, char** argv)
 {        
     int cnt;
-    int numGrab = 100;
+    int numGrab = 15;
     CameraFinder camFinder;
     cv::Mat image;
     cv::Mat imageScaled;
     std::vector<std::string> windowNames;
 
-    // Create and Connect cameras
+    cout << endl;
+
+    // Create and Connect cameras - set videomode
     // ------------------------------------------------------------------------
     cnt = 0;
     CameraPtrList camPtrList = camFinder.createCameraPtrList();
@@ -55,6 +43,8 @@ int main(int argc, char** argv)
     {
         CameraPtr camPtr = *it;
         camPtr -> connect();
+        camPtr -> setVideoMode(VIDEOMODE_FORMAT7);
+        camPtr -> setTriggerInternal();
     }
 
     // Create opencv named windows
@@ -73,47 +63,56 @@ int main(int argc, char** argv)
 
     // Print camera information
     // ------------------------------------------------------------------------
-    cnt = 0;
-    for (
-            CameraPtrList::iterator it=camPtrList.begin(); 
-            it!=camPtrList.end(); 
-            it++
-        ) 
+    if (false) 
     {
-        cout << endl << "Camera " << cnt << endl;
-        CameraPtr camPtr = *it;
-        camPtr -> printInfo();
-        cnt++;
+        cnt = 0;
+        for (
+                CameraPtrList::iterator it=camPtrList.begin(); 
+                it!=camPtrList.end(); 
+                it++
+            ) 
+        {
+            cout << endl << "Camera " << cnt << endl;
+            CameraPtr camPtr = *it;
+            camPtr -> printInfo();
+            cnt++;
+        }
     }
 
     // Print Property information for all cameras
     // ------------------------------------------------------------------------
-    cnt = 0;
-    for (
-            CameraPtrList::iterator it=camPtrList.begin();
-            it!=camPtrList.end();
-            it++
-        )
+    if (false) 
     {
-        cout << endl << "Camera " << cnt << " Property Information" << endl;
-        CameraPtr camPtr = *it;
-        camPtr -> printAllPropertyInfos();
-        cnt++;
+        cnt = 0;
+        for (
+                CameraPtrList::iterator it=camPtrList.begin();
+                it!=camPtrList.end();
+                it++
+            )
+        {
+            cout << endl << "Camera " << cnt << " Property Information" << endl;
+            CameraPtr camPtr = *it;
+            camPtr -> printAllPropertyInfos();
+            cnt++;
+        }
     }
 
     // Print property values for all cameras
     // ------------------------------------------------------------------------
-    cnt = 0;
-    for (
-            CameraPtrList::iterator it=camPtrList.begin();
-            it!=camPtrList.end();
-            it++
-        )
+    if (false)
     {
-        cout << endl << "Camera " << cnt << " Property Values" << endl;
-        CameraPtr camPtr = *it;
-        camPtr -> printAllProperties();
-        cnt++;
+        cnt = 0;
+        for (
+                CameraPtrList::iterator it=camPtrList.begin();
+                it!=camPtrList.end();
+                it++
+            )
+        {
+            cout << endl << "Camera " << cnt << " Property Values" << endl;
+            CameraPtr camPtr = *it;
+            camPtr -> printAllProperties();
+            cnt++;
+        }
     }
 
     // Start capture on cameras
@@ -127,8 +126,8 @@ int main(int argc, char** argv)
         ) 
     {
         cout << cnt << " ";
-        CameraPtr cameraPtr = *it;
-        cameraPtr -> startCapture();
+        CameraPtr camPtr = *it;
+        camPtr -> startCapture();
         cnt++;
     }
     cout << "done" << endl;
@@ -184,10 +183,6 @@ int main(int argc, char** argv)
     cout << "done" << endl << endl;
 
 
-
-
-
-    
 
 	return 0;
 }

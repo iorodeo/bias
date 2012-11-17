@@ -79,7 +79,6 @@ namespace bias {
                 ssError << ": unabled to got FlyCapture2 camera info";
                 throw RuntimeError(ERROR_FC2_GET_CAMERA_INFO, ssError.str());
             }
-
         }
     }
 
@@ -114,9 +113,6 @@ namespace bias {
         {
             createRawImage();
             createConvertedImage();
-
-            // Temporary - for now just pick a video mode which works.
-            temp_SetVideoMode_Format7Mode0();
 
             fc2Error error = fc2StartCapture(context_);
             if (error != FC2_ERROR_OK) 
@@ -160,19 +156,24 @@ namespace bias {
 
         grabImageCommon();
 
-        // Only create new image if the size is incorrect - might be a better
-        // way to do this. 
+        // Only create new image if the size is incorrect - 
+        // --------------------------------------------------------------------
+        // TO DO ... currently only handles 8 bit mono images
         // --------------------------------------------------------------------
         if ((image.cols != rawImage_.cols) | (image.rows != rawImage_.rows))
         {
             resize = true;
         }
         
+        // ---------------------------------------------------------------------
         // TO DO .. also test for image type.
         // ---------------------------------------------------------------------
 
         if (resize) {
-            // TO DO .. need to handle Pixel type conversions
+            // -----------------------------------------------------------------
+            // TO DO .. need to handle Pixel type conversions again currently
+            // only supports 8 bit mono images
+            // -----------------------------------------------------------------
             image = cv::Mat(rawImage_.rows, rawImage_.cols, CV_8UC1);
         }
 
@@ -378,23 +379,45 @@ namespace bias {
         propInfo =  convertPropertyInfo_from_fc2(propInfo_fc2);
         return propInfo;
     }
+   
+    ImageInfo CameraDevice_fc2::getImageInfo()
+    {
+        // Note, this method grab a frame from the camera in order
+        // to get the image information. 
+        ImageInfo imgInfo;
+        PixelFormat pixFormat;
+
+        TriggerType savedTrigType = getTriggerType(); 
+
+        if (savedTrigType == TRIGGER_EXTERNAL) 
+        {
+            // Temporarily set to internal trigger
+            setTriggerInternal();
+        }
+
+        grabImageCommon();
+        imgInfo.rows = rawImage_.rows;
+        imgInfo.cols = rawImage_.cols;
+        imgInfo.stride = rawImage_.stride;
+        imgInfo.dataSize = rawImage_.dataSize;
+        pixFormat = convertPixelFormat_from_fc2(rawImage_.format);
+        imgInfo.pixelFormat = pixFormat; 
+
+        if (savedTrigType == TRIGGER_EXTERNAL) 
+        {
+            // Return to external trigger
+            setTriggerExternal();
+        }
+
+        return imgInfo;
+    }
 
     void CameraDevice_fc2::setProperty(Property prop)
     {
         fc2Property prop_fc2;
-        fc2Error error;
-
         prop_fc2 = convertProperty_to_fc2(prop);
-        error = fc2SetProperty(context_, &prop_fc2);
-        if (error != FC2_ERROR_OK) 
-        { 
-            std::stringstream ssError;
-            ssError << __PRETTY_FUNCTION__;
-            ssError << ": unable to set FlyCapture2 prop";
-            throw RuntimeError(ERROR_FC2_SET_PROPERTY, ssError.str());
-        }
+        setProperty(prop_fc2);
     }
-
 
     bool CameraDevice_fc2::isSupported(VideoMode vidMode, FrameRate frmRate)
     {
@@ -431,14 +454,7 @@ namespace bias {
             return false;
         }
 
-        if (supported == TRUE) 
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return (supported == TRUE ? true : false);
     }
 
     bool CameraDevice_fc2::isSupported(ImageMode imgMode)
@@ -464,33 +480,95 @@ namespace bias {
         {   
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
-            ssError <<": unable to get format7 information for given mode";
+            ssError << ": unable to get format7 information for given mode";
             throw RuntimeError(ERROR_FC2_GET_FORMAT7_INFO, ssError.str());
         }
+        return (supported==TRUE ? true : false);
+    }
 
-        if (supported == TRUE)
+    void CameraDevice_fc2::setVideoMode(VideoMode vidMode, FrameRate frmRate) 
+    {
+        if (vidMode != VIDEOMODE_FORMAT7) 
         {
-            return true;
+            // For all non-format7 video modes
+            fc2VideoMode vidMode_fc2 = convertVideoMode_to_fc2(vidMode);
+            fc2FrameRate frmRate_fc2 = convertFrameRate_to_fc2(frmRate);
+            fc2Error error = fc2SetVideoModeAndFrameRate(
+                    context_, 
+                    vidMode_fc2, 
+                    frmRate_fc2
+                    );
+            if (error != FC2_ERROR_OK)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to set VideoMode and frame rate";
+                throw RuntimeError(
+                        ERROR_FC2_SET_VIDEOMODE_AND_FRAMERATE, 
+                        ssError.str()
+                        );
+            }
         }
         else 
         {
-            return true;
+            // For format 7 video modes ... 
+            //
+            // Temporary. TO DO uses setVideoModeFormat7 which needs to be 
+            // worked on to make it more flexible.
+            ImageModeList allowedImageModes = getAllowedImageModes();
+            if (allowedImageModes.empty())
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to set Format7 video mode not support imageModes";
+                throw RuntimeError(ERROR_FC2_SET_VIDEOMODE_FORMAT7, ssError.str());
+            }
+            ImageMode mode = allowedImageModes.front();
+            setVideoModeToFormat7(mode);
         }
     }
 
-    void CameraDevice_fc2::setVideoMode(VideoMode vidMode) 
+
+    void CameraDevice_fc2::setFormat7ImageMode(ImageMode imgMode) 
     {
+        // -------------------------------------------------
         // TO DO ...
+        // -------------------------------------------------
     }
 
-    void CameraDevice_fc2::setFrameRate(FrameRate frmRate)
+    void CameraDevice_fc2::setTriggerInternal()
     {
-        // TO DO ...
+        fc2TriggerMode trigMode = getTriggerMode_fc2();
+        trigMode.onOff = FALSE;
+        setTriggerMode(trigMode);
     }
 
-    void CameraDevice_fc2::setImageMode(ImageMode imgMode) 
+    void CameraDevice_fc2::setTriggerExternal()
     {
-        // TO DO ...
+        // ------------------------------------------------
+        // TO DO ... not really finished yet
+        // ------------------------------------------------
+        //
+        // Currently only sets to mode 0, doesn't check for
+        // support, doesn't set polarity, etc.
+        // ------------------------------------------------ 
+        fc2TriggerMode trigMode = getTriggerMode_fc2();
+        trigMode.onOff = TRUE;
+        trigMode.mode = 0;
+        setTriggerMode(trigMode);
+    }
+
+    TriggerType CameraDevice_fc2::getTriggerType()
+    {
+        fc2TriggerMode trigMode = getTriggerMode_fc2();
+        if ((trigMode.onOff == TRUE) && (trigMode.mode != 3)) // Note, mode 3 is frame skip
+        {
+            return TRIGGER_EXTERNAL;
+        }
+        else
+        {
+            return TRIGGER_INTERNAL;
+        }
     }
 
     std::string CameraDevice_fc2::toString()
@@ -536,8 +614,6 @@ namespace bias {
     {
         std::cout << toString();
     }
-
-
        
     // Private methods
     // -------------------------------------------------------------------------
@@ -664,6 +740,10 @@ namespace bias {
         //----------------------------------------------------------------
     }
 
+
+    // fc2 get methods
+    // ---------------
+
     void CameraDevice_fc2::getVideoModeAndFrameRate(
             fc2VideoMode &vidMode, 
             fc2FrameRate &frmRate
@@ -733,10 +813,74 @@ namespace bias {
         return config;
     }
 
+    fc2TriggerMode CameraDevice_fc2::getTriggerMode_fc2()
+    {
+        fc2Error error;
+        fc2TriggerMode triggerMode;
+        error = fc2GetTriggerMode(context_, &triggerMode);
+        if (error != FC2_ERROR_OK)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get FlyCapture2 TriggerMode";
+            throw RuntimeError(ERROR_FC2_GET_TRIGGER_MODE, ssError.str());
+        }
+        return triggerMode;
+    }
+
+    fc2TriggerModeInfo CameraDevice_fc2::getTriggerModeInfo_fc2()
+    {
+        fc2Error error;
+        fc2TriggerModeInfo triggerModeInfo;
+        error = fc2GetTriggerModeInfo(context_, &triggerModeInfo);
+        if (error != FC2_ERROR_OK)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get FlyCapture2 TriggerModeInfo";
+            throw RuntimeError(ERROR_FC2_GET_TRIGGER_MODE_INFO, ssError.str());
+        }
+    }
+
+
+    // fc2 set methods
+    // ---------------
+
+    void CameraDevice_fc2::setProperty(fc2Property prop)
+    {
+        fc2Error error = fc2SetProperty(context_, &prop);
+        if (error != FC2_ERROR_OK) 
+        { 
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to set FlyCapture2 prop";
+            throw RuntimeError(ERROR_FC2_SET_PROPERTY, ssError.str());
+        }
+    }
+
+    void CameraDevice_fc2::setTriggerMode(fc2TriggerMode trigMode)
+    {
+        fc2Error error = fc2SetTriggerMode(context_, &trigMode);
+        if (error != FC2_ERROR_OK)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to set FlyCapture2 TriggerMode";
+            throw RuntimeError(ERROR_FC2_SET_TRIGGER_MODE, ssError.str());
+        }
+    }
 
     // Temporary methods
     // ------------------------------------------------------------------------
-    void CameraDevice_fc2::temp_SetVideoMode_Format7Mode0()
+
+    void CameraDevice_fc2::setVideoModeToFormat7(ImageMode mode)
+    {
+        fc2Mode mode_fc2;
+        mode_fc2 = convertImageMode_to_fc2(mode);
+        setVideoModeToFormat7(mode_fc2);
+    }
+
+    void CameraDevice_fc2::setVideoModeToFormat7(fc2Mode mode)
     {
         fc2Error error;
         fc2Format7Info format7Info;
@@ -749,7 +893,7 @@ namespace bias {
         BOOL settingsAreValid;
 
         // Get the format 7 info
-        format7Info.mode = FC2_MODE_0;
+        format7Info.mode = mode;
         error = fc2GetFormat7Info(context_, &format7Info, &supported);
         if (error != FC2_ERROR_OK) 
         {

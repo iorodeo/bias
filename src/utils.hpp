@@ -6,6 +6,8 @@
 
 namespace bias
 {
+
+
     // Functions which return lists of enumeration types
     // ------------------------------------------------------------------------
 
@@ -28,6 +30,12 @@ namespace bias
     std::string getPropertyTypeString(PropertyType propType);
 
     std::string getPixelFormatString(PixelFormat pixFormat);
+
+    std::string getImageInfoString(ImageInfo imgInfo);
+
+    // ------------------------------------------------------------------------
+    float getFrameRateAsFloat(FrameRate frmRate);
+
 
 }
 

@@ -30,20 +30,28 @@ namespace bias {
             virtual void grabImage(cv::Mat &image);
 
             virtual bool isColor() {return false;} // TO DO //
+            virtual bool isSupported(ImageMode imgMode) { return false; }; // TO DO //
+            virtual bool isSupported(VideoMode vidMode, FrameRate frmRate) { return false; }; // TO DO //
 
             virtual VideoMode getVideoMode() {}; // TO DO //
             virtual FrameRate getFrameRate() {}; // TO DO //
             virtual ImageMode getImageMode() {}; // TO DO //
+
             virtual VideoModeList getAllowedVideoModes();  // TO DO //
             virtual FrameRateList getAllowedFrameRates(VideoMode vidMode);  // TO DO //
             virtual ImageModeList getAllowedImageModes();  // TO DO //
+
             virtual Property getProperty(PropertyType propType) {}; // TO DO //
             virtual PropertyInfo getPropertyInfo(PropertyType propType) {}; // TO DO //
+            virtual ImageInfo getImageInfo() { return ImageInfo(); };
 
             virtual void setProperty(Property prop) {}; // TO DO //
-            virtual void setVideoMode(VideoMode vidMode) {}; // TO DO //
-            virtual void setFrameRate(FrameRate frmRate) {}; // TO DO //
-            virtual void setImageMode(ImageMode imgMode) {}; // TO DO //
+            virtual void setVideoModeAndFrameRate(VideoMode vidMode, FrameRate frameRate) {}; // TO DO //
+            virtual void setFormat7ImageMode(ImageMode imgMode) {}; // TO DO //
+
+            virtual void setTriggerInternal() {}; // TO DO //
+            virtual void setTriggerExternal() {}; // TO DO //
+            virtual TriggerType getTriggerType() {}; // TO DO //
 
             virtual std::string toString();
             virtual void printGuid();

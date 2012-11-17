@@ -210,7 +210,52 @@ namespace bias {
         return prop_fc2;
     }
 
-        // Conversion from FlyCapture2 types to BIAS types
+    static std::map<PixelFormat, fc2PixelFormat> createPixelFormatMap_to_fc2()
+    {
+        std::map<PixelFormat, fc2PixelFormat> map;
+        map[PIXEL_FORMAT_MONO8]         =   FC2_PIXEL_FORMAT_MONO8;
+        map[PIXEL_FORMAT_411YUV8]       =   FC2_PIXEL_FORMAT_411YUV8;
+        map[PIXEL_FORMAT_422YUV8]       =   FC2_PIXEL_FORMAT_422YUV8;
+        map[PIXEL_FORMAT_444YUV8]       =   FC2_PIXEL_FORMAT_444YUV8;
+        map[PIXEL_FORMAT_RGB8]          =   FC2_PIXEL_FORMAT_RGB8;
+        map[PIXEL_FORMAT_MONO16]        =   FC2_PIXEL_FORMAT_MONO16;
+        map[PIXEL_FORMAT_RGB16]         =   FC2_PIXEL_FORMAT_RGB16;
+        map[PIXEL_FORMAT_S_MONO16]      =   FC2_PIXEL_FORMAT_S_MONO16;
+        map[PIXEL_FORMAT_S_RGB16]       =   FC2_PIXEL_FORMAT_S_RGB16;
+        map[PIXEL_FORMAT_RAW8]          =   FC2_PIXEL_FORMAT_RAW8;
+        map[PIXEL_FORMAT_RAW16]         =   FC2_PIXEL_FORMAT_RAW16;
+        map[PIXEL_FORMAT_MONO12]        =   FC2_PIXEL_FORMAT_MONO12;
+        map[PIXEL_FORMAT_RAW12]         =   FC2_PIXEL_FORMAT_RAW12;
+        map[PIXEL_FORMAT_BGR]           =   FC2_PIXEL_FORMAT_BGR;
+        map[PIXEL_FORMAT_BGRU]          =   FC2_PIXEL_FORMAT_BGRU;
+        map[PIXEL_FORMAT_RGB]           =   FC2_PIXEL_FORMAT_RGB;
+        map[PIXEL_FORMAT_RGBU]          =   FC2_PIXEL_FORMAT_RGBU;
+        map[PIXEL_FORMAT_BGR16]         =   FC2_PIXEL_FORMAT_BGR16;
+	    map[PIXEL_FORMAT_BGRU16]        =   FC2_PIXEL_FORMAT_BGRU16;
+        map[PIXEL_FORMAT_422YUV8_JPEG]  =   FC2_PIXEL_FORMAT_422YUV8_JPEG;
+        return map;
+    };
+
+    static std::map<PixelFormat, fc2PixelFormat> pixelFormatMap_to_fc2 = 
+        createPixelFormatMap_to_fc2();
+
+    fc2PixelFormat convertPixelFormat_to_fc2(PixelFormat pixFormat)
+    {
+        if (pixelFormatMap_to_fc2.count(pixFormat) != 0)
+        {
+            return pixelFormatMap_to_fc2[pixFormat];
+        }
+        else
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to convert pixel format to FlyCapture2 ";
+            ssError << "imaging mode";
+            throw RuntimeError(ERROR_FC2_CONVERT_PIXEL_FORMAT, ssError.str());
+        }
+    }
+
+    // Conversion from FlyCapture2 types to BIAS types
     // ------------------------------------------------------------------------
      
     static std::map<fc2PropertyType, PropertyType> createPropertyTypeMap_from_fc2()
@@ -427,6 +472,49 @@ namespace bias {
         return propInfo;
     }
 
+    static std::map<fc2PixelFormat, PixelFormat> createPixelFormatMap_from_fc2()
+    {
+        std::map<fc2PixelFormat, PixelFormat> map;
+        map[FC2_PIXEL_FORMAT_MONO8]         =   PIXEL_FORMAT_MONO8;
+        map[FC2_PIXEL_FORMAT_411YUV8]       =   PIXEL_FORMAT_411YUV8;
+        map[FC2_PIXEL_FORMAT_422YUV8]       =   PIXEL_FORMAT_422YUV8;
+        map[FC2_PIXEL_FORMAT_444YUV8]       =   PIXEL_FORMAT_444YUV8;
+        map[FC2_PIXEL_FORMAT_RGB8]          =   PIXEL_FORMAT_RGB8;
+        map[FC2_PIXEL_FORMAT_MONO16]        =   PIXEL_FORMAT_MONO16;
+        map[FC2_PIXEL_FORMAT_RGB16]         =   PIXEL_FORMAT_RGB16;
+        map[FC2_PIXEL_FORMAT_S_MONO16]      =   PIXEL_FORMAT_S_MONO16;
+        map[FC2_PIXEL_FORMAT_S_RGB16]       =   PIXEL_FORMAT_S_RGB16;
+        map[FC2_PIXEL_FORMAT_RAW8]          =   PIXEL_FORMAT_RAW8;
+        map[FC2_PIXEL_FORMAT_RAW16]         =   PIXEL_FORMAT_RAW16;
+        map[FC2_PIXEL_FORMAT_MONO12]        =   PIXEL_FORMAT_MONO12;
+        map[FC2_PIXEL_FORMAT_RAW12]         =   PIXEL_FORMAT_RAW12;
+        map[FC2_PIXEL_FORMAT_BGR]           =   PIXEL_FORMAT_BGR;
+        map[FC2_PIXEL_FORMAT_BGRU]          =   PIXEL_FORMAT_BGRU;
+        map[FC2_PIXEL_FORMAT_RGB]           =   PIXEL_FORMAT_RGB;
+        map[FC2_PIXEL_FORMAT_RGBU]          =   PIXEL_FORMAT_RGBU;
+        map[FC2_PIXEL_FORMAT_BGR16]         =   PIXEL_FORMAT_BGR16;
+	    map[FC2_PIXEL_FORMAT_BGRU16]        =   PIXEL_FORMAT_BGRU16;
+        map[FC2_PIXEL_FORMAT_422YUV8_JPEG]  =   PIXEL_FORMAT_422YUV8_JPEG;
+        return map;
+    };
+
+    static std::map<fc2PixelFormat, PixelFormat> pixelFormatMap_from_fc2 = 
+        createPixelFormatMap_from_fc2();
+
+    PixelFormat convertPixelFormat_from_fc2(fc2PixelFormat pixFormat_fc2)
+    {
+        if (pixelFormatMap_from_fc2.count(pixFormat_fc2) != 0)
+        {
+            return pixelFormatMap_from_fc2[pixFormat_fc2];
+        }
+        else
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to convert pixel format from FlyCaptuer2";
+            throw RuntimeError(ERROR_FC2_CONVERT_PROPERTY_TYPE, ssError.str());
+        }
+    }
 
     // Functions for printing information
     // --------------------------------------------------------------
@@ -592,6 +680,50 @@ namespace bias {
             std::cout << "   [" << i << "] = " << prop.reserved[i] << std::endl; 
         }
         std::cout << std::endl; 
+    }
+
+    void printTriggerMode_fc2(fc2TriggerMode &trigMode)
+    {
+        std::cout << std::endl;
+        std::cout << "-----------------------" << std::endl;
+        std::cout << "FlyCapture2 TriggerMode" << std::endl;
+        std::cout << "-----------------------" << std::endl;
+        std::cout << std::endl << std::boolalpha;
+        std::cout << " onOff:     " << bool(trigMode.onOff) << std::endl;
+        std::cout << std::noboolalpha;
+        std::cout << " polarity:  " << trigMode.polarity << std::endl;
+        std::cout << " source:    " << trigMode.source << std::endl;
+        std::cout << " mode:      " << trigMode.mode << std::endl;
+        std::cout << " parameter: " << trigMode.parameter << std::endl;
+        std::cout << " reserved   " << std::endl;
+        for (int i=0; i<8; i++)
+        {
+            std::cout << "   [" << i << "] = " << trigMode.reserved[i] << std::endl; 
+        }
+        std::cout << std::endl; 
+    }
+
+    void printTriggerModeInfo_fc2(fc2TriggerModeInfo &trigModeInfo)
+    {
+        std::cout << std::endl;
+        std::cout << "---------------------------" << std::endl;
+        std::cout << "FlyCapture2 TriggerModeInfo" << std::endl;
+        std::cout << "---------------------------" << std::endl;
+        std::cout << std::endl << std::boolalpha;
+        std::cout << " present:                  " << bool(trigModeInfo.present) << std::endl;
+        std::cout << " readOutSupported:         " << bool(trigModeInfo.readOutSupported) << std::endl;
+        std::cout << " onOffSupported:           " << bool(trigModeInfo.onOffSupported) << std::endl;
+        std::cout << " polaritySupported:        " << bool(trigModeInfo.polaritySupported) << std::endl;
+        std::cout << " valueReadable:            " << bool(trigModeInfo.valueReadable) << std::endl;
+        std::cout << " sourceMask:               " << std::bitset<32>(trigModeInfo.sourceMask) << std::endl;
+        std::cout << " softwareTriggerSupported: " << bool(trigModeInfo.softwareTriggerSupported) << std::endl;
+        std::cout << " modeMask:                 " << std::bitset<32>(trigModeInfo.modeMask) << std::endl;
+        std::cout << " reserved   " << std::endl;
+        for (int i=0; i<8; i++)
+        {
+            std::cout << "   [" << i << "] = " << trigModeInfo.reserved[i] << std::endl; 
+        }
+        std::cout << std::noboolalpha << std::endl;
     }
 
     // Functions for converting FlyCapture2 enumerations to strings   
