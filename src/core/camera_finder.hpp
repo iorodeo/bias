@@ -8,7 +8,7 @@
 #include "camera.hpp"
 
 #ifdef WITH_FC2
-#include "C/FlyCapture2_C.h"
+#include "FlyCapture2_C.h"
 #endif
 #ifdef WITH_DC1394
 #include <dc1394/dc1394.h> 

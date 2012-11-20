@@ -6,7 +6,7 @@
 #include <memory>
 #include "basic_types.hpp"
 #include "guid_device.hpp"
-#include "C/FlyCapture2_C.h"
+#include "FlyCapture2_C.h"
 
 namespace bias {
 

@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 project(bais)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
 # Backend camera library options
 # -----------------------------------------------------------------------------
 option(with_fc2 "include the FlyCapture2 backend" ON)
@@ -34,9 +36,7 @@ endif()
 # FlyCapture2 library location - replace this this custom find_package
 # -----------------------------------------------------------------------------
 if(with_fc2)
-    set(flycapture2_dir "C:/Program Files/Point Grey Research/FlyCapture2")
-    set(flycapture2_c_lib "${flycapture2_dir}/lib64/C/FlyCapture2_C.lib")
-    set(flycapture2_include "${flycapture2_dir}/include")
+    find_package( FlyCapture2 REQUIRED )
 endif()
 
 
@@ -65,7 +65,7 @@ if(with_fc2)
     set(
         bias_include_dir 
         ${bias_include_dir} 
-        ${flycapture2_include} 
+        ${FlyCapture2_INCLUDE_DIRS} 
         "./src/backend/fc2"
         )
 endif()
@@ -86,7 +86,7 @@ include_directories(${bias_include_dir})
 set(bias_ext_link_libs ${OpenCV_LIBS})
 
 if(with_fc2)
-    set(bias_ext_link_libs ${bias_ext_link_libs} ${flycapture2_c_lib})
+    set(bias_ext_link_libs ${bias_ext_link_libs} ${FlyCapture2_LIBRARIES})
 endif()
 
 if(with_dc1394)

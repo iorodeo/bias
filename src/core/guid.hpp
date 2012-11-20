@@ -11,7 +11,7 @@
 #include "guid_device.hpp"
 
 #ifdef WITH_FC2
-#include "C/FlyCapture2_C.h"
+#include "FlyCapture2_C.h"
 #include "guid_device_fc2.hpp"
 #endif
 

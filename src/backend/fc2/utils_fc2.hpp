@@ -5,7 +5,7 @@
 #include "basic_types.hpp"
 #include "property.hpp"
 #include <string>
-#include "C/FlyCapture2_C.h"
+#include "FlyCapture2_C.h"
 
 namespace bias {
 

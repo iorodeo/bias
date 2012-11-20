@@ -7,7 +7,7 @@
 #include "utils.hpp"
 #include "camera_device.hpp"
 #include "property.hpp"
-#include "C/FlyCapture2_C.h"
+#include "FlyCapture2_C.h"
 
 namespace bias {
 
