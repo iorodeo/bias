@@ -5,7 +5,16 @@ project(bais)
 # Backend camera library options
 # -----------------------------------------------------------------------------
 option(with_fc2 "include the FlyCapture2 backend" ON)
+if(with_fc2)
+    message(STATUS "with_fc2=on")
+endif()
+
 option(with_dc1394 "include the libdc1394 backend" OFF)
+if(with_dc1394)
+    message(STATUS "with_dc1394=on")
+endif()
+
+
 if( NOT( with_fc2 OR with_dc1394 ) )
     message(FATAL_ERROR "their must be at least one camera backend")
 endif()
@@ -13,7 +22,7 @@ endif()
 
 # Opencv library
 # -----------------------------------------------------------------------------
-find_package( openCV REQUIRED )
+find_package( OpenCV REQUIRED )
 
 if(${OpenCV_FOUND})
     message(STATUS "OpenCV found")
