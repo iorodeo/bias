@@ -4,18 +4,16 @@ project(bais)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-# Backend camera library options
+
+# Options
 # -----------------------------------------------------------------------------
-option(with_fc2 "include the FlyCapture2 backend" ON)
-if(with_fc2)
-    message(STATUS "with_fc2=on")
-endif()
+option(with_qt_gui  "include image acquisition GUI"   ON ) 
+option(with_fc2     "include the FlyCapture2 backend" ON )
+option(with_dc1394  "include the libdc1394 backend"   OFF)
 
-option(with_dc1394 "include the libdc1394 backend" OFF)
-if(with_dc1394)
-    message(STATUS "with_dc1394=on")
-endif()
-
+message(STATUS "Option: with_fc2     = ${with_fc2}")
+message(STATUS "Option: with_dc1394  = ${with_dc1394}")
+message(STATUS "Option: with_qt_gui  = ${with_qt_gui}")
 
 if( NOT( with_fc2 OR with_dc1394 ) )
     message(FATAL_ERROR "their must be at least one camera backend")
@@ -39,6 +37,12 @@ if(with_fc2)
     find_package( FlyCapture2 REQUIRED )
 endif()
 
+# Qt library
+# ------------------------------------------------------------------------------
+if(with_qt_gui)
+    set(QT_BINARY_DIR "C:/users/wbd/work/qt/qt_activestate/bin")
+    find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
+endif()
 
 # Compiler flags
 # -----------------------------------------------------------------------------
@@ -60,25 +64,16 @@ endif()
 
 # Include directories
 # -----------------------------------------------------------------------------
-set(bias_include_dir "./src/backend/base" "./src/core")
+include_directories("./src/backend/base")
+include_directories("./src/core")
 if(with_fc2)
-    set(
-        bias_include_dir 
-        ${bias_include_dir} 
-        ${FlyCapture2_INCLUDE_DIRS} 
-        "./src/backend/fc2"
-        )
+    include_directories(${FlyCapture2_INCLUDE_DIRS})
+    include_directories("./src/backend/fc2")
 endif()
 
 if(with_dc1394)
-    set(
-        bias_include_dir 
-        ${bias_include_dir} 
-        "./src/backend/dc1394"
-        )
+    include_directories("./src/backend/dc1394")
 endif()
-
-include_directories(${bias_include_dir})
 
 
 # External link libraries
@@ -112,4 +107,8 @@ endif()
 
 add_subdirectory("src/core")
 add_subdirectory("src/test")
+
+if(with_qt_gui)
+    add_subdirectory("src/gui")
+endif()
 
