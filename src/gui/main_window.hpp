@@ -23,7 +23,7 @@ class MainWindow : public QMainWindow, private Ui::MainWindow
 
         QTimer *timer_;
 
-        QPixmap pixmapScaled_; 
+        bool havePixmap_;
         QPixmap pixmapOriginal_;
 
         bias::CameraPtr cameraPtr_;
