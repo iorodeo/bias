@@ -1,5 +1,4 @@
 #include <QApplication>
-#include <QDialog>
 
 #include "main_window.hpp"
 
