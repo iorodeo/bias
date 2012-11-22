@@ -1,9 +1,10 @@
 #ifndef BIAS_TEST_GUI_MAINWINDOW_HPP
 #define BIAS_TEST_GUI_MAINWINDOW_HPP
 
-#include "ui_main_window.h"
 #include <QMainWindow>
+#include "ui_main_window.h"
 #include "camera.hpp"
+#include "image_pool.hpp"
 
 class QTimer;
 
@@ -18,6 +19,7 @@ class MainWindow : public QMainWindow, private Ui::MainWindow
         void startButtonClicked();
         void stopButtonClicked();
         void timerUpdate();
+        void testTimerUpdate();
 
     private:
 
@@ -28,6 +30,7 @@ class MainWindow : public QMainWindow, private Ui::MainWindow
 
         bias::CameraPtr cameraPtr_;
         unsigned int counter_;
+        ImagePool imagePool_;
 
         void initialize();
         void connectWidgets();
@@ -35,6 +38,9 @@ class MainWindow : public QMainWindow, private Ui::MainWindow
         void updateImageLabel();
 
         void resizeEvent(QResizeEvent *event);
+
+        QTimer *testTimer_;
+
        
 }; // class MainWindow
 
