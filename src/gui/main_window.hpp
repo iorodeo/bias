@@ -7,6 +7,8 @@
 #include "image_pool.hpp"
 
 class QTimer;
+class QThread;
+class ImageGrabber;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
@@ -14,6 +16,11 @@ class MainWindow : public QMainWindow, private Ui::MainWindow
 
     public:
         MainWindow(QWidget *parent=0);
+        bool haveCamera();
+
+    protected:
+        void resizeEvent(QResizeEvent *event);
+        void closeEvent(QCloseEvent *event);
 
     private slots:
         void startButtonClicked();
@@ -23,7 +30,12 @@ class MainWindow : public QMainWindow, private Ui::MainWindow
 
     private:
 
+        bool haveCamera_;
+
         QTimer *timer_;
+        QTimer *testTimer_;
+
+        ImageGrabber *imageGrabber_;
 
         bool havePixmap_;
         QPixmap pixmapOriginal_;
@@ -37,9 +49,7 @@ class MainWindow : public QMainWindow, private Ui::MainWindow
         void createCamera();
         void updateImageLabel();
 
-        void resizeEvent(QResizeEvent *event);
 
-        QTimer *testTimer_;
 
        
 }; // class MainWindow

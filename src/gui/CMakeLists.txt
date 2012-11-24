@@ -9,6 +9,7 @@ set(
     main_window.hpp 
     mat_to_qimage.hpp
     image_pool.hpp
+    image_grabber.hpp
     )
 
 set(
@@ -17,6 +18,7 @@ set(
     main_window.cpp 
     mat_to_qimage.cpp
     image_pool.cpp
+    image_grabber.cpp
     )
 
 

@@ -1,9 +1,11 @@
 #include "main_window.hpp"
 #include <iostream>
 #include <QTimer>
+#include <QThread>
 #include <opencv2/core/core.hpp>
 #include "camera_finder.hpp"
 #include "mat_to_qimage.hpp"
+#include "image_grabber.hpp"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
@@ -11,19 +13,25 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     initialize();
 }
 
+bool MainWindow::haveCamera()
+{
+    return haveCamera_;
+}
+
 // Private slots
 // ----------------------------------------------------------------------------
 void MainWindow::startButtonClicked()
 {
-    counter_ = 0;
-    cameraPtr_ -> startCapture();
-    timer_ -> start(15);
+    //counter_ = 0;
+    //cameraPtr_ -> startCapture();
+    //timer_ -> start(15);
+    
 }
 
 void MainWindow::stopButtonClicked()
 {
-    cameraPtr_ -> stopCapture();
-    timer_ -> stop();
+    //cameraPtr_ -> stopCapture();
+    //timer_ -> stop();
 }
 
 void MainWindow::timerUpdate()
@@ -55,11 +63,17 @@ void MainWindow::initialize()
     timer_ = new QTimer(this);
     connectWidgets();
     createCamera();
-    havePixmap_ = false;
 
-    testTimer_ = new QTimer(this);
-    connect(testTimer_, SIGNAL(timeout()), this, SLOT(testTimerUpdate()));
-    testTimer_ -> start(100);
+    if (haveCamera_) 
+    {
+        havePixmap_ = false;
+        testTimer_ = new QTimer(this);
+        connect(testTimer_, SIGNAL(timeout()), this, SLOT(testTimerUpdate()));
+        testTimer_ -> start(100);
+
+        imageGrabber_ = new ImageGrabber(cameraPtr_);
+
+    }
 }
 
 void MainWindow::testTimerUpdate()
@@ -102,14 +116,22 @@ void MainWindow::connectWidgets()
 
 void MainWindow::createCamera()
 {
+
     // Find cameras
     bias::CameraFinder cameraFinder;
     bias::CameraPtrList cameraPtrList = cameraFinder.createCameraPtrList();
-
-    // Get first camera in list and connect
-    cameraPtr_ = cameraPtrList.front();
-    cameraPtr_ -> connect();
-    cameraPtr_ -> printInfo();
+    if (cameraPtrList.empty())
+    {
+        haveCamera_ = false;
+    }
+    else 
+    {
+        // Get first camera in list and connect
+        cameraPtr_ = cameraPtrList.front();
+        cameraPtr_ -> connect();
+        cameraPtr_ -> printInfo();
+        haveCamera_ = true;
+    }
 }
 
 void MainWindow::updateImageLabel()
@@ -151,4 +173,10 @@ void MainWindow::resizeEvent(QResizeEvent *event)
             updateImageLabel();
         }
     }
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    std::cout << "closeEvent" << std::endl;
+    event -> accept();
 }
