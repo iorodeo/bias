@@ -7,8 +7,9 @@
 #include "image_pool.hpp"
 
 class QTimer;
-class QThread;
+class QThreadPool;
 class ImageGrabber;
+class ImageProcessor;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
@@ -25,28 +26,29 @@ class MainWindow : public QMainWindow, private Ui::MainWindow
     private slots:
         void startButtonClicked();
         void stopButtonClicked();
-        void timerUpdate();
-        void testTimerUpdate();
+        void updateImageDisplay();
 
     private:
 
-        bool haveCamera_;
+        unsigned int counter_;
+        QTimer *imageDisplayTimer_;
 
-        QTimer *timer_;
-        QTimer *testTimer_;
+        QThreadPool *threadPool_;
+
+        bool haveCamera_;
+        bias::CameraPtr cameraPtr_;
+        bias::ImagePoolPtr imagePoolPtr_;
 
         ImageGrabber *imageGrabber_;
+        ImageProcessor *imageProcessor_;
 
         bool havePixmap_;
         QPixmap pixmapOriginal_;
 
-        bias::CameraPtr cameraPtr_;
-        unsigned int counter_;
-        ImagePool imagePool_;
-
         void initialize();
         void connectWidgets();
         void createCamera();
+        void updatePixmap();
         void updateImageLabel();
 
 

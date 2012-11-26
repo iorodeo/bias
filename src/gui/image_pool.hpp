@@ -3,36 +3,47 @@
 
 #include <queue>
 #include <QMutex>
+#include <memory>
 #include <opencv2/core/core.hpp>
 
-class ImagePool
+namespace bias 
 {
-    public:
-        
-        ImagePool() {};
-        
-        unsigned int numberOfNewImages();
-        unsigned int numberOfOldImages();
+    class ImagePool
+    {
+        public:
 
-        void enqueueOldImage(cv::Mat img);
-        void enqueueNewImage(cv::Mat img);
+            ImagePool() {};
 
-        cv::Mat dequeueOldImage();
-        cv::Mat dequeueNewImage();
+            unsigned int numberOfNewImages();
+            unsigned int numberOfOldImages();
 
-        void acquireNewImageLock();
-        void acquireOldImageLock();
+            void enqueueOldImage(cv::Mat img);
+            void enqueueNewImage(cv::Mat img);
 
-        void releaseNewImageLock();
-        void releaseOldImageLock();
+            cv::Mat dequeueOldImage();
+            cv::Mat dequeueNewImage();
 
-    private:
+            void acquireNewImageLock();
+            void acquireOldImageLock();
 
-        std::queue<cv::Mat> newImages_; 
-        std::queue<cv::Mat> oldImages_;
+            void releaseNewImageLock();
+            void releaseOldImageLock();
 
-        QMutex newImageMutex_;
-        QMutex oldImageMutex_;
-};
+            void emptyNewImages();
+            void emptyOldImages();
+            void empty();
+
+        private:
+
+            std::queue<cv::Mat> newImages_; 
+            std::queue<cv::Mat> oldImages_;
+
+            QMutex newImageMutex_;
+            QMutex oldImageMutex_;
+    };
+
+    typedef std::shared_ptr<ImagePool> ImagePoolPtr;
+}
+
 
 #endif // #ifndef BIAS_IMAGE_POOL

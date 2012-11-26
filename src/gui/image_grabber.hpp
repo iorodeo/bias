@@ -1,27 +1,25 @@
 #ifndef BIAS_IMAGE_GRABBER_HPP  
 #define BIAS_IMAGE_GRABBER_HPP
 
-#include <QObject>
+#include <QRunnable>
 #include "camera.hpp"
+#include "image_pool.hpp"
 
-class ImageGrabber : public QObject
+class ImageGrabber : public QRunnable
 {
-    Q_OBJECT
-
     public:
         ImageGrabber();
-        explicit ImageGrabber(bias::CameraPtr camPtr);
-        void setCameraPtr(bias::CameraPtr camPtr);
-
-    public slots:
-        void run();
-
-    signals:
-        void finished();
+        ImageGrabber(bias::CameraPtr camPtr, bias::ImagePoolPtr imgPoolPtr);
+        void initialize(bias::CameraPtr camPtr, bias::ImagePoolPtr imgPoolPtr);
+        void stop();
 
     private:
-        bool haveCamera_;
+        unsigned int count_;
+        bool ready_;
+        bool stopped_;
         bias::CameraPtr cameraPtr_;
+        bias::ImagePoolPtr imagePoolPtr_;
+        void run();
 };
 
 

@@ -1,64 +1,90 @@
 #include "image_pool.hpp"
 
-unsigned int ImagePool::numberOfNewImages()
+namespace bias
 {
-    return newImages_.size();
-}
 
-unsigned int ImagePool::numberOfOldImages()
-{
-    return oldImages_.size();
-}
-
-void ImagePool::enqueueOldImage(cv::Mat img)
-{
-    oldImages_.push(img);
-}
-
-void ImagePool::enqueueNewImage(cv::Mat img)
-{
-    newImages_.push(img);
-}
-
-cv::Mat ImagePool::dequeueOldImage()
-{
-    cv::Mat img;
-    if (oldImages_.size() > 0)
+    unsigned int ImagePool::numberOfNewImages()
     {
-        img = oldImages_.front();
-        oldImages_.pop();
+        return newImages_.size();
     }
-    return img;
-}
 
-cv::Mat ImagePool::dequeueNewImage()
-{
-    cv::Mat img;
-    if (newImages_.size() > 0)
+    unsigned int ImagePool::numberOfOldImages()
     {
-        img = newImages_.front();
-        newImages_.pop();
+        return oldImages_.size();
     }
-    return img;
-}
 
-void ImagePool::acquireNewImageLock()
-{
-    newImageMutex_.lock();
-}
+    void ImagePool::enqueueOldImage(cv::Mat img)
+    {
+        oldImages_.push(img);
+    }
 
-void ImagePool::acquireOldImageLock()
-{
-    oldImageMutex_.lock();
-}
+    void ImagePool::enqueueNewImage(cv::Mat img)
+    {
+        newImages_.push(img);
+    }
 
-void ImagePool::releaseNewImageLock()
-{
-    newImageMutex_.unlock();
-}
+    cv::Mat ImagePool::dequeueOldImage()
+    {
+        cv::Mat img;
+        if (oldImages_.size() > 0)
+        {
+            img = oldImages_.front();
+            oldImages_.pop();
+        }
+        return img;
+    }
 
-void ImagePool::releaseOldImageLock()
-{
-    oldImageMutex_.unlock();
-}
+    cv::Mat ImagePool::dequeueNewImage()
+    {
+        cv::Mat img;
+        if (newImages_.size() > 0)
+        {
+            img = newImages_.front();
+            newImages_.pop();
+        }
+        return img;
+    }
 
+    void ImagePool::acquireNewImageLock()
+    {
+        newImageMutex_.lock();
+    }
+
+    void ImagePool::acquireOldImageLock()
+    {
+        oldImageMutex_.lock();
+    }
+
+    void ImagePool::releaseNewImageLock()
+    {
+        newImageMutex_.unlock();
+    }
+
+    void ImagePool::releaseOldImageLock()
+    {
+        oldImageMutex_.unlock();
+    }
+
+    void ImagePool::emptyNewImages()
+    {
+        while (!newImages_.empty()) 
+        { 
+            newImages_.pop(); 
+        }
+    }
+
+    void ImagePool::emptyOldImages()
+    {
+        while (!oldImages_.empty())
+        { 
+            oldImages_.pop();
+        }
+    }
+
+    void ImagePool::empty()
+    {
+        emptyNewImages();
+        emptyOldImages();
+    }
+
+}

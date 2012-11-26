@@ -1,11 +1,13 @@
 #include "main_window.hpp"
 #include <iostream>
+#include <memory>
 #include <QTimer>
-#include <QThread>
+#include <QThreadPool>
 #include <opencv2/core/core.hpp>
 #include "camera_finder.hpp"
 #include "mat_to_qimage.hpp"
 #include "image_grabber.hpp"
+#include "image_processor.hpp"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
@@ -22,96 +24,56 @@ bool MainWindow::haveCamera()
 // ----------------------------------------------------------------------------
 void MainWindow::startButtonClicked()
 {
-    //counter_ = 0;
-    //cameraPtr_ -> startCapture();
-    //timer_ -> start(15);
-    
+    imageGrabber_ = new ImageGrabber(cameraPtr_, imagePoolPtr_);
+    imageProcessor_ = new ImageProcessor(imagePoolPtr_);
+    threadPool_ -> start(imageGrabber_);
+    threadPool_ -> start(imageProcessor_);
+    imageDisplayTimer_ -> start(66);
 }
 
 void MainWindow::stopButtonClicked()
 {
-    //cameraPtr_ -> stopCapture();
-    //timer_ -> stop();
+    imageDisplayTimer_ ->stop();
+    imageGrabber_ -> stop();
+    imageProcessor_ -> stop();
+    imagePoolPtr_ -> empty();
 }
 
-void MainWindow::timerUpdate()
+void MainWindow::updateImageDisplay()
 {
-    std::cout << "timerUpdate" << std::endl;
+    std::cout << "update image display" << std::endl;
 
-    imagePool_.acquireOldImageLock();
-    cv::Mat mat = imagePool_.dequeueOldImage();
-    imagePool_.releaseOldImageLock();
-
-    cameraPtr_ -> grabImage(mat);
-
-    imagePool_.acquireNewImageLock();
-    imagePool_.enqueueNewImage(mat);
-    imagePool_.releaseNewImageLock();
-
+    imageProcessor_ -> acquireDisplayImageLock();
+    cv::Mat mat = imageProcessor_ -> getDisplayImage();
     QImage img = matToQImage(mat);
+    imageProcessor_ -> releaseDisplayImageLock();
+
     pixmapOriginal_ = QPixmap::fromImage(img);
     updateImageLabel();
     havePixmap_ = true;
-    counter_++;
 }
+
 
 // Private methods
 // ----------------------------------------------------------------------------
 
 void MainWindow::initialize()
 {
-    timer_ = new QTimer(this);
+    havePixmap_ = false;
     connectWidgets();
     createCamera();
 
-    if (haveCamera_) 
-    {
-        havePixmap_ = false;
-        testTimer_ = new QTimer(this);
-        connect(testTimer_, SIGNAL(timeout()), this, SLOT(testTimerUpdate()));
-        testTimer_ -> start(100);
+    threadPool_ = new QThreadPool(this);
+    imagePoolPtr_ = std::make_shared<bias::ImagePool>();
+    imageDisplayTimer_ = new QTimer;
+    connect(imageDisplayTimer_, SIGNAL(timeout()), this, SLOT(updateImageDisplay()));
 
-        imageGrabber_ = new ImageGrabber(cameraPtr_);
-
-    }
-}
-
-void MainWindow::testTimerUpdate()
-{
-    std::cout << "testTimerUpdate" << std::endl;
-    cv::Mat img;
-    bool haveNewImage;
-
-    while (true)
-    {
-        haveNewImage = false;
-
-        imagePool_.acquireNewImageLock();
-        if (imagePool_.numberOfNewImages() > 0) {
-            std::cout << " newImage -> oldImage" << std::endl;
-            img = imagePool_.dequeueNewImage();
-            haveNewImage = true;
-        }
-        imagePool_.releaseNewImageLock();
-
-        if (haveNewImage) 
-        {
-            imagePool_.acquireOldImageLock();
-            imagePool_.enqueueOldImage(img);
-            imagePool_.releaseOldImageLock();
-        }
-        else
-        {
-            break;
-        }
-    }
 }
 
 void MainWindow::connectWidgets()
 {
     connect(startButton,SIGNAL(clicked()),this,SLOT(startButtonClicked())); 
     connect(stopButton,SIGNAL(clicked()),this,SLOT(stopButtonClicked()));
-    connect(timer_, SIGNAL(timeout()), this, SLOT(timerUpdate())); 
 }
 
 void MainWindow::createCamera()
@@ -145,13 +107,13 @@ void MainWindow::updateImageLabel()
     // -------------------------------------
     // Drawing test
     // -------------------------------------
-    QPainter painter(&pixmapScaled);
-    QColor red(255,0,0);
-    //QColor grn(0,255,0);
-    QString msg;  
-    msg.sprintf("Count: %d",counter_);
-    painter.setPen(red);
-    painter.drawText(10,10, msg);
+    //QPainter painter(&pixmapScaled);
+    //QColor red(255,0,0);
+    ////QColor grn(0,255,0);
+    //QString msg;  
+    //msg.sprintf("Count: %d",counter_);
+    //painter.setPen(red);
+    //painter.drawText(10,10, msg);
     //painter.setPen(grn);
     //painter.drawRect(40,40,50,50);
     // --------------------------------------

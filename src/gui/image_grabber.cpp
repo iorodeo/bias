@@ -5,32 +5,59 @@
 
 ImageGrabber::ImageGrabber() 
 {
-    haveCamera_ = false;
+    count_ = 0;
+    ready_ = false;
+    stopped_ = true;
 }
 
-ImageGrabber::ImageGrabber(bias::CameraPtr cameraPtr) 
+ImageGrabber::ImageGrabber(bias::CameraPtr camPtr, bias::ImagePoolPtr imgPoolPtr)
 {
-    setCameraPtr(cameraPtr);
+    initialize(camPtr, imgPoolPtr);
 }
 
-void ImageGrabber::setCameraPtr(bias::CameraPtr cameraPtr)
+void ImageGrabber::initialize(bias::CameraPtr camPtr, bias::ImagePoolPtr imgPoolPtr)
 {
-    cameraPtr_ = cameraPtr;
-    haveCamera_ = true;
+    cameraPtr_ = camPtr;
+    imagePoolPtr_ = imgPoolPtr;
+    ready_ = true;
+    stopped_ = true;
 }
 
+void ImageGrabber::stop()
+{
+    stopped_ = true;
+}
 
 void ImageGrabber::run()
-{
-    if (!haveCamera_)
+{ 
+    cv::Mat img;
+    count_ = 0;
+    stopped_ = false;
+
+    if (!ready_) { return; }
+
+    cameraPtr_ -> startCapture();
+
+    while (!stopped_)
     {
-        while (true)
-        {
-            std::cout << "hello" << std::endl;
+        std::cout << "image grabber -> new image" << std::endl << std::flush;
 
-        }
+        // Remove old image from image pool
+        imagePoolPtr_ -> acquireOldImageLock();
+        img = imagePoolPtr_ -> dequeueOldImage();
+        imagePoolPtr_ -> releaseOldImageLock();
+        
+        // Capture new image
+        cameraPtr_ -> grabImage(img);
 
+        // Place new image into image pool
+        imagePoolPtr_ -> acquireNewImageLock();
+        imagePoolPtr_ -> enqueueNewImage(img);
+        imagePoolPtr_ -> releaseNewImageLock();
+        
     }
-    emit finished();
+
+    cameraPtr_ -> stopCapture();
 }
+
 
