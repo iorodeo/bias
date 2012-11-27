@@ -2,9 +2,9 @@
 #define BIAS_CAMERA_HPP
 
 #include "camera_fwd.hpp"
+#include "property_fwd.hpp"
 #include "basic_types.hpp"
 #include <iostream>
-#include "property.hpp"
 #include "camera_device.hpp"
 
 namespace cv

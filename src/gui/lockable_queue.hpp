@@ -1,5 +1,5 @@
-#ifndef BIAS_LOCKING_QUEUE_HPP
-#define BIAS_LOCKING_QUEUE_HPP
+#ifndef BIAS_LOCKABLE_QUEUE_HPP
+#define BIAS_LOCKABLE_QUEUE_HPP
 
 #include <queue>
 #include <QMutex>
@@ -40,4 +40,4 @@ namespace bias
 
 }
 
-#endif // #ifndef BIAS_LOCKING_QUEUE_HPP
+#endif // #ifndef BIAS_LOCKABLE_QUEUE_HPP

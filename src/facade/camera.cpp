@@ -1,4 +1,5 @@
 #include "camera.hpp"
+#include "property.hpp"
 #include "exception.hpp"
 #include "utils.hpp"
 #include "guid.hpp"

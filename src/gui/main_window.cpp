@@ -127,7 +127,7 @@ namespace bias
 
     void MainWindow::resizeEvent(QResizeEvent *event)
     {
-        if (havePixmap_)  
+        if (havePixmap_ && !(pixmapOriginal_.isNull()))  
         {
             QSize sizeImageLabel = imageLabel_ -> size();
             QSize sizeAdjusted = pixmapOriginal_.size();
