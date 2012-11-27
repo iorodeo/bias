@@ -78,14 +78,14 @@ endif()
 
 # External link libraries
 # -----------------------------------------------------------------------------
-set(bias_ext_link_libs ${OpenCV_LIBS})
+set(bias_ext_link_LIBS ${OpenCV_LIBS})
 
 if(with_fc2)
-    set(bias_ext_link_libs ${bias_ext_link_libs} ${FlyCapture2_LIBRARIES})
+    set(bias_ext_link_LIBS ${bias_ext_link_LIBS} ${FlyCapture2_LIBRARIES})
 endif()
 
 if(with_dc1394)
-    set(bias_ext_link_libs ${bias_ext_link_libs} dc1394)
+    set(bias_ext_link_LIBS ${bias_ext_link_LIBS} dc1394)
 endif()
 
 

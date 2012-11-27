@@ -8,9 +8,9 @@ set(
     bias_gui_HEADERS 
     main_window.hpp 
     mat_to_qimage.hpp
-    image_pool.hpp
     image_grabber.hpp
-    image_processor.hpp
+    image_dispatcher.hpp
+    lockable_queue.hpp
     )
 
 set(
@@ -18,11 +18,9 @@ set(
     main.cpp 
     main_window.cpp 
     mat_to_qimage.cpp
-    image_pool.cpp
     image_grabber.cpp
-    image_processor.cpp
+    image_dispatcher.cpp
     )
-
 
 qt4_wrap_ui(bias_gui_FORMS_HEADERS ${bias_gui_FORMS}) 
 qt4_wrap_cpp(bias_gui_HEADERS_MOC ${bias_gui_HEADERS})
@@ -42,7 +40,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(
     test_gui 
     ${QT_LIBRARIES} 
-    ${bias_ext_link_libs} 
+    ${bias_ext_link_LIBS} 
     bias_camera_facade
     )
 

@@ -254,6 +254,7 @@ namespace bias {
         TRIGGER_EXTERNAL
     };
 
+
 } // namespace bias
 
 #endif // #ifndef BIAS_BASIC_TYPES_HPP

@@ -1,6 +1,7 @@
 #include "image_grabber.hpp"
 #include "camera.hpp"
-#include "image_pool.hpp"
+#include "stamped_image.hpp"
+#include "lockable_queue.hpp"
 #include <iostream>
 #include <QTime>
 #include <opencv2/core/core.hpp>
@@ -14,18 +15,26 @@ namespace bias {
         stopped_ = true;
     }
 
-    ImageGrabber::ImageGrabber(CameraPtr camPtr, ImagePoolPtr imgPoolPtr, QObject *parent) : QObject(parent)
+    ImageGrabber::ImageGrabber (
+            CameraPtr cameraPtr, 
+            std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr, 
+            QObject *parent
+            ) : QObject(parent)
     {
-        initialize(camPtr, imgPoolPtr);
+        initialize(cameraPtr, newImageQueuePtr);
     }
 
-    void ImageGrabber::initialize(CameraPtr camPtr, ImagePoolPtr imgPoolPtr)
+    void ImageGrabber::initialize( 
+            CameraPtr cameraPtr, 
+            std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr 
+            ) 
     {
-        cameraPtr_ = camPtr;
-        imagePoolPtr_ = imgPoolPtr;
+        cameraPtr_ = cameraPtr;
+        newImageQueuePtr_ = newImageQueuePtr;
         ready_ = true;
         stopped_ = true;
     }
+
 
     void ImageGrabber::stop()
     {
@@ -34,12 +43,16 @@ namespace bias {
 
     void ImageGrabber::run()
     { 
-        cv::Mat img;
+        StampedImage stampImg;
+
+        // TO DO ... Temporary timestamp
+        // ------------------------------------
         QTime timer;
         float timeLast = 0.0;
         float timeCurr = 0.0;
         float timeDiff = 0.0;
         float frameRateEst = 0.0;
+        // ------------------------------------
 
         count_ = 0;
         stopped_ = false;
@@ -52,27 +65,22 @@ namespace bias {
 
         while (!stopped_)
         {
-            //// Remove old image from image pool
-            //imagePoolPtr_ -> acquireOldImageLock();
-            //img = imagePoolPtr_ -> dequeueOldImage();
-            //imagePoolPtr_ -> releaseOldImageLock();
+            stampImg.image = cameraPtr_ -> grabImage();
 
-            // Capture new image
-            img = cameraPtr_ -> grabImage();
-
+            // TO Do ... temporary get current time for time stamp 
+            // ---------------------------------------------------
             timeCurr = timer.elapsed()*0.001;
             timeDiff = timeCurr - timeLast;
             timeLast = timeCurr;
             frameRateEst = 0.95*frameRateEst + 0.05/timeDiff; 
-
             //std::cout << frameRateEst << std::endl << std::flush;
-            std::cout << timeCurr << " " << timeDiff << std::endl << std::flush;
+            // ---------------------------------------------------
 
-            // Place new image into image pool
-            imagePoolPtr_ -> acquireNewImageLock();
-            imagePoolPtr_ -> enqueueNewImage(img);
-            imagePoolPtr_ -> releaseNewImageLock();
+            stampImg.timeStamp = timeCurr;
 
+            newImageQueuePtr_ -> acquireLock();
+            newImageQueuePtr_ -> push(stampImg);
+            newImageQueuePtr_ -> releaseLock();
         }
 
         cameraPtr_ -> stopCapture();

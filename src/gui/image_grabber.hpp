@@ -9,8 +9,8 @@
 namespace bias
 {
 
-    class ImagePool;
-    typedef std::shared_ptr<ImagePool> ImagePoolPtr;
+    struct StampedImage;
+    template <class T> class LockableQueue;
 
     class ImageGrabber : public QObject, public QRunnable
     {
@@ -18,8 +18,18 @@ namespace bias
 
         public:
             ImageGrabber(QObject *parent=0);
-            ImageGrabber(CameraPtr camPtr, ImagePoolPtr imgPoolPtr, QObject *parent=0);
-            void initialize(CameraPtr camPtr, ImagePoolPtr imgPoolPtr);
+
+            ImageGrabber(
+                    CameraPtr cameraPtr, 
+                    std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr, 
+                    QObject *parent=0
+                    );
+
+            void initialize(
+                    CameraPtr cameraPtr, 
+                    std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr 
+                    );
+
             void stop();
 
         private:
@@ -27,7 +37,7 @@ namespace bias
             bool ready_;
             bool stopped_;
             CameraPtr cameraPtr_;
-            ImagePoolPtr imagePoolPtr_;
+            std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr_;
 
             void run();
     };

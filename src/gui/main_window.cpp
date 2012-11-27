@@ -4,13 +4,12 @@
 #include <QTimer>
 #include <QThreadPool>
 #include <opencv2/core/core.hpp>
-
 #include "camera_facade.hpp"
 #include "mat_to_qimage.hpp"
-#include "image_pool.hpp"
+#include "stamped_image.hpp"
+#include "lockable_queue.hpp"
 #include "image_grabber.hpp"
-#include "image_processor.hpp"
-
+#include "image_dispatcher.hpp"
 
 namespace bias
 {
@@ -30,10 +29,11 @@ namespace bias
     // ----------------------------------------------------------------------------
     void MainWindow::startButtonClicked()
     {
-        imageGrabber_ = new ImageGrabber(cameraPtr_, imagePoolPtr_);
-        imageProcessor_ = new ImageProcessor(imagePoolPtr_);
+        imageGrabber_ = new ImageGrabber(cameraPtr_, newImageQueuePtr_);
+        imageDispatcher_ = new ImageDispatcher(newImageQueuePtr_);
+
         threadPoolPtr_ -> start(imageGrabber_);
-        threadPoolPtr_ -> start(imageProcessor_);
+        threadPoolPtr_ -> start(imageDispatcher_);
         imageDisplayTimerPtr_ -> start(66);
     }
 
@@ -41,18 +41,16 @@ namespace bias
     {
         imageDisplayTimerPtr_ -> stop();
         imageGrabber_ -> stop();
-        imageProcessor_ -> stop();
-        imagePoolPtr_ -> empty();
+        imageDispatcher_ -> stop();
+        newImageQueuePtr_ -> clear();
     }
 
     void MainWindow::updateImageDisplay()
     {
-        //std::cout << "update image display" << std::endl;
-
-        imageProcessor_ -> acquireDisplayImageLock();
-        cv::Mat mat = imageProcessor_ -> getDisplayImage();
+        imageDispatcher_ -> acquireDisplayImageLock();
+        cv::Mat mat = imageDispatcher_ -> getDisplayImage();
         QImage img = matToQImage(mat);
-        imageProcessor_ -> releaseDisplayImageLock();
+        imageDispatcher_ -> releaseDisplayImageLock();
 
         pixmapOriginal_ = QPixmap::fromImage(img);
         updateImageLabel();
@@ -69,15 +67,11 @@ namespace bias
         connectWidgets();
         createCamera();
 
-
         threadPoolPtr_ = new QThreadPool(this);
         imageDisplayTimerPtr_ = new QTimer(this);
-
-        imagePoolPtr_ = std::make_shared<ImagePool>();
-
+        newImageQueuePtr_ = std::make_shared<LockableQueue<StampedImage>>();
 
         connect(imageDisplayTimerPtr_, SIGNAL(timeout()), this, SLOT(updateImageDisplay()));
-
     }
 
     void MainWindow::connectWidgets()

@@ -10,17 +10,26 @@
 namespace bias
 {
 
-    class ImagePool;
-    typedef std::shared_ptr<ImagePool> ImagePoolPtr;
+    struct StampedImage;
+    template <class T> class LockableQueue;
 
-    class ImageProcessor : public QObject, public QRunnable
+    class ImageDispatcher : public QObject, public QRunnable
     {
         Q_OBJECT
 
         public:
-            ImageProcessor(QObject *parent=0);
-            explicit ImageProcessor(ImagePoolPtr imagePoolPtr, QObject *parent=0);
-            void initialize(ImagePoolPtr imagePoolPtr);
+            ImageDispatcher(QObject *parent=0);
+
+            ImageDispatcher( 
+                    std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr, 
+                    QObject *parent = 0
+                    );
+
+            void initialize( 
+                    std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr 
+                    );
+
+            
             bool tryDisplayImageLock();
             void acquireDisplayImageLock();
             void releaseDisplayImageLock();
@@ -30,11 +39,9 @@ namespace bias
         private:
             bool ready_;
             bool stopped_;
-
             QMutex displayImageMutex_;
             cv::Mat displayImage_;
-
-            bias::ImagePoolPtr imagePoolPtr_;
+            std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr_;
 
             void run();
     };
