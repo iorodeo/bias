@@ -1,7 +1,9 @@
 #include "camera.hpp"
 #include "exception.hpp"
 #include "utils.hpp"
+#include "guid.hpp"
 #include <sstream>
+#include <opencv2/core/core.hpp>
 #ifdef WITH_FC2
 #include "camera_device_fc2.hpp"
 #endif

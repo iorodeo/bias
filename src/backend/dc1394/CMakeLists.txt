@@ -14,5 +14,5 @@ target_link_libraries(
     bias_backend_dc1394 
     ${bias_ext_link_libs} 
     bias_backend_base 
-    bias_core
+    bias_camera_facade
     )

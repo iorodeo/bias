@@ -39,5 +39,10 @@ add_executable(
 
 add_dependencies(test_gui ${bias_gui_FORMS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
-target_link_libraries(test_gui ${QT_LIBRARIES} ${bias_ext_link_libs} bias_core)
+target_link_libraries(
+    test_gui 
+    ${QT_LIBRARIES} 
+    ${bias_ext_link_libs} 
+    bias_camera_facade
+    )
 

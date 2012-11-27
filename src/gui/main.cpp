@@ -6,9 +6,8 @@
 
 int main (int argc, char *argv[])
 {
-
     QApplication app(argc, argv);
-    MainWindow win;
+    bias::MainWindow win;
     if (win.haveCamera())
     {
         std::cout << "have camera" << std::endl ;

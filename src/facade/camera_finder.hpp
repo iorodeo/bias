@@ -1,11 +1,10 @@
 #ifndef BIAS_CAMERA_FINDER_HPP
 #define BIAS_CAMERA_FINDER_HPP
 
-#include <set>
-#include <string>
 #include "basic_types.hpp"
-#include "guid.hpp"
-#include "camera.hpp"
+#include "guid_fwd.hpp"
+#include "camera_fwd.hpp"
+#include <string>
 
 #ifdef WITH_FC2
 #include "FlyCapture2_C.h"

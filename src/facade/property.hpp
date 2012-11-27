@@ -1,11 +1,8 @@
 #ifndef BIAS_PROPERTY_HPP
 #define BIAS_PROPERTY_HPP
 
-#include "basic_types.hpp"
+#include "property_fwd.hpp"
 #include <string>
-#include <list>
-#include <set>
-#include <map>
 
 namespace bias 
 {
@@ -24,10 +21,6 @@ namespace bias
         std::string toString();
         void print();
     };
-
-    typedef std::list<Property> PropertyList;
-    typedef std::set<Property> PropertySet;
-    typedef std::map<PropertyType, Property> PropertyMap;
 
     struct PropertyInfo 
     {
@@ -55,10 +48,6 @@ namespace bias
         void print();
 
     };
-
-    typedef std::list<PropertyInfo> PropertyInfoList;
-    typedef std::set<PropertyInfo> PropertyInfoSet;
-    typedef std::map<PropertyType, PropertyInfo> PropertyInfoMap;
 
 }
 

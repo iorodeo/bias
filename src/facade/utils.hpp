@@ -7,7 +7,6 @@
 namespace bias
 {
 
-
     // Functions which return lists of enumeration types
     // ------------------------------------------------------------------------
 
@@ -35,7 +34,6 @@ namespace bias
 
     // ------------------------------------------------------------------------
     float getFrameRateAsFloat(FrameRate frmRate);
-
 
 }
 

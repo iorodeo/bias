@@ -1,13 +1,12 @@
 #ifndef BIAS_GUID_HPP
 #define BIAS_GUID_HPP
 
-#include <string>
-#include <iostream>
-#include <set>
-#include <list>
-#include <memory>
-#include <stdint.h>
+#include "guid_fwd.hpp"
 #include "basic_types.hpp"
+#include <stdint.h>
+#include <string>
+#include <functional>
+#include <iostream>
 #include "guid_device.hpp"
 
 #ifdef WITH_FC2
@@ -63,28 +62,19 @@ namespace bias {
            
     };
 
-
-    // ------------------------------------------------------------------------
-
     class GuidCmp : public std::binary_function<Guid, Guid, bool>
     {
         // Comparision object for Guid objects
         public:
             bool operator() (const Guid &guid0, const Guid &guid1);
     };
-    typedef std::list<Guid> GuidList;
-    typedef std::set<Guid, GuidCmp> GuidSet;
 
-
-    typedef std::shared_ptr<Guid> GuidPtr;
     class GuidPtrCmp : public std::binary_function<GuidPtr, GuidPtr, bool>
     {
         // Comparison object for shared_ptrs to Guid objects  
         public:
             bool operator() (const GuidPtr &guidPtr0, const GuidPtr &guidPtr1);
     };
-    typedef std::list<GuidPtr> GuidPtrList;
-    typedef std::set<GuidPtr, GuidPtrCmp> GuidPtrSet;
 
 } // namespase bias
 

@@ -1,5 +1,7 @@
+#include "guid.hpp"
 #include "camera_finder.hpp"
 #include "exception.hpp"
+#include "camera.hpp"
 #include <iostream>
 #include <sstream>
 

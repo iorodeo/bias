@@ -1,4 +1,5 @@
 #include "mat_to_qimage.hpp"
+#include <opencv2/core/core.hpp>
 
 QImage matToQImage(const cv::Mat& mat)
 {

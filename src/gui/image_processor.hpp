@@ -1,33 +1,45 @@
 #ifndef BIAS_IMAGE_PROCESSOR_HPP
 #define BIAS_IMAGE_PROCESSOR_HPP
 
+#include <memory>
 #include <QMutex>
+#include <QObject>
 #include <QRunnable>
 #include <opencv2/core/core.hpp>
-#include "image_pool.hpp"
 
-class ImageProcessor : public QRunnable
+namespace bias
 {
-    public:
-        ImageProcessor();
-        explicit ImageProcessor(bias::ImagePoolPtr imagePoolPtr);
-        bool tryDisplayImageLock();
-        void acquireDisplayImageLock();
-        void releaseDisplayImageLock();
-        cv::Mat getDisplayImage();
-        void stop();
 
-    private:
-        bool ready_;
-        bool stopped_;
+    class ImagePool;
+    typedef std::shared_ptr<ImagePool> ImagePoolPtr;
 
-        QMutex displayImageMutex_;
-        cv::Mat displayImage_;
+    class ImageProcessor : public QObject, public QRunnable
+    {
+        Q_OBJECT
 
-        bias::ImagePoolPtr imagePoolPtr_;
+        public:
+            ImageProcessor(QObject *parent=0);
+            explicit ImageProcessor(ImagePoolPtr imagePoolPtr, QObject *parent=0);
+            void initialize(ImagePoolPtr imagePoolPtr);
+            bool tryDisplayImageLock();
+            void acquireDisplayImageLock();
+            void releaseDisplayImageLock();
+            cv::Mat getDisplayImage();
+            void stop();
 
-        void run();
-};
+        private:
+            bool ready_;
+            bool stopped_;
+
+            QMutex displayImageMutex_;
+            cv::Mat displayImage_;
+
+            bias::ImagePoolPtr imagePoolPtr_;
+
+            void run();
+    };
+
+} // namespace bias
 
 
 #endif // #ifndef BIAS_IMAGE_PROCESSOR_HPP

@@ -3,7 +3,8 @@
 
 #include <QtGui>
 #include <QDebug>
-#include <opencv2/core/core.hpp>
+
+namespace cv { class Mat; }
 
 QImage matToQImage(const cv::Mat& mat);
 

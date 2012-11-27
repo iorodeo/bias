@@ -1,17 +1,21 @@
 #ifndef BIAS_CAMERA_HPP
 #define BIAS_CAMERA_HPP
 
-#include <set>
-#include <list>
-#include <memory>
-#include <iostream>
-#include <opencv2/core/core.hpp>
-#include "guid.hpp"
+#include "camera_fwd.hpp"
 #include "basic_types.hpp"
+#include <iostream>
 #include "property.hpp"
 #include "camera_device.hpp"
 
+namespace cv
+{
+    class Mat;
+}
+
 namespace bias {
+
+    // Forward declarations
+    class Guid;
 
     class Camera {
 
@@ -118,8 +122,6 @@ namespace bias {
 
     };
 
-    typedef std::shared_ptr<Camera> CameraPtr;
-
     class CameraPtrCmp : public std::binary_function<CameraPtr, CameraPtr, bool>
     {
         // Comparison object for shared_ptrs to Guid objects  
@@ -127,8 +129,6 @@ namespace bias {
             bool operator() (const CameraPtr &camPtr0, const CameraPtr &camPtr1);
     };
 
-    typedef std::set<CameraPtr> CameraPtrSet;
-    typedef std::list<CameraPtr> CameraPtrList;
 }
 
 #endif // #ifndef BIAS_CAMERA_HPP

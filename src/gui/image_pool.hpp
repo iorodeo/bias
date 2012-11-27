@@ -42,7 +42,6 @@ namespace bias
             QMutex oldImageMutex_;
     };
 
-    typedef std::shared_ptr<ImagePool> ImagePoolPtr;
 }
 
 
