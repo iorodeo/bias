@@ -10,7 +10,12 @@ namespace bias
     template <class T>
     class LockableQueue : public std::queue<T>
     {
+        // Mixin class for creating lockable queues 
+
         public:
+
+            LockableQueue() : std::queue<T>() {};
+
             void acquireLock()
             {
                 mutex.lock();

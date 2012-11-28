@@ -15,6 +15,7 @@ namespace bias
     class ImageGrabber;
     class ImageDispatcher;
     struct StampedImage;
+    template <class T> class Lockable;
     template <class T> class LockableQueue;
 
     class CameraWindow : public QMainWindow, private Ui::CameraWindow
@@ -46,7 +47,7 @@ namespace bias
 
             QPixmap pixmapOriginal_;
 
-            std::shared_ptr<Camera> cameraPtr_;
+            std::shared_ptr<Lockable<Camera>> cameraPtr_;
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr_;
 
             QPointer<QThreadPool> threadPoolPtr_;

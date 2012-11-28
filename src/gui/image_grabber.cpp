@@ -2,6 +2,7 @@
 #include "camera.hpp"
 #include "exception.hpp"
 #include "stamped_image.hpp"
+#include "lockable.hpp"
 #include "lockable_queue.hpp"
 #include <iostream>
 #include <QTime>
@@ -16,7 +17,7 @@ namespace bias {
     }
 
     ImageGrabber::ImageGrabber (
-            CameraPtr cameraPtr, 
+            std::shared_ptr<Lockable<Camera>> cameraPtr,
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr, 
             QObject *parent
             ) : QObject(parent)
@@ -25,7 +26,7 @@ namespace bias {
     }
 
     void ImageGrabber::initialize( 
-            CameraPtr cameraPtr, 
+            std::shared_ptr<Lockable<Camera>> cameraPtr,
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr 
             ) 
     {
@@ -58,6 +59,7 @@ namespace bias {
     void ImageGrabber::run()
     { 
         bool done = false;
+        bool grabError = false;
         StampedImage stampImg;
         QTime timer; // TO DO ... temporary for timestamp generation 
 
@@ -70,40 +72,47 @@ namespace bias {
         stopped_ = false;
         releaseLock();
 
+        cameraPtr_ -> acquireLock();
         cameraPtr_ -> startCapture();
-        timer.start();
+        cameraPtr_ -> releaseLock();
+
+        timer.start(); // TO DO ... temporary 
 
         while (!done)
         {
             // Grab image from camera
+            cameraPtr_ -> acquireLock();
             try
             {
                 stampImg.image = cameraPtr_ -> grabImage();
+                grabError = false;
             }
             catch (RuntimeError &runtimeError)
             {
                 std::cout << "Frame grab error: id = ";
                 std::cout << runtimeError.id() << ", what = "; 
                 std::cout << runtimeError.what() << std::endl;
-                continue;
+                grabError = true;
             }
+            cameraPtr_ -> releaseLock();
 
-            // TO DO ... temporary get current time for time stamp 
-            //
-            // Get time stamp from camera when available
-            // ------------------------------------------------------
-            stampImg.timeStamp = timer.elapsed()*0.001;
+            if (!grabError) 
+            {
+                stampImg.timeStamp = timer.elapsed()*0.001; // TO DO ... temporary
 
-            newImageQueuePtr_ -> acquireLock();
-            newImageQueuePtr_ -> push(stampImg);
-            newImageQueuePtr_ -> releaseLock();
+                newImageQueuePtr_ -> acquireLock();
+                newImageQueuePtr_ -> push(stampImg);
+                newImageQueuePtr_ -> releaseLock();
 
-            acquireLock();
-            done = stopped_;
-            releaseLock();
+                acquireLock();
+                done = stopped_;
+                releaseLock();
+            }
         }
 
+        cameraPtr_ -> acquireLock();
         cameraPtr_ -> stopCapture();
+        cameraPtr_ -> releaseLock();
     }
 
 } // namespace bias

@@ -2,6 +2,7 @@
 #include "camera_facade.hpp"
 #include "mat_to_qimage.hpp"
 #include "stamped_image.hpp"
+#include "lockable.hpp"
 #include "lockable_queue.hpp"
 #include "image_grabber.hpp"
 #include "image_dispatcher.hpp"
@@ -9,7 +10,6 @@
 #include <QThreadPool>
 #include <opencv2/core/core.hpp>
 #include <iostream>
-
 
 namespace bias
 {
@@ -115,7 +115,11 @@ namespace bias
         connectButtonPtr_ -> setText(QString("Connect"));
         if (haveCamera_) 
         {
+
+            cameraPtr_ -> acquireLock();
             Guid cameraGuid = cameraPtr_ -> getGuid();
+            cameraPtr_ -> releaseLock();
+
             QString guidString("GUID: ");
             guidString += QString::fromStdString(cameraGuid.toString());
             guidLabelPtr_ -> setText(guidString);
@@ -149,15 +153,17 @@ namespace bias
     {
         // Find cameras
         CameraFinder cameraFinder;
-        CameraPtrList cameraPtrList = cameraFinder.createCameraPtrList();
-        if (cameraPtrList.empty())
+        GuidList cameraGuidList = cameraFinder.getGuidList();
+
+        if (cameraGuidList.empty())
         {
             haveCamera_ = false;
         }
         else 
         {
             // Take first camera from list
-            cameraPtr_ = cameraPtrList.front();
+            Guid cameraGuid = cameraGuidList.front();
+            cameraPtr_ = std::make_shared<Lockable<Camera>>(cameraGuid);
             haveCamera_ = true;
         }
     }
@@ -194,8 +200,10 @@ namespace bias
             // TO DO .. add error message
             return;
         }
+        cameraPtr_ -> acquireLock();
         cameraPtr_ -> connect();
-        cameraPtr_ -> printInfo();
+        cameraPtr_ -> releaseLock();
+
         connectButtonPtr_ -> setText(QString("Disconnect"));
         startButtonPtr_ -> setEnabled(true);
         statusbarPtr_ -> showMessage(QString("Connected, Stopped"));
@@ -213,7 +221,11 @@ namespace bias
         {
             stopImageCapture();
         }
+
+        cameraPtr_ -> acquireLock();
         cameraPtr_ -> disconnect();
+        cameraPtr_ -> releaseLock();
+
         connectButtonPtr_ -> setText(QString("Connect"));
         startButtonPtr_ -> setEnabled(false);
         statusbarPtr_ -> showMessage(QString("Disconnected"));

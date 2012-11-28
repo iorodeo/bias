@@ -11,6 +11,7 @@ namespace bias
 {
 
     struct StampedImage;
+    template <class T> class Lockable;
     template <class T> class LockableQueue;
 
     class ImageGrabber : public QObject, public QRunnable
@@ -21,13 +22,13 @@ namespace bias
             ImageGrabber(QObject *parent=0);
 
             ImageGrabber(
-                    CameraPtr cameraPtr, 
+                    std::shared_ptr<Lockable<Camera>> cameraPtr,
                     std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr, 
                     QObject *parent=0
                     );
 
             void initialize(
-                    CameraPtr cameraPtr, 
+                    std::shared_ptr<Lockable<Camera>> cameraPtr,
                     std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr 
                     );
 
@@ -42,7 +43,7 @@ namespace bias
             bool stopped_;
 
             QMutex mutex_;
-            CameraPtr cameraPtr_;
+            std::shared_ptr<Lockable<Camera>> cameraPtr_;
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr_;
 
             void run();
