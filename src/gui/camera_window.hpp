@@ -69,6 +69,8 @@ namespace bias
             void startImageCapture();
             void stopImageCapture();
 
+            void setCameraInfoMessage(QString vendorName, QString modelName);
+
 
     }; // class CameraWindow
 

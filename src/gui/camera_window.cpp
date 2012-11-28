@@ -136,15 +136,12 @@ namespace bias
         Guid cameraGuid = cameraPtr_ -> getGuid();
         cameraPtr_ -> releaseLock();
 
-        QString guidString("GUID: ");
-        guidString += QString::fromStdString(cameraGuid.toString());
-        guidLabelPtr_ -> setText(guidString);
-        connectButtonPtr_ -> setEnabled(true);
-        statusbarPtr_ -> showMessage(QString("Camera found, disconnected"));
+        setCameraInfoMessage(QString("____"), QString("____"));
 
         startButtonPtr_ -> setText(QString("Start"));
         startButtonPtr_ -> setEnabled(false);
-        settingsButtonPtr_ -> setEnabled(false);
+        connectButtonPtr_ -> setEnabled(true);
+        statusbarPtr_ -> showMessage(QString("Camera found, disconnected"));
     }
 
     void CameraWindow::connectWidgets()
@@ -208,6 +205,12 @@ namespace bias
             connectButtonPtr_ -> setText(QString("Disconnect"));
             startButtonPtr_ -> setEnabled(true);
             statusbarPtr_ -> showMessage(QString("Connected, Stopped"));
+
+            setCameraInfoMessage(
+                    QString::fromStdString(cameraPtr_ -> getVendorName()),
+                    QString::fromStdString(cameraPtr_ -> getModelName())
+                    );
+
             connected_ = true;
         }
         else 
@@ -331,6 +334,15 @@ namespace bias
         connectButtonPtr_ -> setEnabled(true);
         statusbarPtr_ -> showMessage(QString("Connected, Stopped"));
         capturing_ = false;
+    }
+    
+    void CameraWindow::setCameraInfoMessage(QString vendorName, QString modelName)
+    {
+        QString cameraInfoString("Vendor = ");
+        cameraInfoString += vendorName;
+        cameraInfoString += QString(",  Model = ");
+        cameraInfoString += modelName; 
+        cameraInfoLabelPtr_ -> setText(cameraInfoString);
     }
 
 } // namespace bias
