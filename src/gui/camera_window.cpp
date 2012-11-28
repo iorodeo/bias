@@ -18,7 +18,6 @@ namespace bias
     // Public methods
     // ----------------------------------------------------------------------------------
 
-
     CameraWindow::CameraWindow(Guid cameraGuid, QWidget *parent) : QMainWindow(parent)
     {
         setupUi(this);
@@ -76,11 +75,12 @@ namespace bias
 
     void CameraWindow::updateImageDisplay()
     {
-        imageDispatcher_ -> acquireLock();
-        cv::Mat mat = imageDispatcher_ -> getImage();
-        double fps = imageDispatcher_ -> getFPS();
+        // Get information from image dispatcher
+        imageDispatcherPtr_ -> acquireLock();
+        cv::Mat mat = imageDispatcherPtr_ -> getImage();
+        double fps = imageDispatcherPtr_ -> getFPS();
         QImage img = matToQImage(mat);
-        imageDispatcher_ -> releaseLock();
+        imageDispatcherPtr_ -> releaseLock();
 
         if (!img.isNull()) 
         {
@@ -93,6 +93,26 @@ namespace bias
         }
     }
 
+    void CameraWindow::startImageCaptureError(unsigned int errorId, QString errorMsg)
+    {
+        stopImageCapture();
+        QString msgTitle("Start Image Capture Error");
+        QString msgText("Failed to start image capture\n\nError ID: ");
+        msgText += QString::number(errorId);
+        msgText += "\n\n";
+        msgText += errorMsg;
+        QMessageBox::critical(this, msgTitle, msgText);
+    }
+
+    void CameraWindow::stopImageCaptureError(unsigned int errorId, QString errorMsg)
+    {
+        QString msgTitle("Stop Image Capture Error");
+        QString msgText("Failed to stop image capture\n\nError ID: ");
+        msgText += QString::number(errorId);
+        msgText += "\n\n";
+        msgText += errorMsg;
+        QMessageBox::critical(this, msgTitle, msgText);
+    }
 
     // Private methods
     // -----------------------------------------------------------------------------------
@@ -166,45 +186,112 @@ namespace bias
 
     void CameraWindow::connectCamera() 
     {
+        bool error = false;
+        unsigned int errorId;
+        QString errorMsg;
+
         cameraPtr_ -> acquireLock();
-        cameraPtr_ -> connect();
+        try
+        {
+            cameraPtr_ -> connect();
+        }
+        catch (RuntimeError &runtimeError)
+        {
+            error = true;
+            errorId = runtimeError.id();
+            errorMsg = QString::fromStdString(runtimeError.what());
+        }
         cameraPtr_ -> releaseLock();
 
-        connectButtonPtr_ -> setText(QString("Disconnect"));
-        startButtonPtr_ -> setEnabled(true);
-        statusbarPtr_ -> showMessage(QString("Connected, Stopped"));
-        connected_ = true;
+        if (!error) 
+        {
+            connectButtonPtr_ -> setText(QString("Disconnect"));
+            startButtonPtr_ -> setEnabled(true);
+            statusbarPtr_ -> showMessage(QString("Connected, Stopped"));
+            connected_ = true;
+        }
+        else 
+        {
+            QString msgTitle("Connection Error");
+            QString msgText("Failed to connect camera:\n\nError ID: ");
+            msgText += QString::number(errorId);
+            msgText += "\n\n";
+            msgText += errorMsg;
+            QMessageBox::critical(this, msgTitle, msgText);
+        }
     }
 
     void CameraWindow::disconnectCamera()
     {
+        bool error = false;
+        unsigned int errorId;
+        QString errorMsg; 
+
         if (capturing_) 
         {
             stopImageCapture();
         }
 
         cameraPtr_ -> acquireLock();
-        cameraPtr_ -> disconnect();
+        try
+        {
+            cameraPtr_ -> disconnect();
+        }
+        catch (RuntimeError &runtimeError)
+        {
+            error = true;
+            errorId = runtimeError.id();
+            errorMsg = QString::fromStdString(runtimeError.what());
+        }
         cameraPtr_ -> releaseLock();
 
-        connectButtonPtr_ -> setText(QString("Connect"));
-        startButtonPtr_ -> setEnabled(false);
-        statusbarPtr_ -> showMessage(QString("Disconnected"));
-        connected_ = false;
+        if (!error) 
+        {
+            connectButtonPtr_ -> setText(QString("Connect"));
+            startButtonPtr_ -> setEnabled(false);
+            statusbarPtr_ -> showMessage(QString("Disconnected"));
+            connected_ = false;
+        }
+        else 
+        {
+            QString msgTitle("Disconnection Error");
+            QString msgText("Failed to disconnect camera:\n\nError ID: ");
+            msgText += QString::number(errorId);
+            msgText += "\n\n";
+            msgText += errorMsg;
+            QMessageBox::critical(this, msgTitle, msgText);
+        }
     }
     
     void CameraWindow::startImageCapture() 
     {
         if (!connected_)
         {
-            // TO DO .. add error message 
-            return;
+            QString msgTitle("Capture Error");
+            QString msgText("Unable to start image capture: not connected");
+            QMessageBox::critical(this, msgTitle, msgText);
         }
 
-        imageGrabber_ = new ImageGrabber(cameraPtr_, newImageQueuePtr_);
-        imageDispatcher_ = new ImageDispatcher(newImageQueuePtr_);
-        threadPoolPtr_ -> start(imageGrabber_);
-        threadPoolPtr_ -> start(imageDispatcher_);
+        imageGrabberPtr_ = new ImageGrabber(cameraPtr_, newImageQueuePtr_);
+        imageDispatcherPtr_ = new ImageDispatcher(newImageQueuePtr_);
+
+        connect(
+                imageGrabberPtr_, 
+                SIGNAL(startCaptureError(unsigned int, QString)),
+                this,
+                SLOT(startImageCaptureError(unsigned int, QString))
+               );
+
+        connect(
+                imageGrabberPtr_,
+                SIGNAL(stopCaptureError(unsigned int, QString)),
+                this,
+                SLOT(stopImageCaptureError(unsigned int, QString))
+               );
+
+        threadPoolPtr_ -> start(imageGrabberPtr_);
+        threadPoolPtr_ -> start(imageDispatcherPtr_);
+
         imageDisplayTimerPtr_ -> start(imageDisplayDt_);
         startButtonPtr_ -> setText(QString("Stop"));
         connectButtonPtr_ -> setEnabled(false);
@@ -216,21 +303,28 @@ namespace bias
     {
         if (!connected_)
         {
-            // TO DO .. add error message 
-            return;
+            QString msgTitle("Capture Error");
+            QString msgText("Unable to stop image capture: not connected");
+            QMessageBox::critical(this, msgTitle, msgText);
         }
 
         // Note, image grabber and dispatcher are destroyed by the 
         // threadPool when their run methods exit.
         imageDisplayTimerPtr_ -> stop();
 
-        imageGrabber_ -> acquireLock();
-        imageGrabber_ -> stop();
-        imageGrabber_ -> releaseLock();
+        if (!imageGrabberPtr_.isNull())
+        {
+            imageGrabberPtr_ -> acquireLock();
+            imageGrabberPtr_ -> stop();
+            imageGrabberPtr_ -> releaseLock();
+        }
 
-        imageDispatcher_ -> acquireLock();
-        imageDispatcher_ -> stop();
-        imageDispatcher_ -> releaseLock();
+        if (!imageDispatcherPtr_.isNull())
+        {
+            imageDispatcherPtr_ -> acquireLock();
+            imageDispatcherPtr_ -> stop();
+            imageDispatcherPtr_ -> releaseLock();
+        }
 
         newImageQueuePtr_ -> clear();
         startButtonPtr_ -> setText(QString("Start"));

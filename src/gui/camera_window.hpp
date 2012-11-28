@@ -35,6 +35,8 @@ namespace bias
             void connectButtonClicked();
             void startButtonClicked();
             void updateImageDisplay();
+            void startImageCaptureError(unsigned int errorId, QString errorMsg);
+            void stopImageCaptureError(unsigned int errorId, QString errorMsg);
 
         private:
 
@@ -51,8 +53,8 @@ namespace bias
             QPointer<QThreadPool> threadPoolPtr_;
             QPointer<QTimer> imageDisplayTimerPtr_;
 
-            QPointer<ImageGrabber> imageGrabber_;
-            QPointer<ImageDispatcher> imageDispatcher_;
+            QPointer<ImageGrabber> imageGrabberPtr_;
+            QPointer<ImageDispatcher> imageDispatcherPtr_;
 
             void connectWidgets();
             void initialize(Guid guid);

@@ -14,6 +14,7 @@ namespace bias {
     {
         ready_ = false;
         stopped_ = true;
+        capturing_ = false;
     }
 
     ImageGrabber::ImageGrabber (
@@ -34,6 +35,7 @@ namespace bias {
         newImageQueuePtr_ = newImageQueuePtr;
         ready_ = true;
         stopped_ = true;
+        capturing_ = false;
     }
 
     bool ImageGrabber::tryLock()
@@ -59,44 +61,64 @@ namespace bias {
     void ImageGrabber::run()
     { 
         bool done = false;
-        bool grabError = false;
+        bool error = false;
+        unsigned int errorId = 0;
         StampedImage stampImg;
-        QTime timer; // TO DO ... temporary for timestamp generation 
+        QString errorMsg("no message");
+        QTime timer; // TO DO ... temporary timestamp generation 
 
         if (!ready_) 
         { 
             return; 
         }
 
+        // Start image capture
+        cameraPtr_ -> acquireLock();
+        try
+        {
+            cameraPtr_ -> startCapture();
+        }
+        catch (RuntimeError &runtimeError)
+        {
+            error = true;
+            errorId = runtimeError.id();
+            errorMsg = QString::fromStdString(runtimeError.what());
+        }
+        cameraPtr_ -> releaseLock();
+
+        if (error)
+        {
+            emit startCaptureError(errorId, errorMsg);
+            return;
+        } 
+
         acquireLock();
         stopped_ = false;
         releaseLock();
 
-        cameraPtr_ -> acquireLock();
-        cameraPtr_ -> startCapture();
-        cameraPtr_ -> releaseLock();
+        timer.start(); // TO DO ... temporary timestamp generation 
 
-        timer.start(); // TO DO ... temporary 
-
+        // Grab images from camera until the done signal is given
         while (!done)
         {
-            // Grab image from camera
+            // Grab an image
             cameraPtr_ -> acquireLock();
             try
             {
                 stampImg.image = cameraPtr_ -> grabImage();
-                grabError = false;
+                error = false;
             }
             catch (RuntimeError &runtimeError)
             {
                 std::cout << "Frame grab error: id = ";
                 std::cout << runtimeError.id() << ", what = "; 
                 std::cout << runtimeError.what() << std::endl;
-                grabError = true;
+                error = true;
             }
             cameraPtr_ -> releaseLock();
 
-            if (!grabError) 
+            // Push image into new image queue
+            if (!error) 
             {
                 stampImg.timeStamp = timer.elapsed()*0.001; // TO DO ... temporary
 
@@ -110,9 +132,24 @@ namespace bias {
             }
         }
 
+        // Stop image capture
         cameraPtr_ -> acquireLock();
-        cameraPtr_ -> stopCapture();
+        try
+        {
+            cameraPtr_ -> stopCapture();
+        }
+        catch (RuntimeError &runtimeError)
+        {
+            error = true;
+            errorId = runtimeError.id();
+            errorMsg = QString::fromStdString(runtimeError.what());
+        }
         cameraPtr_ -> releaseLock();
+
+        if (error)
+        {
+            emit stopCaptureError(errorId, errorMsg);
+        }
     }
 
 } // namespace bias

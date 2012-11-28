@@ -38,9 +38,14 @@ namespace bias
 
             void stop();
 
+        signals:
+            void startCaptureError(unsigned int errorId, QString errorMsg);
+            void stopCaptureError(unsigned int errorId, QString errorMsg);
+
         private:
             bool ready_;
             bool stopped_;
+            bool capturing_;
 
             QMutex mutex_;
             std::shared_ptr<Lockable<Camera>> cameraPtr_;
