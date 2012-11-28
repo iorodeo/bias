@@ -571,6 +571,16 @@ namespace bias {
         }
     }
 
+    std::string CameraDevice_fc2::getVendorName()
+    {
+        return cameraInfo_.vendorName;
+    }
+
+    std::string CameraDevice_fc2::getModelName()
+    {
+        return cameraInfo_.modelName;
+    }
+
     std::string CameraDevice_fc2::toString()
     {
         fc2Error error;

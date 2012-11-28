@@ -53,6 +53,9 @@ namespace bias {
             virtual void setTriggerExternal() {}; // TO DO //
             virtual TriggerType getTriggerType() {}; // TO DO //
 
+            virtual std::string getVendorName() { return std::string("not done"); }; // TO DO //
+            virtual std::string getModelName() { return std::string("not done"); }; // TO DO //
+
             virtual std::string toString();
             virtual void printGuid();
             virtual void printInfo();  

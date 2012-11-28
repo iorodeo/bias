@@ -104,6 +104,9 @@ namespace bias {
 
             std::string getPropertyString(PropertyType propType);
             std::string getPropertyInfoString(PropertyType propType);
+
+            std::string getVendorName();
+            std::string getModelName();
                 
             void printInfo();
             void printGuid();

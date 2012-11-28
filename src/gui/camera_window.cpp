@@ -18,21 +18,12 @@ namespace bias
     // Public methods
     // ----------------------------------------------------------------------------------
 
-    CameraWindow::CameraWindow(QWidget *parent) : QMainWindow(parent)
-    {
-        setupUi(this);
-        initialize();
-    }
 
     CameraWindow::CameraWindow(Guid cameraGuid, QWidget *parent) : QMainWindow(parent)
     {
         setupUi(this);
+        connectWidgets();
         initialize(cameraGuid);
-    }
-
-    bool CameraWindow::haveCamera()
-    {
-        return haveCamera_;
     }
 
     // Protected methods
@@ -91,12 +82,15 @@ namespace bias
         QImage img = matToQImage(mat);
         imageDispatcher_ -> releaseLock();
 
-        pixmapOriginal_ = QPixmap::fromImage(img);
-        updateImageLabel();
-        QString statusMsg;
-        statusMsg.sprintf("Capturing: %1.1f fps", fps);
-        statusbarPtr_ -> showMessage(statusMsg);
-        havePixmap_ = true;
+        if (!img.isNull()) 
+        {
+            pixmapOriginal_ = QPixmap::fromImage(img);
+            updateImageLabel();
+            QString statusMsg;
+            statusMsg.sprintf("Capturing: %1.1f fps", fps);
+            statusbarPtr_ -> showMessage(statusMsg);
+            havePixmap_ = true;
+        }
     }
 
 
@@ -105,9 +99,6 @@ namespace bias
 
     void CameraWindow::initialize(Guid guid)
     {
-        connectWidgets();
-
-        haveCamera_ = true; // remove
         connected_ = false;
         capturing_ = false;
         havePixmap_ = false;
@@ -136,47 +127,6 @@ namespace bias
         settingsButtonPtr_ -> setEnabled(false);
     }
 
-    void CameraWindow::initialize()
-    {
-        connected_ = false;
-        capturing_ = false;
-        haveCamera_ = false;
-        havePixmap_ = false;
-        imageDisplayDt_ = DEFAULT_IMAGE_DISPLAY_DT;
-
-        connectWidgets();
-
-        findCamera();
-        setupImageDisplayTimer();
-
-        threadPoolPtr_ = new QThreadPool(this);
-        newImageQueuePtr_ = std::make_shared<LockableQueue<StampedImage>>();
-
-        connectButtonPtr_ -> setText(QString("Connect"));
-        if (haveCamera_) 
-        {
-
-            cameraPtr_ -> acquireLock();
-            Guid cameraGuid = cameraPtr_ -> getGuid();
-            cameraPtr_ -> releaseLock();
-
-            QString guidString("GUID: ");
-            guidString += QString::fromStdString(cameraGuid.toString());
-            guidLabelPtr_ -> setText(guidString);
-            connectButtonPtr_ -> setEnabled(true);
-            statusbarPtr_ -> showMessage(QString("Camera found, disconnected"));
-        }
-        else
-        {
-            connectButtonPtr_ -> setEnabled(false);
-            statusbarPtr_ -> showMessage(QString("No Camera found"));
-        }
-
-        startButtonPtr_ -> setText(QString("Start"));
-        startButtonPtr_ -> setEnabled(false);
-        settingsButtonPtr_ -> setEnabled(false);
-    }
-
     void CameraWindow::connectWidgets()
     {
         connect(startButtonPtr_, SIGNAL(clicked()), this, SLOT(startButtonClicked())); 
@@ -187,25 +137,6 @@ namespace bias
     {
         imageDisplayTimerPtr_ = new QTimer(this);
         connect(imageDisplayTimerPtr_, SIGNAL(timeout()), this, SLOT(updateImageDisplay()));
-    }
-
-    void CameraWindow::findCamera()
-    {
-        // Find cameras
-        CameraFinder cameraFinder;
-        GuidList cameraGuidList = cameraFinder.getGuidList();
-
-        if (cameraGuidList.empty())
-        {
-            haveCamera_ = false;
-        }
-        else 
-        {
-            // Take first camera from list
-            Guid cameraGuid = cameraGuidList.front();
-            cameraPtr_ = std::make_shared<Lockable<Camera>>(cameraGuid);
-            haveCamera_ = true;
-        }
     }
 
     void CameraWindow::updateImageLabel()
@@ -235,11 +166,6 @@ namespace bias
 
     void CameraWindow::connectCamera() 
     {
-        if (!haveCamera_)
-        {
-            // TO DO .. add error message
-            return;
-        }
         cameraPtr_ -> acquireLock();
         cameraPtr_ -> connect();
         cameraPtr_ -> releaseLock();
@@ -252,11 +178,6 @@ namespace bias
 
     void CameraWindow::disconnectCamera()
     {
-        if (!haveCamera_)
-        {
-            // TO DO .. add error message
-            return;
-        }
         if (capturing_) 
         {
             stopImageCapture();
@@ -274,12 +195,6 @@ namespace bias
     
     void CameraWindow::startImageCapture() 
     {
-        if (!haveCamera_)
-        {
-            // TO DO ... add error message
-            return;
-        }
-
         if (!connected_)
         {
             // TO DO .. add error message 
@@ -299,12 +214,6 @@ namespace bias
 
     void CameraWindow::stopImageCapture()
     {
-        if (!haveCamera_)
-        {
-            // TO DO ... add error message
-            return;
-        }
-
         if (!connected_)
         {
             // TO DO .. add error message 

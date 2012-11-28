@@ -1,7 +1,7 @@
-#include <QPointer>
 #include <list>
 #include <iostream>
 #include <QApplication>
+#include <QSharedPointer>
 
 #include "camera_window.hpp"
 #include "camera_facade.hpp"
@@ -11,7 +11,7 @@ int main (int argc, char *argv[])
     QApplication app(argc, argv);
     bias::CameraFinder cameraFinder;
     bias::GuidList guidList = cameraFinder.getGuidList();
-    std::list<QPointer<bias::CameraWindow>> windowPtrList; // Not the best way
+    std::list<QSharedPointer<bias::CameraWindow>> windowPtrList; // Not the best way
 
     if (guidList.empty()) 
     {
@@ -25,9 +25,8 @@ int main (int argc, char *argv[])
         for (guidIt=guidList.begin(); guidIt!=guidList.end(); guidIt++)
         {
             bias::Guid guid = *guidIt;
-            QPointer<bias::CameraWindow> windowPtr = new bias::CameraWindow(guid);
+            QSharedPointer<bias::CameraWindow> windowPtr(new bias::CameraWindow(guid));
             windowPtr -> show();
-
             windowPtrList.push_back(windowPtr);
         }
         return app.exec();

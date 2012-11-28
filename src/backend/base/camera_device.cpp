@@ -103,4 +103,14 @@ namespace bias
     {
         return std::string("camera not defined");
     }
+
+    std::string CameraDevice::getVendorName()
+    {
+        return std::string("vendor name not defined");
+    }
+
+    std::string CameraDevice::getModelName()
+    {
+        return std::string("model name not defined");
+    }
 }

@@ -439,6 +439,16 @@ namespace bias {
         return propInfo.toString();
     }
 
+    std::string Camera::getVendorName()
+    {
+        return cameraDevicePtr_ -> getVendorName();
+    }
+
+    std::string Camera::getModelName()
+    {
+        return cameraDevicePtr_ -> getModelName();
+    }
+
     void Camera::printInfo() 
     { 
         cameraDevicePtr_ -> printInfo(); 

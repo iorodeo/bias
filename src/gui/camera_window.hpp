@@ -25,9 +25,7 @@ namespace bias
         const unsigned int DEFAULT_IMAGE_DISPLAY_DT = 66; // ms
 
         public:
-            CameraWindow(QWidget *parent=0);
             CameraWindow(Guid cameraGuid, QWidget *parent=0);
-            bool haveCamera();
 
         protected:
             void resizeEvent(QResizeEvent *event);
@@ -43,7 +41,6 @@ namespace bias
             bool connected_;
             bool capturing_;
             bool havePixmap_;
-            bool haveCamera_;
             unsigned int imageDisplayDt_;
 
             QPixmap pixmapOriginal_;
@@ -57,10 +54,8 @@ namespace bias
             QPointer<ImageGrabber> imageGrabber_;
             QPointer<ImageDispatcher> imageDispatcher_;
 
-            void initialize();
-            void initialize(Guid guid);
-            void findCamera();
             void connectWidgets();
+            void initialize(Guid guid);
             void setupImageDisplayTimer();
 
             void updatePixmap();
