@@ -6,6 +6,7 @@
 #include "lockable_queue.hpp"
 #include "image_grabber.hpp"
 #include "image_dispatcher.hpp"
+#include <QtGui>
 #include <QTimer>
 #include <QThreadPool>
 #include <opencv2/core/core.hpp>
