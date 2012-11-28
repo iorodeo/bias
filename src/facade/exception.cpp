@@ -10,6 +10,11 @@ namespace bias {
         error_id_ = error_id;
     }
 
+    unsigned int RuntimeError::id()
+    {
+        return error_id_;
+    }
+
     void throw_ERROR_NO_FC2(std::string prettyFunctionStr)
     {
         std::stringstream ssError;

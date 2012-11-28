@@ -1,11 +1,10 @@
-#ifndef BIAS_TEST_GUI_MAINWINDOW_HPP
-#define BIAS_TEST_GUI_MAINWINDOW_HPP
+#ifndef BIAS_GUI_CAMERA_WINDOW_HPP
+#define BIAS_GUI_CAMERA_WINDOW_HPP
 
 #include <memory>
 #include <QPointer>
-#include <QSharedPointer>
 #include <QMainWindow>
-#include "ui_main_window.h"
+#include "ui_camera_window.h"
 #include "camera_facade_fwd.hpp"
 
 class QTimer;
@@ -13,35 +12,37 @@ class QThreadPool;
 
 namespace bias 
 {
-
     class ImageGrabber;
     class ImageDispatcher;
     struct StampedImage;
     template <class T> class LockableQueue;
 
-    class MainWindow : public QMainWindow, private Ui::MainWindow
+    class CameraWindow : public QMainWindow, private Ui::CameraWindow
     {
         Q_OBJECT
 
-        public:
+        const unsigned int DEFAULT_IMAGE_DISPLAY_DT = 66; // ms
 
-            MainWindow(QWidget *parent=0);
+        public:
+            CameraWindow(QWidget *parent=0);
             bool haveCamera();
 
         protected:
-
             void resizeEvent(QResizeEvent *event);
             void closeEvent(QCloseEvent *event);
 
-            private slots:
-                void startButtonClicked();
-            void stopButtonClicked();
+        private slots:
+            void connectButtonClicked();
+            void startButtonClicked();
             void updateImageDisplay();
 
         private:
 
-            bool haveCamera_;
+            bool connected_;
+            bool capturing_;
             bool havePixmap_;
+            bool haveCamera_;
+            unsigned int imageDisplayDt_;
 
             QPixmap pixmapOriginal_;
 
@@ -55,14 +56,22 @@ namespace bias
             QPointer<ImageDispatcher> imageDispatcher_;
 
             void initialize();
+            void findCamera();
             void connectWidgets();
-            void createCamera();
+            void setupImageDisplayTimer();
+
             void updatePixmap();
             void updateImageLabel();
 
+            void connectCamera();
+            void disconnectCamera();
 
-    }; // class MainWindow
+            void startImageCapture();
+            void stopImageCapture();
+
+
+    }; // class CameraWindow
 
 }
 
-#endif // #ifndef BIAS_TEST_GUI_MAINWINDOW_HPP
+#endif // #ifndef BIAS_GUI_CAMERA_WINDOW_HPP

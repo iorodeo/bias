@@ -1,5 +1,6 @@
 #include "image_grabber.hpp"
 #include "camera.hpp"
+#include "exception.hpp"
 #include "stamped_image.hpp"
 #include "lockable_queue.hpp"
 #include <iostream>
@@ -10,7 +11,6 @@ namespace bias {
 
     ImageGrabber::ImageGrabber(QObject *parent) : QObject(parent) 
     {
-        count_ = 0;
         ready_ = false;
         stopped_ = true;
     }
@@ -35,6 +35,20 @@ namespace bias {
         stopped_ = true;
     }
 
+    bool ImageGrabber::tryLock()
+    {
+        return mutex_.tryLock();
+    }
+
+    void ImageGrabber::acquireLock()
+    {
+        mutex_.lock();
+    }
+
+    void ImageGrabber::releaseLock()
+    {
+        mutex_.unlock();
+    }
 
     void ImageGrabber::stop()
     {
@@ -43,44 +57,50 @@ namespace bias {
 
     void ImageGrabber::run()
     { 
+        bool done = false;
         StampedImage stampImg;
+        QTime timer; // TO DO ... temporary for timestamp generation 
 
-        // TO DO ... Temporary timestamp
-        // ------------------------------------
-        QTime timer;
-        float timeLast = 0.0;
-        float timeCurr = 0.0;
-        float timeDiff = 0.0;
-        float frameRateEst = 0.0;
-        // ------------------------------------
+        if (!ready_) 
+        { 
+            return; 
+        }
 
-        count_ = 0;
+        acquireLock();
         stopped_ = false;
-
-        if (!ready_) { return; }
+        releaseLock();
 
         cameraPtr_ -> startCapture();
         timer.start();
 
-
-        while (!stopped_)
+        while (!done)
         {
-            stampImg.image = cameraPtr_ -> grabImage();
+            // Grab image from camera
+            try
+            {
+                stampImg.image = cameraPtr_ -> grabImage();
+            }
+            catch (RuntimeError &runtimeError)
+            {
+                std::cout << "Frame grab error: id = ";
+                std::cout << runtimeError.id() << ", what = "; 
+                std::cout << runtimeError.what() << std::endl;
+                continue;
+            }
 
-            // TO Do ... temporary get current time for time stamp 
-            // ---------------------------------------------------
-            timeCurr = timer.elapsed()*0.001;
-            timeDiff = timeCurr - timeLast;
-            timeLast = timeCurr;
-            frameRateEst = 0.95*frameRateEst + 0.05/timeDiff; 
-            //std::cout << frameRateEst << std::endl << std::flush;
-            // ---------------------------------------------------
-
-            stampImg.timeStamp = timeCurr;
+            // TO DO ... temporary get current time for time stamp 
+            //
+            // Get time stamp from camera when available
+            // ------------------------------------------------------
+            stampImg.timeStamp = timer.elapsed()*0.001;
 
             newImageQueuePtr_ -> acquireLock();
             newImageQueuePtr_ -> push(stampImg);
             newImageQueuePtr_ -> releaseLock();
+
+            acquireLock();
+            done = stopped_;
+            releaseLock();
         }
 
         cameraPtr_ -> stopCapture();

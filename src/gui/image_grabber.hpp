@@ -2,6 +2,7 @@
 #define BIAS_IMAGE_GRABBER_HPP
 
 #include <memory>
+#include <QMutex>
 #include <QObject>
 #include <QRunnable>
 #include "camera_fwd.hpp"
@@ -30,12 +31,17 @@ namespace bias
                     std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr 
                     );
 
+            bool tryLock();
+            void acquireLock();
+            void releaseLock();
+
             void stop();
 
         private:
-            unsigned int count_;
             bool ready_;
             bool stopped_;
+
+            QMutex mutex_;
             CameraPtr cameraPtr_;
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr_;
 

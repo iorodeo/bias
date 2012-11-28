@@ -10,6 +10,7 @@ namespace bias
     {
         ready_ = false;
         stopped_ = true;
+        currentTimeStamp_ = 0.0;
     }
 
     ImageDispatcher::ImageDispatcher( 
@@ -27,26 +28,37 @@ namespace bias
         newImageQueuePtr_ = newImageQueuePtr;
         ready_ = true;
         stopped_ = true;
+        currentTimeStamp_ = 0.0;
     }
 
-    bool ImageDispatcher::tryDisplayImageLock()
+    bool ImageDispatcher::tryLock()
     {
-        return displayImageMutex_.tryLock();
+        return mutex_.tryLock();
     }
 
-    void ImageDispatcher::acquireDisplayImageLock() 
+    void ImageDispatcher::acquireLock() 
     {
-        displayImageMutex_.lock();
+        mutex_.lock();
     }
 
-    void ImageDispatcher::releaseDisplayImageLock()
+    void ImageDispatcher::releaseLock()
     {
-        displayImageMutex_.unlock();
+        mutex_.unlock();
     }
 
-    cv::Mat ImageDispatcher::getDisplayImage()
+    cv::Mat ImageDispatcher::getImage()
     {
-        return displayImage_;
+        return currentImage_;
+    }
+
+    double ImageDispatcher::getTimeStamp()
+    {
+        return currentTimeStamp_;
+    }
+
+    double ImageDispatcher::getFPS()
+    {
+        return fpsEstimator_.getValue();
     }
 
     void ImageDispatcher::stop()
@@ -58,12 +70,13 @@ namespace bias
     void ImageDispatcher::run()
     {
         StampedImage newStampImage;
-
         bool haveNewImage = false;
+        bool done = false;
 
         stopped_ = false;
+        fpsEstimator_.reset();
 
-        while (!stopped_) 
+        while (!done) 
         {
             newImageQueuePtr_ -> acquireLock();
             if (!(newImageQueuePtr_ -> empty()))
@@ -75,15 +88,16 @@ namespace bias
             }
             newImageQueuePtr_ -> releaseLock();
 
+            acquireLock();
             if (haveNewImage) 
             {
-                if (tryDisplayImageLock())
-                {
-                    displayImage_ = newStampImage.image;
-                    releaseDisplayImageLock();
-                }
+                currentImage_ = newStampImage.image;
+                currentTimeStamp_ = newStampImage.timeStamp;
+                fpsEstimator_.update(newStampImage.timeStamp);
                 haveNewImage = false;
             }
+            done = stopped_;
+            releaseLock();
         }
     }
 

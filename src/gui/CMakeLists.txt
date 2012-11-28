@@ -2,24 +2,26 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 project(bias_gui)
 
-set(bias_gui_FORMS main_window.ui)
+set(bias_gui_FORMS camera_window.ui)
 
 set(
     bias_gui_HEADERS 
-    main_window.hpp 
+    camera_window.hpp 
     mat_to_qimage.hpp
     image_grabber.hpp
     image_dispatcher.hpp
     lockable_queue.hpp
+    fps_estimator.hpp
     )
 
 set(
     bias_gui_SOURCES 
     main.cpp 
-    main_window.cpp 
+    camera_window.cpp 
     mat_to_qimage.cpp
     image_grabber.cpp
     image_dispatcher.cpp
+    fps_estimator.cpp
     )
 
 qt4_wrap_ui(bias_gui_FORMS_HEADERS ${bias_gui_FORMS}) 

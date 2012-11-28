@@ -6,6 +6,7 @@
 #include <QObject>
 #include <QRunnable>
 #include <opencv2/core/core.hpp>
+#include "fps_estimator.hpp"
 
 namespace bias
 {
@@ -30,18 +31,30 @@ namespace bias
                     );
 
             
-            bool tryDisplayImageLock();
-            void acquireDisplayImageLock();
-            void releaseDisplayImageLock();
-            cv::Mat getDisplayImage();
+            bool tryLock();
+            void acquireLock();
+            void releaseLock();
+
+            // Use lock when calling these methods
+            // ----------------------------------
             void stop();
+            cv::Mat getImage();
+            double getTimeStamp();
+            double getFPS();
+            // -----------------------------------
 
         private:
             bool ready_;
-            bool stopped_;
-            QMutex displayImageMutex_;
-            cv::Mat displayImage_;
+            QMutex mutex_;
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr_;
+
+            // use lock when setting these values
+            // -----------------------------------
+            bool stopped_;
+            cv::Mat currentImage_;
+            double currentTimeStamp_;
+            FPS_Estimator fpsEstimator_;
+            // ------------------------------------
 
             void run();
     };

@@ -1,17 +1,17 @@
 #include <iostream>
 #include <QApplication>
 
-#include "main_window.hpp"
+#include "camera_window.hpp"
 
 
 int main (int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    bias::MainWindow win;
-    if (win.haveCamera())
+    bias::CameraWindow cameraWindow;
+    if (cameraWindow.haveCamera())
     {
         std::cout << "have camera" << std::endl ;
-        win.show();
+        cameraWindow.show();
         return app.exec();
     }
     else

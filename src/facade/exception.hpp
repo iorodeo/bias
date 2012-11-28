@@ -10,6 +10,7 @@ namespace bias {
     {
         public:
             RuntimeError(const unsigned int error_id, const std::string &what_arg);
+            unsigned int id();
         private:
             unsigned int error_id_;
     };

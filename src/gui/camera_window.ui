@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>CameraWindow</class>
+ <widget class="QMainWindow" name="CameraWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,12 +11,12 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>BIAS Image Window</string>
+   <string>BIAS Camera Window</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
+  <widget class="QWidget" name="centralwidgetPtr_">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QLabel" name="imageLabel_">
+     <widget class="QLabel" name="imageLabelPtr_">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
         <horstretch>0</horstretch>
@@ -54,7 +54,50 @@
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <spacer name="horizontalSpacer">
+        <widget class="QPushButton" name="connectButtonPtr_">
+         <property name="text">
+          <string>Connect</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="startButtonPtr_">
+         <property name="text">
+          <string>Start</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>10</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="guidLabelPtr_">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>GUID:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_1">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -67,16 +110,16 @@
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="startButton">
+        <widget class="QPushButton" name="settingsButtonPtr_">
          <property name="text">
-          <string>Start</string>
+          <string>Settings</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="stopButton">
+        <widget class="QCheckBox" name="loggingCheckBoxPtr_">
          <property name="text">
-          <string>Stop</string>
+          <string>Logging</string>
          </property>
         </widget>
        </item>
@@ -85,7 +128,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menubar">
+  <widget class="QMenuBar" name="menubarPtr_">
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -95,7 +138,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QStatusBar" name="statusbarPtr_"/>
  </widget>
  <resources/>
  <connections/>
