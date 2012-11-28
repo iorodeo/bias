@@ -23,10 +23,6 @@ namespace bias {
     void CameraFinder::update() 
     {
         guidSet_.clear();
-        // old version
-        // -------------------
-        //guidPtrSet_.clear();
-        // -------------------
         update_fc2();
         update_dc1394();
     }
@@ -54,27 +50,11 @@ namespace bias {
         }
         ss << std::endl;
         return ss.str();
-
-        // old version
-        // --------------------------------------------------------------------------
-        //GuidPtrSet::iterator it;
-        //for (it=guidPtrSet_.begin(), count=0; it!=guidPtrSet_.end(); it++, count++) 
-        //{
-        //    ss << "[" << count << "] " << **it << std::endl;
-        //}
-        //ss << std::endl;
-        //return ss.str();
-        //----------------------------------------------------------------------------
     }
 
     unsigned int CameraFinder::numberOfCameras() 
     {
         return guidSet_.size();
-        
-        // old version
-        // ----------------------------
-        //return guidPtrSet_.size();
-        //-----------------------------
     }
 
     Guid CameraFinder::getGuidByIndex(unsigned int index)
@@ -88,19 +68,6 @@ namespace bias {
         GuidSet::iterator it = guidSet_.begin();
         std::advance(it,index);
         return *it;
-
-        // old version
-        // ---------------------------------------------------------
-        //if (index >= guidPtrSet_.size()) {
-        //    std::stringstream ssError;
-        //    ssError << __PRETTY_FUNCTION__;
-        //    ssError << ": unable to get FlyCapture2 guid by index";
-        //    throw RuntimeError(ERROR_FC2_GET_GUID, ssError.str());
-        //}
-        //GuidPtrSet::iterator it = guidPtrSet_.begin();
-        //std::advance(it,index);
-        //return **it;
-        // ----------------------------------------------------------
     }
 
     GuidSet CameraFinder::getGuidSet()
@@ -139,30 +106,11 @@ namespace bias {
         return camPtrList;
     }
 
-
-    // old version
-    // --------------------------------------------------------------
-    //GuidPtrSet CameraFinder::getGuidPtrSet()
-    //{
-    //    return guidPtrSet_;
-    //}
-
-    //GuidPtrList CameraFinder::getGuidPtrList()
-    //{
-    //    GuidPtrList guidPtrList;
-    //    std::copy(
-    //            guidPtrSet_.begin(), 
-    //            guidPtrSet_.end(), 
-    //            std::back_inserter(guidPtrList)
-    //            ); 
-    //    return guidPtrList;
-    //}
-    // ----------------------------------------------------------------
-
 #ifdef WITH_FC2
 
     // FlyCapture2 specific features
     // ------------------------------------------------------------------------
+
     void CameraFinder::createQueryContext_fc2()
     {
         fc2Error error = fc2CreateContext(&queryContext_fc2_);
@@ -217,12 +165,6 @@ namespace bias {
             else 
             {
                 guidSet_.insert(Guid(guid_fc2));
-
-                // old version
-                // --------------------------------------------------
-                //GuidPtr guidPtr = std::make_shared<Guid>(guid_fc2);
-                //guidPtrSet_.insert(guidPtr);
-                // --------------------------------------------------
             }
         }
     }
@@ -242,6 +184,7 @@ namespace bias {
 
     // Libdc1394 specific features
     // ------------------------------------------------------------------------
+
     void CameraFinder::createQueryContext_dc1394()
     {
         queryContext_dc1394_ = NULL;
@@ -289,12 +232,6 @@ namespace bias {
         for (int i=0; i<(cameraList->num); i++) 
         {
             guidSet_.insert(Guid( cameraList -> ids[i].guid));
-
-            // old version 
-            // ---------------------------------------------------------------
-            //GuidPtr guidPtr = std::make_shared<Guid>(cameraList->ids[i].guid);
-            //guidPtrSet_.insert(guidPtr);
-            // ---------------------------------------------------------------
         }
         dc1394_camera_free_list(cameraList);
     }

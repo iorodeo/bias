@@ -26,6 +26,7 @@ namespace bias
 
         public:
             CameraWindow(QWidget *parent=0);
+            CameraWindow(Guid cameraGuid, QWidget *parent=0);
             bool haveCamera();
 
         protected:
@@ -57,6 +58,7 @@ namespace bias
             QPointer<ImageDispatcher> imageDispatcher_;
 
             void initialize();
+            void initialize(Guid guid);
             void findCamera();
             void connectWidgets();
             void setupImageDisplayTimer();

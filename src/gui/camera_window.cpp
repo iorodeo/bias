@@ -24,6 +24,12 @@ namespace bias
         initialize();
     }
 
+    CameraWindow::CameraWindow(Guid cameraGuid, QWidget *parent) : QMainWindow(parent)
+    {
+        setupUi(this);
+        initialize(cameraGuid);
+    }
+
     bool CameraWindow::haveCamera()
     {
         return haveCamera_;
@@ -96,6 +102,39 @@ namespace bias
 
     // Private methods
     // -----------------------------------------------------------------------------------
+
+    void CameraWindow::initialize(Guid guid)
+    {
+        connectWidgets();
+
+        haveCamera_ = true; // remove
+        connected_ = false;
+        capturing_ = false;
+        havePixmap_ = false;
+        imageDisplayDt_ = DEFAULT_IMAGE_DISPLAY_DT;
+        cameraPtr_ = std::make_shared<Lockable<Camera>>(guid);
+
+        setupImageDisplayTimer();
+
+        threadPoolPtr_ = new QThreadPool(this);
+        newImageQueuePtr_ = std::make_shared<LockableQueue<StampedImage>>();
+
+        connectButtonPtr_ -> setText(QString("Connect"));
+
+        cameraPtr_ -> acquireLock();
+        Guid cameraGuid = cameraPtr_ -> getGuid();
+        cameraPtr_ -> releaseLock();
+
+        QString guidString("GUID: ");
+        guidString += QString::fromStdString(cameraGuid.toString());
+        guidLabelPtr_ -> setText(guidString);
+        connectButtonPtr_ -> setEnabled(true);
+        statusbarPtr_ -> showMessage(QString("Camera found, disconnected"));
+
+        startButtonPtr_ -> setText(QString("Start"));
+        startButtonPtr_ -> setEnabled(false);
+        settingsButtonPtr_ -> setEnabled(false);
+    }
 
     void CameraWindow::initialize()
     {

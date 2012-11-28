@@ -33,20 +33,8 @@ namespace bias {
             std::string getGuidListAsString();
             void printGuid();
 
-            // old version
-            // ---------------------------
-            //GuidPtrSet getGuidPtrSet();
-            //GuidPtrList getGuidPtrList();
-            // ---------------------------
-
-
         private:
             GuidSet guidSet_;
-
-            // old version
-            // ---------------------------
-            //GuidPtrSet guidPtrSet_;
-            // ----------------------------
             
             void createQueryContext_fc2();
             void destroyQueryContext_fc2();
