@@ -98,7 +98,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Camera Info</string>
+          <string>Camera Info String</string>
          </property>
         </widget>
        </item>
@@ -129,48 +129,52 @@
      <height>20</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFile">
+   <widget class="QMenu" name="menuLoggingPtr_">
     <property name="title">
      <string>Logging</string>
     </property>
-    <widget class="QMenu" name="menuFormat">
+    <widget class="QMenu" name="menuFormatPtr_">
      <property name="title">
       <string>Format</string>
      </property>
-     <addaction name="actionAVI"/>
-     <addaction name="actionFMF"/>
-     <addaction name="actionUFMF"/>
+     <addaction name="actionAVIPtr_"/>
+     <addaction name="actionFMFPtr_"/>
+     <addaction name="actionUFMFPtr_"/>
     </widget>
-    <widget class="QMenu" name="menuTimer">
-     <property name="title">
-      <string>Timer</string>
-     </property>
-     <addaction name="actionEnabled"/>
-     <addaction name="actionTimerSettings"/>
-    </widget>
-    <addaction name="actionVideo_File"/>
-    <addaction name="menuFormat"/>
-    <addaction name="menuTimer"/>
+    <addaction name="actionLoggingEnabledPtr_"/>
+    <addaction name="menuFormatPtr_"/>
+    <addaction name="actionVideoFilePtr_"/>
+    <addaction name="actionLoggingSettingsPtr_"/>
    </widget>
-   <widget class="QMenu" name="menuSettings">
+   <widget class="QMenu" name="menuTimerPtr_">
     <property name="title">
-     <string>Video Mode</string>
+     <string>Timer</string>
     </property>
+    <addaction name="actionTimerEnabledPtr_"/>
+    <addaction name="actionTimerSettingsPtr_"/>
    </widget>
-   <widget class="QMenu" name="menuProperties">
+   <widget class="QMenu" name="menuConfigurationPtr_">
     <property name="title">
-     <string>Framerate</string>
+     <string>Configuration</string>
     </property>
+    <addaction name="actionSetupPtr_"/>
+    <addaction name="actionFrameRatePtr_"/>
+    <addaction name="actionPropertiesPtr_"/>
+    <addaction name="actionFormat7Ptr_"/>
    </widget>
-   <widget class="QMenu" name="menuProperties_2">
+   <widget class="QMenu" name="menuHelpPtr_">
     <property name="title">
-     <string>Properties</string>
+     <string>Help</string>
     </property>
+    <addaction name="actionUserManualPtr_"/>
+    <addaction name="separator"/>
+    <addaction name="actionVersionPtr_"/>
+    <addaction name="actionAbout"/>
    </widget>
-   <addaction name="menuFile"/>
-   <addaction name="menuSettings"/>
-   <addaction name="menuProperties"/>
-   <addaction name="menuProperties_2"/>
+   <addaction name="menuConfigurationPtr_"/>
+   <addaction name="menuLoggingPtr_"/>
+   <addaction name="menuTimerPtr_"/>
+   <addaction name="menuHelpPtr_"/>
   </widget>
   <widget class="QStatusBar" name="statusbarPtr_"/>
   <action name="actionLogging">
@@ -178,12 +182,12 @@
     <string>Logging</string>
    </property>
   </action>
-  <action name="actionVideo_File">
+  <action name="actionVideoFilePtr_">
    <property name="text">
     <string>Video File...</string>
    </property>
   </action>
-  <action name="actionAVI">
+  <action name="actionAVIPtr_">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -194,7 +198,7 @@
     <string>avi</string>
    </property>
   </action>
-  <action name="actionFMF">
+  <action name="actionFMFPtr_">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -205,7 +209,7 @@
     <string>fmf</string>
    </property>
   </action>
-  <action name="actionUFMF">
+  <action name="actionUFMFPtr_">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -232,9 +236,68 @@
     <string>Enabled</string>
    </property>
   </action>
-  <action name="actionTimerSettings">
+  <action name="actionLoggingEnabledPtr_">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Enabled</string>
+   </property>
+  </action>
+  <action name="actionTimerEnabledPtr_">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Enabled</string>
+   </property>
+  </action>
+  <action name="actionTimerSettingsPtr_">
    <property name="text">
     <string>Settings...</string>
+   </property>
+  </action>
+  <action name="actionSetupPtr_">
+   <property name="text">
+    <string>VideoMode</string>
+   </property>
+  </action>
+  <action name="actionFrameRatePtr_">
+   <property name="text">
+    <string>FrameRate</string>
+   </property>
+  </action>
+  <action name="actionPropertiesPtr_">
+   <property name="text">
+    <string>Properties</string>
+   </property>
+  </action>
+  <action name="actionLoggingSettingsPtr_">
+   <property name="text">
+    <string>Settings...</string>
+   </property>
+  </action>
+  <action name="actionFormat7Ptr_">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Format7 Settings...</string>
+   </property>
+  </action>
+  <action name="actionUserManualPtr_">
+   <property name="text">
+    <string>User Manual...</string>
+   </property>
+  </action>
+  <action name="actionVersionPtr_">
+   <property name="text">
+    <string>Version...</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About...</string>
    </property>
   </action>
  </widget>

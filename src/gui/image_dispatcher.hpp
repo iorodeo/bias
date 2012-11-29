@@ -41,6 +41,7 @@ namespace bias
             cv::Mat getImage();
             double getTimeStamp();
             double getFPS();
+            unsigned long getFrameCount();
             // -----------------------------------
 
         private:
@@ -54,6 +55,7 @@ namespace bias
             cv::Mat currentImage_;
             double currentTimeStamp_;
             FPS_Estimator fpsEstimator_;
+            unsigned long frameCount_;
             // ------------------------------------
 
             void run();

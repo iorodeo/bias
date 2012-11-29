@@ -25,13 +25,16 @@ namespace bias
         const unsigned int DEFAULT_IMAGE_DISPLAY_DT = 66; // ms
 
         public:
+
             CameraWindow(Guid cameraGuid, QWidget *parent=0);
 
         protected:
+
             void resizeEvent(QResizeEvent *event);
             void closeEvent(QCloseEvent *event);
 
         private slots:
+           
             void connectButtonClicked();
             void startButtonClicked();
             void updateImageDisplay();
@@ -43,6 +46,7 @@ namespace bias
             bool connected_;
             bool capturing_;
             bool havePixmap_;
+            unsigned long frameCount_;
             unsigned int imageDisplayDt_;
 
             QPixmap pixmapOriginal_;
@@ -70,6 +74,8 @@ namespace bias
             void stopImageCapture();
 
             void setCameraInfoMessage(QString vendorName, QString modelName);
+
+            void setMenuChildrenEnabled(QWidget *parentWidgetPtr, bool value);
 
 
     }; // class CameraWindow

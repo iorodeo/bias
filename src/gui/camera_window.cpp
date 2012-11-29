@@ -78,8 +78,9 @@ namespace bias
         // Get information from image dispatcher
         imageDispatcherPtr_ -> acquireLock();
         cv::Mat mat = imageDispatcherPtr_ -> getImage();
-        double fps = imageDispatcherPtr_ -> getFPS();
         QImage img = matToQImage(mat);
+        double fps = imageDispatcherPtr_ -> getFPS();
+        frameCount_ = imageDispatcherPtr_ -> getFrameCount();
         imageDispatcherPtr_ -> releaseLock();
 
         if (!img.isNull()) 
@@ -136,12 +137,19 @@ namespace bias
         Guid cameraGuid = cameraPtr_ -> getGuid();
         cameraPtr_ -> releaseLock();
 
+        QString windowTitle("BIAS Camera Window, Guid: ");
+        windowTitle += QString::fromStdString(cameraGuid.toString());
+        setWindowTitle(windowTitle);
+
         setCameraInfoMessage(QString("____"), QString("____"));
 
         startButtonPtr_ -> setText(QString("Start"));
         startButtonPtr_ -> setEnabled(false);
         connectButtonPtr_ -> setEnabled(true);
         statusbarPtr_ -> showMessage(QString("Camera found, disconnected"));
+
+        menuConfigurationPtr_ -> setEnabled(false);
+
     }
 
     void CameraWindow::connectWidgets()
@@ -164,19 +172,13 @@ namespace bias
                 Qt::SmoothTransformation
                 );
 
-        // -------------------------------------
-        // Drawing test
-        // -------------------------------------
-        //QPainter painter(&pixmapScaled);
-        //QColor red(255,0,0);
-        ////QColor grn(0,255,0);
-        //QString msg;  
-        //msg.sprintf("Hello");
-        //painter.setPen(red);
-        //painter.drawText(10,10, msg);
-        //painter.setPen(grn);
-        //painter.drawRect(40,40,50,50);
-        // --------------------------------------
+        
+        // Add framecount message
+        QPainter painter(&pixmapScaled);
+        QString msg;  
+        msg.sprintf("%d",frameCount_);
+        painter.setPen(QColor(0,220,0));
+        painter.drawText(5,12, msg);
 
         imageLabelPtr_ -> setPixmap(pixmapScaled);
     } 
@@ -200,20 +202,7 @@ namespace bias
         }
         cameraPtr_ -> releaseLock();
 
-        if (!error) 
-        {
-            connectButtonPtr_ -> setText(QString("Disconnect"));
-            startButtonPtr_ -> setEnabled(true);
-            statusbarPtr_ -> showMessage(QString("Connected, Stopped"));
-
-            setCameraInfoMessage(
-                    QString::fromStdString(cameraPtr_ -> getVendorName()),
-                    QString::fromStdString(cameraPtr_ -> getModelName())
-                    );
-
-            connected_ = true;
-        }
-        else 
+        if (error)
         {
             QString msgTitle("Connection Error");
             QString msgText("Failed to connect camera:\n\nError ID: ");
@@ -221,7 +210,20 @@ namespace bias
             msgText += "\n\n";
             msgText += errorMsg;
             QMessageBox::critical(this, msgTitle, msgText);
+            return;
         }
+
+        connectButtonPtr_ -> setText(QString("Disconnect"));
+        statusbarPtr_ -> showMessage(QString("Connected, Stopped"));
+        startButtonPtr_ -> setEnabled(true);
+        menuConfigurationPtr_ -> setEnabled(true);
+
+        setCameraInfoMessage(
+                QString::fromStdString(cameraPtr_ -> getVendorName()),
+                QString::fromStdString(cameraPtr_ -> getModelName())
+                );
+
+        connected_ = true;
     }
 
     void CameraWindow::disconnectCamera()
@@ -248,14 +250,7 @@ namespace bias
         }
         cameraPtr_ -> releaseLock();
 
-        if (!error) 
-        {
-            connectButtonPtr_ -> setText(QString("Connect"));
-            startButtonPtr_ -> setEnabled(false);
-            statusbarPtr_ -> showMessage(QString("Disconnected"));
-            connected_ = false;
-        }
-        else 
+        if (error)
         {
             QString msgTitle("Disconnection Error");
             QString msgText("Failed to disconnect camera:\n\nError ID: ");
@@ -263,7 +258,14 @@ namespace bias
             msgText += "\n\n";
             msgText += errorMsg;
             QMessageBox::critical(this, msgTitle, msgText);
+            return;
         }
+
+        connectButtonPtr_ -> setText(QString("Connect"));
+        statusbarPtr_ -> showMessage(QString("Disconnected"));
+        startButtonPtr_ -> setEnabled(false);
+        menuConfigurationPtr_ -> setEnabled(false);
+        connected_ = false;
     }
     
     void CameraWindow::startImageCapture() 
@@ -273,7 +275,11 @@ namespace bias
             QString msgTitle("Capture Error");
             QString msgText("Unable to start image capture: not connected");
             QMessageBox::critical(this, msgTitle, msgText);
+            return;
         }
+
+        setMenuChildrenEnabled(menuLoggingPtr_, false);
+        setMenuChildrenEnabled(menuTimerPtr_, false);
 
         imageGrabberPtr_ = new ImageGrabber(cameraPtr_, newImageQueuePtr_);
         imageDispatcherPtr_ = new ImageDispatcher(newImageQueuePtr_);
@@ -309,6 +315,7 @@ namespace bias
             QString msgTitle("Capture Error");
             QString msgText("Unable to stop image capture: not connected");
             QMessageBox::critical(this, msgTitle, msgText);
+            return;
         }
 
         // Note, image grabber and dispatcher are destroyed by the 
@@ -333,6 +340,8 @@ namespace bias
         startButtonPtr_ -> setText(QString("Start"));
         connectButtonPtr_ -> setEnabled(true);
         statusbarPtr_ -> showMessage(QString("Connected, Stopped"));
+        setMenuChildrenEnabled(menuLoggingPtr_, true);
+        setMenuChildrenEnabled(menuTimerPtr_, true);
         capturing_ = false;
     }
     
@@ -343,6 +352,25 @@ namespace bias
         cameraInfoString += QString(",  Model = ");
         cameraInfoString += modelName; 
         cameraInfoLabelPtr_ -> setText(cameraInfoString);
+    }
+
+    void CameraWindow::setMenuChildrenEnabled(QWidget *parentWidgetPtr, bool value)
+    {
+        QList<QMenu *> childList = parentWidgetPtr -> findChildren<QMenu *>();
+        QList<QMenu *>::iterator childIt;
+        for (childIt=childList.begin(); childIt!=childList.end(); childIt++)
+        {
+            QMenu *menuPtr = *childIt;
+            menuPtr -> setEnabled(value);
+        }
+
+        QList<QAction *> actionList = parentWidgetPtr -> actions();
+        QList<QAction *>::iterator actionIt;
+        for (actionIt=actionList.begin(); actionIt!=actionList.end(); actionIt++)
+        {
+            QAction *actionPtr = *actionIt;
+            actionPtr -> setEnabled(value);
+        }
     }
 
 } // namespace bias

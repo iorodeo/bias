@@ -10,6 +10,7 @@ namespace bias
     {
         ready_ = false;
         stopped_ = true;
+        frameCount_ = 0;
         currentTimeStamp_ = 0.0;
     }
 
@@ -28,6 +29,7 @@ namespace bias
         newImageQueuePtr_ = newImageQueuePtr;
         ready_ = true;
         stopped_ = true;
+        frameCount_ = 0;
         currentTimeStamp_ = 0.0;
     }
 
@@ -61,6 +63,11 @@ namespace bias
         return fpsEstimator_.getValue();
     }
 
+    unsigned long ImageDispatcher::getFrameCount()
+    {
+        return frameCount_;
+    }
+
     void ImageDispatcher::stop()
     {
         stopped_ = true;
@@ -74,6 +81,7 @@ namespace bias
         bool done = false;
 
         stopped_ = false;
+        frameCount_ = 0;
         fpsEstimator_.reset();
 
         while (!done) 
@@ -95,6 +103,7 @@ namespace bias
                 currentTimeStamp_ = newStampImage.timeStamp;
                 fpsEstimator_.update(newStampImage.timeStamp);
                 haveNewImage = false;
+                frameCount_++;
             }
             done = stopped_;
             releaseLock();
