@@ -277,7 +277,7 @@ namespace bias {
             ImageMode imgMode = *it;
             try
             {
-                supported != isSupported(imgMode);
+                supported |= isSupported(imgMode);
             }
             catch (RuntimeError &runtimeError)
             {

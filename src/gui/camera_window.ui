@@ -22,32 +22,44 @@
   <widget class="QWidget" name="centralwidgetPtr_">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QLabel" name="imageLabelPtr_">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
+     <widget class="QTabWidget" name="previewTabWidgetPtr_">
+      <property name="currentIndex">
+       <number>0</number>
       </property>
-      <property name="minimumSize">
-       <size>
-        <width>50</width>
-        <height>50</height>
-       </size>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="Line" name="line">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
+      <widget class="QWidget" name="previewTabPtr">
+       <attribute name="title">
+        <string>Preview</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLabel" name="imageLabelPtr_">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>50</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="statisticsTabPtr_">
+       <attribute name="title">
+        <string>Statistics</string>
+       </attribute>
+      </widget>
      </widget>
     </item>
     <item>
@@ -115,6 +127,31 @@
          </property>
         </spacer>
        </item>
+       <item>
+        <widget class="QLabel" name="captureTimeLabelPtr_">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>100</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="layoutDirection">
+          <enum>Qt::LeftToRight</enum>
+         </property>
+         <property name="text">
+          <string>capture time</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
@@ -133,18 +170,18 @@
     <property name="title">
      <string>Logging</string>
     </property>
-    <widget class="QMenu" name="menuFormatPtr_">
+    <widget class="QMenu" name="menuLoggingFormatPtr_">
      <property name="title">
       <string>Format</string>
      </property>
-     <addaction name="actionAVIPtr_"/>
-     <addaction name="actionFMFPtr_"/>
-     <addaction name="actionUFMFPtr_"/>
+     <addaction name="actionLoggingFormatAVIPtr_"/>
+     <addaction name="actionLoggingFormatFMFPtr_"/>
+     <addaction name="actionLoggingFormatUFMFPtr_"/>
     </widget>
     <addaction name="actionLoggingEnabledPtr_"/>
-    <addaction name="menuFormatPtr_"/>
-    <addaction name="actionVideoFilePtr_"/>
+    <addaction name="actionLoggingVideoFilePtr_"/>
     <addaction name="actionLoggingSettingsPtr_"/>
+    <addaction name="menuLoggingFormatPtr_"/>
    </widget>
    <widget class="QMenu" name="menuTimerPtr_">
     <property name="title">
@@ -153,27 +190,78 @@
     <addaction name="actionTimerEnabledPtr_"/>
     <addaction name="actionTimerSettingsPtr_"/>
    </widget>
-   <widget class="QMenu" name="menuConfigurationPtr_">
+   <widget class="QMenu" name="menuCameraPtr_">
     <property name="title">
-     <string>Configuration</string>
+     <string>Camera</string>
     </property>
-    <addaction name="actionSetupPtr_"/>
-    <addaction name="actionFrameRatePtr_"/>
-    <addaction name="actionPropertiesPtr_"/>
-    <addaction name="actionFormat7Ptr_"/>
+    <widget class="QMenu" name="menuVideoModePtr_">
+     <property name="title">
+      <string>Video Mode</string>
+     </property>
+     <addaction name="actionDummyVideoModePtr_"/>
+    </widget>
+    <widget class="QMenu" name="menuFrameRatePtr_">
+     <property name="title">
+      <string>Frame Rate</string>
+     </property>
+     <addaction name="actionDummyFrameRatePtr_"/>
+    </widget>
+    <widget class="QMenu" name="menuPropertiesPtr_">
+     <property name="title">
+      <string>Properties</string>
+     </property>
+     <addaction name="actionDummyPropertyPtr_"/>
+    </widget>
+    <widget class="QMenu" name="menuCameraTriggerPtr_">
+     <property name="title">
+      <string>Trigger</string>
+     </property>
+     <addaction name="actionCameraTriggerInternalPtr_"/>
+     <addaction name="actionCameraTriggerExternalPtr_"/>
+    </widget>
+    <addaction name="actionCameraInfoPtr_"/>
+    <addaction name="menuVideoModePtr_"/>
+    <addaction name="menuFrameRatePtr_"/>
+    <addaction name="menuPropertiesPtr_"/>
+    <addaction name="menuCameraTriggerPtr_"/>
+    <addaction name="actionCameraFormat7SettingsPtr_"/>
    </widget>
    <widget class="QMenu" name="menuHelpPtr_">
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="actionUserManualPtr_"/>
+    <addaction name="actionHelpUserManualPtr_"/>
     <addaction name="separator"/>
-    <addaction name="actionVersionPtr_"/>
-    <addaction name="actionAbout"/>
+    <addaction name="actionHelpAboutPtr_"/>
    </widget>
-   <addaction name="menuConfigurationPtr_"/>
+   <widget class="QMenu" name="menuDisplayPtr_">
+    <property name="title">
+     <string>Display</string>
+    </property>
+    <widget class="QMenu" name="menuDisplayOrientationPtr_">
+     <property name="title">
+      <string>Orientation</string>
+     </property>
+     <addaction name="actionDisplayFlipVertPtr_"/>
+     <addaction name="actionDisplayFlipHorzPtr_"/>
+    </widget>
+    <widget class="QMenu" name="menuDisplayRotPtr_">
+     <property name="title">
+      <string>Rotation (deg)</string>
+     </property>
+     <addaction name="actionDisplayRot0Ptr_"/>
+     <addaction name="actionDisplayRot90Ptr_"/>
+     <addaction name="actionDisplayRot180Ptr_"/>
+     <addaction name="actionDisplayRot270Ptr_"/>
+    </widget>
+    <addaction name="actionDisplayUpdateFreqPtr_"/>
+    <addaction name="menuDisplayOrientationPtr_"/>
+    <addaction name="menuDisplayRotPtr_"/>
+   </widget>
+   <addaction name="menuCameraPtr_"/>
    <addaction name="menuLoggingPtr_"/>
    <addaction name="menuTimerPtr_"/>
+   <addaction name="menuDisplayPtr_"/>
    <addaction name="menuHelpPtr_"/>
   </widget>
   <widget class="QStatusBar" name="statusbarPtr_"/>
@@ -182,39 +270,39 @@
     <string>Logging</string>
    </property>
   </action>
-  <action name="actionVideoFilePtr_">
+  <action name="actionLoggingVideoFilePtr_">
    <property name="text">
     <string>Video File...</string>
    </property>
   </action>
-  <action name="actionAVIPtr_">
+  <action name="actionLoggingFormatAVIPtr_">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>avi</string>
    </property>
   </action>
-  <action name="actionFMFPtr_">
+  <action name="actionLoggingFormatFMFPtr_">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="checked">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>fmf</string>
    </property>
   </action>
-  <action name="actionUFMFPtr_">
+  <action name="actionLoggingFormatUFMFPtr_">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>ufmf</string>
@@ -277,27 +365,113 @@
     <string>Settings...</string>
    </property>
   </action>
-  <action name="actionFormat7Ptr_">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Format7 Settings...</string>
-   </property>
-  </action>
-  <action name="actionUserManualPtr_">
+  <action name="actionHelpUserManualPtr_">
    <property name="text">
     <string>User Manual...</string>
    </property>
   </action>
-  <action name="actionVersionPtr_">
+  <action name="actionHelpVersionPtr_">
    <property name="text">
     <string>Version...</string>
    </property>
   </action>
-  <action name="actionAbout">
+  <action name="actionHelpAboutPtr_">
    <property name="text">
     <string>About...</string>
+   </property>
+  </action>
+  <action name="actionCameraInfoPtr_">
+   <property name="text">
+    <string>Info...</string>
+   </property>
+  </action>
+  <action name="actionDisplayUpdateFreqPtr_">
+   <property name="text">
+    <string>Update Frequency...</string>
+   </property>
+  </action>
+  <action name="actionDisplayFlipVertPtr_">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Flip Vertical</string>
+   </property>
+  </action>
+  <action name="actionDisplayFlipHorzPtr_">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Flip Horizontal</string>
+   </property>
+  </action>
+  <action name="actionDisplayRot0Ptr_">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>0 </string>
+   </property>
+  </action>
+  <action name="actionDisplayRot90Ptr_">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>90</string>
+   </property>
+  </action>
+  <action name="actionDisplayRot180Ptr_">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>180</string>
+   </property>
+  </action>
+  <action name="actionDisplayRot270Ptr_">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>270</string>
+   </property>
+  </action>
+  <action name="actionDummyVideoModePtr_">
+   <property name="text">
+    <string>dummy video mode</string>
+   </property>
+  </action>
+  <action name="actionDummyFrameRatePtr_">
+   <property name="text">
+    <string>dumm framerate</string>
+   </property>
+  </action>
+  <action name="actionDummyPropertyPtr_">
+   <property name="text">
+    <string>dummy property</string>
+   </property>
+  </action>
+  <action name="actionCameraFormat7SettingsPtr_">
+   <property name="text">
+    <string>Format7 Settings...</string>
+   </property>
+  </action>
+  <action name="actionCameraTriggerInternalPtr_">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Internal</string>
+   </property>
+  </action>
+  <action name="actionCameraTriggerExternalPtr_">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>External</string>
    </property>
   </action>
  </widget>
