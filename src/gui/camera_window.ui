@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>581</width>
+    <height>479</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -22,7 +22,7 @@
   <widget class="QWidget" name="centralwidgetPtr_">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QTabWidget" name="previewTabWidgetPtr_">
+     <widget class="QTabWidget" name="tabWidgetPtr_">
       <property name="currentIndex">
        <number>0</number>
       </property>
@@ -32,7 +32,7 @@
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QLabel" name="imageLabelPtr_">
+         <widget class="QLabel" name="previewImageLabelPtr_">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -55,10 +55,66 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="statisticsTabPtr_">
+      <widget class="QWidget" name="pluginPreviewPtr_">
        <attribute name="title">
-        <string>Statistics</string>
+        <string>Plugin Preview</string>
        </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QLabel" name="pluginImageLabelPtr_">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>50</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Plugin Not Enabled</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="histogramTabPtr_">
+       <attribute name="title">
+        <string>Histogram</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QLabel" name="histogramImageLabelPtr_">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>50</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
@@ -162,7 +218,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>581</width>
      <height>20</height>
     </rect>
    </property>
@@ -179,9 +235,9 @@
      <addaction name="actionLoggingFormatUFMFPtr_"/>
     </widget>
     <addaction name="actionLoggingEnabledPtr_"/>
+    <addaction name="menuLoggingFormatPtr_"/>
     <addaction name="actionLoggingVideoFilePtr_"/>
     <addaction name="actionLoggingSettingsPtr_"/>
-    <addaction name="menuLoggingFormatPtr_"/>
    </widget>
    <widget class="QMenu" name="menuTimerPtr_">
     <property name="title">
@@ -219,12 +275,12 @@
      <addaction name="actionCameraTriggerInternalPtr_"/>
      <addaction name="actionCameraTriggerExternalPtr_"/>
     </widget>
-    <addaction name="actionCameraInfoPtr_"/>
     <addaction name="menuVideoModePtr_"/>
     <addaction name="menuFrameRatePtr_"/>
     <addaction name="menuPropertiesPtr_"/>
     <addaction name="menuCameraTriggerPtr_"/>
     <addaction name="actionCameraFormat7SettingsPtr_"/>
+    <addaction name="actionCameraInfoPtr_"/>
    </widget>
    <widget class="QMenu" name="menuHelpPtr_">
     <property name="title">
@@ -254,14 +310,34 @@
      <addaction name="actionDisplayRot180Ptr_"/>
      <addaction name="actionDisplayRot270Ptr_"/>
     </widget>
-    <addaction name="actionDisplayUpdateFreqPtr_"/>
     <addaction name="menuDisplayOrientationPtr_"/>
     <addaction name="menuDisplayRotPtr_"/>
+    <addaction name="actionDisplayUpdateFreqPtr_"/>
    </widget>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionFileLoadConfigPtr_"/>
+    <addaction name="actionFileSaveConfigPtr_"/>
+    <addaction name="separator"/>
+    <addaction name="actionFileCloseWindowPtr_"/>
+    <addaction name="actionFileHideWindowPtr_"/>
+   </widget>
+   <widget class="QMenu" name="menuPluginsPtr_">
+    <property name="title">
+     <string>Plugins</string>
+    </property>
+    <addaction name="actionPluginsSettingsPtr_"/>
+    <addaction name="separator"/>
+    <addaction name="actionNoPluginsFoundPtr_"/>
+   </widget>
+   <addaction name="menuFile"/>
    <addaction name="menuCameraPtr_"/>
    <addaction name="menuLoggingPtr_"/>
    <addaction name="menuTimerPtr_"/>
    <addaction name="menuDisplayPtr_"/>
+   <addaction name="menuPluginsPtr_"/>
    <addaction name="menuHelpPtr_"/>
   </widget>
   <widget class="QStatusBar" name="statusbarPtr_"/>
@@ -472,6 +548,47 @@
    </property>
    <property name="text">
     <string>External</string>
+   </property>
+  </action>
+  <action name="actionFileLoadConfigPtr_">
+   <property name="text">
+    <string>Load Configuration...</string>
+   </property>
+  </action>
+  <action name="actionFileSaveConfigPtr_">
+   <property name="text">
+    <string>Save Configuration....</string>
+   </property>
+  </action>
+  <action name="actionFileCloseWindowPtr_">
+   <property name="text">
+    <string>Close Window...</string>
+   </property>
+  </action>
+  <action name="actionFileHideWindowPtr_">
+   <property name="text">
+    <string>Hide Window...</string>
+   </property>
+  </action>
+  <action name="actionNoPluginsFoundPtr_">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>no plugins found</string>
+   </property>
+  </action>
+  <action name="actionPluginsSettingsPtr_">
+   <property name="text">
+    <string>Settings...</string>
+   </property>
+  </action>
+  <action name="actionProcessingEqualizeHistPtr_">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Equalize Histogram</string>
    </property>
   </action>
  </widget>

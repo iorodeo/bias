@@ -12,6 +12,7 @@
 #include <QTimer>
 #include <QThreadPool>
 #include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
 
 namespace bias
@@ -30,19 +31,14 @@ namespace bias
     // Protected methods
     // ----------------------------------------------------------------------------------
 
+    void CameraWindow::showEvent(QShowEvent *event)
+    {
+        resizeAllImageLabels();
+    }
+
     void CameraWindow::resizeEvent(QResizeEvent *event)
     {
-        if (havePixmap_ && !(pixmapOriginal_.isNull()))  
-        {
-            QSize sizeImageLabel = imageLabelPtr_ -> size();
-            QSize sizeAdjusted = pixmapOriginal_.size();
-            sizeAdjusted.scale(sizeImageLabel, Qt::KeepAspectRatio);
-            QSize sizeImageLabelPixmap = imageLabelPtr_ -> pixmap() -> size();
-            if (sizeImageLabelPixmap != sizeAdjusted) 
-            {
-                updateImageLabel();
-            }
-        }
+        resizeAllImageLabels();
     }
 
     void CameraWindow::closeEvent(QCloseEvent *event)
@@ -61,6 +57,7 @@ namespace bias
         event -> accept();
     }
 
+
     // Private slots
     // ----------------------------------------------------------------------------------
 
@@ -68,6 +65,7 @@ namespace bias
     {
         (!connected_) ? connectCamera() : disconnectCamera();
     }
+
 
     void CameraWindow::startButtonClicked()
     { 
@@ -84,15 +82,38 @@ namespace bias
         double fps = imageDispatcherPtr_ -> getFPS();
         double stamp = imageDispatcherPtr_ -> getTimeStamp();
         frameCount_ = imageDispatcherPtr_ -> getFrameCount();
+
+        // ---------------------------------
+        // TO DO ... temporary
+        //
+        // Calculate image histogram
+        // ---------------------------------
+        //int channels[] = {0};
+        //int histSize[] = {256};
+        //float dimRange[] = {0,256};
+        //const float *ranges[] = {dimRange};
+        //cv::Mat hist;
+        //cv::calcHist(&mat, 1, channels, cv::Mat(), hist, 1, histSize, ranges, true, false);
+        //cv::Size size = hist.size();
+
+        //for (int i=0; i<size.height; i++)
+        //{
+        //    std::cout << hist.at<float>(0,i) << " ";
+        //}
+        //std::cout << std::endl << std::endl;
+        // ---------------------------------
         imageDispatcherPtr_ -> releaseLock();
 
-        // Update image
+        // Update preview image
         if (!img.isNull()) 
         {
-            pixmapOriginal_ = QPixmap::fromImage(img);
-            updateImageLabel();
-            havePixmap_ = true;
+            previewPixmapOriginal_ = QPixmap::fromImage(img);
+            updateImageLabel(previewImageLabelPtr_, previewPixmapOriginal_, true);
         }
+
+        // TO DO ... Update plugin image
+
+        // TO DO .. Update histogram image
 
         // Update statusbar message
         QString statusMsg("Capturing,  logging = ");
@@ -106,6 +127,11 @@ namespace bias
         setCaptureTimeLabel(stamp);
     }
 
+    void CameraWindow::tabWidgetChanged(int index)
+    {
+        resizeAllImageLabels();
+    }
+
     void CameraWindow::startImageCaptureError(unsigned int errorId, QString errorMsg)
     {
         stopImageCapture();
@@ -117,6 +143,7 @@ namespace bias
         QMessageBox::critical(this, msgTitle, msgText);
     }
 
+
     void CameraWindow::stopImageCaptureError(unsigned int errorId, QString errorMsg)
     {
         QString msgTitle("Stop Image Capture Error");
@@ -127,21 +154,51 @@ namespace bias
         QMessageBox::critical(this, msgTitle, msgText);
     }
 
+
+    void CameraWindow::actionFileLoadConfigTriggered()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+    }
+
+
+    void CameraWindow::actionFileSaveconfigTriggered()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+    }
+
+
+    void CameraWindow::actionFileCloseWindowTriggered()
+    {
+        // TO DO ... some sort of query before close if 
+        // configuration has changed.
+        close();
+    }
+
+
+    void CameraWindow::actionFileHideWindowTriggered()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+    }
+
+
     void CameraWindow::actionCameraInfoTriggered()
     {
         std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
+
 
     void CameraWindow::actionCameraFormat7SettingsTriggered()
     {
         std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
 
+
     void CameraWindow::actionLoggingEnabledTriggered()
     {
         logging_ = actionLoggingEnabledPtr_ -> isChecked();
         std::cout << "logging: " << boolToOnOffQString(logging_).toStdString() << std::endl;
     }
+
 
     void CameraWindow::actionLoggingVideoFileTriggered()
     {
@@ -154,11 +211,13 @@ namespace bias
 
         std::cout << videoFileFullPath.toStdString() << std::endl;
     }
+    
 
     void CameraWindow::actionLoggingSettingsTriggered()
     {
         std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
+
 
     void CameraWindow::actionLoggingFormatTriggered()
     {
@@ -170,21 +229,25 @@ namespace bias
         }
     }
 
+
     void CameraWindow::actionTimerEnabledTriggered()
     {
         timer_ = actionTimerEnabledPtr_ -> isChecked();
         std::cout << "timer: " << boolToOnOffQString(timer_).toStdString() << std::endl;
     }
 
+
     void CameraWindow::actionTimerSettingsTriggered()
     {
         std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
 
+
     void CameraWindow::actionDisplayUpdateFreqTriggered()
     {
         std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
+
 
     void CameraWindow::actionDisplayFlipVertTriggered()
     {
@@ -192,11 +255,13 @@ namespace bias
         std::cout << "flip vertical: " << boolToOnOffQString(flipVert_).toStdString() << std::endl;
     }
 
+
     void CameraWindow::actionDisplayFlipHorzTriggered()
     {
         flipHorz_ = actionDisplayFlipHorzPtr_ -> isChecked();
         std::cout << "flip horizontal: " << boolToOnOffQString(flipHorz_).toStdString() << std::endl;
     }
+
 
     void CameraWindow::actionDisplayRotTriggered()
     {
@@ -208,24 +273,32 @@ namespace bias
         }
     }
 
+
     void CameraWindow::actionHelpUserManualTriggered()
     {
         std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
+
 
     void CameraWindow::actionHelpAboutTriggered()
     {
         std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
 
+    void CameraWindow::actionPluginsSettingsTriggered()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+    }
+
+
     // Private methods
     // -----------------------------------------------------------------------------------
 
     void CameraWindow::initialize(Guid guid)
     {
+        isFirstPaintEvent_ = true;
         connected_ = false;
         capturing_ = false;
-        havePixmap_ = false;
         logging_ = false;
         timer_ = false;
         flipVert_ = false;
@@ -242,6 +315,7 @@ namespace bias
         setupLoggingMenu();
         setupDisplayMenu();
         setupImageDisplayTimer();
+        setupImageLabels();
 
         cameraPtr_ -> acquireLock();
         Guid cameraGuid = cameraPtr_ -> getGuid();
@@ -262,6 +336,25 @@ namespace bias
         connectButtonPtr_ -> setEnabled(true);
 
     }
+
+    void CameraWindow::setupImageLabels()
+    {
+        QImage dummyImage;
+        dummyImage = QImage(PREVIEW_DUMMY_IMAGE_SIZE,QImage::Format_RGB888);
+        dummyImage.fill(QColor(Qt::gray).rgb());
+        previewPixmapOriginal_ = QPixmap::fromImage(dummyImage);
+        pluginPixmapOriginal_ = QPixmap::fromImage(dummyImage);
+
+        dummyImage = QImage(DEFAULT_HISTOGRAM_IMAGE_SIZE,QImage::Format_RGB888);
+        dummyImage.fill(QColor(Qt::gray).rgb());
+        histogramPixmapOriginal_ = QPixmap::fromImage(dummyImage);
+
+        updateImageLabel(previewImageLabelPtr_, previewPixmapOriginal_, true);
+        updateImageLabel(pluginImageLabelPtr_, pluginPixmapOriginal_, false);
+        updateImageLabel(histogramImageLabelPtr_, histogramPixmapOriginal_, false);
+    }
+
+
 
     void CameraWindow::connectWidgets()
     {
@@ -411,8 +504,50 @@ namespace bias
                 this,
                 SLOT(actionHelpAboutTriggered())
                );
-        
+
+        connect(
+                actionFileLoadConfigPtr_,
+                SIGNAL(triggered()),
+                this,
+                SLOT(actionFileLoadConfigTriggered())
+               );
+
+        connect(
+                actionFileSaveConfigPtr_,
+                SIGNAL(triggered()),
+                this,
+                SLOT(actionFileSaveconfigTriggered())
+               );
+
+        connect(
+                actionFileCloseWindowPtr_,
+                SIGNAL(triggered()),
+                this,
+                SLOT(actionFileCloseWindowTriggered())
+               );
+
+        connect(
+                actionFileHideWindowPtr_,
+                SIGNAL(triggered()),
+                this,
+                SLOT(actionFileHideWindowTriggered())
+               );
+
+        connect(
+                actionPluginsSettingsPtr_,
+                SIGNAL(triggered()),
+                this,
+                SLOT(actionPluginsSettingsTriggered())
+               );
+
+        connect(
+                tabWidgetPtr_,
+                SIGNAL(currentChanged(int)),
+                this,
+                SLOT(tabWidgetChanged(int))
+               );
     }
+
 
     void CameraWindow::setDefaultSaveDir()
     {
@@ -428,6 +563,7 @@ namespace bias
         }
     }
 
+
     void CameraWindow::setupImageDisplayTimer()
     {
         imageDisplayTimerPtr_ = new QTimer(this);
@@ -439,17 +575,21 @@ namespace bias
                 );
     }
 
+
     void CameraWindow::setupCameraMenu()
     {
-        menuCameraPtr_ -> setEnabled(false);
-        // TO DO ... temporary, disable format7 settings
-        // -----------------------------------------------
-        actionCameraFormat7SettingsPtr_ -> setEnabled(false);
-        // -----------------------------------------------
         cameraTriggerActionGroupPtr_ = new QActionGroup(menuCameraPtr_);
         cameraTriggerActionGroupPtr_ -> addAction(actionCameraTriggerInternalPtr_);
         cameraTriggerActionGroupPtr_ -> addAction(actionCameraTriggerExternalPtr_);
+
+        setMenuChildrenEnabled(menuCameraPtr_, false);
+
+        // TO DO .... temporary, disable external trigger option
+        // -----------------------------------------------------
+        actionCameraTriggerExternalPtr_ -> setEnabled(false);
+        // -----------------------------------------------------
     }
+
 
     void CameraWindow::setupLoggingMenu()
     {
@@ -462,11 +602,13 @@ namespace bias
         actionLoggingFormatUFMFPtr_ -> setChecked(false);
     }
 
+
     void CameraWindow::setupDisplayMenu() 
     {
         setupDisplayRotMenu();
         setupDisplayOrientMenu();
     }
+
 
     void CameraWindow::setupDisplayOrientMenu()
     {
@@ -474,6 +616,7 @@ namespace bias
         actionDisplayFlipVertPtr_ -> setChecked(flipVert_);
         actionDisplayFlipHorzPtr_ -> setChecked(flipHorz_);
     }
+    
 
     void CameraWindow::setupDisplayRotMenu()
     {
@@ -488,24 +631,62 @@ namespace bias
         actionDisplayRot270Ptr_ -> setChecked(false);
     }
 
-    void CameraWindow::updateImageLabel()
+
+    void CameraWindow::updateImageLabel(
+            QLabel *imageLabelPtr, 
+            QPixmap &pixmapOriginal,
+            bool addFrameCount
+            )
     {
-        QPixmap pixmapScaled =  pixmapOriginal_.scaled(
-                imageLabelPtr_ -> size(),
+        // Updates pixmap of image on Qlabel - sizing based on QLabel size
+
+        QPixmap pixmapScaled =  pixmapOriginal.scaled(
+                imageLabelPtr -> size(),
                 Qt::KeepAspectRatio, 
                 Qt::SmoothTransformation
                 );
-
         
-        // Add framecount message
-        QPainter painter(&pixmapScaled);
-        QString msg;  
-        msg.sprintf("%d",frameCount_);
-        painter.setPen(QColor(0,220,0));
-        painter.drawText(5,12, msg);
+        if (addFrameCount && (frameCount_ > 0))
+        {
+            QPainter painter(&pixmapScaled);
+            QString msg;  
+            msg.sprintf("%d",frameCount_);
+            painter.setPen(QColor(0,220,0));
+            painter.drawText(5,12, msg);
+        }
+        imageLabelPtr -> setPixmap(pixmapScaled);
+    }
 
-        imageLabelPtr_ -> setPixmap(pixmapScaled);
-    } 
+
+    void CameraWindow::resizeImageLabel( 
+            QLabel *imageLabelPtr, 
+            QPixmap &pixmapOriginal, 
+            bool addFrameCount
+            )
+    {
+        // Determines if resize of pixmap of image on Qlabel is required and 
+        // if so resizes the pixmap.
+        
+        if (pixmapOriginal.isNull() || ((imageLabelPtr -> pixmap()) == 0))  
+        {
+            return;
+        }
+        QSize sizeImageLabel = imageLabelPtr -> size();
+        QSize sizeAdjusted = pixmapOriginal.size();
+        sizeAdjusted.scale(sizeImageLabel, Qt::KeepAspectRatio);
+        QSize sizeImageLabelPixmap = imageLabelPtr -> pixmap() -> size();
+        if (sizeImageLabelPixmap != sizeAdjusted) 
+        {
+            updateImageLabel(imageLabelPtr,pixmapOriginal,addFrameCount);
+        }
+    }
+
+    void CameraWindow::resizeAllImageLabels()
+    { 
+        resizeImageLabel(previewImageLabelPtr_, previewPixmapOriginal_, true);
+        resizeImageLabel(pluginImageLabelPtr_, pluginPixmapOriginal_, false);
+        resizeImageLabel(histogramImageLabelPtr_, histogramPixmapOriginal_, false);
+    }
 
     void CameraWindow::connectCamera() 
     {
@@ -545,6 +726,7 @@ namespace bias
         updateCameraInfoMessage();
 
     }
+
 
     void CameraWindow::disconnectCamera()
     {
@@ -588,6 +770,7 @@ namespace bias
         updateCameraInfoMessage();
         setCaptureTimeLabel(0.0);
     }
+
     
     void CameraWindow::startImageCapture() 
     {
@@ -599,8 +782,6 @@ namespace bias
             return;
         }
 
-        setMenuChildrenEnabled(menuLoggingPtr_, false);
-        setMenuChildrenEnabled(menuTimerPtr_, false);
 
         imageGrabberPtr_ = new ImageGrabber(cameraPtr_, newImageQueuePtr_);
         imageDispatcherPtr_ = new ImageDispatcher(newImageQueuePtr_);
@@ -628,7 +809,12 @@ namespace bias
         connectButtonPtr_ -> setEnabled(false);
         statusbarPtr_ -> showMessage(QString("Capturing"));
         capturing_ = true;
+
+        updateLoggingMenu();
+        updateTimerMenu();
+
     }
+
 
     void CameraWindow::stopImageCapture()
     {
@@ -662,10 +848,12 @@ namespace bias
         startButtonPtr_ -> setText(QString("Start"));
         connectButtonPtr_ -> setEnabled(true);
         statusbarPtr_ -> showMessage(QString("Connected, Stopped"));
-        setMenuChildrenEnabled(menuLoggingPtr_, true);
-        setMenuChildrenEnabled(menuTimerPtr_, true);
         capturing_ = false;
+
+        updateLoggingMenu();
+        updateTimerMenu();
     }
+
 
     void CameraWindow::updateCameraInfoMessage()
     {
@@ -687,6 +875,7 @@ namespace bias
         }
 
     }
+
     
     void CameraWindow::setCameraInfoMessage(QString vendorName, QString modelName)
     {
@@ -696,6 +885,7 @@ namespace bias
         cameraInfoString += modelName; 
         cameraInfoLabelPtr_ -> setText(cameraInfoString);
     }
+
 
     void CameraWindow::setMenuChildrenEnabled(QWidget *parentWidgetPtr, bool value)
     {
@@ -716,11 +906,30 @@ namespace bias
         }
     } 
 
+
     void CameraWindow::updateCameraMenu()
     {
-        populateVideoModeMenu();
+        if (connected_)
+        {
+            setMenuChildrenEnabled(menuCameraPtr_, true);
+            populateVideoModeMenu();
 
+            // TO DO .. temporarily disable format7 settings
+            // ------------------------------------------------
+            actionCameraFormat7SettingsPtr_ -> setEnabled(false);
+            // ------------------------------------------------
+        }
+        else 
+        {
+            setMenuChildrenEnabled(menuCameraPtr_, true);
+        }
+
+        updateCameraTriggerMenu();
+        updateCameraVideoModeMenu();
+        updateCameraFrameRateMenu();
+        updateCameraPropertiesMenu();
     }
+
 
     void CameraWindow::populateVideoModeMenu()
     {
@@ -728,6 +937,11 @@ namespace bias
         unsigned int errorId;
         QString errorMsg;
         VideoModeList modeList;
+
+        if (!connected_) 
+        {
+            return;
+        }
 
         // Delete any existing actions
         deleteMenuActions(menuVideoModePtr_);
@@ -778,8 +992,98 @@ namespace bias
             }
             // -------------------------------------
         }
-
     }
+
+
+    void CameraWindow::updateCameraVideoModeMenu()
+    {
+    }
+
+
+    void CameraWindow::updateCameraFrameRateMenu()
+    {
+    }
+
+
+    void CameraWindow::updateCameraPropertiesMenu()
+    {
+    }
+
+
+    void CameraWindow::updateCameraTriggerMenu()
+    {
+        bool error = false;
+        unsigned int errorId;
+        QString errorMsg;
+        TriggerType trigType;
+
+        if (!connected_) 
+        {
+            return;
+        }
+
+        cameraPtr_ -> acquireLock();
+        try
+        {
+            trigType = cameraPtr_ -> getTriggerType();
+        }
+        catch (RuntimeError &runtimeError)
+        {
+            error = true;
+            errorId = runtimeError.id();
+            errorMsg = QString::fromStdString(runtimeError.what());
+        }
+        cameraPtr_ -> releaseLock();
+
+        if (error)
+        {
+            QString msgTitle("Camera Query Error");
+            QString msgText("Failed to read trigger type from camera:\n\nError ID: ");
+            msgText += QString::number(errorId);
+            msgText += "\n\n";
+            msgText += errorMsg;
+            QMessageBox::critical(this, msgTitle, msgText);
+            return;
+        }
+
+        if (trigType == TRIGGER_INTERNAL)
+        {
+            actionCameraTriggerInternalPtr_ -> setChecked(true);
+            actionCameraTriggerExternalPtr_ -> setChecked(false);
+        }
+        else 
+        {
+            actionCameraTriggerInternalPtr_ -> setChecked(false);
+            actionCameraTriggerExternalPtr_ -> setChecked(true);
+        }
+    }
+
+
+    void CameraWindow::updateLoggingMenu() 
+    {
+        if (capturing_)
+        {
+            setMenuChildrenEnabled(menuLoggingPtr_, false);
+        }
+        else
+        {
+            setMenuChildrenEnabled(menuLoggingPtr_, true);
+        }
+    }
+
+
+    void CameraWindow::updateTimerMenu()
+    {
+        if (capturing_)
+        {
+            setMenuChildrenEnabled(menuTimerPtr_, false);
+        }
+        else
+        {
+            setMenuChildrenEnabled(menuTimerPtr_, true);
+        }
+    }
+
 
     void CameraWindow::deleteMenuActions(QMenu *menuPtr)
     {
@@ -791,6 +1095,7 @@ namespace bias
             menuPtr -> removeAction(actionPtr);
         }
     }
+
 
     void CameraWindow::setCaptureTimeLabel(double timeStamp)
     {
@@ -806,6 +1111,7 @@ namespace bias
     {
         return (value) ? QString("on") : QString("off");
     }
+
 
     QString timeStampToQString(double timeStamp)
     {

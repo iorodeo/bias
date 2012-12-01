@@ -65,7 +65,7 @@ namespace bias {
         unsigned int errorId = 0;
         StampedImage stampImg;
         QString errorMsg("no message");
-        QTime timer; // TO DO ... temporary timestamp generation 
+        QTime clock; // TO DO ... temporary timestamp generation 
 
         if (!ready_) 
         { 
@@ -96,7 +96,7 @@ namespace bias {
         stopped_ = false;
         releaseLock();
 
-        timer.start(); // TO DO ... temporary timestamp generation 
+        clock.start(); // TO DO ... temporary timestamp generation 
 
         // Grab images from camera until the done signal is given
         while (!done)
@@ -120,7 +120,7 @@ namespace bias {
             // Push image into new image queue
             if (!error) 
             {
-                stampImg.timeStamp = timer.elapsed()*0.001; // TO DO ... temporary
+                stampImg.timeStamp = clock.elapsed()*0.001; // TO DO ... temporary
 
                 newImageQueuePtr_ -> acquireLock();
                 newImageQueuePtr_ -> push(stampImg);

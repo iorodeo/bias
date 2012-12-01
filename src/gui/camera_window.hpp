@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <QDir>
+#include <QSize>
 #include <QPointer>
 #include <QMainWindow>
 #include "ui_camera_window.h"
@@ -28,6 +29,8 @@ namespace bias
         Q_OBJECT
 
         const double DEFAULT_IMAGE_DISPLAY_FREQ = 15.0; // Hz 
+        const QSize PREVIEW_DUMMY_IMAGE_SIZE = QSize(320,256);
+        const QSize DEFAULT_HISTOGRAM_IMAGE_SIZE = QSize(256,204);
 
         public:
 
@@ -37,6 +40,7 @@ namespace bias
 
             void resizeEvent(QResizeEvent *event);
             void closeEvent(QCloseEvent *event);
+            void showEvent(QShowEvent *event);
 
         private slots:
            
@@ -49,7 +53,14 @@ namespace bias
             // Display Timer update
             void updateImageDisplay();
 
+            // Tab changed event
+            void tabWidgetChanged(int index);
+
             // Menu actions
+            void actionFileLoadConfigTriggered();
+            void actionFileSaveconfigTriggered();
+            void actionFileCloseWindowTriggered();
+            void actionFileHideWindowTriggered();
             void actionCameraInfoTriggered();
             void actionCameraFormat7SettingsTriggered();
             void actionLoggingEnabledTriggered();
@@ -64,12 +75,13 @@ namespace bias
             void actionDisplayRotTriggered();
             void actionHelpUserManualTriggered();
             void actionHelpAboutTriggered();
+            void actionPluginsSettingsTriggered();
 
         private:
 
+            bool isFirstPaintEvent_;
             bool connected_;
             bool capturing_;
-            bool havePixmap_;
             bool logging_;
             bool timer_;
             bool flipVert_;
@@ -78,7 +90,10 @@ namespace bias
             double imageDisplayFreq_;
             unsigned long frameCount_;
 
-            QPixmap pixmapOriginal_;
+            QPixmap previewPixmapOriginal_;
+            QPixmap pluginPixmapOriginal_;
+            QPixmap histogramPixmapOriginal_;
+
             QPointer<QActionGroup> cameraTriggerActionGroupPtr_;
             QPointer<QActionGroup> rotationActionGroupPtr_;
             QPointer<QActionGroup> loggingFormatActionGroupPtr_;
@@ -94,16 +109,6 @@ namespace bias
 
             void connectWidgets();
             void initialize(Guid guid);
-            void setDefaultSaveDir();
-            void setupImageDisplayTimer();
-            void setupCameraMenu();
-            void setupLoggingMenu();
-            void setupDisplayMenu();
-            void setupDisplayOrientMenu();
-            void setupDisplayRotMenu();
-
-            void updatePixmap();
-            void updateImageLabel();
 
             void connectCamera();
             void disconnectCamera();
@@ -111,9 +116,41 @@ namespace bias
             void startImageCapture();
             void stopImageCapture();
 
-            void updateCameraInfoMessage();
+            void setDefaultSaveDir();
+            void setupImageDisplayTimer();
+            
+            // Menu setup methods
+            void setupCameraMenu();
+            void setupLoggingMenu();
+            void setupDisplayMenu();
+            void setupDisplayOrientMenu();
+            void setupDisplayRotMenu();
+
+            // Menu update methods
             void updateCameraMenu();
             void populateVideoModeMenu();
+            void updateCameraVideoModeMenu();
+            void updateCameraFrameRateMenu();
+            void updateCameraPropertiesMenu();
+            void updateCameraTriggerMenu();
+            void updateLoggingMenu();
+            void updateTimerMenu();
+           
+            void updatePreviewImageLabel();
+            void updateCameraInfoMessage();
+
+            void setupImageLabels();
+            void updateImageLabel(
+                    QLabel *imageLabelPtr, 
+                    QPixmap &pixmapOriginal, 
+                    bool addFrameCount=true
+                    );
+            void resizeImageLabel(
+                    QLabel *imageLabelPtr, 
+                    QPixmap &pixmapOriginal, 
+                    bool addFrameCount=true
+                    );
+            void resizeAllImageLabels();
 
             void deleteMenuActions(QMenu *menuPtr);
             void setCameraInfoMessage(QString vendorName, QString modelName);
