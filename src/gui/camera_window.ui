@@ -26,7 +26,7 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="previewTabPtr">
+      <widget class="QWidget" name="previewTabPtr_">
        <attribute name="title">
         <string>Preview</string>
        </attribute>
@@ -61,7 +61,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="pluginPreviewPtr_">
+      <widget class="QWidget" name="pluginPreviewTabPtr_">
        <attribute name="title">
         <string>Plugin Preview</string>
        </attribute>
@@ -265,19 +265,19 @@
     <property name="title">
      <string>Camera</string>
     </property>
-    <widget class="QMenu" name="menuVideoModePtr_">
+    <widget class="QMenu" name="menuCameraVideoModePtr_">
      <property name="title">
       <string>Video Mode</string>
      </property>
      <addaction name="actionDummyVideoModePtr_"/>
     </widget>
-    <widget class="QMenu" name="menuFrameRatePtr_">
+    <widget class="QMenu" name="menuCameraFrameRatePtr_">
      <property name="title">
       <string>Frame Rate</string>
      </property>
      <addaction name="actionDummyFrameRatePtr_"/>
     </widget>
-    <widget class="QMenu" name="menuPropertiesPtr_">
+    <widget class="QMenu" name="menuCameraPropertiesPtr_">
      <property name="title">
       <string>Properties</string>
      </property>
@@ -290,9 +290,9 @@
      <addaction name="actionCameraTriggerInternalPtr_"/>
      <addaction name="actionCameraTriggerExternalPtr_"/>
     </widget>
-    <addaction name="menuVideoModePtr_"/>
-    <addaction name="menuFrameRatePtr_"/>
-    <addaction name="menuPropertiesPtr_"/>
+    <addaction name="menuCameraVideoModePtr_"/>
+    <addaction name="menuCameraFrameRatePtr_"/>
+    <addaction name="menuCameraPropertiesPtr_"/>
     <addaction name="menuCameraTriggerPtr_"/>
     <addaction name="actionCameraFormat7SettingsPtr_"/>
     <addaction name="actionCameraInfoPtr_"/>

@@ -13,6 +13,8 @@
 // External lib forward declarations
 class QTimer;
 class QThreadPool;
+class QSignalMapper;
+
 namespace cv   { class Mat; }
 
 namespace bias 
@@ -78,9 +80,13 @@ namespace bias
             void actionHelpAboutTriggered();
             void actionPluginsSettingsTriggered();
 
+            // Signal mappers for videomode, framerate and properties
+            void actionVideoModeTriggered(int vidModeInt);
+            void actionFrameRateTriggered(int frmRateInt);
+            void actionPropertyTriggered(int propTypeInt);
+
         private:
 
-            bool isFirstPaintEvent_;
             bool connected_;
             bool capturing_;
             bool logging_;
@@ -95,9 +101,15 @@ namespace bias
             QPixmap pluginPixmapOriginal_;
             QPixmap histogramPixmapOriginal_;
 
+            QPointer<QActionGroup> videoModeActionGroupPtr_; 
+            QPointer<QActionGroup> frameRateActionGroupPtr_; 
             QPointer<QActionGroup> cameraTriggerActionGroupPtr_;
-            QPointer<QActionGroup> rotationActionGroupPtr_;
             QPointer<QActionGroup> loggingFormatActionGroupPtr_;
+            QPointer<QActionGroup> rotationActionGroupPtr_;
+
+            QPointer<QSignalMapper> videoModeSignalMapperPtr_;
+            QPointer<QSignalMapper> frameRateSignalMapperPtr_;
+            QPointer<QSignalMapper> propertiesSignalMapperPtr_;
 
             std::shared_ptr<Lockable<Camera>> cameraPtr_;
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr_;
@@ -130,6 +142,8 @@ namespace bias
             // Menu update methods
             void updateCameraMenu();
             void populateVideoModeMenu();
+            void populateFrameRateMenu();
+            void populatePropertiesMenu();
             void updateCameraVideoModeMenu();
             void updateCameraFrameRateMenu();
             void updateCameraPropertiesMenu();
@@ -155,7 +169,7 @@ namespace bias
 
             void updateHistogramPixmap(cv::Mat hist);
 
-            void deleteMenuActions(QMenu *menuPtr);
+            void deleteMenuActions(QMenu *menuPtr, QActionGroup *actionGroupPtr=NULL);
             void setCameraInfoMessage(QString vendorName, QString modelName);
             void setMenuChildrenEnabled(QWidget *parentWidgetPtr, bool value);
             void setCaptureTimeLabel(double timeStamp);

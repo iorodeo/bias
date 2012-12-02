@@ -11,6 +11,7 @@
 #include <QtGui>
 #include <QTimer>
 #include <QThreadPool>
+#include <QSignalMapper>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
@@ -75,11 +76,16 @@ namespace bias
 
     void CameraWindow::updateImageDisplay()
     {
+        // Timer update method for image displays. Note, this is getting a bit messy.
+        
         QPointer<QWidget> currTabPtr = tabWidgetPtr_ -> currentWidget();
+
+        bool isPreviewTab = (currTabPtr == previewTabPtr_);
+        bool isPluginPreviewTab = (currTabPtr == pluginPreviewTabPtr_);
         bool isHistogramTab = (currTabPtr == histogramTabPtr_);
 
         // Get information from image dispatcher
-        // ---------------------------------------------------------------
+        // ----------------------------------------------------------------
         imageDispatcherPtr_ -> acquireLock();
 
         cv::Mat imgMat = imageDispatcherPtr_ -> getImage();
@@ -88,18 +94,22 @@ namespace bias
         double stamp = imageDispatcherPtr_ -> getTimeStamp();
         frameCount_ = imageDispatcherPtr_ -> getFrameCount();
         cv::Mat histMat = (isHistogramTab) ? calcHistogram(imgMat) : cv::Mat();
+        cv::Size imgSize = imgMat.size();
 
         imageDispatcherPtr_ -> releaseLock();
         // ---------------------------------------------------------------
 
         // Update preview image
-        if (!img.isNull()) 
+        if (isPreviewTab && !img.isNull()) 
         {
             previewPixmapOriginal_ = QPixmap::fromImage(img);
             updateImageLabel(previewImageLabelPtr_, previewPixmapOriginal_, true);
         }
 
         // TO DO ... Update plugin image
+        if (isPluginPreviewTab)
+        {
+        }
 
         // Update histogram image
         if (isHistogramTab)
@@ -113,6 +123,7 @@ namespace bias
         statusMsg += boolToOnOffQString(logging_);
         statusMsg += QString(", timer = ");
         statusMsg += boolToOnOffQString(timer_);
+        statusMsg += QString().sprintf(",  %dx%d", imgSize.width, imgSize.height);
         statusMsg += QString().sprintf(",  %1.1f fps", fps);
         statusbarPtr_ -> showMessage(statusMsg);
 
@@ -283,13 +294,32 @@ namespace bias
         std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
 
+    void CameraWindow::actionVideoModeTriggered(int vidModeInt)
+    {
+        VideoMode vidMode = VideoMode(vidModeInt);
+        std::cout << "videoMode: " << getVideoModeString(vidMode) << std::endl;
+    }
+
+
+    void CameraWindow::actionFrameRateTriggered(int frmRateInt)
+    {
+        FrameRate frmRate = FrameRate(frmRateInt);
+        std::cout << "frameRate: " << getFrameRateString(frmRate) << std::endl;
+    }
+
+
+    void CameraWindow::actionPropertyTriggered(int propTypeInt)
+    {
+        PropertyType propType = PropertyType(propTypeInt);
+        std::cout << "propertyType: " << getPropertyTypeString(propType) << std::endl;
+    }
+
 
     // Private methods
     // -----------------------------------------------------------------------------------
 
     void CameraWindow::initialize(Guid guid)
     {
-        isFirstPaintEvent_ = true;
         connected_ = false;
         capturing_ = false;
         logging_ = false;
@@ -309,6 +339,8 @@ namespace bias
         setupDisplayMenu();
         setupImageDisplayTimer();
         setupImageLabels();
+
+        tabWidgetPtr_ -> setCurrentWidget(previewTabPtr_);
 
         cameraPtr_ -> acquireLock();
         Guid cameraGuid = cameraPtr_ -> getGuid();
@@ -571,6 +603,34 @@ namespace bias
 
     void CameraWindow::setupCameraMenu()
     {
+        videoModeActionGroupPtr_ = new QActionGroup(menuCameraVideoModePtr_);
+        frameRateActionGroupPtr_ = new QActionGroup(menuCameraFrameRatePtr_);
+
+        videoModeSignalMapperPtr_ = new QSignalMapper(menuCameraVideoModePtr_);
+        frameRateSignalMapperPtr_ = new QSignalMapper(menuCameraFrameRatePtr_);
+        propertiesSignalMapperPtr_ = new QSignalMapper(menuCameraPropertiesPtr_);
+
+        connect(
+                videoModeSignalMapperPtr_,
+                SIGNAL(mapped(int)),
+                this,
+                SLOT(actionVideoModeTriggered(int))
+               );
+
+        connect(
+                frameRateSignalMapperPtr_,
+                SIGNAL(mapped(int)),
+                this,
+                SLOT(actionFrameRateTriggered(int))
+               );
+
+        connect(
+                propertiesSignalMapperPtr_,
+                SIGNAL(mapped(int)),
+                this,
+                SLOT(actionPropertyTriggered(int))
+               );
+
         cameraTriggerActionGroupPtr_ = new QActionGroup(menuCameraPtr_);
         cameraTriggerActionGroupPtr_ -> addAction(actionCameraTriggerInternalPtr_);
         cameraTriggerActionGroupPtr_ -> addAction(actionCameraTriggerExternalPtr_);
@@ -927,6 +987,8 @@ namespace bias
         {
             setMenuChildrenEnabled(menuCameraPtr_, true);
             populateVideoModeMenu();
+            populateFrameRateMenu();
+            populatePropertiesMenu();
 
             // TO DO .. temporarily disable format7 settings
             // ------------------------------------------------
@@ -950,21 +1012,20 @@ namespace bias
         bool error = false;
         unsigned int errorId;
         QString errorMsg;
-        VideoModeList modeList;
+        VideoMode currentVideoMode;
+        VideoModeList videoModeList;
 
-        if (!connected_) 
-        {
-            return;
-        }
+        if (!connected_) { return; }
 
-        // Delete any existing actions
-        deleteMenuActions(menuVideoModePtr_);
+        // Remove any existing actions
+        deleteMenuActions(menuCameraVideoModePtr_, videoModeActionGroupPtr_);
 
-        // Add action for each allowed video mode
+        // Get list of allowed videomodes from camera 
         cameraPtr_ -> acquireLock();
         try
         {
-            modeList= cameraPtr_ -> getAllowedVideoModes(); 
+            currentVideoMode = cameraPtr_ -> getVideoMode();
+            videoModeList = cameraPtr_ -> getAllowedVideoModes(); 
         }
         catch (RuntimeError &runtimeError)
         {
@@ -977,34 +1038,192 @@ namespace bias
         if (error) 
         {
             QString msgTitle("Camera Query Error");
-            QString msgText("Failed to read allowed video modes from camera:\n\nError ID: ");
-            msgText += QString::number(errorId);
+            QString msgText("Failed to read allowed video modes from camera:");
+            msgText += QString("\n\nError ID: ") + QString::number(errorId);
             msgText += "\n\n";
             msgText += errorMsg;
             QMessageBox::critical(this, msgTitle, msgText);
             return;
         }
 
+        // Add action to menu for each allowed video mode
         VideoModeList::iterator modeIt;
-        for (modeIt=modeList.begin(); modeIt!=modeList.end(); modeIt++)
+        for (modeIt=videoModeList.begin(); modeIt!=videoModeList.end(); modeIt++)
         {
             VideoMode mode = *modeIt;
             QString modeString = QString::fromStdString(getVideoModeString(mode));
-            QPointer<QAction> modeActionPtr = menuVideoModePtr_ -> addAction(modeString);
+            QPointer<QAction> modeActionPtr = 
+                menuCameraVideoModePtr_ -> addAction(modeString);
+            videoModeActionGroupPtr_ -> addAction(modeActionPtr);
             modeActionPtr -> setCheckable(true);
-            modeActionPtr -> setEnabled(false);
+            
+            connect( 
+                    modeActionPtr, 
+                    SIGNAL(triggered()), 
+                    videoModeSignalMapperPtr_, 
+                    SLOT(map())
+                   );
+            videoModeSignalMapperPtr_ -> setMapping(modeActionPtr, mode);
 
-            // TO DO .. temporary only allow format7
-            // -------------------------------------
-            if (mode != VIDEOMODE_FORMAT7)
-            {
-                modeActionPtr -> setChecked(false);
-            }
-            else 
+            if (mode == currentVideoMode)
             {
                 modeActionPtr -> setChecked(true);
             }
-            // -------------------------------------
+            else
+            {
+                modeActionPtr -> setChecked(false);
+            }
+            // --------------------------------------------------------------------
+            // TO DO ... temporary, currently don't allow video mode to be changed
+            // ---------------------------------------------------------------------
+            //modeActionPtr -> setEnabled(false);
+        }
+    }
+
+
+    void CameraWindow::populateFrameRateMenu()
+    {
+        bool error = false;
+        unsigned int errorId;
+        QString errorMsg;
+        FrameRateList allowedRateList;
+        FrameRate currentFrameRate;
+        VideoMode currentVideoMode;
+
+        if (!connected_) { return; }
+
+        // Remove any existing actions from menu
+        deleteMenuActions(menuCameraFrameRatePtr_, frameRateActionGroupPtr_);
+
+        // Get list of allowed framerates from camera 
+        cameraPtr_ -> acquireLock();
+        try
+        {
+            currentFrameRate = cameraPtr_ -> getFrameRate();
+            currentVideoMode = cameraPtr_ -> getVideoMode();
+            allowedRateList = cameraPtr_ -> getAllowedFrameRates(currentVideoMode); 
+        }
+        catch (RuntimeError &runtimeError)
+        {
+            error = true;
+            errorId = runtimeError.id();
+            errorMsg = QString::fromStdString(runtimeError.what());
+        }
+        cameraPtr_ -> releaseLock();
+
+        if (error) 
+        {
+            QString msgTitle("Camera Query Error");
+            QString msgText("Failed to read frame rates from camera:");  
+            msgText += QString("\n\nError ID: ") + QString::number(errorId);
+            msgText += "\n\n";
+            msgText += errorMsg;
+            QMessageBox::critical(this, msgTitle, msgText);
+            return;
+        }
+
+        // Add action to menu for each allowed frame rate
+        FrameRateList::iterator rateIt;
+        for (rateIt=allowedRateList.begin(); rateIt!=allowedRateList.end(); rateIt++)
+        {
+            FrameRate rate = *rateIt;
+            QString rateString = QString::fromStdString(getFrameRateString(rate));
+            QPointer<QAction> rateActionPtr = 
+                menuCameraFrameRatePtr_ -> addAction(rateString);
+            frameRateActionGroupPtr_ -> addAction(rateActionPtr);
+            rateActionPtr -> setCheckable(true);
+
+            connect( 
+                    rateActionPtr, 
+                    SIGNAL(triggered()), 
+                    frameRateSignalMapperPtr_, 
+                    SLOT(map())
+                   );
+            frameRateSignalMapperPtr_ -> setMapping(rateActionPtr, rate);
+
+            if (rate == currentFrameRate)
+            {
+                rateActionPtr -> setChecked(true);
+            }
+            else
+            {
+                rateActionPtr -> setChecked(false);
+            } 
+            // --------------------------------------------------------------------
+            // TO DO ... temporary, currently don't allow frame rate to be changed
+            // ---------------------------------------------------------------------
+            //rateActionPtr -> setEnabled(false);
+        }
+    }
+
+
+    void CameraWindow::populatePropertiesMenu()
+    {
+        bool error = false;
+        unsigned int errorId;
+        QString errorMsg;
+        PropertyList propList;
+        PropertyInfoMap propInfoMap;
+
+        if (!connected_) { return; }
+
+        // Remove any existing actions from menu
+        deleteMenuActions(menuCameraPropertiesPtr_);
+
+        // Get list of properties from camera 
+        cameraPtr_ -> acquireLock();
+        try
+        {
+            propList = cameraPtr_ -> getListOfProperties();
+            propInfoMap = cameraPtr_ -> getMapOfPropertyInfos();
+        }
+        catch (RuntimeError &runtimeError)
+        {
+            error = true;
+            errorId = runtimeError.id();
+            errorMsg = QString::fromStdString(runtimeError.what());
+        }
+        cameraPtr_ -> releaseLock();
+
+        if (error) 
+        {
+            QString msgTitle("Camera Query Error");
+            QString msgText("Failed to read properties from camera:");  
+            msgText += QString("\n\nError ID: ") + QString::number(errorId);
+            msgText += "\n\n";
+            msgText += errorMsg;
+            QMessageBox::critical(this, msgTitle, msgText);
+            return;
+        }
+
+        // Action action to menu for each property in list
+        PropertyList::iterator propIt;
+        for (propIt=propList.begin(); propIt!=propList.end(); propIt++)
+        {
+            Property prop = *propIt;
+            PropertyInfo propInfo = propInfoMap[prop.type];
+            if (prop.present)
+            {
+                //prop.print();
+                //propInfo.print();
+                std::string propStringStd = getPropertyTypeString(prop.type);
+                QString propString = QString::fromStdString(propStringStd);
+                QPointer<QAction> propActionPtr = 
+                    menuCameraPropertiesPtr_ -> addAction(propString);
+
+                connect( 
+                        propActionPtr, 
+                        SIGNAL(triggered()), 
+                        propertiesSignalMapperPtr_, 
+                        SLOT(map())
+                        );
+                propertiesSignalMapperPtr_ -> setMapping(propActionPtr, prop.type);
+
+                // --------------------------------------------------------------
+                // TO DO ... temporary
+                // ---------------------------------------------------------------
+                //propActionPtr -> setEnabled(false);
+            }
         }
     }
 
@@ -1099,13 +1318,18 @@ namespace bias
     }
 
 
-    void CameraWindow::deleteMenuActions(QMenu *menuPtr)
+    void CameraWindow::deleteMenuActions(QMenu *menuPtr, QActionGroup *actionGroupPtr)
     {
         QList<QAction *> actionList = menuPtr -> actions();
         QList<QAction *>::iterator actionIt;
         for (actionIt=actionList.begin(); actionIt!=actionList.end(); actionIt++)
         {
             QPointer<QAction> actionPtr = *actionIt;
+            if (actionGroupPtr != NULL)
+            {
+                actionGroupPtr -> removeAction(actionPtr);
+
+            }
             menuPtr -> removeAction(actionPtr);
         }
     }
