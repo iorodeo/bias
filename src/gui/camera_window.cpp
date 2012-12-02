@@ -103,7 +103,7 @@ namespace bias
         if (isPreviewTab && !img.isNull()) 
         {
             previewPixmapOriginal_ = QPixmap::fromImage(img);
-            updateImageLabel(previewImageLabelPtr_, previewPixmapOriginal_, true);
+            updateImageLabel(previewImageLabelPtr_, previewPixmapOriginal_, true, true);
         }
 
         // TO DO ... Update plugin image
@@ -115,7 +115,7 @@ namespace bias
         if (isHistogramTab)
         {
             updateHistogramPixmap(histMat);
-            updateImageLabel(histogramImageLabelPtr_, histogramPixmapOriginal_, false);
+            updateImageLabel(histogramImageLabelPtr_, histogramPixmapOriginal_, false, false);
         }
 
         // Update statusbar message
@@ -269,12 +269,9 @@ namespace bias
 
     void CameraWindow::actionDisplayRotTriggered()
     {
-        // Get Rotation 
         QPointer<QAction> actionPtr = qobject_cast<QAction *>(sender());
-        if (actionPtr != NULL) {
-            QString rotString = actionPtr -> text();
-            std:: cout << "display rotation: " << rotString.toStdString() << std::endl;
-        }
+        imageRotation_ = actionToRotationMap_[actionPtr];
+        std:: cout << "display rotation: " << int(imageRotation_) << std::endl;
     }
 
 
@@ -326,6 +323,7 @@ namespace bias
         timer_ = false;
         flipVert_ = false;
         flipHorz_ = false;
+        imageRotation_ = IMAGE_ROTATION_0;
 
         imageDisplayFreq_ = DEFAULT_IMAGE_DISPLAY_FREQ;
         cameraPtr_ = std::make_shared<Lockable<Camera>>(guid);
@@ -374,9 +372,9 @@ namespace bias
         dummyImage.fill(QColor(Qt::gray).rgb());
         histogramPixmapOriginal_ = QPixmap::fromImage(dummyImage);
 
-        updateImageLabel(previewImageLabelPtr_, previewPixmapOriginal_, true);
-        updateImageLabel(pluginImageLabelPtr_, pluginPixmapOriginal_, false);
-        updateImageLabel(histogramImageLabelPtr_, histogramPixmapOriginal_, false);
+        updateImageLabel(previewImageLabelPtr_, previewPixmapOriginal_, true, true);
+        updateImageLabel(pluginImageLabelPtr_, pluginPixmapOriginal_, true, false);
+        updateImageLabel(histogramImageLabelPtr_, histogramPixmapOriginal_, false, false);
     }
 
 
@@ -678,16 +676,37 @@ namespace bias
         rotationActionGroupPtr_ -> addAction(actionDisplayRot90Ptr_);
         rotationActionGroupPtr_ -> addAction(actionDisplayRot180Ptr_);
         rotationActionGroupPtr_ -> addAction(actionDisplayRot270Ptr_);
-        actionDisplayRot0Ptr_ -> setChecked(true);
-        actionDisplayRot90Ptr_ -> setChecked(false);
-        actionDisplayRot180Ptr_ -> setChecked(false);
-        actionDisplayRot270Ptr_ -> setChecked(false);
+
+        actionToRotationMap_[actionDisplayRot0Ptr_] =  IMAGE_ROTATION_0;
+        actionToRotationMap_[actionDisplayRot90Ptr_] = IMAGE_ROTATION_90;
+        actionToRotationMap_[actionDisplayRot180Ptr_] = IMAGE_ROTATION_180;
+        actionToRotationMap_[actionDisplayRot270Ptr_] = IMAGE_ROTATION_270; 
+        
+        QMap<QAction*, ImageRotationType>:: iterator mapIt;
+        for (
+                mapIt = actionToRotationMap_.begin();
+                mapIt != actionToRotationMap_.end();
+                mapIt++
+            )
+        {
+            ImageRotationType rotType = *mapIt;
+            QAction *actionPtr = mapIt.key();
+            if (rotType == imageRotation_)
+            {
+                actionPtr -> setChecked(true);
+            }
+            else
+            {
+                actionPtr -> setChecked(false);
+            }
+        }
     }
 
 
     void CameraWindow::updateImageLabel(
             QLabel *imageLabelPtr, 
             QPixmap &pixmapOriginal,
+            bool flipAndRotate,
             bool addFrameCount
             )
     {
@@ -699,6 +718,25 @@ namespace bias
                 Qt::SmoothTransformation
                 );
         
+        // Flip and rotate pixmap if required
+        if (flipAndRotate) {
+            if ((imageRotation_ != IMAGE_ROTATION_0) || flipVert_ || flipHorz_ )
+            {
+                QTransform transform;
+                transform.rotate(-1.0*float(imageRotation_));
+                if (flipVert_)
+                {
+                    transform.scale(1.0,-1.0);
+                }
+                if (flipHorz_) 
+                {
+                    transform.scale(-1.0,1.0);
+                }
+                pixmapScaled = pixmapScaled.transformed(transform);
+            }
+        }
+
+        // Add frame count
         if (addFrameCount && (frameCount_ > 0))
         {
             QPainter painter(&pixmapScaled);
@@ -707,6 +745,7 @@ namespace bias
             painter.setPen(QColor(0,220,0));
             painter.drawText(5,12, msg);
         }
+
         imageLabelPtr -> setPixmap(pixmapScaled);
     }
 
@@ -714,6 +753,7 @@ namespace bias
     void CameraWindow::resizeImageLabel( 
             QLabel *imageLabelPtr, 
             QPixmap &pixmapOriginal, 
+            bool flipAndRotate,
             bool addFrameCount
             )
     {
@@ -730,7 +770,12 @@ namespace bias
         QSize sizeImageLabelPixmap = imageLabelPtr -> pixmap() -> size();
         if (sizeImageLabelPixmap != sizeAdjusted) 
         {
-            updateImageLabel(imageLabelPtr,pixmapOriginal,addFrameCount);
+            updateImageLabel(
+                    imageLabelPtr,
+                    pixmapOriginal,
+                    flipAndRotate,
+                    addFrameCount
+                    );
         }
     }
 

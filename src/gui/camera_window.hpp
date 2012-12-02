@@ -4,6 +4,7 @@
 #include <memory>
 #include <QDir>
 #include <QSize>
+#include <QMap>
 #include <QPointer>
 #include <QMainWindow>
 #include "ui_camera_window.h"
@@ -27,6 +28,7 @@ namespace bias
     template <class T> class LockableQueue;
 
 
+
     class CameraWindow : public QMainWindow, private Ui::CameraWindow
     {
         Q_OBJECT
@@ -34,6 +36,13 @@ namespace bias
         const double DEFAULT_IMAGE_DISPLAY_FREQ = 15.0; // Hz 
         const QSize PREVIEW_DUMMY_IMAGE_SIZE = QSize(320,256);
         const QSize DEFAULT_HISTOGRAM_IMAGE_SIZE = QSize(256,204);
+        enum ImageRotationType
+        { 
+            IMAGE_ROTATION_0=0,
+            IMAGE_ROTATION_90=90,
+            IMAGE_ROTATION_180=180,
+            IMAGE_ROTATION_270=270
+        };
 
         public:
 
@@ -95,6 +104,7 @@ namespace bias
             bool flipHorz_;
             QDir defaultSaveDir_;
             double imageDisplayFreq_;
+            ImageRotationType imageRotation_;
             unsigned long frameCount_;
 
             QPixmap previewPixmapOriginal_;
@@ -110,6 +120,8 @@ namespace bias
             QPointer<QSignalMapper> videoModeSignalMapperPtr_;
             QPointer<QSignalMapper> frameRateSignalMapperPtr_;
             QPointer<QSignalMapper> propertiesSignalMapperPtr_;
+
+            QMap<QAction*, ImageRotationType> actionToRotationMap_;
 
             std::shared_ptr<Lockable<Camera>> cameraPtr_;
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr_;
@@ -158,11 +170,13 @@ namespace bias
             void updateImageLabel(
                     QLabel *imageLabelPtr, 
                     QPixmap &pixmapOriginal, 
+                    bool flipAndRotate=true,
                     bool addFrameCount=true
                     );
             void resizeImageLabel(
                     QLabel *imageLabelPtr, 
                     QPixmap &pixmapOriginal, 
+                    bool flipAndRotate=true,
                     bool addFrameCount=true
                     );
             void resizeAllImageLabels();
