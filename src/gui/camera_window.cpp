@@ -75,34 +75,22 @@ namespace bias
 
     void CameraWindow::updateImageDisplay()
     {
+        QPointer<QWidget> currTabPtr = tabWidgetPtr_ -> currentWidget();
+        bool isHistogramTab = (currTabPtr == histogramTabPtr_);
+
         // Get information from image dispatcher
+        // ---------------------------------------------------------------
         imageDispatcherPtr_ -> acquireLock();
-        cv::Mat mat = imageDispatcherPtr_ -> getImage();
-        QImage img = matToQImage(mat);
+
+        cv::Mat imgMat = imageDispatcherPtr_ -> getImage();
+        QImage img = matToQImage(imgMat);
         double fps = imageDispatcherPtr_ -> getFPS();
         double stamp = imageDispatcherPtr_ -> getTimeStamp();
         frameCount_ = imageDispatcherPtr_ -> getFrameCount();
+        cv::Mat histMat = (isHistogramTab) ? calcHistogram(imgMat) : cv::Mat();
 
-        // ---------------------------------
-        // TO DO ... temporary
-        //
-        // Calculate image histogram
-        // ---------------------------------
-        //int channels[] = {0};
-        //int histSize[] = {256};
-        //float dimRange[] = {0,256};
-        //const float *ranges[] = {dimRange};
-        //cv::Mat hist;
-        //cv::calcHist(&mat, 1, channels, cv::Mat(), hist, 1, histSize, ranges, true, false);
-        //cv::Size size = hist.size();
-
-        //for (int i=0; i<size.height; i++)
-        //{
-        //    std::cout << hist.at<float>(0,i) << " ";
-        //}
-        //std::cout << std::endl << std::endl;
-        // ---------------------------------
         imageDispatcherPtr_ -> releaseLock();
+        // ---------------------------------------------------------------
 
         // Update preview image
         if (!img.isNull()) 
@@ -113,7 +101,12 @@ namespace bias
 
         // TO DO ... Update plugin image
 
-        // TO DO .. Update histogram image
+        // Update histogram image
+        if (isHistogramTab)
+        {
+            updateHistogramPixmap(histMat);
+            updateImageLabel(histogramImageLabelPtr_, histogramPixmapOriginal_, false);
+        }
 
         // Update statusbar message
         QString statusMsg("Capturing,  logging = ");
@@ -688,6 +681,27 @@ namespace bias
         resizeImageLabel(histogramImageLabelPtr_, histogramPixmapOriginal_, false);
     }
 
+    void CameraWindow::updateHistogramPixmap(cv::Mat hist)
+    {
+        QImage dummyImage = QImage(DEFAULT_HISTOGRAM_IMAGE_SIZE,QImage::Format_RGB888);
+        dummyImage.fill(QColor(Qt::gray).rgb());
+        histogramPixmapOriginal_ = QPixmap::fromImage(dummyImage);
+
+        QPainter painter(&histogramPixmapOriginal_);
+        painter.setPen(QColor(50,50,50));
+        cv::Size histSize = hist.size();
+
+        float histImageMaxY = float(DEFAULT_HISTOGRAM_IMAGE_SIZE.height() - 1.0);
+
+        for (int i=0; i<histSize.height; i++) 
+        {
+            int y0 = int(histImageMaxY);
+            int y1 = int(histImageMaxY - hist.at<float>(0,i));
+            painter.drawLine(i,y0,i,y1);
+        }
+
+    }
+
     void CameraWindow::connectCamera() 
     {
         bool error = false;
@@ -1101,6 +1115,28 @@ namespace bias
     {
         QString stampString = timeStampToQString(timeStamp); 
         captureTimeLabelPtr_ -> setText(stampString);
+    }
+
+    // Development
+    // ----------------------------------------------------------------------------------
+    cv::Mat CameraWindow::calcHistogram(cv::Mat mat)
+    {
+        // -----------------------------------------------------------------------------
+        // TO DO  - only for 8bit black and white cameras needs modification for color.
+        // -----------------------------------------------------------------------------
+        int channels[] = {0};
+        int histSize[] = {256};
+        float dimRange[] = {0,256}; // need to be set based on image type.
+        const float *ranges[] = {dimRange};
+        double minVal = 0;
+        double maxVal = 0;
+        double histImageMaxY = DEFAULT_HISTOGRAM_IMAGE_SIZE.height() - 1.0;
+
+        cv::Mat hist;
+        cv::calcHist(&mat, 1, channels, cv::Mat(), hist, 1, histSize, ranges, true, false);
+        minMaxLoc(hist,&minVal,&maxVal,NULL,NULL);
+        hist = hist*(float(histImageMaxY)/float(maxVal));
+        return hist;
     }
 
 

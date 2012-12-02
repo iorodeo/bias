@@ -10,9 +10,10 @@
 #include "camera_facade_fwd.hpp"
 
 
-// Qt forward declarations
+// External lib forward declarations
 class QTimer;
 class QThreadPool;
+namespace cv   { class Mat; }
 
 namespace bias 
 {
@@ -152,10 +153,16 @@ namespace bias
                     );
             void resizeAllImageLabels();
 
+            void updateHistogramPixmap(cv::Mat hist);
+
             void deleteMenuActions(QMenu *menuPtr);
             void setCameraInfoMessage(QString vendorName, QString modelName);
             void setMenuChildrenEnabled(QWidget *parentWidgetPtr, bool value);
             void setCaptureTimeLabel(double timeStamp);
+
+            // Development
+            cv::Mat calcHistogram(cv::Mat mat);
+
 
     }; // class CameraWindow
 
@@ -163,6 +170,7 @@ namespace bias
     // Utilitiy functions
     QString boolToOnOffQString(bool value);
     QString timeStampToQString(double timeStamp);
+
 }
 
 #endif // #ifndef BIAS_GUI_CAMERA_WINDOW_HPP
