@@ -1063,7 +1063,7 @@ namespace bias
                     videoModeSignalMapperPtr_, 
                     SLOT(map())
                    );
-            videoModeSignalMapperPtr_ -> setMapping(modeActionPtr, mode);
+            videoModeSignalMapperPtr_ -> setMapping(modeActionPtr, int(mode));
 
             if (mode == currentVideoMode)
             {
@@ -1076,7 +1076,7 @@ namespace bias
             // --------------------------------------------------------------------
             // TO DO ... temporary, currently don't allow video mode to be changed
             // ---------------------------------------------------------------------
-            //modeActionPtr -> setEnabled(false);
+            modeActionPtr -> setEnabled(false);
         }
     }
 
@@ -1139,7 +1139,7 @@ namespace bias
                     frameRateSignalMapperPtr_, 
                     SLOT(map())
                    );
-            frameRateSignalMapperPtr_ -> setMapping(rateActionPtr, rate);
+            frameRateSignalMapperPtr_ -> setMapping(rateActionPtr, int(rate));
 
             if (rate == currentFrameRate)
             {
@@ -1152,7 +1152,7 @@ namespace bias
             // --------------------------------------------------------------------
             // TO DO ... temporary, currently don't allow frame rate to be changed
             // ---------------------------------------------------------------------
-            //rateActionPtr -> setEnabled(false);
+            rateActionPtr -> setEnabled(false);
         }
     }
 
@@ -1217,7 +1217,7 @@ namespace bias
                         propertiesSignalMapperPtr_, 
                         SLOT(map())
                         );
-                propertiesSignalMapperPtr_ -> setMapping(propActionPtr, prop.type);
+                propertiesSignalMapperPtr_ -> setMapping(propActionPtr, int(prop.type));
 
                 // --------------------------------------------------------------
                 // TO DO ... temporary
