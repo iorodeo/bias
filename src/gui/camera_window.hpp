@@ -27,22 +27,25 @@ namespace bias
     template <class T> class Lockable;
     template <class T> class LockableQueue;
 
+    enum ImageRotationType
+    { 
+        IMAGE_ROTATION_0=0,
+        IMAGE_ROTATION_90=90,
+        IMAGE_ROTATION_180=180,
+        IMAGE_ROTATION_270=270
+    };
+
+    enum VideoFileFormat
+    {
+        VIDEOFILE_FORMAT_AVI,
+        VIDEOFILE_FORMAT_FMF,
+        VIDEOFILE_FORMAT_UFMF
+    };
 
 
     class CameraWindow : public QMainWindow, private Ui::CameraWindow
     {
         Q_OBJECT
-
-        const double DEFAULT_IMAGE_DISPLAY_FREQ = 15.0; // Hz 
-        const QSize PREVIEW_DUMMY_IMAGE_SIZE = QSize(320,256);
-        const QSize DEFAULT_HISTOGRAM_IMAGE_SIZE = QSize(256,204);
-        enum ImageRotationType
-        { 
-            IMAGE_ROTATION_0=0,
-            IMAGE_ROTATION_90=90,
-            IMAGE_ROTATION_180=180,
-            IMAGE_ROTATION_270=270
-        };
 
         public:
 
@@ -63,7 +66,7 @@ namespace bias
             void stopImageCaptureError(unsigned int errorId, QString errorMsg);
 
             // Display Timer update
-            void updateImageDisplay();
+            void updateDisplayOnTimer();
 
             // Tab changed event
             void tabWidgetChanged(int index);
@@ -71,10 +74,11 @@ namespace bias
             // Menu actions
             void actionFileLoadConfigTriggered();
             void actionFileSaveconfigTriggered();
-            void actionFileCloseWindowTriggered();
             void actionFileHideWindowTriggered();
             void actionCameraInfoTriggered();
             void actionCameraFormat7SettingsTriggered();
+            void actionCameraTriggerExternalTriggered();
+            void actionCameraTriggerInternalTriggered();
             void actionLoggingEnabledTriggered();
             void actionLoggingVideoFileTriggered();
             void actionLoggingSettingsTriggered();
@@ -103,8 +107,11 @@ namespace bias
             bool flipVert_;
             bool flipHorz_;
             QDir defaultSaveDir_;
+            QDir currentSaveDir_;
+            QString currentSaveFileName_;
             double imageDisplayFreq_;
             ImageRotationType imageRotation_;
+            VideoFileFormat videoFileFormat_;
             unsigned long frameCount_;
 
             QPixmap previewPixmapOriginal_;
@@ -122,6 +129,7 @@ namespace bias
             QPointer<QSignalMapper> propertiesSignalMapperPtr_;
 
             QMap<QAction*, ImageRotationType> actionToRotationMap_;
+            QMap<QAction*, VideoFileFormat> actionToVideoFileFormatMap_;
 
             std::shared_ptr<Lockable<Camera>> cameraPtr_;
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr_;
@@ -152,16 +160,17 @@ namespace bias
             void setupDisplayRotMenu();
 
             // Menu update methods
+            void updateAllMenus();
+            void updateFileMenu();
             void updateCameraMenu();
-            void populateVideoModeMenu();
-            void populateFrameRateMenu();
-            void populatePropertiesMenu();
+            void updateLoggingMenu();
+            void updateTimerMenu();
+
             void updateCameraVideoModeMenu();
             void updateCameraFrameRateMenu();
             void updateCameraPropertiesMenu();
             void updateCameraTriggerMenu();
-            void updateLoggingMenu();
-            void updateTimerMenu();
+
            
             void updatePreviewImageLabel();
             void updateCameraInfoMessage();
@@ -173,6 +182,8 @@ namespace bias
                     bool flipAndRotate=true,
                     bool addFrameCount=true
                     );
+            void updateAllImageLabels();
+
             void resizeImageLabel(
                     QLabel *imageLabelPtr, 
                     QPixmap &pixmapOriginal, 
@@ -188,7 +199,6 @@ namespace bias
             void setMenuChildrenEnabled(QWidget *parentWidgetPtr, bool value);
             void setCaptureTimeLabel(double timeStamp);
 
-            // Development
             cv::Mat calcHistogram(cv::Mat mat);
 
 

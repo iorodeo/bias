@@ -18,6 +18,22 @@
 
 namespace bias
 {
+    // Constants
+    // ----------------------------------------------------------------------------------
+    const double DEFAULT_IMAGE_DISPLAY_FREQ = 10.0;  
+    const QSize PREVIEW_DUMMY_IMAGE_SIZE = QSize(320,256);
+    const QSize DEFAULT_HISTOGRAM_IMAGE_SIZE = QSize(256,204);
+    const QString DEFAULT_SAVE_FILE_NAME = QString("bias_video");
+    QMap<VideoFileFormat, QString> createExtensionMap()
+    {
+        QMap<VideoFileFormat, QString> map;
+        map.insert(VIDEOFILE_FORMAT_AVI,  QString("avi"));
+        map.insert(VIDEOFILE_FORMAT_FMF,  QString("fmf"));
+        map.insert(VIDEOFILE_FORMAT_UFMF, QString("ufmf"));
+        return map;
+    };
+    const QMap<VideoFileFormat, QString> VIDEOFILE_EXTENSION_MAP = createExtensionMap();
+
 
     // Public methods
     // ----------------------------------------------------------------------------------
@@ -28,6 +44,7 @@ namespace bias
         connectWidgets();
         initialize(cameraGuid);
     }
+
 
     // Protected methods
     // ----------------------------------------------------------------------------------
@@ -46,8 +63,23 @@ namespace bias
     {
         if (capturing_)
         {
-            stopImageCapture();
-            threadPoolPtr_ -> waitForDone();
+            QMessageBox msgBox;
+            msgBox.setWindowTitle("Close Request");
+            msgBox.setText("The application is currently capturing images:");
+            msgBox.setInformativeText("Do you want to stop capture and close the window?");
+            msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+            msgBox.setDefaultButton(QMessageBox::Cancel);
+            int ret = msgBox.exec();
+            if (ret == QMessageBox::Cancel)
+            {
+                event -> ignore();
+                return;
+            }
+            else 
+            {
+                stopImageCapture();
+                threadPoolPtr_ -> waitForDone();
+            }
         }
 
         if (connected_)
@@ -74,18 +106,13 @@ namespace bias
     }
    
 
-    void CameraWindow::updateImageDisplay()
+    void CameraWindow::updateDisplayOnTimer()
     {
-        // Timer update method for image displays. Note, this is getting a bit messy.
+        //QTime stopWatch;
+        //stopWatch.start();
         
-        QPointer<QWidget> currTabPtr = tabWidgetPtr_ -> currentWidget();
-
-        bool isPreviewTab = (currTabPtr == previewTabPtr_);
-        bool isPluginPreviewTab = (currTabPtr == pluginPreviewTabPtr_);
-        bool isHistogramTab = (currTabPtr == histogramTabPtr_);
-
         // Get information from image dispatcher
-        // ----------------------------------------------------------------
+        // -------------------------------------------------------------------
         imageDispatcherPtr_ -> acquireLock();
 
         cv::Mat imgMat = imageDispatcherPtr_ -> getImage();
@@ -93,30 +120,20 @@ namespace bias
         double fps = imageDispatcherPtr_ -> getFPS();
         double stamp = imageDispatcherPtr_ -> getTimeStamp();
         frameCount_ = imageDispatcherPtr_ -> getFrameCount();
-        cv::Mat histMat = (isHistogramTab) ? calcHistogram(imgMat) : cv::Mat();
+        cv::Mat histMat = calcHistogram(imgMat);
         cv::Size imgSize = imgMat.size();
 
         imageDispatcherPtr_ -> releaseLock();
-        // ---------------------------------------------------------------
+        // -------------------------------------------------------------------
 
-        // Update preview image
-        if (isPreviewTab && !img.isNull()) 
+        // Set pixmaps and update image labels - note need to add pluginPixmap
+        if (!img.isNull()) 
         {
             previewPixmapOriginal_ = QPixmap::fromImage(img);
-            updateImageLabel(previewImageLabelPtr_, previewPixmapOriginal_, true, true);
         }
+        updateHistogramPixmap(histMat);
 
-        // TO DO ... Update plugin image
-        if (isPluginPreviewTab)
-        {
-        }
-
-        // Update histogram image
-        if (isHistogramTab)
-        {
-            updateHistogramPixmap(histMat);
-            updateImageLabel(histogramImageLabelPtr_, histogramPixmapOriginal_, false, false);
-        }
+        updateAllImageLabels();
 
         // Update statusbar message
         QString statusMsg("Capturing,  logging = ");
@@ -129,12 +146,16 @@ namespace bias
 
         // Update capture time
         setCaptureTimeLabel(stamp);
+
+        //std::cout << stopWatch.elapsed() << std::endl;
     }
+
 
     void CameraWindow::tabWidgetChanged(int index)
     {
-        resizeAllImageLabels();
+        updateAllImageLabels();
     }
+
 
     void CameraWindow::startImageCaptureError(unsigned int errorId, QString errorMsg)
     {
@@ -161,65 +182,93 @@ namespace bias
 
     void CameraWindow::actionFileLoadConfigTriggered()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        QString msgTitle("Development");
+        QString msgText("Load configuration not fully implemented");
+        QMessageBox::information(this, msgTitle, msgText);
     }
 
 
     void CameraWindow::actionFileSaveconfigTriggered()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-    }
-
-
-    void CameraWindow::actionFileCloseWindowTriggered()
-    {
-        // TO DO ... some sort of query before close if 
-        // configuration has changed.
-        close();
+        QString msgTitle("Development");
+        QString msgText("Save configuration not fully implemented");
+        QMessageBox::information(this, msgTitle, msgText);
     }
 
 
     void CameraWindow::actionFileHideWindowTriggered()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        QString msgTitle("Development");
+        QString msgText("Hide not fully implemented");
+        QMessageBox::information(this, msgTitle, msgText);
     }
 
 
     void CameraWindow::actionCameraInfoTriggered()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        QString msgTitle("Development");
+        QString msgText("Camera info not fully implemented");
+        QMessageBox::information(this, msgTitle, msgText);
     }
 
 
     void CameraWindow::actionCameraFormat7SettingsTriggered()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        QString msgTitle("Development");
+        QString msgText("Format7 settings not fully implemented");
+        QMessageBox::information(this, msgTitle, msgText);
+    }
+
+    
+    void CameraWindow::actionCameraTriggerExternalTriggered()
+    {
+        QString msgTitle("Development");
+        QString msgText("Set camera trigger external not fully implemented");
+        QMessageBox::information(this, msgTitle, msgText);
+    }
+
+
+    void CameraWindow::actionCameraTriggerInternalTriggered()
+    {
+        QString msgTitle("Development");
+        QString msgText("Set camera trigger internal not fully implemented");
+        QMessageBox::information(this, msgTitle, msgText);
     }
 
 
     void CameraWindow::actionLoggingEnabledTriggered()
     {
         logging_ = actionLoggingEnabledPtr_ -> isChecked();
-        std::cout << "logging: " << boolToOnOffQString(logging_).toStdString() << std::endl;
     }
 
 
     void CameraWindow::actionLoggingVideoFileTriggered()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-        QString videoFileFullPath = QFileDialog::getSaveFileName(
+        if (!currentSaveDir_.exists()) 
+        {
+            currentSaveDir_ = defaultSaveDir_;
+        }
+        QString extString = VIDEOFILE_EXTENSION_MAP[videoFileFormat_];
+        QString saveFileWithExt = currentSaveFileName_ + "." + extString;
+        QFileInfo videoFileInfo(currentSaveDir_, saveFileWithExt);
+        QString videoFileString = QFileDialog::getSaveFileName(
                 this, 
                 QString("Select Video File"),
-                defaultSaveDir_.absolutePath()
+                videoFileInfo.absoluteFilePath()
                 );
-
-        std::cout << videoFileFullPath.toStdString() << std::endl;
+        videoFileInfo = QFileInfo(videoFileString);
+        currentSaveDir_ = videoFileInfo.dir();
+        currentSaveFileName_ = videoFileInfo.baseName();
+        std::cout << "dir:  " << currentSaveDir_.absolutePath().toStdString() << std::endl;
+        std::cout << "file: " << currentSaveFileName_.toStdString() << std::endl;
     }
     
 
     void CameraWindow::actionLoggingSettingsTriggered()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        QString msgTitle("Development");
+        QString msgText("Logging settings not fully implemented");
+        QMessageBox::information(this, msgTitle, msgText);
     }
 
 
@@ -227,10 +276,25 @@ namespace bias
     {
         // Get Format string
         QPointer<QAction> actionPtr = qobject_cast<QAction *>(sender());
-        if (actionPtr != NULL) {
-            QString formatString = actionPtr -> text();
-            std:: cout << "logging format: " << formatString.toStdString() << std::endl;
+        videoFileFormat_ = actionToVideoFileFormatMap_[actionPtr]; 
+
+        std::cout << "video file format: ";
+        switch (videoFileFormat_)
+        {
+            case VIDEOFILE_FORMAT_AVI:
+                std::cout << "avi";
+                break;
+            case VIDEOFILE_FORMAT_FMF:
+                std::cout << "fmf";
+                break;
+            case VIDEOFILE_FORMAT_UFMF:
+                std::cout << "ufmf";
+                break;
+            default:
+                std::cout << "unknown";
+                break;
         }
+        std::cout << std::endl;
     }
 
 
@@ -243,27 +307,31 @@ namespace bias
 
     void CameraWindow::actionTimerSettingsTriggered()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        QString msgTitle("Development");
+        QString msgText("Timer settings not fully implemented");
+        QMessageBox::information(this, msgTitle, msgText);
     }
 
 
     void CameraWindow::actionDisplayUpdateFreqTriggered()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        QString msgTitle("Development");
+        QString msgText("Display update frequency not fully implemented");
+        QMessageBox::information(this, msgTitle, msgText);
     }
 
 
     void CameraWindow::actionDisplayFlipVertTriggered()
     {
         flipVert_ = actionDisplayFlipVertPtr_ -> isChecked();
-        std::cout << "flip vertical: " << boolToOnOffQString(flipVert_).toStdString() << std::endl;
+        updateAllImageLabels();
     }
 
 
     void CameraWindow::actionDisplayFlipHorzTriggered()
     {
         flipHorz_ = actionDisplayFlipHorzPtr_ -> isChecked();
-        std::cout << "flip horizontal: " << boolToOnOffQString(flipHorz_).toStdString() << std::endl;
+        updateAllImageLabels();
     }
 
 
@@ -271,44 +339,84 @@ namespace bias
     {
         QPointer<QAction> actionPtr = qobject_cast<QAction *>(sender());
         imageRotation_ = actionToRotationMap_[actionPtr];
-        std:: cout << "display rotation: " << int(imageRotation_) << std::endl;
+        updateAllImageLabels();
     }
 
 
     void CameraWindow::actionHelpUserManualTriggered()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        QString msgTitle("Development");
+        QString msgText("User manual not fully implemented");
+        QMessageBox::information(this, msgTitle, msgText);
     }
 
 
     void CameraWindow::actionHelpAboutTriggered()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        QString msgTitle("Development");
+        QString msgText("About not fully implemented");
+        QMessageBox::information(this, msgTitle, msgText);
     }
 
     void CameraWindow::actionPluginsSettingsTriggered()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        QString msgTitle("Development");
+        QString msgText("Plugin settings not fully implemented");
+        QMessageBox::information(this, msgTitle, msgText);
     }
 
     void CameraWindow::actionVideoModeTriggered(int vidModeInt)
     {
         VideoMode vidMode = VideoMode(vidModeInt);
-        std::cout << "videoMode: " << getVideoModeString(vidMode) << std::endl;
+        QString vidModeString = QString::fromStdString(getVideoModeString(vidMode));
+
+        // -----------------------------------------------------------------------
+        // TO DO ... temporary, issue message and revert to format7 video mode
+        // -----------------------------------------------------------------------
+        if (vidMode == VIDEOMODE_FORMAT7) 
+        {
+            return;
+        }
+
+        QString msgTitle("Development");
+        QString msgText("Can't change video mode to "); 
+        msgText += vidModeString;
+        msgText += QString(" - only Format7 currently supported");
+        QMessageBox::information(this, msgTitle, msgText);
+
+        QList<QAction *> actionList = menuCameraVideoModePtr_ -> actions();
+        QList<QAction *>::iterator actionIt;
+        for (actionIt=actionList.begin(); actionIt!=actionList.end(); actionIt++)
+        {
+            QPointer<QAction> actionPtr = *actionIt;
+            if (actionPtr -> text() == QString("Format7"))
+            {
+                actionPtr -> setChecked(true);
+            }
+            else
+            {
+                actionPtr -> setChecked(false);
+            }
+        }
     }
 
 
     void CameraWindow::actionFrameRateTriggered(int frmRateInt)
     {
         FrameRate frmRate = FrameRate(frmRateInt);
-        std::cout << "frameRate: " << getFrameRateString(frmRate) << std::endl;
+        QString frmRateString = QString::fromStdString(getFrameRateString(frmRate));
     }
 
 
     void CameraWindow::actionPropertyTriggered(int propTypeInt)
     {
         PropertyType propType = PropertyType(propTypeInt);
-        std::cout << "propertyType: " << getPropertyTypeString(propType) << std::endl;
+        QString propTypeString = QString::fromStdString(getPropertyTypeString(propType));
+        QString msgTitle("Development");
+        QString msgText("Set Property,  ");
+        msgText += propTypeString; 
+        msgText += QString(", not fully implemented");
+        QMessageBox::information(this, msgTitle, msgText);
     }
 
 
@@ -324,6 +432,7 @@ namespace bias
         flipVert_ = false;
         flipHorz_ = false;
         imageRotation_ = IMAGE_ROTATION_0;
+        videoFileFormat_ = VIDEOFILE_FORMAT_AVI;
 
         imageDisplayFreq_ = DEFAULT_IMAGE_DISPLAY_FREQ;
         cameraPtr_ = std::make_shared<Lockable<Camera>>(guid);
@@ -332,11 +441,15 @@ namespace bias
         newImageQueuePtr_ = std::make_shared<LockableQueue<StampedImage>>();
 
         setDefaultSaveDir();
+        currentSaveDir_ = defaultSaveDir_;
+        currentSaveFileName_ = DEFAULT_SAVE_FILE_NAME;
+
         setupCameraMenu();
         setupLoggingMenu();
         setupDisplayMenu();
         setupImageDisplayTimer();
         setupImageLabels();
+        updateAllMenus(); 
 
         tabWidgetPtr_ -> setCurrentWidget(previewTabPtr_);
 
@@ -372,9 +485,7 @@ namespace bias
         dummyImage.fill(QColor(Qt::gray).rgb());
         histogramPixmapOriginal_ = QPixmap::fromImage(dummyImage);
 
-        updateImageLabel(previewImageLabelPtr_, previewPixmapOriginal_, true, true);
-        updateImageLabel(pluginImageLabelPtr_, pluginPixmapOriginal_, true, false);
-        updateImageLabel(histogramImageLabelPtr_, histogramPixmapOriginal_, false, false);
+        updateAllImageLabels();
     }
 
 
@@ -407,6 +518,20 @@ namespace bias
                 SIGNAL(triggered()),
                 this,
                 SLOT(actionCameraFormat7SettingsTriggered())
+               );
+
+        connect(
+                actionCameraTriggerExternalPtr_,
+                SIGNAL(triggered()),
+                this,
+                SLOT(actionCameraTriggerExternalTriggered())
+               );
+
+        connect(
+                actionCameraTriggerInternalPtr_,
+                SIGNAL(triggered()),
+                this,
+                SLOT(actionCameraTriggerInternalTriggered())
                );
        
         connect(
@@ -546,7 +671,7 @@ namespace bias
                 actionFileCloseWindowPtr_,
                 SIGNAL(triggered()),
                 this,
-                SLOT(actionFileCloseWindowTriggered())
+                SLOT(close())
                );
 
         connect(
@@ -569,13 +694,16 @@ namespace bias
                 this,
                 SLOT(tabWidgetChanged(int))
                );
+
     }
 
 
     void CameraWindow::setDefaultSaveDir()
     {
 #ifdef WIN32
-        defaultSaveDir_ = QDir(QString(getenv("USERPROFILE")));
+        QString myDocsString = QString(getenv("USERPROFILE"));
+        myDocsString += "/Videos";
+        defaultSaveDir_ = QDir(myDocsString);
 #else
         defaultSaveDir_ = QDir(QString(getenv("HOME")));
 #endif 
@@ -594,7 +722,7 @@ namespace bias
                 imageDisplayTimerPtr_, 
                 SIGNAL(timeout()), 
                 this, 
-                SLOT(updateImageDisplay())
+                SLOT(updateDisplayOnTimer())
                 );
     }
 
@@ -632,13 +760,6 @@ namespace bias
         cameraTriggerActionGroupPtr_ = new QActionGroup(menuCameraPtr_);
         cameraTriggerActionGroupPtr_ -> addAction(actionCameraTriggerInternalPtr_);
         cameraTriggerActionGroupPtr_ -> addAction(actionCameraTriggerExternalPtr_);
-
-        setMenuChildrenEnabled(menuCameraPtr_, false);
-
-        // TO DO .... temporary, disable external trigger option
-        // -----------------------------------------------------
-        actionCameraTriggerExternalPtr_ -> setEnabled(false);
-        // -----------------------------------------------------
     }
 
 
@@ -648,9 +769,29 @@ namespace bias
         loggingFormatActionGroupPtr_ -> addAction(actionLoggingFormatAVIPtr_);
         loggingFormatActionGroupPtr_ -> addAction(actionLoggingFormatFMFPtr_);
         loggingFormatActionGroupPtr_ -> addAction(actionLoggingFormatUFMFPtr_);
-        actionLoggingFormatAVIPtr_ -> setChecked(true);
-        actionLoggingFormatFMFPtr_ -> setChecked(false);
-        actionLoggingFormatUFMFPtr_ -> setChecked(false);
+
+        actionToVideoFileFormatMap_[actionLoggingFormatAVIPtr_] = VIDEOFILE_FORMAT_AVI;
+        actionToVideoFileFormatMap_[actionLoggingFormatFMFPtr_] = VIDEOFILE_FORMAT_FMF;
+        actionToVideoFileFormatMap_[actionLoggingFormatUFMFPtr_] = VIDEOFILE_FORMAT_UFMF;
+
+        QMap<QAction*, VideoFileFormat>::iterator it;
+        for (
+                it  = actionToVideoFileFormatMap_.begin();
+                it != actionToVideoFileFormatMap_.end();
+                it++
+            )
+        {
+            VideoFileFormat fileFormat = *it;
+            QPointer<QAction> actionPtr = actionToVideoFileFormatMap_.key(fileFormat);
+            if (videoFileFormat_ == fileFormat) 
+            {
+                actionPtr -> setChecked(true);
+            }
+            else
+            {
+                actionPtr -> setChecked(false);
+            }
+        }
     }
 
 
@@ -750,6 +891,14 @@ namespace bias
     }
 
 
+    void CameraWindow::updateAllImageLabels()
+    { 
+        updateImageLabel(previewImageLabelPtr_, previewPixmapOriginal_, true, true);
+        updateImageLabel(pluginImageLabelPtr_, pluginPixmapOriginal_, true, false);
+        updateImageLabel(histogramImageLabelPtr_, histogramPixmapOriginal_, false, false);
+    }
+
+
     void CameraWindow::resizeImageLabel( 
             QLabel *imageLabelPtr, 
             QPixmap &pixmapOriginal, 
@@ -841,9 +990,9 @@ namespace bias
         statusbarPtr_ -> showMessage(QString("Connected, Stopped"));
         startButtonPtr_ -> setEnabled(true);
         menuCameraPtr_ -> setEnabled(true);
-        updateCameraMenu();
-        updateCameraInfoMessage();
 
+        updateCameraInfoMessage();
+        updateAllMenus();
     }
 
 
@@ -888,6 +1037,8 @@ namespace bias
         menuCameraPtr_ -> setEnabled(false);
         updateCameraInfoMessage();
         setCaptureTimeLabel(0.0);
+
+        updateAllMenus();
     }
 
     
@@ -929,8 +1080,7 @@ namespace bias
         statusbarPtr_ -> showMessage(QString("Capturing"));
         capturing_ = true;
 
-        updateLoggingMenu();
-        updateTimerMenu();
+        updateAllMenus();
 
     }
 
@@ -969,8 +1119,7 @@ namespace bias
         statusbarPtr_ -> showMessage(QString("Connected, Stopped"));
         capturing_ = false;
 
-        updateLoggingMenu();
-        updateTimerMenu();
+        updateAllMenus();
     }
 
 
@@ -1025,34 +1174,57 @@ namespace bias
         }
     } 
 
-
-    void CameraWindow::updateCameraMenu()
+    void CameraWindow::updateAllMenus()
     {
-        if (connected_)
-        {
-            setMenuChildrenEnabled(menuCameraPtr_, true);
-            populateVideoModeMenu();
-            populateFrameRateMenu();
-            populatePropertiesMenu();
+        updateFileMenu();
+        updateCameraMenu();
+        updateLoggingMenu();
+        updateTimerMenu();
+    }
 
-            // TO DO .. temporarily disable format7 settings
-            // ------------------------------------------------
-            actionCameraFormat7SettingsPtr_ -> setEnabled(false);
-            // ------------------------------------------------
-        }
-        else 
+    void CameraWindow::updateFileMenu()
+    {
+        if (capturing_ || !connected_)
         {
-            setMenuChildrenEnabled(menuCameraPtr_, true);
+            actionFileLoadConfigPtr_ -> setEnabled(false);
+            actionFileSaveConfigPtr_ -> setEnabled(false);
         }
-
-        updateCameraTriggerMenu();
-        updateCameraVideoModeMenu();
-        updateCameraFrameRateMenu();
-        updateCameraPropertiesMenu();
+        else
+        {
+            actionFileLoadConfigPtr_ -> setEnabled(true);
+            actionFileSaveConfigPtr_ -> setEnabled(true);
+        }
     }
 
 
-    void CameraWindow::populateVideoModeMenu()
+    void CameraWindow::updateCameraMenu()
+    {
+        updateCameraVideoModeMenu();
+        updateCameraFrameRateMenu();
+        updateCameraPropertiesMenu();
+        updateCameraTriggerMenu();
+
+        if (connected_) 
+        { 
+            setMenuChildrenEnabled(menuCameraPtr_,true); 
+        }
+        else
+        {
+            setMenuChildrenEnabled(menuCameraPtr_,false);
+        }
+
+        if (capturing_ || !connected_)
+        {
+            actionCameraFormat7SettingsPtr_ -> setEnabled(false);
+        }
+        else
+        {
+            actionCameraFormat7SettingsPtr_ -> setEnabled(true);
+        }
+    }
+
+
+    void CameraWindow::updateCameraVideoModeMenu()
     {
         bool error = false;
         unsigned int errorId;
@@ -1118,15 +1290,21 @@ namespace bias
             {
                 modeActionPtr -> setChecked(false);
             }
-            // --------------------------------------------------------------------
-            // TO DO ... temporary, currently don't allow video mode to be changed
-            // ---------------------------------------------------------------------
-            modeActionPtr -> setEnabled(false);
+            modeActionPtr -> setEnabled(true);
+        }
+
+        if (capturing_)
+        {
+            setMenuChildrenEnabled(menuCameraVideoModePtr_,false);
+        }
+        else
+        {
+            setMenuChildrenEnabled(menuCameraVideoModePtr_,true);
         }
     }
 
 
-    void CameraWindow::populateFrameRateMenu()
+    void CameraWindow::updateCameraFrameRateMenu()
     {
         bool error = false;
         unsigned int errorId;
@@ -1194,15 +1372,21 @@ namespace bias
             {
                 rateActionPtr -> setChecked(false);
             } 
-            // --------------------------------------------------------------------
-            // TO DO ... temporary, currently don't allow frame rate to be changed
-            // ---------------------------------------------------------------------
-            rateActionPtr -> setEnabled(false);
+            rateActionPtr -> setEnabled(true);
+        }
+
+        if (capturing_)
+        {
+            setMenuChildrenEnabled(menuCameraFrameRatePtr_,false);
+        }
+        else
+        {
+            setMenuChildrenEnabled(menuCameraFrameRatePtr_,true);
         }
     }
 
 
-    void CameraWindow::populatePropertiesMenu()
+    void CameraWindow::updateCameraPropertiesMenu()
     {
         bool error = false;
         unsigned int errorId;
@@ -1263,30 +1447,17 @@ namespace bias
                         SLOT(map())
                         );
                 propertiesSignalMapperPtr_ -> setMapping(propActionPtr, int(prop.type));
-
-                // --------------------------------------------------------------
-                // TO DO ... temporary
-                // ---------------------------------------------------------------
-                //propActionPtr -> setEnabled(false);
             }
         }
+        if (capturing_)
+        {
+            setMenuChildrenEnabled(menuCameraPropertiesPtr_,false);
+        }
+        else
+        {
+            setMenuChildrenEnabled(menuCameraPropertiesPtr_,true);
+        }
     }
-
-
-    void CameraWindow::updateCameraVideoModeMenu()
-    {
-    }
-
-
-    void CameraWindow::updateCameraFrameRateMenu()
-    {
-    }
-
-
-    void CameraWindow::updateCameraPropertiesMenu()
-    {
-    }
-
 
     void CameraWindow::updateCameraTriggerMenu()
     {
@@ -1333,6 +1504,18 @@ namespace bias
         {
             actionCameraTriggerInternalPtr_ -> setChecked(false);
             actionCameraTriggerExternalPtr_ -> setChecked(true);
+        }
+
+        if (capturing_)
+        {
+            actionCameraTriggerInternalPtr_ -> setEnabled(false);
+            actionCameraTriggerExternalPtr_ -> setEnabled(false);
+        }
+        else
+        {
+            // TO DO ... temporary, currently only internal trigger supported
+            actionCameraTriggerInternalPtr_ -> setEnabled(true);
+            actionCameraTriggerExternalPtr_ -> setEnabled(false);
         }
     }
 
@@ -1386,8 +1569,6 @@ namespace bias
         captureTimeLabelPtr_ -> setText(stampString);
     }
 
-    // Development
-    // ----------------------------------------------------------------------------------
     cv::Mat CameraWindow::calcHistogram(cv::Mat mat)
     {
         // -----------------------------------------------------------------------------
