@@ -9,6 +9,7 @@ set(
     camera_window.hpp 
     mat_to_qimage.hpp
     image_grabber.hpp
+    image_logger.hpp
     image_dispatcher.hpp
     lockable_queue.hpp
     fps_estimator.hpp
@@ -20,6 +21,7 @@ set(
     camera_window.cpp 
     mat_to_qimage.cpp
     image_grabber.cpp
+    image_logger.cpp
     image_dispatcher.cpp
     fps_estimator.cpp
     )

@@ -6,6 +6,7 @@
 #include "lockable_queue.hpp"
 #include "image_grabber.hpp"
 #include "image_dispatcher.hpp"
+#include "image_logger.hpp"
 #include <cstdlib>
 #include <cmath>
 #include <QtGui>
@@ -244,23 +245,23 @@ namespace bias
 
     void CameraWindow::actionLoggingVideoFileTriggered()
     {
-        if (!currentSaveDir_.exists()) 
+        if (!currentVideoFileDir_.exists()) 
         {
-            currentSaveDir_ = defaultSaveDir_;
+            currentVideoFileDir_ = defaultVideoFileDir_;
         }
         QString extString = VIDEOFILE_EXTENSION_MAP[videoFileFormat_];
-        QString saveFileWithExt = currentSaveFileName_ + "." + extString;
-        QFileInfo videoFileInfo(currentSaveDir_, saveFileWithExt);
+        QString saveFileWithExt = currentVideoFileName_ + "." + extString;
+        QFileInfo videoFileInfo(currentVideoFileDir_, saveFileWithExt);
         QString videoFileString = QFileDialog::getSaveFileName(
                 this, 
                 QString("Select Video File"),
                 videoFileInfo.absoluteFilePath()
                 );
         videoFileInfo = QFileInfo(videoFileString);
-        currentSaveDir_ = videoFileInfo.dir();
-        currentSaveFileName_ = videoFileInfo.baseName();
-        std::cout << "dir:  " << currentSaveDir_.absolutePath().toStdString() << std::endl;
-        std::cout << "file: " << currentSaveFileName_.toStdString() << std::endl;
+        currentVideoFileDir_ = videoFileInfo.dir();
+        currentVideoFileName_ = videoFileInfo.baseName();
+        std::cout << "dir:  " << currentVideoFileDir_.absolutePath().toStdString() << std::endl;
+        std::cout << "file: " << currentVideoFileName_.toStdString() << std::endl;
     }
     
 
@@ -439,10 +440,11 @@ namespace bias
 
         threadPoolPtr_ = new QThreadPool(this);
         newImageQueuePtr_ = std::make_shared<LockableQueue<StampedImage>>();
+        logImageQueuePtr_ = std::make_shared<LockableQueue<StampedImage>>();
 
-        setDefaultSaveDir();
-        currentSaveDir_ = defaultSaveDir_;
-        currentSaveFileName_ = DEFAULT_SAVE_FILE_NAME;
+        setDefaultVideoFileDir();
+        currentVideoFileDir_ = defaultVideoFileDir_;
+        currentVideoFileName_ = DEFAULT_SAVE_FILE_NAME;
 
         setupCameraMenu();
         setupLoggingMenu();
@@ -698,19 +700,19 @@ namespace bias
     }
 
 
-    void CameraWindow::setDefaultSaveDir()
+    void CameraWindow::setDefaultVideoFileDir()
     {
 #ifdef WIN32
         QString myDocsString = QString(getenv("USERPROFILE"));
         myDocsString += "/Videos";
-        defaultSaveDir_ = QDir(myDocsString);
+        defaultVideoFileDir_ = QDir(myDocsString);
 #else
-        defaultSaveDir_ = QDir(QString(getenv("HOME")));
+        defaultVideoFileDir_ = QDir(QString(getenv("HOME")));
 #endif 
-        if (!defaultSaveDir_.exists())
+        if (!defaultVideoFileDir_.exists())
         {
             // Something is wrong with home directory set to root.
-            defaultSaveDir_ = QDir(QDir::rootPath());
+            defaultVideoFileDir_ = QDir(QDir::rootPath());
         }
     }
 
@@ -818,7 +820,7 @@ namespace bias
         rotationActionGroupPtr_ -> addAction(actionDisplayRot180Ptr_);
         rotationActionGroupPtr_ -> addAction(actionDisplayRot270Ptr_);
 
-        actionToRotationMap_[actionDisplayRot0Ptr_] =  IMAGE_ROTATION_0;
+        actionToRotationMap_[actionDisplayRot0Ptr_] = IMAGE_ROTATION_0;
         actionToRotationMap_[actionDisplayRot90Ptr_] = IMAGE_ROTATION_90;
         actionToRotationMap_[actionDisplayRot180Ptr_] = IMAGE_ROTATION_180;
         actionToRotationMap_[actionDisplayRot270Ptr_] = IMAGE_ROTATION_270; 
@@ -1052,9 +1054,24 @@ namespace bias
             return;
         }
 
+        newImageQueuePtr_ -> clear();
+        logImageQueuePtr_ -> clear();
 
         imageGrabberPtr_ = new ImageGrabber(cameraPtr_, newImageQueuePtr_);
-        imageDispatcherPtr_ = new ImageDispatcher(newImageQueuePtr_);
+        imageDispatcherPtr_ = new ImageDispatcher(
+                logging_, 
+                newImageQueuePtr_,
+                logImageQueuePtr_
+                );
+
+        if (logging_)
+        {
+            QString fileExtension = VIDEOFILE_EXTENSION_MAP[videoFileFormat_];
+            QString fileNameWithExt = currentVideoFileName_ + "." + fileExtension;
+            QFileInfo videoFileInfo(currentVideoFileDir_, fileNameWithExt);
+            QString fileFullPath = videoFileInfo.absoluteFilePath();
+            imageLoggerPtr_ = new ImageLogger(fileFullPath, logImageQueuePtr_);
+        }
 
         connect(
                 imageGrabberPtr_, 
@@ -1072,6 +1089,10 @@ namespace bias
 
         threadPoolPtr_ -> start(imageGrabberPtr_);
         threadPoolPtr_ -> start(imageDispatcherPtr_);
+        if (logging_)
+        {
+            threadPoolPtr_ -> start(imageLoggerPtr_);
+        }
 
         unsigned int imageDisplayDt = int(1000.0/imageDisplayFreq_);
         imageDisplayTimerPtr_ -> start(imageDisplayDt);
@@ -1113,7 +1134,16 @@ namespace bias
             imageDispatcherPtr_ -> releaseLock();
         }
 
+        if (!imageLoggerPtr_.isNull())
+        {
+            imageLoggerPtr_ -> acquireLock();
+            imageLoggerPtr_ -> stop();
+            imageLoggerPtr_ -> releaseLock();
+        }
+
         newImageQueuePtr_ -> clear();
+        logImageQueuePtr_ -> clear();
+
         startButtonPtr_ -> setText(QString("Start"));
         connectButtonPtr_ -> setEnabled(true);
         statusbarPtr_ -> showMessage(QString("Connected, Stopped"));

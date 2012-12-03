@@ -10,42 +10,34 @@ namespace bias
     {
         ready_ = false;
         stopped_ = true;
+        logging_ = false;
         frameCount_ = 0;
         currentTimeStamp_ = 0.0;
     }
 
     ImageDispatcher::ImageDispatcher( 
+            bool logging,
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr, 
+            std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr, 
             QObject *parent
             ) : QObject(parent)
     {
-        initialize(newImageQueuePtr);
+        initialize(logging,newImageQueuePtr,logImageQueuePtr);
     }
 
     void ImageDispatcher::initialize(
-            std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr 
+            bool logging,
+            std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr,
+            std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr 
             ) 
     {
         newImageQueuePtr_ = newImageQueuePtr;
+        logImageQueuePtr_ = logImageQueuePtr;
         ready_ = true;
         stopped_ = true;
+        logging_ = logging;
         frameCount_ = 0;
         currentTimeStamp_ = 0.0;
-    }
-
-    bool ImageDispatcher::tryLock()
-    {
-        return mutex_.tryLock();
-    }
-
-    void ImageDispatcher::acquireLock() 
-    {
-        mutex_.lock();
-    }
-
-    void ImageDispatcher::releaseLock()
-    {
-        mutex_.unlock();
     }
 
     cv::Mat ImageDispatcher::getImage()
@@ -80,31 +72,45 @@ namespace bias
         bool haveNewImage = false;
         bool done = false;
 
-        stopped_ = false;
+        if (!ready_) { return; }
+
+        acquireLock();
         frameCount_ = 0;
+        stopped_ = false;
         fpsEstimator_.reset();
+        releaseLock();
 
         while (!done) 
         {
+            haveNewImage = false;
+
             newImageQueuePtr_ -> acquireLock();
             if (!(newImageQueuePtr_ -> empty()))
             {
                 newStampImage = newImageQueuePtr_ -> front();
                 newImageQueuePtr_ -> pop();
                 haveNewImage = true;
-
             }
             newImageQueuePtr_ -> releaseLock();
 
-            acquireLock();
+            if (logging_ && haveNewImage)
+            {
+                logImageQueuePtr_ -> acquireLock();
+                logImageQueuePtr_ -> push(newStampImage);
+                logImageQueuePtr_ -> releaseLock();
+            }
+
             if (haveNewImage) 
             {
+                acquireLock();
                 currentImage_ = newStampImage.image;
                 currentTimeStamp_ = newStampImage.timeStamp;
                 fpsEstimator_.update(newStampImage.timeStamp);
-                haveNewImage = false;
                 frameCount_++;
+                releaseLock();
             }
+
+            acquireLock();
             done = stopped_;
             releaseLock();
         }

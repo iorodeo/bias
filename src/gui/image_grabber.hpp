@@ -6,15 +6,15 @@
 #include <QObject>
 #include <QRunnable>
 #include "camera_fwd.hpp"
+#include "lockable.hpp"
 
 namespace bias
 {
 
     struct StampedImage;
-    template <class T> class Lockable;
     template <class T> class LockableQueue;
 
-    class ImageGrabber : public QObject, public QRunnable
+    class ImageGrabber : public QObject, public QRunnable, public Lockable<Empty>
     {
         Q_OBJECT
 
@@ -32,10 +32,6 @@ namespace bias
                     std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr 
                     );
 
-            bool tryLock();
-            void acquireLock();
-            void releaseLock();
-
             void stop();
 
         signals:
@@ -47,7 +43,6 @@ namespace bias
             bool stopped_;
             bool capturing_;
 
-            QMutex mutex_;
             std::shared_ptr<Lockable<Camera>> cameraPtr_;
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr_;
 

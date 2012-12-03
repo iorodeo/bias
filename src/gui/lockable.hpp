@@ -5,6 +5,8 @@
 
 namespace bias
 {
+    class Empty {};
+
     template <class T>
     class Lockable : public T 
     {

@@ -7,6 +7,7 @@
 #include <QRunnable>
 #include <opencv2/core/core.hpp>
 #include "fps_estimator.hpp"
+#include "lockable.hpp"
 
 namespace bias
 {
@@ -14,7 +15,7 @@ namespace bias
     struct StampedImage;
     template <class T> class LockableQueue;
 
-    class ImageDispatcher : public QObject, public QRunnable
+    class ImageDispatcher : public QObject, public QRunnable, public Lockable<Empty>
     {
         Q_OBJECT
 
@@ -22,18 +23,17 @@ namespace bias
             ImageDispatcher(QObject *parent=0);
 
             ImageDispatcher( 
+                    bool logging,
                     std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr, 
+                    std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr, 
                     QObject *parent = 0
                     );
 
             void initialize( 
-                    std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr 
+                    bool logging,
+                    std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr,
+                    std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr 
                     );
-
-            
-            bool tryLock();
-            void acquireLock();
-            void releaseLock();
 
             // Use lock when calling these methods
             // ----------------------------------
@@ -46,8 +46,9 @@ namespace bias
 
         private:
             bool ready_;
-            QMutex mutex_;
+            bool logging_;
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr_;
+            std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr_;
 
             // use lock when setting these values
             // -----------------------------------

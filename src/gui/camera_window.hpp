@@ -23,6 +23,7 @@ namespace bias
     // BIAS forward declarations
     class ImageGrabber;
     class ImageDispatcher;
+    class ImageLogger;
     struct StampedImage;
     template <class T> class Lockable;
     template <class T> class LockableQueue;
@@ -106,9 +107,11 @@ namespace bias
             bool timer_;
             bool flipVert_;
             bool flipHorz_;
-            QDir defaultSaveDir_;
-            QDir currentSaveDir_;
-            QString currentSaveFileName_;
+
+            QDir defaultVideoFileDir_;
+            QDir currentVideoFileDir_;
+            QString currentVideoFileName_;
+
             double imageDisplayFreq_;
             ImageRotationType imageRotation_;
             VideoFileFormat videoFileFormat_;
@@ -133,12 +136,14 @@ namespace bias
 
             std::shared_ptr<Lockable<Camera>> cameraPtr_;
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr_;
+            std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr_;
 
             QPointer<QThreadPool> threadPoolPtr_;
             QPointer<QTimer> imageDisplayTimerPtr_;
 
             QPointer<ImageGrabber> imageGrabberPtr_;
             QPointer<ImageDispatcher> imageDispatcherPtr_;
+            QPointer<ImageLogger> imageLoggerPtr_;
 
             void connectWidgets();
             void initialize(Guid guid);
@@ -149,7 +154,7 @@ namespace bias
             void startImageCapture();
             void stopImageCapture();
 
-            void setDefaultSaveDir();
+            void setDefaultVideoFileDir();
             void setupImageDisplayTimer();
             
             // Menu setup methods

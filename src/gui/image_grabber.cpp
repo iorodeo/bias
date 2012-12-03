@@ -2,7 +2,6 @@
 #include "camera.hpp"
 #include "exception.hpp"
 #include "stamped_image.hpp"
-#include "lockable.hpp"
 #include "lockable_queue.hpp"
 #include <iostream>
 #include <QTime>
@@ -36,21 +35,6 @@ namespace bias {
         ready_ = true;
         stopped_ = true;
         capturing_ = false;
-    }
-
-    bool ImageGrabber::tryLock()
-    {
-        return mutex_.tryLock();
-    }
-
-    void ImageGrabber::acquireLock()
-    {
-        mutex_.lock();
-    }
-
-    void ImageGrabber::releaseLock()
-    {
-        mutex_.unlock();
     }
 
     void ImageGrabber::stop()
