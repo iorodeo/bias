@@ -83,6 +83,9 @@ namespace bias {
         ERROR_DC1394_START_CAPTURE,
         ERROR_DC1394_GRAB_IMAGE,
 
+        // Video Writer Errors
+        ERROR_VIDEO_WRITER_ADD_FRAME,
+
         NUMBER_OF_ERROR,
     }; 
 
@@ -252,6 +255,21 @@ namespace bias {
     {
         TRIGGER_INTERNAL,
         TRIGGER_EXTERNAL
+    };
+
+    enum VideoFileFormat
+    {
+        VIDEOFILE_FORMAT_AVI,
+        VIDEOFILE_FORMAT_FMF,
+        VIDEOFILE_FORMAT_UFMF
+    };
+
+    enum ImageRotationType
+    { 
+        IMAGE_ROTATION_0=0,
+        IMAGE_ROTATION_90=90,
+        IMAGE_ROTATION_180=180,
+        IMAGE_ROTATION_270=270
     };
 
 

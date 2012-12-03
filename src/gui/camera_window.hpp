@@ -23,30 +23,15 @@ namespace bias
     // BIAS forward declarations
     class ImageGrabber;
     class ImageDispatcher;
-    class ImageLogger;
-    struct StampedImage;
+    class ImageLogger; struct StampedImage;
     template <class T> class Lockable;
     template <class T> class LockableQueue;
-
-    enum ImageRotationType
-    { 
-        IMAGE_ROTATION_0=0,
-        IMAGE_ROTATION_90=90,
-        IMAGE_ROTATION_180=180,
-        IMAGE_ROTATION_270=270
-    };
-
-    enum VideoFileFormat
-    {
-        VIDEOFILE_FORMAT_AVI,
-        VIDEOFILE_FORMAT_FMF,
-        VIDEOFILE_FORMAT_UFMF
-    };
-
 
     class CameraWindow : public QMainWindow, private Ui::CameraWindow
     {
         Q_OBJECT
+
+        static const unsigned int MAX_THREAD_COUNT=10;
 
         public:
 
@@ -63,8 +48,11 @@ namespace bias
             // Button callbacks
             void connectButtonClicked();
             void startButtonClicked();
+
+            // Errors
             void startImageCaptureError(unsigned int errorId, QString errorMsg);
             void stopImageCaptureError(unsigned int errorId, QString errorMsg);
+            void imageLoggingError(unsigned int errorId, QString errorMsg);
 
             // Display Timer update
             void updateDisplayOnTimer();
@@ -176,7 +164,6 @@ namespace bias
             void updateCameraPropertiesMenu();
             void updateCameraTriggerMenu();
 
-           
             void updatePreviewImageLabel();
             void updateCameraInfoMessage();
 
@@ -196,7 +183,6 @@ namespace bias
                     bool addFrameCount=true
                     );
             void resizeAllImageLabels();
-
             void updateHistogramPixmap(cv::Mat hist);
 
             void deleteMenuActions(QMenu *menuPtr, QActionGroup *actionGroupPtr=NULL);
@@ -205,7 +191,6 @@ namespace bias
             void setCaptureTimeLabel(double timeStamp);
 
             cv::Mat calcHistogram(cv::Mat mat);
-
 
     }; // class CameraWindow
 

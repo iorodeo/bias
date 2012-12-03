@@ -6,6 +6,7 @@
 #include "image_grabber.hpp"
 #include "image_dispatcher.hpp"
 #include "image_logger.hpp"
+#include "video_writer.hpp"
 #include <cstdlib>
 #include <cmath>
 #include <QtGui>
@@ -166,6 +167,7 @@ namespace bias
         msgText += "\n\n";
         msgText += errorMsg;
         QMessageBox::critical(this, msgTitle, msgText);
+        stopImageCapture();
     }
 
 
@@ -177,6 +179,18 @@ namespace bias
         msgText += "\n\n";
         msgText += errorMsg;
         QMessageBox::critical(this, msgTitle, msgText);
+    }
+
+
+    void CameraWindow::imageLoggingError(unsigned int errorId, QString errorMsg)
+    {
+        QString msgTitle("Image Logging Error");
+        QString msgText("image logging has failed\n\nError ID: ");
+        msgText += QString::number(errorId);
+        msgText += "\n\n";
+        msgText += errorMsg;
+        QMessageBox::critical(this, msgTitle, msgText);
+        stopImageCapture();
     }
 
 
@@ -464,6 +478,7 @@ namespace bias
         cameraPtr_ = std::make_shared<Lockable<Camera>>(guid);
 
         threadPoolPtr_ = new QThreadPool(this);
+        threadPoolPtr_ -> setMaxThreadCount(MAX_THREAD_COUNT);
         newImageQueuePtr_ = std::make_shared<LockableQueue<StampedImage>>();
         logImageQueuePtr_ = std::make_shared<LockableQueue<StampedImage>>();
 
@@ -497,7 +512,6 @@ namespace bias
 
         startButtonPtr_ -> setEnabled(false);
         connectButtonPtr_ -> setEnabled(true);
-
     }
 
     void CameraWindow::setupImageLabels()
@@ -1091,11 +1105,25 @@ namespace bias
 
         if (logging_)
         {
+            // Wrap this with method
+            // Get video file name w/ extension based on current file format
+            // --------------------------------------------------------------------
             QString fileExtension = VIDEOFILE_EXTENSION_MAP[videoFileFormat_];
-            QString fileNameWithExt = currentVideoFileName_ + "." + fileExtension;
-            QFileInfo videoFileInfo(currentVideoFileDir_, fileNameWithExt);
-            QString fileFullPath = videoFileInfo.absoluteFilePath();
-            imageLoggerPtr_ = new ImageLogger(fileFullPath, logImageQueuePtr_);
+            QString fileName = currentVideoFileName_;
+            if (!fileExtension.isEmpty())
+            {
+                fileName +=  "." + fileExtension;
+            }
+            
+            QFileInfo videoFileInfo(currentVideoFileDir_, fileName);
+            QString fileNameFullPath = videoFileInfo.absoluteFilePath();
+            // --------------------------------------------------------------------
+
+            // Create video writer
+            std::shared_ptr<VideoWriter> vidWriterPtr = std::make_shared<VideoWriter>();
+            vidWriterPtr -> setFileName(fileNameFullPath);
+
+            imageLoggerPtr_ = new ImageLogger(vidWriterPtr, logImageQueuePtr_);
         }
 
         connect(
@@ -1110,6 +1138,13 @@ namespace bias
                 SIGNAL(stopCaptureError(unsigned int, QString)),
                 this,
                 SLOT(stopImageCaptureError(unsigned int, QString))
+               );
+
+        connect(
+                imageLoggerPtr_,
+                SIGNAL(imageLoggingError(unsigned int, QString)),
+                this,
+                SLOT(imageLoggingError(unsigned int, QString))
                );
 
         threadPoolPtr_ -> start(imageGrabberPtr_);
@@ -1166,8 +1201,15 @@ namespace bias
             imageLoggerPtr_ -> releaseLock();
         }
 
+        threadPoolPtr_ -> waitForDone();
+
+        newImageQueuePtr_ -> acquireLock();
         newImageQueuePtr_ -> clear();
+        newImageQueuePtr_ -> releaseLock();
+
+        logImageQueuePtr_ -> acquireLock();
         logImageQueuePtr_ -> clear();
+        logImageQueuePtr_ -> releaseLock();
 
         startButtonPtr_ -> setText(QString("Start"));
         connectButtonPtr_ -> setEnabled(true);

@@ -10,8 +10,11 @@
 
 class QString;
 
+
 namespace bias
 {
+
+    class VideoWriter;
 
     struct StampedImage;
 
@@ -23,27 +26,27 @@ namespace bias
             ImageLogger(QObject *parent=0);
 
             ImageLogger(
-                    QString logFileName,
+                    std::shared_ptr<VideoWriter> videoWriterPtr,
                     std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr, 
                     QObject *parent=0
                     );
 
             void initialize(
-                    QString logFileName,
+                    std::shared_ptr<VideoWriter> videoWriterPtr,
                     std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr 
                     );
 
             void stop();
 
         signals:
-            void loggingError(unsigned int errorId, QString errorMsg);
+            void imageLoggingError(unsigned int errorId, QString errorMsg);
 
         private:
             bool ready_;
             bool stopped_;
             unsigned long frameCount_;
 
-            QString logFileName_;
+            std::shared_ptr<VideoWriter> videoWriterPtr_;
             std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr_;
 
             void run();
