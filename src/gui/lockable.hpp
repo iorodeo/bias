@@ -2,6 +2,7 @@
 #define BIAS_LOCKABLE_HPP
 
 #include <QMutex>
+#include <queue>
 
 namespace bias
 {
@@ -37,6 +38,24 @@ namespace bias
         private:
             QMutex mutex_;
             
+    };
+
+    template <class T>
+    class LockableQueue : public std::queue<T>, public Lockable<Empty>
+    {
+        // Mixin class for creating lockable queues 
+
+        public:
+
+            LockableQueue() : std::queue<T>() {};
+
+            void clear()
+            {
+                while (!(this -> empty())) 
+                { 
+                    this -> pop();
+                }
+            }
     };
 }
 

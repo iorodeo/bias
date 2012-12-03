@@ -1,7 +1,6 @@
 #include "image_logger.hpp"
 #include "exception.hpp"
 #include "stamped_image.hpp"
-#include "lockable_queue.hpp"
 #include <queue>
 #include <iostream>
 #include <opencv2/core/core.hpp>

@@ -11,7 +11,6 @@ set(
     image_grabber.hpp
     image_logger.hpp
     image_dispatcher.hpp
-    lockable_queue.hpp
     fps_estimator.hpp
     )
 

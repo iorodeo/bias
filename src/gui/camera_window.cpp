@@ -3,7 +3,6 @@
 #include "mat_to_qimage.hpp"
 #include "stamped_image.hpp"
 #include "lockable.hpp"
-#include "lockable_queue.hpp"
 #include "image_grabber.hpp"
 #include "image_dispatcher.hpp"
 #include "image_logger.hpp"
@@ -24,7 +23,7 @@ namespace bias
     const double DEFAULT_IMAGE_DISPLAY_FREQ = 10.0;  
     const QSize PREVIEW_DUMMY_IMAGE_SIZE = QSize(320,256);
     const QSize DEFAULT_HISTOGRAM_IMAGE_SIZE = QSize(256,204);
-    const QString DEFAULT_SAVE_FILE_NAME = QString("bias_video");
+    const QString DEFAULT_VIDEO_FILE_NAME = QString("bias_video");
     QMap<VideoFileFormat, QString> createExtensionMap()
     {
         QMap<VideoFileFormat, QString> map;
@@ -245,6 +244,7 @@ namespace bias
 
     void CameraWindow::actionLoggingVideoFileTriggered()
     {
+        // Get current video filename
         if (!currentVideoFileDir_.exists()) 
         {
             currentVideoFileDir_ = defaultVideoFileDir_;
@@ -252,14 +252,39 @@ namespace bias
         QString extString = VIDEOFILE_EXTENSION_MAP[videoFileFormat_];
         QString saveFileWithExt = currentVideoFileName_ + "." + extString;
         QFileInfo videoFileInfo(currentVideoFileDir_, saveFileWithExt);
+
+        // Query user for desired video filename and directory
         QString videoFileString = QFileDialog::getSaveFileName(
                 this, 
                 QString("Select Video File"),
                 videoFileInfo.absoluteFilePath()
                 );
         videoFileInfo = QFileInfo(videoFileString);
-        currentVideoFileDir_ = videoFileInfo.dir();
-        currentVideoFileName_ = videoFileInfo.baseName();
+
+        QDir videoFileDir = videoFileInfo.dir();
+        QString videoFileName = videoFileInfo.baseName();
+
+        // Check return results and assign values
+        if (videoFileName.isEmpty())
+        {
+            if (currentVideoFileName_.isEmpty())
+            {
+                videoFileName = DEFAULT_VIDEO_FILE_NAME;
+            }
+            else
+            {
+                videoFileName = currentVideoFileName_;
+            }
+            videoFileDir = currentVideoFileDir_;
+        }
+        if (!videoFileDir.exists())
+        {
+            videoFileDir = defaultVideoFileDir_;
+        }
+
+        currentVideoFileDir_ = videoFileDir;
+        currentVideoFileName_ = videoFileName;
+
         std::cout << "dir:  " << currentVideoFileDir_.absolutePath().toStdString() << std::endl;
         std::cout << "file: " << currentVideoFileName_.toStdString() << std::endl;
     }
@@ -444,7 +469,7 @@ namespace bias
 
         setDefaultVideoFileDir();
         currentVideoFileDir_ = defaultVideoFileDir_;
-        currentVideoFileName_ = DEFAULT_SAVE_FILE_NAME;
+        currentVideoFileName_ = DEFAULT_VIDEO_FILE_NAME;
 
         setupCameraMenu();
         setupLoggingMenu();

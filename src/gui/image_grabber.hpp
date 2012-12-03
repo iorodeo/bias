@@ -12,7 +12,6 @@ namespace bias
 {
 
     struct StampedImage;
-    template <class T> class LockableQueue;
 
     class ImageGrabber : public QObject, public QRunnable, public Lockable<Empty>
     {

@@ -2,7 +2,6 @@
 #include "camera.hpp"
 #include "exception.hpp"
 #include "stamped_image.hpp"
-#include "lockable_queue.hpp"
 #include <iostream>
 #include <QTime>
 #include <opencv2/core/core.hpp>

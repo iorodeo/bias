@@ -1,6 +1,5 @@
 #include "image_dispatcher.hpp"
 #include "stamped_image.hpp"
-#include "lockable_queue.hpp"
 #include <iostream>
 
 namespace bias
