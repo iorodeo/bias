@@ -322,7 +322,6 @@
       <string>Rotation (deg)</string>
      </property>
      <addaction name="actionDisplayRot0Ptr_"/>
-     <addaction name="actionDisplayRot45Ptr_"/>
      <addaction name="actionDisplayRot90Ptr_"/>
      <addaction name="actionDisplayRot180Ptr_"/>
      <addaction name="actionDisplayRot270Ptr_"/>
