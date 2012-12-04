@@ -14,6 +14,7 @@ set(
     video_writer.hpp
     video_writer_bmp.hpp
     video_writer_avi.hpp
+    video_writer_fmf.hpp
     fps_estimator.hpp
     )
 
@@ -28,6 +29,7 @@ set(
     video_writer.cpp
     video_writer_bmp.cpp
     video_writer_avi.cpp
+    video_writer_fmf.cpp
     fps_estimator.cpp
     )
 

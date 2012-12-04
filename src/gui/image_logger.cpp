@@ -73,7 +73,7 @@ namespace bias
             logQueueSize =  logImageQueuePtr_ -> size();
             logImageQueuePtr_ -> releaseLock();
 
-            std::cout << "queue size: " << logQueueSize << std::endl;
+            //std::cout << "queue size: " << logQueueSize << std::endl;
 
             if (logQueueSize > MAX_LOG_QUEUE_SIZE)
             {
@@ -81,7 +81,6 @@ namespace bias
                 QString errorMsg("logger image queue has exceeded the maximum allowed size");
                 emit imageLoggingError(errorId, errorMsg);
             }
-
 
             if (haveNewImage)
             {
@@ -108,11 +107,3 @@ namespace bias
 
 } // namespace bias
 
-
-// cv videoWriter example
-// ----------------------------------------------------
-//#include <opencv2/highgui/highgui.hpp>
-//cv::VideoWriter videoWriter;
-//cv::Size frameSize = newStampedImage.image.size();
-//videoWriter.open( logFileName_.toStdString(), CV_FOURCC('D','I','V', 'X'), 30.0, frameSize, false );
-//videoWriter << newStampedImage.image;
