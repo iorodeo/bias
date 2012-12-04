@@ -2,12 +2,15 @@
 #define BIAS_VIDEO_WRITER_HPP
 #include "stamped_image.hpp"
 #include <QString>
+#include <QObject>
 #include <opencv2/core/core.hpp>
 
 namespace bias
 {
-    class VideoWriter
+    class VideoWriter : public QObject
     {
+        Q_OBJECT 
+
         public:
 
             VideoWriter(); 
