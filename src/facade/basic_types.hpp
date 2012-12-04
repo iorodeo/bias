@@ -85,7 +85,12 @@ namespace bias {
 
         // Video Writer Errors
         ERROR_VIDEO_WRITER_ADD_FRAME,
+        ERROR_VIDEO_WRITER_INITIALIZE,
 
+        // Image Logger Errors
+        ERROR_IMAGE_LOGGER_MAX_QUEUE_SIZE,
+
+        
         NUMBER_OF_ERROR,
     }; 
 
@@ -259,6 +264,7 @@ namespace bias {
 
     enum VideoFileFormat
     {
+        VIDEOFILE_FORMAT_BMP,
         VIDEOFILE_FORMAT_AVI,
         VIDEOFILE_FORMAT_FMF,
         VIDEOFILE_FORMAT_UFMF

@@ -7,6 +7,7 @@
 #include "image_dispatcher.hpp"
 #include "image_logger.hpp"
 #include "video_writer.hpp"
+#include "video_writer_bmp.hpp"
 #include <cstdlib>
 #include <cmath>
 #include <QtGui>
@@ -24,10 +25,11 @@ namespace bias
     const double DEFAULT_IMAGE_DISPLAY_FREQ = 10.0;  
     const QSize PREVIEW_DUMMY_IMAGE_SIZE = QSize(320,256);
     const QSize DEFAULT_HISTOGRAM_IMAGE_SIZE = QSize(256,204);
-    const QString DEFAULT_VIDEO_FILE_NAME = QString("bias_video");
+    const QString DEFAULT_VIDEOFILE_NAME = QString("bias_video");
     QMap<VideoFileFormat, QString> createExtensionMap()
     {
         QMap<VideoFileFormat, QString> map;
+        map.insert(VIDEOFILE_FORMAT_BMP,  QString("bmp"));
         map.insert(VIDEOFILE_FORMAT_AVI,  QString("avi"));
         map.insert(VIDEOFILE_FORMAT_FMF,  QString("fmf"));
         map.insert(VIDEOFILE_FORMAT_UFMF, QString("ufmf"));
@@ -167,7 +169,6 @@ namespace bias
         msgText += "\n\n";
         msgText += errorMsg;
         QMessageBox::critical(this, msgTitle, msgText);
-        stopImageCapture();
     }
 
 
@@ -184,13 +185,13 @@ namespace bias
 
     void CameraWindow::imageLoggingError(unsigned int errorId, QString errorMsg)
     {
+        stopImageCapture();
         QString msgTitle("Image Logging Error");
         QString msgText("image logging has failed\n\nError ID: ");
         msgText += QString::number(errorId);
         msgText += "\n\n";
         msgText += errorMsg;
         QMessageBox::critical(this, msgTitle, msgText);
-        stopImageCapture();
     }
 
 
@@ -283,7 +284,7 @@ namespace bias
         {
             if (currentVideoFileName_.isEmpty())
             {
-                videoFileName = DEFAULT_VIDEO_FILE_NAME;
+                videoFileName = DEFAULT_VIDEOFILE_NAME;
             }
             else
             {
@@ -317,24 +318,9 @@ namespace bias
         // Get Format string
         QPointer<QAction> actionPtr = qobject_cast<QAction *>(sender());
         videoFileFormat_ = actionToVideoFileFormatMap_[actionPtr]; 
-
-        std::cout << "video file format: ";
-        switch (videoFileFormat_)
-        {
-            case VIDEOFILE_FORMAT_AVI:
-                std::cout << "avi";
-                break;
-            case VIDEOFILE_FORMAT_FMF:
-                std::cout << "fmf";
-                break;
-            case VIDEOFILE_FORMAT_UFMF:
-                std::cout << "ufmf";
-                break;
-            default:
-                std::cout << "unknown";
-                break;
-        }
-        std::cout << std::endl;
+        //std::cout << "video file format: "; 
+        //std::cout << VIDEOFILE_EXTENSION_MAP[videoFileFormat_].toStdString();
+        //std::cout << std::endl;
     }
 
 
@@ -484,7 +470,7 @@ namespace bias
 
         setDefaultVideoFileDir();
         currentVideoFileDir_ = defaultVideoFileDir_;
-        currentVideoFileName_ = DEFAULT_VIDEO_FILE_NAME;
+        currentVideoFileName_ = DEFAULT_VIDEOFILE_NAME;
 
         setupCameraMenu();
         setupLoggingMenu();
@@ -594,6 +580,13 @@ namespace bias
                 SIGNAL(triggered()),
                 this,
                 SLOT(actionLoggingSettingsTriggered())
+               );
+
+        connect(
+                actionLoggingFormatBMPPtr_,
+                SIGNAL(triggered()),
+                this,
+                SLOT(actionLoggingFormatTriggered())
                );
 
         connect(
@@ -807,10 +800,12 @@ namespace bias
     void CameraWindow::setupLoggingMenu()
     {
         loggingFormatActionGroupPtr_ = new QActionGroup(menuLoggingFormatPtr_);
+        loggingFormatActionGroupPtr_ -> addAction(actionLoggingFormatBMPPtr_);
         loggingFormatActionGroupPtr_ -> addAction(actionLoggingFormatAVIPtr_);
         loggingFormatActionGroupPtr_ -> addAction(actionLoggingFormatFMFPtr_);
         loggingFormatActionGroupPtr_ -> addAction(actionLoggingFormatUFMFPtr_);
 
+        actionToVideoFileFormatMap_[actionLoggingFormatBMPPtr_] = VIDEOFILE_FORMAT_BMP;
         actionToVideoFileFormatMap_[actionLoggingFormatAVIPtr_] = VIDEOFILE_FORMAT_AVI;
         actionToVideoFileFormatMap_[actionLoggingFormatFMFPtr_] = VIDEOFILE_FORMAT_FMF;
         actionToVideoFileFormatMap_[actionLoggingFormatUFMFPtr_] = VIDEOFILE_FORMAT_UFMF;
@@ -1103,29 +1098,6 @@ namespace bias
                 logImageQueuePtr_
                 );
 
-        if (logging_)
-        {
-            // Wrap this with method
-            // Get video file name w/ extension based on current file format
-            // --------------------------------------------------------------------
-            QString fileExtension = VIDEOFILE_EXTENSION_MAP[videoFileFormat_];
-            QString fileName = currentVideoFileName_;
-            if (!fileExtension.isEmpty())
-            {
-                fileName +=  "." + fileExtension;
-            }
-            
-            QFileInfo videoFileInfo(currentVideoFileDir_, fileName);
-            QString fileNameFullPath = videoFileInfo.absoluteFilePath();
-            // --------------------------------------------------------------------
-
-            // Create video writer
-            std::shared_ptr<VideoWriter> vidWriterPtr = std::make_shared<VideoWriter>();
-            vidWriterPtr -> setFileName(fileNameFullPath);
-
-            imageLoggerPtr_ = new ImageLogger(vidWriterPtr, logImageQueuePtr_);
-        }
-
         connect(
                 imageGrabberPtr_, 
                 SIGNAL(startCaptureError(unsigned int, QString)),
@@ -1140,17 +1112,38 @@ namespace bias
                 SLOT(stopImageCaptureError(unsigned int, QString))
                );
 
-        connect(
-                imageLoggerPtr_,
-                SIGNAL(imageLoggingError(unsigned int, QString)),
-                this,
-                SLOT(imageLoggingError(unsigned int, QString))
-               );
-
         threadPoolPtr_ -> start(imageGrabberPtr_);
         threadPoolPtr_ -> start(imageDispatcherPtr_);
+
         if (logging_)
         {
+            // Create video writer based on video file format type
+            std::shared_ptr<VideoWriter> videoWriterPtr; 
+
+            switch (videoFileFormat_)
+            {
+                case VIDEOFILE_FORMAT_BMP:
+                    videoWriterPtr = std::make_shared<VideoWriter_bmp>();
+                    break;
+
+                default:
+                    videoWriterPtr = std::make_shared<VideoWriter>();
+                    break;
+
+            }
+
+            // Set output file
+            QString videoFileFullPath = getVideoFileFullPath();
+            videoWriterPtr -> setFileName(videoFileFullPath);
+
+            imageLoggerPtr_ = new ImageLogger(videoWriterPtr, logImageQueuePtr_);
+            connect(
+                    imageLoggerPtr_,
+                    SIGNAL(imageLoggingError(unsigned int, QString)),
+                    this,
+                    SLOT(imageLoggingError(unsigned int, QString))
+                   );
+
             threadPoolPtr_ -> start(imageLoggerPtr_);
         }
 
@@ -1664,6 +1657,19 @@ namespace bias
     {
         QString stampString = timeStampToQString(timeStamp); 
         captureTimeLabelPtr_ -> setText(stampString);
+    }
+
+    QString CameraWindow::getVideoFileFullPath()
+    {
+        QString fileExtension = VIDEOFILE_EXTENSION_MAP[videoFileFormat_];
+        QString fileName = currentVideoFileName_;
+        if (!fileExtension.isEmpty())
+        {
+            fileName +=  "." + fileExtension;
+        }
+        QFileInfo videoFileInfo(currentVideoFileDir_, fileName);
+        QString videoFileFullPath = videoFileInfo.absoluteFilePath();
+        return videoFileFullPath;
     }
 
     cv::Mat CameraWindow::calcHistogram(cv::Mat mat)

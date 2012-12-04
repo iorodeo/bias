@@ -245,6 +245,7 @@
      <property name="title">
       <string>Format</string>
      </property>
+     <addaction name="actionLoggingFormatBMPPtr_"/>
      <addaction name="actionLoggingFormatAVIPtr_"/>
      <addaction name="actionLoggingFormatFMFPtr_"/>
      <addaction name="actionLoggingFormatUFMFPtr_"/>
@@ -610,6 +611,14 @@
   <action name="actionDisplayRot45Ptr_">
    <property name="text">
     <string>45</string>
+   </property>
+  </action>
+  <action name="actionLoggingFormatBMPPtr_">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>bmp</string>
    </property>
   </action>
  </widget>

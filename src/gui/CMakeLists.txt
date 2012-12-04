@@ -12,6 +12,7 @@ set(
     image_logger.hpp
     image_dispatcher.hpp
     video_writer.hpp
+    video_writer_bmp.hpp
     fps_estimator.hpp
     )
 
@@ -24,6 +25,7 @@ set(
     image_logger.cpp
     image_dispatcher.cpp
     video_writer.cpp
+    video_writer_bmp.cpp
     fps_estimator.cpp
     )
 

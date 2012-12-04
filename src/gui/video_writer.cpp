@@ -19,6 +19,8 @@ namespace bias
         frameCount_ = 0;
     }
 
+    VideoWriter::~VideoWriter() {}
+
 
     void VideoWriter::setFileName(QString fileName)
     {
@@ -34,41 +36,10 @@ namespace bias
 
     void VideoWriter::addFrame(StampedImage stampedImg)
     {
-        frameCount_++;
         std::cout << __PRETTY_FUNCTION__;
         std::cout << ", added frame: " << frameCount_;
         std::cout << ", w/ timeStamp: " << stampedImg.timeStamp << std::endl;
-    }
-
-
-    void VideoWriter::start()
-    {
-        frameCount_ = 0;
-        std::cout << __PRETTY_FUNCTION__;
-        std::cout << ", start, width = " << size_.width; 
-        std::cout << ", height = " << size_.height << std::endl;
-    }
-
-
-    void VideoWriter::start(cv::Size size)
-    {
-        setSize(size);
-        start();
-    }
-
-
-    void VideoWriter::start(QString fileName, cv::Size size)
-    {
-        setFileName(fileName);
-        setSize(size);
-        start();
-    }
-
-
-    void VideoWriter::stop()
-    {
-        std::cout << __PRETTY_FUNCTION__;
-        std::cout << ", stop, frame count = "<< frameCount_  << std::endl;
+        frameCount_++;
     }
 
 

@@ -9,6 +9,8 @@
 
 namespace bias
 {
+    const unsigned int MAX_LOG_QUEUE_SIZE = 500;
+
     ImageLogger::ImageLogger(QObject *parent) : QObject(parent) 
     {
         ready_ = false;
@@ -46,11 +48,9 @@ namespace bias
     void ImageLogger::run()
     {
         StampedImage newStampedImage;
-        unsigned int errorId = 0;
         bool haveNewImage = false;
-        bool isFirst = true;
-        bool error = false;
         bool done = false;
+        unsigned int logQueueSize;
 
         if (!ready_) { return; }
 
@@ -70,8 +70,18 @@ namespace bias
                 logImageQueuePtr_ -> pop();
                 haveNewImage = true;
             }
-            std::cout << "log   queue size = " << logImageQueuePtr_ -> size() << std::endl;
+            logQueueSize =  logImageQueuePtr_ -> size();
             logImageQueuePtr_ -> releaseLock();
+
+            std::cout << "queue size: " << logQueueSize << std::endl;
+
+            if (logQueueSize > MAX_LOG_QUEUE_SIZE)
+            {
+                unsigned int errorId = ERROR_IMAGE_LOGGER_MAX_QUEUE_SIZE;
+                QString errorMsg("logger image queue has exceeded the maximum allowed size");
+                emit imageLoggingError(errorId, errorMsg);
+            }
+
 
             if (haveNewImage)
             {
@@ -83,12 +93,8 @@ namespace bias
                 }
                 catch (RuntimeError &runtimeError)
                 {
-                    acquireLock();
-                    stopped_ = true;
-                    releaseLock();
-
-                    unsigned int errorId = ERROR_VIDEO_WRITER_ADD_FRAME;
-                    QString errorMsg("videoWriter addFrame failed");
+                    unsigned int errorId = runtimeError.id();;
+                    QString errorMsg = QString::fromStdString(runtimeError.what());
                     emit imageLoggingError(errorId, errorMsg);
                 }
             }
@@ -97,8 +103,6 @@ namespace bias
             done = stopped_;
             releaseLock();
         }
-
-        videoWriterPtr_ -> stop();
 
     } // while (!done)
 

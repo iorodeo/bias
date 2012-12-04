@@ -189,6 +189,7 @@ namespace bias
             void setCameraInfoMessage(QString vendorName, QString modelName);
             void setMenuChildrenEnabled(QWidget *parentWidgetPtr, bool value);
             void setCaptureTimeLabel(double timeStamp);
+            QString getVideoFileFullPath();
 
             cv::Mat calcHistogram(cv::Mat mat);
 
