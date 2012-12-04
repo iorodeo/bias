@@ -13,6 +13,7 @@ set(
     image_dispatcher.hpp
     video_writer.hpp
     video_writer_bmp.hpp
+    video_writer_avi.hpp
     fps_estimator.hpp
     )
 
@@ -26,6 +27,7 @@ set(
     image_dispatcher.cpp
     video_writer.cpp
     video_writer_bmp.cpp
+    video_writer_avi.cpp
     fps_estimator.cpp
     )
 

@@ -7,10 +7,8 @@
 
 namespace bias
 {
-
     class VideoWriter_bmp : public VideoWriter
     {
-
         public:
 
             VideoWriter_bmp();
@@ -18,7 +16,11 @@ namespace bias
             virtual ~VideoWriter_bmp();
             virtual void addFrame(StampedImage stampedImg);
 
-        private:
+            static const QString IMAGE_FILE_BASE;
+            static const QString IMAGE_FILE_EXT;
+            static const unsigned int DEFAULT_FRAME_SKIP;
+
+        protected:
             void initialize();
             bool isFirst_;
             QDir baseDir_;
@@ -28,4 +30,4 @@ namespace bias
    
 }
 
-#endif // #ifndef BIAS_VIDEO_WRITER_PPM_HPP
+#endif // #ifndef BIAS_VIDEO_WRITER_BMP_HPP

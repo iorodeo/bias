@@ -57,6 +57,21 @@ namespace bias
         }
         std::cout << std::endl;
         frameCount_++;
+    } 
+    
+    QString VideoWriter::getFileName()
+    {
+        return fileName_;
+    }
+
+    cv::Size VideoWriter::getSize()
+    {
+        return size_;
+    }
+
+    unsigned int VideoWriter::getFrameSkip()
+    {
+        return frameSkip_;
     }
 
 

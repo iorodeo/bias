@@ -8,20 +8,20 @@
 
 namespace bias
 {
-    const QString IMAGE_FILE_BASE = QString("image_");
-    const QString IMAGE_FILE_EXT = QString(".bmp");
-    const unsigned int DEFAULT_FRAME_SKIP = 5;
+    const QString VideoWriter_bmp::IMAGE_FILE_BASE = QString("image_");
+    const QString VideoWriter_bmp::IMAGE_FILE_EXT = QString(".bmp");
+    const unsigned int VideoWriter_bmp::DEFAULT_FRAME_SKIP = 5;
 
     VideoWriter_bmp::VideoWriter_bmp() : VideoWriter() 
     {
         isFirst_ = true;
-        frameSkip_ = DEFAULT_FRAME_SKIP;
+        setFrameSkip(DEFAULT_FRAME_SKIP);
     }
 
     VideoWriter_bmp::VideoWriter_bmp(QString fileName) : VideoWriter(fileName) 
     {
         isFirst_ = true;
-        frameSkip_ = DEFAULT_FRAME_SKIP;
+        setFrameSkip(DEFAULT_FRAME_SKIP);
     }
 
     VideoWriter_bmp::~VideoWriter_bmp() {}
@@ -53,6 +53,7 @@ namespace bias
                 throw RuntimeError(errorId, errorMsg);
             }
         }
+
         frameCount_++;
     }
 
@@ -78,10 +79,10 @@ namespace bias
             // one which doesn't a bit kludgey, but easy.
             QString baseNameTemp;
 
-            unsigned int cnt = 1;
+            unsigned int cnt = 2;
             while (logDir_.exists())
             {
-                baseNameTemp =  baseName_ + "_" + QString::number(cnt);
+                baseNameTemp =  baseName_ + "_v" + QString::number(cnt);
                 logDir_ = QDir(baseDir_.absolutePath() + "/" + baseNameTemp);
                 cnt++;
             }

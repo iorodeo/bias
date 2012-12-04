@@ -3,7 +3,6 @@
 #include "stamped_image.hpp"
 #include <QString>
 #include <opencv2/core/core.hpp>
-//#include <opencv2/core/types_c.h>
 
 namespace bias
 {
@@ -18,6 +17,9 @@ namespace bias
             virtual void setSize(cv::Size size);
             virtual void setFrameSkip(unsigned int frameSkip);
             virtual void addFrame(StampedImage stampedImg);
+            virtual QString getFileName();
+            virtual cv::Size getSize();
+            virtual unsigned int getFrameSkip();
 
         protected:
 

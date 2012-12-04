@@ -190,6 +190,7 @@ namespace bias
             void setMenuChildrenEnabled(QWidget *parentWidgetPtr, bool value);
             void setCaptureTimeLabel(double timeStamp);
             QString getVideoFileFullPath();
+            QString getVideoFileFullPathWithGuid();
 
             cv::Mat calcHistogram(cv::Mat mat);
 

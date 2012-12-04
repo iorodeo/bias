@@ -8,6 +8,7 @@
 #include "image_logger.hpp"
 #include "video_writer.hpp"
 #include "video_writer_bmp.hpp"
+#include "video_writer_avi.hpp"
 #include <cstdlib>
 #include <cmath>
 #include <QtGui>
@@ -29,7 +30,7 @@ namespace bias
     QMap<VideoFileFormat, QString> createExtensionMap()
     {
         QMap<VideoFileFormat, QString> map;
-        map.insert(VIDEOFILE_FORMAT_BMP,  QString("bmp"));
+        map.insert(VIDEOFILE_FORMAT_BMP,  QString(""));
         map.insert(VIDEOFILE_FORMAT_AVI,  QString("avi"));
         map.insert(VIDEOFILE_FORMAT_FMF,  QString("fmf"));
         map.insert(VIDEOFILE_FORMAT_UFMF, QString("ufmf"));
@@ -264,9 +265,8 @@ namespace bias
         {
             currentVideoFileDir_ = defaultVideoFileDir_;
         }
-        QString extString = VIDEOFILE_EXTENSION_MAP[videoFileFormat_];
-        QString saveFileWithExt = currentVideoFileName_ + "." + extString;
-        QFileInfo videoFileInfo(currentVideoFileDir_, saveFileWithExt);
+        QString videoFileFullPath = getVideoFileFullPath();
+        QFileInfo videoFileInfo(videoFileFullPath);
 
         // Query user for desired video filename and directory
         QString videoFileString = QFileDialog::getSaveFileName(
@@ -481,12 +481,8 @@ namespace bias
 
         tabWidgetPtr_ -> setCurrentWidget(previewTabPtr_);
 
-        cameraPtr_ -> acquireLock();
-        Guid cameraGuid = cameraPtr_ -> getGuid();
-        cameraPtr_ -> releaseLock();
-
         QString windowTitle("BIAS Camera Window, Guid: ");
-        windowTitle += QString::fromStdString(cameraGuid.toString());
+        windowTitle += QString::fromStdString(guid.toString());
         setWindowTitle(windowTitle);
 
         updateCameraInfoMessage();
@@ -1126,14 +1122,17 @@ namespace bias
                     videoWriterPtr = std::make_shared<VideoWriter_bmp>();
                     break;
 
+                case VIDEOFILE_FORMAT_AVI:  
+                    videoWriterPtr = std::make_shared<VideoWriter_avi>();
+                    break;
+
                 default:
                     videoWriterPtr = std::make_shared<VideoWriter>();
                     break;
-
             }
 
             // Set output file
-            QString videoFileFullPath = getVideoFileFullPath();
+            QString videoFileFullPath = getVideoFileFullPathWithGuid();
             videoWriterPtr -> setFileName(videoFileFullPath);
 
             imageLoggerPtr_ = new ImageLogger(videoWriterPtr, logImageQueuePtr_);
@@ -1663,6 +1662,24 @@ namespace bias
     {
         QString fileExtension = VIDEOFILE_EXTENSION_MAP[videoFileFormat_];
         QString fileName = currentVideoFileName_;
+        if (!fileExtension.isEmpty())
+        {
+            fileName +=  "." + fileExtension;
+        }
+        QFileInfo videoFileInfo(currentVideoFileDir_, fileName);
+        QString videoFileFullPath = videoFileInfo.absoluteFilePath();
+        return videoFileFullPath;
+    }
+
+    QString CameraWindow::getVideoFileFullPathWithGuid()
+    {
+        cameraPtr_ -> acquireLock();
+        Guid cameraGuid = cameraPtr_ -> getGuid();
+        cameraPtr_ -> releaseLock();
+        
+        QString fileExtension = VIDEOFILE_EXTENSION_MAP[videoFileFormat_];
+        QString fileName = currentVideoFileName_;
+        fileName += "_guid_" + QString::fromStdString(cameraGuid.toString());
         if (!fileExtension.isEmpty())
         {
             fileName +=  "." + fileExtension;
