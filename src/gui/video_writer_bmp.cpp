@@ -10,15 +10,18 @@ namespace bias
 {
     const QString IMAGE_FILE_BASE = QString("image_");
     const QString IMAGE_FILE_EXT = QString(".bmp");
+    const unsigned int DEFAULT_FRAME_SKIP = 5;
 
     VideoWriter_bmp::VideoWriter_bmp() : VideoWriter() 
     {
         isFirst_ = true;
+        frameSkip_ = DEFAULT_FRAME_SKIP;
     }
 
     VideoWriter_bmp::VideoWriter_bmp(QString fileName) : VideoWriter(fileName) 
     {
         isFirst_ = true;
+        frameSkip_ = DEFAULT_FRAME_SKIP;
     }
 
     VideoWriter_bmp::~VideoWriter_bmp() {}
@@ -36,7 +39,7 @@ namespace bias
         imageFileName += IMAGE_FILE_EXT;
         QFileInfo imageFileInfo(logDir_,imageFileName);
         QString fullPathName = imageFileInfo.absoluteFilePath();
-        if (frameCount_%2==0) 
+        if (frameCount_%frameSkip_==0) 
         {
             try
             {

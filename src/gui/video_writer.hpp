@@ -16,6 +16,7 @@ namespace bias
             virtual ~VideoWriter();
             virtual void setFileName(QString fileName);
             virtual void setSize(cv::Size size);
+            virtual void setFrameSkip(unsigned int frameSkip);
             virtual void addFrame(StampedImage stampedImg);
 
         protected:
@@ -23,6 +24,7 @@ namespace bias
             cv::Size size_;
             QString fileName_;
             unsigned long frameCount_;
+            unsigned int frameSkip_;
     };
 
 } // namespace bias

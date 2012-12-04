@@ -4,11 +4,14 @@
 
 namespace bias
 {
+    const unsigned int DEFAULT_FRAME_SKIP = 1;
+
     VideoWriter::VideoWriter() 
     {
         fileName_ = QString("filename_not_set");
         size_ = cv::Size(0,0);
         frameCount_ = 0;
+        frameSkip_ = DEFAULT_FRAME_SKIP;
     }
 
 
@@ -17,6 +20,7 @@ namespace bias
         setFileName(fileName);
         size_ = cv::Size(0,0);
         frameCount_ = 0;
+        frameSkip_ = DEFAULT_FRAME_SKIP;
     }
 
     VideoWriter::~VideoWriter() {}
@@ -34,11 +38,24 @@ namespace bias
     }
 
 
+    void VideoWriter::setFrameSkip(unsigned int frameSkip)
+    {
+        frameSkip_ = frameSkip;
+    }
+
     void VideoWriter::addFrame(StampedImage stampedImg)
     {
         std::cout << __PRETTY_FUNCTION__;
-        std::cout << ", added frame: " << frameCount_;
-        std::cout << ", w/ timeStamp: " << stampedImg.timeStamp << std::endl;
+        if (frameCount_%frameSkip_ == 0) 
+        {
+            std::cout << ", added frame: " << frameCount_;
+            std::cout << ", w/ timeStamp: " << stampedImg.timeStamp;
+        }
+        else 
+        {
+            std::cout << ", skipped frame: " << frameCount_; 
+        }
+        std::cout << std::endl;
         frameCount_++;
     }
 

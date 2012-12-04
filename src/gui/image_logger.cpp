@@ -9,7 +9,7 @@
 
 namespace bias
 {
-    const unsigned int MAX_LOG_QUEUE_SIZE = 500;
+    const unsigned int MAX_LOG_QUEUE_SIZE = 1000;
 
     ImageLogger::ImageLogger(QObject *parent) : QObject(parent) 
     {
