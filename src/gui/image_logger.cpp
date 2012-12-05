@@ -73,7 +73,7 @@ namespace bias
             logQueueSize =  logImageQueuePtr_ -> size();
             logImageQueuePtr_ -> releaseLock();
 
-            //std::cout << "queue size: " << logQueueSize << std::endl;
+            std::cout << "queue size: " << logQueueSize << std::endl;
 
             if (logQueueSize > MAX_LOG_QUEUE_SIZE)
             {
@@ -101,9 +101,23 @@ namespace bias
             acquireLock();
             done = stopped_;
             releaseLock();
-        }
 
-    } // while (!done)
+        } // while (!done)
+
+        try
+        {
+            videoWriterPtr_ -> finish();
+        }
+        catch (RuntimeError &runtimeError)
+        {
+            unsigned int errorId = runtimeError.id();;
+            QString errorMsg = QString::fromStdString(runtimeError.what());
+            emit imageLoggingError(errorId, errorMsg);
+        }
+    
+    }  // void ImageLogger::run()
+
+
 
 } // namespace bias
 

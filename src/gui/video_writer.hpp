@@ -23,6 +23,7 @@ namespace bias
             virtual QString getFileName();
             virtual cv::Size getSize();
             virtual unsigned int getFrameSkip();
+            virtual void finish();
 
         protected:
 
@@ -30,6 +31,7 @@ namespace bias
             QString fileName_;
             unsigned long frameCount_;
             unsigned int frameSkip_;
+            QString getUniqueFileName();
     };
 
 } // namespace bias

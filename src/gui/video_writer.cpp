@@ -1,6 +1,8 @@
 #include "video_writer.hpp"
 #include "Stamped_image.hpp"
 #include <iostream>
+#include <QFileInfo>
+#include <QDir>
 
 namespace bias
 {
@@ -72,6 +74,32 @@ namespace bias
     unsigned int VideoWriter::getFrameSkip()
     {
         return frameSkip_;
+    }
+
+    void VideoWriter::finish() {};
+
+    QString VideoWriter::getUniqueFileName()
+    {
+        QFileInfo fileInfo(fileName_);
+        QString incrFileName = fileName_;
+
+        if (fileInfo.exists())
+        {
+            QDir filePath = QDir(fileInfo.absolutePath());
+            QString baseName = fileInfo.baseName();
+            QString ext = fileInfo.suffix();
+
+            unsigned int cnt = 2;
+            while(fileInfo.exists())
+            {
+                QString ver = "_v" + QString::number(cnt);
+                fileInfo = QFileInfo(filePath, baseName + ver + "." + ext);
+                incrFileName = fileInfo.absoluteFilePath();
+                cnt++;
+            }
+        }
+
+        return incrFileName;
     }
 
 

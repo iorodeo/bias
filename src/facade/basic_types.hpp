@@ -86,6 +86,7 @@ namespace bias {
         // Video Writer Errors
         ERROR_VIDEO_WRITER_ADD_FRAME,
         ERROR_VIDEO_WRITER_INITIALIZE,
+        ERROR_VIDEO_WRITER_FINISH,
 
         // Image Logger Errors
         ERROR_IMAGE_LOGGER_MAX_QUEUE_SIZE,

@@ -44,24 +44,7 @@ namespace bias
 
     void VideoWriter_avi::initialize(StampedImage stampedImg)
     {
-        QFileInfo fileInfo(fileName_);
-        QString incrFileName = fileName_;
-
-        if (fileInfo.exists())
-        {
-            QDir filePath = QDir(fileInfo.absolutePath());
-            QString baseName = fileInfo.baseName();
-            QString ext = fileInfo.suffix();
-
-            unsigned int cnt = 2;
-            while(fileInfo.exists())
-            {
-                QString ver = "_v" + QString::number(cnt);
-                fileInfo = QFileInfo(filePath, baseName + ver + "." + ext);
-                incrFileName = fileInfo.absoluteFilePath();
-                cnt++;
-            }
-        }
+        QString incrFileName = getUniqueFileName();
 
         try
         {

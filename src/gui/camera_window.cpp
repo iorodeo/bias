@@ -83,7 +83,6 @@ namespace bias
             else 
             {
                 stopImageCapture();
-                threadPoolPtr_ -> waitForDone();
             }
         }
 
@@ -1730,9 +1729,9 @@ namespace bias
         double rem = timeStamp; 
 
         hrs = std::floor(timeStamp/3600.0);
-        rem -= hrs;
+        rem -= 3600*hrs;
         min = std::floor(rem/60.0);
-        rem -= min;
+        rem -= 60*min;
         sec = std::floor(rem);
 
         QString timeString;
