@@ -45,11 +45,11 @@ namespace bias
             {
                 cv::imwrite(fullPathName.toStdString(), stampedImg.image);
             }
-            catch (std::runtime_error &err)
+            catch (cv::Exception &exc)
             {
                 unsigned int errorId = ERROR_VIDEO_WRITER_ADD_FRAME;
                 std::string errorMsg("adding frame failed - "); 
-                errorMsg += err.what();
+                errorMsg += exc.what();
                 throw RuntimeError(errorId, errorMsg);
             }
         }

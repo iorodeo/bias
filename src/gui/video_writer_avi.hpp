@@ -15,10 +15,14 @@ namespace bias
             virtual ~VideoWriter_avi();
             virtual void addFrame(StampedImage stampedImg);
 
+            static const int DEFAULT_FOURCC;
+            static const double DEFAULT_FPS;
             static const unsigned int DEFAULT_FRAME_SKIP;
 
         protected:
 
+            int fourcc_;
+            double fps_;
             bool isFirst_;
             cv::VideoWriter videoWriter_;
             void initialize(StampedImage stampedImage);

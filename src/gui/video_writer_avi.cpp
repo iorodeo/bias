@@ -7,21 +7,22 @@
 
 namespace bias
 { 
-    // ----------------------------------------------------------
-    // Temporary ... need to estimate this before starting video
-    const double DEFAULT_AVI_FPS = 30.0; 
-    // ----------------------------------------------------------
-
+    const int VideoWriter_avi::DEFAULT_FOURCC = CV_FOURCC('D','I','V','X');
+    const double VideoWriter_avi::DEFAULT_FPS = 30.0;
     const unsigned int VideoWriter_avi::DEFAULT_FRAME_SKIP = 5;
 
     VideoWriter_avi::VideoWriter_avi() : VideoWriter() 
     {
+        fourcc_ = DEFAULT_FOURCC;
+        fps_ = DEFAULT_FPS;
         isFirst_ = true;
         setFrameSkip(DEFAULT_FRAME_SKIP);
     }
 
     VideoWriter_avi::VideoWriter_avi(QString fileName) : VideoWriter(fileName)
     {
+        fourcc_ = DEFAULT_FOURCC;
+        fps_ = DEFAULT_FPS;
         isFirst_ = true;
         setFrameSkip(DEFAULT_FRAME_SKIP);
     }
@@ -44,17 +45,13 @@ namespace bias
 
     void VideoWriter_avi::initialize(StampedImage stampedImg)
     {
-        QString incrFileName = getUniqueFileName();
+        std::string incrFileName = getUniqueFileName().toStdString();
+        
+        setSize(stampedImg.image.size());
 
         try
         {
-            videoWriter_.open(
-                    incrFileName.toStdString(), 
-                    CV_FOURCC('D','I','V', 'X'), 
-                    DEFAULT_AVI_FPS, 
-                    stampedImg.image.size(), 
-                    false 
-                    );
+            videoWriter_.open(incrFileName,fourcc_,fps_,size_,false);
         }
         catch (cv::Exception &e)
         {
@@ -71,7 +68,6 @@ namespace bias
             errorMsg += "no exception thrown, but file not opened??";
             throw RuntimeError(errorId, errorMsg); 
         }
-        setSize(stampedImg.image.size());
     }
 
 } // namespace bias

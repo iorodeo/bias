@@ -458,7 +458,7 @@ namespace bias
         flipVert_ = false;
         flipHorz_ = false;
         imageRotation_ = IMAGE_ROTATION_0;
-        videoFileFormat_ = VIDEOFILE_FORMAT_AVI;
+        videoFileFormat_ = VIDEOFILE_FORMAT_FMF;
 
         imageDisplayFreq_ = DEFAULT_IMAGE_DISPLAY_FREQ;
         cameraPtr_ = std::make_shared<Lockable<Camera>>(guid);

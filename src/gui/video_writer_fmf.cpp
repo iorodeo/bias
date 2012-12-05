@@ -111,7 +111,7 @@ namespace bias
         uint32_t fmfVersion = uint32_t(FMF_VERSION);
         uint32_t width = uint32_t(size_.width);
         uint32_t height = uint32_t(size_.height);
-        uint64_t bytesPerChunk = uint64_t(width)*uint64_t(height) + uint64_t(8);
+        uint64_t bytesPerChunk = uint64_t(width)*uint64_t(height) + sizeof(double);
 
         // Add fmf header to file
         try 
