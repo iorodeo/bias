@@ -7,11 +7,7 @@ namespace bias
 
     ImageDispatcher::ImageDispatcher(QObject *parent) : QObject(parent)
     {
-        ready_ = false;
-        stopped_ = true;
-        logging_ = false;
-        frameCount_ = 0;
-        currentTimeStamp_ = 0.0;
+        initialize(false,NULL,NULL);
     }
 
     ImageDispatcher::ImageDispatcher( 
@@ -32,7 +28,14 @@ namespace bias
     {
         newImageQueuePtr_ = newImageQueuePtr;
         logImageQueuePtr_ = logImageQueuePtr;
-        ready_ = true;
+        if ((newImageQueuePtr_ != NULL) && (logImageQueuePtr_ !=NULL)) 
+        {
+            ready_ = true;
+        }
+        else 
+        {
+            ready_ = false;
+        }
         stopped_ = true;
         logging_ = logging;
         frameCount_ = 0;
@@ -104,8 +107,8 @@ namespace bias
                 acquireLock();
                 currentImage_ = newStampImage.image;
                 currentTimeStamp_ = newStampImage.timeStamp;
+                frameCount_ = newStampImage.frameCount;
                 fpsEstimator_.update(newStampImage.timeStamp);
-                frameCount_++;
                 releaseLock();
             }
 

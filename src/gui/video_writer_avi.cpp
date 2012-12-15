@@ -7,17 +7,13 @@
 
 namespace bias
 { 
-    const int VideoWriter_avi::DEFAULT_FOURCC = CV_FOURCC('D','I','V','X');
-    const double VideoWriter_avi::DEFAULT_FPS = 30.0;
-    const unsigned int VideoWriter_avi::DEFAULT_FRAME_SKIP = 5;
+    const QString DUMMY_FILENAME("dummy.avi");
 
-    VideoWriter_avi::VideoWriter_avi() : VideoWriter() 
-    {
-        fourcc_ = DEFAULT_FOURCC;
-        fps_ = DEFAULT_FPS;
-        isFirst_ = true;
-        setFrameSkip(DEFAULT_FRAME_SKIP);
-    }
+    const double VideoWriter_avi::DEFAULT_FPS = 30.0;
+    const unsigned int VideoWriter_avi::DEFAULT_FRAME_SKIP = 4;
+    const int VideoWriter_avi::DEFAULT_FOURCC = CV_FOURCC('D','I','V','X');
+
+    VideoWriter_avi::VideoWriter_avi() : VideoWriter_avi(DUMMY_FILENAME) {}
 
     VideoWriter_avi::VideoWriter_avi(QString fileName) : VideoWriter(fileName)
     {
@@ -33,7 +29,7 @@ namespace bias
     {
         if (isFirst_)
         {
-            initialize(stampedImg);
+            setupOutput(stampedImg);
             isFirst_ = false;
         }
         if (frameCount_%frameSkip_==0)
@@ -43,7 +39,7 @@ namespace bias
         frameCount_++;
     }
 
-    void VideoWriter_avi::initialize(StampedImage stampedImg)
+    void VideoWriter_avi::setupOutput(StampedImage stampedImg)
     {
         std::string incrFileName = getUniqueFileName().toStdString();
         

@@ -7,6 +7,7 @@ set(bias_gui_FORMS camera_window.ui)
 set(
     bias_gui_HEADERS 
     camera_window.hpp 
+    lockable.hpp
     mat_to_qimage.hpp
     image_grabber.hpp
     image_logger.hpp
@@ -15,6 +16,8 @@ set(
     video_writer_bmp.hpp
     video_writer_avi.hpp
     video_writer_fmf.hpp
+    video_writer_ufmf.hpp
+    background_model_ufmf.hpp
     fps_estimator.hpp
     )
 
@@ -30,6 +33,8 @@ set(
     video_writer_bmp.cpp
     video_writer_avi.cpp
     video_writer_fmf.cpp
+    video_writer_ufmf.cpp
+    background_model_ufmf.cpp
     fps_estimator.cpp
     )
 

@@ -13,9 +13,7 @@ namespace bias
 
     ImageLogger::ImageLogger(QObject *parent) : QObject(parent) 
     {
-        ready_ = false;
-        stopped_ = true;
-        frameCount_ = 0;
+        initialize(NULL,NULL);
     }
 
     ImageLogger::ImageLogger (
@@ -32,18 +30,24 @@ namespace bias
             std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr 
             ) 
     {
+        frameCount_ = 0;
+        stopped_ = true;
         videoWriterPtr_ = videoWriterPtr;
         logImageQueuePtr_ = logImageQueuePtr;
-        ready_ = true;
-        stopped_ = true;
-        frameCount_ = 0;
+        if ((logImageQueuePtr_ != NULL) && (videoWriterPtr_ != NULL))
+        {
+            ready_ = true;
+        }
+        else
+        {
+            ready_ = false;
+        }
     }
 
     void ImageLogger::stop()
     {
         stopped_ = true;
     }
-
 
     void ImageLogger::run()
     {
@@ -73,7 +77,6 @@ namespace bias
             logQueueSize =  logImageQueuePtr_ -> size();
             logImageQueuePtr_ -> releaseLock();
 
-            std::cout << "queue size: " << logQueueSize << std::endl;
 
             if (logQueueSize > MAX_LOG_QUEUE_SIZE)
             {
@@ -84,6 +87,7 @@ namespace bias
 
             if (haveNewImage)
             {
+                std::cout << "queue size: " << logQueueSize << std::endl;
                 frameCount_++;
 
                 try 

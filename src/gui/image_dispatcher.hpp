@@ -37,8 +37,8 @@ namespace bias
             // Use lock when calling these methods
             // ----------------------------------
             void stop();
-            cv::Mat getImage();
-            double getTimeStamp();
+            cv::Mat getImage();     // Note, might want to change so that we return 
+            double getTimeStamp();  // the stampedImage.
             double getFPS();
             unsigned long getFrameCount();
             // -----------------------------------
@@ -52,8 +52,8 @@ namespace bias
             // use lock when setting these values
             // -----------------------------------
             bool stopped_;
-            cv::Mat currentImage_;
-            double currentTimeStamp_;
+            cv::Mat currentImage_;        // Note, might want to change so that we store
+            double currentTimeStamp_;     // the stampedImage. 
             FPS_Estimator fpsEstimator_;
             unsigned long frameCount_;
             // ------------------------------------

@@ -10,6 +10,7 @@
 #include "video_writer_bmp.hpp"
 #include "video_writer_avi.hpp"
 #include "video_writer_fmf.hpp"
+#include "video_writer_ufmf.hpp"
 #include <cstdlib>
 #include <cmath>
 #include <QtGui>
@@ -1128,6 +1129,10 @@ namespace bias
 
                 case VIDEOFILE_FORMAT_FMF:
                     videoWriterPtr = std::make_shared<VideoWriter_fmf>();
+                    break;
+
+                case VIDEOFILE_FORMAT_UFMF:
+                    videoWriterPtr = std::make_shared<VideoWriter_ufmf>();
                     break;
 
                 default:

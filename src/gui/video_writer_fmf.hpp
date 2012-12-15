@@ -22,7 +22,7 @@ namespace bias
             bool isFirst_;
             std::fstream file_;
             uint64_t numWritten_;
-            void initialize(StampedImage stampImg);
+            void setupOutput(StampedImage stampImg);
     };
 
 } // namespace bias

@@ -9,13 +9,9 @@ namespace bias
 {
     const unsigned int VideoWriter_fmf::DEFAULT_FRAME_SKIP = 2;
     const unsigned int VideoWriter_fmf::FMF_VERSION = 1;
+    const QString DUMMY_FILENAME("dummy.fmf");
 
-    VideoWriter_fmf::VideoWriter_fmf() : VideoWriter() 
-    {
-        numWritten_ = 0;
-        isFirst_ = true;
-        setFrameSkip(DEFAULT_FRAME_SKIP);
-    }
+    VideoWriter_fmf::VideoWriter_fmf() : VideoWriter_fmf(DUMMY_FILENAME) {}
 
     VideoWriter_fmf::VideoWriter_fmf(QString fileName) : VideoWriter(fileName)
     {
@@ -50,7 +46,7 @@ namespace bias
     {
         if (isFirst_)
         {
-            initialize(stampedImg);
+            setupOutput(stampedImg);
             isFirst_ = false;
         }
         if (frameCount_%frameSkip_==0)
@@ -77,7 +73,7 @@ namespace bias
         frameCount_++;
     }
 
-    void VideoWriter_fmf::initialize(StampedImage stampedImg)
+    void VideoWriter_fmf::setupOutput(StampedImage stampedImg)
     {
         file_.clear();
         file_.exceptions(std::ifstream::failbit | std::ifstream::badbit);

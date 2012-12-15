@@ -9,6 +9,7 @@ namespace bias
     {
         cv::Mat image;
         double timeStamp;
+        unsigned long frameCount;
     };
 
 }

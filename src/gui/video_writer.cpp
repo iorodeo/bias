@@ -7,15 +7,9 @@
 namespace bias
 {
     const unsigned int DEFAULT_FRAME_SKIP = 1;
+    const QString DUMMY_FILENAME("dummy_filename");
 
-    VideoWriter::VideoWriter() 
-    {
-        fileName_ = QString("filename_not_set");
-        size_ = cv::Size(0,0);
-        frameCount_ = 0;
-        frameSkip_ = DEFAULT_FRAME_SKIP;
-    }
-
+    VideoWriter::VideoWriter() : VideoWriter(DUMMY_FILENAME) {};
 
     VideoWriter::VideoWriter(QString fileName)
     {

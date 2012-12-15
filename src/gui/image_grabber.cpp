@@ -10,9 +10,7 @@ namespace bias {
 
     ImageGrabber::ImageGrabber(QObject *parent) : QObject(parent) 
     {
-        ready_ = false;
-        stopped_ = true;
-        capturing_ = false;
+        initialize(NULL,NULL);
     }
 
     ImageGrabber::ImageGrabber (
@@ -29,11 +27,18 @@ namespace bias {
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr 
             ) 
     {
+        capturing_ = false;
+        stopped_ = true;
         cameraPtr_ = cameraPtr;
         newImageQueuePtr_ = newImageQueuePtr;
-        ready_ = true;
-        stopped_ = true;
-        capturing_ = false;
+        if ((cameraPtr_ != NULL) && (newImageQueuePtr_ != NULL))
+        {
+            ready_ = true;
+        }
+        else
+        {
+            ready_ = false;
+        }
     }
 
     void ImageGrabber::stop()
@@ -46,6 +51,8 @@ namespace bias {
         bool done = false;
         bool error = false;
         unsigned int errorId = 0;
+        unsigned long frameCount = 0;
+
         StampedImage stampImg;
         QString errorMsg("no message");
         QTime clock; // TO DO ... temporary timestamp generation 
@@ -104,6 +111,8 @@ namespace bias {
             if (!error) 
             {
                 stampImg.timeStamp = clock.elapsed()*0.001; // TO DO ... temporary
+                stampImg.frameCount = frameCount;
+                frameCount++;
 
                 newImageQueuePtr_ -> acquireLock();
                 newImageQueuePtr_ -> push(stampImg);

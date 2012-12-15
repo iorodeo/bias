@@ -25,7 +25,7 @@ namespace bias
             double fps_;
             bool isFirst_;
             cv::VideoWriter videoWriter_;
-            void initialize(StampedImage stampedImage);
+            void setupOutput(StampedImage stampedImage);
             
     };
    

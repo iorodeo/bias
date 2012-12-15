@@ -21,7 +21,7 @@ namespace bias
             static const unsigned int DEFAULT_FRAME_SKIP;
 
         protected:
-            void initialize();
+            void setupOutput();
             bool isFirst_;
             QDir baseDir_;
             QDir logDir_;
