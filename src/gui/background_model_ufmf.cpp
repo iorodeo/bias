@@ -30,6 +30,14 @@ namespace bias
     {
         std::cout << __PRETTY_FUNCTION__ << std::endl;
 
+        if (stampedImg.image.channels() != 1)
+        {
+            unsigned int errorId = ERROR_VIDEO_WRITER_INITIALIZE;
+            std::string errorMsg("ufmf background model setup failed:\n\n"); 
+            errorMsg += "images must be single channel";
+            throw RuntimeError(errorId,errorMsg);
+        }
+
         imageSize_ = stampedImg.image.size();
         imageDepth_ = stampedImg.image.depth();
 
@@ -54,7 +62,6 @@ namespace bias
 
         }
          
-        
 
     }
 
