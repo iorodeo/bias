@@ -48,6 +48,8 @@ namespace bias {
 
     void ImageGrabber::run()
     { 
+        //double tLast = 0.0;
+
         bool done = false;
         bool error = false;
         unsigned int errorId = 0;
@@ -116,11 +118,16 @@ namespace bias {
 
                 newImageQueuePtr_ -> acquireLock();
                 newImageQueuePtr_ -> push(stampImg);
+                newImageQueuePtr_ -> signalNotEmpty(); 
                 newImageQueuePtr_ -> releaseLock();
 
                 acquireLock();
                 done = stopped_;
                 releaseLock();
+
+                //float dt = stampImg.timeStamp - tLast;
+                //tLast = stampImg.timeStamp;
+                //std::cout << "dt = " << dt << std::endl;
             }
         }
 

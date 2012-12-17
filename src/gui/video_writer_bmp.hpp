@@ -11,8 +11,8 @@ namespace bias
     {
         public:
 
-            VideoWriter_bmp();
-            explicit VideoWriter_bmp(QString fileName);
+            VideoWriter_bmp(QObject *parent=0);
+            explicit VideoWriter_bmp(QString fileName, QObject *parent=0);
             virtual ~VideoWriter_bmp();
             virtual void addFrame(StampedImage stampedImg);
 

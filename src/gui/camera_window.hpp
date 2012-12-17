@@ -23,7 +23,8 @@ namespace bias
     // BIAS forward declarations
     class ImageGrabber;
     class ImageDispatcher;
-    class ImageLogger; struct StampedImage;
+    class ImageLogger; 
+    struct StampedImage;
     template <class T> class Lockable;
     template <class T> class LockableQueue;
 

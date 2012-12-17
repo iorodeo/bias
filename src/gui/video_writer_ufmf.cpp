@@ -1,39 +1,83 @@
 #include "video_writer_ufmf.hpp"
 #include "basic_types.hpp"
 #include "exception.hpp"
+#include "lockable.hpp"
+#include "background_histogram_ufmf.hpp"
+#include <QThreadPool>
 #include <QFileInfo>
 #include <QDir>
 #include <iostream>
 
 namespace bias
 {
-    const QString DUMMY_FILENAME("dummy.ufmf");
-
+    // Static Constants
+    const unsigned int VideoWriter_ufmf::MAX_THREAD_COUNT = 8;
     const unsigned int VideoWriter_ufmf::DEFAULT_FRAME_SKIP = 1;
+    const QString VideoWriter_ufmf::DUMMY_FILENAME("dummy.ufmf");
 
-    VideoWriter_ufmf::VideoWriter_ufmf() : VideoWriter_ufmf(DUMMY_FILENAME) {}
 
-    VideoWriter_ufmf::~VideoWriter_ufmf() {};
+    VideoWriter_ufmf::VideoWriter_ufmf(QObject *parent) 
+        : VideoWriter_ufmf(DUMMY_FILENAME, parent) 
+    {} 
 
-    VideoWriter_ufmf::VideoWriter_ufmf(QString fileName) : VideoWriter(fileName)
+
+    VideoWriter_ufmf::VideoWriter_ufmf(QString fileName, QObject *parent) 
+        : VideoWriter(fileName,parent) 
     {
         isFirst_ = true;
         setFrameSkip(DEFAULT_FRAME_SKIP);
+
+        // Create thread pool for background modelling
+        threadPoolPtr_ = new QThreadPool(this);
+        threadPoolPtr_ -> setMaxThreadCount(MAX_THREAD_COUNT);
+
+        // Create queue for images sent to background modeler
+        bgImageQueuePtr_ = std::make_shared<LockableQueue<StampedImage>>();
     }
+
+
+    VideoWriter_ufmf::~VideoWriter_ufmf() 
+    {
+        stopBackgroundModeling();
+    } 
+
 
     void VideoWriter_ufmf::addFrame(StampedImage stampedImg) 
     {
+        // On first call - setup output file, background modeling, etc
         if (isFirst_)
         {
+            checkImageFormat(stampedImg);
+            startBackgroundModeling();
             setupOutput(stampedImg);
+
             isFirst_ = false;
         }
-        backgroundModel_.addFrame(stampedImg);
 
+        // Process frame on every frame count divisible by the frame skip parameter
+        if (frameCount_%frameSkip_==0)
+        {
+
+            //std::cout << "video writer processing frame" << std::endl;
+
+            // Add frame to background image queue if it is empty 
+            bgImageQueuePtr_ -> acquireLock();
+            if (bgImageQueuePtr_ -> empty())
+            {
+                bgImageQueuePtr_ -> push(stampedImg);
+                bgImageQueuePtr_ -> signalNotEmpty();
+            }
+            bgImageQueuePtr_ -> releaseLock();
+
+        }
+        frameCount_++;
     }
 
-    void VideoWriter_ufmf::setupOutput(StampedImage stampedImg) 
+
+    void VideoWriter_ufmf::checkImageFormat(StampedImage stampedImg)
     {
+        std::cout << __PRETTY_FUNCTION__ <<  std::endl;
+        // Check that  image format is suitable
         if (stampedImg.image.channels() != 1)
         {
             unsigned int errorId = ERROR_VIDEO_WRITER_INITIALIZE;
@@ -42,17 +86,48 @@ namespace bias
             throw RuntimeError(errorId,errorMsg);
         }
 
-        int imageDepth = stampedImg.image.depth();
-        if (imageDepth != CV_8U)
+        if (stampedImg.image.depth() != CV_8U)
         {
             unsigned int errorId = ERROR_VIDEO_WRITER_INITIALIZE;
             std::string errorMsg("video writer ufmf setup failed:\n\n"); 
             errorMsg += "image depth must be CV_8U or CV_16U";
             throw RuntimeError(errorId,errorMsg);
-
         }
-        size_ = stampedImg.image.size();
-
     }
+
+
+    void VideoWriter_ufmf::setupOutput(StampedImage stampedImg) 
+    {
+        std::cout << __PRETTY_FUNCTION__ <<  std::endl;
+        size_ = stampedImg.image.size();
+    }
+
+
+    void VideoWriter_ufmf::startBackgroundModeling()
+    {
+        std::cout << __PRETTY_FUNCTION__ <<  std::endl;
+
+        bgImageQueuePtr_ -> clear();
+        bgHistogramPtr_ = new BackgroundHistogram_ufmf(bgImageQueuePtr_);
+        threadPoolPtr_ -> start(bgHistogramPtr_);
+    }
+
+
+    void VideoWriter_ufmf::stopBackgroundModeling()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+
+        // Signal for background modeling threads to stop
+        if (!bgHistogramPtr_.isNull()) 
+        {
+            bgHistogramPtr_ -> acquireLock();
+            bgHistogramPtr_ -> stop();
+            bgHistogramPtr_ -> releaseLock();
+        }
+
+        // Wait for threads to finish
+        threadPoolPtr_ -> waitForDone();
+    }
+
 
 } // namespace bias

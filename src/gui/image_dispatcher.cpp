@@ -87,18 +87,17 @@ namespace bias
             haveNewImage = false;
 
             newImageQueuePtr_ -> acquireLock();
-            if (!(newImageQueuePtr_ -> empty()))
-            {
-                newStampImage = newImageQueuePtr_ -> front();
-                newImageQueuePtr_ -> pop();
-                haveNewImage = true;
-            }
+            newImageQueuePtr_ -> waitIfEmpty();
+            newStampImage = newImageQueuePtr_ -> front();
+            newImageQueuePtr_ -> pop();
+            haveNewImage = true;
             newImageQueuePtr_ -> releaseLock();
 
             if (logging_ && haveNewImage)
             {
                 logImageQueuePtr_ -> acquireLock();
                 logImageQueuePtr_ -> push(newStampImage);
+                logImageQueuePtr_ -> signalNotEmpty();
                 logImageQueuePtr_ -> releaseLock();
             }
 

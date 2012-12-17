@@ -9,9 +9,12 @@ namespace bias
     const unsigned int DEFAULT_FRAME_SKIP = 1;
     const QString DUMMY_FILENAME("dummy_filename");
 
-    VideoWriter::VideoWriter() : VideoWriter(DUMMY_FILENAME) {};
+    VideoWriter::VideoWriter(QObject *parent) 
+        : VideoWriter(DUMMY_FILENAME,parent) 
+    {}
 
-    VideoWriter::VideoWriter(QString fileName)
+    VideoWriter::VideoWriter(QString fileName, QObject *parent) 
+        : QObject(parent)
     {
         setFileName(fileName);
         size_ = cv::Size(0,0);
@@ -19,7 +22,8 @@ namespace bias
         frameSkip_ = DEFAULT_FRAME_SKIP;
     }
 
-    VideoWriter::~VideoWriter() {}
+    VideoWriter::~VideoWriter() 
+    {}
 
 
     void VideoWriter::setFileName(QString fileName)

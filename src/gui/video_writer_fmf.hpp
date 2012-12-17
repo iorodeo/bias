@@ -9,8 +9,8 @@ namespace bias
     class VideoWriter_fmf : public VideoWriter
     {
         public:
-            VideoWriter_fmf();
-            VideoWriter_fmf(QString fileName);
+            VideoWriter_fmf(QObject *parent=0);
+            VideoWriter_fmf(QString fileName, QObject *paraent=0);
             ~VideoWriter_fmf();
             virtual void finish();
             virtual void addFrame(StampedImage stampedImg);

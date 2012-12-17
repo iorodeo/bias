@@ -68,12 +68,10 @@ namespace bias
             haveNewImage = false;
 
             logImageQueuePtr_ -> acquireLock();
-            if (!logImageQueuePtr_ -> empty())
-            {
-                newStampedImage = logImageQueuePtr_ -> front();
-                logImageQueuePtr_ -> pop();
-                haveNewImage = true;
-            }
+            logImageQueuePtr_ -> waitIfEmpty();
+            newStampedImage = logImageQueuePtr_ -> front();
+            logImageQueuePtr_ -> pop();
+            haveNewImage = true;
             logQueueSize =  logImageQueuePtr_ -> size();
             logImageQueuePtr_ -> releaseLock();
 

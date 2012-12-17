@@ -2,6 +2,7 @@
 #define BIAS_LOCKABLE_HPP
 
 #include <QMutex>
+#include <QWaitCondition>
 #include <queue>
 
 namespace bias
@@ -35,7 +36,7 @@ namespace bias
                 mutex_.unlock();
             }
 
-        private:
+        protected:
             QMutex mutex_;
             
     };
@@ -56,6 +57,23 @@ namespace bias
                     this -> pop();
                 }
             }
+
+            void waitIfEmpty()
+            {
+                if (this -> empty())
+                {
+                    emptyWaitCond_.wait(&mutex_);
+                }
+            }
+
+            void signalNotEmpty()
+            {
+                emptyWaitCond_.wakeAll();
+            }
+
+
+        protected:
+            QWaitCondition emptyWaitCond_;
     };
 }
 

@@ -10,8 +10,8 @@ namespace bias
     {
         public:
 
-            VideoWriter_avi();
-            explicit VideoWriter_avi(QString fileName);
+            VideoWriter_avi(QObject *parent=0);
+            VideoWriter_avi(QString fileName, QObject *parent=0);
             virtual ~VideoWriter_avi();
             virtual void addFrame(StampedImage stampedImg);
 

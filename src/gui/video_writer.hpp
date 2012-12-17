@@ -13,8 +13,8 @@ namespace bias
 
         public:
 
-            VideoWriter(); 
-            explicit VideoWriter(QString fileName);
+            VideoWriter(QObject *parent=0); 
+            explicit VideoWriter(QString fileName, QObject *parent=0);
             virtual ~VideoWriter();
             virtual void setFileName(QString fileName);
             virtual void setSize(cv::Size size);

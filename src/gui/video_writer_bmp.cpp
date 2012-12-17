@@ -13,9 +13,12 @@ namespace bias
     const QString DUMMY_FILENAME("dummy.bmp");
     const unsigned int VideoWriter_bmp::DEFAULT_FRAME_SKIP = 6;
 
-    VideoWriter_bmp::VideoWriter_bmp() : VideoWriter_bmp(DUMMY_FILENAME) {}
+    VideoWriter_bmp::VideoWriter_bmp(QObject *parent) 
+        : VideoWriter_bmp(DUMMY_FILENAME,parent) 
+    {}
 
-    VideoWriter_bmp::VideoWriter_bmp(QString fileName) : VideoWriter(fileName) 
+    VideoWriter_bmp::VideoWriter_bmp(QString fileName, QObject *parent) 
+        : VideoWriter(fileName,parent) 
     {
         isFirst_ = true;
         setFrameSkip(DEFAULT_FRAME_SKIP);

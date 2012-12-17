@@ -11,9 +11,12 @@ namespace bias
     const unsigned int VideoWriter_fmf::FMF_VERSION = 1;
     const QString DUMMY_FILENAME("dummy.fmf");
 
-    VideoWriter_fmf::VideoWriter_fmf() : VideoWriter_fmf(DUMMY_FILENAME) {}
+    VideoWriter_fmf::VideoWriter_fmf(QObject *parent) 
+        : VideoWriter_fmf(DUMMY_FILENAME, parent) 
+    {}
 
-    VideoWriter_fmf::VideoWriter_fmf(QString fileName) : VideoWriter(fileName)
+    VideoWriter_fmf::VideoWriter_fmf(QString fileName, QObject *parent) 
+        : VideoWriter(fileName, parent)
     {
         numWritten_ = 0;
         isFirst_ = true;

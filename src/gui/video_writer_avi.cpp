@@ -13,9 +13,12 @@ namespace bias
     const unsigned int VideoWriter_avi::DEFAULT_FRAME_SKIP = 4;
     const int VideoWriter_avi::DEFAULT_FOURCC = CV_FOURCC('D','I','V','X');
 
-    VideoWriter_avi::VideoWriter_avi() : VideoWriter_avi(DUMMY_FILENAME) {}
+    VideoWriter_avi::VideoWriter_avi(QObject *parent) 
+        : VideoWriter_avi(DUMMY_FILENAME,parent) 
+    {}
 
-    VideoWriter_avi::VideoWriter_avi(QString fileName) : VideoWriter(fileName)
+    VideoWriter_avi::VideoWriter_avi(QString fileName, QObject *parent) 
+        : VideoWriter(fileName,parent)
     {
         fourcc_ = DEFAULT_FOURCC;
         fps_ = DEFAULT_FPS;
