@@ -239,7 +239,7 @@
    </property>
    <widget class="QMenu" name="menuLoggingPtr_">
     <property name="title">
-     <string>Logging</string>
+     <string>&amp;Logging</string>
     </property>
     <widget class="QMenu" name="menuLoggingFormatPtr_">
      <property name="title">
@@ -257,14 +257,14 @@
    </widget>
    <widget class="QMenu" name="menuTimerPtr_">
     <property name="title">
-     <string>Timer</string>
+     <string>&amp;Timer</string>
     </property>
     <addaction name="actionTimerEnabledPtr_"/>
     <addaction name="actionTimerSettingsPtr_"/>
    </widget>
    <widget class="QMenu" name="menuCameraPtr_">
     <property name="title">
-     <string>Camera</string>
+     <string>&amp;Camera</string>
     </property>
     <widget class="QMenu" name="menuCameraVideoModePtr_">
      <property name="title">
@@ -300,7 +300,7 @@
    </widget>
    <widget class="QMenu" name="menuHelpPtr_">
     <property name="title">
-     <string>Help</string>
+     <string>&amp;Help</string>
     </property>
     <addaction name="actionHelpUserManualPtr_"/>
     <addaction name="separator"/>
@@ -308,7 +308,7 @@
    </widget>
    <widget class="QMenu" name="menuDisplayPtr_">
     <property name="title">
-     <string>Display</string>
+     <string>&amp;Display</string>
     </property>
     <widget class="QMenu" name="menuDisplayOrientationPtr_">
      <property name="title">
@@ -332,7 +332,7 @@
    </widget>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="actionFileLoadConfigPtr_"/>
     <addaction name="actionFileSaveConfigPtr_"/>
@@ -342,7 +342,7 @@
    </widget>
    <widget class="QMenu" name="menuPluginsPtr_">
     <property name="title">
-     <string>Plugins</string>
+     <string>&amp;Plugins</string>
     </property>
     <addaction name="actionPluginsSettingsPtr_"/>
     <addaction name="separator"/>

@@ -9,7 +9,7 @@ namespace bias
 {
     const QString DUMMY_FILENAME("dummy.ufmf");
 
-    const unsigned int VideoWriter_ufmf::DEFAULT_FRAME_SKIP = 4;
+    const unsigned int VideoWriter_ufmf::DEFAULT_FRAME_SKIP = 1;
 
     VideoWriter_ufmf::VideoWriter_ufmf() : VideoWriter_ufmf(DUMMY_FILENAME) {}
 
@@ -43,7 +43,7 @@ namespace bias
         }
 
         int imageDepth = stampedImg.image.depth();
-        if ((imageDepth != CV_8U) || (imageDepth != CV_16U))
+        if (imageDepth != CV_8U)
         {
             unsigned int errorId = ERROR_VIDEO_WRITER_INITIALIZE;
             std::string errorMsg("video writer ufmf setup failed:\n\n"); 

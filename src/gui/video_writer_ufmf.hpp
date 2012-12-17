@@ -22,7 +22,6 @@ namespace bias
 
             bool isFirst_;
             BackgroundModel_ufmf backgroundModel_;
-
             void setupOutput(StampedImage stampedImg);
             
     };
