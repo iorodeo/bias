@@ -64,4 +64,49 @@ namespace bias
 
     }
 
+
+    std::shared_ptr<float> BackgroundData_ufmf::getMedians()
+    {
+        unsigned int bin;
+        unsigned int binValue;
+        unsigned long cntTotal;
+        unsigned long cntHalf;
+        unsigned long cntCurrent;
+        unsigned int  *binPtr = binPtr_.get();
+        unsigned long *cntPtr = cntPtr_.get();
+        std::shared_ptr<float> medianPtr = std::shared_ptr<float>(
+                new float[numRows_*numCols_],
+                std::default_delete<float[]>()
+                );
+        float *medianPtrTmp = medianPtr.get();  
+        float medianTmp;
+
+
+        for (unsigned int i=0; i<numRows_; i++)
+        {
+            for (unsigned int j=0; j<numCols_; j++)
+            {
+                cntTotal = *(cntPtr + j + numCols_*i);
+                cntHalf = cntTotal/2;
+                for (bin=0,cntCurrent=0; bin<numBins_, cntCurrent<=cntHalf; bin++)
+                {
+                    binValue = *(binPtr + j+ numCols_*i + (numRows_*numCols_)*bin);  
+                    cntCurrent += binValue;
+                }
+                if ((cntTotal%2!=0) || (binValue > 1))
+                {
+                    medianTmp = float(bin);
+
+                }
+                else
+                {
+                    medianTmp = float(bin)-0.5;
+                }
+
+                *(medianPtrTmp + j + numCols_*i) = medianTmp;
+
+            }
+        }
+    }
+
 } // namespace bias
