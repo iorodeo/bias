@@ -78,6 +78,7 @@ namespace bias
             logImageQueuePtr_ -> releaseLock();
 
             frameCount_++;
+            //std::cout << "logger frame count = " << frameCount_ << std::endl;
 
             if (!errorFlag) 
             {
@@ -89,7 +90,7 @@ namespace bias
                     emit imageLoggingError(errorId, errorMsg);
                     errorFlag = true;
                 }
-                std::cout << "queue size: " << logQueueSize << std::endl;
+                //std::cout << "queue size: " << logQueueSize << std::endl;
 
                 // Add frame to video writer
                 try 

@@ -35,7 +35,8 @@ namespace bias
 
         // Create queue for images sent to background modeler
         bgImageQueuePtr_ = std::make_shared<LockableQueue<StampedImage>>();
-        bgDataQueuePtr_ = std::make_shared<LockableQueue<BackgroundData_ufmf>>();
+        bgNewDataQueuePtr_ = std::make_shared<LockableQueue<BackgroundData_ufmf>>();
+        bgOldDataQueuePtr_ = std::make_shared<LockableQueue<BackgroundData_ufmf>>();
     }
 
 
@@ -59,9 +60,6 @@ namespace bias
         // Process frame on every frame count divisible by the frame skip parameter
         if (frameCount_%frameSkip_==0)
         {
-
-            //std::cout << "video writer processing frame" << std::endl;
-
             // Add frame to background image queue if it is empty 
             bgImageQueuePtr_ -> acquireLock();
             if (bgImageQueuePtr_ -> empty())
@@ -78,8 +76,6 @@ namespace bias
 
     void VideoWriter_ufmf::checkImageFormat(StampedImage stampedImg)
     {
-        std::cout << __PRETTY_FUNCTION__ <<  std::endl;
-        // Check that  image format is suitable
         if (stampedImg.image.channels() != 1)
         {
             unsigned int errorId = ERROR_VIDEO_WRITER_INITIALIZE;
@@ -100,25 +96,25 @@ namespace bias
 
     void VideoWriter_ufmf::setupOutput(StampedImage stampedImg) 
     {
-        std::cout << __PRETTY_FUNCTION__ <<  std::endl;
         size_ = stampedImg.image.size();
     }
 
 
     void VideoWriter_ufmf::startBackgroundModeling()
     {
-        std::cout << __PRETTY_FUNCTION__ <<  std::endl;
-
         bgImageQueuePtr_ -> clear();
-        bgDataQueuePtr_ -> clear();
+        bgNewDataQueuePtr_ -> clear();
+        bgOldDataQueuePtr_ -> clear();
 
         bgHistogramPtr_ = new BackgroundHistogram_ufmf(
                 bgImageQueuePtr_,
-                bgDataQueuePtr_
+                bgNewDataQueuePtr_,
+                bgOldDataQueuePtr_
                 );
 
         bgMedianPtr_ = new BackgroundMedian_ufmf(
-                bgDataQueuePtr_
+                bgNewDataQueuePtr_,
+                bgOldDataQueuePtr_
                 );
 
         threadPoolPtr_ -> start(bgHistogramPtr_);
@@ -128,8 +124,6 @@ namespace bias
 
     void VideoWriter_ufmf::stopBackgroundModeling()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-
         // Signal for background modeling threads to stop
         if (!bgMedianPtr_.isNull())
         {
@@ -137,10 +131,9 @@ namespace bias
             bgMedianPtr_ -> stop();
             bgMedianPtr_ -> releaseLock();
 
-            // Not sure is this is right
-            bgDataQueuePtr_ -> acquireLock();
-            bgDataQueuePtr_ -> signalNotEmpty();
-            bgDataQueuePtr_ -> releaseLock();
+            bgNewDataQueuePtr_ -> acquireLock();
+            bgNewDataQueuePtr_ -> signalNotEmpty();
+            bgNewDataQueuePtr_ -> releaseLock();
         }
 
         if (!bgHistogramPtr_.isNull()) 
@@ -149,7 +142,6 @@ namespace bias
             bgHistogramPtr_ -> stop();
             bgHistogramPtr_ -> releaseLock();
 
-            // Not sure if ths is right
             bgImageQueuePtr_ -> acquireLock();
             bgImageQueuePtr_ -> signalNotEmpty();
             bgImageQueuePtr_ -> releaseLock();

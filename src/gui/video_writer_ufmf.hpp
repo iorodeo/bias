@@ -38,7 +38,8 @@ namespace bias
             QPointer<BackgroundHistogram_ufmf> bgHistogramPtr_;
             QPointer<BackgroundMedian_ufmf> bgMedianPtr_;
             std::shared_ptr<LockableQueue<StampedImage>> bgImageQueuePtr_;
-            std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgDataQueuePtr_;
+            std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgNewDataQueuePtr_;
+            std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr_;
 
             void checkImageFormat(StampedImage stampedImg);
             void setupOutput(StampedImage stampedImg);

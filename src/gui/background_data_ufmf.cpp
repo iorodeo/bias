@@ -69,18 +69,23 @@ namespace bias
     {
         unsigned int bin;
         unsigned int binValue;
+        unsigned int *binPtr = binPtr_.get();
+
         unsigned long cntTotal;
         unsigned long cntHalf;
         unsigned long cntCurrent;
-        unsigned int  *binPtr = binPtr_.get();
         unsigned long *cntPtr = cntPtr_.get();
+
+        float medianScale = float(binSize_);
+        float medianShift = (medianScale - 1.0)/2.0;
+        float medianTmp;
+
         std::shared_ptr<float> medianPtr = std::shared_ptr<float>(
                 new float[numRows_*numCols_],
                 std::default_delete<float[]>()
                 );
-        float *medianPtrTmp = medianPtr.get();  
-        float medianTmp;
 
+        float *medianPtrTmp = medianPtr.get();  
 
         for (unsigned int i=0; i<numRows_; i++)
         {
@@ -93,20 +98,24 @@ namespace bias
                     binValue = *(binPtr + j+ numCols_*i + (numRows_*numCols_)*bin);  
                     cntCurrent += binValue;
                 }
-                if ((cntTotal%2!=0) || (binValue > 1))
+
+                if ((cntTotal%2!=0) || ((cntHalf-(cntCurrent-binValue)) > 1))
                 {
                     medianTmp = float(bin);
 
                 }
+
                 else
                 {
-                    medianTmp = float(bin)-0.5;
+                    medianTmp = (float(bin)-0.5);
                 }
 
+                medianTmp = medianScale*medianTmp + medianShift;
                 *(medianPtrTmp + j + numCols_*i) = medianTmp;
 
-            }
-        }
+            } // for j
+
+        } // for i
 
         return medianPtr;
     }

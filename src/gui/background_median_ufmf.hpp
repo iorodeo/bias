@@ -18,19 +18,22 @@ namespace bias
         public:
             BackgroundMedian_ufmf(QObject *parent=0);
             BackgroundMedian_ufmf( 
-                    std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgDataQueuePtr,
+                    std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgNewDataQueuePtr,
+                    std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr,
                     QObject *parent=0
                     );
             void initialize(
-                    std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgDataQueuePtr
+                    std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgNewDataQueuePtr,
+                    std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr
                     );
             void stop();
 
         private:
             bool ready_;
             bool stopped_;
-            // Queue of incoming background data for median calculation
-            std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgDataQueuePtr_;
+            // Queues of incoming and outgoing background data for median calculation
+            std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgNewDataQueuePtr_;
+            std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr_;
 
             void run();
 

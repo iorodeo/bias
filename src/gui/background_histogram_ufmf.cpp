@@ -7,40 +7,51 @@ namespace bias
 {
 
     // Temporary
-    // ---------------------------------------
+    // ------------------------------------------------
     const unsigned int DEFAULT_NUM_BINS = 256;
     const unsigned int DEFAULT_BIN_SIZE = 1;
-    // ---------------------------------------
+    const unsigned int DEFAULT_MIN_UPDATE_COUNT = 50;
+    // -------------------------------------------------
 
 
     BackgroundHistogram_ufmf::BackgroundHistogram_ufmf(QObject *parent) 
         : QObject(parent) 
     {
-        initialize(NULL,NULL);
+        initialize(NULL,NULL,NULL);
     }
 
 
     BackgroundHistogram_ufmf::BackgroundHistogram_ufmf (
             std::shared_ptr<LockableQueue<StampedImage>> bgImageQueuePtr, 
-            std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgDataQueuePtr,
+            std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgNewDataQueuePtr,
+            std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr,
             QObject *parent
             ) 
         : QObject(parent)
     {
-        initialize(bgImageQueuePtr, bgDataQueuePtr);
+        initialize(bgImageQueuePtr, bgNewDataQueuePtr, bgOldDataQueuePtr);
     }
 
 
     void BackgroundHistogram_ufmf::initialize( 
             std::shared_ptr<LockableQueue<StampedImage>> bgImageQueuePtr,
-            std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgDataQueuePtr
+            std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgNewDataQueuePtr,
+            std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr
             ) 
     {
         ready_ = false;
         stopped_ = true;
         bgImageQueuePtr_ = bgImageQueuePtr;
-        bgDataQueuePtr_ = bgDataQueuePtr;
-        if ((bgImageQueuePtr_ != NULL) && (bgDataQueuePtr_ != NULL))
+        bgNewDataQueuePtr_ = bgNewDataQueuePtr;
+        bgOldDataQueuePtr_ = bgOldDataQueuePtr;
+
+        // Make sure none of the data queue pointers are null
+        bool notNull = true;
+        notNull &= (bgImageQueuePtr_   != NULL);
+        notNull &= (bgNewDataQueuePtr_ != NULL);
+        notNull &= (bgOldDataQueuePtr_ != NULL);
+
+        if (notNull) 
         {
             ready_ = true;
         }
@@ -57,7 +68,7 @@ namespace bias
     { 
         bool done = false;
         bool isFirst = true;
-        unsigned long frameCount = 0;
+        unsigned long count = 0;
         BackgroundData_ufmf backgroundData;
 
         StampedImage newStampedImg;
@@ -85,20 +96,57 @@ namespace bias
             bgImageQueuePtr_ -> pop();
             bgImageQueuePtr_ -> releaseLock();
 
-            std::cout << "have new image" << std::endl;
+            std::cout << "* new bg image, count = " << count << std::endl;
             if (isFirst)
             {
-                // Create new Background data object
-                backgroundData = BackgroundData_ufmf(
-                        newStampedImg,
-                        DEFAULT_NUM_BINS,
-                        DEFAULT_BIN_SIZE
-                        );
+                // Create two new background data objects - put one in old data queue.
+                for (int i=0; i<2; i++) 
+                {
+                    backgroundData = BackgroundData_ufmf(
+                            newStampedImg,
+                            DEFAULT_NUM_BINS,
+                            DEFAULT_BIN_SIZE
+                            );
+                    if (i==0)
+                    {
+                        bgOldDataQueuePtr_ -> acquireLock();
+                        bgOldDataQueuePtr_ -> push(backgroundData);
+                        bgOldDataQueuePtr_ -> releaseLock();
+                    }
+                }
+
                 isFirst = false;
             }
 
             // Add image to background data
             backgroundData.addImage(newStampedImg);
+            count++;
+
+            // Check to see if median computation is done if so swap the buffers
+            if (count > DEFAULT_MIN_UPDATE_COUNT)
+            {
+                bool swapDataFlag = false;
+                BackgroundData_ufmf backgroundDataTmp;
+
+                bgOldDataQueuePtr_ -> acquireLock();
+                if (!(bgOldDataQueuePtr_ -> empty()))
+                {
+                    backgroundDataTmp = bgOldDataQueuePtr_ -> front();
+                    bgOldDataQueuePtr_ -> pop();
+                    swapDataFlag = true;
+                }
+                bgOldDataQueuePtr_ -> releaseLock();
+
+                if (swapDataFlag)
+                {
+                    bgNewDataQueuePtr_ -> acquireLock();
+                    bgNewDataQueuePtr_ -> push(backgroundData);
+                    bgNewDataQueuePtr_ -> signalNotEmpty();
+                    bgNewDataQueuePtr_ -> releaseLock();
+                    backgroundData = backgroundDataTmp;
+                    count = 0;
+                }
+            }
 
             acquireLock();
             done = stopped_;

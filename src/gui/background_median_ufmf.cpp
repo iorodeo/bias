@@ -7,28 +7,31 @@ namespace bias
     BackgroundMedian_ufmf::BackgroundMedian_ufmf(QObject *parent)
         : QObject(parent)
     { 
-        initialize(NULL);
+        initialize(NULL,NULL);
     }
 
 
     BackgroundMedian_ufmf::BackgroundMedian_ufmf( 
-            std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgDataQueuePtr,
+            std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgNewDataQueuePtr,
+            std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr,
             QObject *parent
             ) 
         : QObject(parent)
     {
-        initialize(bgDataQueuePtr);
+        initialize(bgNewDataQueuePtr,bgOldDataQueuePtr);
     }
 
 
     void BackgroundMedian_ufmf::initialize(
-            std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgDataQueuePtr
+            std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgNewDataQueuePtr,
+            std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr
             )
     {
         ready_ = false;
         stopped_ = true;
-        bgDataQueuePtr_ = bgDataQueuePtr;
-        if (bgDataQueuePtr_ != NULL)
+        bgNewDataQueuePtr_ = bgNewDataQueuePtr;
+        bgOldDataQueuePtr_ = bgOldDataQueuePtr;
+        if ((bgNewDataQueuePtr_ != NULL) && (bgOldDataQueuePtr_))
         {
             ready_ = true;
         }
@@ -46,6 +49,7 @@ namespace bias
         bool done = false;
         bool isFirst = true;
         BackgroundData_ufmf backgroundData;
+        std::shared_ptr<float> medianData;
 
         if (!ready_) 
         { 
@@ -59,18 +63,28 @@ namespace bias
         while(!done)
         {
             // Grab background data from queue
-            bgDataQueuePtr_ -> acquireLock();
-            bgDataQueuePtr_ -> waitIfEmpty();
-            if (bgDataQueuePtr_ -> empty())
+            bgNewDataQueuePtr_ -> acquireLock();
+            bgNewDataQueuePtr_ -> waitIfEmpty();
+            if (bgNewDataQueuePtr_ -> empty())
             {
-                bgDataQueuePtr_ -> releaseLock();
+                bgNewDataQueuePtr_ -> releaseLock();
                 break;
             }
-            backgroundData = bgDataQueuePtr_ -> front();
-            bgDataQueuePtr_ -> pop();
-            bgDataQueuePtr_ -> releaseLock();
+            backgroundData = bgNewDataQueuePtr_ -> front();
+            bgNewDataQueuePtr_ -> pop();
+            bgNewDataQueuePtr_ -> releaseLock();
 
-            std::cout << "background median - have new data" << std::endl;
+            std::cout << "*** new median data" << std::endl;
+
+            // Compute median
+            medianData = backgroundData.getMedians();
+
+
+            // Put data back into outgoing queue 
+            bgOldDataQueuePtr_ -> acquireLock();
+            bgOldDataQueuePtr_ -> push(backgroundData);
+            bgOldDataQueuePtr_ -> releaseLock();
+
 
             acquireLock();
             done = stopped_;
