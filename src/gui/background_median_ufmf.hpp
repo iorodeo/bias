@@ -1,5 +1,5 @@
-#ifndef BIAS_BACKGROUND_HISTOGRAM_UFMF_HPP
-#define BIAS_BACKGROUND_HISTOGRAM_UFMF_HPP
+#ifndef BIAS_BACKGROUND_MEDIAN_UFMF_HPP
+#define BIAS_BACKGROUND_MEDIAN_UFMF_HPP
 #include <memory>
 #include <QObject>
 #include <QRunnable>
@@ -7,23 +7,21 @@
 
 namespace bias
 {
-    struct StampedImage;
     class BackgroundData_ufmf;
 
-    class BackgroundHistogram_ufmf 
+
+    class BackgroundMedian_ufmf
         : public QObject, public QRunnable, public Lockable<Empty>
     {
         Q_OBJECT
 
         public:
-            BackgroundHistogram_ufmf(QObject *parent=0);
-            BackgroundHistogram_ufmf(
-                    std::shared_ptr<LockableQueue<StampedImage>> bgImageQueuePtr, 
+            BackgroundMedian_ufmf(QObject *parent=0);
+            BackgroundMedian_ufmf( 
                     std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgDataQueuePtr,
                     QObject *parent=0
                     );
             void initialize(
-                    std::shared_ptr<LockableQueue<StampedImage>> bgImageQueuePtr,
                     std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgDataQueuePtr
                     );
             void stop();
@@ -31,16 +29,14 @@ namespace bias
         private:
             bool ready_;
             bool stopped_;
-
-            // Queue of incoming images for background model
-            std::shared_ptr<LockableQueue<StampedImage>> bgImageQueuePtr_;       
-
-            // Queue of outgoing background data for median calculation
+            // Queue of incoming background data for median calculation
             std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgDataQueuePtr_;
 
             void run();
+
     };
 
-}
 
-#endif // #ifndef BAIS_BACKGOUND_HISTOGRAM_UFMF_HPP
+} // namespace bias
+
+#endif // #ifndef BAIS_BACKGROUND_MEDAIN_HPP

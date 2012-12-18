@@ -51,9 +51,9 @@ namespace bias
 
     void ImageLogger::run()
     {
-        StampedImage newStampedImage;
-        bool haveNewImage = false;
         bool done = false;
+        bool errorFlag = false;
+        StampedImage newStampedImage;
         unsigned int logQueueSize;
 
         if (!ready_) { return; }
@@ -65,29 +65,33 @@ namespace bias
 
         while (!done)
         {
-            haveNewImage = false;
-
             logImageQueuePtr_ -> acquireLock();
             logImageQueuePtr_ -> waitIfEmpty();
+            if (logImageQueuePtr_ -> empty())
+            {
+                logImageQueuePtr_ -> releaseLock();
+                break;
+            }
             newStampedImage = logImageQueuePtr_ -> front();
             logImageQueuePtr_ -> pop();
-            haveNewImage = true;
             logQueueSize =  logImageQueuePtr_ -> size();
             logImageQueuePtr_ -> releaseLock();
 
+            frameCount_++;
 
-            if (logQueueSize > MAX_LOG_QUEUE_SIZE)
+            if (!errorFlag) 
             {
-                unsigned int errorId = ERROR_IMAGE_LOGGER_MAX_QUEUE_SIZE;
-                QString errorMsg("logger image queue has exceeded the maximum allowed size");
-                emit imageLoggingError(errorId, errorMsg);
-            }
-
-            if (haveNewImage)
-            {
+                // Check if log queue has grown too large - if so signal an error
+                if (logQueueSize > MAX_LOG_QUEUE_SIZE)
+                {
+                    unsigned int errorId = ERROR_IMAGE_LOGGER_MAX_QUEUE_SIZE;
+                    QString errorMsg("logger image queue has exceeded the maximum allowed size");
+                    emit imageLoggingError(errorId, errorMsg);
+                    errorFlag = true;
+                }
                 std::cout << "queue size: " << logQueueSize << std::endl;
-                frameCount_++;
 
+                // Add frame to video writer
                 try 
                 {
                     videoWriterPtr_ -> addFrame(newStampedImage);

@@ -1181,6 +1181,7 @@ namespace bias
         // threadPool when their run methods exit.
         imageDisplayTimerPtr_ -> stop();
 
+        // Send stop singals to threads
         if (!imageGrabberPtr_.isNull())
         {
             imageGrabberPtr_ -> acquireLock();
@@ -1193,6 +1194,10 @@ namespace bias
             imageDispatcherPtr_ -> acquireLock();
             imageDispatcherPtr_ -> stop();
             imageDispatcherPtr_ -> releaseLock();
+
+            newImageQueuePtr_ -> acquireLock();
+            newImageQueuePtr_ -> signalNotEmpty();
+            newImageQueuePtr_ -> releaseLock();
         }
 
         if (!imageLoggerPtr_.isNull())
@@ -1200,10 +1205,16 @@ namespace bias
             imageLoggerPtr_ -> acquireLock();
             imageLoggerPtr_ -> stop();
             imageLoggerPtr_ -> releaseLock();
+
+            logImageQueuePtr_ -> acquireLock();
+            logImageQueuePtr_ -> signalNotEmpty();
+            logImageQueuePtr_ -> releaseLock();
         }
 
+        // Wait until threads are finished
         threadPoolPtr_ -> waitForDone();
 
+        // Clear any stale data out of existing queues
         newImageQueuePtr_ -> acquireLock();
         newImageQueuePtr_ -> clear();
         newImageQueuePtr_ -> releaseLock();
@@ -1212,6 +1223,7 @@ namespace bias
         logImageQueuePtr_ -> clear();
         logImageQueuePtr_ -> releaseLock();
 
+        // Update data GUI information
         startButtonPtr_ -> setText(QString("Start"));
         connectButtonPtr_ -> setEnabled(true);
         statusbarPtr_ -> showMessage(QString("Connected, Stopped"));

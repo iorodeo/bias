@@ -70,11 +70,13 @@ namespace bias
 
     void ImageDispatcher::run()
     {
-        StampedImage newStampImage;
-        bool haveNewImage = false;
         bool done = false;
+        StampedImage newStampImage;
 
-        if (!ready_) { return; }
+        if (!ready_) 
+        { 
+            return; 
+        }
 
         acquireLock();
         frameCount_ = 0;
@@ -84,16 +86,19 @@ namespace bias
 
         while (!done) 
         {
-            haveNewImage = false;
 
             newImageQueuePtr_ -> acquireLock();
             newImageQueuePtr_ -> waitIfEmpty();
+            if (newImageQueuePtr_ -> empty())
+            {
+                newImageQueuePtr_ -> releaseLock();
+                break;
+            }
             newStampImage = newImageQueuePtr_ -> front();
             newImageQueuePtr_ -> pop();
-            haveNewImage = true;
             newImageQueuePtr_ -> releaseLock();
 
-            if (logging_ && haveNewImage)
+            if (logging_ )
             {
                 logImageQueuePtr_ -> acquireLock();
                 logImageQueuePtr_ -> push(newStampImage);
@@ -101,15 +106,12 @@ namespace bias
                 logImageQueuePtr_ -> releaseLock();
             }
 
-            if (haveNewImage) 
-            {
-                acquireLock();
-                currentImage_ = newStampImage.image;
-                currentTimeStamp_ = newStampImage.timeStamp;
-                frameCount_ = newStampImage.frameCount;
-                fpsEstimator_.update(newStampImage.timeStamp);
-                releaseLock();
-            }
+            acquireLock();
+            currentImage_ = newStampImage.image;
+            currentTimeStamp_ = newStampImage.timeStamp;
+            frameCount_ = newStampImage.frameCount;
+            fpsEstimator_.update(newStampImage.timeStamp);
+            releaseLock();
 
             acquireLock();
             done = stopped_;

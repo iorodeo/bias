@@ -10,7 +10,9 @@ class QThreadPool;
 
 namespace bias
 {
+    class BackgroundData_ufmf;
     class BackgroundHistogram_ufmf;
+    class BackgroundMedian_ufmf;
     template <class T> class Lockable;
     template <class T> class LockableQueue;
 
@@ -34,7 +36,9 @@ namespace bias
             bool isFirst_;
             QPointer<QThreadPool> threadPoolPtr_;
             QPointer<BackgroundHistogram_ufmf> bgHistogramPtr_;
+            QPointer<BackgroundMedian_ufmf> bgMedianPtr_;
             std::shared_ptr<LockableQueue<StampedImage>> bgImageQueuePtr_;
+            std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgDataQueuePtr_;
 
             void checkImageFormat(StampedImage stampedImg);
             void setupOutput(StampedImage stampedImg);

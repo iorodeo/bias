@@ -2,7 +2,9 @@
 #include "basic_types.hpp"
 #include "exception.hpp"
 #include "lockable.hpp"
+#include "background_data_ufmf.hpp"
 #include "background_histogram_ufmf.hpp"
+#include "background_median_ufmf.hpp"
 #include <QThreadPool>
 #include <QFileInfo>
 #include <QDir>
@@ -33,6 +35,7 @@ namespace bias
 
         // Create queue for images sent to background modeler
         bgImageQueuePtr_ = std::make_shared<LockableQueue<StampedImage>>();
+        bgDataQueuePtr_ = std::make_shared<LockableQueue<BackgroundData_ufmf>>();
     }
 
 
@@ -50,7 +53,6 @@ namespace bias
             checkImageFormat(stampedImg);
             startBackgroundModeling();
             setupOutput(stampedImg);
-
             isFirst_ = false;
         }
 
@@ -108,8 +110,19 @@ namespace bias
         std::cout << __PRETTY_FUNCTION__ <<  std::endl;
 
         bgImageQueuePtr_ -> clear();
-        bgHistogramPtr_ = new BackgroundHistogram_ufmf(bgImageQueuePtr_);
+        bgDataQueuePtr_ -> clear();
+
+        bgHistogramPtr_ = new BackgroundHistogram_ufmf(
+                bgImageQueuePtr_,
+                bgDataQueuePtr_
+                );
+
+        bgMedianPtr_ = new BackgroundMedian_ufmf(
+                bgDataQueuePtr_
+                );
+
         threadPoolPtr_ -> start(bgHistogramPtr_);
+        threadPoolPtr_ -> start(bgMedianPtr_);
     }
 
 
@@ -118,11 +131,28 @@ namespace bias
         std::cout << __PRETTY_FUNCTION__ << std::endl;
 
         // Signal for background modeling threads to stop
+        if (!bgMedianPtr_.isNull())
+        {
+            bgMedianPtr_ -> acquireLock();
+            bgMedianPtr_ -> stop();
+            bgMedianPtr_ -> releaseLock();
+
+            // Not sure is this is right
+            bgDataQueuePtr_ -> acquireLock();
+            bgDataQueuePtr_ -> signalNotEmpty();
+            bgDataQueuePtr_ -> releaseLock();
+        }
+
         if (!bgHistogramPtr_.isNull()) 
         {
             bgHistogramPtr_ -> acquireLock();
             bgHistogramPtr_ -> stop();
             bgHistogramPtr_ -> releaseLock();
+
+            // Not sure if ths is right
+            bgImageQueuePtr_ -> acquireLock();
+            bgImageQueuePtr_ -> signalNotEmpty();
+            bgImageQueuePtr_ -> releaseLock();
         }
 
         // Wait for threads to finish
