@@ -107,6 +107,8 @@ namespace bias
 
             }
         }
+
+        return medianPtr;
     }
 
 } // namespace bias
