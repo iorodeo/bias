@@ -1,5 +1,6 @@
 #include "background_data_ufmf.hpp"
 #include "stamped_image.hpp"
+#include <cstring>
 
 namespace bias
 { 
@@ -11,6 +12,7 @@ namespace bias
         numCols_ = 0;
         binPtr_ = NULL;
         cntPtr_ = NULL;
+        isFirst_ = true;
     }
 
 
@@ -34,7 +36,7 @@ namespace bias
                 new unsigned long[numRows_*numCols_],
                 std::default_delete<unsigned long[]>()
                 );
-
+        clear();
     }
 
 
@@ -55,13 +57,25 @@ namespace bias
                 bin = pix/binSize_; 
 
                 binInd = col + numCols_*row + (numRows_*numCols_)*bin;
-                *(binPtr + binInd) += 1;
-
                 cntInd = col + numCols_*row;
-                *(cntPtr + cntInd) += 1;
-            }
-        }
 
+                if (isFirst_)
+                {
+                    *(binPtr + binInd) = 1;
+                    *(cntPtr + cntInd) = 1;
+                }
+                else
+                {
+                    *(binPtr + binInd) += 1;
+                    *(cntPtr + cntInd) += 1;
+                }
+            } // for col
+        } // for row
+
+        if (isFirst_)
+        {
+            isFirst_ = false;
+        }
     }
 
 
@@ -78,46 +92,55 @@ namespace bias
 
         float medianScale = float(binSize_);
         float medianShift = (medianScale - 1.0)/2.0;
-        float medianTmp;
+        float median;
 
-        std::shared_ptr<float> medianPtr = std::shared_ptr<float>(
+        std::shared_ptr<float> medianPtrShared = std::shared_ptr<float>(
                 new float[numRows_*numCols_],
                 std::default_delete<float[]>()
                 );
 
-        float *medianPtrTmp = medianPtr.get();  
+        float *medianPtr = medianPtrShared.get();  
 
-        for (unsigned int i=0; i<numRows_; i++)
+        for (unsigned int row=0; row<numRows_; row++)
         {
-            for (unsigned int j=0; j<numCols_; j++)
+            for (unsigned int col=0; col<numCols_; col++)
             {
-                cntTotal = *(cntPtr + j + numCols_*i);
+                // Get total and half total # of counts for current pixel
+                cntTotal = *(cntPtr + col + numCols_*row);
                 cntHalf = cntTotal/2;
+
+                // Find first bin such that at least half of all counts are in a 
+                // bin with a value smaller than of equal to itself. 
                 for (bin=0,cntCurrent=0; bin<numBins_, cntCurrent<=cntHalf; bin++)
                 {
-                    binValue = *(binPtr + j+ numCols_*i + (numRows_*numCols_)*bin);  
+                    binValue = *(binPtr + col + numCols_*row + (numRows_*numCols_)*bin);  
                     cntCurrent += binValue;
                 }
 
+                // Compute the median bin value
                 if ((cntTotal%2!=0) || ((cntHalf-(cntCurrent-binValue)) > 1))
                 {
-                    medianTmp = float(bin);
-
+                    median = float(bin);
                 }
-
                 else
                 {
-                    medianTmp = (float(bin)-0.5);
+                    median = (float(bin)-0.5);
                 }
 
-                medianTmp = medianScale*medianTmp + medianShift;
-                *(medianPtrTmp + j + numCols_*i) = medianTmp;
+                // Adjust to get the median pixal value
+                median = medianScale*median + medianShift;
+                *(medianPtr + col + numCols_*row) = median;
 
             } // for j
 
         } // for i
 
-        return medianPtr;
+        return medianPtrShared;
+    }
+
+    void BackgroundData_ufmf::clear()
+    {
+        isFirst_ = true;
     }
 
 } // namespace bias

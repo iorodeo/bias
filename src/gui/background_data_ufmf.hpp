@@ -17,6 +17,7 @@ namespace bias
                     );
             void addImage(StampedImage stampedImg);
             std::shared_ptr<float> getMedians();
+            void clear();
 
         private:
             std::shared_ptr<unsigned int>  binPtr_;
@@ -25,6 +26,7 @@ namespace bias
             unsigned int numCols_;
             unsigned int numBins_;
             unsigned int binSize_;
+            bool isFirst_;
 
     };
 }

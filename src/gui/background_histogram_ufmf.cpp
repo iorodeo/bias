@@ -144,7 +144,10 @@ namespace bias
                     bgNewDataQueuePtr_ -> signalNotEmpty();
                     bgNewDataQueuePtr_ -> releaseLock();
                     backgroundData = backgroundDataTmp;
+
+                    // Clear out old data
                     count = 0;
+                    backgroundData.clear();
                 }
             }
 
