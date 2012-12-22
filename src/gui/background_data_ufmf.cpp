@@ -12,7 +12,6 @@ namespace bias
         numCols_ = 0;
         binPtr_ = NULL;
         cntPtr_ = NULL;
-        isFirst_ = true;
     }
 
 
@@ -59,23 +58,10 @@ namespace bias
                 binInd = col + numCols_*row + (numRows_*numCols_)*bin;
                 cntInd = col + numCols_*row;
 
-                if (isFirst_)
-                {
-                    *(binPtr + binInd) = 1;
-                    *(cntPtr + cntInd) = 1;
-                }
-                else
-                {
-                    *(binPtr + binInd) += 1;
-                    *(cntPtr + cntInd) += 1;
-                }
-            } // for col
-        } // for row
-
-        if (isFirst_)
-        {
-            isFirst_ = false;
-        }
+                *(binPtr + binInd) += 1;
+                *(cntPtr + cntInd) += 1;
+            } 
+        } 
     }
 
 
@@ -140,7 +126,8 @@ namespace bias
 
     void BackgroundData_ufmf::clear()
     {
-        isFirst_ = true;
+        memset(binPtr_.get(), 0, numRows_*numCols_*numBins_*sizeof(unsigned int));
+        memset(cntPtr_.get(), 0, numRows_*numCols_*sizeof(unsigned long));
     }
 
 } // namespace bias

@@ -90,7 +90,7 @@ namespace bias
                     emit imageLoggingError(errorId, errorMsg);
                     errorFlag = true;
                 }
-                //std::cout << "queue size: " << logQueueSize << std::endl;
+                std::cout << "queue size: " << logQueueSize << std::endl;
 
                 // Add frame to video writer
                 try 

@@ -26,8 +26,6 @@ namespace bias
             unsigned int numCols_;
             unsigned int numBins_;
             unsigned int binSize_;
-            bool isFirst_;
-
     };
 }
 
