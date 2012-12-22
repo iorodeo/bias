@@ -4,7 +4,7 @@
 #include "video_writer.hpp"
 #include <memory>
 #include <QPointer>
-#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/core/core.hpp>
 
 class QThreadPool;
 
@@ -34,12 +34,14 @@ namespace bias
         protected:
 
             bool isFirst_;
+            cv::Mat medianImage_;
             QPointer<QThreadPool> threadPoolPtr_;
             QPointer<BackgroundHistogram_ufmf> bgHistogramPtr_;
             QPointer<BackgroundMedian_ufmf> bgMedianPtr_;
             std::shared_ptr<LockableQueue<StampedImage>> bgImageQueuePtr_;
             std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgNewDataQueuePtr_;
             std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr_;
+            std::shared_ptr<LockableQueue<cv::Mat>> medianMatQueuePtr_;
 
             void checkImageFormat(StampedImage stampedImg);
             void setupOutput(StampedImage stampedImg);

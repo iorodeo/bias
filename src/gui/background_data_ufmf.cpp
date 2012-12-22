@@ -1,6 +1,7 @@
 #include "background_data_ufmf.hpp"
 #include "stamped_image.hpp"
 #include <cstring>
+#include <opencv2/core/core.hpp>
 
 namespace bias
 { 
@@ -64,6 +65,59 @@ namespace bias
         } 
     }
 
+    cv::Mat BackgroundData_ufmf::getMedianImage()
+    {
+        unsigned int bin;
+        unsigned int binValue;
+        unsigned int *binPtr = binPtr_.get();
+
+        unsigned long cntTotal;
+        unsigned long cntHalf;
+        unsigned long cntCurrent;
+        unsigned long *cntPtr = cntPtr_.get();
+
+        float medianScale = float(binSize_);
+        float medianShift = (medianScale - 1.0)/2.0;
+        float median;
+
+        cv::Mat medianMat(numRows_, numCols_, CV_8UC1);
+
+        for (unsigned int row=0; row<numRows_; row++)
+        {
+            for (unsigned int col=0; col<numCols_; col++)
+            {
+                // Get total and half total # of counts for current pixel
+                cntTotal = *(cntPtr + col + numCols_*row);
+                cntHalf = cntTotal/2;
+
+                // Find first bin such that at least half of all counts are in a 
+                // bin with a value smaller than of equal to itself. 
+                for (bin=0,cntCurrent=0; bin<numBins_, cntCurrent<=cntHalf; bin++)
+                {
+                    binValue = *(binPtr + col + numCols_*row + (numRows_*numCols_)*bin);  
+                    cntCurrent += binValue;
+                }
+
+                // Compute the median bin value
+                if ((cntTotal%2!=0) || ((cntHalf-(cntCurrent-binValue)) > 1))
+                {
+                    median = float(bin);
+                }
+                else
+                {
+                    median = (float(bin)-0.5);
+                }
+
+                // Adjust to get the median pixal value
+                median = medianScale*median + medianShift;
+                medianMat.at<uchar>(row,col) = uchar(median);
+
+            } // for j
+
+        } // for i
+
+        return medianMat;
+    }
 
     std::shared_ptr<float> BackgroundData_ufmf::getMedians()
     {

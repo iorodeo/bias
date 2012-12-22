@@ -2,6 +2,8 @@
 #define BIAS_BACKGROUND_DATA_UFMF_HPP
 #include <memory>
 
+namespace cv {class Mat;}
+
 namespace bias
 {
     class StampedImage;
@@ -17,6 +19,7 @@ namespace bias
                     );
             void addImage(StampedImage stampedImg);
             std::shared_ptr<float> getMedians();
+            cv::Mat getMedianImage();
             void clear();
 
         private:

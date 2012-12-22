@@ -1,37 +1,46 @@
 #include "background_median_ufmf.hpp"
 #include "background_data_ufmf.hpp"
 #include <iostream>
+#include <opencv2/core/core.hpp>
 
 namespace bias
 { 
     BackgroundMedian_ufmf::BackgroundMedian_ufmf(QObject *parent)
         : QObject(parent)
     { 
-        initialize(NULL,NULL);
+        initialize(NULL,NULL,NULL);
     }
 
 
     BackgroundMedian_ufmf::BackgroundMedian_ufmf( 
             std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgNewDataQueuePtr,
             std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr,
+            std::shared_ptr<LockableQueue<cv::Mat>> medianMatQueuePtr,
             QObject *parent
             ) 
         : QObject(parent)
     {
-        initialize(bgNewDataQueuePtr,bgOldDataQueuePtr);
+        initialize(bgNewDataQueuePtr,bgOldDataQueuePtr,medianMatQueuePtr);
     }
 
 
     void BackgroundMedian_ufmf::initialize(
             std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgNewDataQueuePtr,
-            std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr
+            std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr,
+            std::shared_ptr<LockableQueue<cv::Mat>> medianMatQueuePtr
             )
     {
         ready_ = false;
         stopped_ = true;
         bgNewDataQueuePtr_ = bgNewDataQueuePtr;
         bgOldDataQueuePtr_ = bgOldDataQueuePtr;
-        if ((bgNewDataQueuePtr_ != NULL) && (bgOldDataQueuePtr_))
+        medianMatQueuePtr_ = medianMatQueuePtr;
+
+        bool notNull = true;
+        notNull &= (bgNewDataQueuePtr_ != NULL);
+        notNull &= (bgOldDataQueuePtr_ != NULL);
+        notNull &= (medianMatQueuePtr_ != NULL);
+        if (notNull)
         {
             ready_ = true;
         }
@@ -49,7 +58,7 @@ namespace bias
         bool done = false;
         bool isFirst = true;
         BackgroundData_ufmf backgroundData;
-        std::shared_ptr<float> medianData;
+        cv::Mat medianImage;
 
         if (!ready_) 
         { 
@@ -77,8 +86,11 @@ namespace bias
             std::cout << "*** new median data" << std::endl;
 
             // Compute median
-            medianData = backgroundData.getMedians();
+            medianImage = backgroundData.getMedianImage();
 
+            medianMatQueuePtr_ -> acquireLock();
+            medianMatQueuePtr_ -> push(medianImage);
+            medianMatQueuePtr_ -> releaseLock();
 
             // Put data back into outgoing queue 
             bgOldDataQueuePtr_ -> acquireLock();

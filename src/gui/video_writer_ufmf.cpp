@@ -37,6 +37,7 @@ namespace bias
         bgImageQueuePtr_ = std::make_shared<LockableQueue<StampedImage>>();
         bgNewDataQueuePtr_ = std::make_shared<LockableQueue<BackgroundData_ufmf>>();
         bgOldDataQueuePtr_ = std::make_shared<LockableQueue<BackgroundData_ufmf>>();
+        medianMatQueuePtr_ = std::make_shared<LockableQueue<cv::Mat>>();
     }
 
 
@@ -51,6 +52,7 @@ namespace bias
         // On first call - setup output file, background modeling, etc
         if (isFirst_)
         {
+            medianImage_ = stampedImg.image;
             checkImageFormat(stampedImg);
             startBackgroundModeling();
             setupOutput(stampedImg);
@@ -68,6 +70,16 @@ namespace bias
                 bgImageQueuePtr_ -> signalNotEmpty();
             }
             bgImageQueuePtr_ -> releaseLock();
+
+            // Get median image if available
+            medianMatQueuePtr_ -> acquireLock();
+            if ( !(medianMatQueuePtr_ -> empty()))
+            {
+                medianImage_ = medianMatQueuePtr_ -> front();
+                medianMatQueuePtr_ -> pop();
+                std::cout << " *** got median image " << std::endl;
+            }
+            medianMatQueuePtr_ -> releaseLock();
 
         }
         frameCount_++;
@@ -105,6 +117,7 @@ namespace bias
         bgImageQueuePtr_ -> clear();
         bgNewDataQueuePtr_ -> clear();
         bgOldDataQueuePtr_ -> clear();
+        medianMatQueuePtr_ -> clear();
 
         bgHistogramPtr_ = new BackgroundHistogram_ufmf(
                 bgImageQueuePtr_,
@@ -114,7 +127,8 @@ namespace bias
 
         bgMedianPtr_ = new BackgroundMedian_ufmf(
                 bgNewDataQueuePtr_,
-                bgOldDataQueuePtr_
+                bgOldDataQueuePtr_,
+                medianMatQueuePtr_
                 );
 
         threadPoolPtr_ -> start(bgHistogramPtr_);

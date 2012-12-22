@@ -5,6 +5,8 @@
 #include <QRunnable>
 #include "lockable.hpp"
 
+namespace cv {class Mat;}
+
 namespace bias
 {
     class BackgroundData_ufmf;
@@ -20,11 +22,13 @@ namespace bias
             BackgroundMedian_ufmf( 
                     std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgNewDataQueuePtr,
                     std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr,
+                    std::shared_ptr<LockableQueue<cv::Mat>> medianMatQueuePtr,
                     QObject *parent=0
                     );
             void initialize(
                     std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgNewDataQueuePtr,
-                    std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr
+                    std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr,
+                    std::shared_ptr<LockableQueue<cv::Mat>> medianMatQueuePtr
                     );
             void stop();
 
@@ -34,7 +38,7 @@ namespace bias
             // Queues of incoming and outgoing background data for median calculation
             std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgNewDataQueuePtr_;
             std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr_;
-
+            std::shared_ptr<LockableQueue<cv::Mat>> medianMatQueuePtr_;
             void run();
 
     };
