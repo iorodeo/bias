@@ -125,65 +125,6 @@ namespace bias
         return medianMat;
     }
 
-    std::shared_ptr<float> BackgroundData_ufmf::getMedians()
-    {
-        unsigned int bin;
-        unsigned int binValue;
-        unsigned int *binPtr = binPtr_.get();
-
-        unsigned long cntTotal;
-        unsigned long cntHalf;
-        unsigned long cntCurrent;
-        unsigned long *cntPtr = cntPtr_.get();
-
-        float medianScale = float(binSize_);
-        float medianShift = (medianScale - 1.0)/2.0;
-        float median;
-
-        std::shared_ptr<float> medianPtrShared = std::shared_ptr<float>(
-                new float[numRows_*numCols_],
-                std::default_delete<float[]>()
-                );
-
-        float *medianPtr = medianPtrShared.get();  
-
-        for (unsigned int row=0; row<numRows_; row++)
-        {
-            for (unsigned int col=0; col<numCols_; col++)
-            {
-                // Get total and half total # of counts for current pixel
-                cntTotal = *(cntPtr + col + numCols_*row);
-                cntHalf = cntTotal/2;
-
-                // Find first bin such that at least half of all counts are in a 
-                // bin with a value smaller than of equal to itself. 
-                for (bin=0,cntCurrent=0; bin<numBins_, cntCurrent<=cntHalf; bin++)
-                {
-                    binValue = *(binPtr + col + numCols_*row + (numRows_*numCols_)*bin);  
-                    cntCurrent += binValue;
-                }
-
-                // Compute the median bin value
-                if ((cntTotal%2!=0) || ((cntHalf-(cntCurrent-binValue)) > 1))
-                {
-                    median = float(bin-1);
-                }
-                else
-                {
-                    median = (float(bin-1)-0.5);
-                }
-
-                // Adjust to get the median pixal value
-                median = medianScale*median + medianShift;
-                *(medianPtr + col + numCols_*row) = median;
-
-            } // for j
-
-        } // for i
-
-        return medianPtrShared;
-    }
-
     void BackgroundData_ufmf::clear()
     {
         memset(binPtr_.get(), 0, numRows_*numCols_*numBins_*sizeof(unsigned int));

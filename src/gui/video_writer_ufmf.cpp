@@ -49,10 +49,16 @@ namespace bias
 
     void VideoWriter_ufmf::addFrame(StampedImage stampedImg) 
     {
+        bool haveNewMedianImage = false;
+
+        currentImage_ = stampedImg.image;
+
         // On first call - setup output file, background modeling, etc
         if (isFirst_)
         {
             medianImage_ = stampedImg.image;
+            cv::add(medianImage_,  10, upperBoundImage_);
+            cv::subtract(medianImage_, 10, lowerBoundImage_); 
             checkImageFormat(stampedImg);
             startBackgroundModeling();
             setupOutput(stampedImg);
@@ -77,9 +83,15 @@ namespace bias
             {
                 medianImage_ = medianMatQueuePtr_ -> front();
                 medianMatQueuePtr_ -> pop();
+                haveNewMedianImage = true;
                 std::cout << " *** got median image " << std::endl;
             }
             medianMatQueuePtr_ -> releaseLock();
+            if (haveNewMedianImage)
+            {
+                cv::add(medianImage_,  20, upperBoundImage_);
+                cv::subtract(medianImage_, 20, lowerBoundImage_); 
+            }
 
         }
         frameCount_++;
@@ -88,7 +100,9 @@ namespace bias
     // Debug ----------------------------------------------------------------------------
     cv::Mat VideoWriter_ufmf::getMedianImage()
     {
-        return medianImage_;
+        cv::Mat tempImage;
+        cv::inRange(currentImage_, lowerBoundImage_, upperBoundImage_, tempImage);
+        return tempImage;
     }
     // -----------------------------------------------------------------------------------
 

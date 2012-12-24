@@ -40,6 +40,9 @@ namespace bias
 
             bool isFirst_;
             cv::Mat medianImage_;
+            cv::Mat upperBoundImage_;
+            cv::Mat lowerBoundImage_;
+            cv::Mat currentImage_;
             QPointer<QThreadPool> threadPoolPtr_;
             QPointer<BackgroundHistogram_ufmf> bgHistogramPtr_;
             QPointer<BackgroundMedian_ufmf> bgMedianPtr_;
