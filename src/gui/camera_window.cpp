@@ -133,7 +133,7 @@ namespace bias
 
         // Debug  - display background median image from ufmf logger
         // -------------------------------------------------------------------
-        if (videoFileFormat_ == VIDEOFILE_FORMAT_UFMF)
+        if (logging_ && (videoFileFormat_ == VIDEOFILE_FORMAT_UFMF))
         {
             imageLoggerPtr_ -> acquireLock();
             cv::Mat medianMat = imageLoggerPtr_ -> getBackgroundMedianImage();

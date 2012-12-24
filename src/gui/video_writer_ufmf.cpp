@@ -14,8 +14,9 @@ namespace bias
 {
     // Static Constants
     const unsigned int VideoWriter_ufmf::MAX_THREAD_COUNT = 8;
-    const unsigned int VideoWriter_ufmf::DEFAULT_FRAME_SKIP = 1;
     const QString VideoWriter_ufmf::DUMMY_FILENAME("dummy.ufmf");
+    const unsigned int VideoWriter_ufmf::DEFAULT_FRAME_SKIP = 1;
+    const unsigned int VideoWriter_ufmf::DEFAULT_BACKGROUND_THRESHOLD = 40;
 
 
     VideoWriter_ufmf::VideoWriter_ufmf(QObject *parent) 
@@ -27,6 +28,7 @@ namespace bias
         : VideoWriter(fileName,parent) 
     {
         isFirst_ = true;
+        backgroundThreshold_ = DEFAULT_BACKGROUND_THRESHOLD;
         setFrameSkip(DEFAULT_FRAME_SKIP);
 
         // Create thread pool for background modelling
@@ -56,14 +58,17 @@ namespace bias
         // On first call - setup output file, background modeling, etc
         if (isFirst_)
         {
-            medianImage_ = stampedImg.image;
-            cv::add(medianImage_,  10, upperBoundImage_);
-            cv::subtract(medianImage_, 10, lowerBoundImage_); 
             checkImageFormat(stampedImg);
+
+            bgMedianImage_ = stampedImg.image;
+            cv::add(bgMedianImage_,  backgroundThreshold_, bgUpperBoundImage_);
+            cv::subtract(bgMedianImage_, backgroundThreshold_, bgLowerBoundImage_); 
+
             startBackgroundModeling();
             setupOutput(stampedImg);
             isFirst_ = false;
         }
+
 
         // Process frame on every frame count divisible by the frame skip parameter
         if (frameCount_%frameSkip_==0)
@@ -81,16 +86,17 @@ namespace bias
             medianMatQueuePtr_ -> acquireLock();
             if ( !(medianMatQueuePtr_ -> empty()))
             {
-                medianImage_ = medianMatQueuePtr_ -> front();
+                bgMedianImage_ = medianMatQueuePtr_ -> front();
                 medianMatQueuePtr_ -> pop();
                 haveNewMedianImage = true;
                 std::cout << " *** got median image " << std::endl;
             }
             medianMatQueuePtr_ -> releaseLock();
+
             if (haveNewMedianImage)
             {
-                cv::add(medianImage_,  20, upperBoundImage_);
-                cv::subtract(medianImage_, 20, lowerBoundImage_); 
+                cv::add(bgMedianImage_,  backgroundThreshold_, bgUpperBoundImage_);
+                cv::subtract(bgMedianImage_, backgroundThreshold_, bgLowerBoundImage_); 
             }
 
         }
@@ -101,7 +107,7 @@ namespace bias
     cv::Mat VideoWriter_ufmf::getMedianImage()
     {
         cv::Mat tempImage;
-        cv::inRange(currentImage_, lowerBoundImage_, upperBoundImage_, tempImage);
+        cv::inRange(currentImage_, bgLowerBoundImage_, bgUpperBoundImage_, tempImage);
         return tempImage;
     }
     // -----------------------------------------------------------------------------------

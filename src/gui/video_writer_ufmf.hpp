@@ -32,17 +32,19 @@ namespace bias
             // ----------------------
 
             static const unsigned int MAX_THREAD_COUNT;
-            static const unsigned int DEFAULT_FRAME_SKIP;
             static const QString DUMMY_FILENAME;
+            static const unsigned int DEFAULT_FRAME_SKIP;
+            static const unsigned int DEFAULT_BACKGROUND_THRESHOLD;
 
 
         protected:
 
             bool isFirst_;
-            cv::Mat medianImage_;
-            cv::Mat upperBoundImage_;
-            cv::Mat lowerBoundImage_;
+            unsigned int backgroundThreshold_;
             cv::Mat currentImage_;
+            cv::Mat bgMedianImage_;
+            cv::Mat bgUpperBoundImage_;
+            cv::Mat bgLowerBoundImage_;
             QPointer<QThreadPool> threadPoolPtr_;
             QPointer<BackgroundHistogram_ufmf> bgHistogramPtr_;
             QPointer<BackgroundMedian_ufmf> bgMedianPtr_;
