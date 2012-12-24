@@ -8,6 +8,10 @@
 #include "camera_fwd.hpp"
 #include "lockable.hpp"
 
+// Debugging -------------------
+#include <opencv2/core/core.hpp>
+// -----------------------------
+
 class QString;
 
 
@@ -37,6 +41,10 @@ namespace bias
                     );
 
             void stop();
+
+            // Debugging ----------------------
+            cv::Mat getBackgroundMedianImage();
+            // --------------------------------
 
         signals:
             void imageLoggingError(unsigned int errorId, QString errorMsg);

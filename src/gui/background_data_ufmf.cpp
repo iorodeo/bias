@@ -101,12 +101,18 @@ namespace bias
                 // Compute the median bin value
                 if ((cntTotal%2!=0) || ((cntHalf-(cntCurrent-binValue)) > 1))
                 {
-                    median = float(bin);
+                    median = float(bin-1);
                 }
                 else
                 {
-                    median = (float(bin)-0.5);
+                    median = (float(bin-1)-0.5);
                 }
+
+                // Median clamp - in case of values outside of range (shouldn't happen)
+                // --------------------------------------------------------------------
+                //median = (median < 0)   ?   0 : median;
+                //median = (median > 255) ? 255 : median;
+                //---------------------------------------------------------------------
 
                 // Adjust to get the median pixal value
                 median = medianScale*median + medianShift;
@@ -160,11 +166,11 @@ namespace bias
                 // Compute the median bin value
                 if ((cntTotal%2!=0) || ((cntHalf-(cntCurrent-binValue)) > 1))
                 {
-                    median = float(bin);
+                    median = float(bin-1);
                 }
                 else
                 {
-                    median = (float(bin)-0.5);
+                    median = (float(bin-1)-0.5);
                 }
 
                 // Adjust to get the median pixal value

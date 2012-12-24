@@ -27,9 +27,14 @@ namespace bias
             virtual ~VideoWriter_ufmf();
             virtual void addFrame(StampedImage stampedImg);
 
+            // Debug ----------------
+            cv::Mat getMedianImage();
+            // ----------------------
+
             static const unsigned int MAX_THREAD_COUNT;
             static const unsigned int DEFAULT_FRAME_SKIP;
             static const QString DUMMY_FILENAME;
+
 
         protected:
 

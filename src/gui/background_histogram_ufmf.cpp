@@ -10,7 +10,7 @@ namespace bias
     // ------------------------------------------------
     const unsigned int DEFAULT_NUM_BINS = 256;
     const unsigned int DEFAULT_BIN_SIZE = 1;
-    const unsigned int DEFAULT_MIN_UPDATE_COUNT = 50;
+    const unsigned int DEFAULT_MIN_UPDATE_COUNT = 100;
     // -------------------------------------------------
 
 

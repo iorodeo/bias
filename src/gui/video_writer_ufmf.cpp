@@ -85,6 +85,13 @@ namespace bias
         frameCount_++;
     }
 
+    // Debug ----------------------------------------------------------------------------
+    cv::Mat VideoWriter_ufmf::getMedianImage()
+    {
+        return medianImage_;
+    }
+    // -----------------------------------------------------------------------------------
+
 
     void VideoWriter_ufmf::checkImageFormat(StampedImage stampedImg)
     {

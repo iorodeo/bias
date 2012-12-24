@@ -7,6 +7,10 @@
 #include <iostream>
 #include <opencv2/core/core.hpp>
 
+// Debug -----------------------
+#include "video_writer_ufmf.hpp"
+// -----------------------------
+
 namespace bias
 {
     const unsigned int MAX_LOG_QUEUE_SIZE = 1000;
@@ -48,6 +52,16 @@ namespace bias
     {
         stopped_ = true;
     }
+
+    // Debug ----------------------------------------------------------------------------
+    cv::Mat ImageLogger::getBackgroundMedianImage()
+    {
+        // Very unsafe !!!!!
+        VideoWriter_ufmf *videoWriter_ufmf_Ptr = (VideoWriter_ufmf*) videoWriterPtr_.get();
+        return videoWriter_ufmf_Ptr -> getMedianImage();
+
+    }
+    // ----------------------------------------------------------------------------------
 
     void ImageLogger::run()
     {

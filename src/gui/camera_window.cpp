@@ -131,6 +131,21 @@ namespace bias
         imageDispatcherPtr_ -> releaseLock();
         // -------------------------------------------------------------------
 
+        // Debug  - display background median image from ufmf logger
+        // -------------------------------------------------------------------
+        if (videoFileFormat_ == VIDEOFILE_FORMAT_UFMF)
+        {
+            imageLoggerPtr_ -> acquireLock();
+            cv::Mat medianMat = imageLoggerPtr_ -> getBackgroundMedianImage();
+            QImage medianImg = matToQImage(medianMat);
+            imageLoggerPtr_ -> releaseLock();
+            if (!img.isNull())
+            {
+                pluginPixmapOriginal_ = QPixmap::fromImage(medianImg);
+            }
+        }
+        // -------------------------------------------------------------------
+
         // Set pixmaps and update image labels - note need to add pluginPixmap
         if (!img.isNull()) 
         {
@@ -459,7 +474,7 @@ namespace bias
         flipVert_ = false;
         flipHorz_ = false;
         imageRotation_ = IMAGE_ROTATION_0;
-        videoFileFormat_ = VIDEOFILE_FORMAT_FMF;
+        videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
 
         imageDisplayFreq_ = DEFAULT_IMAGE_DISPLAY_FREQ;
         cameraPtr_ = std::make_shared<Lockable<Camera>>(guid);
