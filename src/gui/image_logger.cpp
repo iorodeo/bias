@@ -53,15 +53,15 @@ namespace bias
         stopped_ = true;
     }
 
-    // Debug ----------------------------------------------------------------------------
-    cv::Mat ImageLogger::getBackgroundMedianImage()
-    {
-        // Very unsafe !!!!!
-        VideoWriter_ufmf *videoWriter_ufmf_Ptr = (VideoWriter_ufmf*) videoWriterPtr_.get();
-        return videoWriter_ufmf_Ptr -> getMedianImage();
-
-    }
-    // ----------------------------------------------------------------------------------
+    //// Debug ----------------------------------------------------------------------------
+    //cv::Mat ImageLogger::getBackgroundMembershipImage()
+    //{
+    //    // Very unsafe !!!!!
+    //    VideoWriter_ufmf *videoWriter_ufmf_Ptr = (VideoWriter_ufmf*) videoWriterPtr_.get();
+    //    cv::Mat tmpImg = videoWriter_ufmf_Ptr -> getMembershipImage();
+    //    return tmpImg;
+    //}
+    //// ----------------------------------------------------------------------------------
 
     void ImageLogger::run()
     {
@@ -104,7 +104,7 @@ namespace bias
                     emit imageLoggingError(errorId, errorMsg);
                     errorFlag = true;
                 }
-                //std::cout << "queue size: " << logQueueSize << std::endl;
+                std::cout << "queue size: " << logQueueSize << std::endl;
 
                 // Add frame to video writer
                 try 

@@ -42,9 +42,9 @@ namespace bias
 
             void stop();
 
-            // Debugging ----------------------
-            cv::Mat getBackgroundMedianImage();
-            // --------------------------------
+            // Debugging --------------------------
+            cv::Mat getBackgroundMembershipImage();
+            // ------------------------------------
 
         signals:
             void imageLoggingError(unsigned int errorId, QString errorMsg);

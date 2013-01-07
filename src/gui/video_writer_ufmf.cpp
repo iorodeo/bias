@@ -15,7 +15,7 @@ namespace bias
     // Static Constants
     const unsigned int VideoWriter_ufmf::MAX_THREAD_COUNT = 8;
     const QString VideoWriter_ufmf::DUMMY_FILENAME("dummy.ufmf");
-    const unsigned int VideoWriter_ufmf::DEFAULT_FRAME_SKIP = 1;
+    const unsigned int VideoWriter_ufmf::DEFAULT_FRAME_SKIP = 2;
     const unsigned int VideoWriter_ufmf::DEFAULT_BACKGROUND_THRESHOLD = 40;
 
 
@@ -40,6 +40,7 @@ namespace bias
         bgNewDataQueuePtr_ = std::make_shared<LockableQueue<BackgroundData_ufmf>>();
         bgOldDataQueuePtr_ = std::make_shared<LockableQueue<BackgroundData_ufmf>>();
         medianMatQueuePtr_ = std::make_shared<LockableQueue<cv::Mat>>();
+
     }
 
 
@@ -61,6 +62,7 @@ namespace bias
             checkImageFormat(stampedImg);
 
             bgMedianImage_ = stampedImg.image;
+            bgMembershipImage_.create(stampedImg.image.rows, stampedImg.image.cols,CV_8UC1);
             cv::add(bgMedianImage_,  backgroundThreshold_, bgUpperBoundImage_);
             cv::subtract(bgMedianImage_, backgroundThreshold_, bgLowerBoundImage_); 
 
@@ -73,6 +75,7 @@ namespace bias
         // Process frame on every frame count divisible by the frame skip parameter
         if (frameCount_%frameSkip_==0)
         {
+
             // Add frame to background image queue if it is empty 
             bgImageQueuePtr_ -> acquireLock();
             if (bgImageQueuePtr_ -> empty())
@@ -89,7 +92,7 @@ namespace bias
                 bgMedianImage_ = medianMatQueuePtr_ -> front();
                 medianMatQueuePtr_ -> pop();
                 haveNewMedianImage = true;
-                std::cout << " *** got median image " << std::endl;
+                //std::cout << " *** got median image " << std::endl;
             }
             medianMatQueuePtr_ -> releaseLock();
 
@@ -99,16 +102,45 @@ namespace bias
                 cv::subtract(bgMedianImage_, backgroundThreshold_, bgLowerBoundImage_); 
             }
 
+            //updateMembershipImage();
+            //loopTest();
+
         }
         frameCount_++;
     }
 
     // Debug ----------------------------------------------------------------------------
-    cv::Mat VideoWriter_ufmf::getMedianImage()
+    void VideoWriter_ufmf::loopTest()
     {
-        cv::Mat tempImage;
-        cv::inRange(currentImage_, bgLowerBoundImage_, bgUpperBoundImage_, tempImage);
-        return tempImage;
+        uint8_t *curPtr = (uint8_t*) currentImage_.data;
+        uint8_t *memPtr = (uint8_t*) bgMembershipImage_.data;
+        uint8_t *uppPtr = (uint8_t*) bgUpperBoundImage_.data;
+        uint8_t *lowPtr = (uint8_t*) bgLowerBoundImage_.data;
+
+        uint8_t pixVal;
+
+        for (unsigned int i=0; i<currentImage_.rows*currentImage_.cols; i++)
+        {
+            pixVal = *(curPtr + i);
+            if ((pixVal < *(lowPtr+i)) || (pixVal > *(uppPtr+i)))
+            {
+                *(memPtr+i) = 255;
+            }
+            else
+            {
+                *(memPtr+i) = 0;
+            }
+        }
+    }
+
+    void VideoWriter_ufmf::updateMembershipImage()
+    {
+        cv::inRange(currentImage_, bgLowerBoundImage_, bgUpperBoundImage_, bgMembershipImage_);
+    }
+
+    cv::Mat VideoWriter_ufmf::getMembershipImage()
+    {
+        return bgMembershipImage_;
     }
     // -----------------------------------------------------------------------------------
 

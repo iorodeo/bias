@@ -28,7 +28,9 @@ namespace bias
             virtual void addFrame(StampedImage stampedImg);
 
             // Debug ----------------
-            cv::Mat getMedianImage();
+            void loopTest();
+            void updateMembershipImage();
+            cv::Mat getMembershipImage();
             // ----------------------
 
             static const unsigned int MAX_THREAD_COUNT;
@@ -36,18 +38,21 @@ namespace bias
             static const unsigned int DEFAULT_FRAME_SKIP;
             static const unsigned int DEFAULT_BACKGROUND_THRESHOLD;
 
-
         protected:
 
             bool isFirst_;
             unsigned int backgroundThreshold_;
+
             cv::Mat currentImage_;
             cv::Mat bgMedianImage_;
             cv::Mat bgUpperBoundImage_;
             cv::Mat bgLowerBoundImage_;
+            cv::Mat bgMembershipImage_;
+
             QPointer<QThreadPool> threadPoolPtr_;
             QPointer<BackgroundHistogram_ufmf> bgHistogramPtr_;
             QPointer<BackgroundMedian_ufmf> bgMedianPtr_;
+
             std::shared_ptr<LockableQueue<StampedImage>> bgImageQueuePtr_;
             std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgNewDataQueuePtr_;
             std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr_;
@@ -58,9 +63,7 @@ namespace bias
 
             void startBackgroundModeling();
             void stopBackgroundModeling();
-            
     };
-   
 }
 
 #endif // #ifndef BIAS_VIDEO_WRITER_UFMF_HPP

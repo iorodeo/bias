@@ -83,7 +83,7 @@ namespace bias
             bgNewDataQueuePtr_ -> pop();
             bgNewDataQueuePtr_ -> releaseLock();
 
-            std::cout << "*** new median data" << std::endl;
+            //std::cout << "*** new median data" << std::endl;
 
             // Compute median
             medianImage = backgroundData.getMedianImage();

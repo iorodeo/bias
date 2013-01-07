@@ -96,7 +96,7 @@ namespace bias
             bgImageQueuePtr_ -> pop();
             bgImageQueuePtr_ -> releaseLock();
 
-            std::cout << "* new bg image, count = " << count << std::endl;
+            //std::cout << "* new bg image, count = " << count << std::endl;
             if (isFirst)
             {
                 // Create two new background data objects - put one in old data queue.
