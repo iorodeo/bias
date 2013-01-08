@@ -249,6 +249,7 @@
      <addaction name="actionLoggingFormatAVIPtr_"/>
      <addaction name="actionLoggingFormatFMFPtr_"/>
      <addaction name="actionLoggingFormatUFMFPtr_"/>
+     <addaction name="actionLoggingFormatIFMFPtr_"/>
     </widget>
     <addaction name="actionLoggingEnabledPtr_"/>
     <addaction name="menuLoggingFormatPtr_"/>
@@ -618,6 +619,14 @@
    </property>
    <property name="text">
     <string>bmp</string>
+   </property>
+  </action>
+  <action name="actionLoggingFormatIFMFPtr_">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>ifmf</string>
    </property>
   </action>
  </widget>

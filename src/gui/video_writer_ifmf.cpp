@@ -1,4 +1,4 @@
-#include "video_writer_fmf.hpp"
+#include "video_writer_ifmf.hpp"
 #include "basic_types.hpp"
 #include "exception.hpp"
 #include <iostream>
@@ -7,28 +7,30 @@
 
 namespace bias
 {
-    const unsigned int VideoWriter_fmf::DEFAULT_FRAME_SKIP = 4;
-    const unsigned int VideoWriter_fmf::FMF_VERSION = 1;
-    const QString DUMMY_FILENAME("dummy.fmf");
+    const unsigned int VideoWriter_ifmf::DEFAULT_FRAME_SKIP = 1;
+    const unsigned int VideoWriter_ifmf::FMF_VERSION = 1;
+    const QString DUMMY_FILENAME("dummy.ifmf");
 
-    VideoWriter_fmf::VideoWriter_fmf(QObject *parent) 
-        : VideoWriter_fmf(DUMMY_FILENAME, parent) 
+    VideoWriter_ifmf::VideoWriter_ifmf(QObject *parent) 
+        : VideoWriter_ifmf(DUMMY_FILENAME, parent) 
     {}
 
-    VideoWriter_fmf::VideoWriter_fmf(QString fileName, QObject *parent) 
+    VideoWriter_ifmf::VideoWriter_ifmf(QString fileName, QObject *parent) 
         : VideoWriter(fileName, parent)
     {
         numWritten_ = 0;
         isFirst_ = true;
+        rowOffset_ = 0;
+        colOffset_ = 0;
         setFrameSkip(DEFAULT_FRAME_SKIP);
     }
 
-    VideoWriter_fmf::~VideoWriter_fmf()
+    VideoWriter_ifmf::~VideoWriter_ifmf()
     {
         file_.close();
     }
 
-    void VideoWriter_fmf::finish()
+    void VideoWriter_ifmf::finish()
     {
         try
         {
@@ -45,38 +47,62 @@ namespace bias
         }
     }
 
-    void VideoWriter_fmf::addFrame(StampedImage stampedImg)
+    void VideoWriter_ifmf::addFrame(StampedImage stampedImg)
     {
         if (isFirst_)
         {
             setupOutput(stampedImg);
             isFirst_ = false;
+            buffer_.create(stampedImg.image.rows, stampedImg.image.cols,CV_8UC1);
         }
         if (frameCount_%frameSkip_==0)
         {
             //std::cout << "write" << std::endl;
-            try
+
+            // Fill data buffer with every other pixel
+            uint8_t *imgPtr = (uint8_t*) stampedImg.image.data;
+            uint8_t *bufPtr = (uint8_t*) buffer_.data;
+            unsigned int imgInd;
+            unsigned int bufInd;
+            for (unsigned int i=rowOffset_; i<stampedImg.image.rows; i+=2)
             {
-                file_.write((char*) &stampedImg.timeStamp, sizeof(double));
-                file_.write((char*) stampedImg.image.data, size_.width*size_.height*sizeof(char)); 
+                colOffset_ = (rowOffset_ + i)%2;
+                for (unsigned int j=colOffset_; j<stampedImg.image.cols; j+=2)
+                {
+                    imgInd = i*stampedImg.image.step + j;
+                    *(bufPtr + imgInd) = *(imgPtr + imgInd);
+                }
             }
-            catch (std::ifstream::failure &exc)
+
+            // Every other frame - write time stamp and buffer data to file
+            if (rowOffset_ == 1) 
             {
-                unsigned int errorId = ERROR_VIDEO_WRITER_ADD_FRAME;
-                std::string errorMsg("video writer add frame failed:\n\n"); 
-                errorMsg += exc.what();
-                throw RuntimeError(errorId, errorMsg); 
+                try
+                {
+                    file_.write((char*) &stampedImg.timeStamp, sizeof(double));
+                    file_.write((char*) buffer_.data, (buffer_.rows*buffer_.cols)*sizeof(char)); 
+                }
+                catch (std::ifstream::failure &exc)
+                {
+                    unsigned int errorId = ERROR_VIDEO_WRITER_ADD_FRAME;
+                    std::string errorMsg("video writer add frame failed:\n\n"); 
+                    errorMsg += exc.what();
+                    throw RuntimeError(errorId, errorMsg); 
+                }
             }
+
+            std::cout << rowOffset_ << std::endl;
+            rowOffset_ = (rowOffset_ + 1)%2;
             numWritten_++;
         }
         else 
         {
-            //std::cout << "skip" << std::endl;
+            std::cout << "skip" << std::endl;
         }
         frameCount_++;
     }
 
-    void VideoWriter_fmf::setupOutput(StampedImage stampedImg)
+    void VideoWriter_ifmf::setupOutput(StampedImage stampedImg)
     {
         file_.clear();
         file_.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -124,7 +150,7 @@ namespace bias
         catch (std::ifstream::failure &exc)
         {
             unsigned int errorId = ERROR_VIDEO_WRITER_INITIALIZE;
-            std::string errorMsg("video writer unable to write fmf header:\n\n"); 
+            std::string errorMsg("video writer unable to write ifmf header:\n\n"); 
             errorMsg += exc.what();
             throw RuntimeError(errorId, errorMsg); 
         }

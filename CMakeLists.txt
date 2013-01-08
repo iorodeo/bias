@@ -46,12 +46,13 @@ endif()
 
 # Compiler flags
 # -----------------------------------------------------------------------------
+#set(CMAKE_CXX_FLAGS "-std=gnu++0x -O2")
 set(CMAKE_CXX_FLAGS "-std=gnu++0x")
 
 
 # Definitions 
 # -----------------------------------------------------------------------------
-add_definitions(-DDebug)
+ add_definitions(-DDebug)
 
 if(with_fc2)
     add_definitions(-DWITH_FC2)

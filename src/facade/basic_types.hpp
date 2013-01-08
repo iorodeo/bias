@@ -268,7 +268,8 @@ namespace bias {
         VIDEOFILE_FORMAT_BMP,
         VIDEOFILE_FORMAT_AVI,
         VIDEOFILE_FORMAT_FMF,
-        VIDEOFILE_FORMAT_UFMF
+        VIDEOFILE_FORMAT_UFMF,
+        VIDEOFILE_FORMAT_IFMF
     };
 
     enum ImageRotationType

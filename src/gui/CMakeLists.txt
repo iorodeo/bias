@@ -17,6 +17,7 @@ set(
     video_writer_avi.hpp
     video_writer_fmf.hpp
     video_writer_ufmf.hpp
+    video_writer_ifmf.hpp
     background_data_ufmf.hpp
     background_histogram_ufmf.hpp
     background_median_ufmf.hpp
@@ -36,6 +37,7 @@ set(
     video_writer_avi.cpp
     video_writer_fmf.cpp
     video_writer_ufmf.cpp
+    video_writer_ifmf.cpp
     background_data_ufmf.cpp
     background_histogram_ufmf.cpp
     background_median_ufmf.cpp

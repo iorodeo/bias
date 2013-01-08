@@ -15,7 +15,7 @@ namespace bias
     // Static Constants
     const unsigned int VideoWriter_ufmf::MAX_THREAD_COUNT = 8;
     const QString VideoWriter_ufmf::DUMMY_FILENAME("dummy.ufmf");
-    const unsigned int VideoWriter_ufmf::DEFAULT_FRAME_SKIP = 2;
+    const unsigned int VideoWriter_ufmf::DEFAULT_FRAME_SKIP = 1;
     const unsigned int VideoWriter_ufmf::DEFAULT_BACKGROUND_THRESHOLD = 40;
 
 
@@ -103,8 +103,7 @@ namespace bias
             }
 
             //updateMembershipImage();
-            //loopTest();
-
+            loopTest();
         }
         frameCount_++;
     }
@@ -119,16 +118,27 @@ namespace bias
 
         uint8_t pixVal;
 
-        for (unsigned int i=0; i<currentImage_.rows*currentImage_.cols; i++)
+        //for (unsigned int i=0; i<currentImage_.rows*currentImage_.cols; i++)
+        //{
+        //    pixVal = *(curPtr + i);
+        //    if ((pixVal < *(lowPtr+i)) || (pixVal > *(uppPtr+i)))
+        //    {
+        //        *(memPtr+i) = 255;
+        //    }
+        //    else
+        //    {
+        //        *(memPtr+i) = 0;
+        //    }
+        //}
+        
+        unsigned int index;
+        for (unsigned int i=0; i<currentImage_.rows; i=i+2)
         {
-            pixVal = *(curPtr + i);
-            if ((pixVal < *(lowPtr+i)) || (pixVal > *(uppPtr+i)))
+            for (unsigned int j=0; j<currentImage_.cols; j=j+2)
             {
-                *(memPtr+i) = 255;
-            }
-            else
-            {
-                *(memPtr+i) = 0;
+                index = (currentImage_.step*i + j);
+                pixVal = *(curPtr + index);
+                *(memPtr + index/2) = pixVal;
             }
         }
     }

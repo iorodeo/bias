@@ -11,6 +11,7 @@
 #include "video_writer_avi.hpp"
 #include "video_writer_fmf.hpp"
 #include "video_writer_ufmf.hpp"
+#include "video_writer_ifmf.hpp"
 #include <cstdlib>
 #include <cmath>
 #include <QtGui>
@@ -36,6 +37,7 @@ namespace bias
         map.insert(VIDEOFILE_FORMAT_AVI,  QString("avi"));
         map.insert(VIDEOFILE_FORMAT_FMF,  QString("fmf"));
         map.insert(VIDEOFILE_FORMAT_UFMF, QString("ufmf"));
+        map.insert(VIDEOFILE_FORMAT_IFMF, QString("ifmf"));
         return map;
     };
     const QMap<VideoFileFormat, QString> VIDEOFILE_EXTENSION_MAP = createExtensionMap();
@@ -60,10 +62,12 @@ namespace bias
         resizeAllImageLabels();
     }
 
+
     void CameraWindow::resizeEvent(QResizeEvent *event)
     {
         resizeAllImageLabels();
     }
+
 
     void CameraWindow::closeEvent(QCloseEvent *event)
     {
@@ -334,9 +338,10 @@ namespace bias
         // Get Format string
         QPointer<QAction> actionPtr = qobject_cast<QAction *>(sender());
         videoFileFormat_ = actionToVideoFileFormatMap_[actionPtr]; 
-        //std::cout << "video file format: "; 
-        //std::cout << VIDEOFILE_EXTENSION_MAP[videoFileFormat_].toStdString();
-        //std::cout << std::endl;
+
+        std::cout << "video file format: "; 
+        std::cout << VIDEOFILE_EXTENSION_MAP[videoFileFormat_].toStdString();
+        std::cout << std::endl;
     }
 
 
@@ -623,6 +628,13 @@ namespace bias
                );
 
         connect(
+                actionLoggingFormatIFMFPtr_,
+                SIGNAL(triggered()),
+                this,
+                SLOT(actionLoggingFormatTriggered())
+               );
+
+        connect(
                 actionTimerEnabledPtr_,
                 SIGNAL(triggered()),
                 this,
@@ -816,11 +828,13 @@ namespace bias
         loggingFormatActionGroupPtr_ -> addAction(actionLoggingFormatAVIPtr_);
         loggingFormatActionGroupPtr_ -> addAction(actionLoggingFormatFMFPtr_);
         loggingFormatActionGroupPtr_ -> addAction(actionLoggingFormatUFMFPtr_);
+        loggingFormatActionGroupPtr_ -> addAction(actionLoggingFormatIFMFPtr_);
 
         actionToVideoFileFormatMap_[actionLoggingFormatBMPPtr_] = VIDEOFILE_FORMAT_BMP;
         actionToVideoFileFormatMap_[actionLoggingFormatAVIPtr_] = VIDEOFILE_FORMAT_AVI;
         actionToVideoFileFormatMap_[actionLoggingFormatFMFPtr_] = VIDEOFILE_FORMAT_FMF;
         actionToVideoFileFormatMap_[actionLoggingFormatUFMFPtr_] = VIDEOFILE_FORMAT_UFMF;
+        actionToVideoFileFormatMap_[actionLoggingFormatIFMFPtr_] = VIDEOFILE_FORMAT_IFMF;
 
         QMap<QAction*, VideoFileFormat>::iterator it;
         for (
@@ -1148,6 +1162,11 @@ namespace bias
 
                 case VIDEOFILE_FORMAT_UFMF:
                     videoWriterPtr = std::make_shared<VideoWriter_ufmf>();
+                    break;
+
+                case VIDEOFILE_FORMAT_IFMF:
+                    std::cout << "ifmf format" << std::endl;
+                    videoWriterPtr = std::make_shared<VideoWriter_ifmf>();
                     break;
 
                 default:
@@ -1694,6 +1713,7 @@ namespace bias
         captureTimeLabelPtr_ -> setText(stampString);
     }
 
+
     QString CameraWindow::getVideoFileFullPath()
     {
         QString fileExtension = VIDEOFILE_EXTENSION_MAP[videoFileFormat_];
@@ -1706,6 +1726,7 @@ namespace bias
         QString videoFileFullPath = videoFileInfo.absoluteFilePath();
         return videoFileFullPath;
     }
+
 
     QString CameraWindow::getVideoFileFullPathWithGuid()
     {
@@ -1724,6 +1745,7 @@ namespace bias
         QString videoFileFullPath = videoFileInfo.absoluteFilePath();
         return videoFileFullPath;
     }
+
 
     cv::Mat CameraWindow::calcHistogram(cv::Mat mat)
     {
