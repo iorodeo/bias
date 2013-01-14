@@ -26,28 +26,31 @@ namespace bias
 
         private:
 
-            bool haveData_;
-            bool isCompressed_;
+            bool haveData_;              
+            bool isCompressed_;          // true if frame is compressed 
 
-            StampImage stampedImg_;
+            StampedImage stampedImg_;    // original image w/ framenumber and timestamp
+            cv::Mat bgMembership_;       // background membership
 
-            cv::Mat bgMembership_;
+            unsigned int numForeground_; // number of forground pixels
+            unsigned int numPixWritten_; // number of pixels written
 
-            unsigned int numForeground_;
-            unsigned int numPixWritten_;
+            std::shared_ptr<uint16_t> writeRowBuffer_;     // ymins
+            std::shared_ptr<uint16_t> writeColBuffer_;     // xmins
+            std::shared_ptr<uint16_t> writeHeightBuffer_;  // heights
+            std::shared_ptr<uint16_t> writeWidthBuffer_;   // widths
+            std::shared_ptr<uint16_t> numPixWriteBuffer_;  // # times pixel written 
+            std::shared_ptr<uint8_t> imgDataBuffer_;       // image data 
 
-            std::shared_ptr<uint16_t> writeRowBuffer_;
-            std::shared_ptr<uint16_t> writeColBuffer_;
-            std::shared_ptr<uint16_t> writeHeightBuffer_;
-            std::shared_ptr<uint16_t> writeWidthBuffer_;
-            std::shared_ptr<uint16_t> numWrites_;
-            std::shared_ptr<uint8_t> writeDataBuffer_;
+            unsigned long numConectedComp_; // number of connected components
+            unsigned int boxLength_;        // length of boxes or foreground pixels to store
+            unsigned int boxArea_;          // boxLength*boxLength
 
-            unsigned long numConectedComp_;
-            unsigned int boxLength_;
-            unsigned int boxArea_;
-
-            double fgMaxFracCompress_;
+            double fgMaxFracCompress_;      // maximum fraction of pixels that can be in foreground
+                                            // in order for us to compress
+                                            //
+            void allocateBuffers(); 
+                                      
 
     };
 

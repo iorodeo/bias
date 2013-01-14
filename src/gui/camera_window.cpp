@@ -106,12 +106,16 @@ namespace bias
     void CameraWindow::connectButtonClicked()
     {
         (!connected_) ? connectCamera() : disconnectCamera();
+        std::cout << "connected: "; 
+        std::cout << std::boolalpha << connected_ << std::noboolalpha << std::endl;
     }
 
 
     void CameraWindow::startButtonClicked()
     { 
         (!capturing_) ? startImageCapture() : stopImageCapture();
+        std::cout << "capturing: ";
+        std::cout << std::boolalpha << capturing_ << std::noboolalpha << std::endl;
     }
    
 
@@ -275,6 +279,9 @@ namespace bias
     void CameraWindow::actionLoggingEnabledTriggered()
     {
         logging_ = actionLoggingEnabledPtr_ -> isChecked();
+        std::cout << "logging: ";
+        std::cout << std::boolalpha << logging_ << std::noboolalpha;
+        std::cout << std::endl;
     }
 
 
@@ -340,7 +347,14 @@ namespace bias
         videoFileFormat_ = actionToVideoFileFormatMap_[actionPtr]; 
 
         std::cout << "video file format: "; 
-        std::cout << VIDEOFILE_EXTENSION_MAP[videoFileFormat_].toStdString();
+        if (videoFileFormat_ != VIDEOFILE_FORMAT_BMP)
+        {
+            std::cout << VIDEOFILE_EXTENSION_MAP[videoFileFormat_].toStdString();
+        }
+        else
+        {
+            std::cout << "bmp";
+        }
         std::cout << std::endl;
     }
 
