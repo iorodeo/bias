@@ -15,7 +15,7 @@ namespace bias
     // Static Constants
     const unsigned int VideoWriter_ufmf::MAX_THREAD_COUNT = 8;
     const QString VideoWriter_ufmf::DUMMY_FILENAME("dummy.ufmf");
-    const unsigned int VideoWriter_ufmf::DEFAULT_FRAME_SKIP = 1;
+    const unsigned int VideoWriter_ufmf::DEFAULT_FRAME_SKIP = 10;
     const unsigned int VideoWriter_ufmf::DEFAULT_BACKGROUND_THRESHOLD = 40;
 
 
@@ -103,7 +103,7 @@ namespace bias
             }
 
             //updateMembershipImage();
-            loopTest();
+            //loopTest();
         }
         frameCount_++;
     }
@@ -150,6 +150,7 @@ namespace bias
 
     cv::Mat VideoWriter_ufmf::getMembershipImage()
     {
+        updateMembershipImage();
         return bgMembershipImage_;
     }
     // -----------------------------------------------------------------------------------

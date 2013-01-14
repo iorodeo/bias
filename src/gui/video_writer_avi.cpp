@@ -11,7 +11,8 @@ namespace bias
 
     const double VideoWriter_avi::DEFAULT_FPS = 30.0;
     const unsigned int VideoWriter_avi::DEFAULT_FRAME_SKIP = 4;
-    const int VideoWriter_avi::DEFAULT_FOURCC = CV_FOURCC('D','I','V','X');
+    //const int VideoWriter_avi::DEFAULT_FOURCC = CV_FOURCC('D','I','V','X');
+    const int VideoWriter_avi::DEFAULT_FOURCC = CV_FOURCC('X','V','I','D');
 
     VideoWriter_avi::VideoWriter_avi(QObject *parent) 
         : VideoWriter_avi(DUMMY_FILENAME,parent) 
@@ -48,20 +49,33 @@ namespace bias
         
         setSize(stampedImg.image.size());
 
+        bool openOK= true;
+
         try
         {
-            videoWriter_.open(incrFileName,fourcc_,fps_,size_,false);
+            openOK = videoWriter_.open(incrFileName,fourcc_,fps_,size_,false);
         }
         catch (cv::Exception &e)
         {
+            isFirst_ = false;
             unsigned int errorId = ERROR_VIDEO_WRITER_INITIALIZE;
             std::string errorMsg("video writer unable to open file:\n\n"); 
             errorMsg += e.what();
             throw RuntimeError(errorId, errorMsg); 
         }
 
+        if (!openOK)
+        {
+            isFirst_ = false;
+            unsigned int errorId = ERROR_VIDEO_WRITER_INITIALIZE;
+            std::string errorMsg("video writer unable to open file:\n\n"); 
+            errorMsg += "returned false";
+            throw RuntimeError(errorId, errorMsg); 
+        }
+
         if (!videoWriter_.isOpened())
         {
+            isFirst_ = false;
             unsigned int errorId = ERROR_VIDEO_WRITER_INITIALIZE;
             std::string errorMsg("video writer unable to open file:\n\n"); 
             errorMsg += "no exception thrown, but file not opened??";

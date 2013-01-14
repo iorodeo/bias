@@ -524,7 +524,9 @@ namespace bias {
                 throw RuntimeError(ERROR_FC2_SET_VIDEOMODE_FORMAT7, ssError.str());
             }
             ImageMode mode = allowedImageModes.front();
+            std::cout << "mode " << mode << std::endl;
             setVideoModeToFormat7(mode);
+            //setVideoModeToFormat7(IMAGEMODE_1);
         }
     }
 

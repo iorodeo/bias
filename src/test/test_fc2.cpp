@@ -16,6 +16,7 @@
 #include "property.hpp"
 #include "camera.hpp"
 #include "camera_finder.hpp"
+#include "basic_types.hpp"
 
 using namespace std;
 using namespace bias;
@@ -23,7 +24,7 @@ using namespace bias;
 int main(int argc, char** argv)
 {        
     int cnt;
-    int numGrab = 15;
+    int numGrab = 1;
     CameraFinder camFinder;
     cv::Mat image;
     cv::Mat imageScaled;
@@ -43,8 +44,14 @@ int main(int argc, char** argv)
     {
         CameraPtr camPtr = *it;
         camPtr -> connect();
-        camPtr -> setVideoMode(VIDEOMODE_FORMAT7);
-        camPtr -> setTriggerInternal();
+        std::cout << "image mode" << camPtr -> getImageMode();
+        //camPtr -> setVideoMode(VIDEOMODE_FORMAT7);
+        //camPtr -> setTriggerInternal();
+
+        //Property prop = camPtr -> getProperty(PROPERTY_TYPE_FRAME_RATE);
+        //prop.autoActive = false;
+        //prop.value = 465;
+        //camPtr -> setProperty(prop);
     }
 
     // Create opencv named windows
@@ -115,72 +122,72 @@ int main(int argc, char** argv)
         }
     }
 
-    // Start capture on cameras
-    // ------------------------------------------------------------------------
-    cout << "Starting capture on cameras: ";
-    cnt = 0;
-    for (
-            CameraPtrList::iterator it=camPtrList.begin(); 
-            it!=camPtrList.end(); 
-            it++
-        ) 
-    {
-        cout << cnt << " ";
-        CameraPtr camPtr = *it;
-        camPtr -> startCapture();
-        cnt++;
-    }
-    cout << "done" << endl;
-    cout << endl;
+    //// Start capture on cameras
+    //// ------------------------------------------------------------------------
+    //cout << "Starting capture on cameras: ";
+    //cnt = 0;
+    //for (
+    //        CameraPtrList::iterator it=camPtrList.begin(); 
+    //        it!=camPtrList.end(); 
+    //        it++
+    //    ) 
+    //{
+    //    cout << cnt << " ";
+    //    CameraPtr camPtr = *it;
+    //    camPtr -> startCapture();
+    //    cnt++;
+    //}
+    //cout << "done" << endl;
+    //cout << endl;
    
 
-    // Grab images
-    // ------------------------------------------------------------------------
-    cout << "Grabing images" << endl;
-    cout << endl;
-    for (int i=0; i<numGrab; i++) 
-    {
-        cout << "  image: " << (i+1) << "/" << numGrab << " camera: ";
-        cnt = 0;
-        for (
-                CameraPtrList::iterator it=camPtrList.begin();
-                it!=camPtrList.end(); 
-                it++
-            )
-        {
-            CameraPtr cameraPtr = *it;
-            cameraPtr -> grabImage(image);
+    //// Grab images
+    //// ------------------------------------------------------------------------
+    //cout << "Grabing images" << endl;
+    //cout << endl;
+    //for (int i=0; i<numGrab; i++) 
+    //{
+    //    cout << "  image: " << (i+1) << "/" << numGrab << " camera: ";
+    //    cnt = 0;
+    //    for (
+    //            CameraPtrList::iterator it=camPtrList.begin();
+    //            it!=camPtrList.end(); 
+    //            it++
+    //        )
+    //    {
+    //        CameraPtr cameraPtr = *it;
+    //        cameraPtr -> grabImage(image);
 
-            if (cnt%10 == 0) {
-                cv::resize(image,imageScaled, cv::Size(0,0), 0.5, 0.5);
-                cv::imshow(windowNames[cnt], imageScaled);
-                cv::waitKey(1);
-            }
+    //        if (cnt%10 == 0) {
+    //            cv::resize(image,imageScaled, cv::Size(0,0), 0.5, 0.5);
+    //            cv::imshow(windowNames[cnt], imageScaled);
+    //            cv::waitKey(1);
+    //        }
 
-            cout << cnt << " ";
-            cnt++;
-        } 
-        cout << endl;
-    }
+    //        cout << cnt << " ";
+    //        cnt++;
+    //    } 
+    //    cout << endl;
+    //}
 
 
-    // Stop capture on cameras
-    // ------------------------------------------------------------------------
-    cout << endl;
-    cout << "Stopping capture on cameras: ";
-    cnt = 0;
-    for (
-            CameraPtrList::iterator it=camPtrList.begin(); 
-            it!=camPtrList.end(); 
-            it++
-        ) 
-    {
-        cout << cnt << " "; 
-        CameraPtr cameraPtr = *it;
-        cameraPtr -> stopCapture();
-        cnt++;
-    }
-    cout << "done" << endl << endl;
+    //// Stop capture on cameras
+    //// ------------------------------------------------------------------------
+    //cout << endl;
+    //cout << "Stopping capture on cameras: ";
+    //cnt = 0;
+    //for (
+    //        CameraPtrList::iterator it=camPtrList.begin(); 
+    //        it!=camPtrList.end(); 
+    //        it++
+    //    ) 
+    //{
+    //    cout << cnt << " "; 
+    //    CameraPtr cameraPtr = *it;
+    //    cameraPtr -> stopCapture();
+    //    cnt++;
+    //}
+    //cout << "done" << endl << endl;
 
 
 

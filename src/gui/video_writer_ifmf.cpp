@@ -7,7 +7,7 @@
 
 namespace bias
 {
-    const unsigned int VideoWriter_ifmf::DEFAULT_FRAME_SKIP = 1;
+    const unsigned int VideoWriter_ifmf::DEFAULT_FRAME_SKIP = 2;
     const unsigned int VideoWriter_ifmf::FMF_VERSION = 1;
     const QString DUMMY_FILENAME("dummy.ifmf");
 
@@ -91,13 +91,13 @@ namespace bias
                 }
             }
 
-            std::cout << rowOffset_ << std::endl;
+            //std::cout << rowOffset_ << std::endl;
             rowOffset_ = (rowOffset_ + 1)%2;
             numWritten_++;
         }
         else 
         {
-            std::cout << "skip" << std::endl;
+            //std::cout << "skip" << std::endl;
         }
         frameCount_++;
     }

@@ -137,17 +137,17 @@ namespace bias
 
         // Debug  - display background median image from ufmf logger
         // -------------------------------------------------------------------
-        //if (logging_ && (videoFileFormat_ == VIDEOFILE_FORMAT_UFMF))
-        //{
-        //    imageLoggerPtr_ -> acquireLock();
-        //    cv::Mat medianMat = imageLoggerPtr_ -> getBackgroundMembershipImage();
-        //    QImage medianImg = matToQImage(medianMat);
-        //    imageLoggerPtr_ -> releaseLock();
-        //    if (!img.isNull())
-        //    {
-        //        pluginPixmapOriginal_ = QPixmap::fromImage(medianImg);
-        //    }
-        //}
+        if (logging_ && (videoFileFormat_ == VIDEOFILE_FORMAT_UFMF))
+        {
+            imageLoggerPtr_ -> acquireLock();
+            cv::Mat medianMat = imageLoggerPtr_ -> getBackgroundMembershipImage();
+            QImage medianImg = matToQImage(medianMat);
+            imageLoggerPtr_ -> releaseLock();
+            if (!img.isNull())
+            {
+                pluginPixmapOriginal_ = QPixmap::fromImage(medianImg);
+            }
+        }
         // -------------------------------------------------------------------
 
         // Set pixmaps and update image labels - note need to add pluginPixmap

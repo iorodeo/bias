@@ -7,7 +7,7 @@
 
 namespace bias
 {
-    const unsigned int VideoWriter_fmf::DEFAULT_FRAME_SKIP = 4;
+    const unsigned int VideoWriter_fmf::DEFAULT_FRAME_SKIP = 3;
     const unsigned int VideoWriter_fmf::FMF_VERSION = 1;
     const QString DUMMY_FILENAME("dummy.fmf");
 

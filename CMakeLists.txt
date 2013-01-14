@@ -47,6 +47,7 @@ endif()
 # Compiler flags
 # -----------------------------------------------------------------------------
 #set(CMAKE_CXX_FLAGS "-std=gnu++0x -O2")
+#set(CMAKE_CXX_FLAGS "-std=gnu++0x -mwindows")
 set(CMAKE_CXX_FLAGS "-std=gnu++0x")
 
 
