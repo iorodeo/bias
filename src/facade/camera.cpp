@@ -80,12 +80,16 @@ namespace bias {
 
     cv::Mat Camera::grabImage()
     {
+        std::cout << "B " << __PRETTY_FUNCTION__ << std::endl;
         return cameraDevicePtr_ -> grabImage();
+        std::cout << "E " << __PRETTY_FUNCTION__ << std::endl;
     }
 
     void Camera::grabImage(cv::Mat &image)
     {
+        std::cout << "B " << __PRETTY_FUNCTION__ << std::endl;
         cameraDevicePtr_ -> grabImage(image);
+        std::cout << "E " << __PRETTY_FUNCTION__ << std::endl;
     }
 
     bool Camera::isConnected()

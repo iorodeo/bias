@@ -154,12 +154,15 @@ namespace bias {
     {
         bool resize = false;
 
+        std::cout << "B " << __PRETTY_FUNCTION__ << std::endl;
+
         grabImageCommon();
 
         // Only create new image if the size is incorrect - 
         // --------------------------------------------------------------------
         // TO DO ... currently only handles 8 bit mono images
         // --------------------------------------------------------------------
+        std::cout << "  check image size" << std::endl;
         if ((image.cols != rawImage_.cols) | (image.rows != rawImage_.rows))
         {
             resize = true;
@@ -168,8 +171,8 @@ namespace bias {
         // ---------------------------------------------------------------------
         // TO DO .. also test for image type.
         // ---------------------------------------------------------------------
-
         if (resize) {
+            std::cout << "  resize image" << std::endl;
             // -----------------------------------------------------------------
             // TO DO .. need to handle Pixel type conversions again currently
             // only supports 8 bit mono images
@@ -179,9 +182,12 @@ namespace bias {
 
         // Copy data -- TO DO might be able to do this without copying.
         // ---------------------------------------------------------------------
+
         unsigned char *pData0 = rawImage_.pData;
         unsigned char *pData1 = rawImage_.pData + rawImage_.dataSize - 1;
+        std::cout << "  copy data" << std::endl;
         std::copy(pData0,pData1,image.data);
+        std::cout << "E " << __PRETTY_FUNCTION__ << std::endl;
     }
 
 
@@ -524,7 +530,6 @@ namespace bias {
                 throw RuntimeError(ERROR_FC2_SET_VIDEOMODE_FORMAT7, ssError.str());
             }
             ImageMode mode = allowedImageModes.front();
-            std::cout << "mode " << mode << std::endl;
             setVideoModeToFormat7(mode);
             //setVideoModeToFormat7(IMAGEMODE_1);
         }
@@ -707,6 +712,8 @@ namespace bias {
 
     void CameraDevice_fc2::grabImageCommon()
     {
+        std::cout << "B " << __PRETTY_FUNCTION__ << std::endl;
+
         fc2Error error;
 
         if (!capturing_) 
@@ -718,6 +725,7 @@ namespace bias {
         }
 
         // Retrieve image from buffer
+        std::cout << "  retrieve image buffer" << std::endl;
         error = fc2RetrieveBuffer(context_, &rawImage_);
         if ( error != FC2_ERROR_OK ) 
         {
@@ -750,6 +758,8 @@ namespace bias {
         //printImageInfo_fc2(convertedImage_);
         //std::cout << std::flush;
         //----------------------------------------------------------------
+
+        std::cout << "E " << __PRETTY_FUNCTION__ << std::endl;
     }
 
 
