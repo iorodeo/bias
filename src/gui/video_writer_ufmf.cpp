@@ -40,7 +40,6 @@ namespace bias
         bgNewDataQueuePtr_ = std::make_shared<LockableQueue<BackgroundData_ufmf>>();
         bgOldDataQueuePtr_ = std::make_shared<LockableQueue<BackgroundData_ufmf>>();
         medianMatQueuePtr_ = std::make_shared<LockableQueue<cv::Mat>>();
-
     }
 
 

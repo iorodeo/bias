@@ -27,31 +27,30 @@ namespace bias
         private:
 
             bool haveData_;              
-            bool isCompressed_;          // true if frame is compressed 
+            bool isCompressed_;            // True if frame is compressed 
 
-            StampedImage stampedImg_;    // original image w/ framenumber and timestamp
-            cv::Mat bgMembership_;       // background membership
+            StampedImage stampedImg_;      // Original image w/ framenumber and timestamp
+            cv::Mat bgMembership_;         // Background membership
 
-            unsigned int numForeground_; // number of forground pixels
-            unsigned int numPixWritten_; // number of pixels written
+            unsigned int numForeground_;   // Number of forground pixels
+            unsigned int numPixWritten_;   // Number of pixels written
 
-            std::shared_ptr<uint16_t> writeRowBuffer_;     // ymins
-            std::shared_ptr<uint16_t> writeColBuffer_;     // xmins
-            std::shared_ptr<uint16_t> writeHeightBuffer_;  // heights
-            std::shared_ptr<uint16_t> writeWidthBuffer_;   // widths
-            std::shared_ptr<uint16_t> numPixWriteBuffer_;  // # times pixel written 
-            std::shared_ptr<uint8_t> imgDataBuffer_;       // image data 
+            std::shared_ptr<uint16_t> writeRowBuffer_;     // Y mins
+            std::shared_ptr<uint16_t> writeColBuffer_;     // X mins
+            std::shared_ptr<uint16_t> writeHeightBuffer_;  // Heights
+            std::shared_ptr<uint16_t> writeWidthBuffer_;   // Widths
+            std::shared_ptr<uint16_t> numPixWriteBuffer_;  // Number of times pixel written 
+            std::shared_ptr<uint8_t>  imageDataBuffer_;    // Image data 
 
-            unsigned long numConectedComp_; // number of connected components
-            unsigned int boxLength_;        // length of boxes or foreground pixels to store
-            unsigned int boxArea_;          // boxLength*boxLength
+            unsigned long numConectedComp_; // Number of connected components
+            unsigned int boxLength_;        // Length of boxes or foreground pixels to store
+            unsigned int boxArea_;          // BoxLength*boxLength
 
-            double fgMaxFracCompress_;      // maximum fraction of pixels that can be in foreground
+            double fgMaxFracCompress_;      // Maximum fraction of pixels that can be in foreground
                                             // in order for us to compress
-                                            //
-            void allocateBuffers(); 
-                                      
 
+            void allocateBuffers(cv::Size imageSize);          
+                                      
     };
 
 }

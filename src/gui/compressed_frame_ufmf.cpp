@@ -1,4 +1,5 @@
 #include "compressed_frame_ufmf.hpp"
+#include <algorithm>
 
 namespace bias
 {
@@ -34,8 +35,51 @@ namespace bias
 
     }
 
-    void CompressedFrame_ufmf::allocateBuffers()
+    void CompressedFrame_ufmf::allocateBuffers(cv::Size imageSize)
     {
+       
+        unsigned int numPix = imageSize.width*imageSize.height;
+
+        // Allocate memory for compressed frame buffers
+        writeRowBuffer_ = std::shared_ptr<uint16_t>(
+                new uint16_t[numPix], 
+                std::default_delete<uint16_t[]>()
+                );
+
+        writeColBuffer_ = std::shared_ptr<uint16_t>( 
+                new uint16_t[numPix], 
+                std::default_delete<uint16_t[]>()
+                ); 
+
+        writeHeightBuffer_ = std::shared_ptr<uint16_t>( 
+                new uint16_t[numPix], 
+                std::default_delete<uint16_t[]>()
+                ); 
+
+        writeWidthBuffer_ = std::shared_ptr<uint16_t>( 
+                new uint16_t[numPix], 
+                std::default_delete<uint16_t[]>()
+                ); 
+
+        numPixWriteBuffer_ = std::shared_ptr<uint16_t>( 
+                new uint16_t[numPix], 
+                std::default_delete<uint16_t[]>()
+                ); 
+
+        imageDataBuffer_ = std::shared_ptr<uint8_t>( 
+                new uint8_t[numPix], 
+                std::default_delete<uint8_t[]>()
+                ); 
+        
+        // Initial buffer values
+        std::fill_n(writeRowBuffer_.get(), numPix, 0); 
+        std::fill_n(writeColBuffer_.get(), numPix, 0);
+        std::fill_n(writeHeightBuffer_.get(), numPix, 0);
+        std::fill_n(writeWidthBuffer_.get(), numPix, 0);
+        std::fill_n(numPixWriteBuffer_.get(), numPix, 0);
+        std::fill_n(imageDataBuffer_.get(), numPix, 0);
+
+
     }
 
 }

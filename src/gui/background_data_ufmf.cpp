@@ -1,6 +1,7 @@
 #include "background_data_ufmf.hpp"
 #include "stamped_image.hpp"
 #include <cstring>
+#include <algorithm>
 #include <opencv2/core/core.hpp>
 
 namespace bias
@@ -127,8 +128,8 @@ namespace bias
 
     void BackgroundData_ufmf::clear()
     {
-        memset(binPtr_.get(), 0, numRows_*numCols_*numBins_*sizeof(unsigned int));
-        memset(cntPtr_.get(), 0, numRows_*numCols_*sizeof(unsigned long));
+        std::fill_n(binPtr_.get(), numRows_*numCols_*numBins_, 0);
+        std::fill_n(cntPtr_.get(), numRows_*numCols_, 0);
     }
 
 } // namespace bias
