@@ -24,17 +24,25 @@ namespace bias
             static const unsigned int DEFAULT_BOX_LENGTH; 
             static const double DEFAULT_FG_MAX_FRAC_COMPRESS;
 
+            // TEMPORARY REMOVE THIS ???
+            // ----------------------------------------------------
+            cv::Mat bgMembershipImage_;    // Background membership
+            cv::Mat getMembershipImage();
+            // ----------------------------------------------------
+
         private:
 
             bool haveData_;              
             bool isCompressed_;            // True if frame is compressed 
 
-            StampedImage stampedImg_;      // Original image w/ framenumber and timestamp
-            cv::Mat bgMembership_;         // Background membership
 
+            StampedImage stampedImg_;      // Original image w/ framenumber and timestamp
+
+            unsigned int numPix_;
             unsigned int numForeground_;   // Number of forground pixels
             unsigned int numPixWritten_;   // Number of pixels written
 
+            std::shared_ptr<bool> isForeground_;             
             std::shared_ptr<uint16_t> writeRowBuffer_;     // Y mins
             std::shared_ptr<uint16_t> writeColBuffer_;     // X mins
             std::shared_ptr<uint16_t> writeHeightBuffer_;  // Heights
@@ -49,7 +57,8 @@ namespace bias
             double fgMaxFracCompress_;      // Maximum fraction of pixels that can be in foreground
                                             // in order for us to compress
 
-            void allocateBuffers(cv::Size imageSize);          
+            void allocateBuffers();          
+            void resetBuffers();
                                       
     };
 

@@ -2,6 +2,7 @@
 #define BIAS_VIDEO_WRITER_UFMF_HPP
 
 #include "video_writer.hpp"
+#include "compressed_frame_ufmf.hpp"
 #include <memory>
 #include <QPointer>
 #include <opencv2/core/core.hpp>
@@ -28,7 +29,6 @@ namespace bias
             virtual void addFrame(StampedImage stampedImg);
 
             // Debug ----------------
-            void loopTest();
             void updateMembershipImage();
             cv::Mat getMembershipImage();
             // ----------------------
@@ -43,7 +43,11 @@ namespace bias
             bool isFirst_;
             unsigned int backgroundThreshold_;
 
-            cv::Mat currentImage_;
+            StampedImage currentImage_;
+
+            CompressedFrame_ufmf compressedFrame_;
+
+            //cv::Mat currentImage_;
             cv::Mat bgMedianImage_;
             cv::Mat bgUpperBoundImage_;
             cv::Mat bgLowerBoundImage_;

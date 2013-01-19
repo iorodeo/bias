@@ -53,7 +53,8 @@ namespace bias
     {
         bool haveNewMedianImage = false;
 
-        currentImage_ = stampedImg.image;
+        //currentImage_ = stampedImg.image;
+        currentImage_ = stampedImg;
 
         // On first call - setup output file, background modeling, etc
         if (isFirst_)
@@ -101,50 +102,16 @@ namespace bias
                 cv::subtract(bgMedianImage_, backgroundThreshold_, bgLowerBoundImage_); 
             }
 
-            //updateMembershipImage();
-            //loopTest();
         }
         frameCount_++;
     }
 
-    // Debug ----------------------------------------------------------------------------
-    void VideoWriter_ufmf::loopTest()
-    {
-        uint8_t *curPtr = (uint8_t*) currentImage_.data;
-        uint8_t *memPtr = (uint8_t*) bgMembershipImage_.data;
-        uint8_t *uppPtr = (uint8_t*) bgUpperBoundImage_.data;
-        uint8_t *lowPtr = (uint8_t*) bgLowerBoundImage_.data;
-
-        uint8_t pixVal;
-
-        //for (unsigned int i=0; i<currentImage_.rows*currentImage_.cols; i++)
-        //{
-        //    pixVal = *(curPtr + i);
-        //    if ((pixVal < *(lowPtr+i)) || (pixVal > *(uppPtr+i)))
-        //    {
-        //        *(memPtr+i) = 255;
-        //    }
-        //    else
-        //    {
-        //        *(memPtr+i) = 0;
-        //    }
-        //}
-        
-        unsigned int index;
-        for (unsigned int i=0; i<currentImage_.rows; i=i+2)
-        {
-            for (unsigned int j=0; j<currentImage_.cols; j=j+2)
-            {
-                index = (currentImage_.step*i + j);
-                pixVal = *(curPtr + index);
-                *(memPtr + index/2) = pixVal;
-            }
-        }
-    }
 
     void VideoWriter_ufmf::updateMembershipImage()
     {
-        cv::inRange(currentImage_, bgLowerBoundImage_, bgUpperBoundImage_, bgMembershipImage_);
+        compressedFrame_.setData(currentImage_, bgLowerBoundImage_, bgUpperBoundImage_);
+        bgMembershipImage_ = compressedFrame_.getMembershipImage();
+        //cv::inRange(currentImage_.image, bgLowerBoundImage_, bgUpperBoundImage_, bgMembershipImage_);
     }
 
     cv::Mat VideoWriter_ufmf::getMembershipImage()
@@ -152,7 +119,6 @@ namespace bias
         updateMembershipImage();
         return bgMembershipImage_;
     }
-    // -----------------------------------------------------------------------------------
 
 
     void VideoWriter_ufmf::checkImageFormat(StampedImage stampedImg)
