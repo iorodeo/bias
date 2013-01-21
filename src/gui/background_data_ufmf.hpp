@@ -22,6 +22,7 @@ namespace bias
             void clear();
 
         private:
+            // Move these to std vectors ??
             std::shared_ptr<unsigned int>  binPtr_;
             std::shared_ptr<unsigned long> cntPtr_;
             unsigned int numRows_;
