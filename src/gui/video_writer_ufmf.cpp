@@ -103,6 +103,7 @@ namespace bias
             }
 
             compressedFrame_.setData(currentImage_, bgLowerBoundImage_, bgUpperBoundImage_);
+            compressedFrame_.compress();
 
         } // if (frameCount_%frameSkip_==0) 
 

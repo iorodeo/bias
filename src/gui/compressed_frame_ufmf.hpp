@@ -2,22 +2,28 @@
 #define BIAS_COMPRESSED_FRAME_UFMF
 
 #include <memory>
+#include <QObject>
+#include <QRunnable>
 #include <vector>
 #include <opencv2/core/core.hpp>
+#include "lockable.hpp"
 #include "stamped_image.hpp"
 
 namespace bias
 {
 
-    class CompressedFrame_ufmf
+    class CompressedFrame_ufmf : public QObject, public QRunnable, public Lockable<Empty>
     {
+        Q_OBJECT
+
         public:
 
-            CompressedFrame_ufmf();
+            CompressedFrame_ufmf(QObject *parent=0);
 
             CompressedFrame_ufmf(
                     unsigned int boxLength, 
-                    double fgMaxFracCompress
+                    double fgMaxFracCompress,
+                    QObject *parent=0
                     );
 
             void setData(
@@ -25,6 +31,9 @@ namespace bias
                     cv::Mat bgLowerBound, 
                     cv::Mat bgUpperBound
                     );
+
+            void compress();
+
 
             static const uchar BACKGROUND_MEMBER_VALUE;
             static const uchar FOREGROUND_MEMBER_VALUE;
@@ -38,10 +47,13 @@ namespace bias
 
         private:
 
-            bool haveData_;              
+            bool haveData_;               // True if image data has been set 
             bool isCompressed_;           // True if frame is compressed 
+            bool ready_;                  // True if compressed frame has been calculated
 
             StampedImage stampedImg_;     // Original image w/ framenumber and timestamp
+            cv::Mat bgLowerBound_;        // Background lower bound image values
+            cv::Mat bgUpperBound_;        // Background upper bound image values
             cv::Mat membershipImage_;     // Background/foreground membership
 
             unsigned int numPix_;
@@ -60,11 +72,16 @@ namespace bias
             unsigned long numConnectedComp_; // Number of connected components
             double fgMaxFracCompress_;       // Maximum fraction of pixels that can be in foreground
                                              // in order for us to compress
+                                             
+            void initialize( unsigned int boxLength, double fgMaxFraccompress);
             void allocateBuffers();          
-            void resetBuffers();
+            void resetBuffers(); 
+            void createUncompressedFrame();
+            void createCompressedFrame();
+            void run();
                                       
     };
 
-}
+} // namespace bias
 
 #endif // #ifndef BIAS_COMPRESSED_FRAME_UFMF
