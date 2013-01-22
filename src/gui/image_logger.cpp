@@ -54,13 +54,13 @@ namespace bias
     }
 
     // Debug ----------------------------------------------------------------------------
-    cv::Mat ImageLogger::getBackgroundMembershipImage()
-    {
-        // Very unsafe !!!!!
-        VideoWriter_ufmf *videoWriter_ufmf_Ptr = (VideoWriter_ufmf*) videoWriterPtr_.get();
-        cv::Mat tmpImg = videoWriter_ufmf_Ptr -> getMembershipImage();
-        return tmpImg;
-    }
+    //cv::Mat ImageLogger::getBackgroundMembershipImage()
+    //{
+    //    // Very unsafe !!!!!
+    //    VideoWriter_ufmf *videoWriter_ufmf_Ptr = (VideoWriter_ufmf*) videoWriterPtr_.get();
+    //    cv::Mat tmpImg = videoWriter_ufmf_Ptr -> getMembershipImage();
+    //    return tmpImg;
+    //}
     // ----------------------------------------------------------------------------------
 
     void ImageLogger::run()
@@ -107,7 +107,7 @@ namespace bias
                 std::cout << "queue size: " << logQueueSize << std::endl;
 
                 // Add frame to video writer
-                acquireLock();
+                //acquireLock();
                 try 
                 {
                     videoWriterPtr_ -> addFrame(newStampedImage);
@@ -118,7 +118,7 @@ namespace bias
                     QString errorMsg = QString::fromStdString(runtimeError.what());
                     emit imageLoggingError(errorId, errorMsg);
                 }
-                releaseLock();
+                //releaseLock();
             }
 
             acquireLock();

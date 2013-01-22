@@ -15,7 +15,7 @@ namespace bias
     // Static Constants
     const unsigned int VideoWriter_ufmf::MAX_THREAD_COUNT = 8;
     const QString VideoWriter_ufmf::DUMMY_FILENAME("dummy.ufmf");
-    const unsigned int VideoWriter_ufmf::DEFAULT_FRAME_SKIP = 1;
+    const unsigned int VideoWriter_ufmf::DEFAULT_FRAME_SKIP = 4;
     const unsigned int VideoWriter_ufmf::DEFAULT_BACKGROUND_THRESHOLD = 40;
 
 
@@ -102,23 +102,26 @@ namespace bias
                 cv::subtract(bgMedianImage_, backgroundThreshold_, bgLowerBoundImage_); 
             }
 
-        }
+            compressedFrame_.setData(currentImage_, bgLowerBoundImage_, bgUpperBoundImage_);
+
+        } // if (frameCount_%frameSkip_==0) 
+
         frameCount_++;
     }
 
 
-    void VideoWriter_ufmf::updateMembershipImage()
-    {
-        compressedFrame_.setData(currentImage_, bgLowerBoundImage_, bgUpperBoundImage_);
-        bgMembershipImage_ = compressedFrame_.getMembershipImage();
-        //cv::inRange(currentImage_.image, bgLowerBoundImage_, bgUpperBoundImage_, bgMembershipImage_);
-    }
+    //void VideoWriter_ufmf::updateMembershipImage()
+    //{
+    //    compressedFrame_.setData(currentImage_, bgLowerBoundImage_, bgUpperBoundImage_);
+    //    bgMembershipImage_ = compressedFrame_.getMembershipImage();
+    //    //cv::inRange(currentImage_.image, bgLowerBoundImage_, bgUpperBoundImage_, bgMembershipImage_);
+    //}
 
-    cv::Mat VideoWriter_ufmf::getMembershipImage()
-    {
-        updateMembershipImage();
-        return bgMembershipImage_;
-    }
+    //cv::Mat VideoWriter_ufmf::getMembershipImage()
+    //{
+    //    updateMembershipImage();
+    //    return bgMembershipImage_;
+    //}
 
 
     void VideoWriter_ufmf::checkImageFormat(StampedImage stampedImg)

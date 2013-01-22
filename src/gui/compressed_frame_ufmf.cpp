@@ -1,5 +1,6 @@
 #include "compressed_frame_ufmf.hpp"
 #include <algorithm>
+#include <iostream>
 
 namespace bias
 {
@@ -93,6 +94,7 @@ namespace bias
             // Compressed image
             // --------------------------------------------------------------------------
             bool stopEarly = false;
+            unsigned int imageDatInd = 0;
 
             for (unsigned int row=0; row<numRow; row++)
             {
@@ -111,23 +113,76 @@ namespace bias
                     writeWdtBuf_[numConnectedComp_] = std::min(boxLength_, numCol-col);
 
                     // Loop through pixels to store
+                    unsigned int rowPlusHeight = row + writeHgtBuf_[numConnectedComp_];
+
+                    for (unsigned int rowEnd=row; rowEnd < rowPlusHeight; rowEnd++)
+                    {
+                        bool stopEarly = false;
+                        unsigned int colEnd = col;
+                        unsigned int numWriteInd = rowEnd*numCol + col;
+                        unsigned int colPlusWidth = col + writeWdtBuf_[numConnectedComp_];
+
+                        // Check if we've already written something in this column
+                        for (colEnd=col; colEnd < colPlusWidth; colEnd++)
+                        {
+                            if (numWriteBuf_[numWriteInd] > 0)
+                            {
+                                stopEarly = true;
+                                break;
+                            }
+                            numWriteInd += 1;
+
+                        }  // for (unsigned int colEnd 
+
+                        if (stopEarly) 
+                        {
+                            if (rowEnd == row)
+                            { 
+                                // If this is the first row - shorten the width and write as usual
+                                writeWdtBuf_[numConnectedComp_] = colEnd - col;
+                            }
+                            else
+                            {
+                                // Otherwise, shorten the height, and don't write any of this row
+                                writeHgtBuf_[numConnectedComp_] = rowEnd - row;
+                                break;
+                            }
+
+                        } // if (stopEarly) 
+
+                        colPlusWidth = col + writeWdtBuf_[numConnectedComp_];
+                        numWriteInd = rowEnd*numCol + col;
+
+                        for (colEnd=col; colEnd < colPlusWidth; colEnd++)
+                        {
+                            numWriteBuf_[numWriteInd] += 1;
+                            numWriteInd += 1;
+                            imageDatBuf_[imageDatInd] = (uint8_t) stampedImg.image.at<uchar>(rowEnd,colEnd); 
+                            imageDatInd += 1;
+                            membershipImage_.at<uchar>(rowEnd,colEnd) = BACKGROUND_MEMBER_VALUE;
+                        } // for (unsigned int colEnd 
 
 
-                    // end loop
+                    } // for (unsigned int rowEnd 
+
                     numConnectedComp_++;
-                }
-            }
 
-            isCompressed = true;
+                } // for (unsigned int col
+
+            } // for (unsigned int row
+
+            std::cout << "numConnectedComp: " << numConnectedComp_ << std::endl;
+
+            isCompressed_ = true;
         }
 
         haveData_ = true;
     }
 
-    cv::Mat CompressedFrame_ufmf::getMembershipImage()
-    {
-        return membershipImage_;
-    }
+    //cv::Mat CompressedFrame_ufmf::getMembershipImage()
+    //{
+    //    return membershipImage_;
+    //}
 
     void CompressedFrame_ufmf::allocateBuffers()
     {

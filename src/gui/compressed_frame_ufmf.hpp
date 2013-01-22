@@ -14,7 +14,11 @@ namespace bias
         public:
 
             CompressedFrame_ufmf();
-            CompressedFrame_ufmf(unsigned int boxLength, double fgMaxFracCompress);
+
+            CompressedFrame_ufmf(
+                    unsigned int boxLength, 
+                    double fgMaxFracCompress
+                    );
 
             void setData(
                     StampedImage stampedImg, 
@@ -29,7 +33,7 @@ namespace bias
 
             // TEMPORARY REMOVE THIS ???
             // -------------------------------------------------------------
-            cv::Mat getMembershipImage();
+            //cv::Mat getMembershipImage();
             // --------------------------------------------------------------
 
         private:
