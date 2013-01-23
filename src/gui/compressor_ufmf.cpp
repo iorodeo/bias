@@ -1,4 +1,5 @@
 #include "compressor_ufmf.hpp"
+#include <iostream>
 
 namespace bias
 {
@@ -25,6 +26,8 @@ namespace bias
             CompressedFrameSetPtr_ufmf framesFinishedSetPtr 
             )
     {
+        std::cout << " starting compressor" << std:: endl;
+
         ready_ = false;
         stopped_ = true;
         framesToDoQueuePtr_ = framesToDoQueuePtr;
@@ -84,6 +87,8 @@ namespace bias
             releaseLock();
 
         }
+
+        std::cout << "  compressor done" << std::endl;
 
     }
 

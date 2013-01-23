@@ -30,16 +30,16 @@ namespace bias
             virtual ~VideoWriter_ufmf();
             virtual void addFrame(StampedImage stampedImg);
 
-            // Debug ----------------
-            void updateMembershipImage();
-            cv::Mat getMembershipImage();
-            // ----------------------
+            //// Debug ----------------
+            //void updateMembershipImage();
+            //cv::Mat getMembershipImage();
+            //// ----------------------
 
-            static const unsigned int MAX_THREAD_COUNT;
             static const QString DUMMY_FILENAME;
             static const unsigned int DEFAULT_FRAME_SKIP;
             static const unsigned int DEFAULT_BACKGROUND_THRESHOLD;
             static const unsigned int DEFAULT_NUMBER_OF_COMPRESSORS;
+            static const unsigned int DEFAULT_MAX_THREAD_COUNT;
 
         protected:
 
@@ -49,7 +49,6 @@ namespace bias
 
             StampedImage currentImage_;
 
-            CompressedFrame_ufmf compressedFrame_;
             std::vector<QPointer<Compressor_ufmf>> compressorPtrVec_;
 
             //cv::Mat currentImage_;

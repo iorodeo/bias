@@ -89,7 +89,6 @@ namespace bias
                     );
     };
 
-
     // Typedef for sets and queues of compressed frame objects
     typedef LockableQueue<CompressedFrame_ufmf> CompressedFrameQueue_ufmf;
     typedef std::shared_ptr<CompressedFrameQueue_ufmf> CompressedFrameQueuePtr_ufmf;
