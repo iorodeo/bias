@@ -59,17 +59,17 @@ namespace bias
         frameCount_++;
     } 
     
-    QString VideoWriter::getFileName()
+    QString VideoWriter::getFileName() const
     {
         return fileName_;
     }
 
-    cv::Size VideoWriter::getSize()
+    cv::Size VideoWriter::getSize() const
     {
         return size_;
     }
 
-    unsigned int VideoWriter::getFrameSkip()
+    unsigned int VideoWriter::getFrameSkip() const
     {
         return frameSkip_;
     }

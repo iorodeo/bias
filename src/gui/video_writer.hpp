@@ -20,9 +20,9 @@ namespace bias
             virtual void setSize(cv::Size size);
             virtual void setFrameSkip(unsigned int frameSkip);
             virtual void addFrame(StampedImage stampedImg);
-            virtual QString getFileName();
-            virtual cv::Size getSize();
-            virtual unsigned int getFrameSkip();
+            virtual QString getFileName() const;
+            virtual cv::Size getSize() const;
+            virtual unsigned int getFrameSkip() const;
             virtual void finish();
 
         protected:

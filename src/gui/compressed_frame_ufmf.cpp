@@ -14,28 +14,15 @@ namespace bias
 
     // Methods
     // -------------------------------------------------------------------------------
-    CompressedFrame_ufmf::CompressedFrame_ufmf(QObject *parent) 
-        : QObject(parent)
-    { 
-        initialize(DEFAULT_BOX_LENGTH, DEFAULT_FG_MAX_FRAC_COMPRESS);
-    }
+    CompressedFrame_ufmf::CompressedFrame_ufmf() 
+        : CompressedFrame_ufmf(DEFAULT_BOX_LENGTH,DEFAULT_FG_MAX_FRAC_COMPRESS) 
+    { }
 
 
     CompressedFrame_ufmf::CompressedFrame_ufmf(
             unsigned int boxLength, 
-            double fgMaxFracCompress,
-            QObject *parent
-            ) 
-        : QObject(parent)
-    {
-        initialize(boxLength,fgMaxFracCompress);
-    }
-
-
-    void CompressedFrame_ufmf::initialize(
-            unsigned int boxLength, 
             double fgMaxFracCompress
-            )
+            ) 
     {
         haveData_ = false;
         isCompressed_ = false;
@@ -47,6 +34,28 @@ namespace bias
         boxLength_ = boxLength;
         boxArea_ = boxLength*boxLength;
         fgMaxFracCompress_ = fgMaxFracCompress;
+    }
+
+
+    bool CompressedFrame_ufmf::haveData() const
+    {
+        return haveData_;
+    }
+
+
+    unsigned long CompressedFrame_ufmf::getFrameCount() const
+    {
+        unsigned long frameCount;
+
+        if (haveData_)
+        {
+            frameCount = stampedImg_.frameCount;
+        }
+        else 
+        {
+            frameCount = 0;
+        }
+        return frameCount;
     }
 
 
@@ -255,9 +264,34 @@ namespace bias
     }
 
 
-    void CompressedFrame_ufmf::run()
+    // Compressed frame comparison operator
+    // ----------------------------------------------------------------------------------------
+    bool CompressedFrameCmp_ufmf::operator() (
+            const CompressedFrame_ufmf &cmpFrame0,
+            const CompressedFrame_ufmf &cmpFrame1
+            )
     {
-        compress();
+        bool haveData0 = cmpFrame0.haveData();
+        bool haveData1 = cmpFrame1.haveData();
+
+        if ((haveData0 == false) && (haveData1 == false))
+        {
+            return false;
+        }
+        else if ((haveData0 == false) && (haveData1 == true))
+        {
+            return false;
+        }
+        else if ((haveData0 == true) && (haveData1 == false))
+        {
+            return true;
+        }
+        else
+        {
+            unsigned long frameCount0 = cmpFrame0.getFrameCount();
+            unsigned long frameCount1 = cmpFrame1.getFrameCount();
+            return (frameCount0 < frameCount1);
+        }
     }
 
 } // namespace bias

@@ -22,6 +22,7 @@ set(
     background_histogram_ufmf.hpp
     background_median_ufmf.hpp
     compressed_frame_ufmf.hpp
+    compressor_ufmf.hpp
     fps_estimator.hpp
     )
 
@@ -43,6 +44,7 @@ set(
     background_histogram_ufmf.cpp
     background_median_ufmf.cpp
     compressed_frame_ufmf.cpp
+    compressor_ufmf.cpp
     fps_estimator.cpp
     )
 

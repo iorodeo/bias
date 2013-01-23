@@ -1,29 +1,24 @@
 #ifndef BIAS_COMPRESSED_FRAME_UFMF
 #define BIAS_COMPRESSED_FRAME_UFMF
 
-#include <memory>
-#include <QObject>
-#include <QRunnable>
 #include <vector>
+#include <memory>
+#include <functional>
 #include <opencv2/core/core.hpp>
-#include "lockable.hpp"
 #include "stamped_image.hpp"
+#include "lockable.hpp"
 
 namespace bias
 {
-
-    class CompressedFrame_ufmf : public QObject, public QRunnable, public Lockable<Empty>
+    class CompressedFrame_ufmf 
     {
-        Q_OBJECT
-
         public:
 
-            CompressedFrame_ufmf(QObject *parent=0);
+            CompressedFrame_ufmf();
 
             CompressedFrame_ufmf(
                     unsigned int boxLength, 
-                    double fgMaxFracCompress,
-                    QObject *parent=0
+                    double fgMaxFracCompress
                     );
 
             void setData(
@@ -34,6 +29,8 @@ namespace bias
 
             void compress();
 
+            bool haveData() const;
+            unsigned long getFrameCount() const;
 
             static const uchar BACKGROUND_MEMBER_VALUE;
             static const uchar FOREGROUND_MEMBER_VALUE;
@@ -72,15 +69,33 @@ namespace bias
             unsigned long numConnectedComp_; // Number of connected components
             double fgMaxFracCompress_;       // Maximum fraction of pixels that can be in foreground
                                              // in order for us to compress
-                                             
-            void initialize( unsigned int boxLength, double fgMaxFraccompress);
+                                             //
             void allocateBuffers();          
             void resetBuffers(); 
             void createUncompressedFrame();
             void createCompressedFrame();
-            void run();
                                       
     };
+
+
+    class CompressedFrameCmp_ufmf 
+        : public std::binary_function<CompressedFrame_ufmf, CompressedFrame_ufmf, bool>
+    {
+        // Comparison object for Compressed frames
+        public:
+            bool operator() (
+                    const CompressedFrame_ufmf &cmpFrame0,
+                    const CompressedFrame_ufmf &cmpFrame1
+                    );
+    };
+
+
+    // Typedef for sets and queues of compressed frame objects
+    typedef LockableQueue<CompressedFrame_ufmf> CompressedFrameQueue_ufmf;
+    typedef std::shared_ptr<CompressedFrameQueue_ufmf> CompressedFrameQueuePtr_ufmf;
+
+    typedef LockableSet<CompressedFrame_ufmf, CompressedFrameCmp_ufmf> CompressedFrameSet_ufmf;
+    typedef std::shared_ptr<CompressedFrameSet_ufmf> CompressedFrameSetPtr_ufmf;
 
 } // namespace bias
 
