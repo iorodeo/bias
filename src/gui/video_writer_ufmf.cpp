@@ -13,12 +13,16 @@
 namespace bias
 {
     // Static Constants
-    const unsigned int VideoWriter_ufmf::MAX_THREAD_COUNT = 8;
+    // ----------------------------------------------------------------------------------
     const QString VideoWriter_ufmf::DUMMY_FILENAME("dummy.ufmf");
+    const unsigned int VideoWriter_ufmf::MAX_THREAD_COUNT = 10;
     const unsigned int VideoWriter_ufmf::DEFAULT_FRAME_SKIP = 4;
     const unsigned int VideoWriter_ufmf::DEFAULT_BACKGROUND_THRESHOLD = 40;
+    const unsigned int VideoWriter_ufmf::DEFAULT_NUMBER_OF_COMPRESSORS = 6;
 
 
+    // Methods
+    // ----------------------------------------------------------------------------------
     VideoWriter_ufmf::VideoWriter_ufmf(QObject *parent) 
         : VideoWriter_ufmf(DUMMY_FILENAME, parent) 
     {} 
@@ -29,6 +33,7 @@ namespace bias
     {
         isFirst_ = true;
         backgroundThreshold_ = DEFAULT_BACKGROUND_THRESHOLD;
+        numberOfCompressors_ = DEFAULT_NUMBER_OF_COMPRESSORS;
         setFrameSkip(DEFAULT_FRAME_SKIP);
 
         // Create thread pool for background modelling
@@ -40,12 +45,19 @@ namespace bias
         bgNewDataQueuePtr_ = std::make_shared<LockableQueue<BackgroundData_ufmf>>();
         bgOldDataQueuePtr_ = std::make_shared<LockableQueue<BackgroundData_ufmf>>();
         medianMatQueuePtr_ = std::make_shared<LockableQueue<cv::Mat>>();
+
+        // Create queue and set for frame compression
+        framesToDoQueuePtr_ = std::make_shared<CompressedFrameQueue_ufmf>();
+        framesFinishedSetPtr_ = std::make_shared<CompressedFrameSet_ufmf>();
+
     }
 
 
     VideoWriter_ufmf::~VideoWriter_ufmf() 
     {
         stopBackgroundModeling();
+        //stopCompressors();
+        threadPoolPtr_ -> waitForDone();
     } 
 
 
@@ -67,6 +79,7 @@ namespace bias
             cv::subtract(bgMedianImage_, backgroundThreshold_, bgLowerBoundImage_); 
 
             startBackgroundModeling();
+            //startCompressors();
             setupOutput(stampedImg);
             isFirst_ = false;
         }
@@ -201,7 +214,42 @@ namespace bias
         }
 
         // Wait for threads to finish
-        threadPoolPtr_ -> waitForDone();
+        //threadPoolPtr_ -> waitForDone();
+    }
+
+    void VideoWriter_ufmf::startCompressors()
+    {
+        framesToDoQueuePtr_ -> clear();
+        framesFinishedSetPtr_ -> clear();
+
+        // Create compressor threads and start on thread pool
+        compressorPtrVec_.resize(numberOfCompressors_);
+        for (unsigned int i=0; i<compressorPtrVec_.size(); i++)
+        {
+            compressorPtrVec_[i] = new Compressor_ufmf(
+                    framesToDoQueuePtr_,
+                    framesFinishedSetPtr_
+                    );
+            threadPoolPtr_ -> start(compressorPtrVec_[i]);
+        }
+    }
+
+    void VideoWriter_ufmf::stopCompressors()
+    {
+        // Signal for threads to stop 
+        for (unsigned int i=0; i<compressorPtrVec_.size(); i++)
+        {
+            if (compressorPtrVec_[i].isNull())
+            { 
+                compressorPtrVec_[i] -> acquireLock();
+                compressorPtrVec_[i] -> stop();
+                compressorPtrVec_[i] -> releaseLock();
+            }
+
+            framesToDoQueuePtr_ -> acquireLock();
+            framesToDoQueuePtr_ -> signalNotEmpty();
+            framesToDoQueuePtr_ -> releaseLock();
+        }
     }
 
 

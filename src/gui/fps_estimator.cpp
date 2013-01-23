@@ -13,12 +13,12 @@ namespace bias
         reset();
     }
 
-    double FPS_Estimator::getValue()
+    double FPS_Estimator::getValue() const
     {
         return fps_;
     }
 
-    double FPS_Estimator::getCutOffFreq()
+    double FPS_Estimator::getCutOffFreq() const
     {
         return cutOffFreq_;
     }

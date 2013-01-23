@@ -42,22 +42,22 @@ namespace bias
         currentTimeStamp_ = 0.0;
     }
 
-    cv::Mat ImageDispatcher::getImage()
+    cv::Mat ImageDispatcher::getImage() const
     {
         return currentImage_;
     }
 
-    double ImageDispatcher::getTimeStamp()
+    double ImageDispatcher::getTimeStamp() const
     {
         return currentTimeStamp_;
     }
 
-    double ImageDispatcher::getFPS()
+    double ImageDispatcher::getFPS() const
     {
         return fpsEstimator_.getValue();
     }
 
-    unsigned long ImageDispatcher::getFrameCount()
+    unsigned long ImageDispatcher::getFrameCount() const
     {
         return frameCount_;
     }

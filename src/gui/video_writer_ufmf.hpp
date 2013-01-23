@@ -2,8 +2,10 @@
 #define BIAS_VIDEO_WRITER_UFMF_HPP
 
 #include "video_writer.hpp"
+#include "compressor_ufmf.hpp"
 #include "compressed_frame_ufmf.hpp"
 #include <memory>
+#include <vector>
 #include <QPointer>
 #include <opencv2/core/core.hpp>
 
@@ -37,15 +39,18 @@ namespace bias
             static const QString DUMMY_FILENAME;
             static const unsigned int DEFAULT_FRAME_SKIP;
             static const unsigned int DEFAULT_BACKGROUND_THRESHOLD;
+            static const unsigned int DEFAULT_NUMBER_OF_COMPRESSORS;
 
         protected:
 
             bool isFirst_;
             unsigned int backgroundThreshold_;
+            unsigned int numberOfCompressors_;
 
             StampedImage currentImage_;
 
             CompressedFrame_ufmf compressedFrame_;
+            std::vector<QPointer<Compressor_ufmf>> compressorPtrVec_;
 
             //cv::Mat currentImage_;
             cv::Mat bgMedianImage_;
@@ -62,11 +67,16 @@ namespace bias
             std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr_;
             std::shared_ptr<LockableQueue<cv::Mat>> medianMatQueuePtr_;
 
+            CompressedFrameQueuePtr_ufmf framesToDoQueuePtr_;
+            CompressedFrameSetPtr_ufmf framesFinishedSetPtr_;
+
             void checkImageFormat(StampedImage stampedImg);
             void setupOutput(StampedImage stampedImg);
 
             void startBackgroundModeling();
             void stopBackgroundModeling();
+            void startCompressors();
+            void stopCompressors();
     };
 }
 

@@ -66,7 +66,7 @@ namespace bias
         } 
     }
 
-    cv::Mat BackgroundData_ufmf::getMedianImage()
+    cv::Mat BackgroundData_ufmf::getMedianImage() const
     {
         unsigned int bin;
         unsigned int binValue;

@@ -37,10 +37,10 @@ namespace bias
             // Use lock when calling these methods
             // ----------------------------------
             void stop();
-            cv::Mat getImage();     // Note, might want to change so that we return 
-            double getTimeStamp();  // the stampedImage.
-            double getFPS();
-            unsigned long getFrameCount();
+            cv::Mat getImage() const;     // Note, might want to change so that we return 
+            double getTimeStamp() const;  // the stampedImage.
+            double getFPS() const;
+            unsigned long getFrameCount() const;
             // -----------------------------------
 
         private:

@@ -19,8 +19,8 @@ namespace bias
             Compressor_ufmf(QObject *parent=0);
 
             Compressor_ufmf(
-                    CompressedFrameQueuePtr_ufmf cmpFrameWaitQueuePtr,
-                    CompressedFrameSetPtr_ufmf cmpFrameSetPtr,
+                    CompressedFrameQueuePtr_ufmf framesToDoQueuePtr,
+                    CompressedFrameSetPtr_ufmf framesFinishedSetPtr,
                     QObject *parent=0
                     );
 
@@ -31,12 +31,12 @@ namespace bias
             bool ready_;
             bool stopped_;
 
-            CompressedFrameQueuePtr_ufmf cmpFrameWaitQueuePtr_;
-            CompressedFrameSetPtr_ufmf cmpFrameDoneSetPtr_;
+            CompressedFrameQueuePtr_ufmf framesToDoQueuePtr_;
+            CompressedFrameSetPtr_ufmf framesFinishedSetPtr_;
 
             void initialize(
-                    CompressedFrameQueuePtr_ufmf cmpFrameWaitQueuePtr,
-                    CompressedFrameSetPtr_ufmf cmpFrameDoneSetPtr
+                    CompressedFrameQueuePtr_ufmf framesToDoQueuePtr,
+                    CompressedFrameSetPtr_ufmf framesFinishedSetPtr
                     );
 
             void run();

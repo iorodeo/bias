@@ -10,26 +10,26 @@ namespace bias
     }
 
     Compressor_ufmf::Compressor_ufmf( 
-            CompressedFrameQueuePtr_ufmf cmpFrameWaitQueuePtr, 
-            CompressedFrameSetPtr_ufmf cmpFrameDoneSetPtr, 
+            CompressedFrameQueuePtr_ufmf framesToDoQueuePtr, 
+            CompressedFrameSetPtr_ufmf framesFinishedSetPtr, 
             QObject *parent
             )  
         : QObject(parent)
     {
-        initialize(cmpFrameWaitQueuePtr,cmpFrameDoneSetPtr);
+        initialize(framesToDoQueuePtr,framesFinishedSetPtr);
     }
 
     
     void Compressor_ufmf::initialize( 
-            CompressedFrameQueuePtr_ufmf cmpFrameWaitQueuePtr, 
-            CompressedFrameSetPtr_ufmf cmpFrameDoneSetPtr 
+            CompressedFrameQueuePtr_ufmf framesToDoQueuePtr, 
+            CompressedFrameSetPtr_ufmf framesFinishedSetPtr 
             )
     {
         ready_ = false;
         stopped_ = true;
-        cmpFrameWaitQueuePtr_ = cmpFrameWaitQueuePtr;
-        cmpFrameDoneSetPtr_ = cmpFrameDoneSetPtr;
-        if ((cmpFrameWaitQueuePtr_ != NULL) && (cmpFrameDoneSetPtr_ != NULL))
+        framesToDoQueuePtr_ = framesToDoQueuePtr;
+        framesFinishedSetPtr_ = framesFinishedSetPtr;
+        if ((framesToDoQueuePtr_ != NULL) && (framesFinishedSetPtr_ != NULL))
         {
             ready_ = true;
         }
@@ -59,16 +59,29 @@ namespace bias
         while (!done)
         {
             // Get next frame from in waiting queue
-            cmpFrameWaitQueuePtr_ -> acquireLock();
-            cmpFrameWaitQueuePtr_ -> waitIfEmpty();
-            if (cmpFrameWaitQueuePtr_ -> empty())
+            framesToDoQueuePtr_ -> acquireLock();
+            framesToDoQueuePtr_ -> waitIfEmpty();
+            if (framesToDoQueuePtr_ -> empty())
             {
-                cmpFrameWaitQueuePtr_ -> releaseLock();
+                framesToDoQueuePtr_ -> releaseLock();
                 break;
             }
-            cmpFrame = cmpFrameWaitQueuePtr_ -> front();
-            cmpFrameWaitQueuePtr_ -> pop();
-            cmpFrameWaitQueuePtr_ -> releaseLock();
+            cmpFrame = framesToDoQueuePtr_ -> front();
+            framesToDoQueuePtr_ -> pop();
+            framesToDoQueuePtr_ -> releaseLock();
+
+            // Compress the frame
+            cmpFrame.compress();
+
+            // Put completed compressed frame into "done" set
+            framesFinishedSetPtr_ -> acquireLock();
+            framesFinishedSetPtr_ -> insert(cmpFrame);
+            framesFinishedSetPtr_ -> releaseLock();
+
+            // Check to see if stop has been called
+            acquireLock();
+            done = stopped_;
+            releaseLock();
 
         }
 

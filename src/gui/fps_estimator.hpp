@@ -9,8 +9,8 @@ namespace bias
 
         public:
             FPS_Estimator();
-            double getValue();
-            double getCutOffFreq();
+            double getValue() const;
+            double getCutOffFreq() const;
             double setCutOffFreq(double freq);
             void reset();
             void update(double timeNew); 

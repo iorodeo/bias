@@ -18,7 +18,7 @@ namespace bias
                     unsigned int binSize
                     );
             void addImage(StampedImage stampedImg);
-            cv::Mat getMedianImage();
+            cv::Mat getMedianImage() const;
             void clear();
 
         private:
