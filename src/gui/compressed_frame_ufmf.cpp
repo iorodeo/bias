@@ -123,18 +123,18 @@ namespace bias
         unsigned int numRow = (unsigned int) (stampedImg_.image.rows);
         unsigned int numCol = (unsigned int) (stampedImg_.image.cols);
 
-        writeRowBuf_[0] = 0;
-        writeColBuf_[0] = 0;
-        writeHgtBuf_[0] = numRow;
-        writeWdtBuf_[0] = numCol;
+        (*writeRowBufPtr_)[0] = 0;
+        (*writeColBufPtr_)[0] = 0;
+        (*writeHgtBufPtr_)[0] = numRow;
+        (*writeWdtBufPtr_)[0] = numCol;
 
         unsigned int pixCnt = 0;
         for (unsigned int row=0; row<numRow; row++)
         {
             for (unsigned int col=0; col<numCol; col++)
             {
-                imageDatBuf_[pixCnt] = (uint8_t) stampedImg_.image.at<uchar>(row,col);
-                numWriteBuf_[pixCnt] = 1;
+                (*imageDatBufPtr_)[pixCnt] = (uint8_t) stampedImg_.image.at<uchar>(row,col);
+                (*numWriteBufPtr_)[pixCnt] = 1;
                 pixCnt++;
             }
         }
@@ -164,25 +164,25 @@ namespace bias
                 }
 
                 // store everything in box with corner at (row,col)
-                writeRowBuf_[numConnectedComp_] = row;
-                writeColBuf_[numConnectedComp_] = col;
-                writeHgtBuf_[numConnectedComp_] = std::min(boxLength_, numRow-row);
-                writeWdtBuf_[numConnectedComp_] = std::min(boxLength_, numCol-col);
+                (*writeRowBufPtr_)[numConnectedComp_] = row;
+                (*writeColBufPtr_)[numConnectedComp_] = col;
+                (*writeHgtBufPtr_)[numConnectedComp_] = std::min(boxLength_, numRow-row);
+                (*writeWdtBufPtr_)[numConnectedComp_] = std::min(boxLength_, numCol-col);
 
                 // Loop through pixels to store
-                unsigned int rowPlusHeight = row + writeHgtBuf_[numConnectedComp_];
+                unsigned int rowPlusHeight = row + (*writeHgtBufPtr_)[numConnectedComp_];
 
                 for (unsigned int rowEnd=row; rowEnd < rowPlusHeight; rowEnd++)
                 {
                     bool stopEarly = false;
                     unsigned int colEnd = col;
                     unsigned int numWriteInd = rowEnd*numCol + col;
-                    unsigned int colPlusWidth = col + writeWdtBuf_[numConnectedComp_];
+                    unsigned int colPlusWidth = col + (*writeWdtBufPtr_)[numConnectedComp_];
 
                     // Check if we've already written something in this column
                     for (colEnd=col; colEnd < colPlusWidth; colEnd++)
                     {
-                        if (numWriteBuf_[numWriteInd] > 0)
+                        if ((*numWriteBufPtr_)[numWriteInd] > 0)
                         {
                             stopEarly = true;
                             break;
@@ -196,25 +196,25 @@ namespace bias
                         if (rowEnd == row)
                         { 
                             // If this is the first row - shorten the width and write as usual
-                            writeWdtBuf_[numConnectedComp_] = colEnd - col;
+                            (*writeWdtBufPtr_)[numConnectedComp_] = colEnd - col;
                         }
                         else
                         {
                             // Otherwise, shorten the height, and don't write any of this row
-                            writeHgtBuf_[numConnectedComp_] = rowEnd - row;
+                            (*writeHgtBufPtr_)[numConnectedComp_] = rowEnd - row;
                             break;
                         }
 
                     } // if (stopEarly) 
 
-                    colPlusWidth = col + writeWdtBuf_[numConnectedComp_];
+                    colPlusWidth = col + (*writeWdtBufPtr_)[numConnectedComp_];
                     numWriteInd = rowEnd*numCol + col;
 
                     for (colEnd=col; colEnd < colPlusWidth; colEnd++)
                     {
-                        numWriteBuf_[numWriteInd] += 1;
+                        (*numWriteBufPtr_)[numWriteInd] += 1;
                         numWriteInd += 1;
-                        imageDatBuf_[imageDatInd] = (uint8_t) stampedImg_.image.at<uchar>(rowEnd,colEnd); 
+                        (*imageDatBufPtr_)[imageDatInd] = (uint8_t) stampedImg_.image.at<uchar>(rowEnd,colEnd); 
                         imageDatInd += 1;
                         membershipImage_.at<uchar>(rowEnd,colEnd) = BACKGROUND_MEMBER_VALUE;
                     } // for (unsigned int colEnd 
@@ -230,7 +230,7 @@ namespace bias
 
         isCompressed_ = true;
 
-        std::cout << "numConnectedComp: " << numConnectedComp_ << std::endl;
+        //std::cout << "numConnectedComp: " << numConnectedComp_ << std::endl;
 
     } // CompressedFrame_ufmf::createCompressedFrame
 
@@ -243,24 +243,30 @@ namespace bias
 
     void CompressedFrame_ufmf::allocateBuffers()
     {
-        writeRowBuf_.resize(numPix_);
-        writeColBuf_.resize(numPix_);
-        writeHgtBuf_.resize(numPix_);
-        writeWdtBuf_.resize(numPix_);
-        numWriteBuf_.resize(numPix_);
-        imageDatBuf_.resize(numPix_);
-        
+        writeRowBufPtr_ = std::make_shared<std::vector<uint16_t>>();
+        writeColBufPtr_ = std::make_shared<std::vector<uint16_t>>();
+        writeHgtBufPtr_ = std::make_shared<std::vector<uint16_t>>();
+        writeWdtBufPtr_ = std::make_shared<std::vector<uint16_t>>();
+        numWriteBufPtr_ = std::make_shared<std::vector<uint16_t>>();
+        imageDatBufPtr_ = std::make_shared<std::vector<uint8_t>>();
+
+        writeRowBufPtr_ -> resize(numPix_);
+        writeColBufPtr_ -> resize(numPix_);
+        writeHgtBufPtr_ -> resize(numPix_);
+        writeWdtBufPtr_ -> resize(numPix_);
+        numWriteBufPtr_ -> resize(numPix_);
+        imageDatBufPtr_ -> resize(numPix_);
     }
 
 
     void CompressedFrame_ufmf::resetBuffers()
     {
-        std::fill_n(writeRowBuf_.begin(), numPix_, 0); 
-        std::fill_n(writeColBuf_.begin(), numPix_, 0);
-        std::fill_n(writeHgtBuf_.begin(), numPix_, 0);
-        std::fill_n(writeWdtBuf_.begin(), numPix_, 0);
-        std::fill_n(numWriteBuf_.begin(), numPix_, 0);
-        std::fill_n(imageDatBuf_.begin(), numPix_, 0);
+        std::fill_n(writeRowBufPtr_ -> begin(), numPix_, 0); 
+        std::fill_n(writeColBufPtr_ -> begin(), numPix_, 0);
+        std::fill_n(writeHgtBufPtr_ -> begin(), numPix_, 0);
+        std::fill_n(writeWdtBufPtr_ -> begin(), numPix_, 0);
+        std::fill_n(numWriteBufPtr_ -> begin(), numPix_, 0);
+        std::fill_n(imageDatBufPtr_ -> begin(), numPix_, 0);
     }
 
 

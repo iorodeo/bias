@@ -15,9 +15,9 @@ namespace bias
     // Static Constants
     // ----------------------------------------------------------------------------------
     const QString VideoWriter_ufmf::DUMMY_FILENAME("dummy.ufmf");
-    const unsigned int VideoWriter_ufmf::DEFAULT_FRAME_SKIP = 4;
+    const unsigned int VideoWriter_ufmf::DEFAULT_FRAME_SKIP = 3;
     const unsigned int VideoWriter_ufmf::DEFAULT_BACKGROUND_THRESHOLD = 40;
-    const unsigned int VideoWriter_ufmf::DEFAULT_NUMBER_OF_COMPRESSORS = 10;
+    const unsigned int VideoWriter_ufmf::DEFAULT_NUMBER_OF_COMPRESSORS = 15;
     const unsigned int VideoWriter_ufmf::DEFAULT_MAX_THREAD_COUNT = 
         DEFAULT_NUMBER_OF_COMPRESSORS + 4;
 
@@ -122,10 +122,24 @@ namespace bias
             compressedFrame.setData(currentImage_, bgLowerBoundImage_, bgUpperBoundImage_);
 
             // Insert new (uncalculated) compressed frame int "to do" queue.
-            //framesToDoQueuePtr_ -> push(compressedFrame);
+            std::cout << "ufmf todo queue size: " << framesToDoQueuePtr_ -> size() << std::endl;
+            framesToDoQueuePtr_ -> acquireLock();
+            framesToDoQueuePtr_ -> push(compressedFrame);
+            framesToDoQueuePtr_ -> wakeOne();
+            framesToDoQueuePtr_ -> releaseLock();
 
 
         } // if (frameCount_%frameSkip_==0) 
+
+        // Remove frames form "finished" set
+        framesFinishedSetPtr_ -> acquireLock();
+        if (!(framesFinishedSetPtr_ -> empty()))
+        {
+            CompressedFrameSet_ufmf::iterator it = framesFinishedSetPtr_ -> begin();
+            framesFinishedSetPtr_ -> erase(it);
+        }
+        framesFinishedSetPtr_ -> releaseLock();
+        std::cout << "ufmf set size: " << framesFinishedSetPtr_ -> size() << std::endl;
 
         frameCount_++;
     }
@@ -241,19 +255,26 @@ namespace bias
 
     void VideoWriter_ufmf::stopCompressors()
     {
-        // Signal for threads to stop 
+        // Send all compressor threads a stop signal 
         for (unsigned int i=0; i<compressorPtrVec_.size(); i++)
         {
-            if (!compressorPtrVec_[i].isNull())
+            if (!(compressorPtrVec_[i].isNull()))
             { 
                 compressorPtrVec_[i] -> acquireLock();
                 compressorPtrVec_[i] -> stop();
                 compressorPtrVec_[i] -> releaseLock();
             }
+        }
 
-            framesToDoQueuePtr_ -> acquireLock();
-            framesToDoQueuePtr_ -> signalNotEmpty();
-            framesToDoQueuePtr_ -> releaseLock();
+        // Wait until all compressor threads are null
+        for (unsigned int i=0; i<compressorPtrVec_.size(); i++)
+        {
+            while (!(compressorPtrVec_[i].isNull()))
+            {
+                framesToDoQueuePtr_ -> acquireLock();
+                framesToDoQueuePtr_ -> wakeOne();
+                framesToDoQueuePtr_ -> releaseLock();
+            }
         }
     }
 

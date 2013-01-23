@@ -26,8 +26,6 @@ namespace bias
             CompressedFrameSetPtr_ufmf framesFinishedSetPtr 
             )
     {
-        std::cout << " starting compressor" << std:: endl;
-
         ready_ = false;
         stopped_ = true;
         framesToDoQueuePtr_ = framesToDoQueuePtr;
@@ -48,12 +46,10 @@ namespace bias
     void Compressor_ufmf::run()
     {
         bool done = false;
-        CompressedFrame_ufmf cmpFrame;
 
-        if (!ready_)
-        {
-            return;
-        }
+        CompressedFrame_ufmf compressedFrame;
+
+        if (!ready_) { return; }
 
         acquireLock();
         stopped_ = false;
@@ -61,35 +57,41 @@ namespace bias
 
         while (!done)
         {
+            bool haveNewFrame = false;
+
             // Get next frame from in waiting queue
             framesToDoQueuePtr_ -> acquireLock();
             framesToDoQueuePtr_ -> waitIfEmpty();
             if (framesToDoQueuePtr_ -> empty())
             {
-                framesToDoQueuePtr_ -> releaseLock();
-                break;
+                haveNewFrame = false;
             }
-            cmpFrame = framesToDoQueuePtr_ -> front();
-            framesToDoQueuePtr_ -> pop();
+            else
+            {
+                haveNewFrame = true;
+                compressedFrame = framesToDoQueuePtr_ -> front();
+                framesToDoQueuePtr_ -> pop();
+            }
             framesToDoQueuePtr_ -> releaseLock();
-
-            // Compress the frame
-            cmpFrame.compress();
-
-            // Put completed compressed frame into "done" set
-            framesFinishedSetPtr_ -> acquireLock();
-            framesFinishedSetPtr_ -> insert(cmpFrame);
-            framesFinishedSetPtr_ -> releaseLock();
 
             // Check to see if stop has been called
             acquireLock();
             done = stopped_;
             releaseLock();
 
+            if ((haveNewFrame) && (!done))
+            {
+                // Compress the frame
+                compressedFrame.compress();
+
+                // Put completed compressed frame into "done" set
+                framesFinishedSetPtr_ -> acquireLock();
+                framesFinishedSetPtr_ -> insert(compressedFrame);
+                framesFinishedSetPtr_ -> releaseLock();
+            }
+
+
         }
-
-        std::cout << "  compressor done" << std::endl;
-
     }
 
 } // namespace bias

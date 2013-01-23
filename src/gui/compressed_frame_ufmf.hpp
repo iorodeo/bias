@@ -57,12 +57,12 @@ namespace bias
             unsigned int numForeground_;  // Number of forground pixels
             unsigned int numPixWritten_;  // Number of pixels written
 
-            std::vector<uint16_t> writeRowBuf_;  // Y mins
-            std::vector<uint16_t> writeColBuf_;  // X mins
-            std::vector<uint16_t> writeHgtBuf_;  // Heights
-            std::vector<uint16_t> writeWdtBuf_;  // Widths
-            std::vector<uint16_t> numWriteBuf_;  // Number of times pixel written 
-            std::vector<uint8_t>  imageDatBuf_;  // Image data 
+            std::shared_ptr<std::vector<uint16_t>> writeRowBufPtr_;  // Y mins
+            std::shared_ptr<std::vector<uint16_t>> writeColBufPtr_;  // X mins
+            std::shared_ptr<std::vector<uint16_t>> writeHgtBufPtr_;  // Heights
+            std::shared_ptr<std::vector<uint16_t>> writeWdtBufPtr_;  // Widths
+            std::shared_ptr<std::vector<uint16_t>> numWriteBufPtr_;  // Number of times pixel written 
+            std::shared_ptr<std::vector<uint8_t>>  imageDatBufPtr_;  // Image data 
 
             unsigned int boxArea_;           // BoxLength*boxLength
             unsigned int boxLength_;         // Length of boxes or foreground pixels to store

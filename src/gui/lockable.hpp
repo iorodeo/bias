@@ -74,6 +74,11 @@ namespace bias
                 emptyWaitCond_.wakeAll();
             }
 
+            void wakeOne()
+            {
+                emptyWaitCond_.wakeOne();
+            }
+
         protected:
             QWaitCondition emptyWaitCond_;
     };
