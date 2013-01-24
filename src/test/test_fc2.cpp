@@ -88,7 +88,7 @@ int main(int argc, char** argv)
 
     // Print Property information for all cameras
     // ------------------------------------------------------------------------
-    if (false) 
+    if (true) 
     {
         cnt = 0;
         for (
