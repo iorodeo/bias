@@ -67,6 +67,7 @@ namespace bias
             std::shared_ptr<LockableQueue<cv::Mat>> medianMatQueuePtr_;
 
             CompressedFrameQueuePtr_ufmf framesToDoQueuePtr_;
+            CompressedFrameQueuePtr_ufmf framesWaitQueuePtr_;
             CompressedFrameSetPtr_ufmf framesFinishedSetPtr_;
 
             void checkImageFormat(StampedImage stampedImg);

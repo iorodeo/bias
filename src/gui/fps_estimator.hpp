@@ -5,7 +5,7 @@ namespace bias
 {
     class FPS_Estimator
     {
-        const double DEFAULT_CUTOFF_FREQ = 5.0;
+        const double DEFAULT_CUTOFF_FREQ = 1.0;
 
         public:
             FPS_Estimator();

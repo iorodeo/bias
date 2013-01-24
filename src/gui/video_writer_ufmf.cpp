@@ -15,7 +15,7 @@ namespace bias
     // Static Constants
     // ----------------------------------------------------------------------------------
     const QString VideoWriter_ufmf::DUMMY_FILENAME("dummy.ufmf");
-    const unsigned int VideoWriter_ufmf::DEFAULT_FRAME_SKIP = 3;
+    const unsigned int VideoWriter_ufmf::DEFAULT_FRAME_SKIP = 1;
     const unsigned int VideoWriter_ufmf::DEFAULT_BACKGROUND_THRESHOLD = 40;
     const unsigned int VideoWriter_ufmf::DEFAULT_NUMBER_OF_COMPRESSORS = 15;
     const unsigned int VideoWriter_ufmf::DEFAULT_MAX_THREAD_COUNT = 
@@ -49,6 +49,7 @@ namespace bias
 
         // Create queue and set for frame compression
         framesToDoQueuePtr_ = std::make_shared<CompressedFrameQueue_ufmf>();
+        framesWaitQueuePtr_ = std::make_shared<CompressedFrameQueue_ufmf>();
         framesFinishedSetPtr_ = std::make_shared<CompressedFrameSet_ufmf>();
 
     }
@@ -119,10 +120,17 @@ namespace bias
 
             // Create compressed frame and set its data using the current frame 
             CompressedFrame_ufmf compressedFrame;
+            if (!(framesWaitQueuePtr_ -> empty()))
+            {
+                // Take pre-allocate frame if available
+                compressedFrame = framesWaitQueuePtr_ -> front();
+                framesWaitQueuePtr_ -> pop();
+            }
+            //std::cout << "ufmf frames wait size: " << framesWaitQueuePtr_ -> size() << std::endl;
             compressedFrame.setData(currentImage_, bgLowerBoundImage_, bgUpperBoundImage_);
 
             // Insert new (uncalculated) compressed frame int "to do" queue.
-            std::cout << "ufmf todo queue size: " << framesToDoQueuePtr_ -> size() << std::endl;
+            //std::cout << "ufmf todo queue size: " << framesToDoQueuePtr_ -> size() << std::endl;
             framesToDoQueuePtr_ -> acquireLock();
             framesToDoQueuePtr_ -> push(compressedFrame);
             framesToDoQueuePtr_ -> wakeOne();
@@ -136,10 +144,12 @@ namespace bias
         if (!(framesFinishedSetPtr_ -> empty()))
         {
             CompressedFrameSet_ufmf::iterator it = framesFinishedSetPtr_ -> begin();
+            CompressedFrame_ufmf compressedFrame = *it;
+            framesWaitQueuePtr_ -> push(compressedFrame);
             framesFinishedSetPtr_ -> erase(it);
         }
         framesFinishedSetPtr_ -> releaseLock();
-        std::cout << "ufmf set size: " << framesFinishedSetPtr_ -> size() << std::endl;
+        //std::cout << "ufmf set size: " << framesFinishedSetPtr_ -> size() << std::endl;
 
         frameCount_++;
     }
