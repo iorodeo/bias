@@ -78,6 +78,7 @@ namespace bias
 
     void VideoWriter_fmf::setupOutput(StampedImage stampedImg)
     {
+        // Set error control state, set exceptions mask
         file_.clear();
         file_.exceptions(std::ifstream::failbit | std::ifstream::badbit);
        

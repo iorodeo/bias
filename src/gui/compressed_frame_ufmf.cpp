@@ -19,6 +19,11 @@ namespace bias
     { }
 
 
+    CompressedFrame_ufmf::CompressedFrame_ufmf(unsigned int boxLength)
+        : CompressedFrame_ufmf(boxLength, DEFAULT_FG_MAX_FRAC_COMPRESS)
+    { }
+
+
     CompressedFrame_ufmf::CompressedFrame_ufmf(
             unsigned int boxLength, 
             double fgMaxFracCompress
@@ -214,9 +219,12 @@ namespace bias
                     {
                         (*numWriteBufPtr_)[numWriteInd] += 1;
                         numWriteInd += 1;
+
                         (*imageDatBufPtr_)[imageDatInd] = (uint8_t) stampedImg_.image.at<uchar>(rowEnd,colEnd); 
                         imageDatInd += 1;
+
                         membershipImage_.at<uchar>(rowEnd,colEnd) = BACKGROUND_MEMBER_VALUE;
+
                     } // for (unsigned int colEnd 
 
 

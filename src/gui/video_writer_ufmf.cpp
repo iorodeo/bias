@@ -14,12 +14,16 @@ namespace bias
 {
     // Static Constants
     // ----------------------------------------------------------------------------------
-    const QString VideoWriter_ufmf::DUMMY_FILENAME("dummy.ufmf");
     const unsigned int VideoWriter_ufmf::DEFAULT_FRAME_SKIP = 1;
     const unsigned int VideoWriter_ufmf::DEFAULT_BACKGROUND_THRESHOLD = 40;
+    const unsigned int VideoWriter_ufmf::DEFAULT_UFMF_BOX_LENGTH = 30;
     const unsigned int VideoWriter_ufmf::DEFAULT_NUMBER_OF_COMPRESSORS = 15;
     const unsigned int VideoWriter_ufmf::DEFAULT_MAX_THREAD_COUNT = 
         DEFAULT_NUMBER_OF_COMPRESSORS + 4;
+    const QString VideoWriter_ufmf::DEFAULT_COLOR_CODING("MONO8");
+    const QString VideoWriter_ufmf::DUMMY_FILENAME("dummy.ufmf");
+    const QString VideoWriter_ufmf::UFMF_HEADER_STRING("ufmf");
+    const unsigned int VideoWriter_ufmf::UFMF_VERSION_NUMBER = 4;
 
 
     // Methods
@@ -52,6 +56,11 @@ namespace bias
         framesWaitQueuePtr_ = std::make_shared<CompressedFrameQueue_ufmf>();
         framesFinishedSetPtr_ = std::make_shared<CompressedFrameSet_ufmf>();
 
+        indexLocation_ = 0;
+        isFixedSize_ = false;
+        boxLength_ = DEFAULT_UFMF_BOX_LENGTH;
+        colorCoding_ = QString(DEFAULT_COLOR_CODING);
+
     }
 
 
@@ -74,6 +83,8 @@ namespace bias
         if (isFirst_)
         {
             checkImageFormat(stampedImg);
+            setupOutputFile(stampedImg);
+            writeHeader();
 
             bgMedianImage_ = stampedImg.image;
             bgMembershipImage_.create(stampedImg.image.rows, stampedImg.image.cols,CV_8UC1);
@@ -82,7 +93,7 @@ namespace bias
 
             startBackgroundModeling();
             startCompressors();
-            setupOutput(stampedImg);
+
             isFirst_ = false;
         }
 
@@ -119,7 +130,8 @@ namespace bias
             }
 
             // Create compressed frame and set its data using the current frame 
-            CompressedFrame_ufmf compressedFrame;
+            CompressedFrame_ufmf compressedFrame(boxLength_);
+
             if (!(framesWaitQueuePtr_ -> empty()))
             {
                 // Take pre-allocate frame if available
@@ -189,9 +201,87 @@ namespace bias
     }
 
 
-    void VideoWriter_ufmf::setupOutput(StampedImage stampedImg) 
+    void VideoWriter_ufmf::setupOutputFile(StampedImage stampedImg) 
     {
-        size_ = stampedImg.image.size();
+
+        // Set error control state, set exceptions mask
+        file_.clear();
+        file_.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+
+        // Get unique name for file and open for reading
+        QString incrFileName = getUniqueFileName();
+
+        try
+        {
+            file_.open(incrFileName.toStdString(), std::ios::binary | std::ios::out);
+        }
+        catch (std::ifstream::failure &exc)
+        {
+            unsigned int errorId = ERROR_VIDEO_WRITER_INITIALIZE;
+            std::string errorMsg("video writer unable to open file:\n\n"); 
+            errorMsg += exc.what();
+            throw RuntimeError(errorId, errorMsg); 
+        }
+
+        if (!file_.is_open())
+        {
+            unsigned int errorId = ERROR_VIDEO_WRITER_INITIALIZE;
+            std::string errorMsg("video writer unable to open file:\n\n"); 
+            errorMsg += "no exception thrown";
+            throw RuntimeError(errorId, errorMsg); 
+        }
+        setSize(stampedImg.image.size());
+
+    }
+
+
+    void VideoWriter_ufmf::writeHeader()
+    {
+        try 
+        {
+            
+            QByteArray headerStrArray = UFMF_HEADER_STRING.toLatin1();
+            unsigned int headerStrLen = UFMF_HEADER_STRING.size();
+            file_.write((char*) headerStrArray.data(), headerStrLen*sizeof(char));
+
+            uint32_t ufmf_version_uint32 = uint32_t(UFMF_VERSION_NUMBER);
+            file_.write((char*) &ufmf_version_uint32, sizeof(uint32_t));
+
+            indexLocationPtr_ = file_.tellp();
+            uint64_t indexLocation_uint64 = uint64_t(indexLocation_);
+            file_.write((char*) &indexLocation_uint64, sizeof(uint64_t));
+
+            if (isFixedSize_)
+            {
+                uint16_t boxLength_uint16 = uint16_t(boxLength_);
+                file_.write((char*) &boxLength_uint16, sizeof(uint16_t)); 
+                file_.write((char*) &boxLength_uint16, sizeof(uint16_t));
+            }
+            else
+            {
+                uint16_t width_uint16 = uint16_t(size_.width);
+                file_.write((char*) &width_uint16, sizeof(uint16_t));
+
+                uint16_t height_uint16 = uint16_t(size_.height);
+                file_.write((char*) &height_uint16, sizeof(uint16_t));
+            }
+
+            uint8_t isFixedSize_uint8 = uint8_t(isFixedSize_);
+            file_.write((char*) &isFixedSize_uint8, sizeof(uint8_t));
+
+            uint8_t colorCodingLength = uint8_t(colorCoding_.size());
+            file_.write((char*) &colorCodingLength, sizeof(uint8_t));
+
+            QByteArray colorCodingArray = colorCoding_.toLatin1();
+            file_.write((char*) colorCodingArray.data(), colorCodingLength*sizeof(char));
+        }
+        catch (std::ifstream::failure &exc)
+        {
+            unsigned int errorId = ERROR_VIDEO_WRITER_INITIALIZE;
+            std::string errorMsg("video writer unable to write ufmf header:\n\n"); 
+            errorMsg += exc.what();
+            throw RuntimeError(errorId, errorMsg); 
+        }
     }
 
 

@@ -17,6 +17,10 @@ namespace bias
             CompressedFrame_ufmf();
 
             CompressedFrame_ufmf(
+                    unsigned int boxLength
+                    );
+
+            CompressedFrame_ufmf(
                     unsigned int boxLength, 
                     double fgMaxFracCompress
                     );

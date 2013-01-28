@@ -8,6 +8,7 @@
 #include <vector>
 #include <QPointer>
 #include <opencv2/core/core.hpp>
+#include <fstream>
 
 class QThreadPool;
 
@@ -31,31 +32,42 @@ namespace bias
             virtual void addFrame(StampedImage stampedImg);
 
             //// Debug ----------------
+            //cv::Mat currentImage_;
             //void updateMembershipImage();
             //cv::Mat getMembershipImage();
             //// ----------------------
 
-            static const QString DUMMY_FILENAME;
             static const unsigned int DEFAULT_FRAME_SKIP;
             static const unsigned int DEFAULT_BACKGROUND_THRESHOLD;
+            static const unsigned int DEFAULT_UFMF_BOX_LENGTH;
             static const unsigned int DEFAULT_NUMBER_OF_COMPRESSORS;
             static const unsigned int DEFAULT_MAX_THREAD_COUNT;
+            static const QString DEFAULT_COLOR_CODING;
+            static const QString DUMMY_FILENAME;
+            static const QString UFMF_HEADER_STRING;
+            static const unsigned int UFMF_VERSION_NUMBER;
 
         protected:
 
             bool isFirst_;
             unsigned int backgroundThreshold_;
             unsigned int numberOfCompressors_;
+            unsigned int boxLength_;
+            bool isFixedSize_;
+            QString colorCoding_;
 
             StampedImage currentImage_;
 
-            std::vector<QPointer<Compressor_ufmf>> compressorPtrVec_;
+            std::fstream file_;
+            std::streampos indexLocationPtr_;
+            unsigned long indexLocation_;
 
-            //cv::Mat currentImage_;
             cv::Mat bgMedianImage_;
             cv::Mat bgUpperBoundImage_;
             cv::Mat bgLowerBoundImage_;
             cv::Mat bgMembershipImage_;
+
+            std::vector<QPointer<Compressor_ufmf>> compressorPtrVec_;
 
             QPointer<QThreadPool> threadPoolPtr_;
             QPointer<BackgroundHistogram_ufmf> bgHistogramPtr_;
@@ -71,7 +83,8 @@ namespace bias
             CompressedFrameSetPtr_ufmf framesFinishedSetPtr_;
 
             void checkImageFormat(StampedImage stampedImg);
-            void setupOutput(StampedImage stampedImg);
+            void setupOutputFile(StampedImage stampedImg);
+            void writeHeader();
 
             void startBackgroundModeling();
             void stopBackgroundModeling();
