@@ -46,6 +46,7 @@ namespace bias
             static const QString DUMMY_FILENAME;
             static const QString UFMF_HEADER_STRING;
             static const unsigned int UFMF_VERSION_NUMBER;
+            static const unsigned int INDEX_DICT_CHUNK;
 
         protected:
 
@@ -61,17 +62,19 @@ namespace bias
             std::fstream file_;
             std::streampos indexLocationPtr_;
             unsigned long indexLocation_;
+            unsigned long nextFrameToWrite_;
+            unsigned long numKeyFramesWritten_;
 
             cv::Mat bgMedianImage_;
             cv::Mat bgUpperBoundImage_;
             cv::Mat bgLowerBoundImage_;
             cv::Mat bgMembershipImage_;
 
-            std::vector<QPointer<Compressor_ufmf>> compressorPtrVec_;
-
             QPointer<QThreadPool> threadPoolPtr_;
             QPointer<BackgroundHistogram_ufmf> bgHistogramPtr_;
             QPointer<BackgroundMedian_ufmf> bgMedianPtr_;
+
+            std::vector<QPointer<Compressor_ufmf>> compressorPtrVec_;
 
             std::shared_ptr<LockableQueue<StampedImage>> bgImageQueuePtr_;
             std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgNewDataQueuePtr_;
@@ -85,6 +88,9 @@ namespace bias
             void checkImageFormat(StampedImage stampedImg);
             void setupOutputFile(StampedImage stampedImg);
             void writeHeader();
+            void writeKeyFrame();
+            void writeCompressedFrame(CompressedFrame_ufmf frame);
+            void finishWriting();
 
             void startBackgroundModeling();
             void stopBackgroundModeling();

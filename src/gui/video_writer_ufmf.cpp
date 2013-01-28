@@ -24,6 +24,7 @@ namespace bias
     const QString VideoWriter_ufmf::DUMMY_FILENAME("dummy.ufmf");
     const QString VideoWriter_ufmf::UFMF_HEADER_STRING("ufmf");
     const unsigned int VideoWriter_ufmf::UFMF_VERSION_NUMBER = 4;
+    const unsigned int VideoWriter_ufmf::INDEX_DICT_CHUNK = 2;
 
 
     // Methods
@@ -56,10 +57,13 @@ namespace bias
         framesWaitQueuePtr_ = std::make_shared<CompressedFrameQueue_ufmf>();
         framesFinishedSetPtr_ = std::make_shared<CompressedFrameSet_ufmf>();
 
-        indexLocation_ = 0;
         isFixedSize_ = false;
         boxLength_ = DEFAULT_UFMF_BOX_LENGTH;
         colorCoding_ = QString(DEFAULT_COLOR_CODING);
+
+        indexLocation_ = 0;
+        nextFrameToWrite_ = 0;
+        numKeyFramesWritten_ = 0;
 
     }
 
@@ -69,6 +73,7 @@ namespace bias
         stopBackgroundModeling();
         stopCompressors();
         threadPoolPtr_ -> waitForDone();
+        finishWriting();
     } 
 
 
@@ -118,7 +123,6 @@ namespace bias
                 bgMedianImage_ = medianMatQueuePtr_ -> front();
                 medianMatQueuePtr_ -> pop();
                 haveNewMedianImage = true;
-                //std::cout << " *** got median image " << std::endl;
             }
             medianMatQueuePtr_ -> releaseLock();
 
@@ -138,11 +142,9 @@ namespace bias
                 compressedFrame = framesWaitQueuePtr_ -> front();
                 framesWaitQueuePtr_ -> pop();
             }
-            //std::cout << "ufmf frames wait size: " << framesWaitQueuePtr_ -> size() << std::endl;
             compressedFrame.setData(currentImage_, bgLowerBoundImage_, bgUpperBoundImage_);
 
             // Insert new (uncalculated) compressed frame int "to do" queue.
-            //std::cout << "ufmf todo queue size: " << framesToDoQueuePtr_ -> size() << std::endl;
             framesToDoQueuePtr_ -> acquireLock();
             framesToDoQueuePtr_ -> push(compressedFrame);
             framesToDoQueuePtr_ -> wakeOne();
@@ -157,11 +159,17 @@ namespace bias
         {
             CompressedFrameSet_ufmf::iterator it = framesFinishedSetPtr_ -> begin();
             CompressedFrame_ufmf compressedFrame = *it;
-            framesWaitQueuePtr_ -> push(compressedFrame);
-            framesFinishedSetPtr_ -> erase(it);
+
+            if (compressedFrame.getFrameCount() == nextFrameToWrite_)
+            {
+                framesWaitQueuePtr_ -> push(compressedFrame);
+                framesFinishedSetPtr_ -> erase(it);
+                nextFrameToWrite_ += frameSkip_;
+                writeCompressedFrame(compressedFrame);
+            }
+
         }
         framesFinishedSetPtr_ -> releaseLock();
-        //std::cout << "ufmf set size: " << framesFinishedSetPtr_ -> size() << std::endl;
 
         frameCount_++;
     }
@@ -282,6 +290,45 @@ namespace bias
             errorMsg += exc.what();
             throw RuntimeError(errorId, errorMsg); 
         }
+    }
+
+    void VideoWriter_ufmf::finishWriting()
+    {
+        // Move to end of filed
+        file_.seekp(0, std::ios_base::end);
+
+        // Write index chunk identifier
+        uint8_t indexDictChunk_uint8 = uint8_t(INDEX_DICT_CHUNK);
+        file_.write((char*) &indexDictChunk_uint8, sizeof(uint8_t));
+
+        // Save index location
+        indexLocation_ = (unsigned long)(file_.tellp());
+
+        // Write 'd' for dict
+        char dCharForDict = 'd'; 
+        file_.write((char*) &dCharForDict, sizeof(char));
+
+        // To Do
+
+        // Write the index location
+        file_.seekp(indexLocationPtr_, std::ios_base::beg);
+        uint64_t indexLocation_uint64 = uint64_t(indexLocation_);
+        file_.write((char*) &indexLocation_, sizeof(uint64_t));
+
+        // Close the file
+        file_.close();
+    }
+
+
+    void VideoWriter_ufmf::writeCompressedFrame(CompressedFrame_ufmf frame)
+    {
+        std::cout << "writing compressed frame" << std::endl;
+    }
+
+
+    void VideoWriter_ufmf::writeKeyFrame()
+    {
+        std::cout << "writing key frame" << std::endl;
     }
 
 
