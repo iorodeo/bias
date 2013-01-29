@@ -6,6 +6,7 @@
 #include "compressed_frame_ufmf.hpp"
 #include <memory>
 #include <vector>
+#include <list>
 #include <QPointer>
 #include <opencv2/core/core.hpp>
 #include <fstream>
@@ -46,7 +47,10 @@ namespace bias
             static const QString DUMMY_FILENAME;
             static const QString UFMF_HEADER_STRING;
             static const unsigned int UFMF_VERSION_NUMBER;
-            static const unsigned int INDEX_DICT_CHUNK;
+
+            static const unsigned int KEYFRAME_CHUNK_ID;
+            static const unsigned int FRAME_CHUNK_ID;
+            static const unsigned int INDEX_DICT_CHUNK_ID;
 
         protected:
 
@@ -64,6 +68,13 @@ namespace bias
             unsigned long indexLocation_;
             unsigned long nextFrameToWrite_;
             unsigned long numKeyFramesWritten_;
+
+            unsigned long bgUpdateCount_;
+            unsigned long bgModelFrameCount_;
+            double bgModelTimeStamp_;
+
+            std::list<std::streampos> bgKeyFramePosList_; 
+            std::list<double> bgKeyFrameTimeStampList_;
 
             cv::Mat bgMedianImage_;
             cv::Mat bgUpperBoundImage_;

@@ -67,7 +67,8 @@ namespace bias
     void CompressedFrame_ufmf::setData(
             StampedImage stampedImg, 
             cv::Mat bgLowerBound,
-            cv::Mat bgUpperBound
+            cv::Mat bgUpperBound,
+            unsigned long bgUpdateCount
             )
     {
 
@@ -75,6 +76,7 @@ namespace bias
         stampedImg_ = stampedImg;
         bgLowerBound_ = bgLowerBound;
         bgUpperBound_ = bgUpperBound;
+        bgUpdateCount_ = bgUpdateCount;
         haveData_ = true;
     }
 

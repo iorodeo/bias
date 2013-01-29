@@ -24,7 +24,10 @@ namespace bias
     const QString VideoWriter_ufmf::DUMMY_FILENAME("dummy.ufmf");
     const QString VideoWriter_ufmf::UFMF_HEADER_STRING("ufmf");
     const unsigned int VideoWriter_ufmf::UFMF_VERSION_NUMBER = 4;
-    const unsigned int VideoWriter_ufmf::INDEX_DICT_CHUNK = 2;
+
+    const unsigned int VideoWriter_ufmf::KEYFRAME_CHUNK_ID = 0;
+    const unsigned int VideoWriter_ufmf::FRAME_CHUNK_ID = 1;
+    const unsigned int VideoWriter_ufmf::INDEX_DICT_CHUNK_ID = 2;
 
 
     // Methods
@@ -52,7 +55,7 @@ namespace bias
         bgOldDataQueuePtr_ = std::make_shared<LockableQueue<BackgroundData_ufmf>>();
         medianMatQueuePtr_ = std::make_shared<LockableQueue<cv::Mat>>();
 
-        // Create queue and set for frame compression
+        // Create "to do" queue and "finished" set for frame compressors
         framesToDoQueuePtr_ = std::make_shared<CompressedFrameQueue_ufmf>();
         framesWaitQueuePtr_ = std::make_shared<CompressedFrameQueue_ufmf>();
         framesFinishedSetPtr_ = std::make_shared<CompressedFrameSet_ufmf>();
@@ -64,6 +67,9 @@ namespace bias
         indexLocation_ = 0;
         nextFrameToWrite_ = 0;
         numKeyFramesWritten_ = 0;
+        bgUpdateCount_ = 0;
+        bgModelFrameCount_ = 0;
+        bgModelTimeStamp_ = 0.0;
 
     }
 
@@ -84,18 +90,22 @@ namespace bias
         //currentImage_ = stampedImg.image;
         currentImage_ = stampedImg;
 
-        // On first call - setup output file, background modeling, etc
+        // On first call - setup output file, background modeling, start compressors, ...
         if (isFirst_)
         {
             checkImageFormat(stampedImg);
+
+            // Set output file and write header
             setupOutputFile(stampedImg);
             writeHeader();
 
+            // Set initial bg median image - just use current image.
             bgMedianImage_ = stampedImg.image;
             bgMembershipImage_.create(stampedImg.image.rows, stampedImg.image.cols,CV_8UC1);
             cv::add(bgMedianImage_,  backgroundThreshold_, bgUpperBoundImage_);
             cv::subtract(bgMedianImage_, backgroundThreshold_, bgLowerBoundImage_); 
 
+            // Start background model and frame compressors
             startBackgroundModeling();
             startCompressors();
 
@@ -103,7 +113,7 @@ namespace bias
         }
 
 
-        // Process frame on every frame count divisible by the frame skip parameter
+        // Process frames or skip 
         if (frameCount_%frameSkip_==0)
         {
 
@@ -118,7 +128,7 @@ namespace bias
 
             // Get median image if available
             medianMatQueuePtr_ -> acquireLock();
-            if ( !(medianMatQueuePtr_ -> empty()))
+            if (!(medianMatQueuePtr_ -> empty()))
             {
                 bgMedianImage_ = medianMatQueuePtr_ -> front();
                 medianMatQueuePtr_ -> pop();
@@ -131,6 +141,10 @@ namespace bias
             {
                 cv::add(bgMedianImage_,  backgroundThreshold_, bgUpperBoundImage_);
                 cv::subtract(bgMedianImage_, backgroundThreshold_, bgLowerBoundImage_); 
+
+                bgUpdateCount_++;
+                bgModelTimeStamp_ = currentImage_.timeStamp;
+                bgModelFrameCount_ = currentImage_.frameCount;
             }
 
             // Create compressed frame and set its data using the current frame 
@@ -138,13 +152,19 @@ namespace bias
 
             if (!(framesWaitQueuePtr_ -> empty()))
             {
-                // Take pre-allocate frame if available
+                // Take pre-allocated compressed frame if available
                 compressedFrame = framesWaitQueuePtr_ -> front();
                 framesWaitQueuePtr_ -> pop();
             }
-            compressedFrame.setData(currentImage_, bgLowerBoundImage_, bgUpperBoundImage_);
 
-            // Insert new (uncalculated) compressed frame int "to do" queue.
+            compressedFrame.setData(
+                    currentImage_, 
+                    bgLowerBoundImage_, 
+                    bgUpperBoundImage_,
+                    bgUpdateCount_
+                    );
+
+            // Insert new (uncalculated) compressed frame into "to do" queue.
             framesToDoQueuePtr_ -> acquireLock();
             framesToDoQueuePtr_ -> push(compressedFrame);
             framesToDoQueuePtr_ -> wakeOne();
@@ -153,7 +173,7 @@ namespace bias
 
         } // if (frameCount_%frameSkip_==0) 
 
-        // Remove frames form "finished" set
+        // Remove frames from compressed frames "finished" set and write to disk 
         framesFinishedSetPtr_ -> acquireLock();
         if (!(framesFinishedSetPtr_ -> empty()))
         {
@@ -252,8 +272,8 @@ namespace bias
             unsigned int headerStrLen = UFMF_HEADER_STRING.size();
             file_.write((char*) headerStrArray.data(), headerStrLen*sizeof(char));
 
-            uint32_t ufmf_version_uint32 = uint32_t(UFMF_VERSION_NUMBER);
-            file_.write((char*) &ufmf_version_uint32, sizeof(uint32_t));
+            uint32_t ufmf_version = uint32_t(UFMF_VERSION_NUMBER);
+            file_.write((char*) &ufmf_version, sizeof(uint32_t));
 
             indexLocationPtr_ = file_.tellp();
             uint64_t indexLocation_uint64 = uint64_t(indexLocation_);
@@ -267,11 +287,11 @@ namespace bias
             }
             else
             {
-                uint16_t width_uint16 = uint16_t(size_.width);
-                file_.write((char*) &width_uint16, sizeof(uint16_t));
+                uint16_t width = uint16_t(size_.width);
+                file_.write((char*) &width, sizeof(uint16_t));
 
-                uint16_t height_uint16 = uint16_t(size_.height);
-                file_.write((char*) &height_uint16, sizeof(uint16_t));
+                uint16_t height = uint16_t(size_.height);
+                file_.write((char*) &height, sizeof(uint16_t));
             }
 
             uint8_t isFixedSize_uint8 = uint8_t(isFixedSize_);
@@ -298,8 +318,8 @@ namespace bias
         file_.seekp(0, std::ios_base::end);
 
         // Write index chunk identifier
-        uint8_t indexDictChunk_uint8 = uint8_t(INDEX_DICT_CHUNK);
-        file_.write((char*) &indexDictChunk_uint8, sizeof(uint8_t));
+        uint8_t chunkId = uint8_t(INDEX_DICT_CHUNK_ID);
+        file_.write((char*) &chunkId, sizeof(uint8_t));
 
         // Save index location
         indexLocation_ = (unsigned long)(file_.tellp());
@@ -308,12 +328,14 @@ namespace bias
         char dCharForDict = 'd'; 
         file_.write((char*) &dCharForDict, sizeof(char));
 
-        // To Do
+        // -----------------------------------------------
+        // TO DO - write index
+        // -----------------------------------------------
 
         // Write the index location
         file_.seekp(indexLocationPtr_, std::ios_base::beg);
         uint64_t indexLocation_uint64 = uint64_t(indexLocation_);
-        file_.write((char*) &indexLocation_, sizeof(uint64_t));
+        file_.write((char*) &indexLocation_uint64, sizeof(uint64_t));
 
         // Close the file
         file_.close();
@@ -329,7 +351,43 @@ namespace bias
     void VideoWriter_ufmf::writeKeyFrame()
     {
         std::cout << "writing key frame" << std::endl;
+
+        // Get position for index
+        bgKeyFramePosList_.push_back(file_.tellp());
+        bgKeyFrameTimeStampList_.push_back(bgModelTimeStamp_);
+
+        // Write keyframe chunk identifier
+        uint8_t chunkId = uint8_t(KEYFRAME_CHUNK_ID);
+        file_.write((char*) &chunkId, sizeof(uint8_t));
+
+        // Write keyframe type
+        const char keyFrameType[] = "mean";
+        uint8_t keyFrameTypeLength = sizeof(keyFrameType)-1;
+        file_.write((char*) &keyFrameTypeLength, sizeof(uint8_t));
+        file_.write((char*) keyFrameType, keyFrameTypeLength*sizeof(char));
+
+        // Discrepancy ... what about number of points/boxes
+
+        // Write data type
+        const char dataType = 'B'; // 'B' for uint8, 'f' for float
+        file_.write((char*) &dataType, sizeof(char));
+
+        // Write width and height
+        uint16_t width = uint16_t(bgMedianImage_.cols);
+        file_.write((char*) &width, sizeof(uint16_t));
+
+        uint16_t height = uint16_t(bgMedianImage_.rows);
+        file_.write((char*) &height, sizeof(uint16_t));
+
+        // Write timestamp
+        file_.write((char*) &bgModelTimeStamp_, sizeof(double));
+
+        // Write the frame data
+        unsigned int numPixel = bgMedianImage_.rows*bgMedianImage_.cols;
+        file_.write((char*) bgMedianImage_.data, numPixel*sizeof(char));
+
     }
+
 
 
     void VideoWriter_ufmf::startBackgroundModeling()

@@ -28,7 +28,8 @@ namespace bias
             void setData(
                     StampedImage stampedImg, 
                     cv::Mat bgLowerBound, 
-                    cv::Mat bgUpperBound
+                    cv::Mat bgUpperBound,
+                    unsigned long bgUpdateCount
                     );
 
             void compress();
@@ -60,6 +61,7 @@ namespace bias
             unsigned int numPix_;
             unsigned int numForeground_;  // Number of forground pixels
             unsigned int numPixWritten_;  // Number of pixels written
+            unsigned long bgUpdateCount_; // Update count of background model used 
 
             std::shared_ptr<std::vector<uint16_t>> writeRowBufPtr_;  // Y mins
             std::shared_ptr<std::vector<uint16_t>> writeColBufPtr_;  // X mins
