@@ -29,6 +29,9 @@ namespace bias
     const unsigned int VideoWriter_ufmf::FRAME_CHUNK_ID = 1;
     const unsigned int VideoWriter_ufmf::INDEX_DICT_CHUNK_ID = 2;
 
+    const char VideoWriter_ufmf::CHAR_FOR_DICT = 'd';
+    const char VideoWriter_ufmf::CHAR_FOR_ARRAY = 'a';
+
 
     // Methods
     // ----------------------------------------------------------------------------------
@@ -326,13 +329,53 @@ namespace bias
         // Save index location
         indexLocation_ = (unsigned long)(file_.tellp());
 
-        // Write 'd' for dict
-        char dCharForDict = 'd'; 
-        file_.write((char*) &dCharForDict, sizeof(char));
+        // Write char for dict
+        file_.write((char*) &CHAR_FOR_DICT, sizeof(char));
+
+        // Write number of keys
+        uint8_t numKeys = 2;
+        file_.write((char*) &numKeys, sizeof(uint8_t));
+
+        // Write index -> frame
+
+        // Write length of key and key
+        const char frameString[] = "frame"; 
+        uint16_t frameStringLength = sizeof(frameString)-1;
+        file_.write((char*) &frameStringLength, sizeof(uint16_t));
+        file_.write((char*) frameString, frameStringLength*sizeof(char));
+
+        // Write char for dict
+        file_.write((char*) &CHAR_FOR_DICT, sizeof(char));
+
+        // Write number of keys
+        file_.write((char*) &numKeys, sizeof(uint8_t));
+
+        // Write index -> frame -> location
+
+        // Write length of key and key
+        const char locString[] = "loc";
+        uint16_t locStringLength = sizeof(locString) - 1;
+        file_.write((char*) &locStringLength, sizeof(uint16_t));
+        file_.write((char*) locString, locStringLength*sizeof(char));
+
+        // Write char for array
+        file_.write((char*) &CHAR_FOR_ARRAY, sizeof(char));
+
+        // Write data type
+        char charForDataType = 'q';
+        file_.write((char*) &charForDataType, sizeof(char));
 
         // -----------------------------------------------
-        // TO DO - write index
+        // TO DO - finish writing index 
         // -----------------------------------------------
+
+        // End write index -> frame -> location
+
+        // Write index -> frame -> timestamp
+        // End write index -> frame -> timestamp
+
+
+        // End write index -> frame
 
         // Write the index location
         file_.seekp(indexLocationPtr_, std::ios_base::beg);
@@ -444,7 +487,6 @@ namespace bias
         file_.write((char*) bgMedianImage_.data, numPixel*sizeof(char));
 
     }
-
 
 
     void VideoWriter_ufmf::startBackgroundModeling()

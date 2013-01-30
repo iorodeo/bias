@@ -52,6 +52,9 @@ namespace bias
             static const unsigned int FRAME_CHUNK_ID;
             static const unsigned int INDEX_DICT_CHUNK_ID;
 
+            static const char CHAR_FOR_DICT;
+            static const char CHAR_FOR_ARRAY;
+
         protected:
 
             bool isFirst_;
