@@ -73,6 +73,8 @@ namespace bias
             unsigned long bgModelFrameCount_;
             double bgModelTimeStamp_;
 
+            std::list<std::streampos> framePosList_;
+            std::list<double> frameTimeStampList_;
             std::list<std::streampos> bgKeyFramePosList_; 
             std::list<double> bgKeyFrameTimeStampList_;
 

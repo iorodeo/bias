@@ -35,7 +35,16 @@ namespace bias
             void compress();
 
             bool haveData() const;
+            bool isReady() const;
+            double getTimeStamp() const;
             unsigned long getFrameCount() const;
+            unsigned int getNumConnectedComp() const;
+
+            std::shared_ptr<std::vector<uint16_t>> getWriteRowBufPtr();
+            std::shared_ptr<std::vector<uint16_t>> getWriteColBufPtr();
+            std::shared_ptr<std::vector<uint16_t>> getWriteHgtBufPtr();
+            std::shared_ptr<std::vector<uint16_t>> getWriteWdtBufPtr();
+            std::shared_ptr<std::vector<uint8_t>> getImageDataPtr();
 
             static const uchar BACKGROUND_MEMBER_VALUE;
             static const uchar FOREGROUND_MEMBER_VALUE;
@@ -53,10 +62,10 @@ namespace bias
             bool isCompressed_;           // True if frame is compressed 
             bool ready_;                  // True if compressed frame has been calculated
 
-            StampedImage stampedImg_;     // Original image w/ framenumber and timestamp
             cv::Mat bgLowerBound_;        // Background lower bound image values
             cv::Mat bgUpperBound_;        // Background upper bound image values
             cv::Mat membershipImage_;     // Background/foreground membership
+            StampedImage stampedImg_;     // Original image w/ framenumber and timestamp
 
             unsigned int numPix_;
             unsigned int numForeground_;  // Number of forground pixels
@@ -72,7 +81,7 @@ namespace bias
 
             unsigned int boxArea_;           // BoxLength*boxLength
             unsigned int boxLength_;         // Length of boxes or foreground pixels to store
-            unsigned long numConnectedComp_; // Number of connected components
+            unsigned int numConnectedComp_;  // Number of connected components
             double fgMaxFracCompress_;       // Maximum fraction of pixels that can be in foreground
                                              // in order for us to compress
                                              //

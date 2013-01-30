@@ -47,20 +47,71 @@ namespace bias
         return haveData_;
     }
 
+   
+    bool CompressedFrame_ufmf::isReady() const
+    {
+        return ready_;
+    }
+
+
+    double CompressedFrame_ufmf::getTimeStamp() const
+    {
+        if (haveData_)
+        {
+            return stampedImg_.timeStamp;
+        }
+        else
+        {
+            return 0.0;
+        }
+    }
+
 
     unsigned long CompressedFrame_ufmf::getFrameCount() const
     {
-        unsigned long frameCount;
-
         if (haveData_)
         {
-            frameCount = stampedImg_.frameCount;
+            return stampedImg_.frameCount;
         }
         else 
         {
-            frameCount = 0;
+            return 0;
         }
-        return frameCount;
+    }
+
+    unsigned int CompressedFrame_ufmf::getNumConnectedComp() const
+    {
+        return numConnectedComp_;
+    }
+
+
+    std::shared_ptr<std::vector<uint16_t>> CompressedFrame_ufmf::getWriteRowBufPtr()
+    {
+        return writeRowBufPtr_;
+    }
+
+
+    std::shared_ptr<std::vector<uint16_t>> CompressedFrame_ufmf::getWriteColBufPtr()
+    {
+        return writeColBufPtr_;
+    }
+
+
+    std::shared_ptr<std::vector<uint16_t>> CompressedFrame_ufmf::getWriteHgtBufPtr()
+    {
+        return writeHgtBufPtr_;
+    }
+
+
+    std::shared_ptr<std::vector<uint16_t>> CompressedFrame_ufmf::getWriteWdtBufPtr()
+    {
+        return writeWdtBufPtr_;
+    }
+
+
+    std::shared_ptr<std::vector<uint8_t>> CompressedFrame_ufmf::getImageDataPtr()
+    {
+        return imageDatBufPtr_;
     }
 
 
@@ -154,6 +205,10 @@ namespace bias
 
     void CompressedFrame_ufmf::createCompressedFrame()
     { 
+        numPixWritten_ = 0;
+        numConnectedComp_ = 0;
+        isCompressed_ = true;
+
         // Get number of rows, cols and pixels from image
         unsigned int numRow = (unsigned int) (stampedImg_.image.rows);
         unsigned int numCol = (unsigned int) (stampedImg_.image.cols);
@@ -237,10 +292,6 @@ namespace bias
             } // for (unsigned int col
 
         } // for (unsigned int row
-
-        isCompressed_ = true;
-
-        //std::cout << "numConnectedComp: " << numConnectedComp_ << std::endl;
 
     } // CompressedFrame_ufmf::createCompressedFrame
 

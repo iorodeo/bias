@@ -108,6 +108,7 @@ namespace bias
             // Start background model and frame compressors
             startBackgroundModeling();
             startCompressors();
+            writeKeyFrame();
 
             isFirst_ = false;
         }
@@ -145,6 +146,7 @@ namespace bias
                 bgUpdateCount_++;
                 bgModelTimeStamp_ = currentImage_.timeStamp;
                 bgModelFrameCount_ = currentImage_.frameCount;
+                writeKeyFrame();
             }
 
             // Create compressed frame and set its data using the current frame 
@@ -344,15 +346,70 @@ namespace bias
 
     void VideoWriter_ufmf::writeCompressedFrame(CompressedFrame_ufmf frame)
     {
-        std::cout << "writing compressed frame" << std::endl;
+
+        if (!frame.isReady()) { return; }
+
+        // Get position and time stamp for index
+        double timeStamp = frame.getTimeStamp();
+        std::streampos filePosBegin = file_.tellp();
+
+        framePosList_.push_back(filePosBegin);
+        frameTimeStampList_.push_back(timeStamp);
+
+        // Write keyframe chunk identifier
+        uint8_t chunkId = uint8_t(FRAME_CHUNK_ID);
+        file_.write((char*) &chunkId, sizeof(uint8_t));
+
+        // Write time stamp
+        file_.write((char*) &timeStamp, sizeof(double));
+
+        // Write number of connected components
+        uint32_t numConnectedComp = uint32_t(frame.getNumConnectedComp());
+        file_.write((char*) &numConnectedComp, sizeof(uint32_t));
+
+        // Write each box
+        std::shared_ptr<std::vector<uint16_t>> writeRowBufPtr;
+        std::shared_ptr<std::vector<uint16_t>> writeColBufPtr;
+        std::shared_ptr<std::vector<uint16_t>> writeHgtBufPtr;
+        std::shared_ptr<std::vector<uint16_t>> writeWdtBufPtr;
+        std::shared_ptr<std::vector<uint8_t>> imageDataPtr;
+
+        writeRowBufPtr = frame.getWriteRowBufPtr();
+        writeColBufPtr = frame.getWriteColBufPtr();
+        writeHgtBufPtr = frame.getWriteHgtBufPtr();
+        writeWdtBufPtr = frame.getWriteWdtBufPtr();
+        imageDataPtr = frame.getImageDataPtr();
+
+        unsigned int dataPos = 0;
+
+        for (unsigned int cc=0; cc<numConnectedComp; cc++)
+        {
+            uint16_t row = (*writeRowBufPtr)[cc];
+            uint16_t col = (*writeColBufPtr)[cc];
+            uint16_t wdt = (*writeWdtBufPtr)[cc];
+            uint16_t hgt = (*writeHgtBufPtr)[cc];
+            unsigned int boxArea = (*writeHgtBufPtr)[cc]*(*writeWdtBufPtr)[cc];
+
+            file_.write((char*) &row, sizeof(uint16_t));
+            file_.write((char*) &col, sizeof(uint16_t));
+            file_.write((char*) &wdt, sizeof(uint16_t));
+            file_.write((char*) &hgt, sizeof(uint16_t));
+            file_.write((char*) &(*imageDataPtr)[dataPos], boxArea*sizeof(uint8_t));
+            dataPos += boxArea;
+        }
+
+        // Calculate frame size
+        std::streampos filePosEnd = file_.tellp();
+        unsigned long frameSize = (unsigned long)(filePosEnd) - (unsigned long)(filePosBegin);
+        //std::cout << "writing compressed frame: size = " << frameSize << std::endl;
     }
 
 
     void VideoWriter_ufmf::writeKeyFrame()
     {
-        std::cout << "writing key frame" << std::endl;
+        //std::cout << "writing key frame" << std::endl;
 
-        // Get position for index
+        // Get position and time stamp for index
         bgKeyFramePosList_.push_back(file_.tellp());
         bgKeyFrameTimeStampList_.push_back(bgModelTimeStamp_);
 
