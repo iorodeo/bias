@@ -55,6 +55,12 @@ namespace bias
             static const char CHAR_FOR_DICT;
             static const char CHAR_FOR_ARRAY;
 
+            static const char CHAR_FOR_DTYPE_FLOAT; 
+            static const char CHAR_FOR_DTYPE_UINT8;
+            static const char CHAR_FOR_DTYPE_UINT64;
+            static const char CHAR_FOR_DTYPE_DOUBLE;
+
+
         protected:
 
             bool isFirst_;
@@ -64,22 +70,24 @@ namespace bias
             bool isFixedSize_;
             QString colorCoding_;
 
-            StampedImage currentImage_;
-
             std::fstream file_;
             std::streampos indexLocationPtr_;
+
             unsigned long indexLocation_;
             unsigned long nextFrameToWrite_;
             unsigned long numKeyFramesWritten_;
 
+            double bgModelTimeStamp_;
             unsigned long bgUpdateCount_;
             unsigned long bgModelFrameCount_;
-            double bgModelTimeStamp_;
 
             std::list<std::streampos> framePosList_;
-            std::list<double> frameTimeStampList_;
             std::list<std::streampos> bgKeyFramePosList_; 
+
+            std::list<double> frameTimeStampList_;
             std::list<double> bgKeyFrameTimeStampList_;
+
+            StampedImage currentImage_;
 
             cv::Mat bgMedianImage_;
             cv::Mat bgUpperBoundImage_;

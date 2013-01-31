@@ -20,17 +20,23 @@ namespace bias
     const unsigned int VideoWriter_ufmf::DEFAULT_NUMBER_OF_COMPRESSORS = 15;
     const unsigned int VideoWriter_ufmf::DEFAULT_MAX_THREAD_COUNT = 
         DEFAULT_NUMBER_OF_COMPRESSORS + 4;
+
     const QString VideoWriter_ufmf::DEFAULT_COLOR_CODING("MONO8");
     const QString VideoWriter_ufmf::DUMMY_FILENAME("dummy.ufmf");
     const QString VideoWriter_ufmf::UFMF_HEADER_STRING("ufmf");
     const unsigned int VideoWriter_ufmf::UFMF_VERSION_NUMBER = 4;
 
-    const unsigned int VideoWriter_ufmf::KEYFRAME_CHUNK_ID = 0;
-    const unsigned int VideoWriter_ufmf::FRAME_CHUNK_ID = 1;
+    const unsigned int VideoWriter_ufmf::KEYFRAME_CHUNK_ID   = 0;
+    const unsigned int VideoWriter_ufmf::FRAME_CHUNK_ID      = 1;
     const unsigned int VideoWriter_ufmf::INDEX_DICT_CHUNK_ID = 2;
 
-    const char VideoWriter_ufmf::CHAR_FOR_DICT = 'd';
+    const char VideoWriter_ufmf::CHAR_FOR_DICT  = 'd';
     const char VideoWriter_ufmf::CHAR_FOR_ARRAY = 'a';
+
+    const char VideoWriter_ufmf::CHAR_FOR_DTYPE_FLOAT  = 'f'; 
+    const char VideoWriter_ufmf::CHAR_FOR_DTYPE_UINT8  = 'B';
+    const char VideoWriter_ufmf::CHAR_FOR_DTYPE_UINT64 = 'q';
+    const char VideoWriter_ufmf::CHAR_FOR_DTYPE_DOUBLE = 'd';
 
 
     // Methods
@@ -322,60 +328,180 @@ namespace bias
         // Move to end of filed
         file_.seekp(0, std::ios_base::end);
 
-        // Write index chunk identifier
+        // Write index
+        // --------------------------------------------------------------------
+
+        // Write index chunk identifier and save index location
         uint8_t chunkId = uint8_t(INDEX_DICT_CHUNK_ID);
         file_.write((char*) &chunkId, sizeof(uint8_t));
-
-        // Save index location
         indexLocation_ = (unsigned long)(file_.tellp());
 
-        // Write char for dict
+        // Write char for dict and number of keys
         file_.write((char*) &CHAR_FOR_DICT, sizeof(char));
-
-        // Write number of keys
         uint8_t numKeys = 2;
         file_.write((char*) &numKeys, sizeof(uint8_t));
 
         // Write index -> frame
+        // --------------------------------------------------------------------
 
-        // Write length of key and key
+        // Write length of key and key for frame
         const char frameString[] = "frame"; 
-        uint16_t frameStringLength = sizeof(frameString)-1;
+        uint16_t frameStringLength = uint16_t(sizeof(frameString)-1);
         file_.write((char*) &frameStringLength, sizeof(uint16_t));
         file_.write((char*) frameString, frameStringLength*sizeof(char));
 
-        // Write char for dict
+        // Write char for dict and number of keys
         file_.write((char*) &CHAR_FOR_DICT, sizeof(char));
-
-        // Write number of keys
+        numKeys = 2;
         file_.write((char*) &numKeys, sizeof(uint8_t));
 
         // Write index -> frame -> location
+        // --------------------------------------------------------------------
 
-        // Write length of key and key
+        // Write length of key and key for location
         const char locString[] = "loc";
-        uint16_t locStringLength = sizeof(locString) - 1;
+        uint16_t locStringLength = uint16_t(sizeof(locString) - 1);
         file_.write((char*) &locStringLength, sizeof(uint16_t));
         file_.write((char*) locString, locStringLength*sizeof(char));
 
-        // Write char for array
+        // Write char for array and data type
         file_.write((char*) &CHAR_FOR_ARRAY, sizeof(char));
+        file_.write((char*) &CHAR_FOR_DTYPE_UINT64, sizeof(char));
 
-        // Write data type
-        char charForDataType = 'q';
-        file_.write((char*) &charForDataType, sizeof(char));
-
-        // -----------------------------------------------
-        // TO DO - finish writing index 
-        // -----------------------------------------------
-
+        // Write number of bytes and frame positions
+        uint32_t numBytes = uint32_t(framePosList_.size()*sizeof(uint64_t)); 
+        file_.write((char*) &numBytes, sizeof(uint32_t));
+        for ( 
+                std::list<std::streampos>::iterator it=framePosList_.begin(); 
+                it!=framePosList_.end(); 
+                it++
+            )
+        {
+            uint64_t pos = *it;
+            file_.write((char*) &pos, sizeof(uint64_t));
+        }
         // End write index -> frame -> location
+        // --------------------------------------------------------------------
 
         // Write index -> frame -> timestamp
-        // End write index -> frame -> timestamp
+        // --------------------------------------------------------------------
+        
+        // Write key length and key for timestamp
+        const char timeStampString[] = "timestamp";
+        uint16_t timeStampStringLength = uint16_t(sizeof(timeStampString)-1);
+        file_.write((char*) &timeStampStringLength, sizeof(uint16_t));
+        file_.write((char*) timeStampString, timeStampStringLength*sizeof(char));
 
+        // Write char for array and data type
+        file_.write((char*) &CHAR_FOR_ARRAY, sizeof(char));
+        file_.write((char*) &CHAR_FOR_DTYPE_DOUBLE, sizeof(char));
+
+        // Write number of bytes and time stamps
+        numBytes = uint32_t(frameTimeStampList_.size()*sizeof(double));
+        file_.write((char*) &numBytes, sizeof(uint32_t));
+        for (
+                std::list<double>::iterator it=frameTimeStampList_.begin(); 
+                it!=frameTimeStampList_.end(); 
+                it++
+            )
+        { 
+            double ts = *it;
+            file_.write((char*) &ts, sizeof(double));
+        }
+        // End write index -> frame -> timestamp
+        // --------------------------------------------------------------------
 
         // End write index -> frame
+        // --------------------------------------------------------------------
+
+        // Write index -> keyframe
+        // --------------------------------------------------------------------
+
+        // Write key length and key for keyframe
+        const char keyFrameString[] = "keyframe";
+        uint16_t keyFrameStringLength = uint16_t(sizeof(keyFrameString)-1);
+        file_.write((char*) &keyFrameStringLength, sizeof(uint16_t)); 
+        file_.write((char*) keyFrameString, keyFrameStringLength*sizeof(char));
+
+        // Write char for dict and number of keys
+        file_.write((char*) &CHAR_FOR_DICT, sizeof(char)); 
+        numKeys = 1;
+        file_.write((char*) &numKeys, sizeof(uint8_t));
+
+        // Write index -> keyframe -> mean
+        // --------------------------------------------------------------------
+
+        // Write length of key and key for mean
+        const char meanString[] = "mean";
+        uint16_t meanStringLength = uint16_t(sizeof(meanString)-1);
+        file_.write((char*) &meanStringLength, sizeof(uint16_t));
+        file_.write((char*) meanString, meanStringLength*sizeof(char));
+
+        // Write char for dict and number of keys
+        file_.write((char*) &CHAR_FOR_DICT, sizeof(char));
+        numKeys = 2;
+        file_.write((char*) &numKeys, sizeof(uint8_t));
+
+        // Write index -> keyframe -> mean -> loc
+        // --------------------------------------------------------------------
+
+        // Write key length and key for location
+        file_.write((char*) &locStringLength, sizeof(uint16_t));
+        file_.write((char*) locString, locStringLength*sizeof(char));
+
+        // Write char for array and data type
+        file_.write((char*) &CHAR_FOR_ARRAY, sizeof(char));
+        file_.write((char*) &CHAR_FOR_DTYPE_UINT64, sizeof(char));
+
+        // Write number of bytes and keyframe positions
+        numBytes = uint32_t(bgKeyFramePosList_.size()*sizeof(uint64_t));
+        file_.write((char*) &numBytes, sizeof(uint32_t));
+        for (
+                std::list<std::streampos>::iterator it = bgKeyFramePosList_.begin();
+                it != bgKeyFramePosList_.end();
+                it++
+            )
+        {
+            uint64_t pos = *it;
+            file_.write((char*) &pos, sizeof(uint64_t));
+        }
+        // End write index -> keyframe -> mean -> loc
+        // --------------------------------------------------------------------
+        
+        // Write index -> keyframe -> mean -> timestamp
+        // --------------------------------------------------------------------
+
+        // write key length and key for time stamp
+        file_.write((char*) &timeStampStringLength, sizeof(uint16_t));
+        file_.write((char*) timeStampString, timeStampStringLength*sizeof(char));
+
+        // Write char for array and data type
+        file_.write((char*) &CHAR_FOR_ARRAY, sizeof(char));
+        file_.write((char*) &CHAR_FOR_DTYPE_DOUBLE, sizeof(char));
+
+        // Write number of bytes and keyframe time stamps
+        numBytes = uint32_t(bgKeyFrameTimeStampList_.size()*sizeof(double));
+        file_.write((char*) &numBytes, sizeof(uint32_t));
+        for (
+                std::list<double>::iterator it = bgKeyFrameTimeStampList_.begin(); 
+                it != bgKeyFrameTimeStampList_.end();
+                it++
+            )
+        {
+            double ts = *it;
+            file_.write((char*) &ts, sizeof(double));
+        }
+        // End write index -> keyframe -> mean -> timestamp
+        // --------------------------------------------------------------------
+
+        // End write index -> keyframe -> mean
+        // --------------------------------------------------------------------
+        
+        // End write index -> keyframe
+        // --------------------------------------------------------------------
+
+        // End index
+        // --------------------------------------------------------------------
 
         // Write the index location
         file_.seekp(indexLocationPtr_, std::ios_base::beg);
@@ -468,9 +594,8 @@ namespace bias
 
         // Discrepancy ... what about number of points/boxes
 
-        // Write data type
-        const char dataType = 'B'; // 'B' for uint8, 'f' for float
-        file_.write((char*) &dataType, sizeof(char));
+        // Write char specifying data type
+        file_.write((char*) &CHAR_FOR_DTYPE_UINT8, sizeof(char));
 
         // Write width and height
         uint16_t width = uint16_t(bgMedianImage_.cols);
