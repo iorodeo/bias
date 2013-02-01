@@ -205,16 +205,17 @@ namespace bias
 
     void CompressedFrame_ufmf::createCompressedFrame()
     { 
-        numPixWritten_ = 0;
-        numConnectedComp_ = 0;
-        isCompressed_ = true;
-
         // Get number of rows, cols and pixels from image
         unsigned int numRow = (unsigned int) (stampedImg_.image.rows);
         unsigned int numCol = (unsigned int) (stampedImg_.image.cols);
         unsigned int numPix = numRow*numCol;
-        unsigned int imageDatInd = 0;
 
+        isCompressed_ = true;
+        numPixWritten_ = 0;
+        numConnectedComp_ = 0;
+        for (unsigned int i=0; i<numPix; i++) { (*numWriteBufPtr_)[i] = 0; }
+
+        unsigned int imageDatInd = 0;
         for (unsigned int row=0; row<numRow; row++)
         {
             for (unsigned int col=0; col<numCol; col++)
@@ -236,6 +237,7 @@ namespace bias
 
                 for (unsigned int rowEnd=row; rowEnd < rowPlusHeight; rowEnd++)
                 {
+                    
                     bool stopEarly = false;
                     unsigned int colEnd = col;
                     unsigned int numWriteInd = rowEnd*numCol + col;
@@ -250,7 +252,6 @@ namespace bias
                             break;
                         }
                         numWriteInd += 1;
-
                     }  // for (unsigned int colEnd 
 
                     if (stopEarly) 
@@ -292,6 +293,8 @@ namespace bias
             } // for (unsigned int col
 
         } // for (unsigned int row
+
+        numPixWritten_ = imageDatInd;
 
     } // CompressedFrame_ufmf::createCompressedFrame
 

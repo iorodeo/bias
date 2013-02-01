@@ -537,30 +537,30 @@ namespace bias
         file_.write((char*) &numConnectedComp, sizeof(uint32_t));
 
         // Write each box
-        std::shared_ptr<std::vector<uint16_t>> writeRowBufPtr;
         std::shared_ptr<std::vector<uint16_t>> writeColBufPtr;
-        std::shared_ptr<std::vector<uint16_t>> writeHgtBufPtr;
+        std::shared_ptr<std::vector<uint16_t>> writeRowBufPtr;
         std::shared_ptr<std::vector<uint16_t>> writeWdtBufPtr;
+        std::shared_ptr<std::vector<uint16_t>> writeHgtBufPtr;
         std::shared_ptr<std::vector<uint8_t>> imageDataPtr;
 
-        writeRowBufPtr = frame.getWriteRowBufPtr();
         writeColBufPtr = frame.getWriteColBufPtr();
-        writeHgtBufPtr = frame.getWriteHgtBufPtr();
+        writeRowBufPtr = frame.getWriteRowBufPtr();
         writeWdtBufPtr = frame.getWriteWdtBufPtr();
+        writeHgtBufPtr = frame.getWriteHgtBufPtr();
         imageDataPtr = frame.getImageDataPtr();
 
         unsigned int dataPos = 0;
 
         for (unsigned int cc=0; cc<numConnectedComp; cc++)
         {
-            uint16_t row = (*writeRowBufPtr)[cc];
             uint16_t col = (*writeColBufPtr)[cc];
+            uint16_t row = (*writeRowBufPtr)[cc];
             uint16_t wdt = (*writeWdtBufPtr)[cc];
             uint16_t hgt = (*writeHgtBufPtr)[cc];
             unsigned int boxArea = (*writeHgtBufPtr)[cc]*(*writeWdtBufPtr)[cc];
 
-            file_.write((char*) &row, sizeof(uint16_t));
             file_.write((char*) &col, sizeof(uint16_t));
+            file_.write((char*) &row, sizeof(uint16_t));
             file_.write((char*) &wdt, sizeof(uint16_t));
             file_.write((char*) &hgt, sizeof(uint16_t));
             file_.write((char*) &(*imageDataPtr)[dataPos], boxArea*sizeof(uint8_t));
