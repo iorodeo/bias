@@ -1,6 +1,7 @@
 #include "background_histogram_ufmf.hpp"
 #include "background_data_ufmf.hpp"
 #include "stamped_image.hpp"
+#include <QThread>
 #include <iostream>
 
 namespace bias
@@ -77,6 +78,10 @@ namespace bias
         { 
             return; 
         }
+
+        // Set thread priority to idle - only run when no other thread are running
+        QThread *thisThread = QThread::currentThread();
+        thisThread -> setPriority(QThread::IdlePriority);
 
         acquireLock();
         stopped_ = false;

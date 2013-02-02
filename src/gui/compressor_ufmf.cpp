@@ -1,5 +1,6 @@
 #include "compressor_ufmf.hpp"
 #include <iostream>
+#include <QThread>
 
 namespace bias
 {
@@ -49,7 +50,14 @@ namespace bias
 
         CompressedFrame_ufmf compressedFrame;
 
-        if (!ready_) { return; }
+        if (!ready_) 
+        { 
+            return; 
+        }
+
+        // Set thread priority to idle - only run when no other thread are running
+        QThread *thisThread = QThread::currentThread();
+        thisThread -> setPriority(QThread::LowPriority);
 
         acquireLock();
         stopped_ = false;

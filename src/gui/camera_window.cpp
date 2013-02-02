@@ -1074,7 +1074,7 @@ namespace bias
         // ----------------------------------------------------------------
         Property prop = cameraPtr_ -> getProperty(PROPERTY_TYPE_FRAME_RATE);
         prop.autoActive = false;
-        prop.value = 1500;
+        prop.value = 1200;
         cameraPtr_ -> setProperty(prop);
         // ----------------------------------------------------------------
     }

@@ -56,12 +56,15 @@ namespace bias
             virtual void setTriggerExternal() {};
             virtual TriggerType getTriggerType();
 
+            virtual TimeStamp getImageTimeStamp();
+
             virtual std::string getVendorName();
             virtual std::string getModelName();
 
             virtual std::string toString(); 
             virtual void printInfo() {};
             virtual void printGuid() {};
+
 
         protected:
             Guid guid_;

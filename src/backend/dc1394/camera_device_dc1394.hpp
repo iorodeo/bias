@@ -56,6 +56,8 @@ namespace bias {
             virtual std::string getVendorName() { return std::string("not done"); }; // TO DO //
             virtual std::string getModelName() { return std::string("not done"); }; // TO DO //
 
+            virtual TimeStamp getImageTimeStamp();
+
             virtual std::string toString();
             virtual void printGuid();
             virtual void printInfo();  

@@ -63,6 +63,8 @@ namespace bias {
         ERROR_FC2_GET_TRIGGER_MODE,
         ERROR_FC2_GET_TRIGGER_MODE_INFO,
         ERROR_FC2_SET_TRIGGER_MODE,
+        ERROR_FC2_GET_EMBEDDED_IMAGE_INFO,
+        ERROR_FC2_SET_EMBEDDED_IMAGE_INFO,
 
         ERROR_FC2_CONVERT_PROPERTY_TYPE,
         ERROR_FC2_CONVERT_FRAMERATE,
@@ -248,15 +250,6 @@ namespace bias {
     typedef std::list<PixelFormat> PixelFormatList;
     typedef std::set<PixelFormat> PixleFormatSet;
 
-    struct ImageInfo 
-    {
-        unsigned int rows;
-        unsigned int cols;
-        unsigned int stride;
-        unsigned int dataSize;
-        PixelFormat pixelFormat;
-    };
-
     enum TriggerType
     {
         TRIGGER_INTERNAL,
@@ -280,6 +273,20 @@ namespace bias {
         IMAGE_ROTATION_270=270
     };
 
+    struct ImageInfo 
+    {
+        unsigned int rows;
+        unsigned int cols;
+        unsigned int stride;
+        unsigned int dataSize;
+        PixelFormat pixelFormat;
+    };
+
+    struct TimeStamp
+    {
+        unsigned long long seconds;
+        unsigned int microSeconds;
+    };
 
 } // namespace bias
 

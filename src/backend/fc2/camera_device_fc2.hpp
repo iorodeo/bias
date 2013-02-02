@@ -61,6 +61,8 @@ namespace bias {
 
             virtual std::string getVendorName();
             virtual std::string getModelName();
+
+            virtual TimeStamp getImageTimeStamp();
             
             virtual std::string toString();
             virtual void printGuid();
@@ -84,7 +86,9 @@ namespace bias {
             void createConvertedImage();
             void destroyConvertedImage();
 
-            void createPropertyMap();
+            //void createPropertyMap();
+
+            void setupTimeStamping();
 
             // fc2 get methods
             // ---------------

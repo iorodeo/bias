@@ -3,6 +3,7 @@
 #include "exception.hpp"
 #include "stamped_image.hpp"
 #include "video_writer.hpp"
+#include <QThread>
 #include <queue>
 #include <iostream>
 #include <opencv2/core/core.hpp>
@@ -72,6 +73,10 @@ namespace bias
 
         if (!ready_) { return; }
 
+        // Set thread priority to normal
+        QThread *thisThread = QThread::currentThread();
+        thisThread -> setPriority(QThread::NormalPriority);
+
         acquireLock();
         stopped_ = false;
         frameCount_ = 0;
@@ -104,10 +109,9 @@ namespace bias
                     emit imageLoggingError(errorId, errorMsg);
                     errorFlag = true;
                 }
-                std::cout << "log queue size: " << logQueueSize << std::endl;
+                //std::cout << "log queue size: " << logQueueSize << std::endl;
 
                 // Add frame to video writer
-                //acquireLock();
                 try 
                 {
                     videoWriterPtr_ -> addFrame(newStampedImage);
@@ -118,7 +122,6 @@ namespace bias
                     QString errorMsg = QString::fromStdString(runtimeError.what());
                     emit imageLoggingError(errorId, errorMsg);
                 }
-                //releaseLock();
             }
 
             acquireLock();

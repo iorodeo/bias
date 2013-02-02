@@ -4,6 +4,7 @@
 #include "stamped_image.hpp"
 #include <iostream>
 #include <QTime>
+#include <QThread>
 #include <opencv2/core/core.hpp>
 
 namespace bias {
@@ -50,19 +51,30 @@ namespace bias {
     { 
         //double tLast = 0.0;
 
+        bool isFirst = true;
         bool done = false;
         bool error = false;
         unsigned int errorId = 0;
         unsigned long frameCount = 0;
 
         StampedImage stampImg;
+
+        TimeStamp timeStamp;
+        TimeStamp timeStampInit; 
+
+        double timeStampDbl = 0.0;
+        double timeStampDblLast = 0.0;
+
         QString errorMsg("no message");
-        QTime clock; // TO DO ... temporary timestamp generation 
 
         if (!ready_) 
         { 
             return; 
         }
+
+        // Set thread priority to "time critical"
+        QThread *thisThread = QThread::currentThread();
+        thisThread -> setPriority(QThread::TimeCriticalPriority);
 
         // Start image capture
         cameraPtr_ -> acquireLock();
@@ -88,8 +100,6 @@ namespace bias {
         stopped_ = false;
         releaseLock();
 
-        clock.start(); // TO DO ... temporary timestamp generation 
-
         // Grab images from camera until the done signal is given
         while (!done)
         {
@@ -98,6 +108,7 @@ namespace bias {
             try
             {
                 stampImg.image = cameraPtr_ -> grabImage();
+                timeStamp = cameraPtr_ -> getImageTimeStamp();
                 error = false;
             }
             catch (RuntimeError &runtimeError)
@@ -109,10 +120,21 @@ namespace bias {
             }
             cameraPtr_ -> releaseLock();
 
+
             // Push image into new image queue
             if (!error) 
             {
-                stampImg.timeStamp = clock.elapsed()*0.001; // TO DO ... temporary
+                // Save initial time stamp
+                if (isFirst)
+                {
+                    timeStampInit = timeStamp;
+                    isFirst = false;
+                }
+                timeStampDbl  = double(timeStamp.seconds);
+                timeStampDbl -= double(timeStampInit.seconds);
+                timeStampDbl += (1.0e-6)*double(timeStamp.microSeconds);
+                timeStampDbl -= (1.0e-6)*double(timeStampInit.microSeconds);
+                stampImg.timeStamp = timeStampDbl;
                 stampImg.frameCount = frameCount;
                 frameCount++;
 
@@ -125,9 +147,11 @@ namespace bias {
                 done = stopped_;
                 releaseLock();
 
-                //float dt = stampImg.timeStamp - tLast;
-                //tLast = stampImg.timeStamp;
-                //std::cout << "dt = " << dt << std::endl;
+                // ------------------------------------------------------------------
+                std::cout << "dt = " << timeStampDbl - timeStampDblLast << std::endl;
+                timeStampDblLast = timeStampDbl;
+                // ------------------------------------------------------------------
+
             }
         }
 

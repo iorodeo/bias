@@ -1,6 +1,7 @@
 #include "image_dispatcher.hpp"
 #include "stamped_image.hpp"
 #include <iostream>
+#include <QThread>
 
 namespace bias
 {
@@ -78,6 +79,11 @@ namespace bias
             return; 
         }
 
+        // Set thread priority to normal
+        QThread *thisThread = QThread::currentThread();
+        thisThread -> setPriority(QThread::NormalPriority);
+
+        // Initiaiize values
         acquireLock();
         frameCount_ = 0;
         stopped_ = false;

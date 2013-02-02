@@ -1,6 +1,7 @@
 #include "background_median_ufmf.hpp"
 #include "background_data_ufmf.hpp"
 #include <iostream>
+#include <QThread>
 #include <opencv2/core/core.hpp>
 
 namespace bias
@@ -64,6 +65,10 @@ namespace bias
         { 
             return; 
         }
+
+        // Set thread priority to idle - only run when no other thread are running
+        QThread *thisThread = QThread::currentThread();
+        thisThread -> setPriority(QThread::IdlePriority);
 
         acquireLock();
         stopped_ = false;

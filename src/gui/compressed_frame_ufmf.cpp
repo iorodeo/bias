@@ -1,6 +1,7 @@
 #include "compressed_frame_ufmf.hpp"
 #include <algorithm>
 #include <iostream>
+#include <QThread>
 
 namespace bias
 {
@@ -205,6 +206,9 @@ namespace bias
 
     void CompressedFrame_ufmf::createCompressedFrame()
     { 
+        // Get pointer to current thread for yeilding computation
+        QThread *thisThread = QThread::currentThread();
+
         // Get number of rows, cols and pixels from image
         unsigned int numRow = (unsigned int) (stampedImg_.image.rows);
         unsigned int numCol = (unsigned int) (stampedImg_.image.cols);
@@ -290,7 +294,11 @@ namespace bias
 
                 numConnectedComp_++;
 
+                // Yeild to another thread - helps keep frame rate steady
+                thisThread -> yieldCurrentThread();
+
             } // for (unsigned int col
+
 
         } // for (unsigned int row
 

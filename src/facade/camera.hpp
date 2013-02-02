@@ -38,22 +38,28 @@ namespace bias {
 
             void startCapture(); 
             void stopCapture();
-            cv::Mat grabImage();
             void grabImage(cv::Mat &image);
+            cv::Mat grabImage();
+            TimeStamp getImageTimeStamp();
 
             bool isConnected();
             bool isCapturing();
-            bool isColor();
 
+            // Get/set videomode, framerate and image info
             VideoMode getVideoMode();
             FrameRate getFrameRate();
             ImageMode getImageMode();
+            ImageInfo getImageInfo();
+
             VideoModeList getAllowedVideoModes();
             FrameRateList getAllowedFrameRates(VideoMode videoMode);
             ImageModeList getAllowedImageModes();
 
-            ImageInfo getImageInfo();
-
+            void setVideoMode(VideoMode vidMode);
+            void setVideoMode(VideoMode vidMode, FrameRate frmRate);
+            void setFrameRate(FrameRate frmRate); 
+             
+            // Get/set properties
             Property getProperty(PropertyType propType);
             PropertyMap getMapOfProperties();
             PropertyList getListOfProperties();
@@ -90,24 +96,24 @@ namespace bias {
             void setProperty(Property property);
             void setValue(PropertyType propType, unsigned int value);
             void setAbsoluteValue(PropertyType propType, float absValue);
-            
-            void setVideoMode(VideoMode vidMode);
-            void setVideoMode(VideoMode vidMode, FrameRate frmRate);
-            void setFrameRate(FrameRate frmRate); 
-
-            void setTriggerInternal();
-            void setTriggerExternal();
-            TriggerType getTriggerType();
-
-            void setFormat7ImageMode(ImageMode imgMode) {}; // TO DO //
-            void setFormat7PixelFormat(PixelFormat pixFormat) {}; // TO DO //
 
             std::string getPropertyString(PropertyType propType);
             std::string getPropertyInfoString(PropertyType propType);
 
+            // Get/set trigger
+            void setTriggerInternal();
+            void setTriggerExternal();
+            TriggerType getTriggerType();
+
+            void setFormat7ImageMode(ImageMode imgMode) {};        // TO DO //
+            void setFormat7PixelFormat(PixelFormat pixFormat) {};  // TO DO //
+
+            // Get basic camera information
             std::string getVendorName();
             std::string getModelName();
+            bool isColor();
                 
+            // Print methods for displaying information
             void printInfo();
             void printGuid();
             void printProperty(PropertyType propType);

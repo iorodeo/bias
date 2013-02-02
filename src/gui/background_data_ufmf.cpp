@@ -4,6 +4,11 @@
 #include <algorithm>
 #include <opencv2/core/core.hpp>
 
+// TEST
+// ------------------------------------------------------------------
+#include <QThread>
+// ------------------------------------------------------------------
+
 namespace bias
 { 
     BackgroundData_ufmf::BackgroundData_ufmf()  
@@ -50,6 +55,8 @@ namespace bias
         unsigned int  *binPtr = binPtr_.get();
         unsigned long *cntPtr = cntPtr_.get();
 
+        QThread *thisThread = QThread::currentThread();
+
         for (unsigned int row=0; row < numRows_; row++)
         {
             for (unsigned int col=0; col< numCols_; col++)
@@ -62,7 +69,11 @@ namespace bias
 
                 *(binPtr + binInd) += 1;
                 *(cntPtr + cntInd) += 1;
+
+                // Yield to another thread - this helps keep frame rate steady
+                thisThread -> yieldCurrentThread();
             } 
+
         } 
     }
 
@@ -82,6 +93,8 @@ namespace bias
         float median;
 
         cv::Mat medianMat(numRows_, numCols_, CV_8UC1);
+
+        QThread *thisThread = QThread::currentThread();
 
         for (unsigned int row=0; row<numRows_; row++)
         {
@@ -119,7 +132,11 @@ namespace bias
                 median = medianScale*median + medianShift;
                 medianMat.at<uchar>(row,col) = uchar(median);
 
+                // Yield to another thread - this helps keep frame rate steady
+                thisThread -> yieldCurrentThread();
+
             } // for j
+
 
         } // for i
 

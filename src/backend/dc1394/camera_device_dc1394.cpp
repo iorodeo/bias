@@ -216,6 +216,15 @@ namespace bias {
         return ImageModeList();
     }
 
+    TimeStamp CameraDevice_dc1394::getImageTimeStamp()
+    {
+        TimeStamp timeStamp;
+        // ------------------------------------------------
+        // TO DO ... get image timestamp
+        // ------------------------------------------------
+        return timeStamp;
+    }
+
     std::string CameraDevice_dc1394::toString()
     {
         std::stringstream ss;

@@ -113,6 +113,7 @@ namespace bias {
         {
             createRawImage();
             createConvertedImage();
+            setupTimeStamping();
 
             fc2Error error = fc2StartCapture(context_);
             if (error != FC2_ERROR_OK) 
@@ -163,6 +164,7 @@ namespace bias {
         // TO DO ... currently only handles 8 bit mono images
         // --------------------------------------------------------------------
         //std::cout << "  check image size" << std::endl;
+
         if ((image.cols != rawImage_.cols) | (image.rows != rawImage_.rows))
         {
             resize = true;
@@ -171,16 +173,25 @@ namespace bias {
         // ---------------------------------------------------------------------
         // TO DO .. also test for image type.
         // ---------------------------------------------------------------------
+        
         if (resize) {
+
             //std::cout << "  resize image" << std::endl;
             // -----------------------------------------------------------------
             // TO DO .. need to handle Pixel type conversions again currently
             // only supports 8 bit mono images
             // -----------------------------------------------------------------
+
             image = cv::Mat(rawImage_.rows, rawImage_.cols, CV_8UC1);
         }
 
         // Copy data -- TO DO might be able to do this without copying.
+        // ---------------------------------------------------------------------
+
+        // TEMPORARY
+        // ---------------------------------------------------------------------
+        //TimeStamp ts = getImageTimeStamp();
+        //std::cout  << ts.seconds << " " << ts.microSeconds << std::endl;
         // ---------------------------------------------------------------------
 
         unsigned char *pData0 = rawImage_.pData;
@@ -578,6 +589,16 @@ namespace bias {
         }
     }
 
+    TimeStamp CameraDevice_fc2::getImageTimeStamp()
+    {
+        TimeStamp timeStamp;
+        fc2TimeStamp timeStamp_fc2 = fc2GetImageTimeStamp(&rawImage_);
+
+        timeStamp.seconds = (unsigned long long)(timeStamp_fc2.seconds);
+        timeStamp.microSeconds = timeStamp_fc2.microSeconds;
+        return timeStamp;
+    }
+
     std::string CameraDevice_fc2::getVendorName()
     {
         return cameraInfo_.vendorName;
@@ -760,6 +781,41 @@ namespace bias {
         //----------------------------------------------------------------
 
         //std::cout << "E " << __PRETTY_FUNCTION__ << std::endl;
+    }
+
+
+    void CameraDevice_fc2::setupTimeStamping()
+    {
+        fc2Error error;
+        fc2EmbeddedImageInfo embeddedInfo;
+
+        error = fc2GetEmbeddedImageInfo(context_, &embeddedInfo); 
+        if (error != FC2_ERROR_OK)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get FlyCapture2 embedded image info";
+            throw RuntimeError(ERROR_FC2_GET_EMBEDDED_IMAGE_INFO, ssError.str());
+        }
+
+        // If embedded time stamping available enable it
+        if (embeddedInfo.timestamp.available != 0)
+        {
+            embeddedInfo.timestamp.onOff = true;
+        }
+        else
+        {
+            embeddedInfo.timestamp.onOff = false;
+        }
+
+        error = fc2SetEmbeddedImageInfo(context_, &embeddedInfo); 
+        if (error != FC2_ERROR_OK)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to set FlyCapture2 embedded image info";
+            throw RuntimeError(ERROR_FC2_SET_EMBEDDED_IMAGE_INFO, ssError.str());
+        }
     }
 
 

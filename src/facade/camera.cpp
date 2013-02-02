@@ -19,6 +19,7 @@ namespace bias {
         cameraDevicePtr_ = std::make_shared<CameraDevice>();
     }
 
+
     Camera::Camera(Guid guid) 
     {
         std::stringstream ssError;
@@ -45,107 +46,130 @@ namespace bias {
                 break;
         }
     }
+    
 
     Camera::~Camera() { }
+
 
     CameraLib Camera::getCameraLib() 
     { 
         return cameraDevicePtr_ -> getCameraLib(); 
     }
 
+
     Guid Camera::getGuid()
     {
         return cameraDevicePtr_ -> getGuid();
     }
+
 
     void Camera::connect() 
     { 
         cameraDevicePtr_ -> connect(); 
     }
 
+
     void Camera::disconnect() 
     {
         cameraDevicePtr_ -> disconnect();
     }
+
 
     void Camera::startCapture()
     {
         cameraDevicePtr_ -> startCapture();
     }
 
+
     void Camera::stopCapture()
     {
         cameraDevicePtr_ -> stopCapture();
     }
 
+
     cv::Mat Camera::grabImage()
     {
-        //std::cout << "B " << __PRETTY_FUNCTION__ << std::endl;
         return cameraDevicePtr_ -> grabImage();
-        //std::cout << "E " << __PRETTY_FUNCTION__ << std::endl;
     }
+
 
     void Camera::grabImage(cv::Mat &image)
     {
-        //std::cout << "B " << __PRETTY_FUNCTION__ << std::endl;
         cameraDevicePtr_ -> grabImage(image);
-        //std::cout << "E " << __PRETTY_FUNCTION__ << std::endl;
     }
+
+
+    TimeStamp Camera::getImageTimeStamp()
+    {
+        return cameraDevicePtr_ -> getImageTimeStamp();
+    }
+
 
     bool Camera::isConnected()
     {
         return cameraDevicePtr_ -> isConnected();
     }
 
+
     bool Camera::isCapturing() 
     { 
         return cameraDevicePtr_ -> isCapturing();
     }
+
 
     bool Camera::isColor()
     {
         return cameraDevicePtr_ -> isColor();
     }
 
+
     VideoMode Camera::getVideoMode()
     {
         return cameraDevicePtr_ -> getVideoMode();
     }
+
 
     FrameRate Camera::getFrameRate()
     {
         return cameraDevicePtr_ -> getFrameRate();
     }
 
+
     ImageMode Camera::getImageMode()
     {
         return cameraDevicePtr_ -> getImageMode();
     }
+
 
     VideoModeList Camera::getAllowedVideoModes()
     {
         return cameraDevicePtr_ -> getAllowedVideoModes();
     }
 
+
     FrameRateList Camera::getAllowedFrameRates(VideoMode vidMode)
     {
         return cameraDevicePtr_ -> getAllowedFrameRates(vidMode);
     }
+
 
     ImageModeList Camera::getAllowedImageModes()
     {
         return cameraDevicePtr_ -> getAllowedImageModes();
     }
 
+
     ImageInfo Camera::getImageInfo()
     {
         return cameraDevicePtr_ -> getImageInfo();
     }
 
+
     Property Camera::getProperty(PropertyType propType)
     {
         return cameraDevicePtr_ -> getProperty(propType);
     }
+
 
     PropertyMap Camera::getMapOfProperties()
     {
@@ -164,6 +188,7 @@ namespace bias {
         }
         return propMap;
     }
+
 
     PropertyList Camera::getListOfProperties()
     {
@@ -189,6 +214,7 @@ namespace bias {
         return cameraDevicePtr_ -> getPropertyInfo(propType);
     }
 
+
     PropertyInfoMap Camera::getMapOfPropertyInfos()
     {
         PropertyInfoMap  propInfoMap;
@@ -206,6 +232,7 @@ namespace bias {
         }
         return propInfoMap;
     }
+
 
     PropertyInfoList Camera::getListOfPropertyInfos()
     {
@@ -225,12 +252,14 @@ namespace bias {
         return propInfoList;
     }
 
+
     unsigned int Camera::getValue(PropertyType propType)
     {
         Property property;
         property = getProperty(propType);
         return property.value;
     }
+
 
     unsigned int Camera::getMinValue(PropertyType propType)
     {
@@ -239,6 +268,7 @@ namespace bias {
         return propInfo.minValue;
     }
 
+
     unsigned int Camera::getMaxValue(PropertyType propType)
     {
         PropertyInfo propInfo;
@@ -246,18 +276,22 @@ namespace bias {
         return propInfo.maxValue;
     }
 
+
     float Camera::getAbsoluteValue(PropertyType propType)
     {
         Property property;
         property = getProperty(propType);
         return property.absoluteValue;
     }
+
+
     float Camera::getMinAbsoluteValue(PropertyType propType)
     {
         PropertyInfo propInfo;
         propInfo = getPropertyInfo(propType);
         return propInfo.minAbsoluteValue;
     }
+
 
     float Camera::getMaxAbsoluteValue(PropertyType propType)
     {
@@ -266,10 +300,12 @@ namespace bias {
         return propInfo.maxAbsoluteValue;
     } 
 
+
     void Camera::setProperty(Property property)
     {
         cameraDevicePtr_ -> setProperty(property);
     } 
+
 
     bool Camera::isPresent(PropertyType propType)
     {
@@ -277,11 +313,13 @@ namespace bias {
         return propInfo.present;
     }
 
+
     bool Camera::isAutoCapable(PropertyType propType)
     {
         PropertyInfo propInfo = getPropertyInfo(propType);
         return propInfo.autoCapable;
     }
+
 
     bool Camera::isManualCapable(PropertyType propType)
     {
@@ -289,11 +327,13 @@ namespace bias {
         return propInfo.manualCapable;
     }
 
+
     bool Camera::isAbsoluteCapable(PropertyType propType)
     {
         PropertyInfo propInfo = getPropertyInfo(propType);
         return propInfo.absoluteCapable;
     }
+
 
     bool Camera::isOnePushCapable(PropertyType propType) 
     {
@@ -301,11 +341,13 @@ namespace bias {
         return propInfo.onePushCapable;
     }
 
+
     bool Camera::isOnOffCapable(PropertyType propType) 
     {
         PropertyInfo propInfo = getPropertyInfo(propType);
         return propInfo.onOffCapable;
     }
+
 
     bool Camera::isReadOutCapable(PropertyType propType) 
     {
@@ -313,11 +355,13 @@ namespace bias {
         return propInfo.readOutCapable;
     }
 
+
     bool Camera::isAbsoluteControlEnabled(PropertyType propType) 
     {
         Property prop = getProperty(propType);
         return prop.absoluteControl;
     }
+
 
     bool Camera::isOnePushEnabled(PropertyType propType) 
     {
@@ -325,11 +369,13 @@ namespace bias {
         return prop.onePush;
     }
 
+
     bool Camera::isOn(PropertyType propType) 
     {
         Property prop = getProperty(propType);
         return prop.on;
     }
+
 
     bool Camera::isAutoActive(PropertyType propType) 
     {
@@ -337,12 +383,14 @@ namespace bias {
         return prop.autoActive;
     }
 
+
     std::string Camera::getUnits(PropertyType propType)
     {
         PropertyInfo propInfo;
         propInfo = getPropertyInfo(propType);
         return propInfo.units;
     }
+    
 
     std::string Camera::getUnitsAbbr(PropertyType propType)
     {
@@ -351,6 +399,7 @@ namespace bias {
         return propInfo.unitsAbbr;
     }
 
+
     void Camera::setValue(PropertyType propType, unsigned int value)
     {
         Property property;
@@ -358,6 +407,7 @@ namespace bias {
         property.value = value;
         setProperty(property);
     }
+
 
     void Camera::setAbsoluteValue(PropertyType propType, float absValue)
     {
@@ -405,10 +455,12 @@ namespace bias {
         setVideoMode(vidMode,frmRate);
     } 
 
+
     void Camera::setVideoMode(VideoMode vidMode, FrameRate frmRate) 
     {
         cameraDevicePtr_ -> setVideoMode(vidMode, frmRate);
     } 
+
 
     void Camera::setFrameRate(FrameRate frmRate)
     {
@@ -416,20 +468,24 @@ namespace bias {
         setVideoMode(vidMode, frmRate);
     }
 
+
     void Camera::setTriggerInternal()
     {
         cameraDevicePtr_ -> setTriggerInternal();
     }
+
 
     void Camera::setTriggerExternal()
     {
         cameraDevicePtr_ -> setTriggerExternal();
     }
 
+
     TriggerType Camera::getTriggerType()
     {
         return cameraDevicePtr_ -> getTriggerType();
     }
+
 
     std::string Camera::getPropertyString(PropertyType propType)
     {
@@ -437,41 +493,49 @@ namespace bias {
         return prop.toString();
     }
 
+
     std::string Camera::getPropertyInfoString(PropertyType propType) 
     {
         PropertyInfo propInfo = getPropertyInfo(propType);
         return propInfo.toString();
     }
 
+
     std::string Camera::getVendorName()
     {
         return cameraDevicePtr_ -> getVendorName();
     }
+
 
     std::string Camera::getModelName()
     {
         return cameraDevicePtr_ -> getModelName();
     }
 
+
     void Camera::printInfo() 
     { 
         cameraDevicePtr_ -> printInfo(); 
     }
+
 
     void Camera::printGuid() 
     { 
         cameraDevicePtr_ -> printGuid(); 
     }
 
+
     void Camera::printProperty(PropertyType propType) 
     {
         std::cout << getPropertyString(propType) << std::endl;
     }
 
+
     void Camera::printPropertyInfo(PropertyType propType) 
     {
         std::cout << getPropertyInfoString(propType) << std::endl;
     }
+
 
     void Camera::printAllProperties()
     {
@@ -487,6 +551,7 @@ namespace bias {
         }
     }
 
+
     void Camera::printAllPropertyInfos() 
     {
         PropertyTypeList propTypeList = getListOfPropertyTypes();
@@ -501,6 +566,7 @@ namespace bias {
         }
     }
 
+
     void Camera::printImageInfo()
     {
         ImageInfo imgInfo = getImageInfo();
@@ -511,6 +577,7 @@ namespace bias {
         std::cout << std::endl;
         std::cout << getImageInfoString(imgInfo);
     }
+
 
     // FlyCapture2 specific methods
     // ------------------------------------------------------------------------
