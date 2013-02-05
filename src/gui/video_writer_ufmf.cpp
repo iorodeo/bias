@@ -14,8 +14,10 @@ namespace bias
 {
     // Static Constants
     // ----------------------------------------------------------------------------------
-    const unsigned int VideoWriter_ufmf::FRAMES_TODO_MAX_QUEUE_SIZE   = 100;
-    const unsigned int VideoWriter_ufmf::FRAMES_FINISHED_MAX_SET_SIZE = 100;
+    const unsigned int VideoWriter_ufmf::FRAMES_TODO_MAX_QUEUE_SIZE   = 250;
+    const unsigned int VideoWriter_ufmf::FRAMES_FINISHED_MAX_SET_SIZE = 250;
+    const unsigned int VideoWriter_ufmf::FRAMES_WAIT_MAX_QUEUE_SIZE   =  50;
+
     const unsigned int VideoWriter_ufmf::DEFAULT_FRAME_SKIP = 1;
     const unsigned int VideoWriter_ufmf::DEFAULT_BACKGROUND_THRESHOLD = 40;
     const unsigned int VideoWriter_ufmf::DEFAULT_UFMF_BOX_LENGTH = 30;
@@ -217,10 +219,25 @@ namespace bias
         framesFinishedSetPtr_ -> releaseLock();
         frameCount_++;
 
-        // Check frames todo and frames finish queue/set size and emit error if
-        // they grow too large.
-        //std::cout << "frames todo: " << framesToDoQueueSize   << std::endl;
-        //std::cout << "frames finished: " << framesFinishedSetSize << std::endl;
+        // Cull framesWaitQueue if it starts to grow too large
+        unsigned int framesWaitQueueSize = framesWaitQueuePtr_ -> size();
+        if ( framesWaitQueueSize >  FRAMES_WAIT_MAX_QUEUE_SIZE )
+        {
+            //std::cout << "culling frames wait queue" << std::endl;
+            unsigned int numToCull = framesWaitQueueSize - FRAMES_WAIT_MAX_QUEUE_SIZE/2;
+            for (unsigned int i=0; i<numToCull; i++)
+            {
+                //std::cout << " i = " << i << std::endl;
+                framesWaitQueuePtr_ -> pop();
+            }
+        }
+
+        //// Check frames todo and frames finish queue/set size and emit error if
+        //// they grow too large.
+        //std::cout << "todo:     " << framesToDoQueueSize   << std::endl;
+        //std::cout << "finished: " << framesFinishedSetSize << std::endl;
+        //std::cout << "wait:     " << framesWaitQueueSize << std::endl;
+        //std::cout << std::endl;
 
         if (framesToDoQueueSize > FRAMES_TODO_MAX_QUEUE_SIZE) 
         { 

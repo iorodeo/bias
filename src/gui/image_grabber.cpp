@@ -90,7 +90,41 @@ namespace bias {
         // Experimental - windows only
         // ---------------------------------------------------
 #ifdef WIN32
-        SetThreadAffinityMask(GetCurrentThread(), 0b0001);
+        bool rval;
+        DWORD_PTR availProcMask;
+        DWORD_PTR systemMask;
+
+        rval = GetProcessAffinityMask(GetCurrentProcess(),&availProcMask,&systemMask);
+        if (!rval) 
+        { 
+            std::cout << "Error unable to get process affinity mask" << std::endl;
+            // TO DO - raise error and abort
+        }
+
+        // Get index of first available processor
+        unsigned int procNum;
+        for (procNum = 0; procNum< sizeof(DWORD_PTR); procNum++)
+        {
+            if ( ((1<<procNum) & availProcMask) != 0 )
+            {
+                break;
+            }
+        }
+
+        DWORD_PTR cameraProcMask = 1<<procNum;
+        DWORD_PTR normalProcMask = availProcMask & ~(1<<procNum);
+        rval = SetThreadAffinityMask(GetCurrentThread(), cameraProcMask);
+        if (!rval)
+        {
+            std::cout << "Error unable to set thread affinity mask" << std::endl;
+            // TO DO - raise error and abort
+        }
+
+        //std::cout << "procNum:         " << procNum << std::endl;
+        //std::cout << "processor:       " << GetCurrentProcessorNumber() << std::endl;
+        //std::cout << "availProcMask:   " << std::hex << int(availProcMask)  << std::dec << std::endl;
+        //std::cout << "cameraProcMask:  " << std::hex << int(cameraProcMask) << std::dec << std::endl;
+        //std::cout << "normalProcMask:  " << std::hex << int(normalProcMask) << std::dec << std::endl;
 #endif
         // ----------------------------------------------------
 

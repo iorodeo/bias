@@ -35,6 +35,7 @@ namespace bias
             // Static members
             static const unsigned int FRAMES_TODO_MAX_QUEUE_SIZE;
             static const unsigned int FRAMES_FINISHED_MAX_SET_SIZE;
+            static const unsigned int FRAMES_WAIT_MAX_QUEUE_SIZE;
 
             static const unsigned int DEFAULT_FRAME_SKIP;
             static const unsigned int DEFAULT_BACKGROUND_THRESHOLD;
