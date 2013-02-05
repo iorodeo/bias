@@ -3,6 +3,13 @@
 #include <iostream>
 #include <QThread>
 
+// Experimental  - windows only
+// ----------------------------
+#ifdef WIN32
+#include <windows.h>
+#endif
+// ----------------------------
+
 namespace bias
 {
 
@@ -81,7 +88,14 @@ namespace bias
 
         // Set thread priority to normal
         QThread *thisThread = QThread::currentThread();
-        thisThread -> setPriority(QThread::NormalPriority);
+        thisThread -> setPriority(QThread::TimeCriticalPriority);
+
+        // Experimental - windows only
+        // ---------------------------------------------------
+#ifdef WIN32
+        SetThreadAffinityMask(GetCurrentThread(), 0b1110);
+#endif
+        // ----------------------------------------------------
 
         // Initiaiize values
         acquireLock();

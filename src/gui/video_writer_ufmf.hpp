@@ -32,21 +32,20 @@ namespace bias
             virtual ~VideoWriter_ufmf();
             virtual void addFrame(StampedImage stampedImg);
 
-            //// Debug ----------------
-            //cv::Mat currentImage_;
-            //void updateMembershipImage();
-            //cv::Mat getMembershipImage();
-            //// ----------------------
+            // Static members
+            static const unsigned int FRAMES_TODO_MAX_QUEUE_SIZE;
+            static const unsigned int FRAMES_FINISHED_MAX_SET_SIZE;
 
             static const unsigned int DEFAULT_FRAME_SKIP;
             static const unsigned int DEFAULT_BACKGROUND_THRESHOLD;
             static const unsigned int DEFAULT_UFMF_BOX_LENGTH;
             static const unsigned int DEFAULT_NUMBER_OF_COMPRESSORS;
             static const unsigned int DEFAULT_MAX_THREAD_COUNT;
+            static const unsigned int UFMF_VERSION_NUMBER;
+
             static const QString DEFAULT_COLOR_CODING;
             static const QString DUMMY_FILENAME;
             static const QString UFMF_HEADER_STRING;
-            static const unsigned int UFMF_VERSION_NUMBER;
 
             static const unsigned int KEYFRAME_CHUNK_ID;
             static const unsigned int FRAME_CHUNK_ID;

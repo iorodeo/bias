@@ -7,7 +7,16 @@
 #include <QThread>
 #include <opencv2/core/core.hpp>
 
+// Experimental  - windows only
+// ----------------------------
+#ifdef WIN32
+#include <windows.h>
+#endif
+// ----------------------------
+
 namespace bias {
+
+    unsigned int ImageGrabber::NUM_STARTUP_SKIP = 15;
 
     ImageGrabber::ImageGrabber(QObject *parent) : QObject(parent) 
     {
@@ -56,6 +65,8 @@ namespace bias {
         bool error = false;
         unsigned int errorId = 0;
         unsigned long frameCount = 0;
+        unsigned long startUpCount = 0;
+            
 
         StampedImage stampImg;
 
@@ -75,6 +86,13 @@ namespace bias {
         // Set thread priority to "time critical"
         QThread *thisThread = QThread::currentThread();
         thisThread -> setPriority(QThread::TimeCriticalPriority);
+
+        // Experimental - windows only
+        // ---------------------------------------------------
+#ifdef WIN32
+        SetThreadAffinityMask(GetCurrentThread(), 0b0001);
+#endif
+        // ----------------------------------------------------
 
         // Start image capture
         cameraPtr_ -> acquireLock();
@@ -103,6 +121,7 @@ namespace bias {
         // Grab images from camera until the done signal is given
         while (!done)
         {
+
             // Grab an image
             cameraPtr_ -> acquireLock();
             try
@@ -120,6 +139,12 @@ namespace bias {
             }
             cameraPtr_ -> releaseLock();
 
+            // Skip some number of frames on startup 
+            if (startUpCount < NUM_STARTUP_SKIP)
+            {
+                startUpCount++;
+                continue;
+            }
 
             // Push image into new image queue
             if (!error) 

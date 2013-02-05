@@ -25,6 +25,9 @@ namespace bias
             virtual unsigned int getFrameSkip() const;
             virtual void finish();
 
+        signals:
+            void imageLoggingError(unsigned int errorId, QString errorMsg);
+
         protected:
 
             cv::Size size_;

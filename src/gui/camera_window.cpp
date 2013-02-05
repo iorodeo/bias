@@ -22,6 +22,13 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
 
+// Experimental - windows only
+// ---------------------------
+#ifdef WIN32
+#include <windows.h>
+#endif
+// ---------------------------
+
 namespace bias
 {
     // Constants
@@ -529,6 +536,13 @@ namespace bias
 
         startButtonPtr_ -> setEnabled(false);
         connectButtonPtr_ -> setEnabled(true);
+
+        // Experimental - windows only
+        // -----------------------------------------------
+#ifdef WIN32
+        SetThreadAffinityMask(GetCurrentThread(), 0b1110);
+#endif
+        // -----------------------------------------------
     }
 
     void CameraWindow::setupImageLabels()
@@ -1074,7 +1088,7 @@ namespace bias
         // ----------------------------------------------------------------
         Property prop = cameraPtr_ -> getProperty(PROPERTY_TYPE_FRAME_RATE);
         prop.autoActive = false;
-        prop.value = 1200;
+        prop.value = 1500;
         cameraPtr_ -> setProperty(prop);
         // ----------------------------------------------------------------
     }
@@ -1201,8 +1215,17 @@ namespace bias
             videoWriterPtr -> setFileName(videoFileFullPath);
 
             imageLoggerPtr_ = new ImageLogger(videoWriterPtr, logImageQueuePtr_);
+
+            // Connect image logger error signals
             connect(
                     imageLoggerPtr_,
+                    SIGNAL(imageLoggingError(unsigned int, QString)),
+                    this,
+                    SLOT(imageLoggingError(unsigned int, QString))
+                   );
+
+            connect(
+                    videoWriterPtr.get(),
                     SIGNAL(imageLoggingError(unsigned int, QString)),
                     this,
                     SLOT(imageLoggingError(unsigned int, QString))

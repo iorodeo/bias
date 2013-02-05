@@ -33,6 +33,8 @@ namespace bias
 
             void stop();
 
+            static unsigned int NUM_STARTUP_SKIP;
+
         signals:
             void startCaptureError(unsigned int errorId, QString errorMsg);
             void stopCaptureError(unsigned int errorId, QString errorMsg);

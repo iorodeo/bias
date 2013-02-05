@@ -2,6 +2,13 @@
 #include <iostream>
 #include <QThread>
 
+// Experimental  - windows only
+// ----------------------------
+#ifdef WIN32
+#include <windows.h>
+#endif
+// ---------------------------
+
 namespace bias
 {
     Compressor_ufmf::Compressor_ufmf(QObject *parent)
@@ -57,7 +64,14 @@ namespace bias
 
         // Set thread priority to idle - only run when no other thread are running
         QThread *thisThread = QThread::currentThread();
-        thisThread -> setPriority(QThread::LowPriority);
+        thisThread -> setPriority(QThread::NormalPriority);
+
+        // Test - windows only
+        // ---------------------------------------------------
+#ifdef WIN32
+        SetThreadAffinityMask(GetCurrentThread(), 0b1110);
+#endif
+        // ----------------------------------------------------
 
         acquireLock();
         stopped_ = false;

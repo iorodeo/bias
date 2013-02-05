@@ -43,7 +43,7 @@ namespace bias
             void stop();
 
             // Debugging --------------------------
-            cv::Mat getBackgroundMembershipImage();
+            //cv::Mat getBackgroundMembershipImage();
             // ------------------------------------
 
         signals:

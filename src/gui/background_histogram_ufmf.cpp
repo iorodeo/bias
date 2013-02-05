@@ -4,6 +4,13 @@
 #include <QThread>
 #include <iostream>
 
+// Experimental  - windows only
+// ----------------------------
+#ifdef WIN32
+#include <windows.h>
+#endif
+// ----------------------------
+
 namespace bias
 {
 
@@ -81,7 +88,14 @@ namespace bias
 
         // Set thread priority to idle - only run when no other thread are running
         QThread *thisThread = QThread::currentThread();
-        thisThread -> setPriority(QThread::IdlePriority);
+        thisThread -> setPriority(QThread::NormalPriority);
+
+        // Experimental - windows only
+        // ---------------------------------------------------
+#ifdef WIN32
+        SetThreadAffinityMask(GetCurrentThread(), 0b1110);
+#endif
+        // ----------------------------------------------------
 
         acquireLock();
         stopped_ = false;

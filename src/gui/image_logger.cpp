@@ -8,9 +8,12 @@
 #include <iostream>
 #include <opencv2/core/core.hpp>
 
-// Debug -----------------------
-#include "video_writer_ufmf.hpp"
-// -----------------------------
+// Experimental  - windows only
+// ----------------------------
+#ifdef WIN32
+#include <windows.h>
+#endif
+// ----------------------------
 
 namespace bias
 {
@@ -54,16 +57,6 @@ namespace bias
         stopped_ = true;
     }
 
-    // Debug ----------------------------------------------------------------------------
-    //cv::Mat ImageLogger::getBackgroundMembershipImage()
-    //{
-    //    // Very unsafe !!!!!
-    //    VideoWriter_ufmf *videoWriter_ufmf_Ptr = (VideoWriter_ufmf*) videoWriterPtr_.get();
-    //    cv::Mat tmpImg = videoWriter_ufmf_Ptr -> getMembershipImage();
-    //    return tmpImg;
-    //}
-    // ----------------------------------------------------------------------------------
-
     void ImageLogger::run()
     {
         bool done = false;
@@ -76,6 +69,13 @@ namespace bias
         // Set thread priority to normal
         QThread *thisThread = QThread::currentThread();
         thisThread -> setPriority(QThread::NormalPriority);
+
+        // Experimental - windows only
+        // ---------------------------------------------------
+#ifdef WIN32
+        SetThreadAffinityMask(GetCurrentThread(), 0b1110);
+#endif
+        // ----------------------------------------------------
 
         acquireLock();
         stopped_ = false;

@@ -92,7 +92,8 @@ namespace bias {
 
         // Image Logger Errors
         ERROR_IMAGE_LOGGER_MAX_QUEUE_SIZE,
-
+        ERROR_FRAMES_TODO_MAX_QUEUE_SIZE,
+        ERROR_FRAMES_FINISHED_MAX_SET_SIZE,
         
         NUMBER_OF_ERROR,
     }; 

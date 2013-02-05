@@ -14,6 +14,8 @@ namespace bias
 {
     // Static Constants
     // ----------------------------------------------------------------------------------
+    const unsigned int VideoWriter_ufmf::FRAMES_TODO_MAX_QUEUE_SIZE   = 100;
+    const unsigned int VideoWriter_ufmf::FRAMES_FINISHED_MAX_SET_SIZE = 100;
     const unsigned int VideoWriter_ufmf::DEFAULT_FRAME_SKIP = 1;
     const unsigned int VideoWriter_ufmf::DEFAULT_BACKGROUND_THRESHOLD = 40;
     const unsigned int VideoWriter_ufmf::DEFAULT_UFMF_BOX_LENGTH = 30;
@@ -94,6 +96,8 @@ namespace bias
 
     void VideoWriter_ufmf::addFrame(StampedImage stampedImg) 
     {
+        unsigned int framesToDoQueueSize;
+        unsigned int framesFinishedSetSize;
         bool haveNewMedianImage = false;
 
         //currentImage_ = stampedImg.image;
@@ -179,6 +183,7 @@ namespace bias
             framesToDoQueuePtr_ -> acquireLock();
             framesToDoQueuePtr_ -> push(compressedFrame);
             framesToDoQueuePtr_ -> wakeOne();
+            framesToDoQueueSize = framesToDoQueuePtr_ -> size();
             framesToDoQueuePtr_ -> releaseLock();
 
 
@@ -188,36 +193,50 @@ namespace bias
         framesFinishedSetPtr_ -> acquireLock();
         if (!(framesFinishedSetPtr_ -> empty()))
         {
-            CompressedFrameSet_ufmf::iterator it = framesFinishedSetPtr_ -> begin();
-            CompressedFrame_ufmf compressedFrame = *it;
-
-            if (compressedFrame.getFrameCount() == nextFrameToWrite_)
+            bool writeDone = false;
+            while ( (!writeDone) && (!(framesFinishedSetPtr_ -> empty())) )
             {
-                framesWaitQueuePtr_ -> push(compressedFrame);
-                framesFinishedSetPtr_ -> erase(it);
-                nextFrameToWrite_ += frameSkip_;
-                writeCompressedFrame(compressedFrame);
+                CompressedFrameSet_ufmf::iterator it = framesFinishedSetPtr_ -> begin();
+                CompressedFrame_ufmf compressedFrame = *it;
+
+                if (compressedFrame.getFrameCount() == nextFrameToWrite_)
+                {
+                    framesWaitQueuePtr_ -> push(compressedFrame);
+                    framesFinishedSetPtr_ -> erase(it);
+                    nextFrameToWrite_ += frameSkip_;
+                    writeCompressedFrame(compressedFrame);
+                }
+                else
+                {
+                    writeDone = true;
+                }
             }
 
-        }
+        } // if (!(framesFinishedSetPtr_ 
+        framesFinishedSetSize = framesFinishedSetPtr_ -> size();
         framesFinishedSetPtr_ -> releaseLock();
-
         frameCount_++;
+
+        // Check frames todo and frames finish queue/set size and emit error if
+        // they grow too large.
+        //std::cout << "frames todo: " << framesToDoQueueSize   << std::endl;
+        //std::cout << "frames finished: " << framesFinishedSetSize << std::endl;
+
+        if (framesToDoQueueSize > FRAMES_TODO_MAX_QUEUE_SIZE) 
+        { 
+            std::cout << "error: framesToDoQueueSize = " << framesToDoQueueSize << std::endl;
+            unsigned int errorId = ERROR_FRAMES_TODO_MAX_QUEUE_SIZE;
+            QString errorMsg("logger framesToDoQueue has exceeded the maximum allowed size");
+            emit imageLoggingError(errorId, errorMsg);
+        }
+        if (framesFinishedSetSize > FRAMES_FINISHED_MAX_SET_SIZE)
+        {
+            std::cout << "error: framesFinishedSetSize = " << framesFinishedSetSize << std::endl;
+            unsigned int errorId = ERROR_FRAMES_FINISHED_MAX_SET_SIZE;
+            QString errorMsg("logger framesFinishedSet has exceeded the maximum allowed size");
+            emit imageLoggingError(errorId, errorMsg);
+        }
     }
-
-
-    //void VideoWriter_ufmf::updateMembershipImage()
-    //{
-    //    compressedFrame_.setData(currentImage_, bgLowerBoundImage_, bgUpperBoundImage_);
-    //    bgMembershipImage_ = compressedFrame_.getMembershipImage();
-    //    //cv::inRange(currentImage_.image, bgLowerBoundImage_, bgUpperBoundImage_, bgMembershipImage_);
-    //}
-
-    //cv::Mat VideoWriter_ufmf::getMembershipImage()
-    //{
-    //    updateMembershipImage();
-    //    return bgMembershipImage_;
-    //}
 
 
     void VideoWriter_ufmf::checkImageFormat(StampedImage stampedImg)
