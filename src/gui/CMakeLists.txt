@@ -24,6 +24,7 @@ set(
     compressed_frame_ufmf.hpp
     compressor_ufmf.hpp
     fps_estimator.hpp
+    affinity.hpp
     )
 
 set(
@@ -46,6 +47,7 @@ set(
     compressed_frame_ufmf.cpp
     compressor_ufmf.cpp
     fps_estimator.cpp
+    affinity.cpp
     )
 
 qt4_wrap_ui(bias_gui_FORMS_HEADERS ${bias_gui_FORMS}) 

@@ -3,17 +3,11 @@
 #include "exception.hpp"
 #include "stamped_image.hpp"
 #include "video_writer.hpp"
+#include "affinity.hpp"
 #include <QThread>
 #include <queue>
 #include <iostream>
 #include <opencv2/core/core.hpp>
-
-// Experimental  - windows only
-// ----------------------------
-#ifdef WIN32
-#include <windows.h>
-#endif
-// ----------------------------
 
 namespace bias
 {
@@ -69,13 +63,7 @@ namespace bias
         // Set thread priority to normal
         QThread *thisThread = QThread::currentThread();
         thisThread -> setPriority(QThread::NormalPriority);
-
-        // Experimental - windows only
-        // ---------------------------------------------------
-#ifdef WIN32
-        SetThreadAffinityMask(GetCurrentThread(), 0b1110);
-#endif
-        // ----------------------------------------------------
+        assignThreadAffinity(false,1);
 
         acquireLock();
         stopped_ = false;

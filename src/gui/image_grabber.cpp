@@ -2,17 +2,11 @@
 #include "camera.hpp"
 #include "exception.hpp"
 #include "stamped_image.hpp"
+#include "affinity.hpp"
 #include <iostream>
 #include <QTime>
 #include <QThread>
 #include <opencv2/core/core.hpp>
-
-// Experimental  - windows only
-// ----------------------------
-#ifdef WIN32
-#include <windows.h>
-#endif
-// ----------------------------
 
 namespace bias {
 
@@ -83,50 +77,11 @@ namespace bias {
             return; 
         }
 
-        // Set thread priority to "time critical"
+        // Set thread priority to "time critical" and assign cpu affinity
         QThread *thisThread = QThread::currentThread();
         thisThread -> setPriority(QThread::TimeCriticalPriority);
+        assignThreadAffinity(true,1,0);
 
-        // Experimental - windows only
-        // ---------------------------------------------------
-#ifdef WIN32
-        bool rval;
-        DWORD_PTR availProcMask;
-        DWORD_PTR systemMask;
-
-        rval = GetProcessAffinityMask(GetCurrentProcess(),&availProcMask,&systemMask);
-        if (!rval) 
-        { 
-            std::cout << "Error unable to get process affinity mask" << std::endl;
-            // TO DO - raise error and abort
-        }
-
-        // Get index of first available processor
-        unsigned int procNum;
-        for (procNum = 0; procNum< sizeof(DWORD_PTR); procNum++)
-        {
-            if ( ((1<<procNum) & availProcMask) != 0 )
-            {
-                break;
-            }
-        }
-
-        DWORD_PTR cameraProcMask = 1<<procNum;
-        DWORD_PTR normalProcMask = availProcMask & ~(1<<procNum);
-        rval = SetThreadAffinityMask(GetCurrentThread(), cameraProcMask);
-        if (!rval)
-        {
-            std::cout << "Error unable to set thread affinity mask" << std::endl;
-            // TO DO - raise error and abort
-        }
-
-        //std::cout << "procNum:         " << procNum << std::endl;
-        //std::cout << "processor:       " << GetCurrentProcessorNumber() << std::endl;
-        //std::cout << "availProcMask:   " << std::hex << int(availProcMask)  << std::dec << std::endl;
-        //std::cout << "cameraProcMask:  " << std::hex << int(cameraProcMask) << std::dec << std::endl;
-        //std::cout << "normalProcMask:  " << std::hex << int(normalProcMask) << std::dec << std::endl;
-#endif
-        // ----------------------------------------------------
 
         // Start image capture
         cameraPtr_ -> acquireLock();

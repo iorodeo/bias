@@ -12,6 +12,7 @@
 #include "video_writer_fmf.hpp"
 #include "video_writer_ufmf.hpp"
 #include "video_writer_ifmf.hpp"
+#include "affinity.hpp"
 #include <cstdlib>
 #include <cmath>
 #include <QtGui>
@@ -22,12 +23,6 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
 
-// Experimental - windows only
-// ---------------------------
-#ifdef WIN32
-#include <windows.h>
-#endif
-// ---------------------------
 
 namespace bias
 {
@@ -537,12 +532,8 @@ namespace bias
         startButtonPtr_ -> setEnabled(false);
         connectButtonPtr_ -> setEnabled(true);
 
-        // Experimental - windows only
-        // -----------------------------------------------
-#ifdef WIN32
-        SetThreadAffinityMask(GetCurrentThread(), 0b1110);
-#endif
-        // -----------------------------------------------
+        // Assign thread cpu affinity
+        assignThreadAffinity(false,1);
     }
 
     void CameraWindow::setupImageLabels()
@@ -1088,7 +1079,7 @@ namespace bias
         // ----------------------------------------------------------------
         Property prop = cameraPtr_ -> getProperty(PROPERTY_TYPE_FRAME_RATE);
         prop.autoActive = false;
-        prop.value = 1500;
+        prop.value = 1400;
         cameraPtr_ -> setProperty(prop);
         // ----------------------------------------------------------------
     }

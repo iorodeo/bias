@@ -1,14 +1,8 @@
 #include "image_dispatcher.hpp"
 #include "stamped_image.hpp"
+#include "affinity.hpp"
 #include <iostream>
 #include <QThread>
-
-// Experimental  - windows only
-// ----------------------------
-#ifdef WIN32
-#include <windows.h>
-#endif
-// ----------------------------
 
 namespace bias
 {
@@ -86,16 +80,11 @@ namespace bias
             return; 
         }
 
-        // Set thread priority to normal
+        // Set thread priority to normal and assign cpu affinity
         QThread *thisThread = QThread::currentThread();
         thisThread -> setPriority(QThread::TimeCriticalPriority);
+        assignThreadAffinity(false,1);
 
-        // Experimental - windows only
-        // ---------------------------------------------------
-#ifdef WIN32
-        SetThreadAffinityMask(GetCurrentThread(), 0b1110);
-#endif
-        // ----------------------------------------------------
 
         // Initiaiize values
         acquireLock();

@@ -1,15 +1,9 @@
 #include "background_median_ufmf.hpp"
 #include "background_data_ufmf.hpp"
+#include "affinity.hpp"
 #include <iostream>
 #include <QThread>
 #include <opencv2/core/core.hpp>
-
-// Experimental - windows only
-// ---------------------------
-#ifdef WIN32
-#include <windows.h>
-#endif
-// ---------------------------
 
 namespace bias
 { 
@@ -76,13 +70,7 @@ namespace bias
         // Set thread priority to idle - only run when no other thread are running
         QThread *thisThread = QThread::currentThread();
         thisThread -> setPriority(QThread::NormalPriority);
-
-        // Test - windows only
-        // ---------------------------------------------------
-#ifdef WIN32
-        SetThreadAffinityMask(GetCurrentThread(), 0b1110);
-#endif
-        // ----------------------------------------------------
+        assignThreadAffinity(false,1);
 
         acquireLock();
         stopped_ = false;

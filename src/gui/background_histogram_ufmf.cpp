@@ -1,15 +1,9 @@
 #include "background_histogram_ufmf.hpp"
 #include "background_data_ufmf.hpp"
 #include "stamped_image.hpp"
+#include "affinity.hpp"
 #include <QThread>
 #include <iostream>
-
-// Experimental  - windows only
-// ----------------------------
-#ifdef WIN32
-#include <windows.h>
-#endif
-// ----------------------------
 
 namespace bias
 {
@@ -89,13 +83,7 @@ namespace bias
         // Set thread priority to idle - only run when no other thread are running
         QThread *thisThread = QThread::currentThread();
         thisThread -> setPriority(QThread::NormalPriority);
-
-        // Experimental - windows only
-        // ---------------------------------------------------
-#ifdef WIN32
-        SetThreadAffinityMask(GetCurrentThread(), 0b1110);
-#endif
-        // ----------------------------------------------------
+        assignThreadAffinity(false,1);
 
         acquireLock();
         stopped_ = false;
