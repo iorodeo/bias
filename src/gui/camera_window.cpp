@@ -13,6 +13,7 @@
 #include "video_writer_ufmf.hpp"
 #include "video_writer_ifmf.hpp"
 #include "affinity.hpp"
+#include "property_dialog.hpp"
 #include <cstdlib>
 #include <cmath>
 #include <QtGui>
@@ -475,11 +476,15 @@ namespace bias
     {
         PropertyType propType = PropertyType(propTypeInt);
         QString propTypeString = QString::fromStdString(getPropertyTypeString(propType));
-        QString msgTitle("Development");
-        QString msgText("Set Property,  ");
-        msgText += propTypeString; 
-        msgText += QString(", not fully implemented");
-        QMessageBox::information(this, msgTitle, msgText);
+
+        //QString msgTitle("Development");
+        //QString msgText("Set Property,  ");
+        //msgText += propTypeString; 
+        //msgText += QString(", not fully implemented");
+        //QMessageBox::information(this, msgTitle, msgText);
+
+        QPointer<PropertyDialog> propDialogPtr = new PropertyDialog(cameraPtr_, propType, this);
+        propDialogPtr -> show();
     }
 
 
@@ -1079,7 +1084,7 @@ namespace bias
         // ----------------------------------------------------------------
         Property prop = cameraPtr_ -> getProperty(PROPERTY_TYPE_FRAME_RATE);
         prop.autoActive = false;
-        prop.value = 1400;
+        prop.value = 465;
         cameraPtr_ -> setProperty(prop);
         // ----------------------------------------------------------------
     }
