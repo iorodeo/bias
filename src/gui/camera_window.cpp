@@ -193,11 +193,6 @@ namespace bias
             stopImageCapture();
             std::cout << "image caputre stopped by timer" << std::endl;
         }
-        else
-        {
-            int secsToStop = currentDateTime.secsTo(captureStopDateTime_);
-            std::cout << "timer: secsToStop = " << secsToStop << std::endl;
-        }
     }
 
 
@@ -383,9 +378,7 @@ namespace bias
 
     void CameraWindow::actionTimerEnabledTriggered()
     {
-        bool timerEnabled =  actionTimerEnabledPtr_ -> isChecked();
-        std::string timerEnabledStdString = boolToOnOffQString(timerEnabled).toStdString();
-        std::cout << "timer: " <<  timerEnabledStdString << std::endl;
+        setCaptureTimeLabel(0.0);
     }
 
 
@@ -409,6 +402,7 @@ namespace bias
     void CameraWindow::timerDurationChanged(unsigned long duration)
     {
         captureDurationSec_ = duration;
+        setCaptureTimeLabel(0.0);
     }
 
 
@@ -1817,7 +1811,18 @@ namespace bias
     void CameraWindow::setCaptureTimeLabel(double timeStamp)
     {
         QString stampString = timeStampToQString(timeStamp); 
-        captureTimeLabelPtr_ -> setText(stampString);
+        if (actionTimerEnabledPtr_ -> isChecked())
+        {
+            QString captureDurationString = timeStampToQString(
+                    double(captureDurationSec_)
+                    );
+            QString timeLabelString = stampString + " / " + captureDurationString;
+            captureTimeLabelPtr_ -> setText(timeLabelString);
+        }
+        else
+        {
+            captureTimeLabelPtr_ -> setText(stampString);
+        }
     }
 
 
