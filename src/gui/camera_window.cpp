@@ -14,6 +14,7 @@
 #include "video_writer_ifmf.hpp"
 #include "affinity.hpp"
 #include "property_dialog.hpp"
+#include "timer_settings_dialog.hpp"
 #include <cstdlib>
 #include <cmath>
 #include <QtGui>
@@ -29,10 +30,17 @@ namespace bias
 {
     // Constants
     // ----------------------------------------------------------------------------------
-    const double DEFAULT_IMAGE_DISPLAY_FREQ = 10.0;  
+    
+    const unsigned int DURATION_TIMER_INTERVAL = 1000; // msec
     const QSize PREVIEW_DUMMY_IMAGE_SIZE = QSize(320,256);
+
+    // Default settings
+    const unsigned long DEFAULT_CAPTURE_DURATION = 300; // sec
+    const double DEFAULT_IMAGE_DISPLAY_FREQ = 10.0;     // Hz
     const QSize DEFAULT_HISTOGRAM_IMAGE_SIZE = QSize(256,204);
     const QString DEFAULT_VIDEOFILE_NAME = QString("bias_video");
+
+
     QMap<VideoFileFormat, QString> createExtensionMap()
     {
         QMap<VideoFileFormat, QString> map;
@@ -124,9 +132,6 @@ namespace bias
 
     void CameraWindow::updateDisplayOnTimer()
     {
-        //QTime stopWatch;
-        //stopWatch.start();
-        
         // Get information from image dispatcher
         // -------------------------------------------------------------------
         imageDispatcherPtr_ -> acquireLock();
@@ -170,15 +175,29 @@ namespace bias
         QString statusMsg("Capturing,  logging = ");
         statusMsg += boolToOnOffQString(logging_);
         statusMsg += QString(", timer = ");
-        statusMsg += boolToOnOffQString(timer_);
+        statusMsg += boolToOnOffQString(actionTimerEnabledPtr_ -> isChecked());
         statusMsg += QString().sprintf(",  %dx%d", imgSize.width, imgSize.height);
         statusMsg += QString().sprintf(",  %1.1f fps", fps);
         statusbarPtr_ -> showMessage(statusMsg);
 
         // Update capture time
         setCaptureTimeLabel(stamp);
+    }
 
-        //std::cout << stopWatch.elapsed() << std::endl;
+
+    void CameraWindow::checkDurationOnTimer()
+    {
+        QDateTime currentDateTime = QDateTime::currentDateTime();
+        if (currentDateTime >= captureStopDateTime_)
+        {
+            stopImageCapture();
+            std::cout << "image caputre stopped by timer" << std::endl;
+        }
+        else
+        {
+            int secsToStop = currentDateTime.secsTo(captureStopDateTime_);
+            std::cout << "timer: secsToStop = " << secsToStop << std::endl;
+        }
     }
 
 
@@ -364,16 +383,32 @@ namespace bias
 
     void CameraWindow::actionTimerEnabledTriggered()
     {
-        timer_ = actionTimerEnabledPtr_ -> isChecked();
-        std::cout << "timer: " << boolToOnOffQString(timer_).toStdString() << std::endl;
+        bool timerEnabled =  actionTimerEnabledPtr_ -> isChecked();
+        std::string timerEnabledStdString = boolToOnOffQString(timerEnabled).toStdString();
+        std::cout << "timer: " <<  timerEnabledStdString << std::endl;
     }
 
 
     void CameraWindow::actionTimerSettingsTriggered()
     {
-        QString msgTitle("Development");
-        QString msgText("Timer settings not fully implemented");
-        QMessageBox::information(this, msgTitle, msgText);
+        QPointer<TimerSettingsDialog> timerSettingsDialogPtr = new TimerSettingsDialog(
+                captureDurationSec_,
+                this
+                );
+        timerSettingsDialogPtr -> show();
+
+        connect(
+                timerSettingsDialogPtr,
+                SIGNAL(durationChanged(unsigned long)),
+                this,
+                SLOT(timerDurationChanged(unsigned long))
+               );
+    }
+
+
+    void CameraWindow::timerDurationChanged(unsigned long duration)
+    {
+        captureDurationSec_ = duration;
     }
 
 
@@ -496,11 +531,11 @@ namespace bias
         connected_ = false;
         capturing_ = false;
         logging_ = false;
-        timer_ = false;
         flipVert_ = false;
         flipHorz_ = false;
         imageRotation_ = IMAGE_ROTATION_0;
         videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
+        captureDurationSec_ = DEFAULT_CAPTURE_DURATION;
 
         imageDisplayFreq_ = DEFAULT_IMAGE_DISPLAY_FREQ;
         cameraPtr_ = std::make_shared<Lockable<Camera>>(guid);
@@ -518,6 +553,7 @@ namespace bias
         setupLoggingMenu();
         setupDisplayMenu();
         setupImageDisplayTimer();
+        setupCaptureDurationTimer();
         setupImageLabels();
         updateAllMenus(); 
 
@@ -806,6 +842,18 @@ namespace bias
                 this, 
                 SLOT(updateDisplayOnTimer())
                 );
+    }
+
+    void CameraWindow::setupCaptureDurationTimer()
+    {
+        captureDurationTimerPtr_ = new QTimer(this);
+        captureDurationTimerPtr_ -> setInterval(DURATION_TIMER_INTERVAL);
+        connect(
+                captureDurationTimerPtr_,
+                SIGNAL(timeout()),
+                this,
+                SLOT(checkDurationOnTimer())
+               );
     }
 
 
@@ -1230,12 +1278,24 @@ namespace bias
             threadPoolPtr_ -> start(imageLoggerPtr_);
         }
 
+        // Start display update timer
         unsigned int imageDisplayDt = int(1000.0/imageDisplayFreq_);
         imageDisplayTimerPtr_ -> start(imageDisplayDt);
+
+        // Start duration timer - if enabled
+        if (actionTimerEnabledPtr_ -> isChecked())
+        {
+            captureDurationTimerPtr_ -> start();
+        }
+
+        QDateTime currentDateTime = QDateTime::currentDateTime();
+        captureStopDateTime_ = currentDateTime.addSecs(captureDurationSec_);
+
         startButtonPtr_ -> setText(QString("Stop"));
         connectButtonPtr_ -> setEnabled(false);
         statusbarPtr_ -> showMessage(QString("Capturing"));
         capturing_ = true;
+
 
         updateAllMenus();
 
@@ -1252,9 +1312,15 @@ namespace bias
             return;
         }
 
+        // Stop timers.
+        imageDisplayTimerPtr_ -> stop();
+        if (actionTimerEnabledPtr_ -> isChecked())
+        {
+            captureDurationTimerPtr_ -> stop();
+        }
+
         // Note, image grabber and dispatcher are destroyed by the 
         // threadPool when their run methods exit.
-        imageDisplayTimerPtr_ -> stop();
 
         // Send stop singals to threads
         if (!imageGrabberPtr_.isNull())

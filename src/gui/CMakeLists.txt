@@ -2,7 +2,12 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 project(bias_gui)
 
-set(bias_gui_FORMS camera_window.ui property_dialog.ui)
+set(
+    bias_gui_FORMS 
+    camera_window.ui 
+    property_dialog.ui
+    timer_settings_dialog.ui
+    )
 
 set(
     bias_gui_HEADERS 
@@ -26,6 +31,7 @@ set(
     fps_estimator.hpp
     affinity.hpp
     property_dialog.hpp
+    timer_settings_dialog.hpp
     )
 
 set(
@@ -50,6 +56,7 @@ set(
     fps_estimator.cpp
     affinity.cpp
     property_dialog.cpp
+    timer_settings_dialog.cpp
     )
 
 qt4_wrap_ui(bias_gui_FORMS_HEADERS ${bias_gui_FORMS}) 

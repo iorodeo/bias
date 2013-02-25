@@ -6,6 +6,7 @@
 #include <QSize>
 #include <QMap>
 #include <QPointer>
+#include <QDateTime>
 #include <QMainWindow>
 #include "ui_camera_window.h"
 #include "camera_facade_fwd.hpp"
@@ -55,8 +56,9 @@ namespace bias
             void stopImageCaptureError(unsigned int errorId, QString errorMsg);
             void imageLoggingError(unsigned int errorId, QString errorMsg);
 
-            // Display Timer update
+            // Display update and duration check timers
             void updateDisplayOnTimer();
+            void checkDurationOnTimer();
 
             // Tab changed event
             void tabWidgetChanged(int index);
@@ -88,12 +90,14 @@ namespace bias
             void actionFrameRateTriggered(int frmRateInt);
             void actionPropertyTriggered(int propTypeInt);
 
+            // Dialog slots
+            void timerDurationChanged(unsigned long duration);
+
         private:
 
             bool connected_;
             bool capturing_;
             bool logging_;
-            bool timer_;
             bool flipVert_;
             bool flipHorz_;
 
@@ -105,6 +109,7 @@ namespace bias
             ImageRotationType imageRotation_;
             VideoFileFormat videoFileFormat_;
             unsigned long frameCount_;
+            unsigned long captureDurationSec_;
 
             QPixmap previewPixmapOriginal_;
             QPixmap pluginPixmapOriginal_;
@@ -128,11 +133,14 @@ namespace bias
             std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr_;
 
             QPointer<QThreadPool> threadPoolPtr_;
-            QPointer<QTimer> imageDisplayTimerPtr_;
 
             QPointer<ImageGrabber> imageGrabberPtr_;
             QPointer<ImageDispatcher> imageDispatcherPtr_;
             QPointer<ImageLogger> imageLoggerPtr_;
+
+            QPointer<QTimer> imageDisplayTimerPtr_;
+            QPointer<QTimer> captureDurationTimerPtr_;
+            QDateTime captureStopDateTime_;
 
             void connectWidgets();
             void initialize(Guid guid);
@@ -145,6 +153,7 @@ namespace bias
 
             void setDefaultVideoFileDir();
             void setupImageDisplayTimer();
+            void setupCaptureDurationTimer();
             
             // Menu setup methods
             void setupCameraMenu();

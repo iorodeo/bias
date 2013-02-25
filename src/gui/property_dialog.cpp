@@ -109,9 +109,9 @@ namespace bias
             // FIX THIS  - change so that you are setting integer values
             // in the qslide perhaps by scaling the floating point numbers. 
             //////////////////////////////////////////////////////////////
-            absValueSliderPtr -> setMinimum(propertyInfo.minAbsoluteValue);
-            absValueSliderPtr -> setMaximum(propertyInfo.maxAbsoluteValue);
-            absValueSliderPtr -> setSliderPosition(property.absoluteValue);
+            absValueSliderPtr -> setMinimum(int(100*propertyInfo.minAbsoluteValue));
+            absValueSliderPtr -> setMaximum(int(100*propertyInfo.maxAbsoluteValue));
+            absValueSliderPtr -> setSliderPosition(int(100*property.absoluteValue));
 
             minAbsValueLabelPtr -> setText(
                     QString::number(propertyInfo.minAbsoluteValue, 'f', 2)

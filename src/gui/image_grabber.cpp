@@ -162,8 +162,8 @@ namespace bias {
                 releaseLock();
 
                 // ------------------------------------------------------------------
-                std::cout << "dt = " << timeStampDbl - timeStampDblLast << std::endl;
-                timeStampDblLast = timeStampDbl;
+                //std::cout << "dt = " << timeStampDbl - timeStampDblLast << std::endl;
+                //timeStampDblLast = timeStampDbl;
                 // ------------------------------------------------------------------
 
             }
