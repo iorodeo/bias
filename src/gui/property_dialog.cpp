@@ -8,14 +8,16 @@
 
 namespace bias
 {
+    const float ABSOLUTE_VALUE_SCALE = 100.0;
+    const unsigned int FLOAT_PREC = 2;
 
     PropertyDialog::PropertyDialog(QWidget *parent) : QDialog(parent)
     {
         setupUi(this);
         propertyType_ = PROPERTY_TYPE_UNSPECIFIED;
         cameraPtr_ = NULL;
-        connectWidgets();
         initialize();
+        connectWidgets();
     }
 
 
@@ -32,10 +34,70 @@ namespace bias
         initialize();
     }
 
+
     void PropertyDialog::onIntValueSliderChanged()
     {
-        std::cout << "onIntValueSliderChanged: " << intValueSliderPtr -> value() << std::endl;
+        unsigned int value = (unsigned int)(intValueSliderPtr -> value());
+        setPropertyValue(value);
+        std::cout << "onIntValueSliderChanged: " << value << std::endl;
     }
+
+
+    void PropertyDialog::onIntEditingFinished()
+    {
+        QString valueString = intValueLineEditPtr -> text();
+        unsigned int value = valueString.toUInt();
+        setPropertyValue(value);
+        std::cout << "onIntEditingFinished: " << value << std::endl;
+    }
+
+
+    void PropertyDialog::onAbsValueSliderChanged()
+    {
+        float absoluteValue = float(absValueSliderPtr -> value())/ABSOLUTE_VALUE_SCALE;
+        setPropertyAbsoluteValue(absoluteValue);
+        std::cout << "onAbsValueSliderChanged: " << absoluteValue << std::endl;
+    }
+
+
+    void PropertyDialog::onAbsEditingFinished()
+    {
+        QString absoluteValueString = absValueLineEditPtr -> text();
+        float absoluteValue = absoluteValueString.toFloat();
+        setPropertyAbsoluteValue(absoluteValue);
+        std::cout << "onAbsEditingFinished: " << absoluteValue << std::endl;
+    }
+
+    void PropertyDialog::setPropertyValue(unsigned int value)
+    {
+        Property property = cameraPtr_ -> getProperty(propertyType_);
+        PropertyInfo propertyInfo = cameraPtr_ -> getPropertyInfo(propertyType_);
+        property.value = value;
+        property.absoluteControl = false;
+
+        cameraPtr_ -> acquireLock();
+        cameraPtr_ -> setProperty(property);
+        property = cameraPtr_ -> getProperty(propertyType_);
+        cameraPtr_ -> releaseLock();
+
+        updateDisplayValues(property, propertyInfo);
+    }
+
+    void PropertyDialog::setPropertyAbsoluteValue(float absoluteValue)
+    {
+        Property property = cameraPtr_ -> getProperty(propertyType_);
+        PropertyInfo propertyInfo = cameraPtr_ -> getPropertyInfo(propertyType_);
+        property.absoluteValue = absoluteValue;
+        property.absoluteControl = true;
+
+        cameraPtr_ -> acquireLock();
+        cameraPtr_ -> setProperty(property);
+        property = cameraPtr_ -> getProperty(propertyType_);
+        cameraPtr_ -> releaseLock();
+
+        updateDisplayValues(property, propertyInfo);
+    }
+
 
     void PropertyDialog::connectWidgets()
     {
@@ -46,24 +108,49 @@ namespace bias
                 SLOT(onIntValueSliderChanged())
                );
 
+        connect( 
+                absValueSliderPtr,
+                SIGNAL(valueChanged(int)),
+                this,
+                SLOT(onAbsValueSliderChanged())
+               );
         
+        connect(
+                intValueLineEditPtr,
+                SIGNAL(editingFinished()),
+                this,
+                SLOT(onIntEditingFinished())
+               );
+
+        connect(
+                absValueLineEditPtr,
+                SIGNAL(editingFinished()),
+                this,
+                SLOT(onAbsEditingFinished())
+               );
     }
+
 
     void PropertyDialog::initialize()
     {
         propertyNameLabelPtr -> setText(
                 QString::fromStdString(getPropertyTypeString(propertyType_))
                 );
-        updateDisplayValues();
+
+        intValueSliderPtr -> setTracking(false);
+        absValueSliderPtr -> setTracking(false);
+
+        cameraPtr_ -> acquireLock();
+        Property property = cameraPtr_ -> getProperty(propertyType_);
+        PropertyInfo propertyInfo = cameraPtr_ -> getPropertyInfo(propertyType_);
+        cameraPtr_ -> releaseLock();
+
+        updateDisplayValues(property,propertyInfo);
     }
 
 
-    void PropertyDialog::updateDisplayValues()
+    void PropertyDialog::updateDisplayValues(Property property, PropertyInfo propertyInfo)
     {
-        // Get property values and info from camera
-        Property property = cameraPtr_ -> getProperty(propertyType_);
-        PropertyInfo propertyInfo = cameraPtr_ -> getPropertyInfo(propertyType_);
-
         std::cout << property.toString() << std::endl;
         std::cout << propertyInfo.toString() << std::endl;
 
@@ -74,16 +161,19 @@ namespace bias
         autoCheckBoxPtr -> setEnabled(
                 propertyInfo.manualCapable && propertyInfo.autoCapable
                 );
+
         autoCheckBoxPtr -> setChecked(property.autoActive);
 
-        onePushCheckBoxPtr -> setEnabled(propertyInfo.onePushCapable);
-        onePushCheckBoxPtr -> setChecked(property.onePush);
+        onePushPushButtonPtr -> setEnabled(propertyInfo.onePushCapable);
 
         // Enable/disable group boxes
-        intValueGroupBoxPtr -> setEnabled(propertyInfo.manualCapable);
-        absValueGroupBoxPtr -> setEnabled(
-                propertyInfo.manualCapable && propertyInfo.absoluteCapable
-                );
+        bool intGroupBoxEnabled = propertyInfo.manualCapable && (!property.autoActive);
+        intValueGroupBoxPtr -> setEnabled(intGroupBoxEnabled);
+
+        bool absGroupBoxEnabled = propertyInfo.manualCapable; 
+        absGroupBoxEnabled = absGroupBoxEnabled && propertyInfo.absoluteCapable; 
+        absGroupBoxEnabled = absGroupBoxEnabled && (!property.autoActive);
+        absValueGroupBoxPtr -> setEnabled(absGroupBoxEnabled);
 
         // Set integer value slider 
         intValueSliderPtr -> setMinimum(propertyInfo.minValue);
@@ -92,6 +182,7 @@ namespace bias
         minIntValueLabelPtr -> setText(QString::number(propertyInfo.minValue));
         maxIntValueLabelPtr -> setText(QString::number(propertyInfo.maxValue));
         intValueLineEditPtr -> setText(QString::number(property.value));
+
         if (propertyInfo.manualCapable)
         {
             QPointer<QIntValidator> intValueValidatorPtr = new QIntValidator(
@@ -105,29 +196,32 @@ namespace bias
         // Set absolute value slider
         if (propertyInfo.absoluteCapable) 
         {
-            //////////////////////////////////////////////////////////////
-            // FIX THIS  - change so that you are setting integer values
-            // in the qslide perhaps by scaling the floating point numbers. 
-            //////////////////////////////////////////////////////////////
-            absValueSliderPtr -> setMinimum(int(100*propertyInfo.minAbsoluteValue));
-            absValueSliderPtr -> setMaximum(int(100*propertyInfo.maxAbsoluteValue));
-            absValueSliderPtr -> setSliderPosition(int(100*property.absoluteValue));
+            absValueSliderPtr -> setMinimum(
+                    int(ABSOLUTE_VALUE_SCALE*propertyInfo.minAbsoluteValue)
+                    );
+            absValueSliderPtr -> setMaximum(
+                    int(ABSOLUTE_VALUE_SCALE*propertyInfo.maxAbsoluteValue)
+                    );
+            absValueSliderPtr -> setSliderPosition(
+                    int(ABSOLUTE_VALUE_SCALE*property.absoluteValue)
+                    );
 
             minAbsValueLabelPtr -> setText(
-                    QString::number(propertyInfo.minAbsoluteValue, 'f', 2)
+                    QString::number(propertyInfo.minAbsoluteValue, 'f', FLOAT_PREC)
                     );
             maxAbsValueLabelPtr -> setText(
-                    QString::number(propertyInfo.maxAbsoluteValue, 'f', 2)
+                    QString::number(propertyInfo.maxAbsoluteValue, 'f', FLOAT_PREC)
                     );
             absValueLineEditPtr -> setText(
-                    QString::number(property.absoluteValue, 'f', 2)
+                    QString::number(property.absoluteValue, 'f', FLOAT_PREC)
                     );
+
             if (propertyInfo.manualCapable)
             {
                 QPointer<QDoubleValidator> absValueValidatorPtr = new QDoubleValidator(
                         propertyInfo.minAbsoluteValue,
                         propertyInfo.maxAbsoluteValue,
-                        2,
+                        FLOAT_PREC,
                         absValueLineEditPtr
                         );
                 absValueLineEditPtr -> setValidator(absValueValidatorPtr);
@@ -152,8 +246,6 @@ namespace bias
             unitsNameLabelPtr -> setText(QString("NA"));
         }
     }
-
-    
 
 
 } // namespace bias

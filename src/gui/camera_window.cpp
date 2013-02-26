@@ -147,21 +147,6 @@ namespace bias
         imageDispatcherPtr_ -> releaseLock();
         // -------------------------------------------------------------------
 
-        // Debug  - display background median image from ufmf logger
-        // -------------------------------------------------------------------
-        //if (logging_ && (videoFileFormat_ == VIDEOFILE_FORMAT_UFMF))
-        //{
-        //    imageLoggerPtr_ -> acquireLock();
-        //    cv::Mat medianMat = imageLoggerPtr_ -> getBackgroundMembershipImage();
-        //    QImage medianImg = matToQImage(medianMat);
-        //    imageLoggerPtr_ -> releaseLock();
-        //    if (!img.isNull())
-        //    {
-        //        pluginPixmapOriginal_ = QPixmap::fromImage(medianImg);
-        //    }
-        //}
-        // -------------------------------------------------------------------
-
         // Set pixmaps and update image labels - note need to add pluginPixmap
         if (!img.isNull()) 
         {
@@ -505,13 +490,6 @@ namespace bias
     {
         PropertyType propType = PropertyType(propTypeInt);
         QString propTypeString = QString::fromStdString(getPropertyTypeString(propType));
-
-        //QString msgTitle("Development");
-        //QString msgText("Set Property,  ");
-        //msgText += propTypeString; 
-        //msgText += QString(", not fully implemented");
-        //QMessageBox::information(this, msgTitle, msgText);
-
         QPointer<PropertyDialog> propDialogPtr = new PropertyDialog(cameraPtr_, propType, this);
         propDialogPtr -> show();
     }
@@ -1121,14 +1099,6 @@ namespace bias
 
         updateCameraInfoMessage();
         updateAllMenus();
-
-        // DEBUG
-        // ----------------------------------------------------------------
-        Property prop = cameraPtr_ -> getProperty(PROPERTY_TYPE_FRAME_RATE);
-        prop.autoActive = false;
-        prop.value = 465;
-        cameraPtr_ -> setProperty(prop);
-        // ----------------------------------------------------------------
     }
 
 
@@ -1239,7 +1209,6 @@ namespace bias
                     break;
 
                 case VIDEOFILE_FORMAT_IFMF:
-                    std::cout << "ifmf format" << std::endl;
                     videoWriterPtr = std::make_shared<VideoWriter_ifmf>();
                     break;
 
@@ -1289,7 +1258,6 @@ namespace bias
         connectButtonPtr_ -> setEnabled(false);
         statusbarPtr_ -> showMessage(QString("Capturing"));
         capturing_ = true;
-
 
         updateAllMenus();
 
@@ -1694,14 +1662,21 @@ namespace bias
                 propertiesSignalMapperPtr_ -> setMapping(propActionPtr, int(prop.type));
             }
         }
-        if (capturing_)
-        {
-            setMenuChildrenEnabled(menuCameraPropertiesPtr_,false);
-        }
-        else
-        {
-            setMenuChildrenEnabled(menuCameraPropertiesPtr_,true);
-        }
+
+        // Old ---------------------------------------------------------
+        //if (capturing_)
+        //{
+        //    setMenuChildrenEnabled(menuCameraPropertiesPtr_,false);
+        //}
+        //else
+        //{
+        //    setMenuChildrenEnabled(menuCameraPropertiesPtr_,true);
+        //}
+        // -------------------------------------------------------------
+        
+        // New allow properties to be changed while camera is running
+        setMenuChildrenEnabled(menuCameraPropertiesPtr_,true);
+
     }
 
     void CameraWindow::updateCameraTriggerMenu()

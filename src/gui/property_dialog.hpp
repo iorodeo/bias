@@ -27,6 +27,9 @@ namespace bias
         private slots:
 
             void onIntValueSliderChanged();
+            void onIntEditingFinished();
+            void onAbsValueSliderChanged();
+            void onAbsEditingFinished();
 
         private:
 
@@ -38,8 +41,14 @@ namespace bias
 
             void connectWidgets();
             void initialize();
-            void updateDisplayValues();
-            
+
+            void updateDisplayValues(
+                    Property property, 
+                    PropertyInfo propertyInfo
+                    );
+
+            void setPropertyValue(unsigned int value); 
+            void setPropertyAbsoluteValue(float absoluteValue);
 
 
     }; // class PropertyDialog

@@ -62,9 +62,6 @@
        </spacer>
       </item>
       <item>
-       <widget class="QSpinBox" name="hourSpinBoxPtr"/>
-      </item>
-      <item>
        <widget class="QLabel" name="label">
         <property name="font">
          <font>
@@ -78,7 +75,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QSpinBox" name="minSpinBoxPtr"/>
+       <widget class="QSpinBox" name="hourSpinBoxPtr"/>
       </item>
       <item>
        <widget class="QLabel" name="label_2">
@@ -94,7 +91,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QSpinBox" name="secSpinBoxPtr"/>
+       <widget class="QSpinBox" name="minSpinBoxPtr"/>
       </item>
       <item>
        <widget class="QLabel" name="label_3">
@@ -108,6 +105,9 @@
          <string>sec</string>
         </property>
        </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="secSpinBoxPtr"/>
       </item>
      </layout>
     </widget>

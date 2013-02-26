@@ -145,7 +145,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QCheckBox" name="onePushCheckBoxPtr">
+       <widget class="QPushButton" name="onePushPushButtonPtr">
         <property name="text">
          <string>One Push</string>
         </property>
