@@ -13,7 +13,7 @@ namespace bias
     const unsigned int FLOAT_PRECISION = 2;
 
     PropertyDialog::PropertyDialog(QWidget *parent, Qt::WindowFlags f) 
-        : QDialog(parent)
+        : QDialog(parent,f)
     {
         cameraPtr_ = NULL;
         propertyType_ = PROPERTY_TYPE_UNSPECIFIED;
