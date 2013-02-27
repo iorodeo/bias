@@ -117,7 +117,6 @@ namespace bias
 
     void PropertyDialog::onRefreshTimer()
     {
-        std::cout << "onRefreshTimer" << std::endl;
         getPropertyAndUpdateDisplay();
     }
 
