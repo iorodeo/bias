@@ -2,9 +2,12 @@
 #define BIAS_PROPTERy_DIALOG_HPP
 
 #include <QDialog>
+#include <QPointer>
 #include <memory>
 #include "camera_facade_fwd.hpp"
 #include "ui_property_dialog.h"
+
+class QTimer;
 
 namespace bias
 {
@@ -16,12 +19,16 @@ namespace bias
 
         public:
 
-            PropertyDialog(QWidget *parent=0);
+            PropertyDialog(
+                    QWidget *parent=0,
+                    Qt::WindowFlags f=0
+                    );
 
             PropertyDialog(
                     std::shared_ptr<Lockable<Camera>> cameraPtr,
                     PropertyType propertyType, 
-                    QWidget *parent=0
+                    QWidget *parent=0,
+                    Qt::WindowFlags f=0
                     );
 
         private slots:
@@ -30,25 +37,36 @@ namespace bias
             void onIntEditingFinished();
             void onAbsValueSliderChanged();
             void onAbsEditingFinished();
+            void onSliderPressed();
+            void onSliderReleased();
+            void onAutoStateChanged(int state);
+            void onOffStateChanged(int state);
+            void onOnePushButtonClicked();
+            void onRefreshTimer();
 
         private:
 
             std::shared_ptr<Lockable<Camera>> cameraPtr_;
             PropertyType propertyType_;
+
             bool absoluteCapable_; 
             bool manualCapable_;
             bool autoCapable_;
 
+            QPointer<QTimer> refreshTimerPtr_;
+
             void connectWidgets();
             void initialize();
 
-            void updateDisplayValues(
-                    Property property, 
-                    PropertyInfo propertyInfo
-                    );
+            void updateDisplay(Property property, PropertyInfo propertyInfo);
+            void getPropertyAndUpdateDisplay();
 
             void setPropertyValue(unsigned int value); 
             void setPropertyAbsoluteValue(float absoluteValue);
+            void setProperty(Property property);
+
+            Property getProperty();
+            PropertyInfo getPropertyInfo();
 
 
     }; // class PropertyDialog

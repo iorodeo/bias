@@ -9,8 +9,8 @@ namespace bias
 
     {
         setupUi(this);
-        connectWidgets();
         initialize(duration);
+        connectWidgets();
     }
 
 
@@ -51,6 +51,9 @@ namespace bias
 
     void TimerSettingsDialog::initialize(unsigned long duration)
     {
+
+        setAttribute(Qt::WA_DeleteOnClose);
+
         // Set spinbox limits
         hourSpinBoxPtr -> setMaximum(99);
         hourSpinBoxPtr -> setMinimum(0);

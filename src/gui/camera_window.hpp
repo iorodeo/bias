@@ -140,6 +140,7 @@ namespace bias
 
             QPointer<QTimer> imageDisplayTimerPtr_;
             QPointer<QTimer> captureDurationTimerPtr_;
+            QDateTime captureStartDateTime_;
             QDateTime captureStopDateTime_;
 
             void connectWidgets();
@@ -199,6 +200,7 @@ namespace bias
             void setCameraInfoMessage(QString vendorName, QString modelName);
             void setMenuChildrenEnabled(QWidget *parentWidgetPtr, bool value);
             void setCaptureTimeLabel(double timeStamp);
+
             QString getVideoFileFullPath();
             QString getVideoFileFullPathWithGuid();
 

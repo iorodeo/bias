@@ -292,9 +292,9 @@
      <addaction name="actionCameraTriggerInternalPtr_"/>
      <addaction name="actionCameraTriggerExternalPtr_"/>
     </widget>
+    <addaction name="menuCameraPropertiesPtr_"/>
     <addaction name="menuCameraVideoModePtr_"/>
     <addaction name="menuCameraFrameRatePtr_"/>
-    <addaction name="menuCameraPropertiesPtr_"/>
     <addaction name="menuCameraTriggerPtr_"/>
     <addaction name="actionCameraFormat7SettingsPtr_"/>
     <addaction name="actionCameraInfoPtr_"/>

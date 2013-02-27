@@ -165,8 +165,15 @@ namespace bias
         statusMsg += QString().sprintf(",  %1.1f fps", fps);
         statusbarPtr_ -> showMessage(statusMsg);
 
-        // Update capture time
-        setCaptureTimeLabel(stamp);
+        // Set update caputure time 
+        QDateTime currentDateTime = QDateTime::currentDateTime();
+        qint64 captureDt = currentDateTime.toMSecsSinceEpoch();
+        captureDt -= captureStartDateTime_.toMSecsSinceEpoch();
+        setCaptureTimeLabel(double(1.0e-3*captureDt));
+
+        // --------------------------
+        //setCaptureTimeLabel(stamp); 
+        // --------------------------
     }
 
 
@@ -387,6 +394,7 @@ namespace bias
     void CameraWindow::timerDurationChanged(unsigned long duration)
     {
         captureDurationSec_ = duration;
+        captureStopDateTime_ = captureStartDateTime_.addSecs(captureDurationSec_);
         setCaptureTimeLabel(0.0);
     }
 
@@ -1245,22 +1253,22 @@ namespace bias
         unsigned int imageDisplayDt = int(1000.0/imageDisplayFreq_);
         imageDisplayTimerPtr_ -> start(imageDisplayDt);
 
+        // Set Capture start and stop time
+        captureStartDateTime_ = QDateTime::currentDateTime();
+        captureStopDateTime_ = captureStartDateTime_.addSecs(captureDurationSec_);
+
         // Start duration timer - if enabled
         if (actionTimerEnabledPtr_ -> isChecked())
         {
             captureDurationTimerPtr_ -> start();
         }
 
-        QDateTime currentDateTime = QDateTime::currentDateTime();
-        captureStopDateTime_ = currentDateTime.addSecs(captureDurationSec_);
-
+        // Update GUI widget for capturing state
         startButtonPtr_ -> setText(QString("Stop"));
         connectButtonPtr_ -> setEnabled(false);
         statusbarPtr_ -> showMessage(QString("Capturing"));
         capturing_ = true;
-
         updateAllMenus();
-
     }
 
 

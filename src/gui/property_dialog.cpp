@@ -3,34 +3,34 @@
 #include "lockable.hpp"
 #include <string>
 #include <iostream>
-#include <QPointer>
 #include <QString>
+#include <QTimer>
 
 namespace bias
 {
+    const int REFRESH_TIMER_INTERVAL_MS = 1000;
     const float ABSOLUTE_VALUE_SCALE = 100.0;
-    const unsigned int FLOAT_PREC = 2;
+    const unsigned int FLOAT_PRECISION = 2;
 
-    PropertyDialog::PropertyDialog(QWidget *parent) : QDialog(parent)
+    PropertyDialog::PropertyDialog(QWidget *parent, Qt::WindowFlags f) 
+        : QDialog(parent)
     {
-        setupUi(this);
-        propertyType_ = PROPERTY_TYPE_UNSPECIFIED;
         cameraPtr_ = NULL;
+        propertyType_ = PROPERTY_TYPE_UNSPECIFIED;
         initialize();
-        connectWidgets();
     }
 
 
     PropertyDialog::PropertyDialog(
             std::shared_ptr<Lockable<Camera>> cameraPtr,
             PropertyType propertyType, 
-            QWidget *parent
-            ) : QDialog(parent)
+            QWidget *parent,
+            Qt::WindowFlags f
+            ) 
+        : QDialog(parent, f)
     {
-        setupUi(this);
-        propertyType_ = propertyType;
         cameraPtr_ = cameraPtr;
-        connectWidgets();
+        propertyType_ = propertyType;
         initialize();
     }
 
@@ -39,7 +39,6 @@ namespace bias
     {
         unsigned int value = (unsigned int)(intValueSliderPtr -> value());
         setPropertyValue(value);
-        std::cout << "onIntValueSliderChanged: " << value << std::endl;
     }
 
 
@@ -48,15 +47,14 @@ namespace bias
         QString valueString = intValueLineEditPtr -> text();
         unsigned int value = valueString.toUInt();
         setPropertyValue(value);
-        std::cout << "onIntEditingFinished: " << value << std::endl;
     }
 
 
     void PropertyDialog::onAbsValueSliderChanged()
     {
-        float absoluteValue = float(absValueSliderPtr -> value())/ABSOLUTE_VALUE_SCALE;
+        int absoluteValueInt = absValueSliderPtr -> value();
+        float absoluteValue = float(absoluteValueInt)/ABSOLUTE_VALUE_SCALE;
         setPropertyAbsoluteValue(absoluteValue);
-        std::cout << "onAbsValueSliderChanged: " << absoluteValue << std::endl;
     }
 
 
@@ -65,37 +63,62 @@ namespace bias
         QString absoluteValueString = absValueLineEditPtr -> text();
         float absoluteValue = absoluteValueString.toFloat();
         setPropertyAbsoluteValue(absoluteValue);
-        std::cout << "onAbsEditingFinished: " << absoluteValue << std::endl;
     }
 
-    void PropertyDialog::setPropertyValue(unsigned int value)
+
+    void PropertyDialog::onSliderPressed()
     {
-        Property property = cameraPtr_ -> getProperty(propertyType_);
-        PropertyInfo propertyInfo = cameraPtr_ -> getPropertyInfo(propertyType_);
-        property.value = value;
-        property.absoluteControl = false;
-
-        cameraPtr_ -> acquireLock();
-        cameraPtr_ -> setProperty(property);
-        property = cameraPtr_ -> getProperty(propertyType_);
-        cameraPtr_ -> releaseLock();
-
-        updateDisplayValues(property, propertyInfo);
+        refreshTimerPtr_ -> stop();
     }
 
-    void PropertyDialog::setPropertyAbsoluteValue(float absoluteValue)
+    
+    void PropertyDialog::onSliderReleased()
     {
-        Property property = cameraPtr_ -> getProperty(propertyType_);
-        PropertyInfo propertyInfo = cameraPtr_ -> getPropertyInfo(propertyType_);
-        property.absoluteValue = absoluteValue;
-        property.absoluteControl = true;
+        refreshTimerPtr_ -> start();
+    }
 
-        cameraPtr_ -> acquireLock();
-        cameraPtr_ -> setProperty(property);
-        property = cameraPtr_ -> getProperty(propertyType_);
-        cameraPtr_ -> releaseLock();
+    
+    void PropertyDialog::onAutoStateChanged(int state)
+    {
+        Property property = getProperty();
+        if (state == Qt::Unchecked)
+        {
+            property.autoActive = false;
+        }
+        else
+        {
+            property.autoActive = true;
+        }
+        setProperty(property);
+    }
 
-        updateDisplayValues(property, propertyInfo);
+
+    void PropertyDialog::onOffStateChanged(int state)
+    {
+        Property property = getProperty();
+        if (state == Qt::Unchecked)
+        {
+            property.on = false;
+        }
+        else
+        {
+            property.on = true;
+        }
+        setProperty(property);
+    }
+
+    
+    void PropertyDialog::onOnePushButtonClicked()
+    {
+        Property property = getProperty();
+        property.onePush = true;
+        setProperty(property);
+    }
+
+    void PropertyDialog::onRefreshTimer()
+    {
+        std::cout << "onRefreshTimer" << std::endl;
+        getPropertyAndUpdateDisplay();
     }
 
 
@@ -108,13 +131,27 @@ namespace bias
                 SLOT(onIntValueSliderChanged())
                );
 
+        connect(
+                intValueSliderPtr,
+                SIGNAL(sliderPressed()),
+                this,
+                SLOT(onSliderPressed())
+               );
+
+        connect(
+                intValueSliderPtr,
+                SIGNAL(sliderReleased()),
+                this,
+                SLOT(onSliderReleased())
+               );
+
         connect( 
                 absValueSliderPtr,
                 SIGNAL(valueChanged(int)),
                 this,
                 SLOT(onAbsValueSliderChanged())
                );
-        
+
         connect(
                 intValueLineEditPtr,
                 SIGNAL(editingFinished()),
@@ -128,33 +165,68 @@ namespace bias
                 this,
                 SLOT(onAbsEditingFinished())
                );
+
+        connect(
+                autoCheckBoxPtr,
+                SIGNAL(stateChanged(int)),
+                this,
+                SLOT(onAutoStateChanged(int))
+               );
+
+        connect(
+                onCheckBoxPtr,
+                SIGNAL(stateChanged(int)),
+                this,
+                SLOT(onOffStateChanged(int))
+               );
+
+        connect(
+                onePushPushButtonPtr,
+                SIGNAL(clicked()),
+                this,
+                SLOT(onOnePushButtonClicked())
+               );
+
     }
 
 
     void PropertyDialog::initialize()
     {
-        propertyNameLabelPtr -> setText(
-                QString::fromStdString(getPropertyTypeString(propertyType_))
-                );
+        setupUi(this);
+
+        setAttribute(Qt::WA_DeleteOnClose);
 
         intValueSliderPtr -> setTracking(false);
         absValueSliderPtr -> setTracking(false);
 
-        cameraPtr_ -> acquireLock();
-        Property property = cameraPtr_ -> getProperty(propertyType_);
-        PropertyInfo propertyInfo = cameraPtr_ -> getPropertyInfo(propertyType_);
-        cameraPtr_ -> releaseLock();
+        propertyNameLabelPtr -> setText(
+                QString::fromStdString(getPropertyTypeString(propertyType_))
+                );
 
-        updateDisplayValues(property,propertyInfo);
+        getPropertyAndUpdateDisplay();
+
+        connectWidgets();
+
+        // Setup refresh timer
+        refreshTimerPtr_ = new QTimer(this);
+        refreshTimerPtr_ -> setInterval(REFRESH_TIMER_INTERVAL_MS);
+
+        connect(
+                refreshTimerPtr_,
+                SIGNAL(timeout()),
+                this,
+                SLOT(onRefreshTimer())
+               );
+
+        refreshTimerPtr_ -> start();
+
     }
 
+        
 
-    void PropertyDialog::updateDisplayValues(Property property, PropertyInfo propertyInfo)
+    void PropertyDialog::updateDisplay(Property property, PropertyInfo propertyInfo)
     {
-        std::cout << property.toString() << std::endl;
-        std::cout << propertyInfo.toString() << std::endl;
-
-        // Enable/disable checkboxes and set values
+        // Enable/disable checkboxes and onepush button and set values
         onCheckBoxPtr -> setEnabled(propertyInfo.onOffCapable);
         onCheckBoxPtr -> setChecked(property.on);
 
@@ -164,7 +236,9 @@ namespace bias
 
         autoCheckBoxPtr -> setChecked(property.autoActive);
 
-        onePushPushButtonPtr -> setEnabled(propertyInfo.onePushCapable);
+        onePushPushButtonPtr -> setEnabled(
+                propertyInfo.onePushCapable && (!property.autoActive) 
+                );
 
         // Enable/disable group boxes
         bool intGroupBoxEnabled = propertyInfo.manualCapable && (!property.autoActive);
@@ -176,13 +250,17 @@ namespace bias
         absValueGroupBoxPtr -> setEnabled(absGroupBoxEnabled);
 
         // Set integer value slider 
+        intValueSliderPtr -> blockSignals(true);
         intValueSliderPtr -> setMinimum(propertyInfo.minValue);
         intValueSliderPtr -> setMaximum(propertyInfo.maxValue);
-        intValueSliderPtr -> setSliderPosition(property.value);
+        intValueSliderPtr -> setValue(property.value);
+        intValueSliderPtr -> blockSignals(false);
+
         minIntValueLabelPtr -> setText(QString::number(propertyInfo.minValue));
         maxIntValueLabelPtr -> setText(QString::number(propertyInfo.maxValue));
-        intValueLineEditPtr -> setText(QString::number(property.value));
 
+        intValueLineEditPtr -> blockSignals(true);
+        intValueLineEditPtr -> setText(QString::number(property.value));
         if (propertyInfo.manualCapable)
         {
             QPointer<QIntValidator> intValueValidatorPtr = new QIntValidator(
@@ -192,51 +270,69 @@ namespace bias
                     );
             intValueLineEditPtr -> setValidator(intValueValidatorPtr);
         }
+        intValueLineEditPtr -> blockSignals(false);
 
         // Set absolute value slider
         if (propertyInfo.absoluteCapable) 
         {
+            absValueSliderPtr -> blockSignals(true);
             absValueSliderPtr -> setMinimum(
                     int(ABSOLUTE_VALUE_SCALE*propertyInfo.minAbsoluteValue)
                     );
             absValueSliderPtr -> setMaximum(
                     int(ABSOLUTE_VALUE_SCALE*propertyInfo.maxAbsoluteValue)
                     );
-            absValueSliderPtr -> setSliderPosition(
+            absValueSliderPtr -> setValue(
                     int(ABSOLUTE_VALUE_SCALE*property.absoluteValue)
                     );
+            absValueSliderPtr -> blockSignals(false);
 
-            minAbsValueLabelPtr -> setText(
-                    QString::number(propertyInfo.minAbsoluteValue, 'f', FLOAT_PREC)
+            QString minAbsValueString = QString::number(
+                    propertyInfo.minAbsoluteValue, 
+                    'f', 
+                    FLOAT_PRECISION
                     );
-            maxAbsValueLabelPtr -> setText(
-                    QString::number(propertyInfo.maxAbsoluteValue, 'f', FLOAT_PREC)
-                    );
-            absValueLineEditPtr -> setText(
-                    QString::number(property.absoluteValue, 'f', FLOAT_PREC)
-                    );
+            minAbsValueLabelPtr -> setText(minAbsValueString);
 
+            QString maxAbsValueString = QString::number(
+                    propertyInfo.maxAbsoluteValue, 
+                    'f', 
+                    FLOAT_PRECISION
+                    );
+            maxAbsValueLabelPtr -> setText(maxAbsValueString);
+
+            absValueLineEditPtr -> blockSignals(true);
+            QString absValueString = QString::number(
+                    property.absoluteValue, 
+                    'f', 
+                    FLOAT_PRECISION
+                    );
+            absValueLineEditPtr -> setText(absValueString);
             if (propertyInfo.manualCapable)
             {
                 QPointer<QDoubleValidator> absValueValidatorPtr = new QDoubleValidator(
                         propertyInfo.minAbsoluteValue,
                         propertyInfo.maxAbsoluteValue,
-                        FLOAT_PREC,
+                        FLOAT_PRECISION,
                         absValueLineEditPtr
                         );
                 absValueLineEditPtr -> setValidator(absValueValidatorPtr);
             }
+            absValueLineEditPtr -> blockSignals(false);
         }
         else
         {
+            absValueSliderPtr -> blockSignals(true);
             absValueSliderPtr -> setMinimum(0);
             absValueSliderPtr -> setMaximum(100);
-            absValueSliderPtr -> setSliderPosition(0);
+            absValueSliderPtr -> setValue(0);
+            absValueSliderPtr -> blockSignals(false);
+
             minAbsValueLabelPtr -> setText(QString("NA"));
             maxAbsValueLabelPtr -> setText(QString("NA"));
         }
 
-        // Set units
+        // Set units for absoulute value
         if (propertyInfo.haveUnits)
         {
             unitsNameLabelPtr -> setText(QString::fromStdString(propertyInfo.units));
@@ -245,6 +341,84 @@ namespace bias
         {
             unitsNameLabelPtr -> setText(QString("NA"));
         }
+    }
+
+
+    void PropertyDialog::getPropertyAndUpdateDisplay()
+    {
+        if (cameraPtr_ == NULL)
+        {
+            return;
+        }
+        cameraPtr_ -> acquireLock();
+        Property property = cameraPtr_ -> getProperty(propertyType_);
+        PropertyInfo  propertyInfo = cameraPtr_ -> getPropertyInfo(propertyType_);
+        cameraPtr_ -> releaseLock();
+        updateDisplay(property, propertyInfo);
+    }
+
+
+    void PropertyDialog::setPropertyValue(unsigned int value)
+    {
+        Property property = getProperty();
+        property.value = value;
+        property.absoluteControl = false;
+        setProperty(property);
+    }
+
+
+    void PropertyDialog::setPropertyAbsoluteValue(float absoluteValue)
+    {
+        Property property = getProperty();
+        property.absoluteValue = absoluteValue;
+        property.absoluteControl = true;
+        setProperty(property);
+    }
+
+
+    void PropertyDialog::setProperty(
+            Property property
+            )
+    {
+        if (cameraPtr_ == NULL)
+        {
+            return;
+        }
+
+        cameraPtr_ -> acquireLock();
+        cameraPtr_ -> setProperty(property);
+        Property propertyNew = cameraPtr_ -> getProperty(propertyType_);
+        PropertyInfo propertyInfo = cameraPtr_ -> getPropertyInfo(propertyType_);
+        cameraPtr_ -> releaseLock();
+        updateDisplay(propertyNew,propertyInfo);
+    }
+
+
+    Property PropertyDialog::getProperty()
+    {
+        if (cameraPtr_ == NULL) 
+        { 
+            Property dummy;
+            return dummy; 
+        }
+        cameraPtr_ -> acquireLock();
+        Property property = cameraPtr_ -> getProperty(propertyType_);
+        cameraPtr_ -> releaseLock();
+        return property;
+    }
+
+
+    PropertyInfo PropertyDialog::getPropertyInfo()
+    {
+        if (cameraPtr_ == NULL)
+        { 
+            PropertyInfo dummy;
+            return dummy;
+        }
+        cameraPtr_ -> acquireLock();
+        PropertyInfo propertyInfo = cameraPtr_ -> getPropertyInfo(propertyType_);
+        cameraPtr_ -> releaseLock();
+        return propertyInfo;
     }
 
 
