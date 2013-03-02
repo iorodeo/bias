@@ -19,11 +19,21 @@ namespace bias
     const unsigned int VideoWriter_ufmf::FRAMES_WAIT_MAX_QUEUE_SIZE   =  50;
 
     const unsigned int VideoWriter_ufmf::DEFAULT_FRAME_SKIP = 1;
+
     const unsigned int VideoWriter_ufmf::DEFAULT_BACKGROUND_THRESHOLD = 40;
+    const unsigned int VideoWriter_ufmf::MIN_BACKGROUND_THRESHOLD = 1;
+    const unsigned int VideoWriter_ufmf::MAX_BACKGROUND_THRESHOLD = 255;
+
     const unsigned int VideoWriter_ufmf::DEFAULT_UFMF_BOX_LENGTH = 30;
+    const unsigned int VideoWriter_ufmf::MIN_UFMF_BOX_LENGTH = 4;
+    const unsigned int VideoWriter_ufmf::MAX_UFMF_BOX_LENGTH = 500;
+
     const unsigned int VideoWriter_ufmf::DEFAULT_NUMBER_OF_COMPRESSORS = 15;
-    const unsigned int VideoWriter_ufmf::DEFAULT_MAX_THREAD_COUNT = 
-        DEFAULT_NUMBER_OF_COMPRESSORS + 4;
+    const unsigned int VideoWriter_ufmf::MIN_NUMBER_OF_COMPRESSORS = 1;
+    const unsigned int VideoWriter_ufmf::BASE_NUMBER_OF_THREADS = 4;
+
+    const VideoWriterParams_ufmf VideoWriter_ufmf::DEFAULT_PARAMS = 
+        VideoWriterParams_ufmf();
 
     const QString VideoWriter_ufmf::DEFAULT_COLOR_CODING("MONO8");
     const QString VideoWriter_ufmf::DUMMY_FILENAME("dummy.ufmf");
@@ -43,24 +53,56 @@ namespace bias
     const char VideoWriter_ufmf::CHAR_FOR_DTYPE_DOUBLE = 'd';
 
 
-    // Methods
+    // VideoWriterParams methods
+    // ----------------------------------------------------------------------------------
+    VideoWriterParams_ufmf::VideoWriterParams_ufmf()
+    {
+        backgroundThreshold = VideoWriter_ufmf::DEFAULT_BACKGROUND_THRESHOLD;
+        frameSkip = VideoWriter_ufmf::DEFAULT_FRAME_SKIP;
+        boxLength = VideoWriter_ufmf::DEFAULT_UFMF_BOX_LENGTH;
+        numberOfCompressors = VideoWriter_ufmf::DEFAULT_NUMBER_OF_COMPRESSORS;
+        medianUpdateCount = BackgroundHistogram_ufmf::DEFAULT_MEDIAN_UPDATE_COUNT; 
+    }
+
+
+    // VideoWriter Methods
     // ----------------------------------------------------------------------------------
     VideoWriter_ufmf::VideoWriter_ufmf(QObject *parent) 
-        : VideoWriter_ufmf(DUMMY_FILENAME, parent) 
+        : VideoWriter_ufmf(DEFAULT_PARAMS, DUMMY_FILENAME, parent) 
     {} 
 
 
-    VideoWriter_ufmf::VideoWriter_ufmf(QString fileName, QObject *parent) 
+    VideoWriter_ufmf::VideoWriter_ufmf( 
+            VideoWriterParams_ufmf params, 
+            QString fileName, 
+            QObject *parent
+            ) 
         : VideoWriter(fileName,parent) 
     {
         isFirst_ = true;
-        backgroundThreshold_ = DEFAULT_BACKGROUND_THRESHOLD;
-        numberOfCompressors_ = DEFAULT_NUMBER_OF_COMPRESSORS;
-        setFrameSkip(DEFAULT_FRAME_SKIP);
+
+        backgroundThreshold_ = params.backgroundThreshold;
+        medianUpdateCount_ = params.medianUpdateCount;
+        boxLength_ = params.boxLength;
+        setFrameSkip(params.frameSkip);
+
+        numberOfCompressors_ = params.numberOfCompressors;
+
+        std::cout << std::endl;
+        std::cout << "Params: " << std::endl;
+        std::cout << " backgroundThreshold:     " << backgroundThreshold_ << std::endl;
+        std::cout << " numberOfCompressors:     " << numberOfCompressors_ << std::endl;
+        std::cout << " boxLength:               " << boxLength_ << std::endl;
+        std::cout << " frameSkip:               " << frameSkip_ << std:: endl;
+        std::cout << " medianUpdateCount:       " << medianUpdateCount_ << std::endl;
 
         // Create thread pool for background modelling
         threadPoolPtr_ = new QThreadPool(this);
-        threadPoolPtr_ -> setMaxThreadCount(DEFAULT_MAX_THREAD_COUNT);
+        unsigned int maxThreadCount = numberOfCompressors_ + BASE_NUMBER_OF_THREADS;
+        threadPoolPtr_ -> setMaxThreadCount(maxThreadCount);
+
+        std::cout << " writer max thread count: "  << maxThreadCount << std::endl;
+        std::cout << std::endl;
 
         // Create queue for images sent to background modeler
         bgImageQueuePtr_ = std::make_shared<LockableQueue<StampedImage>>();
@@ -74,7 +116,6 @@ namespace bias
         framesFinishedSetPtr_ = std::make_shared<CompressedFrameSet_ufmf>();
 
         isFixedSize_ = false;
-        boxLength_ = DEFAULT_UFMF_BOX_LENGTH;
         colorCoding_ = QString(DEFAULT_COLOR_CODING);
 
         indexLocation_ = 0;
@@ -662,6 +703,8 @@ namespace bias
                 bgNewDataQueuePtr_,
                 bgOldDataQueuePtr_
                 );
+
+        bgHistogramPtr_ -> setMedianUpdateCount(medianUpdateCount_);
 
         bgMedianPtr_ = new BackgroundMedian_ufmf(
                 bgNewDataQueuePtr_,

@@ -8,14 +8,14 @@
 namespace bias
 {
 
-    // Temporary
-    // ------------------------------------------------
-    const unsigned int DEFAULT_NUM_BINS = 256;
-    const unsigned int DEFAULT_BIN_SIZE = 1;
-    const unsigned int DEFAULT_MIN_UPDATE_COUNT = 100;
-    // -------------------------------------------------
+    // Static constants
+    const unsigned int BackgroundHistogram_ufmf::DEFAULT_NUM_BINS = 256;
+    const unsigned int BackgroundHistogram_ufmf::DEFAULT_BIN_SIZE = 1;
+    const unsigned int BackgroundHistogram_ufmf::DEFAULT_MEDIAN_UPDATE_COUNT = 100;
+    const unsigned int BackgroundHistogram_ufmf::MIN_MEDIAN_UPDATE_COUNT = 10;
 
 
+    // Methods
     BackgroundHistogram_ufmf::BackgroundHistogram_ufmf(QObject *parent) 
         : QObject(parent) 
     {
@@ -46,6 +46,7 @@ namespace bias
         bgImageQueuePtr_ = bgImageQueuePtr;
         bgNewDataQueuePtr_ = bgNewDataQueuePtr;
         bgOldDataQueuePtr_ = bgOldDataQueuePtr;
+        medianUpdateCount_ = DEFAULT_MEDIAN_UPDATE_COUNT;
 
         // Make sure none of the data queue pointers are null
         bool notNull = true;
@@ -63,6 +64,12 @@ namespace bias
     void BackgroundHistogram_ufmf::stop()
     {
         stopped_ = true;
+    }
+
+
+    void BackgroundHistogram_ufmf::setMedianUpdateCount(unsigned int medianUpdateCount)
+    {
+        medianUpdateCount_ = medianUpdateCount;
     }
 
 
@@ -130,7 +137,7 @@ namespace bias
             count++;
 
             // Check to see if median computation is done if so swap the buffers
-            if (count > DEFAULT_MIN_UPDATE_COUNT)
+            if (count > medianUpdateCount_)
             {
                 bool swapDataFlag = false;
                 BackgroundData_ufmf backgroundDataTmp;

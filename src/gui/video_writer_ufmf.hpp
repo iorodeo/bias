@@ -2,6 +2,7 @@
 #define BIAS_VIDEO_WRITER_UFMF_HPP
 
 #include "video_writer.hpp"
+#include "video_writer_params.hpp"
 #include "compressor_ufmf.hpp"
 #include "compressed_frame_ufmf.hpp"
 #include <memory>
@@ -21,6 +22,7 @@ namespace bias
     template <class T> class Lockable;
     template <class T> class LockableQueue;
 
+
     class VideoWriter_ufmf : public VideoWriter
     {
         Q_OBJECT
@@ -28,7 +30,12 @@ namespace bias
         public:
 
             VideoWriter_ufmf(QObject *parent=0);
-            VideoWriter_ufmf(QString fileName, QObject *parent=0);
+            VideoWriter_ufmf(
+                    VideoWriterParams_ufmf params, 
+                    QString filenName, 
+                    QObject *parent=0
+                    );
+
             virtual ~VideoWriter_ufmf();
             virtual void addFrame(StampedImage stampedImg);
 
@@ -38,10 +45,20 @@ namespace bias
             static const unsigned int FRAMES_WAIT_MAX_QUEUE_SIZE;
 
             static const unsigned int DEFAULT_FRAME_SKIP;
+
             static const unsigned int DEFAULT_BACKGROUND_THRESHOLD;
+            static const unsigned int MIN_BACKGROUND_THRESHOLD;
+            static const unsigned int MAX_BACKGROUND_THRESHOLD;
+
             static const unsigned int DEFAULT_UFMF_BOX_LENGTH;
+            static const unsigned int MIN_UFMF_BOX_LENGTH;
+            static const unsigned int MAX_UFMF_BOX_LENGTH;
+
             static const unsigned int DEFAULT_NUMBER_OF_COMPRESSORS;
-            static const unsigned int DEFAULT_MAX_THREAD_COUNT;
+            static const unsigned int MIN_NUMBER_OF_COMPRESSORS;
+            static const unsigned int BASE_NUMBER_OF_THREADS;
+
+            static const VideoWriterParams_ufmf DEFAULT_PARAMS;
             static const unsigned int UFMF_VERSION_NUMBER;
 
             static const QString DEFAULT_COLOR_CODING;
@@ -60,13 +77,13 @@ namespace bias
             static const char CHAR_FOR_DTYPE_UINT64;
             static const char CHAR_FOR_DTYPE_DOUBLE;
 
-
         protected:
 
             bool isFirst_;
             unsigned int backgroundThreshold_;
-            unsigned int numberOfCompressors_;
+            unsigned int medianUpdateCount_;
             unsigned int boxLength_;
+            unsigned int numberOfCompressors_;
             bool isFixedSize_;
             QString colorCoding_;
 

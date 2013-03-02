@@ -18,6 +18,7 @@ set(
     image_logger.hpp
     image_dispatcher.hpp
     video_writer.hpp
+    video_writer_params.hpp
     video_writer_bmp.hpp
     video_writer_avi.hpp
     video_writer_fmf.hpp

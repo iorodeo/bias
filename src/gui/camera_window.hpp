@@ -10,6 +10,7 @@
 #include <QMainWindow>
 #include "ui_camera_window.h"
 #include "camera_facade_fwd.hpp"
+#include "video_writer_params.hpp"
 
 
 // External lib forward declarations
@@ -142,6 +143,8 @@ namespace bias
             QPointer<QTimer> captureDurationTimerPtr_;
             QDateTime captureStartDateTime_;
             QDateTime captureStopDateTime_;
+
+            VideoWriterParams_ufmf videoWriterParams_ufmf_;
 
             void connectWidgets();
             void initialize(Guid guid);

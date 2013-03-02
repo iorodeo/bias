@@ -1197,36 +1197,50 @@ namespace bias
         {
             // Create video writer based on video file format type
             std::shared_ptr<VideoWriter> videoWriterPtr; 
+            QString videoFileFullPath = getVideoFileFullPathWithGuid();
 
             switch (videoFileFormat_)
             {
                 case VIDEOFILE_FORMAT_BMP:
-                    videoWriterPtr = std::make_shared<VideoWriter_bmp>();
+                    videoWriterPtr = std::make_shared<VideoWriter_bmp>(
+                            videoFileFullPath
+                            );
                     break;
 
                 case VIDEOFILE_FORMAT_AVI:  
-                    videoWriterPtr = std::make_shared<VideoWriter_avi>();
+                    videoWriterPtr = std::make_shared<VideoWriter_avi>(
+                            videoFileFullPath
+                            );
                     break;
 
                 case VIDEOFILE_FORMAT_FMF:
-                    videoWriterPtr = std::make_shared<VideoWriter_fmf>();
+                    videoWriterPtr = std::make_shared<VideoWriter_fmf>(
+                            videoFileFullPath
+                            );
                     break;
 
                 case VIDEOFILE_FORMAT_UFMF:
-                    videoWriterPtr = std::make_shared<VideoWriter_ufmf>();
+                    videoWriterPtr = std::make_shared<VideoWriter_ufmf>(
+                            videoWriterParams_ufmf_,
+                            videoFileFullPath
+                            );
                     break;
 
                 case VIDEOFILE_FORMAT_IFMF:
-                    videoWriterPtr = std::make_shared<VideoWriter_ifmf>();
+                    videoWriterPtr = std::make_shared<VideoWriter_ifmf>(
+                            videoFileFullPath
+                            );
                     break;
 
                 default:
-                    videoWriterPtr = std::make_shared<VideoWriter>();
+                    videoWriterPtr = std::make_shared<VideoWriter>(
+                            videoFileFullPath
+                            );
                     break;
             }
 
             // Set output file
-            QString videoFileFullPath = getVideoFileFullPathWithGuid();
+            //QString videoFileFullPath = getVideoFileFullPathWithGuid();
             videoWriterPtr -> setFileName(videoFileFullPath);
 
             imageLoggerPtr_ = new ImageLogger(videoWriterPtr, logImageQueuePtr_);
