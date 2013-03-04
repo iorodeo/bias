@@ -3,6 +3,7 @@
 
 #include "video_writer.hpp"
 #include <opencv2/highgui/highgui.hpp>
+#include <QString>
 
 namespace bias
 {
@@ -28,7 +29,10 @@ namespace bias
             void setupOutput(StampedImage stampedImage);
             
     };
-   
+
+
+    QString fourccToQString(unsigned int fourcc);
+
 }
 
 #endif // #ifndef BIAS_VIDEO_WRITER_AVI_HPP

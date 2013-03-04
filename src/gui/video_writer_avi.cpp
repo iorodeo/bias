@@ -83,5 +83,20 @@ namespace bias
         }
     }
 
+
+    QString fourccToQString(unsigned int fourcc)
+    {
+        QString fourccQString;
+        if (fourcc == CV_FOURCC('X','V','I','D'))
+        {
+            fourccQString = QString("XVID");
+        }
+        else
+        {
+            fourccQString = QString("unknown");
+        }
+        return fourccQString;
+    }
+
 } // namespace bias
 

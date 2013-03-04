@@ -15,6 +15,7 @@
 #include "affinity.hpp"
 #include "property_dialog.hpp"
 #include "timer_settings_dialog.hpp"
+#include "logging_settings_dialog.hpp"
 #include <cstdlib>
 #include <cmath>
 #include <QtGui>
@@ -343,9 +344,11 @@ namespace bias
 
     void CameraWindow::actionLoggingSettingsTriggered()
     {
-        QString msgTitle("Development");
-        QString msgText("Logging settings not fully implemented");
-        QMessageBox::information(this, msgTitle, msgText);
+        QPointer<LoggingSettingsDialog> dialogPtr = new LoggingSettingsDialog(
+                videoWriterParams_,
+                this
+                );
+        dialogPtr -> show();
     }
 
 
@@ -1221,7 +1224,7 @@ namespace bias
 
                 case VIDEOFILE_FORMAT_UFMF:
                     videoWriterPtr = std::make_shared<VideoWriter_ufmf>(
-                            videoWriterParams_ufmf_,
+                            videoWriterParams_.ufmf,
                             videoFileFullPath
                             );
                     break;

@@ -50,9 +50,9 @@ namespace bias
             static const unsigned int MIN_BACKGROUND_THRESHOLD;
             static const unsigned int MAX_BACKGROUND_THRESHOLD;
 
-            static const unsigned int DEFAULT_UFMF_BOX_LENGTH;
-            static const unsigned int MIN_UFMF_BOX_LENGTH;
-            static const unsigned int MAX_UFMF_BOX_LENGTH;
+            static const unsigned int DEFAULT_BOX_LENGTH;
+            static const unsigned int MIN_BOX_LENGTH;
+            static const unsigned int MAX_BOX_LENGTH;
 
             static const unsigned int DEFAULT_NUMBER_OF_COMPRESSORS;
             static const unsigned int MIN_NUMBER_OF_COMPRESSORS;

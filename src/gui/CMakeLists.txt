@@ -7,6 +7,7 @@ set(
     camera_window.ui 
     property_dialog.ui
     timer_settings_dialog.ui
+    logging_settings_dialog.ui
     )
 
 set(
@@ -33,6 +34,7 @@ set(
     affinity.hpp
     property_dialog.hpp
     timer_settings_dialog.hpp
+    logging_settings_dialog.hpp
     )
 
 set(
@@ -44,6 +46,7 @@ set(
     image_logger.cpp
     image_dispatcher.cpp
     video_writer.cpp
+    video_writer_params.cpp
     video_writer_bmp.cpp
     video_writer_avi.cpp
     video_writer_fmf.cpp
@@ -58,6 +61,7 @@ set(
     affinity.cpp
     property_dialog.cpp
     timer_settings_dialog.cpp
+    logging_settings_dialog.cpp
     )
 
 qt4_wrap_ui(bias_gui_FORMS_HEADERS ${bias_gui_FORMS}) 

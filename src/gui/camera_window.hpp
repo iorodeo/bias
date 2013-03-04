@@ -144,7 +144,7 @@ namespace bias
             QDateTime captureStartDateTime_;
             QDateTime captureStopDateTime_;
 
-            VideoWriterParams_ufmf videoWriterParams_ufmf_;
+            VideoWriterParams videoWriterParams_;
 
             void connectWidgets();
             void initialize(Guid guid);

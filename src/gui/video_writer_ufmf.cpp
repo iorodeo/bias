@@ -24,9 +24,9 @@ namespace bias
     const unsigned int VideoWriter_ufmf::MIN_BACKGROUND_THRESHOLD = 1;
     const unsigned int VideoWriter_ufmf::MAX_BACKGROUND_THRESHOLD = 255;
 
-    const unsigned int VideoWriter_ufmf::DEFAULT_UFMF_BOX_LENGTH = 30;
-    const unsigned int VideoWriter_ufmf::MIN_UFMF_BOX_LENGTH = 4;
-    const unsigned int VideoWriter_ufmf::MAX_UFMF_BOX_LENGTH = 500;
+    const unsigned int VideoWriter_ufmf::DEFAULT_BOX_LENGTH = 30;
+    const unsigned int VideoWriter_ufmf::MIN_BOX_LENGTH = 4;
+    const unsigned int VideoWriter_ufmf::MAX_BOX_LENGTH = 500;
 
     const unsigned int VideoWriter_ufmf::DEFAULT_NUMBER_OF_COMPRESSORS = 15;
     const unsigned int VideoWriter_ufmf::MIN_NUMBER_OF_COMPRESSORS = 1;
@@ -53,19 +53,7 @@ namespace bias
     const char VideoWriter_ufmf::CHAR_FOR_DTYPE_DOUBLE = 'd';
 
 
-    // VideoWriterParams methods
-    // ----------------------------------------------------------------------------------
-    VideoWriterParams_ufmf::VideoWriterParams_ufmf()
-    {
-        backgroundThreshold = VideoWriter_ufmf::DEFAULT_BACKGROUND_THRESHOLD;
-        frameSkip = VideoWriter_ufmf::DEFAULT_FRAME_SKIP;
-        boxLength = VideoWriter_ufmf::DEFAULT_UFMF_BOX_LENGTH;
-        numberOfCompressors = VideoWriter_ufmf::DEFAULT_NUMBER_OF_COMPRESSORS;
-        medianUpdateCount = BackgroundHistogram_ufmf::DEFAULT_MEDIAN_UPDATE_COUNT; 
-    }
-
-
-    // VideoWriter Methods
+    // Methods
     // ----------------------------------------------------------------------------------
     VideoWriter_ufmf::VideoWriter_ufmf(QObject *parent) 
         : VideoWriter_ufmf(DEFAULT_PARAMS, DUMMY_FILENAME, parent) 
