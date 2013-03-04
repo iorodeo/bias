@@ -149,6 +149,9 @@
         <property name="text">
          <string>One Push</string>
         </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
      </layout>

@@ -47,6 +47,7 @@ namespace bias
         QString valueString = intValueLineEditPtr -> text();
         unsigned int value = valueString.toUInt();
         setPropertyValue(value);
+        startRefreshTimer();
     }
 
 
@@ -63,16 +64,17 @@ namespace bias
         QString absoluteValueString = absValueLineEditPtr -> text();
         float absoluteValue = absoluteValueString.toFloat();
         setPropertyAbsoluteValue(absoluteValue);
+        startRefreshTimer();
     }
 
 
-    void PropertyDialog::onSliderPressed()
+    void PropertyDialog::stopRefreshTimer()
     {
         refreshTimerPtr_ -> stop();
     }
 
     
-    void PropertyDialog::onSliderReleased()
+    void PropertyDialog::startRefreshTimer()
     {
         refreshTimerPtr_ -> start();
     }
@@ -123,6 +125,7 @@ namespace bias
 
     void PropertyDialog::connectWidgets()
     {
+
         connect(
                 intValueSliderPtr,
                 SIGNAL(valueChanged(int)),
@@ -134,14 +137,14 @@ namespace bias
                 intValueSliderPtr,
                 SIGNAL(sliderPressed()),
                 this,
-                SLOT(onSliderPressed())
+                SLOT(stopRefreshTimer())
                );
 
         connect(
                 intValueSliderPtr,
                 SIGNAL(sliderReleased()),
                 this,
-                SLOT(onSliderReleased())
+                SLOT(startRefreshTimer())
                );
 
         connect( 
@@ -149,6 +152,27 @@ namespace bias
                 SIGNAL(valueChanged(int)),
                 this,
                 SLOT(onAbsValueSliderChanged())
+               );
+
+        connect(
+                absValueSliderPtr,
+                SIGNAL(sliderPressed()),
+                this,
+                SLOT(stopRefreshTimer())
+               );
+
+        connect(
+                absValueSliderPtr,
+                SIGNAL(sliderReleased()),
+                this,
+                SLOT(startRefreshTimer())
+               );
+
+        connect(
+                intValueLineEditPtr,
+                SIGNAL(textEdited(const QString)),
+                this,
+                SLOT(stopRefreshTimer())
                );
 
         connect(
@@ -163,6 +187,13 @@ namespace bias
                 SIGNAL(editingFinished()),
                 this,
                 SLOT(onAbsEditingFinished())
+               );
+
+        connect(
+                absValueLineEditPtr,
+                SIGNAL(textEdited(const QString)),
+                this,
+                SLOT(stopRefreshTimer())
                );
 
         connect(
@@ -225,6 +256,7 @@ namespace bias
 
     void PropertyDialog::updateDisplay(Property property, PropertyInfo propertyInfo)
     {
+
         // Enable/disable checkboxes and onepush button and set values
         onCheckBoxPtr -> setEnabled(propertyInfo.onOffCapable);
         onCheckBoxPtr -> setChecked(property.on);
@@ -238,6 +270,7 @@ namespace bias
         onePushPushButtonPtr -> setEnabled(
                 propertyInfo.onePushCapable && (!property.autoActive) 
                 );
+
 
         // Enable/disable group boxes
         bool intGroupBoxEnabled = propertyInfo.manualCapable && (!property.autoActive);

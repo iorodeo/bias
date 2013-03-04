@@ -37,8 +37,8 @@ namespace bias
             void onIntEditingFinished();
             void onAbsValueSliderChanged();
             void onAbsEditingFinished();
-            void onSliderPressed();
-            void onSliderReleased();
+            void stopRefreshTimer();
+            void startRefreshTimer();
             void onAutoStateChanged(int state);
             void onOffStateChanged(int state);
             void onOnePushButtonClicked();
