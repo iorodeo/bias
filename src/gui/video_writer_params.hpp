@@ -1,6 +1,7 @@
 #ifndef BIAS_VIDEO_WRITER_PARAMS_HPP
 #define BIAS_VIDEO_WRITER_PARAMS_HPP
 #include <QString>
+#include <string>
 
 namespace bias
 {
@@ -10,6 +11,7 @@ namespace bias
     {
         unsigned int frameSkip;
         VideoWriterParams_bmp();
+        std::string toString();
     };
 
 
@@ -18,6 +20,7 @@ namespace bias
         unsigned int frameSkip;
         QString codec;
         VideoWriterParams_avi();
+        std::string toString();
     };
 
 
@@ -25,6 +28,7 @@ namespace bias
     {
         unsigned int frameSkip;
         VideoWriterParams_fmf();
+        std::string toString();
     };
 
 
@@ -35,7 +39,11 @@ namespace bias
         unsigned int frameSkip;
         unsigned int numberOfCompressors;
         unsigned int medianUpdateCount;
+        unsigned int dilateWindowSize;
+        bool dilateState;
         VideoWriterParams_ufmf();
+
+        std::string toString();
     };
 
 
@@ -45,6 +53,7 @@ namespace bias
         VideoWriterParams_avi avi;
         VideoWriterParams_fmf fmf;
         VideoWriterParams_ufmf ufmf;
+        std::string toString();
     };
 
 

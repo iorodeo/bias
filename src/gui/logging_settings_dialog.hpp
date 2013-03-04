@@ -2,6 +2,7 @@
 #define BIAS_LOGGING_SETTINGS_DIALOG_HPP
 
 #include <QDialog>
+#include <QIntValidator>
 #include "ui_logging_settings_dialog.h"
 #include "video_writer_params.hpp"
 
@@ -16,6 +17,11 @@ namespace bias
 
             LoggingSettingsDialog(QWidget *parent=0);
             LoggingSettingsDialog(VideoWriterParams params, QWidget *parent=0);
+
+        signals:
+
+            void parametersChanged(VideoWriterParams params);
+
 
         private slots:
 
@@ -38,6 +44,17 @@ namespace bias
             void setInitialValues();
             void setValidators();
             void connectWidgets();
+
+    };
+
+
+    class IntValidatorWithFixup : public QIntValidator
+    {
+        Q_OBJECT
+
+        public:
+            IntValidatorWithFixup(QWidget *parent=0);
+            virtual void fixup(QString &input) const;
 
     };
 

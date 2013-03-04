@@ -90,7 +90,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>FrameSkip: </string>
+                <string>Frame Skip: </string>
                </property>
               </widget>
              </item>
@@ -248,7 +248,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>FrameSkip: </string>
+                <string>Frame Skip: </string>
                </property>
               </widget>
              </item>
@@ -507,7 +507,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>FrameSkip: </string>
+                <string>Frame Skip: </string>
                </property>
               </widget>
              </item>
@@ -665,7 +665,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>FrameSkip: </string>
+                <string>Frame Skip: </string>
                </property>
               </widget>
              </item>

@@ -348,7 +348,24 @@ namespace bias
                 videoWriterParams_,
                 this
                 );
+
+        connect(
+                dialogPtr,
+                SIGNAL(parametersChanged(VideoWriterParams)),
+                this,
+                SLOT(loggingSettingsChanged(VideoWriterParams))
+               );
+
         dialogPtr -> show();
+
+    }
+
+
+    void CameraWindow::loggingSettingsChanged(VideoWriterParams params)
+    {
+        videoWriterParams_ = params;
+        std::cout << "loggingSettingsChanged" << std::endl;
+        std::cout << videoWriterParams_.toString() << std::endl;
     }
 
 

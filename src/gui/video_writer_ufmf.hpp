@@ -58,6 +58,11 @@ namespace bias
             static const unsigned int MIN_NUMBER_OF_COMPRESSORS;
             static const unsigned int BASE_NUMBER_OF_THREADS;
 
+            static const bool DEFAULT_DILATE_STATE;
+            static const unsigned int DEFAULT_DILATE_WINDOW_SIZE;
+            static const unsigned int MIN_DILATE_WINDOW_SIZE;
+            static const unsigned int MAX_DILATE_WINDOW_SIZE;
+
             static const VideoWriterParams_ufmf DEFAULT_PARAMS;
             static const unsigned int UFMF_VERSION_NUMBER;
 

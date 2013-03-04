@@ -32,6 +32,11 @@ namespace bias
     const unsigned int VideoWriter_ufmf::MIN_NUMBER_OF_COMPRESSORS = 1;
     const unsigned int VideoWriter_ufmf::BASE_NUMBER_OF_THREADS = 4;
 
+    const bool VideoWriter_ufmf::DEFAULT_DILATE_STATE = false;
+    const unsigned int VideoWriter_ufmf::DEFAULT_DILATE_WINDOW_SIZE = 2;
+    const unsigned int VideoWriter_ufmf::MIN_DILATE_WINDOW_SIZE = 1;
+    const unsigned int VideoWriter_ufmf::MAX_DILATE_WINDOW_SIZE = 20;
+
     const VideoWriterParams_ufmf VideoWriter_ufmf::DEFAULT_PARAMS = 
         VideoWriterParams_ufmf();
 

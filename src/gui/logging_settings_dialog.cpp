@@ -7,6 +7,9 @@
 namespace bias
 {
 
+    // LoggingSettingsDialog methods
+    // -----------------------------------------------------------------------------
+
     LoggingSettingsDialog::LoggingSettingsDialog(QWidget *parent)
         : QDialog(parent)
     {
@@ -34,93 +37,143 @@ namespace bias
 
     void LoggingSettingsDialog::setInitialValues()
     {
-        bmpFrameSkipLineEditPtr_ -> setText(
-                QString::number(params_.bmp.frameSkip)
-                );
+        QString tmpString;
 
-        bmpFrameSkipRangeLabelPtr_ -> setText(QString(" > 0 "));
+        // bmp tab - frame skip
+        tmpString = QString::number(params_.bmp.frameSkip);
+        bmpFrameSkipLineEditPtr_ -> setText(tmpString);
+        bmpFrameSkipRangeLabelPtr_ -> setText(QString(" >= 0 "));
 
-        aviFrameSkipLineEditPtr_ -> setText(
-                QString::number(params_.avi.frameSkip)
-                );
-
-        aviFrameSkipRangeLabelPtr_ -> setText(QString(" > 0 "));
-
+        // avi tab - frame skip
+        tmpString = QString::number(params_.avi.frameSkip);
+        aviFrameSkipLineEditPtr_ -> setText(tmpString);
+        aviFrameSkipRangeLabelPtr_ -> setText(QString(" >= 0 "));
         aviCodecComboBoxPtr_ -> addItem(params_.avi.codec);
+        aviCodecComboBoxPtr_ -> setEnabled(false); // Temporary
 
-        fmfFrameSkipLineEditPtr_ -> setText(QString::number(
-                    params_.fmf.frameSkip)
+        // fmf tab - frame skip
+        tmpString = QString::number(params_.fmf.frameSkip);
+        fmfFrameSkipLineEditPtr_ -> setText(tmpString);
+        fmfFrameSkipRangeLabelPtr_ -> setText(QString(" >= 0 "));
+
+        // ufmf tab - frame skip
+        tmpString = QString::number(params_.ufmf.frameSkip);
+        ufmfFrameSkipLineEditPtr_ -> setText(tmpString);
+        ufmfFrameSkipRangeLabelPtr_ -> setText(QString(" >= 0"));
+
+        // ufmf tab - background threshold
+        tmpString = QString::number(params_.ufmf.backgroundThreshold);
+        ufmfBackgroundThresholdLineEditPtr_ -> setText(tmpString);
+
+        tmpString = QString("(%1, %2)").arg(
+                    QString::number(VideoWriter_ufmf::MIN_BACKGROUND_THRESHOLD),
+                    QString::number(VideoWriter_ufmf::MAX_BACKGROUND_THRESHOLD)
+                    );
+        ufmfBackgroundThresholdRangeLabelPtr_ -> setText(tmpString);
+
+        // ufmf tab - box length
+        tmpString = QString::number(params_.ufmf.boxLength);
+        ufmfBoxLengthLineEditPtr_ -> setText(tmpString);
+
+        tmpString = QString("(%1, %2)").arg(
+                QString::number(VideoWriter_ufmf::MIN_BOX_LENGTH),  
+                QString::number(VideoWriter_ufmf::MAX_BOX_LENGTH)
                 );
+        ufmfBoxLengthRangeLabelPtr_ -> setText(tmpString);
 
-        fmfFrameSkipRangeLabelPtr_ -> setText(QString(" > 0 "));
+        // ufmf tab - median update count
+        tmpString = QString::number(params_.ufmf.medianUpdateCount);
+        ufmfMedianUpdateCountLineEditPtr_ -> setText(tmpString);
 
-        ufmfFrameSkipLineEditPtr_ -> setText(
-                QString::number(params_.ufmf.frameSkip)
+        tmpString = QString(" > %1").arg(
+                QString::number(BackgroundHistogram_ufmf::MIN_MEDIAN_UPDATE_COUNT)
                 );
+        ufmfMedianUpdateCountRangeLabelPtr_ -> setText(tmpString);
 
-        ufmfBackgroundThresholdLineEditPtr_ -> setText(
-                QString::number(params_.ufmf.backgroundThreshold)
+        // ufmf tab - number of compressor threads
+        tmpString = QString::number(params_.ufmf.numberOfCompressors);
+        ufmfCompressionThreadsLineEditPtr_ -> setText(tmpString);
+
+        tmpString = QString(" > %1").arg(
+                QString::number(VideoWriter_ufmf::MIN_NUMBER_OF_COMPRESSORS)
                 );
+        ufmfCompressionThreadsRangeLabelPtr_ -> setText(tmpString);
 
-        ufmfBoxLengthLineEditPtr_ -> setText(
-                QString::number(params_.ufmf.boxLength)
-                );
+        // ufmf tab - dilate 
+        if (params_.ufmf.dilateState)
+        {
+            ufmfDilateCheckBoxPtr_ -> setCheckState(Qt::Checked);
+        }
+        else
+        {
+            ufmfDilateCheckBoxPtr_ -> setCheckState(Qt::Unchecked);
+        }
 
-        ufmfMedianUpdateCountLineEditPtr_ -> setText(
-                QString::number(params_.ufmf.medianUpdateCount)
-                );
+        tmpString = QString::number(params_.ufmf.dilateWindowSize);
+        ufmfDilateLineEditPtr_ -> setText(tmpString);
 
-        ufmfCompressionThreadsLineEditPtr_ -> setText(
-                QString::number(params_.ufmf.numberOfCompressors)
-                );
+        tmpString = QString("(%1, %2)").arg(
+                    QString::number(VideoWriter_ufmf::MIN_DILATE_WINDOW_SIZE),
+                    QString::number(VideoWriter_ufmf::MAX_DILATE_WINDOW_SIZE)
+                    );
+        ufmfDilateRangeLabelPtr_ -> setText(tmpString);
 
-        // Temporary
-        aviCodecComboBoxPtr_ -> setEnabled(false);
-        ufmfDilateCheckBoxPtr_ -> setEnabled(false);
-        ufmfDilateLineEditPtr_ -> setEnabled(false);
 
+        ufmfDilateCheckBoxPtr_ -> setEnabled(false); // Temporary
+        ufmfDilateLineEditPtr_ -> setEnabled(false); // Temporary
 
     }
+
 
     void LoggingSettingsDialog::setValidators()
     {
         QPointer<QIntValidator> validatorPtr;
 
-        // bmp tab
-        validatorPtr = new QIntValidator(bmpFrameSkipLineEditPtr_);
+        // bmp tab - frame skip
+        validatorPtr = new IntValidatorWithFixup(bmpFrameSkipLineEditPtr_);
         validatorPtr -> setBottom(0);
         bmpFrameSkipLineEditPtr_ -> setValidator(validatorPtr);
 
-        // avi tab
-        validatorPtr = new QIntValidator(aviFrameSkipLineEditPtr_);
+        // avi tab - frame skip
+        validatorPtr = new IntValidatorWithFixup(aviFrameSkipLineEditPtr_);
         validatorPtr -> setBottom(0);
         aviFrameSkipLineEditPtr_ -> setValidator(validatorPtr);
 
-        // fmf tab
-        validatorPtr = new QIntValidator(fmfFrameSkipLineEditPtr_);
+        // fmf tab - frame skip
+        validatorPtr = new IntValidatorWithFixup(fmfFrameSkipLineEditPtr_);
         validatorPtr -> setBottom(0);
         fmfFrameSkipLineEditPtr_ -> setValidator(validatorPtr);
 
-        // ufmf tab
-        validatorPtr = new QIntValidator(ufmfFrameSkipLineEditPtr_);
+        // ufmf tab - frame skip
+        validatorPtr = new IntValidatorWithFixup(ufmfFrameSkipLineEditPtr_);
         validatorPtr -> setBottom(0);
         ufmfFrameSkipLineEditPtr_ -> setValidator(validatorPtr);
 
-        validatorPtr = new QIntValidator(ufmfBackgroundThresholdLineEditPtr_);
+        // ufmf tab - background threshold
+        validatorPtr = new IntValidatorWithFixup(ufmfBackgroundThresholdLineEditPtr_);
         validatorPtr -> setRange(
                 VideoWriter_ufmf::MIN_BACKGROUND_THRESHOLD,
                 VideoWriter_ufmf::MAX_BACKGROUND_THRESHOLD
                 );
         ufmfBackgroundThresholdLineEditPtr_ -> setValidator(validatorPtr);
 
-        validatorPtr = new QIntValidator(ufmfBoxLengthLineEditPtr_);
+        // ufmf tab - box length
+        validatorPtr = new IntValidatorWithFixup(ufmfBoxLengthLineEditPtr_);
         validatorPtr -> setRange(
                 VideoWriter_ufmf::MIN_BOX_LENGTH,
                 VideoWriter_ufmf::MAX_BOX_LENGTH
                 );
         ufmfBoxLengthLineEditPtr_ -> setValidator(validatorPtr);
 
+        // ufmf tab - median update count
+        validatorPtr = new IntValidatorWithFixup(ufmfMedianUpdateCountLineEditPtr_);
+        validatorPtr -> setBottom(BackgroundHistogram_ufmf::MIN_MEDIAN_UPDATE_COUNT);
+        ufmfMedianUpdateCountLineEditPtr_ -> setValidator(validatorPtr);
 
+        // ufmf tab - number of compression threads
+        validatorPtr = new IntValidatorWithFixup(ufmfCompressionThreadsLineEditPtr_);
+        validatorPtr -> setBottom(VideoWriter_ufmf::MIN_NUMBER_OF_COMPRESSORS);
+        ufmfCompressionThreadsLineEditPtr_ -> setValidator(validatorPtr);
     }
 
 
@@ -195,66 +248,114 @@ namespace bias
                 this,
                 SLOT(ufmfDilate_EditingFinished())
                );
-
     }
 
 
     void LoggingSettingsDialog::bmpFrameSkip_EditingFinished()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        QString frameSkipString = bmpFrameSkipLineEditPtr_ -> text();
+        unsigned int frameSkip = frameSkipString.toUInt();
+        params_.bmp.frameSkip = frameSkip;
+        emit parametersChanged(params_);
     }
 
 
     void LoggingSettingsDialog::aviFrameSkip_EditingFinished()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        QString frameSkipString = aviFrameSkipLineEditPtr_ -> text();
+        unsigned int frameSkip = frameSkipString.toUInt();
+        params_.avi.frameSkip = frameSkip;
+        emit parametersChanged(params_);
     }
 
 
     void LoggingSettingsDialog::fmfFrameSkip_EditingFinished()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        QString frameSkipString = fmfFrameSkipLineEditPtr_ -> text();
+        unsigned int frameSkip = frameSkipString.toUInt();
+        params_.fmf.frameSkip = frameSkip;
+        emit parametersChanged(params_);
     }
 
 
     void LoggingSettingsDialog::ufmfFrameSkip_EditingFinished()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        QString frameSkipString = ufmfFrameSkipLineEditPtr_ -> text();
+        unsigned int frameSkip = frameSkipString.toUInt();
+        params_.ufmf.frameSkip = frameSkip;
+        emit parametersChanged(params_);
     }
 
 
     void  LoggingSettingsDialog::ufmfBackgroundThreshold_EditingFinished()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        QString thresholdString = ufmfBackgroundThresholdLineEditPtr_ -> text();
+        unsigned int threshold = thresholdString.toUInt();
+        params_.ufmf.backgroundThreshold = threshold;
+        emit parametersChanged(params_);
     }
 
 
     void LoggingSettingsDialog::ufmfBoxLength_EditingFinished()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        QString boxLengthString = ufmfBoxLengthLineEditPtr_ -> text();
+        unsigned int boxLength = boxLengthString.toUInt();
+        params_.ufmf.boxLength = boxLength;
+        emit parametersChanged(params_);
     }
+
 
     void LoggingSettingsDialog::ufmfMedianUpdateCount_EditingFinished()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        QString updateCountString = ufmfMedianUpdateCountLineEditPtr_ -> text();
+        unsigned int updateCount = updateCountString.toUInt();
+        params_.ufmf.medianUpdateCount = updateCount;
+        emit parametersChanged(params_);
     }
 
 
     void LoggingSettingsDialog::ufmfCompressionThreads_EditingFinished()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        QString numberString = ufmfCompressionThreadsLineEditPtr_ -> text();
+        unsigned int number = numberString.toUInt();
+        params_.ufmf.numberOfCompressors = number;
+        emit parametersChanged(params_);
+
     }
+
 
     void LoggingSettingsDialog::ufmfDilateCheckBox_StateChanged(int state)
     {
-        std::cout << __PRETTY_FUNCTION__ << ", state = " << state << std::endl;
+        params_.ufmf.dilateState = state;
+        emit parametersChanged(params_);
     }
 
 
     void LoggingSettingsDialog::ufmfDilate_EditingFinished()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        QString sizeString = ufmfDilateLineEditPtr_ -> text();
+        unsigned int size = sizeString.toUInt(); 
+        params_.ufmf.dilateWindowSize = size;
+        emit parametersChanged(params_);
     }
 
+
+    // IntValidatorWithFixup methods
+    // -----------------------------------------------------------------------------
+    IntValidatorWithFixup::IntValidatorWithFixup(QWidget *parent) : QIntValidator(parent)
+    {}
+
+    void IntValidatorWithFixup::fixup(QString &input) const
+    {
+        int value = input.toInt();
+        if (value < bottom())
+        {
+            input = QString::number(bottom());
+        }
+        if (value > top())
+        {
+            input = QString::number(top());
+        }
+    }
 
 } // namespace bias
