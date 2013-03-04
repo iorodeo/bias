@@ -28,6 +28,7 @@ namespace bias
     void LoggingSettingsDialog::initialize(VideoWriterParams params)
     {
         setupUi(this);
+        setAttribute(Qt::WA_DeleteOnClose);
         params_ = params;
         setInitialValues();
         setValidators();
@@ -248,6 +249,20 @@ namespace bias
                 this,
                 SLOT(ufmfDilate_EditingFinished())
                );
+
+        connect(
+                parent(),
+                SIGNAL(imageCaptureStarted()),
+                this,
+                SLOT(imageCaptureStarted())
+               );
+
+        connect(
+                parent(),
+                SIGNAL(imageCaptureStopped()),
+                this,
+                SLOT(imageCaptureStopped())
+               );
     }
 
 
@@ -337,6 +352,18 @@ namespace bias
         unsigned int size = sizeString.toUInt(); 
         params_.ufmf.dilateWindowSize = size;
         emit parametersChanged(params_);
+    }
+
+
+    void LoggingSettingsDialog::imageCaptureStarted()
+    {
+        setEnabled(false);
+    }
+
+    
+    void LoggingSettingsDialog::imageCaptureStopped()
+    {
+        setEnabled(true);
     }
 
 

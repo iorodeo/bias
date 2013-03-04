@@ -22,6 +22,8 @@ namespace bias
         private slots:
 
             void spinBoxValueChanged();
+            void imageCaptureStarted();
+            void imageCaptureStopped();
 
         private:
 

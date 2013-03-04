@@ -23,10 +23,12 @@ namespace cv   { class Mat; }
 namespace bias 
 {
     // BIAS forward declarations
+    struct StampedImage;
     class ImageGrabber;
     class ImageDispatcher;
     class ImageLogger; 
-    struct StampedImage;
+    class TimerSettingsDialog;
+    class LoggingSettingsDialog;
     template <class T> class Lockable;
     template <class T> class LockableQueue;
 
@@ -39,6 +41,11 @@ namespace bias
         public:
 
             CameraWindow(Guid cameraGuid, QWidget *parent=0);
+
+        signals:
+
+            void imageCaptureStarted();
+            void imageCaptureStopped();
 
         protected:
 
@@ -144,6 +151,9 @@ namespace bias
             QPointer<QTimer> captureDurationTimerPtr_;
             QDateTime captureStartDateTime_;
             QDateTime captureStopDateTime_;
+
+            QPointer<TimerSettingsDialog> timerSettingsDialogPtr_;
+            QPointer<LoggingSettingsDialog> loggingSettingsDialogPtr_;
 
             VideoWriterParams videoWriterParams_;
 

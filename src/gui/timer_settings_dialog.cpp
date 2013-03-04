@@ -24,6 +24,18 @@ namespace bias
     }
 
 
+    void TimerSettingsDialog::imageCaptureStarted()
+    {
+        setEnabled(false);
+    }
+
+
+    void TimerSettingsDialog::imageCaptureStopped()
+    {
+        setEnabled(true);
+    }
+        
+
     void TimerSettingsDialog::connectWidgets()
     {
         connect(
@@ -45,6 +57,20 @@ namespace bias
                 SIGNAL(valueChanged(int)),
                 this,
                 SLOT(spinBoxValueChanged())
+               );
+
+        connect(
+                parent(),
+                SIGNAL(imageCaptureStarted()),
+                this,
+                SLOT(imageCaptureStarted())
+               );
+
+        connect(
+                parent(),
+                SIGNAL(imageCaptureStopped()),
+                this,
+                SLOT(imageCaptureStopped())
                );
     }
 

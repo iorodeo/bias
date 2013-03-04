@@ -344,20 +344,26 @@ namespace bias
 
     void CameraWindow::actionLoggingSettingsTriggered()
     {
-        QPointer<LoggingSettingsDialog> dialogPtr = new LoggingSettingsDialog(
-                videoWriterParams_,
-                this
-                );
+        if (loggingSettingsDialogPtr_.isNull()) 
+        {
+            loggingSettingsDialogPtr_ = new LoggingSettingsDialog(
+                    videoWriterParams_,
+                    this
+                    );
 
-        connect(
-                dialogPtr,
-                SIGNAL(parametersChanged(VideoWriterParams)),
-                this,
-                SLOT(loggingSettingsChanged(VideoWriterParams))
-               );
+            connect(
+                    loggingSettingsDialogPtr_,
+                    SIGNAL(parametersChanged(VideoWriterParams)),
+                    this,
+                    SLOT(loggingSettingsChanged(VideoWriterParams))
+                   );
 
-        dialogPtr -> show();
-
+            loggingSettingsDialogPtr_ -> show();
+        }
+        else
+        {
+            loggingSettingsDialogPtr_ -> raise();
+        }
     }
 
 
@@ -396,18 +402,25 @@ namespace bias
 
     void CameraWindow::actionTimerSettingsTriggered()
     {
-        QPointer<TimerSettingsDialog> timerSettingsDialogPtr = new TimerSettingsDialog(
-                captureDurationSec_,
-                this
-                );
-        timerSettingsDialogPtr -> show();
+        if (timerSettingsDialogPtr_.isNull()) 
+        {
+            timerSettingsDialogPtr_ = new TimerSettingsDialog(
+                    captureDurationSec_,
+                    this
+                    );
+            timerSettingsDialogPtr_ -> show();
 
-        connect(
-                timerSettingsDialogPtr,
-                SIGNAL(durationChanged(unsigned long)),
-                this,
-                SLOT(timerDurationChanged(unsigned long))
-               );
+            connect(
+                    timerSettingsDialogPtr_,
+                    SIGNAL(durationChanged(unsigned long)),
+                    this,
+                    SLOT(timerDurationChanged(unsigned long))
+                   );
+        }
+        else
+        {
+            timerSettingsDialogPtr_ -> raise();
+        }
     }
 
 
@@ -1303,6 +1316,8 @@ namespace bias
         statusbarPtr_ -> showMessage(QString("Capturing"));
         capturing_ = true;
         updateAllMenus();
+
+        emit imageCaptureStarted();
     }
 
 
@@ -1375,6 +1390,8 @@ namespace bias
         capturing_ = false;
 
         updateAllMenus();
+
+        emit imageCaptureStopped();
     }
 
 
