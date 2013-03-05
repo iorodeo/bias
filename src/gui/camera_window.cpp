@@ -370,8 +370,8 @@ namespace bias
     void CameraWindow::loggingSettingsChanged(VideoWriterParams params)
     {
         videoWriterParams_ = params;
-        std::cout << "loggingSettingsChanged" << std::endl;
-        std::cout << videoWriterParams_.toString() << std::endl;
+        //std::cout << "loggingSettingsChanged" << std::endl;
+        //std::cout << videoWriterParams_.toString() << std::endl;
     }
 
 
@@ -1697,6 +1697,12 @@ namespace bias
             return;
         }
 
+
+        // Temporary - for disabling trigger mode property
+        // ------------------------------------------------
+        QPointer<QAction> triggerModeActionPtr; 
+        // ------------------------------------------------
+
         // Action action to menu for each property in list
         PropertyList::iterator propIt;
         for (propIt=propList.begin(); propIt!=propList.end(); propIt++)
@@ -1705,8 +1711,6 @@ namespace bias
             PropertyInfo propInfo = propInfoMap[prop.type];
             if (prop.present)
             {
-                //prop.print();
-                //propInfo.print();
                 std::string propStringStd = getPropertyTypeString(prop.type);
                 QString propString = QString::fromStdString(propStringStd);
                 QPointer<QAction> propActionPtr = 
@@ -1719,23 +1723,25 @@ namespace bias
                         SLOT(map())
                         );
                 propertiesSignalMapperPtr_ -> setMapping(propActionPtr, int(prop.type));
+
+
+                // Temporary - for disabling trigger mode
+                // ------------------------------------------ 
+                if (prop.type == PROPERTY_TYPE_TRIGGER_MODE)
+                {
+                    triggerModeActionPtr = propActionPtr;
+                }
+                // ------------------------------------------
             }
         }
 
-        // Old ---------------------------------------------------------
-        //if (capturing_)
-        //{
-        //    setMenuChildrenEnabled(menuCameraPropertiesPtr_,false);
-        //}
-        //else
-        //{
-        //    setMenuChildrenEnabled(menuCameraPropertiesPtr_,true);
-        //}
-        // -------------------------------------------------------------
-        
         // New allow properties to be changed while camera is running
         setMenuChildrenEnabled(menuCameraPropertiesPtr_,true);
 
+        // Temporary - for disabling trigger mode property
+        // ------------------------------------------------
+        triggerModeActionPtr -> setEnabled(false);
+        // ------------------------------------------------
     }
 
     void CameraWindow::updateCameraTriggerMenu()

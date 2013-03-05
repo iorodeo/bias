@@ -50,17 +50,6 @@ namespace bias
     };
 
 
-    class IntValidatorWithFixup : public QIntValidator
-    {
-        Q_OBJECT
-
-        public:
-            IntValidatorWithFixup(QWidget *parent=0);
-            virtual void fixup(QString &input) const;
-
-    };
-
-
 } // namespace bias
 
 #endif // #ifndef BIAS_LOGGING_SETTINGS_DIALOG_HPP:W

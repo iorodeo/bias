@@ -1,16 +1,22 @@
 #include "property_dialog.hpp"
 #include "camera_facade.hpp"
 #include "lockable.hpp"
+#include "validators.hpp"
 #include <string>
 #include <iostream>
+#include <algorithm>
 #include <QString>
 #include <QTimer>
 
 namespace bias
 {
+
     const int REFRESH_TIMER_INTERVAL_MS = 1000;
     const float ABSOLUTE_VALUE_SCALE = 100.0;
     const unsigned int FLOAT_PRECISION = 2;
+
+    // PropertyDialog methods
+    // ------------------------------------------------------------------------
 
     PropertyDialog::PropertyDialog(QWidget *parent, Qt::WindowFlags f) 
         : QDialog(parent,f)
@@ -286,6 +292,9 @@ namespace bias
         intValueSliderPtr -> setMinimum(propertyInfo.minValue);
         intValueSliderPtr -> setMaximum(propertyInfo.maxValue);
         intValueSliderPtr -> setValue(property.value);
+        intValueSliderPtr -> setSingleStep(1);
+        int deltaMaxMin = propertyInfo.maxValue-propertyInfo.minValue;
+        intValueSliderPtr -> setPageStep(std::max(2,deltaMaxMin/10));
         intValueSliderPtr -> blockSignals(false);
 
         minIntValueLabelPtr -> setText(QString::number(propertyInfo.minValue));
@@ -295,12 +304,10 @@ namespace bias
         intValueLineEditPtr -> setText(QString::number(property.value));
         if (propertyInfo.manualCapable)
         {
-            QPointer<QIntValidator> intValueValidatorPtr = new QIntValidator(
-                    propertyInfo.minValue,
-                    propertyInfo.maxValue,
-                    intValueLineEditPtr
-                    );
-            intValueLineEditPtr -> setValidator(intValueValidatorPtr);
+            QPointer<IntValidatorWithFixup> validatorPtr; 
+            validatorPtr = new IntValidatorWithFixup(intValueLineEditPtr);
+            validatorPtr -> setRange(propertyInfo.minValue, propertyInfo.maxValue);
+            intValueLineEditPtr -> setValidator(validatorPtr);
         }
         intValueLineEditPtr -> blockSignals(false);
 
@@ -308,15 +315,15 @@ namespace bias
         if (propertyInfo.absoluteCapable) 
         {
             absValueSliderPtr -> blockSignals(true);
-            absValueSliderPtr -> setMinimum(
-                    int(ABSOLUTE_VALUE_SCALE*propertyInfo.minAbsoluteValue)
-                    );
-            absValueSliderPtr -> setMaximum(
-                    int(ABSOLUTE_VALUE_SCALE*propertyInfo.maxAbsoluteValue)
-                    );
-            absValueSliderPtr -> setValue(
-                    int(ABSOLUTE_VALUE_SCALE*property.absoluteValue)
-                    );
+            int minAbsValueInt = int(ABSOLUTE_VALUE_SCALE*propertyInfo.minAbsoluteValue);
+            int maxAbsValueInt = int(ABSOLUTE_VALUE_SCALE*propertyInfo.maxAbsoluteValue);
+            int absValueInt = int(ABSOLUTE_VALUE_SCALE*property.absoluteValue);
+            absValueSliderPtr -> setMinimum(minAbsValueInt);
+            absValueSliderPtr -> setMaximum(maxAbsValueInt);
+            absValueSliderPtr -> setValue(absValueInt);
+            deltaMaxMin = maxAbsValueInt - minAbsValueInt;
+            absValueSliderPtr -> setSingleStep(std::max(1,deltaMaxMin/100));
+            absValueSliderPtr -> setPageStep(std::max(2,deltaMaxMin/10));
             absValueSliderPtr -> blockSignals(false);
 
             QString minAbsValueString = QString::number(
@@ -342,13 +349,11 @@ namespace bias
             absValueLineEditPtr -> setText(absValueString);
             if (propertyInfo.manualCapable)
             {
-                QPointer<QDoubleValidator> absValueValidatorPtr = new QDoubleValidator(
-                        propertyInfo.minAbsoluteValue,
-                        propertyInfo.maxAbsoluteValue,
-                        FLOAT_PRECISION,
-                        absValueLineEditPtr
-                        );
-                absValueLineEditPtr -> setValidator(absValueValidatorPtr);
+                QPointer<DoubleValidatorWithFixup> validatorPtr; 
+                validatorPtr = new DoubleValidatorWithFixup(absValueLineEditPtr);
+                validatorPtr -> setBottom(propertyInfo.minAbsoluteValue);
+                validatorPtr -> setTop(propertyInfo.maxAbsoluteValue);
+                absValueLineEditPtr -> setValidator(validatorPtr);
             }
             absValueLineEditPtr -> blockSignals(false);
         }

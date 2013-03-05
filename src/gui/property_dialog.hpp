@@ -3,11 +3,13 @@
 
 #include <QDialog>
 #include <QPointer>
+#include <QDoubleValidator>
 #include <memory>
 #include "camera_facade_fwd.hpp"
 #include "ui_property_dialog.h"
 
 class QTimer;
+class QString;
 
 namespace bias
 {
@@ -70,6 +72,7 @@ namespace bias
 
 
     }; // class PropertyDialog
+
 
 } // namespace bias
 

@@ -1,6 +1,7 @@
 #include "logging_settings_dialog.hpp"
 #include "video_writer_ufmf.hpp"
 #include "background_histogram_ufmf.hpp"
+#include "validators.hpp"
 #include <iostream>
 #include <QPointer>
 
@@ -43,24 +44,24 @@ namespace bias
         // bmp tab - frame skip
         tmpString = QString::number(params_.bmp.frameSkip);
         bmpFrameSkipLineEditPtr_ -> setText(tmpString);
-        bmpFrameSkipRangeLabelPtr_ -> setText(QString(" >= 0 "));
+        bmpFrameSkipRangeLabelPtr_ -> setText(QString(" >= 1 "));
 
         // avi tab - frame skip
         tmpString = QString::number(params_.avi.frameSkip);
         aviFrameSkipLineEditPtr_ -> setText(tmpString);
-        aviFrameSkipRangeLabelPtr_ -> setText(QString(" >= 0 "));
+        aviFrameSkipRangeLabelPtr_ -> setText(QString(" >= 1 "));
         aviCodecComboBoxPtr_ -> addItem(params_.avi.codec);
         aviCodecComboBoxPtr_ -> setEnabled(false); // Temporary
 
         // fmf tab - frame skip
         tmpString = QString::number(params_.fmf.frameSkip);
         fmfFrameSkipLineEditPtr_ -> setText(tmpString);
-        fmfFrameSkipRangeLabelPtr_ -> setText(QString(" >= 0 "));
+        fmfFrameSkipRangeLabelPtr_ -> setText(QString(" >= 1 "));
 
         // ufmf tab - frame skip
         tmpString = QString::number(params_.ufmf.frameSkip);
         ufmfFrameSkipLineEditPtr_ -> setText(tmpString);
-        ufmfFrameSkipRangeLabelPtr_ -> setText(QString(" >= 0"));
+        ufmfFrameSkipRangeLabelPtr_ -> setText(QString(" >= 1"));
 
         // ufmf tab - background threshold
         tmpString = QString::number(params_.ufmf.backgroundThreshold);
@@ -86,7 +87,7 @@ namespace bias
         tmpString = QString::number(params_.ufmf.medianUpdateCount);
         ufmfMedianUpdateCountLineEditPtr_ -> setText(tmpString);
 
-        tmpString = QString(" > %1").arg(
+        tmpString = QString(" >= %1").arg(
                 QString::number(BackgroundHistogram_ufmf::MIN_MEDIAN_UPDATE_COUNT)
                 );
         ufmfMedianUpdateCountRangeLabelPtr_ -> setText(tmpString);
@@ -95,7 +96,7 @@ namespace bias
         tmpString = QString::number(params_.ufmf.numberOfCompressors);
         ufmfCompressionThreadsLineEditPtr_ -> setText(tmpString);
 
-        tmpString = QString(" > %1").arg(
+        tmpString = QString(" >= %1").arg(
                 QString::number(VideoWriter_ufmf::MIN_NUMBER_OF_COMPRESSORS)
                 );
         ufmfCompressionThreadsRangeLabelPtr_ -> setText(tmpString);
@@ -132,22 +133,22 @@ namespace bias
 
         // bmp tab - frame skip
         validatorPtr = new IntValidatorWithFixup(bmpFrameSkipLineEditPtr_);
-        validatorPtr -> setBottom(0);
+        validatorPtr -> setBottom(1);
         bmpFrameSkipLineEditPtr_ -> setValidator(validatorPtr);
 
         // avi tab - frame skip
         validatorPtr = new IntValidatorWithFixup(aviFrameSkipLineEditPtr_);
-        validatorPtr -> setBottom(0);
+        validatorPtr -> setBottom(1);
         aviFrameSkipLineEditPtr_ -> setValidator(validatorPtr);
 
         // fmf tab - frame skip
         validatorPtr = new IntValidatorWithFixup(fmfFrameSkipLineEditPtr_);
-        validatorPtr -> setBottom(0);
+        validatorPtr -> setBottom(1);
         fmfFrameSkipLineEditPtr_ -> setValidator(validatorPtr);
 
         // ufmf tab - frame skip
         validatorPtr = new IntValidatorWithFixup(ufmfFrameSkipLineEditPtr_);
-        validatorPtr -> setBottom(0);
+        validatorPtr -> setBottom(1);
         ufmfFrameSkipLineEditPtr_ -> setValidator(validatorPtr);
 
         // ufmf tab - background threshold
@@ -366,23 +367,5 @@ namespace bias
         setEnabled(true);
     }
 
-
-    // IntValidatorWithFixup methods
-    // -----------------------------------------------------------------------------
-    IntValidatorWithFixup::IntValidatorWithFixup(QWidget *parent) : QIntValidator(parent)
-    {}
-
-    void IntValidatorWithFixup::fixup(QString &input) const
-    {
-        int value = input.toInt();
-        if (value < bottom())
-        {
-            input = QString::number(bottom());
-        }
-        if (value > top())
-        {
-            input = QString::number(top());
-        }
-    }
 
 } // namespace bias
