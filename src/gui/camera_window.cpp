@@ -288,7 +288,17 @@ namespace bias
 
     void CameraWindow::actionLoggingEnabledTriggered()
     {
-        logging_ = actionLoggingEnabledPtr_ -> isChecked();
+        if (haveDefaultVideosDir_) {
+            logging_ = actionLoggingEnabledPtr_ -> isChecked();
+        }
+        else
+        {
+            actionLoggingEnabledPtr_ -> setChecked(false);
+            logging_ = false;
+            QString msgTitle("Initialization Error");
+            QString msgText("Unable to determine default location for video files.");
+            QMessageBox::critical(this, msgTitle, msgText);
+        }
         std::cout << "logging: ";
         std::cout << std::boolalpha << logging_ << std::noboolalpha;
         std::cout << std::endl;
@@ -546,6 +556,8 @@ namespace bias
         logging_ = false;
         flipVert_ = false;
         flipHorz_ = false;
+        haveDefaultVideosDir_ = false;
+
         imageRotation_ = IMAGE_ROTATION_0;
         videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
         captureDurationSec_ = DEFAULT_CAPTURE_DURATION;
@@ -832,16 +844,48 @@ namespace bias
     void CameraWindow::setDefaultVideoFileDir()
     {
 #ifdef WIN32
-        QString myDocsString = QString(getenv("USERPROFILE"));
-        myDocsString += "/Videos";
-        defaultVideoFileDir_ = QDir(myDocsString);
+
+        QSettings settings(QSettings::UserScope, "Microsoft", "Windows");
+        settings.beginGroup("CurrentVersion/Explorer/Shell Folders");
+        QString myDocsString = settings.value("Personal").toString();
+
+        QDir myDocsDir = QDir(myDocsString);
+        QDir videoDir = myDocsDir;
+
+        bool cdToVideosOk = videoDir.cdUp();
+        cdToVideosOk = cdToVideosOk && videoDir.cd("Videos");
+
+
+        QDir userProfileDir = QDir(QString(getenv("USERPROFILE")));
+
+        if ((cdToVideosOk) && (videoDir.exists()))
+        {
+            defaultVideoFileDir_ = videoDir;
+        }
+        else if (myDocsDir.exists())
+        { 
+            defaultVideoFileDir_ = myDocsDir;
+        }
+        else
+        {
+            defaultVideoFileDir_ = userProfileDir;
+        }
+
+        std::cout << "defaultVideoFileDir_ = " << defaultVideoFileDir_.absolutePath().toStdString() << std::endl;
 #else
         defaultVideoFileDir_ = QDir(QString(getenv("HOME")));
 #endif 
         if (!defaultVideoFileDir_.exists())
         {
-            // Something is wrong with home directory set to root.
-            defaultVideoFileDir_ = QDir(QDir::rootPath());
+            haveDefaultVideosDir_ = false;
+            haveDefaultVideosDir_ = true;
+            QString msgTitle("Initialization Error");
+            QString msgText("Unable to determine default location for video files.");
+            QMessageBox::critical(this, msgTitle, msgText);
+        }
+        else
+        {
+            haveDefaultVideosDir_ = true;
         }
     }
 

@@ -109,6 +109,7 @@ namespace bias
             bool logging_;
             bool flipVert_;
             bool flipHorz_;
+            bool haveDefaultVideosDir_;
 
             QDir defaultVideoFileDir_;
             QDir currentVideoFileDir_;
