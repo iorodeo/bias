@@ -2,6 +2,7 @@
 #define BIAS_VIDEO_WRITER_AVI_HPP
 
 #include "video_writer.hpp"
+#include "video_writer_params.hpp"
 #include <opencv2/highgui/highgui.hpp>
 #include <QString>
 
@@ -12,13 +13,18 @@ namespace bias
         public:
 
             VideoWriter_avi(QObject *parent=0);
-            VideoWriter_avi(QString fileName, QObject *parent=0);
+            VideoWriter_avi(
+                    VideoWriterParams_avi params,
+                    QString fileName, 
+                    QObject *parent=0
+                    );
             virtual ~VideoWriter_avi();
             virtual void addFrame(StampedImage stampedImg);
 
             static const int DEFAULT_FOURCC;
             static const double DEFAULT_FPS;
             static const unsigned int DEFAULT_FRAME_SKIP;
+            static const VideoWriterParams_avi DEFAULT_PARAMS;
 
         protected:
 
@@ -32,6 +38,7 @@ namespace bias
 
 
     QString fourccToQString(unsigned int fourcc);
+    unsigned int qStringToFourcc(QString fourccQString);
 
 }
 

@@ -11,23 +11,33 @@ namespace bias
 
     const double VideoWriter_avi::DEFAULT_FPS = 30.0;
     const unsigned int VideoWriter_avi::DEFAULT_FRAME_SKIP = 4;
-    //const int VideoWriter_avi::DEFAULT_FOURCC = CV_FOURCC('D','I','V','X');
     const int VideoWriter_avi::DEFAULT_FOURCC = CV_FOURCC('X','V','I','D');
+    const VideoWriterParams_avi VideoWriter_avi::DEFAULT_PARAMS = 
+        VideoWriterParams_avi();
+
 
     VideoWriter_avi::VideoWriter_avi(QObject *parent) 
-        : VideoWriter_avi(DUMMY_FILENAME,parent) 
+        : VideoWriter_avi(DEFAULT_PARAMS,DUMMY_FILENAME,parent) 
     {}
 
-    VideoWriter_avi::VideoWriter_avi(QString fileName, QObject *parent) 
+
+    VideoWriter_avi::VideoWriter_avi(
+            VideoWriterParams_avi params,
+            QString fileName, 
+            QObject *parent
+            ) 
         : VideoWriter(fileName,parent)
     {
-        fourcc_ = DEFAULT_FOURCC;
-        fps_ = DEFAULT_FPS;
+        fourcc_ = qStringToFourcc(params.codec);
+        setFrameSkip(params.frameSkip);
+
         isFirst_ = true;
-        setFrameSkip(DEFAULT_FRAME_SKIP);
+        fps_ = DEFAULT_FPS;
     }
 
+
     VideoWriter_avi::~VideoWriter_avi() {};
+
 
     void VideoWriter_avi::addFrame(StampedImage stampedImg)
     {
@@ -42,6 +52,7 @@ namespace bias
         }
         frameCount_++;
     }
+
 
     void VideoWriter_avi::setupOutput(StampedImage stampedImg)
     {
@@ -83,6 +94,11 @@ namespace bias
         }
     }
 
+    // -----------------------------------------------------------------------
+    // TO DO ... if we start dealing with auto detection of codecs, etc. these
+    // funcions will need to be improved - they should be viewed as temporary.
+    // ------------------------------------------------------------------------
+
 
     QString fourccToQString(unsigned int fourcc)
     {
@@ -97,6 +113,27 @@ namespace bias
         }
         return fourccQString;
     }
+
+
+    unsigned int qStringToFourcc(QString fourccQString)
+    {
+        unsigned int fourcc;
+        if (fourccQString == QString("XVID"))
+        {
+            fourcc = CV_FOURCC('X','V','I','D'); 
+        }
+        else
+        {
+            // Set some default codec
+            fourcc = CV_FOURCC('D','I','B',' ');
+            // TO DO - better way to deal with codec not found ? 
+            // ------------------------------------------------------------------
+            std::cout << "Warning - codec not found set to default" << std::endl;
+            // -------------------------------------------------------------------
+        }
+        return fourcc;
+    }
+
 
 } // namespace bias
 

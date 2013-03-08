@@ -2,6 +2,7 @@
 #define BIAS_VIDEO_WRITER_FMF_HPP
 
 #include "video_writer.hpp"
+#include "video_writer_params.hpp"
 #include <fstream>
 
 namespace bias 
@@ -10,13 +11,18 @@ namespace bias
     {
         public:
             VideoWriter_fmf(QObject *parent=0);
-            VideoWriter_fmf(QString fileName, QObject *paraent=0);
+            VideoWriter_fmf(
+                    VideoWriterParams_fmf params,
+                    QString fileName, 
+                    QObject *paraent=0
+                    );
             ~VideoWriter_fmf();
             virtual void finish();
             virtual void addFrame(StampedImage stampedImg);
 
             static const unsigned int DEFAULT_FRAME_SKIP;
             static const unsigned int FMF_VERSION;
+            static const VideoWriterParams_fmf DEFAULT_PARAMS;
 
         private:
             bool isFirst_;

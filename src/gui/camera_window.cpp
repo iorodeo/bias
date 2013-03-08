@@ -1280,18 +1280,21 @@ namespace bias
             {
                 case VIDEOFILE_FORMAT_BMP:
                     videoWriterPtr = std::make_shared<VideoWriter_bmp>(
+                            videoWriterParams_.bmp,
                             videoFileFullPath
                             );
                     break;
 
                 case VIDEOFILE_FORMAT_AVI:  
                     videoWriterPtr = std::make_shared<VideoWriter_avi>(
+                            videoWriterParams_.avi,
                             videoFileFullPath
                             );
                     break;
 
                 case VIDEOFILE_FORMAT_FMF:
                     videoWriterPtr = std::make_shared<VideoWriter_fmf>(
+                            videoWriterParams_.fmf,
                             videoFileFullPath
                             );
                     break;

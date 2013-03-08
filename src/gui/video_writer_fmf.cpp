@@ -10,17 +10,22 @@ namespace bias
     const unsigned int VideoWriter_fmf::DEFAULT_FRAME_SKIP = 3;
     const unsigned int VideoWriter_fmf::FMF_VERSION = 1;
     const QString DUMMY_FILENAME("dummy.fmf");
+    const VideoWriterParams_fmf VideoWriter_fmf::DEFAULT_PARAMS =
+        VideoWriterParams_fmf();
 
     VideoWriter_fmf::VideoWriter_fmf(QObject *parent) 
-        : VideoWriter_fmf(DUMMY_FILENAME, parent) 
+        : VideoWriter_fmf(DEFAULT_PARAMS, DUMMY_FILENAME, parent) 
     {}
 
-    VideoWriter_fmf::VideoWriter_fmf(QString fileName, QObject *parent) 
-        : VideoWriter(fileName, parent)
+    VideoWriter_fmf::VideoWriter_fmf(
+            VideoWriterParams_fmf params,
+            QString fileName, 
+            QObject *parent
+            ) : VideoWriter(fileName, parent)
     {
         numWritten_ = 0;
         isFirst_ = true;
-        setFrameSkip(DEFAULT_FRAME_SKIP);
+        setFrameSkip(params.frameSkip);
     }
 
     VideoWriter_fmf::~VideoWriter_fmf()
