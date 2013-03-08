@@ -64,7 +64,7 @@ namespace bias
 
         if (stampedImg.dtEstimate > MIN_ALLOWED_DT_ESTIMATE)
         {
-            fps_ = 1.0/stampedImg.dtEstimate;
+            fps_ = 1.0/(stampedImg.dtEstimate*frameSkip_);
         }
         else
         {

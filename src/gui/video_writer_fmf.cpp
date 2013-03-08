@@ -59,7 +59,6 @@ namespace bias
         }
         if (frameCount_%frameSkip_==0)
         {
-            //std::cout << "write" << std::endl;
             try
             {
                 file_.write((char*) &stampedImg.timeStamp, sizeof(double));
