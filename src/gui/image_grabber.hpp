@@ -34,10 +34,12 @@ namespace bias
             void stop();
 
             static unsigned int NUM_STARTUP_SKIP;
+            static unsigned int MAX_ERROR_COUNT;
 
         signals:
             void startCaptureError(unsigned int errorId, QString errorMsg);
             void stopCaptureError(unsigned int errorId, QString errorMsg);
+            void captureError(unsigned int errorId, QString errorMsg);
 
         private:
             bool ready_;

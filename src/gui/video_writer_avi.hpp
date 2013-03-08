@@ -23,6 +23,7 @@ namespace bias
 
             static const int DEFAULT_FOURCC;
             static const double DEFAULT_FPS;
+            static const double MIN_ALLOWED_DT_ESTIMATE;
             static const unsigned int DEFAULT_FRAME_SKIP;
             static const VideoWriterParams_avi DEFAULT_PARAMS;
 

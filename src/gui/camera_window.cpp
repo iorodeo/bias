@@ -215,6 +215,18 @@ namespace bias
         QMessageBox::critical(this, msgTitle, msgText);
     }
 
+    
+    void CameraWindow::imageCaptureError(unsigned int errorId, QString errorMsg)
+    {
+        stopImageCapture();
+        QString msgTitle("Image Capture Error");
+        QString msgText("Error ID: ");
+        msgText += QString::number(errorId);
+        msgText += "\n\n";
+        msgText += errorMsg;
+        QMessageBox::critical(this, msgTitle, msgText);
+    }
+
 
     void CameraWindow::imageLoggingError(unsigned int errorId, QString errorMsg)
     {
@@ -1255,6 +1267,13 @@ namespace bias
                 SIGNAL(startCaptureError(unsigned int, QString)),
                 this,
                 SLOT(startImageCaptureError(unsigned int, QString))
+               );
+
+        connect(
+                imageGrabberPtr_,
+                SIGNAL(captureError(unsigned int, QString)),
+                this,
+                SLOT(imageCaptureError(unsigned int, QString))
                );
 
         connect(

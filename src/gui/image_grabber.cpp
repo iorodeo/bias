@@ -11,6 +11,7 @@
 namespace bias {
 
     unsigned int ImageGrabber::NUM_STARTUP_SKIP = 15;
+    unsigned int ImageGrabber::MAX_ERROR_COUNT = 500;
 
     ImageGrabber::ImageGrabber(QObject *parent) : QObject(parent) 
     {
@@ -57,10 +58,12 @@ namespace bias {
         bool isFirst = true;
         bool done = false;
         bool error = false;
+        bool errorEmitted = false;
         unsigned int errorId = 0;
+        unsigned int errorCount = 0;
         unsigned long frameCount = 0;
         unsigned long startUpCount = 0;
-            
+        double dtEstimate = 0.0;
 
         StampedImage stampImg;
 
@@ -100,6 +103,7 @@ namespace bias {
         if (error)
         {
             emit startCaptureError(errorId, errorMsg);
+            errorEmitted = true;
             return;
         } 
 
@@ -110,6 +114,9 @@ namespace bias {
         // Grab images from camera until the done signal is given
         while (!done)
         {
+            acquireLock();
+            done = stopped_;
+            releaseLock();
 
             // Grab an image
             cameraPtr_ -> acquireLock();
@@ -128,28 +135,56 @@ namespace bias {
             }
             cameraPtr_ -> releaseLock();
 
-            // Skip some number of frames on startup 
-            if (startUpCount < NUM_STARTUP_SKIP)
-            {
-                startUpCount++;
-                continue;
-            }
-
             // Push image into new image queue
             if (!error) 
             {
-                // Save initial time stamp
-                if (isFirst)
+                //errorCount = 0;                  // Reset error count
+                errorCount++;
+                timeStampDblLast = timeStampDbl; // Save last timestamp
+                
+                // Set initial time stamp for fps estimate
+                if (startUpCount == 0)
                 {
                     timeStampInit = timeStamp;
+                }
+
+                // Reset initial time stamp for image acquisition
+                if ((isFirst) && (startUpCount >= NUM_STARTUP_SKIP))
+                {
+                    timeStampInit = timeStamp;
+                    timeStampDblLast = 0.0;
                     isFirst = false;
                 }
+
                 timeStampDbl  = double(timeStamp.seconds);
                 timeStampDbl -= double(timeStampInit.seconds);
                 timeStampDbl += (1.0e-6)*double(timeStamp.microSeconds);
                 timeStampDbl -= (1.0e-6)*double(timeStampInit.microSeconds);
+
+                // Skip some number of frames on startup - recommened by Point Grey. 
+                // During this time compute running avg to get estimate of frame interval
+                if (startUpCount < NUM_STARTUP_SKIP)
+                {
+                    double dt = timeStampDbl - timeStampDblLast;
+                    if (startUpCount == 1)
+                    {
+                        dtEstimate = dt;
+
+                    }
+                    else if (startUpCount > 1)
+                    {
+                        double c0 = double(startUpCount-1)/double(startUpCount);
+                        double c1 = double(1.0)/double(startUpCount);
+                        dtEstimate = c0*dtEstimate + c1*dt;
+                    }
+                    startUpCount++;
+                    continue;
+                }
+
+                // Set image data timestamp, framecount and frame interval estimate
                 stampImg.timeStamp = timeStampDbl;
                 stampImg.frameCount = frameCount;
+                stampImg.dtEstimate = dtEstimate;
                 frameCount++;
 
                 newImageQueuePtr_ -> acquireLock();
@@ -157,19 +192,26 @@ namespace bias {
                 newImageQueuePtr_ -> signalNotEmpty(); 
                 newImageQueuePtr_ -> releaseLock();
 
-                acquireLock();
-                done = stopped_;
-                releaseLock();
-
-                // ------------------------------------------------------------------
-                //std::cout << "dt = " << timeStampDbl - timeStampDblLast << std::endl;
-                //timeStampDblLast = timeStampDbl;
-                // ------------------------------------------------------------------
-
             }
-        }
+            else
+            {
+                errorCount++;
+                if (errorCount > MAX_ERROR_COUNT)
+                {
+                    errorId = ERROR_CAPTURE_MAX_ERROR_COUNT;
+                    errorMsg = QString("Maximum allowed capture error count reached");
+                    if (!errorEmitted) 
+                    {
+                        emit captureError(errorId, errorMsg);
+                        errorEmitted = true;
+                    }
+                }
+            }
+
+        } // while (!done) 
 
         // Stop image capture
+        error = false;
         cameraPtr_ -> acquireLock();
         try
         {
@@ -183,8 +225,8 @@ namespace bias {
         }
         cameraPtr_ -> releaseLock();
 
-        if (error)
-        {
+        if ((error) && (!errorEmitted))
+        { 
             emit stopCaptureError(errorId, errorMsg);
         }
     }

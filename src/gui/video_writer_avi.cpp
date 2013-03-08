@@ -8,8 +8,8 @@
 namespace bias
 { 
     const QString DUMMY_FILENAME("dummy.avi");
-
     const double VideoWriter_avi::DEFAULT_FPS = 30.0;
+    const double VideoWriter_avi::MIN_ALLOWED_DT_ESTIMATE = 0.00001; 
     const unsigned int VideoWriter_avi::DEFAULT_FRAME_SKIP = 4;
     const int VideoWriter_avi::DEFAULT_FOURCC = CV_FOURCC('X','V','I','D');
     const VideoWriterParams_avi VideoWriter_avi::DEFAULT_PARAMS = 
@@ -61,6 +61,15 @@ namespace bias
         setSize(stampedImg.image.size());
 
         bool openOK= true;
+
+        if (stampedImg.dtEstimate > MIN_ALLOWED_DT_ESTIMATE)
+        {
+            fps_ = 1.0/stampedImg.dtEstimate;
+        }
+        else
+        {
+            fps_ = 1.0;
+        }
 
         try
         {

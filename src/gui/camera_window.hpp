@@ -62,6 +62,7 @@ namespace bias
             // Errors
             void startImageCaptureError(unsigned int errorId, QString errorMsg);
             void stopImageCaptureError(unsigned int errorId, QString errorMsg);
+            void imageCaptureError(unsigned int errorId, QString errorMsg);
             void imageLoggingError(unsigned int errorId, QString errorMsg);
 
             // Display update and duration check timers
