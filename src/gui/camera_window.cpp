@@ -11,7 +11,6 @@
 #include "video_writer_avi.hpp"
 #include "video_writer_fmf.hpp"
 #include "video_writer_ufmf.hpp"
-#include "video_writer_ifmf.hpp"
 #include "affinity.hpp"
 #include "property_dialog.hpp"
 #include "timer_settings_dialog.hpp"
@@ -49,7 +48,6 @@ namespace bias
         map.insert(VIDEOFILE_FORMAT_AVI,  QString("avi"));
         map.insert(VIDEOFILE_FORMAT_FMF,  QString("fmf"));
         map.insert(VIDEOFILE_FORMAT_UFMF, QString("ufmf"));
-        map.insert(VIDEOFILE_FORMAT_IFMF, QString("ifmf"));
         return map;
     };
     const QMap<VideoFileFormat, QString> VIDEOFILE_EXTENSION_MAP = createExtensionMap();
@@ -963,7 +961,6 @@ namespace bias
         actionToVideoFileFormatMap_[actionLoggingFormatAVIPtr_] = VIDEOFILE_FORMAT_AVI;
         actionToVideoFileFormatMap_[actionLoggingFormatFMFPtr_] = VIDEOFILE_FORMAT_FMF;
         actionToVideoFileFormatMap_[actionLoggingFormatUFMFPtr_] = VIDEOFILE_FORMAT_UFMF;
-        actionToVideoFileFormatMap_[actionLoggingFormatIFMFPtr_] = VIDEOFILE_FORMAT_IFMF;
 
         QMap<QAction*, VideoFileFormat>::iterator it;
         for (
@@ -1302,12 +1299,6 @@ namespace bias
                 case VIDEOFILE_FORMAT_UFMF:
                     videoWriterPtr = std::make_shared<VideoWriter_ufmf>(
                             videoWriterParams_.ufmf,
-                            videoFileFullPath
-                            );
-                    break;
-
-                case VIDEOFILE_FORMAT_IFMF:
-                    videoWriterPtr = std::make_shared<VideoWriter_ifmf>(
                             videoFileFullPath
                             );
                     break;

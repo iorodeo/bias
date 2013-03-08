@@ -249,7 +249,6 @@
      <addaction name="actionLoggingFormatAVIPtr_"/>
      <addaction name="actionLoggingFormatFMFPtr_"/>
      <addaction name="actionLoggingFormatUFMFPtr_"/>
-     <addaction name="actionLoggingFormatIFMFPtr_"/>
     </widget>
     <addaction name="actionLoggingEnabledPtr_"/>
     <addaction name="menuLoggingFormatPtr_"/>
