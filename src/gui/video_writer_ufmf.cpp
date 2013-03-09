@@ -81,6 +81,7 @@ namespace bias
 
         numberOfCompressors_ = params.numberOfCompressors;
 
+        // ----------------------------------------------------------------------------
         std::cout << std::endl;
         std::cout << "Params: " << std::endl;
         std::cout << " backgroundThreshold:     " << backgroundThreshold_ << std::endl;
@@ -88,6 +89,7 @@ namespace bias
         std::cout << " boxLength:               " << boxLength_ << std::endl;
         std::cout << " frameSkip:               " << frameSkip_ << std:: endl;
         std::cout << " medianUpdateCount:       " << medianUpdateCount_ << std::endl;
+        // -----------------------------------------------------------------------------
 
         // Create thread pool for background modelling
         threadPoolPtr_ = new QThreadPool(this);
@@ -257,21 +259,15 @@ namespace bias
         unsigned int framesWaitQueueSize = framesWaitQueuePtr_ -> size();
         if ( framesWaitQueueSize >  FRAMES_WAIT_MAX_QUEUE_SIZE )
         {
-            //std::cout << "culling frames wait queue" << std::endl;
             unsigned int numToCull = framesWaitQueueSize - FRAMES_WAIT_MAX_QUEUE_SIZE/2;
             for (unsigned int i=0; i<numToCull; i++)
             {
-                //std::cout << " i = " << i << std::endl;
                 framesWaitQueuePtr_ -> pop();
             }
         }
 
-        //// Check frames todo and frames finish queue/set size and emit error if
-        //// they grow too large.
-        //std::cout << "todo:     " << framesToDoQueueSize   << std::endl;
-        //std::cout << "finished: " << framesFinishedSetSize << std::endl;
-        //std::cout << "wait:     " << framesWaitQueueSize << std::endl;
-        //std::cout << std::endl;
+        // Check frames todo and frames finish queue/set size and emit error if
+        // they grow too large.
 
         if (framesToDoQueueSize > FRAMES_TODO_MAX_QUEUE_SIZE) 
         { 
@@ -404,7 +400,7 @@ namespace bias
         // Write index chunk identifier and save index location
         uint8_t chunkId = uint8_t(INDEX_DICT_CHUNK_ID);
         file_.write((char*) &chunkId, sizeof(uint8_t));
-        indexLocation_ = (unsigned long)(file_.tellp());
+        indexLocation_ = file_.tellp();
 
         // Write char for dict and number of keys
         file_.write((char*) &CHAR_FOR_DICT, sizeof(char));
@@ -585,7 +581,6 @@ namespace bias
 
     void VideoWriter_ufmf::writeCompressedFrame(CompressedFrame_ufmf frame)
     {
-
         if (!frame.isReady()) { return; }
 
         // Get position and time stamp for index
@@ -640,14 +635,11 @@ namespace bias
         // Calculate frame size
         std::streampos filePosEnd = file_.tellp();
         unsigned long frameSize = (unsigned long)(filePosEnd) - (unsigned long)(filePosBegin);
-        //std::cout << "writing compressed frame: size = " << frameSize << std::endl;
     }
 
 
     void VideoWriter_ufmf::writeKeyFrame()
     {
-        //std::cout << "writing key frame" << std::endl;
-
         // Get position and time stamp for index
         bgKeyFramePosList_.push_back(file_.tellp());
         bgKeyFrameTimeStampList_.push_back(bgModelTimeStamp_);

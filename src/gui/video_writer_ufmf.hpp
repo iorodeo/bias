@@ -93,9 +93,9 @@ namespace bias
             QString colorCoding_;
 
             std::fstream file_;
+            std::streampos indexLocation_;
             std::streampos indexLocationPtr_;
 
-            unsigned long indexLocation_;
             unsigned long nextFrameToWrite_;
             unsigned long numKeyFramesWritten_;
 
