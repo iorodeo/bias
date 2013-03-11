@@ -8,6 +8,7 @@
 #include <QPointer>
 #include <QDateTime>
 #include <QMainWindow>
+#include <QByteArray>
 #include "ui_camera_window.h"
 #include "camera_facade_fwd.hpp"
 #include "video_writer_params.hpp"
@@ -43,6 +44,8 @@ namespace bias
             CameraWindow(Guid cameraGuid, QWidget *parent=0);
             void saveConfiguration();
             void loadConfiguration();
+            QByteArray getConfiguration();
+            void setConfiguration(QByteArray jsonConfig);
 
         signals:
 
@@ -112,7 +115,8 @@ namespace bias
             bool logging_;
             bool flipVert_;
             bool flipHorz_;
-            bool haveDefaultVideosDir_;
+            bool haveDefaultVideoFileDir_;
+            bool haveDefaultConfigFileDir_;
 
             QDir defaultVideoFileDir_;
             QDir currentVideoFileDir_;
@@ -174,7 +178,7 @@ namespace bias
             void startImageCapture();
             void stopImageCapture();
 
-            void setDefaultVideoFileDir();
+            void setDefaultFileDirs();
             void setupImageDisplayTimer();
             void setupCaptureDurationTimer();
             

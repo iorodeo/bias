@@ -22,7 +22,6 @@
 #include <QThreadPool>
 #include <QSignalMapper>
 #include <QVariantMap>
-#include <QByteArray>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
@@ -41,8 +40,9 @@ namespace bias
     const unsigned long DEFAULT_CAPTURE_DURATION = 300; // sec
     const double DEFAULT_IMAGE_DISPLAY_FREQ = 10.0;     // Hz
     const QSize DEFAULT_HISTOGRAM_IMAGE_SIZE = QSize(256,204);
-    const QString DEFAULT_VIDEOFILE_NAME = QString("bias_video");
-
+    const QString DEFAULT_VIDEO_FILE_NAME = QString("bias_video");
+    const QString DEFAULT_CONFIG_FILE_NAME = QString("bias_config");
+    const QString CONFIG_FILE_EXTENSION = QString("json");
 
     QMap<VideoFileFormat, QString> createExtensionMap()
     {
@@ -69,10 +69,29 @@ namespace bias
 
     void CameraWindow::saveConfiguration()
     {
-        if (!connected_) 
-        {
-            return;
-        }
+        // --------------------------------------------------------------------
+        // TO DO  ... need to add error checking. 
+        // --------------------------------------------------------------------
+        if (!connected_) { return; }
+        QByteArray jsonConfig = getConfiguration();
+        std::cout << QString(jsonConfig).toStdString() << std::endl;
+    }
+
+
+    void CameraWindow::loadConfiguration()
+    {
+    }
+
+
+    QByteArray CameraWindow::getConfiguration()
+    {
+        // --------------------------------------------------------------------
+        // TO DO  ... need to add error checking. 
+        // --------------------------------------------------------------------
+        
+        QByteArray jsonConfig;
+
+        if (!connected_) { return jsonConfig; }
 
         QVariantMap configurationMap;
         QJson::Serializer serializer;
@@ -147,8 +166,8 @@ namespace bias
         QVariantMap loggingMap;
         loggingMap.insert("Enabled", logging_);
         loggingMap.insert("Format", VIDEOFILE_EXTENSION_MAP[videoFileFormat_]);
-        loggingMap.insert("Video File Directory", currentVideoFileDir_.canonicalPath());
-        loggingMap.insert("Video File Name", currentVideoFileName_);
+        loggingMap.insert("Directory", currentVideoFileDir_.canonicalPath());
+        loggingMap.insert("File Name", currentVideoFileName_);
         
         // Add logging configuration 
         QVariantMap loggingSettingsMap;
@@ -200,19 +219,24 @@ namespace bias
         displayMap.insert("Update Frequency", imageDisplayFreq_);
         configurationMap.insert("Display", displayMap);
 
+        // Add configuration configuration
+        QVariantMap configConfigMap;
+        configConfigMap.insert("Directory", currentConfigFileDir_.canonicalPath());
+        configConfigMap.insert("File Name", currentConfigFileName_);
+        configurationMap.insert("Configuration", configConfigMap);
+
         // Serialize configuration
         bool ok;
-        QByteArray json = serializer.serialize(configurationMap,&ok);
+        jsonConfig = serializer.serialize(configurationMap,&ok);
         if (!ok)
         {
             std::cout << "Error converting config to json - unable to serialize" << std::endl;
-            return;
         }
-        std::cout << QString(json).toStdString() << std::endl;
+        return jsonConfig;
     }
 
 
-    void CameraWindow::loadConfiguration()
+    void setConfiguration(QByteArray jsonConfig)
     {
     }
 
@@ -402,10 +426,51 @@ namespace bias
 
     void CameraWindow::actionFileSaveconfigTriggered()
     {
+        // Get current video filename
+        if (!currentConfigFileDir_.exists()) 
+        {
+            currentConfigFileDir_ = defaultConfigFileDir_;
+        }
+        QString fileName = currentConfigFileName_ + "." + CONFIG_FILE_EXTENSION;
+        QFileInfo configFileInfo(currentConfigFileDir_, fileName);
+        QString configFileFullPath = configFileInfo.absoluteFilePath();
+
+        // Query user for desired video filename and directory
+        QString configFileString = QFileDialog::getSaveFileName(
+                this, 
+                QString("Select Configuration File"),
+                configFileInfo.absoluteFilePath()
+                );
+        configFileInfo = QFileInfo(configFileString);
+
+        QDir configFileDir = configFileInfo.dir();
+        QString configFileName = configFileInfo.baseName();
+
+        // Check return results and assign values
+        if (configFileName.isEmpty())
+        {
+            if (currentConfigFileName_.isEmpty())
+            {
+                configFileName = DEFAULT_VIDEO_FILE_NAME;
+            }
+            else
+            {
+                configFileName = currentConfigFileName_;
+            }
+            configFileDir = currentConfigFileDir_;
+        }
+        if (!configFileDir.exists())
+        {
+            configFileDir = defaultConfigFileDir_;
+        }
+
+        currentConfigFileDir_ = configFileDir;
+        currentConfigFileName_ = configFileName;
         saveConfiguration();
-        //QString msgTitle("Development");
-        //QString msgText("Save configuration not fully implemented");
-        //QMessageBox::information(this, msgTitle, msgText);
+
+        std::cout << "dir:  " << currentConfigFileDir_.absolutePath().toStdString() << std::endl;
+        std::cout << "file: " << currentConfigFileName_.toStdString() << std::endl;
+
     }
 
 
@@ -451,7 +516,7 @@ namespace bias
 
     void CameraWindow::actionLoggingEnabledTriggered()
     {
-        if (haveDefaultVideosDir_) {
+        if (haveDefaultVideoFileDir_) {
             logging_ = actionLoggingEnabledPtr_ -> isChecked();
         }
         else
@@ -494,7 +559,7 @@ namespace bias
         {
             if (currentVideoFileName_.isEmpty())
             {
-                videoFileName = DEFAULT_VIDEOFILE_NAME;
+                videoFileName = DEFAULT_VIDEO_FILE_NAME;
             }
             else
             {
@@ -719,7 +784,7 @@ namespace bias
         logging_ = false;
         flipVert_ = false;
         flipHorz_ = false;
-        haveDefaultVideosDir_ = false;
+        haveDefaultVideoFileDir_ = false;
 
         imageRotation_ = IMAGE_ROTATION_0;
         videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
@@ -733,9 +798,11 @@ namespace bias
         newImageQueuePtr_ = std::make_shared<LockableQueue<StampedImage>>();
         logImageQueuePtr_ = std::make_shared<LockableQueue<StampedImage>>();
 
-        setDefaultVideoFileDir();
+        setDefaultFileDirs();
         currentVideoFileDir_ = defaultVideoFileDir_;
-        currentVideoFileName_ = DEFAULT_VIDEOFILE_NAME;
+        currentVideoFileName_ = DEFAULT_VIDEO_FILE_NAME;
+        currentConfigFileDir_ = defaultConfigFileDir_;
+        currentConfigFileName_ = DEFAULT_CONFIG_FILE_NAME;
 
         setupCameraMenu();
         setupLoggingMenu();
@@ -1004,7 +1071,7 @@ namespace bias
     }
 
 
-    void CameraWindow::setDefaultVideoFileDir()
+    void CameraWindow::setDefaultFileDirs()
     {
 #ifdef WIN32
 
@@ -1021,6 +1088,7 @@ namespace bias
 
         QDir userProfileDir = QDir(QString(getenv("USERPROFILE")));
 
+        // Set default video file dir
         if ((cdToVideosOk) && (videoDir.exists()))
         {
             defaultVideoFileDir_ = videoDir;
@@ -1034,21 +1102,43 @@ namespace bias
             defaultVideoFileDir_ = userProfileDir;
         }
 
-        std::cout << "defaultVideoFileDir_ = " << defaultVideoFileDir_.absolutePath().toStdString() << std::endl;
+        // Set default config file dir
+        if (myDocsDir.exists())
+        {
+            defaultConfigFileDir_ = myDocsDir;
+        }
+        else
+        {
+            defaultConfigFileDir_ = userProfileDir;
+        }
 #else
         defaultVideoFileDir_ = QDir(QString(getenv("HOME")));
+        defaultConfigFileDir_ = QDir(QString(getenv("HOME")));
 #endif 
+        // Check that default video file directory exists
         if (!defaultVideoFileDir_.exists())
         {
-            haveDefaultVideosDir_ = false;
-            haveDefaultVideosDir_ = true;
+            haveDefaultVideoFileDir_ = false;
             QString msgTitle("Initialization Error");
             QString msgText("Unable to determine default location for video files.");
             QMessageBox::critical(this, msgTitle, msgText);
         }
         else
         {
-            haveDefaultVideosDir_ = true;
+            haveDefaultVideoFileDir_ = true;
+        }
+
+        // Check that default config file directory exists
+        if (!defaultConfigFileDir_.exists())
+        {
+            haveDefaultConfigFileDir_ = false;
+            QString msgTitle("Initialization Error");
+            QString msgText("Unable to determine default location for configuration files.");
+            QMessageBox::critical(this, msgTitle, msgText);
+        }
+        else
+        {
+            haveDefaultConfigFileDir_ = true;
         }
     }
 
