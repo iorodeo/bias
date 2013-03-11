@@ -42,8 +42,8 @@ namespace bias
         public:
 
             CameraWindow(Guid cameraGuid, QWidget *parent=0);
-            void saveConfiguration();
-            void loadConfiguration();
+            void saveConfiguration(QString filename);
+            void loadConfiguration(QString fileName);
             QByteArray getConfiguration();
             void setConfiguration(QByteArray jsonConfig);
 
@@ -229,6 +229,7 @@ namespace bias
 
             QString getVideoFileFullPath();
             QString getVideoFileFullPathWithGuid();
+            QString getConfigFileFullPath();
 
             cv::Mat calcHistogram(cv::Mat mat);
 

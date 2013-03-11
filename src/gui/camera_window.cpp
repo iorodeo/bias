@@ -22,10 +22,14 @@
 #include <QThreadPool>
 #include <QSignalMapper>
 #include <QVariantMap>
+#include <QFile>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
-#include <qjson/serializer.h>
+
+//#include <qjson/serializer.h>
+//#include <qjson/parser.h>
+#include "json.hpp"
 
 
 namespace bias
@@ -67,19 +71,89 @@ namespace bias
     }
 
 
-    void CameraWindow::saveConfiguration()
+    void CameraWindow::saveConfiguration(QString fileName)
     {
         // --------------------------------------------------------------------
         // TO DO  ... need to add error checking. 
         // --------------------------------------------------------------------
         if (!connected_) { return; }
         QByteArray jsonConfig = getConfiguration();
-        std::cout << QString(jsonConfig).toStdString() << std::endl;
+        QFile configFile(fileName);
+        configFile.open(QIODevice::WriteOnly);
+        configFile.write(jsonConfig);
+        configFile.close();
+
+        // Basic pretty printing ... temporary
+        unsigned int indentLevel = 0;
+        unsigned int indentSize = 2;
+        unsigned int pos = 0;
+        QByteArray jsonConfigNew;
+        while (pos < jsonConfig.size()) 
+        {
+            bool delimiter = false;
+            if (jsonConfig[pos] == '}')
+            {
+                jsonConfigNew.append('\n');
+                indentLevel -= 1;
+                for (unsigned int j=0; j<indentLevel*indentSize; j++)
+                {
+                    jsonConfigNew.append(' ');
+                } 
+                jsonConfigNew.append(jsonConfig[pos]);
+                pos++;
+                jsonConfigNew.append(jsonConfig[pos]);
+                jsonConfigNew.append('\n');
+                for (unsigned int j=0; j<indentLevel*indentSize; j++)
+                {
+                    jsonConfigNew.append(' ');
+                } 
+            }
+            else 
+            {
+                jsonConfigNew.append(jsonConfig[pos]);
+
+                if (jsonConfig[pos] == '{')
+                {
+                    jsonConfigNew.append('\n');
+                    indentLevel += 1;
+                    delimiter = true;
+                }
+                else if (jsonConfig[pos] == ',')
+                {
+                    jsonConfigNew.append('\n');
+                    delimiter = true;
+                }
+                if (delimiter) 
+                {
+                    for (unsigned int j=0; j<indentLevel*indentSize; j++)
+                    {
+                        jsonConfigNew.append(' ');
+                    } 
+                }
+            }
+            pos++;
+        }
+        std::cout << QString(jsonConfigNew).toStdString() << std::endl;
     }
 
 
-    void CameraWindow::loadConfiguration()
+    void CameraWindow::loadConfiguration(QString fileName)
     {
+        // --------------------------------------------------------------------
+        // TO DO  ... need to add error checking. 
+        // --------------------------------------------------------------------
+        QFile configFile(fileName);
+        if (!configFile.exists())
+        {
+            // ----------------------------------------------------------------
+            // TO DO ... error message
+            // ----------------------------------------------------------------
+            return;
+        }
+        configFile.open(QIODevice::ReadOnly);
+        QByteArray jsonConfig = configFile.readAll();
+        configFile.close();
+        setConfiguration(jsonConfig);
     }
 
 
@@ -88,18 +162,14 @@ namespace bias
         // --------------------------------------------------------------------
         // TO DO  ... need to add error checking. 
         // --------------------------------------------------------------------
-        
         QByteArray jsonConfig;
 
         if (!connected_) { return jsonConfig; }
 
         QVariantMap configurationMap;
-        QJson::Serializer serializer;
-        serializer.setIndentMode(QJson::IndentFull);
 
-        // --------------------------------------------------------------------
-        // TO DO .. need to add configuration directory and file name
-        // --------------------------------------------------------------------
+        //QJson::Serializer serializer;
+        //serializer.setIndentMode(QJson::IndentFull);
 
         // Add camera configuration 
         QVariantMap cameraMap;
@@ -138,7 +208,6 @@ namespace bias
             valueMap.insert("Value", prop.value);
             valueMap.insert("Absolute Value", prop.absoluteValue);
             cameraPropMap.insert(propName, valueMap);
-            std::cout << prop.toString() << std::endl;
         }
 
         cameraMap.insert("Properties", cameraPropMap);
@@ -227,7 +296,8 @@ namespace bias
 
         // Serialize configuration
         bool ok;
-        jsonConfig = serializer.serialize(configurationMap,&ok);
+        //jsonConfig = serializer.serialize(configurationMap,&ok);
+        jsonConfig = QtJson::serialize(configurationMap,ok);
         if (!ok)
         {
             std::cout << "Error converting config to json - unable to serialize" << std::endl;
@@ -236,9 +306,24 @@ namespace bias
     }
 
 
-    void setConfiguration(QByteArray jsonConfig)
+    void CameraWindow::setConfiguration(QByteArray jsonConfig)
     {
+        std::cout << QString(jsonConfig).toStdString() << std::endl;
+
+        bool ok;
+        QVariantMap configurationMap = QtJson::parse(QString(jsonConfig), ok).toMap();
+        if (!ok)
+        {
+            // ---------------------------------------------------
+            // TO DO  ... error message
+            // ---------------------------------------------------
+            std::cout << "configuration parsing error" << std::endl;
+        }
+        QVariantMap cameraMap = configurationMap["Camera"].toMap();
+        std::cout << "Frame Rate: " << cameraMap["Frame Rate"].toString().toStdString() << std::endl;
+        
     }
+
 
     // Protected methods
     // ----------------------------------------------------------------------------------
@@ -418,33 +503,38 @@ namespace bias
 
     void CameraWindow::actionFileLoadConfigTriggered()
     {
-        QString msgTitle("Development");
-        QString msgText("Load configuration not fully implemented");
-        QMessageBox::information(this, msgTitle, msgText);
+        QString configFileFullPath = getConfigFileFullPath();
+
+        // Query user for desired video filename and directory
+        QString configFileString = QFileDialog::getOpenFileName(
+                this, 
+                QString("Load Configuration File"),
+                configFileFullPath
+                );
+
+        if (configFileString.isEmpty())
+        {
+            return;
+        }
+        loadConfiguration(configFileString);
     }
 
 
     void CameraWindow::actionFileSaveconfigTriggered()
     {
-        // Get current video filename
-        if (!currentConfigFileDir_.exists()) 
-        {
-            currentConfigFileDir_ = defaultConfigFileDir_;
-        }
-        QString fileName = currentConfigFileName_ + "." + CONFIG_FILE_EXTENSION;
-        QFileInfo configFileInfo(currentConfigFileDir_, fileName);
-        QString configFileFullPath = configFileInfo.absoluteFilePath();
+        QString configFileFullPath = getConfigFileFullPath();
 
         // Query user for desired video filename and directory
         QString configFileString = QFileDialog::getSaveFileName(
                 this, 
-                QString("Select Configuration File"),
-                configFileInfo.absoluteFilePath()
+                QString("Save Configuration File"),
+                configFileFullPath
                 );
-        configFileInfo = QFileInfo(configFileString);
+        QFileInfo configFileInfo = QFileInfo(configFileString);
 
         QDir configFileDir = configFileInfo.dir();
         QString configFileName = configFileInfo.baseName();
+
 
         // Check return results and assign values
         if (configFileName.isEmpty())
@@ -466,7 +556,8 @@ namespace bias
 
         currentConfigFileDir_ = configFileDir;
         currentConfigFileName_ = configFileName;
-        saveConfiguration();
+        configFileFullPath = getConfigFileFullPath();
+        saveConfiguration(configFileFullPath);
 
         std::cout << "dir:  " << currentConfigFileDir_.absolutePath().toStdString() << std::endl;
         std::cout << "file: " << currentConfigFileName_.toStdString() << std::endl;
@@ -2179,7 +2270,6 @@ namespace bias
         return videoFileFullPath;
     }
 
-
     QString CameraWindow::getVideoFileFullPathWithGuid()
     {
         cameraPtr_ -> acquireLock();
@@ -2196,6 +2286,19 @@ namespace bias
         QFileInfo videoFileInfo(currentVideoFileDir_, fileName);
         QString videoFileFullPath = videoFileInfo.absoluteFilePath();
         return videoFileFullPath;
+    }
+
+
+    QString CameraWindow::getConfigFileFullPath()
+    {
+        QString fileName = currentConfigFileName_ + "." + CONFIG_FILE_EXTENSION;
+        if (!currentConfigFileDir_.exists())
+        {
+            currentConfigFileDir_ = defaultConfigFileDir_;
+        }
+        QFileInfo configFileInfo(currentConfigFileDir_, fileName);
+        QString configFileFullPath = configFileInfo.absoluteFilePath();
+        return configFileFullPath;
     }
 
 
