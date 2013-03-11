@@ -118,6 +118,10 @@ namespace bias
             QDir currentVideoFileDir_;
             QString currentVideoFileName_;
 
+            QDir defaultConfigFileDir_;
+            QDir currentConfigFileDir_;
+            QString currentConfigFileName_;
+
             double imageDisplayFreq_;
             ImageRotationType imageRotation_;
             VideoFileFormat videoFileFormat_;

@@ -74,11 +74,15 @@ namespace bias
             return;
         }
 
-        QVariantMap configMap;
+        QVariantMap configurationMap;
         QJson::Serializer serializer;
         serializer.setIndentMode(QJson::IndentFull);
 
-        // Add camera information
+        // --------------------------------------------------------------------
+        // TO DO .. need to add configuration directory and file name
+        // --------------------------------------------------------------------
+
+        // Add camera configuration 
         QVariantMap cameraMap;
 
         // --------------------------------------------------------------------
@@ -137,12 +141,68 @@ namespace bias
         // ------------------------------------------------------------------------
         // CAMERA UNLOCKED
         // ------------------------------------------------------------------------
+        configurationMap.insert("Camera", cameraMap);
+
+        // Add logging information
+        QVariantMap loggingMap;
+        loggingMap.insert("Enabled", logging_);
+        loggingMap.insert("Format", VIDEOFILE_EXTENSION_MAP[videoFileFormat_]);
+        loggingMap.insert("Video File Directory", currentVideoFileDir_.canonicalPath());
+        loggingMap.insert("Video File Name", currentVideoFileName_);
         
-        configMap.insert("camera", cameraMap);
+        // Add logging configuration 
+        QVariantMap loggingSettingsMap;
+        
+        QVariantMap bmpSettingsMap;
+        bmpSettingsMap.insert("Frame Skip", videoWriterParams_.bmp.frameSkip);
+        loggingSettingsMap.insert("bmp", bmpSettingsMap);
+
+        QVariantMap aviSettingsMap;
+        aviSettingsMap.insert("Frame Skip", videoWriterParams_.avi.frameSkip);
+        aviSettingsMap.insert("Codec", videoWriterParams_.avi.codec);
+        loggingSettingsMap.insert("avi", aviSettingsMap);
+
+        QVariantMap fmfSettingsMap;
+        fmfSettingsMap.insert("Frame Skip", videoWriterParams_.fmf.frameSkip);
+        loggingSettingsMap.insert("fmf", fmfSettingsMap);
+
+        QVariantMap ufmfSettingsMap;
+        ufmfSettingsMap.insert("Frame Skip", videoWriterParams_.ufmf.frameSkip);
+        ufmfSettingsMap.insert("Background Threshold", videoWriterParams_.ufmf.backgroundThreshold);
+        ufmfSettingsMap.insert("Box Length", videoWriterParams_.ufmf.boxLength);
+        ufmfSettingsMap.insert("Median Update Count", videoWriterParams_.ufmf.medianUpdateCount);
+        ufmfSettingsMap.insert("Compression Threads", videoWriterParams_.ufmf.numberOfCompressors);
+
+        QVariantMap ufmfDilateMap;
+        ufmfDilateMap.insert("On", videoWriterParams_.ufmf.dilateState);
+        ufmfDilateMap.insert("Window Size", videoWriterParams_.ufmf.dilateWindowSize);
+        ufmfSettingsMap.insert("Dilate", ufmfDilateMap);
+        
+        loggingSettingsMap.insert("ufmf", ufmfSettingsMap);
+        loggingMap.insert("Settings", loggingSettingsMap);
+        configurationMap.insert("Logging", loggingMap);
+
+        // Add Timer configuration
+        QVariantMap timerMap;
+        timerMap.insert("Enabled", actionTimerEnabledPtr_ -> isChecked());
+        QVariantMap timerSettingsMap;
+        timerSettingsMap.insert("Duration", qulonglong(captureDurationSec_));
+        timerMap.insert("Settings", timerSettingsMap);
+        configurationMap.insert("Timer", timerMap);
+
+        // Add display configuration
+        QVariantMap displayMap;
+        QVariantMap orientationMap;
+        orientationMap.insert("Flip Vertical", flipVert_ );
+        orientationMap.insert("Flip Horizontal", flipHorz_);
+        displayMap.insert("Orientation", orientationMap);
+        displayMap.insert("Rotation", (unsigned int)(imageRotation_));
+        displayMap.insert("Update Frequency", imageDisplayFreq_);
+        configurationMap.insert("Display", displayMap);
 
         // Serialize configuration
         bool ok;
-        QByteArray json = serializer.serialize(configMap,&ok);
+        QByteArray json = serializer.serialize(configurationMap,&ok);
         if (!ok)
         {
             std::cout << "Error converting config to json - unable to serialize" << std::endl;
