@@ -243,6 +243,20 @@ namespace bias
         return ss.str();
     }
 
+    std::string getTriggerTypeString(TriggerType trigType)
+    {
+        std::string trigTypeString;
+        if (trigType == TRIGGER_INTERNAL)
+        {
+            trigTypeString = std::string("Internal");
+        }
+        else
+        {
+            trigTypeString = std::string("External");
+        }
+        return trigTypeString;
+    }
+
     // ------------------------------------------------------------------------
     
     static std::map<FrameRate, float> createFrameRateToFloatMap()

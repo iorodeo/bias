@@ -21,9 +21,12 @@
 #include <QTimer>
 #include <QThreadPool>
 #include <QSignalMapper>
+#include <QVariantMap>
+#include <QByteArray>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
+#include <qjson/serializer.h>
 
 
 namespace bias
@@ -63,6 +66,95 @@ namespace bias
         initialize(cameraGuid);
     }
 
+
+    void CameraWindow::saveConfiguration()
+    {
+        if (!connected_) 
+        {
+            return;
+        }
+
+        QVariantMap configMap;
+        QJson::Serializer serializer;
+        serializer.setIndentMode(QJson::IndentFull);
+
+        // Add camera information
+        QVariantMap cameraMap;
+
+        // --------------------------------------------------------------------
+        // CAMERA LOCKED  - need to add error checking!!
+        // --------------------------------------------------------------------
+        cameraPtr_ -> acquireLock();
+
+        QString vendorName = QString::fromStdString(cameraPtr_ -> getVendorName());
+        cameraMap.insert("Vendor", vendorName); 
+
+        QString modelName = QString::fromStdString(cameraPtr_ -> getModelName());
+        cameraMap.insert("Model", modelName);
+
+        QString guidString = QString::fromStdString((cameraPtr_ -> getGuid()).toString());
+        cameraMap.insert("GUID", guidString);
+
+        // Add camera properties
+        QVariantMap cameraPropMap;
+        PropertyList propList = cameraPtr_ -> getListOfProperties();
+        for (
+                PropertyList::iterator it = propList.begin();
+                it != propList.end();
+                it++
+            )
+        {
+            Property prop = *it;
+            QString propName = QString::fromStdString(getPropertyTypeString(prop.type));
+            QVariantMap valueMap;
+            valueMap.insert("Present", prop.present);
+            valueMap.insert("Absolute Control", prop.absoluteControl);
+            valueMap.insert("One Push", prop.onePush);
+            valueMap.insert("On", prop.on);
+            valueMap.insert("Auto Active", prop.autoActive);
+            valueMap.insert("Value", prop.value);
+            valueMap.insert("Absolute Value", prop.absoluteValue);
+            cameraPropMap.insert(propName, valueMap);
+            std::cout << prop.toString() << std::endl;
+        }
+
+        cameraMap.insert("Properties", cameraPropMap);
+
+        // Add videomode, framerate and trigger information
+        VideoMode videoMode = cameraPtr_ -> getVideoMode();
+        QString videoModeString = QString::fromStdString(getVideoModeString(videoMode));
+        cameraMap.insert("Video Mode", videoModeString);
+        
+        FrameRate frameRate = cameraPtr_ -> getFrameRate();
+        QString frameRateString = QString::fromStdString(getFrameRateString(frameRate));
+        cameraMap.insert("Frame Rate", frameRateString);
+
+        TriggerType trigType = cameraPtr_ -> getTriggerType();
+        QString trigTypeString = QString::fromStdString(getTriggerTypeString(trigType));
+        cameraMap.insert("Trigger Type", trigTypeString);
+        
+        cameraPtr_ -> releaseLock();
+        // ------------------------------------------------------------------------
+        // CAMERA UNLOCKED
+        // ------------------------------------------------------------------------
+        
+        configMap.insert("camera", cameraMap);
+
+        // Serialize configuration
+        bool ok;
+        QByteArray json = serializer.serialize(configMap,&ok);
+        if (!ok)
+        {
+            std::cout << "Error converting config to json - unable to serialize" << std::endl;
+            return;
+        }
+        std::cout << QString(json).toStdString() << std::endl;
+    }
+
+
+    void CameraWindow::loadConfiguration()
+    {
+    }
 
     // Protected methods
     // ----------------------------------------------------------------------------------
@@ -250,9 +342,10 @@ namespace bias
 
     void CameraWindow::actionFileSaveconfigTriggered()
     {
-        QString msgTitle("Development");
-        QString msgText("Save configuration not fully implemented");
-        QMessageBox::information(this, msgTitle, msgText);
+        saveConfiguration();
+        //QString msgTitle("Development");
+        //QString msgText("Save configuration not fully implemented");
+        //QMessageBox::information(this, msgTitle, msgText);
     }
 
 

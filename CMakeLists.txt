@@ -42,6 +42,11 @@ endif()
 if(with_qt_gui)
     set(QT_BINARY_DIR "C:/users/wbd/work/qt/qt_activestate/bin")
     find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
+    set(qjson_INCLUDE_DIRS "C:/users/wbd/work/qjson/install/include")
+    include_directories(${qjson_INCLUDE_DIRS})
+
+    # FIX THIS ---- 
+    set(qjson_ext_link_LIBS "C:/users/wbd/work/qjson/install/bin/libqjson.dll")
 endif()
 
 # Compiler flags
@@ -81,7 +86,7 @@ endif()
 
 # External link libraries
 # -----------------------------------------------------------------------------
-set(bias_ext_link_LIBS ${OpenCV_LIBS})
+set(bias_ext_link_LIBS ${OpenCV_LIBS} ${qjson_ext_link_LIBS})
 
 if(with_fc2)
     set(bias_ext_link_LIBS ${bias_ext_link_LIBS} ${FlyCapture2_LIBRARIES})

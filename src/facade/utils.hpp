@@ -32,6 +32,8 @@ namespace bias
 
     std::string getImageInfoString(ImageInfo imgInfo);
 
+    std::string getTriggerTypeString(TriggerType trigType);
+
     // ------------------------------------------------------------------------
     float getFrameRateAsFloat(FrameRate frmRate);
 

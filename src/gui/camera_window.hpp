@@ -41,6 +41,8 @@ namespace bias
         public:
 
             CameraWindow(Guid cameraGuid, QWidget *parent=0);
+            void saveConfiguration();
+            void loadConfiguration();
 
         signals:
 

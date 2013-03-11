@@ -4,6 +4,8 @@
 #include <QMessageBox>
 #include "camera_window.hpp"
 #include "camera_facade.hpp"
+#include <iostream>
+
 
 // ------------------------------------------------------------------------
 // TO DO ... temporary main function. Currently just opens a camera
