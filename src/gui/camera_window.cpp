@@ -39,6 +39,7 @@ namespace bias
     
     const unsigned int DURATION_TIMER_INTERVAL = 1000; // msec
     const QSize PREVIEW_DUMMY_IMAGE_SIZE = QSize(320,256);
+    const unsigned int JSON_INDENT_STEP = 4;
 
     // Default settings
     const unsigned long DEFAULT_CAPTURE_DURATION = 300; // sec
@@ -78,62 +79,11 @@ namespace bias
         // --------------------------------------------------------------------
         if (!connected_) { return; }
         QByteArray jsonConfig = getConfiguration();
+        QByteArray jsonConfigPretty = prettyIndentJson(jsonConfig); 
         QFile configFile(fileName);
         configFile.open(QIODevice::WriteOnly);
-        configFile.write(jsonConfig);
+        configFile.write(jsonConfigPretty);
         configFile.close();
-
-        // Basic pretty printing ... temporary
-        unsigned int indentLevel = 0;
-        unsigned int indentSize = 2;
-        unsigned int pos = 0;
-        QByteArray jsonConfigNew;
-        while (pos < jsonConfig.size()) 
-        {
-            bool delimiter = false;
-            if (jsonConfig[pos] == '}')
-            {
-                jsonConfigNew.append('\n');
-                indentLevel -= 1;
-                for (unsigned int j=0; j<indentLevel*indentSize; j++)
-                {
-                    jsonConfigNew.append(' ');
-                } 
-                jsonConfigNew.append(jsonConfig[pos]);
-                pos++;
-                jsonConfigNew.append(jsonConfig[pos]);
-                jsonConfigNew.append('\n');
-                for (unsigned int j=0; j<indentLevel*indentSize; j++)
-                {
-                    jsonConfigNew.append(' ');
-                } 
-            }
-            else 
-            {
-                jsonConfigNew.append(jsonConfig[pos]);
-
-                if (jsonConfig[pos] == '{')
-                {
-                    jsonConfigNew.append('\n');
-                    indentLevel += 1;
-                    delimiter = true;
-                }
-                else if (jsonConfig[pos] == ',')
-                {
-                    jsonConfigNew.append('\n');
-                    delimiter = true;
-                }
-                if (delimiter) 
-                {
-                    for (unsigned int j=0; j<indentLevel*indentSize; j++)
-                    {
-                        jsonConfigNew.append(' ');
-                    } 
-                }
-            }
-            pos++;
-        }
-        std::cout << QString(jsonConfigNew).toStdString() << std::endl;
     }
 
 
@@ -2346,6 +2296,67 @@ namespace bias
         QString timeString;
         timeString.sprintf("%02d:%02d:%02d", int(hrs), int(min), int(sec));
         return timeString;
+    }
+
+
+    QByteArray prettyIndentJson(QByteArray jsonArray)
+    {
+        QByteArray jsonArrayNew;
+        unsigned int pos = 0;
+        unsigned int indentLevel = 0;
+        unsigned int indentStep = JSON_INDENT_STEP;
+        unsigned int indent = 0;
+
+        while (pos < jsonArray.size()) 
+        {
+            if (jsonArray[pos] == '}' || jsonArray[pos] == ']')
+            {
+                addNewLineToByteArray(jsonArrayNew);
+                indentLevel -= 1;
+                indent = indentLevel*indentStep;
+                addIndentToByteArray(jsonArrayNew, indent);
+                jsonArrayNew.append(jsonArray[pos]);
+            }
+            else if ((jsonArray[pos] =='{') || (jsonArray[pos] == '[') )
+            {
+                jsonArrayNew.append(jsonArray[pos]);
+                addNewLineToByteArray(jsonArrayNew);
+                indentLevel += 1;
+                indent = indentLevel*indentStep;
+                addIndentToByteArray(jsonArrayNew, indent);
+            }
+            else if (jsonArray[pos] == ',')
+            {
+                jsonArrayNew.append(jsonArray[pos]);
+                addNewLineToByteArray(jsonArrayNew);
+                indent = indentLevel*indentStep;
+                addIndentToByteArray(jsonArrayNew, indent);
+            }
+            else
+            {
+                jsonArrayNew.append(jsonArray[pos]);
+            }
+            pos++;
+        }
+        return jsonArrayNew;
+    }
+
+
+    void addIndentToByteArray(QByteArray &array, unsigned int width)
+    {
+        for (unsigned int i=0; i<width; i++)
+        {
+            array.append(' ');
+        }
+    }
+
+
+    void addNewLineToByteArray(QByteArray &array)
+    {
+#ifdef WIN32
+        array.append('\r');
+#endif
+        array.append('\n');
     }
 
 } // namespace bias

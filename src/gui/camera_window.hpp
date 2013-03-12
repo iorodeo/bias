@@ -239,6 +239,9 @@ namespace bias
     // Utilitiy functions
     QString boolToOnOffQString(bool value);
     QString timeStampToQString(double timeStamp);
+    QByteArray prettyIndentJson(QByteArray jsonArray);
+    void addIndentToByteArray(QByteArray &array, unsigned int width);
+    void addNewLineToByteArray(QByteArray &array);
 
 }
 
