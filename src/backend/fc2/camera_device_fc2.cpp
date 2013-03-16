@@ -989,30 +989,11 @@ namespace bias {
             throw RuntimeError(ERROR_FC2_UNSUPPORTED_VIDEO_MODE, ssError.str());
         }
 
-        if (0) // Print format7 information for selected mode
+        if (1) // Print format7 information for selected mode
         {
             printFormat7Info_fc2(format7Info);
         }
 
-        // Get Current format7 settings
-        error = fc2GetFormat7Configuration(
-                context_, 
-                &imageSettings,
-                &packetSize,
-                &percentage
-                );
-        if (error != FC2_ERROR_OK)
-        { 
-            std::stringstream ssError; 
-            ssError << __PRETTY_FUNCTION__; 
-            ssError << ": unable to get FlyCapture2 format 7 configuration"; 
-            throw RuntimeError(ERROR_FC2_GET_FORMAT7_CONFIGURATION, ssError.str());
-        }
-
-        if (0) // Print current configuration settings
-        {
-            printFormat7Configuration_fc2(imageSettings,packetSize,percentage);
-        }
 
         // Create desired format7 configuration
         imageSettings.mode = format7Info.mode;
@@ -1020,7 +1001,7 @@ namespace bias {
         imageSettings.offsetY = 0;
         imageSettings.width = format7Info.maxWidth;
         imageSettings.height = format7Info.maxHeight;
-        imageSettings.pixelFormat = FC2_PIXEL_FORMAT_MONO8;
+        imageSettings.pixelFormat = FC2_PIXEL_FORMAT_RAW8;
 
         // Check that settings are valid and get packet info
         error = fc2ValidateFormat7Settings(
@@ -1044,20 +1025,39 @@ namespace bias {
             throw RuntimeError(ERROR_FC2_INVALID_FORMAT7_SETTINGS, ssError.str());
         }
 
-        if (0)  // Print packet info
+        if (1)  // Print packet info
         {
             printFormat7ImageSettings_fc2(imageSettings);
             printFormat7PacketInfo_fc2(packetInfo);
         }
 
         // Set format 7 configuration settings
-        error = fc2SetFormat7Configuration(context_, &imageSettings, 100);
+        error = fc2SetFormat7Configuration(context_, &imageSettings, 100.0);
         if (error != FC2_ERROR_OK)
         {
             std::stringstream ssError; 
             ssError << __PRETTY_FUNCTION__; 
             ssError << ": unable to sete FlyCapture2 format 7 configuration"; 
             throw RuntimeError(ERROR_FC2_SET_FORMAT7_CONFIGURATION, ssError.str());
+        }
+
+        // Get Current format7 image settings
+        error = fc2GetFormat7Configuration(
+                context_, 
+                &imageSettings,
+                &packetSize,
+                &percentage
+                );
+        if (error != FC2_ERROR_OK)
+        { 
+            std::stringstream ssError; 
+            ssError << __PRETTY_FUNCTION__; 
+            ssError << ": unable to get FlyCapture2 format 7 configuration"; 
+            throw RuntimeError(ERROR_FC2_GET_FORMAT7_CONFIGURATION, ssError.str());
+        }
+        if (1) // Print current configuration settings
+        {
+            printFormat7Configuration_fc2(imageSettings,packetSize,percentage);
         }
     }
 }

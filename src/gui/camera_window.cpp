@@ -470,7 +470,7 @@ namespace bias
     }
 
 
-    void CameraWindow::actionFileSaveconfigTriggered()
+    void CameraWindow::actionFileSaveConfigTriggered()
     {
         QString configFileFullPath = getConfigFileFullPath();
 
@@ -1078,7 +1078,7 @@ namespace bias
                 actionFileSaveConfigPtr_,
                 SIGNAL(triggered()),
                 this,
-                SLOT(actionFileSaveconfigTriggered())
+                SLOT(actionFileSaveConfigTriggered())
                );
 
         connect(
@@ -1475,7 +1475,14 @@ namespace bias
         startButtonPtr_ -> setEnabled(true);
         menuCameraPtr_ -> setEnabled(true);
 
+        cameraPtr_ -> acquireLock();
+        cameraPtr_ -> setVideoMode(VIDEOMODE_FORMAT7);
+        cameraPtr_ -> setTriggerInternal();
+        cameraPtr_ -> releaseLock();
+        
         updateCameraInfoMessage();
+
+        
         updateAllMenus();
     }
 

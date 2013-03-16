@@ -79,7 +79,7 @@ namespace bias
 
             // Menu actions
             void actionFileLoadConfigTriggered();
-            void actionFileSaveconfigTriggered();
+            void actionFileSaveConfigTriggered();
             void actionFileHideWindowTriggered();
             void actionCameraInfoTriggered();
             void actionCameraFormat7SettingsTriggered();
