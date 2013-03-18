@@ -21,14 +21,11 @@
 #include <QTimer>
 #include <QThreadPool>
 #include <QSignalMapper>
-#include <QVariantMap>
 #include <QFile>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
 
-//#include <qjson/serializer.h>
-//#include <qjson/parser.h>
 #include "json.hpp"
 
 
@@ -78,16 +75,20 @@ namespace bias
         // TO DO  ... need to add error checking. 
         // --------------------------------------------------------------------
         if (!connected_) { return; }
-        QByteArray jsonConfig = getConfiguration();
+        QByteArray jsonConfig = getConfigurationJson();
+        if (jsonConfig.isEmpty()) 
+        { 
+            return; 
+        }
         QByteArray jsonConfigPretty = prettyIndentJson(jsonConfig); 
         QFile configFile(fileName);
         configFile.open(QIODevice::WriteOnly);
         configFile.write(jsonConfigPretty);
-        configFile.close();
-    }
+        configFile.close(); 
+    } 
+    
 
-
-    void CameraWindow::loadConfiguration(QString fileName)
+    void CameraWindow::loadConfiguration(QString fileName) 
     {
         // --------------------------------------------------------------------
         // TO DO  ... need to add error checking. 
@@ -95,52 +96,102 @@ namespace bias
         QFile configFile(fileName);
         if (!configFile.exists())
         {
-            // ----------------------------------------------------------------
-            // TO DO ... error message
-            // ----------------------------------------------------------------
+            QString errMsgTitle("Load Configuration Error");
+            QString errMsgText("Error configuration file does not exist");
+            QMessageBox::critical(this, errMsgTitle, errMsgText);
             return;
         }
         configFile.open(QIODevice::ReadOnly);
         QByteArray jsonConfig = configFile.readAll();
         configFile.close();
-        setConfiguration(jsonConfig);
+        setConfigurationFromJson(jsonConfig);
     }
 
 
-    QByteArray CameraWindow::getConfiguration()
+    QByteArray CameraWindow::getConfigurationJson()
     {
-        // --------------------------------------------------------------------
-        // TO DO  ... need to add error checking. 
-        // --------------------------------------------------------------------
-        QByteArray jsonConfig;
+        // Get configuration map
+        QVariantMap configurationMap = getConfigurationMap();
+        if (configurationMap.isEmpty())
+        {
+            QByteArray emptyByteArray = QByteArray();
+            return emptyByteArray;
+        }
 
-        if (!connected_) { return jsonConfig; }
+        // Serialize configuration
+        bool ok;
+        QByteArray jsonConfig = QtJson::serialize(configurationMap,ok);
+        if (!ok)
+        {
+            QString errMsgTitle("Save Configuration Error");
+            QString errMsgText("Error serializing configuration");
+            QMessageBox::critical(this, errMsgTitle, errMsgText);
+            QByteArray emptyByteArray = QByteArray();
+            return emptyByteArray;
+        }
+        return jsonConfig;
+    }
+      
 
+    QVariantMap CameraWindow::getConfigurationMap()
+    {
+        if (!connected_) { 
+            QVariantMap emptyMap = QVariantMap();
+            return emptyMap; 
+        }
+
+        // Get configuration values from camera
+        QString vendorName;
+        QString modelName;
+        QString guidString;
+        PropertyList propList;
+        VideoMode videoMode;
+        FrameRate frameRate;
+        TriggerType trigType;
+        QString errorMsg;
+        bool error = false;
+        unsigned int errorId;
+
+        cameraPtr_ -> acquireLock();
+        try
+        { 
+            vendorName = QString::fromStdString(cameraPtr_ -> getVendorName());
+            modelName = QString::fromStdString(cameraPtr_ -> getModelName());
+            guidString = QString::fromStdString((cameraPtr_ -> getGuid()).toString());
+            propList = cameraPtr_ -> getListOfProperties();
+            videoMode = cameraPtr_ -> getVideoMode();
+            frameRate = cameraPtr_ -> getFrameRate();
+            trigType = cameraPtr_ -> getTriggerType();
+        }
+        catch (RuntimeError &runtimeError)
+        {
+            error = true;
+            errorId = runtimeError.id();
+            errorMsg = QString::fromStdString(runtimeError.what());
+        }
+        cameraPtr_ -> releaseLock();
+
+        if (error)
+        {
+            QString msgTitle("Camera Query Error");
+            QString msgText("Error retrieving values from camera.\n\nError ID: ");
+            msgText += QString::number(errorId);
+            msgText += "\n\n";
+            msgText += errorMsg;
+            QMessageBox::critical(this, msgTitle, msgText);
+            QVariantMap emptyMap = QVariantMap();
+        }
+
+        // Create configuration map 
         QVariantMap configurationMap;
-
-        //QJson::Serializer serializer;
-        //serializer.setIndentMode(QJson::IndentFull);
-
-        // Add camera configuration 
         QVariantMap cameraMap;
 
-        // --------------------------------------------------------------------
-        // CAMERA LOCKED  - need to add error checking!!
-        // --------------------------------------------------------------------
-        cameraPtr_ -> acquireLock();
-
-        QString vendorName = QString::fromStdString(cameraPtr_ -> getVendorName());
         cameraMap.insert("Vendor", vendorName); 
-
-        QString modelName = QString::fromStdString(cameraPtr_ -> getModelName());
         cameraMap.insert("Model", modelName);
-
-        QString guidString = QString::fromStdString((cameraPtr_ -> getGuid()).toString());
         cameraMap.insert("GUID", guidString);
 
         // Add camera properties
         QVariantMap cameraPropMap;
-        PropertyList propList = cameraPtr_ -> getListOfProperties();
         for (
                 PropertyList::iterator it = propList.begin();
                 it != propList.end();
@@ -159,26 +210,15 @@ namespace bias
             valueMap.insert("Absolute Value", prop.absoluteValue);
             cameraPropMap.insert(propName, valueMap);
         }
-
         cameraMap.insert("Properties", cameraPropMap);
 
         // Add videomode, framerate and trigger information
-        VideoMode videoMode = cameraPtr_ -> getVideoMode();
         QString videoModeString = QString::fromStdString(getVideoModeString(videoMode));
         cameraMap.insert("Video Mode", videoModeString);
-        
-        FrameRate frameRate = cameraPtr_ -> getFrameRate();
         QString frameRateString = QString::fromStdString(getFrameRateString(frameRate));
         cameraMap.insert("Frame Rate", frameRateString);
-
-        TriggerType trigType = cameraPtr_ -> getTriggerType();
         QString trigTypeString = QString::fromStdString(getTriggerTypeString(trigType));
         cameraMap.insert("Trigger Type", trigTypeString);
-        
-        cameraPtr_ -> releaseLock();
-        // ------------------------------------------------------------------------
-        // CAMERA UNLOCKED
-        // ------------------------------------------------------------------------
         configurationMap.insert("Camera", cameraMap);
 
         // Add logging information
@@ -244,34 +284,324 @@ namespace bias
         configConfigMap.insert("File Name", currentConfigFileName_);
         configurationMap.insert("Configuration", configConfigMap);
 
-        // Serialize configuration
-        bool ok;
-        //jsonConfig = serializer.serialize(configurationMap,&ok);
-        jsonConfig = QtJson::serialize(configurationMap,ok);
-        if (!ok)
-        {
-            std::cout << "Error converting config to json - unable to serialize" << std::endl;
-        }
-        return jsonConfig;
+        return configurationMap;
+
     }
 
 
-    void CameraWindow::setConfiguration(QByteArray jsonConfig)
+    bool CameraWindow::setConfigurationFromJson(QByteArray jsonConfig)
     {
-        std::cout << QString(jsonConfig).toStdString() << std::endl;
+        //std::cout << QString(jsonConfig).toStdString() << std::endl;
 
         bool ok;
-        QVariantMap configurationMap = QtJson::parse(QString(jsonConfig), ok).toMap();
+        QVariantMap configMap = QtJson::parse(QString(jsonConfig), ok).toMap();
+        QVariantMap oldConfigMap = getConfigurationMap();
+
         if (!ok)
         {
-            // ---------------------------------------------------
-            // TO DO  ... error message
-            // ---------------------------------------------------
-            std::cout << "configuration parsing error" << std::endl;
+            QString errMsgTitle("Load Configuration Error");
+            QString errMsgText("Error loading configuration from json file - parse error");
+            QMessageBox::critical(this, errMsgTitle, errMsgText);
+            return false;
         }
-        QVariantMap cameraMap = configurationMap["Camera"].toMap();
-        std::cout << "Frame Rate: " << cameraMap["Frame Rate"].toString().toStdString() << std::endl;
-        
+
+        ok = setConfigurationFromMap(configMap);
+        return ok;
+
+        // TO DO .. check for failure ... if fails return to old configuration
+    }
+
+    bool CameraWindow::setConfigurationFromMap(QVariantMap configMap)
+    {
+        QString errMsgTitle("Load Configuration Error");
+
+        // Get Values from the camera - for making sure that vendor and model match etc.
+        QString currVendorName;
+        QString currModelName;
+        PropertyList currCameraPropList;
+        PropertyInfoMap cameraPropInfoMap;
+        QString errorMsg;
+        bool error = false;
+        unsigned int errorId;
+
+        cameraPtr_ -> acquireLock();
+        try
+        {
+            currVendorName = QString::fromStdString(cameraPtr_ -> getVendorName());
+            currModelName = QString::fromStdString(cameraPtr_ -> getModelName());
+            currCameraPropList = cameraPtr_ -> getListOfProperties();
+            cameraPropInfoMap = cameraPtr_ -> getMapOfPropertyInfos();
+        }
+        catch (RuntimeError &runtimeError)
+        {
+            error = true;
+            errorId = runtimeError.id();
+            errorMsg = QString::fromStdString(runtimeError.what());
+        }
+        cameraPtr_ -> releaseLock();
+
+        if (error)
+        {
+            QString msgTitle("Camera Query Error");
+            QString msgText("Error retrieving values from camera.\n\nError ID: ");
+            msgText += QString::number(errorId);
+            msgText += "\n\n";
+            msgText += errorMsg;
+            QMessageBox::critical(this, msgTitle, msgText);
+            QByteArray emptyByteArray = QByteArray();
+            return false;
+        }
+
+        // Check that current camera vendor and model match that in file
+        QVariantMap cameraMap = configMap["Camera"].toMap();
+        if (cameraMap.isEmpty())
+        {
+            QString errMsgText("Camera configuration is empty");
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        QString vendorName = cameraMap["Vendor"].toString();
+        if (vendorName.isEmpty())
+        {
+            QString errMsgText("Camera vendor name is not present");
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (vendorName != currVendorName)
+        {
+            QString errMsgText("Current camera vendor does not match that in configuration file");
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        QString modelName = cameraMap["Model"].toString();
+        if (modelName.isEmpty())
+        {
+            QString errMsgText("Camera model name is not present");
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (modelName != currModelName)
+        {
+            QString errMsgText("Current camera model does not match that in configuration file");
+            QMessageBox::critical(this,errMsgTitle, errMsgText);
+            return false;
+        }
+
+        // Try to set the camera properties
+        QVariantMap cameraPropMap = cameraMap["Properties"].toMap();
+        if (cameraPropMap.isEmpty())
+        {
+            QString errMsgText("Camera properties are not present");
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+
+        PropertyList::iterator propListIt;
+        for (
+                propListIt = currCameraPropList.begin();
+                propListIt != currCameraPropList.end();
+                propListIt++
+            )
+        {
+            Property prop = *propListIt;
+            Property newProp;
+            newProp.type = prop.type;
+
+            PropertyInfo propInfo = cameraPropInfoMap[prop.type];
+
+            // -----------------------------------------------------------------------
+            // TEMPORARY - ignore tigger mode (some funny happening with the property)
+            // -----------------------------------------------------------------------
+            if (prop.type == PROPERTY_TYPE_TRIGGER_MODE)
+            {
+                continue;
+            }
+            // ------------------------------------------------------------------------
+
+            std::cout << prop.toString() << std::endl;
+            std::cout << propInfo.toString() << std::endl;
+
+            QString name = QString::fromStdString(getPropertyTypeString(prop.type));
+
+            QVariantMap propValueMap = cameraPropMap[name].toMap();
+            if (propValueMap.isEmpty())
+            {
+                QString errMsgText = QString(
+                        "Camera property %1 is not present"
+                        ).arg(name);
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+                return false;
+            }
+
+            if (!propValueMap.contains("Present"))
+            {
+                QString errMsgText = QString(
+                        "Camera property %1 has no value for \"Present\""
+                        ).arg(name);
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+                return false;
+            }
+            newProp.present =  propValueMap["Present"].toBool();
+            if (newProp.present != propInfo.present)
+            {
+                QString errMsgText = QString(
+                        "Camera property %1 \"Present\" value does not match that in property info"
+                        ).arg(name);
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+                return false;
+            }
+
+            if (!propValueMap.contains("Absolute Control"))
+            {
+                QString errMsgText = QString(
+                        "Camera property %1 has no value for \"Absolute Control\""
+                        ).arg(name);
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+                return false;
+            }
+            newProp.absoluteControl = propValueMap["Absolute Control"].toBool();
+            if (newProp.absoluteControl && !propInfo.absoluteCapable)
+            {
+                QString errMsgText = QString(
+                        "Camera property %1 is not capable of \"Absolute Control\""
+                        ).arg(name);
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+                return false;
+            }
+
+            if (!propValueMap.contains("One Push"))
+            {
+                QString errMsgText = QString(
+                        "Camera property %1 has no value for \"One Push\""
+                        ).arg(name);
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+                return false;
+            }
+            newProp.onePush = propValueMap["One Push"].toBool();
+            if (newProp.onePush && !propInfo.onePushCapable)
+            {
+                QString errMsgText = QString(
+                        "Camera property %1 is not capable of \"One Push\""
+                        ).arg(name);
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+                return false;
+            }
+
+            if (!propValueMap.contains("On"))
+            {
+                QString errMsgText = QString(
+                        "Camera property %1 has no value for \"On\""
+                        ).arg(name);
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+                return false;
+            }
+            newProp.on = propValueMap["On"].toBool();
+
+            if (!propValueMap.contains("Auto Active"))
+            {
+                QString errMsgText = QString(
+                        "Camera property %1 has no value for \"Auto Active\""
+                        ).arg(name);
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+                return false;
+            }
+            newProp.autoActive = propValueMap["Auto Active"].toBool();
+            if (newProp.autoActive && !propInfo.autoCapable)
+            {
+                QString errMsgText = QString(
+                        "Camera property %1 is not auto capable"
+                        ).arg(name);
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+                return false;
+            }
+
+            if (!propValueMap.contains("Value"))
+            {
+                QString errMsgText = QString(
+                        "Camera property %1 has no \"Value\""
+                        ).arg(name);
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+                return false;
+            }
+            newProp.value = propValueMap["Value"].toUInt();
+            if (!newProp.absoluteControl) 
+            {
+                if (newProp.value < propInfo.minValue)
+                {
+                    QString errMsgText = QString(
+                            "Value for camera property %1 is out of range (too low)"
+                            ).arg(name);
+                    QMessageBox::critical(this,errMsgTitle,errMsgText);
+                    return false;
+                }
+                else if (newProp.value > propInfo.maxValue)
+                {
+                    QString errMsgText = QString(
+                            "Value for camera property %1 is out of range (too high)"
+                            ).arg(name);
+                    QMessageBox::critical(this,errMsgTitle,errMsgText);
+                    return false;
+                }
+            }
+
+            if (!propValueMap.contains("Absolute Value"))
+            {
+                QString errMsgText = QString(
+                        "Camera property %1 has no \"Absolute Value\""
+                        ).arg(name);
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+                return false;
+            }
+            newProp.absoluteValue = propValueMap["Absolute Value"].toFloat();
+            if (newProp.absoluteControl)
+            {
+                if (newProp.absoluteValue < propInfo.minAbsoluteValue)
+                {
+                    QString errMsgText = QString(
+                            "Absolute value for camera property %1 is out of range (too low)"
+                            ).arg(name);
+                    QMessageBox::critical(this,errMsgTitle,errMsgText);
+                    return false;
+                }
+                else if (newProp.absoluteValue > propInfo.maxAbsoluteValue)
+                {
+                    QString errMsgText = QString(
+                            "Absolute value for camera property %1 is out of range (too high)"
+                            ).arg(name);
+                    QMessageBox::critical(this,errMsgTitle,errMsgText);
+                    return false;
+                }
+            }
+
+            if (propInfo.present) 
+            {
+                cameraPtr_ -> acquireLock();
+                try
+                {
+                    cameraPtr_ -> setProperty(newProp);
+                }
+                catch (RuntimeError &runtimeError)
+                {
+                    error = true;
+                    errorId = runtimeError.id();
+                    errorMsg = QString::fromStdString(runtimeError.what());
+                }
+                cameraPtr_ -> releaseLock();
+
+                if (error)
+                {
+                    QString msgTitle("Set Camera Property Error");
+                    QString msgText = QString("Error setting camera property %1.\n\nError ID: ").arg(name);
+                    msgText += QString::number(errorId);
+                    msgText += "\n\n";
+                    msgText += errorMsg;
+                    QMessageBox::critical(this, msgTitle, msgText);
+                    QByteArray emptyByteArray = QByteArray();
+                    return false;
+                }
+            }
+
+        } // for ( propListIt ...
     }
 
 
@@ -2308,6 +2638,7 @@ namespace bias
 
     QByteArray prettyIndentJson(QByteArray jsonArray)
     {
+        // Week and kludgey json pretty printer.
         QByteArray jsonArrayNew;
         unsigned int pos = 0;
         unsigned int indentLevel = 0;
@@ -2316,6 +2647,7 @@ namespace bias
 
         while (pos < jsonArray.size()) 
         {
+            bool isSpecialChar = false;
             if (jsonArray[pos] == '}' || jsonArray[pos] == ']')
             {
                 addNewLineToByteArray(jsonArrayNew);
@@ -2323,6 +2655,7 @@ namespace bias
                 indent = indentLevel*indentStep;
                 addIndentToByteArray(jsonArrayNew, indent);
                 jsonArrayNew.append(jsonArray[pos]);
+                isSpecialChar = true;
             }
             else if ((jsonArray[pos] =='{') || (jsonArray[pos] == '[') )
             {
@@ -2331,6 +2664,7 @@ namespace bias
                 indentLevel += 1;
                 indent = indentLevel*indentStep;
                 addIndentToByteArray(jsonArrayNew, indent);
+                isSpecialChar = true;
             }
             else if (jsonArray[pos] == ',')
             {
@@ -2338,12 +2672,27 @@ namespace bias
                 addNewLineToByteArray(jsonArrayNew);
                 indent = indentLevel*indentStep;
                 addIndentToByteArray(jsonArrayNew, indent);
+                isSpecialChar = true;
             }
             else
             {
                 jsonArrayNew.append(jsonArray[pos]);
             }
-            pos++;
+
+
+            if (isSpecialChar)
+            {
+                pos++;
+                while (jsonArray[pos] == ' ')
+                {
+                    pos++;
+                }
+
+            }
+            else
+            {
+                pos++;
+            }
         }
         return jsonArrayNew;
     }

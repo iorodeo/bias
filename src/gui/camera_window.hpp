@@ -9,6 +9,7 @@
 #include <QDateTime>
 #include <QMainWindow>
 #include <QByteArray>
+#include <QVariantMap>
 #include "ui_camera_window.h"
 #include "camera_facade_fwd.hpp"
 #include "video_writer_params.hpp"
@@ -44,8 +45,10 @@ namespace bias
             CameraWindow(Guid cameraGuid, QWidget *parent=0);
             void saveConfiguration(QString filename);
             void loadConfiguration(QString fileName);
-            QByteArray getConfiguration();
-            void setConfiguration(QByteArray jsonConfig);
+            QByteArray getConfigurationJson();
+            QVariantMap getConfigurationMap();
+            bool setConfigurationFromJson(QByteArray jsonConfig);
+            bool setConfigurationFromMap(QVariantMap configMap);
 
         signals:
 
