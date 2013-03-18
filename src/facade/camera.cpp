@@ -165,6 +165,62 @@ namespace bias {
     }
 
 
+    // ---
+    bool Camera::isAllowedVideoMode(VideoMode videoMode)
+    {
+        bool allowed = false;
+        VideoModeList videoModeList = getAllowedVideoModes();
+        VideoModeList::iterator it; 
+        for (it=videoModeList.begin(); it!=videoModeList.end(); it++)
+        {
+            VideoMode allowedVideoMode = *it;
+            if (videoMode == allowedVideoMode)
+            {
+                allowed = true;
+                break;
+            }
+        }
+        return allowed;
+    }
+
+
+    bool Camera::isAllowedFrameRate(FrameRate frameRate, VideoMode videoMode)
+    {
+        bool allowed = false;
+        FrameRateList frameRateList = getAllowedFrameRates(videoMode);
+        FrameRateList::iterator it;
+        for (it=frameRateList.begin(); it!=frameRateList.end(); it++)
+        {
+            FrameRate allowedFrameRate = *it;
+            if (frameRate == allowedFrameRate)
+            {
+                allowed = true;
+                break;
+            }
+        }
+        return allowed;
+    }
+
+
+    bool Camera::isAllowedImageMode(ImageMode imageMode)
+    {
+        bool allowed = false;
+        ImageModeList imageModeList = getAllowedImageModes();
+        ImageModeList::iterator it;
+        for (it=imageModeList.begin(); it!=imageModeList.end(); it++)
+        {
+            ImageMode allowedImageMode = *it;
+            if (imageMode == allowedImageMode)
+            {
+                allowed = true;
+                break;
+            }
+        }
+        return allowed;
+    }
+    // ---
+
+
     Property Camera::getProperty(PropertyType propType)
     {
         return cameraDevicePtr_ -> getProperty(propType);

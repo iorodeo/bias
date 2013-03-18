@@ -55,6 +55,10 @@ namespace bias {
             FrameRateList getAllowedFrameRates(VideoMode videoMode);
             ImageModeList getAllowedImageModes();
 
+            bool isAllowedVideoMode(VideoMode videoMode);
+            bool isAllowedFrameRate(FrameRate frameRate, VideoMode videoMode);
+            bool isAllowedImageMode(ImageMode imageMode);
+
             void setVideoMode(VideoMode vidMode);
             void setVideoMode(VideoMode vidMode, FrameRate frmRate);
             void setFrameRate(FrameRate frmRate); 

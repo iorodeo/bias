@@ -59,6 +59,16 @@ namespace bias
         return list;
     }
 
+    TriggerTypeList getListOfTriggerTypes() 
+    {
+        TriggerTypeList list;
+        for (int i=0; i< int(NUMBER_OF_TRIGGER_TYPE); i++)
+        {
+            list.push_back(TriggerType(i));
+        }
+        return list;
+    }
+
     // Functions for converting enumerations to strings
     // ------------------------------------------------------------------------
 
@@ -250,9 +260,13 @@ namespace bias
         {
             trigTypeString = std::string("Internal");
         }
-        else
+        else if (trigType == TRIGGER_EXTERNAL)
         {
             trigTypeString = std::string("External");
+        }
+        else
+        {
+            trigTypeString = std::string("Unspecified");
         }
         return trigTypeString;
     }

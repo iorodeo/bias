@@ -248,6 +248,11 @@ namespace bias
     QByteArray prettyIndentJson(QByteArray jsonArray);
     void addIndentToByteArray(QByteArray &array, unsigned int width);
     void addNewLineToByteArray(QByteArray &array);
+
+    VideoMode convertStringToVideoMode(QString videoModeString);
+    FrameRate convertStringToFrameRate(QString frameRateString);
+    TriggerType convertStringToTriggerType(QString trigTypeString);
+
     QMap<QString,VideoMode> getStringToVideoModeMap();
     QMap<QString,FrameRate> getStringToFrameRateMap();
     QMap<QString,TriggerType> getStringToTriggerTypeMap();

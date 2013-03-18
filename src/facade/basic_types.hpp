@@ -257,8 +257,13 @@ namespace bias {
     enum TriggerType
     {
         TRIGGER_INTERNAL,
-        TRIGGER_EXTERNAL
+        TRIGGER_EXTERNAL,
+        NUMBER_OF_TRIGGER_TYPE,
+        TRIGGER_TYPE_UNSPECIFIED,
     };
+
+    typedef std::list<TriggerType> TriggerTypeList;
+    typedef std::set<TriggerType> TriggerTypeSet;
 
     enum VideoFileFormat
     {

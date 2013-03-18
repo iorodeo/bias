@@ -213,10 +213,6 @@ namespace bias
         qint64 captureDt = currentDateTime.toMSecsSinceEpoch();
         captureDt -= captureStartDateTime_.toMSecsSinceEpoch();
         setCaptureTimeLabel(double(1.0e-3*captureDt));
-
-        // --------------------------
-        //setCaptureTimeLabel(stamp); 
-        // --------------------------
     }
 
 
@@ -482,8 +478,6 @@ namespace bias
     void CameraWindow::loggingSettingsChanged(VideoWriterParams params)
     {
         videoWriterParams_ = params;
-        //std::cout << "loggingSettingsChanged" << std::endl;
-        //std::cout << videoWriterParams_.toString() << std::endl;
     }
 
 
@@ -1283,6 +1277,11 @@ namespace bias
         try
         {
             cameraPtr_ -> connect();
+            // TEMPORARY - set camera to known videomode and trigger type
+            // ------------------------------------------------------------
+            cameraPtr_ -> setVideoMode(VIDEOMODE_FORMAT7);
+            cameraPtr_ -> setTriggerInternal();
+            // ------------------------------------------------------------
         }
         catch (RuntimeError &runtimeError)
         {
@@ -1308,14 +1307,7 @@ namespace bias
         startButtonPtr_ -> setEnabled(true);
         menuCameraPtr_ -> setEnabled(true);
 
-        cameraPtr_ -> acquireLock();
-        cameraPtr_ -> setVideoMode(VIDEOMODE_FORMAT7);
-        cameraPtr_ -> setTriggerInternal();
-        cameraPtr_ -> releaseLock();
-        
         updateCameraInfoMessage();
-
-        
         updateAllMenus();
     }
 
@@ -2436,18 +2428,8 @@ namespace bias
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        QMap<QString,VideoMode> stringToVideoModeMap = getStringToVideoModeMap();
-        if (!stringToVideoModeMap.contains(videoModeString))
-        {
-            QString errMsgText = QString(
-                    "Unknown video mode, %1, in configuration"
-                    ).arg(videoModeString);  
-            QMessageBox::critical(this,errMsgTitle,errMsgText);
-            return false;
-        }
-        std::cout << "video mode = " << videoModeString.toStdString() << std::endl;
+        VideoMode videoMode = convertStringToVideoMode(videoModeString);
 
-        // NOT DONE
         // Frame Rate
         QString frameRateString = cameraMap["Frame Rate"].toString();
         if (frameRateString.isEmpty())
@@ -2456,9 +2438,32 @@ namespace bias
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        std::cout << "frame rate = " << frameRateString.toStdString() << std::endl;
+        FrameRate frameRate = convertStringToFrameRate(frameRateString);
 
-        // NOT DONE
+        // --------------------------------------------------------------------
+        // TEMPORARY - currently only allow format7 for videomode and framerate
+        // --------------------------------------------------------------------
+        if (videoMode != VIDEOMODE_FORMAT7)
+        {
+            QString errMsgText = QString("Development Error: videoMode = %1").arg(videoModeString); 
+            errMsgText += "\n\n";
+            errMsgText += "currently only videoMode=Format7 supported";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;   
+        }
+        if (frameRate != FRAMERATE_FORMAT7)
+        {
+            QString errMsgText = QString("Development Error: frameRate = %1").arg(frameRateString); 
+            errMsgText += "\n\n";
+            errMsgText += "currently only frameRatee=Format7 supported";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        // --------------------------------------------------------------------
+        // TO DO - check if videoMode and frameRate are allowed and if so set
+        // to new value.
+        // --------------------------------------------------------------------
+
         // Trigger Type
         QString triggerTypeString = cameraMap["Trigger Type"].toString();
         if (triggerTypeString.isEmpty())
@@ -2467,7 +2472,22 @@ namespace bias
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        std::cout << "trigger type = " << triggerTypeString.toStdString() << std::endl;
+        TriggerType triggerType = convertStringToTriggerType(triggerTypeString);
+
+        // --------------------------------------------------------------------
+        // TEMPORARY - currently only allow internal trigger
+        // --------------------------------------------------------------------
+        if (triggerType != TRIGGER_INTERNAL)
+        {
+            QString errMsgText = QString("Development Error: triggerType = %1").arg(triggerTypeString); 
+            errMsgText += "\n\n";
+            errMsgText += "currently only triggerType=Internal supported";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        // --------------------------------------------------------------------
+        // Check if trigger type is allowed and if so set to new value
+        // --------------------------------------------------------------------
 
 
 
@@ -2785,6 +2805,57 @@ namespace bias
     }
 
 
+    VideoMode convertStringToVideoMode(QString videoModeString)
+    {
+        QMap<QString,VideoMode> map = getStringToVideoModeMap();
+        VideoMode mode;
+
+        if (map.contains(videoModeString))
+        {
+            mode = map[videoModeString];
+        }
+        else
+        {
+            mode = VIDEOMODE_UNSPECIFIED;
+        }
+        return mode;
+    }
+
+
+    FrameRate convertStringToFrameRate(QString frameRateString)
+    {
+        QMap<QString,FrameRate> map = getStringToFrameRateMap();
+        FrameRate rate;
+
+        if (map.contains(frameRateString))
+        {
+            rate = map[frameRateString];
+        }
+        else
+        {
+            rate = FRAMERATE_UNSPECIFIED;
+        }
+        return rate;
+    }
+
+
+    TriggerType convertStringToTriggerType(QString trigTypeString)
+    {
+        QMap<QString,TriggerType> map = getStringToTriggerTypeMap();
+        TriggerType trigType;
+
+        if (map.contains(trigTypeString))
+        {
+            trigType = map[trigTypeString];
+        }
+        else
+        {
+            trigType = TRIGGER_TYPE_UNSPECIFIED;
+        }
+        return trigType;
+    }
+
+
     QMap<QString,VideoMode> getStringToVideoModeMap()
     {
         QMap<QString,VideoMode> map;
@@ -2800,17 +2871,32 @@ namespace bias
     }
 
 
-    // NOTE DONE
     QMap<QString,FrameRate> getStringToFrameRateMap()
     {
         QMap<QString,FrameRate> map;
+        FrameRateList rateList = getListOfFrameRates();
+        FrameRateList::iterator it;
+        for(it=rateList.begin(); it!=rateList.end(); it++)
+        {
+            FrameRate rate = *it;
+            QString rateString = QString::fromStdString(getFrameRateString(rate));
+            map[rateString] = rate;
+        }
         return map;
     }
 
-    // NOTE DONE
+
     QMap<QString,TriggerType> getStringToTriggerTypeMap()
     {
         QMap<QString,TriggerType> map;
+        TriggerTypeList typeList = getListOfTriggerTypes();
+        TriggerTypeList::iterator it;
+        for (it=typeList.begin(); it!=typeList.end(); it++)
+        {
+            TriggerType trigType = *it;
+            QString typeString = QString::fromStdString(getTriggerTypeString(trigType));
+            map[typeString] = trigType;
+        }
         return map;
     }
 

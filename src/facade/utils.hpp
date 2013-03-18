@@ -20,6 +20,8 @@ namespace bias
 
     PixelFormatList getListOfPixelFormats();
 
+    TriggerTypeList getListOfTriggerTypes(); 
+
     // Functions for converting enumerations to strings
     // ------------------------------------------------------------------------
     std::string getVideoModeString(VideoMode vidMode);
