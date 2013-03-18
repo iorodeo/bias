@@ -45,10 +45,6 @@ namespace bias
             CameraWindow(Guid cameraGuid, QWidget *parent=0);
             void saveConfiguration(QString filename);
             void loadConfiguration(QString fileName);
-            QByteArray getConfigurationJson();
-            QVariantMap getConfigurationMap();
-            bool setConfigurationFromJson(QByteArray jsonConfig);
-            bool setConfigurationFromMap(QVariantMap configMap);
 
         signals:
 
@@ -234,6 +230,13 @@ namespace bias
             QString getVideoFileFullPathWithGuid();
             QString getConfigFileFullPath();
 
+            QByteArray getConfigurationJson();
+            QVariantMap getConfigurationMap();
+            bool setConfigurationFromJson(QByteArray jsonConfig);
+            bool setConfigurationFromMap(QVariantMap configMap);
+            bool setCameraFromMap(QVariantMap cameraMap);
+            bool setPropertyFromMap(QVariantMap propValueMap, PropertyInfo propInfo);
+
             cv::Mat calcHistogram(cv::Mat mat);
 
     }; // class CameraWindow
@@ -245,6 +248,9 @@ namespace bias
     QByteArray prettyIndentJson(QByteArray jsonArray);
     void addIndentToByteArray(QByteArray &array, unsigned int width);
     void addNewLineToByteArray(QByteArray &array);
+    QMap<QString,VideoMode> getStringToVideoModeMap();
+    QMap<QString,FrameRate> getStringToFrameRateMap();
+    QMap<QString,TriggerType> getStringToTriggerTypeMap();
 
 }
 
