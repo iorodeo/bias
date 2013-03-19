@@ -271,6 +271,8 @@ namespace bias {
         VIDEOFILE_FORMAT_AVI,
         VIDEOFILE_FORMAT_FMF,
         VIDEOFILE_FORMAT_UFMF,
+        NUMBER_OF_VIDEOFILE_FORMAT,
+        VIDEOFILE_FORMAT_UNSPECIFIED,
     };
 
     enum ImageRotationType
@@ -278,7 +280,9 @@ namespace bias {
         IMAGE_ROTATION_0=0,
         IMAGE_ROTATION_90=90,
         IMAGE_ROTATION_180=180,
-        IMAGE_ROTATION_270=270
+        IMAGE_ROTATION_270=270,
+        NUMBER_OF_IMAGE_ROTATION,
+        IMAGE_ROTATION_UNSPECIFIED,
     };
 
     struct ImageInfo 

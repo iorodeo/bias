@@ -232,10 +232,16 @@ namespace bias
 
             QByteArray getConfigurationJson();
             QVariantMap getConfigurationMap();
+
             bool setConfigurationFromJson(QByteArray jsonConfig);
             bool setConfigurationFromMap(QVariantMap configMap);
             bool setCameraFromMap(QVariantMap cameraMap);
-            bool setPropertyFromMap(QVariantMap propValueMap, PropertyInfo propInfo);
+            bool setLoggingFromMap(QVariantMap loggingMap);
+            bool setTimerFromMap(QVariantMap timerMap);
+            bool setDisplayFromMap(QVariantMap displayMap);
+            bool setConfigFileFromMap(QVariantMap configFileMap);
+            bool setCameraPropertyFromMap(QVariantMap propValueMap, PropertyInfo propInfo);
+            bool setFormatSettingsFromMap(QVariantMap settingsMap);
 
             cv::Mat calcHistogram(cv::Mat mat);
 
@@ -252,6 +258,7 @@ namespace bias
     VideoMode convertStringToVideoMode(QString videoModeString);
     FrameRate convertStringToFrameRate(QString frameRateString);
     TriggerType convertStringToTriggerType(QString trigTypeString);
+    VideoFileFormat convertStringToVideoFileFormat(QString formatString);
 
     QMap<QString,VideoMode> getStringToVideoModeMap();
     QMap<QString,FrameRate> getStringToFrameRateMap();
