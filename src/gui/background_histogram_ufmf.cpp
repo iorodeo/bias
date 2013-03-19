@@ -13,6 +13,8 @@ namespace bias
     const unsigned int BackgroundHistogram_ufmf::DEFAULT_BIN_SIZE = 1;
     const unsigned int BackgroundHistogram_ufmf::DEFAULT_MEDIAN_UPDATE_COUNT = 100;
     const unsigned int BackgroundHistogram_ufmf::MIN_MEDIAN_UPDATE_COUNT = 10;
+    const unsigned int BackgroundHistogram_ufmf::DEFAULT_MEDIAN_UPDATE_INTERVAL = 50;
+    const unsigned int BackgroundHistogram_ufmf::MIN_MEDIAN_UPDATE_INTERVAL = 1;
 
 
     // Methods
@@ -47,6 +49,7 @@ namespace bias
         bgNewDataQueuePtr_ = bgNewDataQueuePtr;
         bgOldDataQueuePtr_ = bgOldDataQueuePtr;
         medianUpdateCount_ = DEFAULT_MEDIAN_UPDATE_COUNT;
+        medianUpdateInterval_ = DEFAULT_MEDIAN_UPDATE_INTERVAL;
 
         // Make sure none of the data queue pointers are null
         bool notNull = true;
@@ -73,11 +76,20 @@ namespace bias
     }
 
 
+    void BackgroundHistogram_ufmf::setMedianUpdateInterval(unsigned int medianUpdateInterval)
+    {
+        medianUpdateInterval_ = medianUpdateInterval;
+    }
+
+
     void BackgroundHistogram_ufmf::run()
     { 
         bool done = false;
         bool isFirst = true;
         unsigned long count = 0;
+        double lastUpdateTime;
+        double updateDt;
+
         BackgroundData_ufmf backgroundData;
 
         StampedImage newStampedImg;
@@ -128,7 +140,7 @@ namespace bias
                         bgOldDataQueuePtr_ -> releaseLock();
                     }
                 }
-
+                lastUpdateTime = newStampedImg.timeStamp - medianUpdateInterval_;
                 isFirst = false;
             }
 
@@ -137,7 +149,8 @@ namespace bias
             count++;
 
             // Check to see if median computation is done if so swap the buffers
-            if (count > medianUpdateCount_)
+            updateDt = newStampedImg.timeStamp - lastUpdateTime;
+            if ( (count > medianUpdateCount_) && (updateDt > medianUpdateInterval_))
             {
                 bool swapDataFlag = false;
                 BackgroundData_ufmf backgroundDataTmp;
@@ -161,6 +174,7 @@ namespace bias
 
                     // Clear out old data
                     count = 0;
+                    lastUpdateTime = newStampedImg.timeStamp;
                     backgroundData.clear();
                 }
             }

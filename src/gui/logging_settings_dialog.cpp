@@ -86,11 +86,18 @@ namespace bias
         // ufmf tab - median update count
         tmpString = QString::number(params_.ufmf.medianUpdateCount);
         ufmfMedianUpdateCountLineEditPtr_ -> setText(tmpString);
-
         tmpString = QString(" >= %1").arg(
                 QString::number(BackgroundHistogram_ufmf::MIN_MEDIAN_UPDATE_COUNT)
                 );
         ufmfMedianUpdateCountRangeLabelPtr_ -> setText(tmpString);
+
+        // ufmf tab - median update interval
+        tmpString = QString::number(params_.ufmf.medianUpdateInterval);
+        ufmfMedianUpdateIntervalLineEditPtr_ -> setText(tmpString);
+        tmpString = QString(" >= %1").arg(
+                QString::number(BackgroundHistogram_ufmf::MIN_MEDIAN_UPDATE_INTERVAL)
+                );
+        ufmfMedianUpdateIntervalRangeLabelPtr_ -> setText(tmpString);
 
         // ufmf tab - number of compressor threads
         tmpString = QString::number(params_.ufmf.numberOfCompressors);
@@ -172,6 +179,11 @@ namespace bias
         validatorPtr -> setBottom(BackgroundHistogram_ufmf::MIN_MEDIAN_UPDATE_COUNT);
         ufmfMedianUpdateCountLineEditPtr_ -> setValidator(validatorPtr);
 
+        // ufmf tab - median update interval
+        validatorPtr = new IntValidatorWithFixup(ufmfMedianUpdateIntervalLineEditPtr_);
+        validatorPtr -> setBottom(BackgroundHistogram_ufmf::MIN_MEDIAN_UPDATE_INTERVAL);
+        ufmfMedianUpdateIntervalLineEditPtr_ -> setValidator(validatorPtr);
+
         // ufmf tab - number of compression threads
         validatorPtr = new IntValidatorWithFixup(ufmfCompressionThreadsLineEditPtr_);
         validatorPtr -> setBottom(VideoWriter_ufmf::MIN_NUMBER_OF_COMPRESSORS);
@@ -233,6 +245,13 @@ namespace bias
                 this, 
                 SLOT(ufmfMedianUpdateCount_EditingFinished())
                 );
+
+        connect(
+                ufmfMedianUpdateIntervalLineEditPtr_,
+                SIGNAL(editingFinished()),
+                this,
+                SLOT(ufmfMedianUpdateInterval_EditingFinished())
+               );
 
         connect(
                 ufmfCompressionThreadsLineEditPtr_,
@@ -334,13 +353,21 @@ namespace bias
     }
 
 
+    void LoggingSettingsDialog::ufmfMedianUpdateInterval_EditingFinished()
+    {
+        QString updateIntervalString = ufmfMedianUpdateIntervalLineEditPtr_ -> text();
+        unsigned int updateInterval = updateIntervalString.toUInt();
+        params_.ufmf.medianUpdateInterval = updateInterval;
+        emit parametersChanged(params_);
+    }
+
+
     void LoggingSettingsDialog::ufmfCompressionThreads_EditingFinished()
     {
         QString numberString = ufmfCompressionThreadsLineEditPtr_ -> text();
         unsigned int number = numberString.toUInt();
         params_.ufmf.numberOfCompressors = number;
         emit parametersChanged(params_);
-
     }
 
 

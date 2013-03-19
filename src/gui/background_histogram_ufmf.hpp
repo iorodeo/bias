@@ -30,17 +30,21 @@ namespace bias
                     );
             void stop();
             void setMedianUpdateCount(unsigned int medianUpdateCount);
+            void setMedianUpdateInterval(unsigned int medianUpdateInterval);
 
             static const unsigned int DEFAULT_NUM_BINS; 
             static const unsigned int DEFAULT_BIN_SIZE; 
             static const unsigned int DEFAULT_MEDIAN_UPDATE_COUNT;
             static const unsigned int MIN_MEDIAN_UPDATE_COUNT;
+            static const unsigned int DEFAULT_MEDIAN_UPDATE_INTERVAL;
+            static const unsigned int MIN_MEDIAN_UPDATE_INTERVAL;
 
         private:
 
             bool ready_;
             bool stopped_;
             unsigned int medianUpdateCount_;
+            unsigned int medianUpdateInterval_;
 
             // Queue of incoming images for background model
             std::shared_ptr<LockableQueue<StampedImage>> bgImageQueuePtr_;       

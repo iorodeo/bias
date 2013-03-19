@@ -39,10 +39,10 @@ namespace bias
         unsigned int frameSkip;
         unsigned int numberOfCompressors;
         unsigned int medianUpdateCount;
+        unsigned int medianUpdateInterval;
         unsigned int dilateWindowSize;
         bool dilateState;
         VideoWriterParams_ufmf();
-
         std::string toString();
     };
 

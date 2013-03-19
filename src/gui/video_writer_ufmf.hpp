@@ -87,6 +87,7 @@ namespace bias
             bool isFirst_;
             unsigned int backgroundThreshold_;
             unsigned int medianUpdateCount_;
+            unsigned int medianUpdateInterval_;
             unsigned int boxLength_;
             unsigned int numberOfCompressors_;
             bool isFixedSize_;

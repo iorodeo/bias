@@ -76,9 +76,9 @@ namespace bias
 
         backgroundThreshold_ = params.backgroundThreshold;
         medianUpdateCount_ = params.medianUpdateCount;
+        medianUpdateInterval_ = params.medianUpdateInterval;
         boxLength_ = params.boxLength;
         setFrameSkip(params.frameSkip);
-
         numberOfCompressors_ = params.numberOfCompressors;
 
         // ----------------------------------------------------------------------------
@@ -89,6 +89,7 @@ namespace bias
         std::cout << " boxLength:               " << boxLength_ << std::endl;
         std::cout << " frameSkip:               " << frameSkip_ << std:: endl;
         std::cout << " medianUpdateCount:       " << medianUpdateCount_ << std::endl;
+        std::cout << " medianUpdateInterval:    " << medianUpdateInterval_ << std::endl;
         // -----------------------------------------------------------------------------
 
         // Create thread pool for background modelling
@@ -690,6 +691,7 @@ namespace bias
                 );
 
         bgHistogramPtr_ -> setMedianUpdateCount(medianUpdateCount_);
+        bgHistogramPtr_ -> setMedianUpdateInterval(medianUpdateInterval_);
 
         bgMedianPtr_ = new BackgroundMedian_ufmf(
                 bgNewDataQueuePtr_,

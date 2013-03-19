@@ -32,6 +32,7 @@ namespace bias
             void ufmfBackgroundThreshold_EditingFinished();
             void ufmfBoxLength_EditingFinished();
             void ufmfMedianUpdateCount_EditingFinished();
+            void ufmfMedianUpdateInterval_EditingFinished();
             void ufmfCompressionThreads_EditingFinished();
             void ufmfDilateCheckBox_StateChanged(int state);
             void ufmfDilate_EditingFinished();

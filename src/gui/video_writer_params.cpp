@@ -58,6 +58,7 @@ namespace bias
         backgroundThreshold = VideoWriter_ufmf::DEFAULT_BACKGROUND_THRESHOLD;
         boxLength = VideoWriter_ufmf::DEFAULT_BOX_LENGTH;
         medianUpdateCount = BackgroundHistogram_ufmf::DEFAULT_MEDIAN_UPDATE_COUNT; 
+        medianUpdateInterval = BackgroundHistogram_ufmf::DEFAULT_MEDIAN_UPDATE_INTERVAL;
         numberOfCompressors = VideoWriter_ufmf::DEFAULT_NUMBER_OF_COMPRESSORS;
         dilateState = VideoWriter_ufmf::DEFAULT_DILATE_STATE;
         dilateWindowSize = VideoWriter_ufmf::DEFAULT_DILATE_WINDOW_SIZE;
