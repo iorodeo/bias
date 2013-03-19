@@ -27,6 +27,8 @@ namespace bias
             static const unsigned int DEFAULT_FRAME_SKIP;
             static const VideoWriterParams_avi DEFAULT_PARAMS;
 
+            static bool isAllowedCodec(QString codecString);
+
         protected:
 
             int fourcc_;

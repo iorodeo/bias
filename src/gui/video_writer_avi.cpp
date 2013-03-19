@@ -103,6 +103,23 @@ namespace bias
         }
     }
 
+
+    // ----------------------------------------------------------------------
+    // TO DO .... currently only allow XVID. Will need change when dealing 
+    // with more codecs this is currently just a quick hack.
+    // ----------------------------------------------------------------------
+    bool VideoWriter_avi::isAllowedCodec(QString codecString)
+    {
+        if (codecString == QString("XVID"))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     // -----------------------------------------------------------------------
     // TO DO ... if we start dealing with auto detection of codecs, etc. these
     // funcions will need to be improved - they should be viewed as temporary.

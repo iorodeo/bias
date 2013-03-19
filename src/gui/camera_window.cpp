@@ -15,6 +15,7 @@
 #include "property_dialog.hpp"
 #include "timer_settings_dialog.hpp"
 #include "logging_settings_dialog.hpp"
+#include "background_histogram_ufmf.hpp"
 #include <cstdlib>
 #include <cmath>
 #include <QtGui>
@@ -41,6 +42,8 @@ namespace bias
     // Default settings
     const unsigned long DEFAULT_CAPTURE_DURATION = 300; // sec
     const double DEFAULT_IMAGE_DISPLAY_FREQ = 10.0;     // Hz
+    const double MAX_IMAGE_DISPLAY_FREQ = 60.0;         // Hz
+    const double MIN_IMAGE_DISPLAY_FREQ = 1.0;          // Hz 
     const QSize DEFAULT_HISTOGRAM_IMAGE_SIZE = QSize(256,204);
     const QString DEFAULT_VIDEO_FILE_NAME = QString("bias_video");
     const QString DEFAULT_CONFIG_FILE_NAME = QString("bias_config");
@@ -1072,30 +1075,11 @@ namespace bias
         loggingFormatActionGroupPtr_ -> addAction(actionLoggingFormatFMFPtr_);
         loggingFormatActionGroupPtr_ -> addAction(actionLoggingFormatUFMFPtr_);
         loggingFormatActionGroupPtr_ -> addAction(actionLoggingFormatIFMFPtr_);
-
         actionToVideoFileFormatMap_[actionLoggingFormatBMPPtr_] = VIDEOFILE_FORMAT_BMP;
         actionToVideoFileFormatMap_[actionLoggingFormatAVIPtr_] = VIDEOFILE_FORMAT_AVI;
         actionToVideoFileFormatMap_[actionLoggingFormatFMFPtr_] = VIDEOFILE_FORMAT_FMF;
         actionToVideoFileFormatMap_[actionLoggingFormatUFMFPtr_] = VIDEOFILE_FORMAT_UFMF;
-
-        QMap<QAction*, VideoFileFormat>::iterator it;
-        for (
-                it  = actionToVideoFileFormatMap_.begin();
-                it != actionToVideoFileFormatMap_.end();
-                it++
-            )
-        {
-            VideoFileFormat fileFormat = *it;
-            QPointer<QAction> actionPtr = actionToVideoFileFormatMap_.key(fileFormat);
-            if (videoFileFormat_ == fileFormat) 
-            {
-                actionPtr -> setChecked(true);
-            }
-            else
-            {
-                actionPtr -> setChecked(false);
-            }
-        }
+        updateLoggingMenu();
     }
 
 
@@ -1108,9 +1092,7 @@ namespace bias
 
     void CameraWindow::setupDisplayOrientMenu()
     {
-
-        actionDisplayFlipVertPtr_ -> setChecked(flipVert_);
-        actionDisplayFlipHorzPtr_ -> setChecked(flipHorz_);
+        updateDisplayOrientMenu();
     }
     
 
@@ -1121,30 +1103,11 @@ namespace bias
         rotationActionGroupPtr_ -> addAction(actionDisplayRot90Ptr_);
         rotationActionGroupPtr_ -> addAction(actionDisplayRot180Ptr_);
         rotationActionGroupPtr_ -> addAction(actionDisplayRot270Ptr_);
-
         actionToRotationMap_[actionDisplayRot0Ptr_] = IMAGE_ROTATION_0;
         actionToRotationMap_[actionDisplayRot90Ptr_] = IMAGE_ROTATION_90;
         actionToRotationMap_[actionDisplayRot180Ptr_] = IMAGE_ROTATION_180;
         actionToRotationMap_[actionDisplayRot270Ptr_] = IMAGE_ROTATION_270; 
-        
-        QMap<QAction*, ImageRotationType>:: iterator mapIt;
-        for (
-                mapIt = actionToRotationMap_.begin();
-                mapIt != actionToRotationMap_.end();
-                mapIt++
-            )
-        {
-            ImageRotationType rotType = *mapIt;
-            QAction *actionPtr = mapIt.key();
-            if (rotType == imageRotation_)
-            {
-                actionPtr -> setChecked(true);
-            }
-            else
-            {
-                actionPtr -> setChecked(false);
-            }
-        }
+        updateDisplayRotMenu();
     }
 
 
@@ -1618,6 +1581,7 @@ namespace bias
         updateCameraMenu();
         updateLoggingMenu();
         updateTimerMenu();
+        updateDisplayMenu();
     }
 
     void CameraWindow::updateFileMenu()
@@ -1973,6 +1937,27 @@ namespace bias
 
     void CameraWindow::updateLoggingMenu() 
     {
+        // Set selected format
+        QMap<QAction*, VideoFileFormat>::iterator it;
+        for (
+                it  = actionToVideoFileFormatMap_.begin();
+                it != actionToVideoFileFormatMap_.end();
+                it++
+            )
+        {
+            VideoFileFormat fileFormat = *it;
+            QPointer<QAction> actionPtr = actionToVideoFileFormatMap_.key(fileFormat);
+            if (videoFileFormat_ == fileFormat) 
+            {
+                actionPtr -> setChecked(true);
+            }
+            else
+            {
+                actionPtr -> setChecked(false);
+            }
+        }
+
+        // Set Enabled based on capturing state
         if (capturing_)
         {
             setMenuChildrenEnabled(menuLoggingPtr_, false);
@@ -1993,6 +1978,43 @@ namespace bias
         else
         {
             setMenuChildrenEnabled(menuTimerPtr_, true);
+        }
+    }
+
+
+    void CameraWindow::updateDisplayMenu()
+    {
+        updateDisplayOrientMenu();
+        updateDisplayRotMenu();
+    }
+
+
+    void CameraWindow::updateDisplayOrientMenu()
+    {
+        actionDisplayFlipVertPtr_ -> setChecked(flipVert_);
+        actionDisplayFlipHorzPtr_ -> setChecked(flipHorz_);
+    }
+
+   
+    void CameraWindow::updateDisplayRotMenu()
+    {
+        QMap<QAction*, ImageRotationType>:: iterator mapIt;
+        for (
+                mapIt = actionToRotationMap_.begin();
+                mapIt != actionToRotationMap_.end();
+                mapIt++
+            )
+        {
+            ImageRotationType rotType = *mapIt;
+            QAction *actionPtr = mapIt.key();
+            if (rotType == imageRotation_)
+            {
+                actionPtr -> setChecked(true);
+            }
+            else
+            {
+                actionPtr -> setChecked(false);
+            }
         }
     }
 
@@ -2610,7 +2632,7 @@ namespace bias
         if (!loggingMap["Format"].canConvert<QString>())
         {
             QString errMsgText("Logging configuration - unable to convert");
-            errMsgText += "\"Format\" to string";
+            errMsgText += " \"Format\" to string";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
@@ -2637,7 +2659,7 @@ namespace bias
         if (!loggingMap["Directory"].canConvert<QString>())
         {
             QString errMsgText("Logging configuration - unable to convert");
-            errMsgText += "\"Directory\" to string";
+            errMsgText += " \"Directory\" to string";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
@@ -2663,7 +2685,7 @@ namespace bias
         if (!loggingMap["File Name"].canConvert<QString>())
         {
             QString errMsgText("Logging configuration - unable to convert");
-            errMsgText += "\"File Name\" to string";
+            errMsgText += " \"File Name\" to string";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
@@ -2690,27 +2712,224 @@ namespace bias
 
     bool CameraWindow::setTimerFromMap(QVariantMap timerMap)
     {
-        // -------------------------------------------------
-        // TO DO 
-        // -------------------------------------------------
+        QString errMsgTitle("Load Configuration Error (Timer)");
+
+        // Set "Enabled" value
+        if (!timerMap.contains("Enabled"))
+        {
+            QString errMsgText("Timer configuration - \"Enabled\"");
+            errMsgText += " is not present";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!timerMap["Enabled"].canConvert<bool>())
+        {
+            QString errMsgText("Timer configuration - unable to ");
+            errMsgText += " convert \"Enabled\" to bool";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        bool timerEnabled = timerMap["Enabled"].toBool();
+        actionTimerEnabledPtr_ -> setChecked(timerEnabled);
+
+        // Get Settings map
+        QVariantMap settingsMap = timerMap["Settings"].toMap();
+        if (settingsMap.isEmpty())
+        {
+            QString errMsgText("Timer configuration - \"Settings\"");
+            errMsgText += " is not present";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+
+        // Set "Duration" value
+        if (!settingsMap.contains("Duration"))
+        {
+            QString errMsgText("Timer configuration - \"Settings\"");
+            errMsgText += " \"Duration\" is not present";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!settingsMap["Duration"].canConvert<unsigned long long>())
+        {
+            QString errMsgText("Timer configuration - unable to convert");
+            errMsgText += " \"Settings\" \"Duration\" to unsigned long";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        captureDurationSec_ = (unsigned long)(settingsMap["Duration"].toULongLong());
         return true;
     }
 
 
     bool CameraWindow::setDisplayFromMap(QVariantMap displayMap)
     {
-        // -------------------------------------------------
-        // TO DO 
-        // -------------------------------------------------
+        QString errMsgTitle("Load Congifuration Error (Display)");
+
+        // Get Orientation map
+        QVariantMap orientMap = displayMap["Orientation"].toMap();
+        if (orientMap.isEmpty())
+        {
+            QString errMsgText("Display configuration - \"Orientation\"");
+            errMsgText += " is not present";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+
+        // Set Orientation Flip Vertical
+        if (!orientMap.contains("Flip Vertical"))
+        {
+            QString errMsgText("Display configuration - \"Orientation\"");
+            errMsgText += " \"Flip Vertical\" is not present";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!orientMap["Flip Vertical"].canConvert<bool>())
+        {
+            QString errMsgText("Display configuration - unable to convert");
+            errMsgText += " \"Orientation\" \"Flip Vertical\" to bool";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        flipVert_ = orientMap["Flip Vertical"].toBool();
+        std::cout << "flipVert_ " << flipVert_ << std::endl;
+
+        // Set Orientation Flip Horizontal
+        if (!orientMap.contains("Flip Horizontal"))
+        {
+            QString errMsgText("Display configuration - \"Orientation\"");
+            errMsgText += " \"Flip Horizontal\" is not present";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!orientMap["Flip Horizontal"].canConvert<bool>())
+        {
+            QString errMsgText("Display configuration - unable to convert");
+            errMsgText += " \"Orientation\" \"Flip Horizontal\" to bool";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        flipHorz_ = orientMap["Flip Horizontal"].toBool();
+        std::cout << "flipHorz_ " << flipHorz_ << std::endl;
+
+        // Set Rotation
+        if (!displayMap.contains("Rotation"))
+        {
+            QString errMsgText("Display configuration - \"Rotation\"");
+            errMsgText += " is not present";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!displayMap["Rotation"].canConvert<unsigned int>())
+        {
+            QString errMsgText("Display configuration - unable to convert");
+            errMsgText += " \"Rotation\" to unsigned int";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        unsigned int rotationUInt = displayMap["Rotation"].toUInt();
+        if ( 
+                (rotationUInt != IMAGE_ROTATION_0 )  && 
+                (rotationUInt != IMAGE_ROTATION_90)  &&
+                (rotationUInt != IMAGE_ROTATION_180) &&
+                (rotationUInt != IMAGE_ROTATION_270) 
+           )
+        {
+            QString errMsgText("Display configuration - \"Rotation\"");
+            errMsgText += " must be 0, 90, 180, or 270";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        imageRotation_ = ImageRotationType(rotationUInt);
+
+        // Set Image Display frequency
+        if (!displayMap.contains("Update Frequency"))
+        {
+            QString errMsgText("Display configuration - \"Update Frequency\"");
+            errMsgText += " is not present";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!displayMap["Update Frequency"].canConvert<double>())
+        {
+            QString errMsgText("Display configuration - unable to convert");
+            errMsgText += " \"Update Frequency\" to double";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        double displayFreq = displayMap["Update Frequency"].toDouble();
+        if (displayFreq < MIN_IMAGE_DISPLAY_FREQ)
+        {
+            QString errMsgText("Display configuration - \"Update Frequency\"");
+            errMsgText += QString(" must be greater than or equal to %1").arg(
+                    MIN_IMAGE_DISPLAY_FREQ
+                    );
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (displayFreq > MAX_IMAGE_DISPLAY_FREQ)
+        {
+            QString errMsgText("Display configuration - \"Update Frequency\"");
+            errMsgText += QString(" must be less than or equal to %1").arg(
+                    MIN_IMAGE_DISPLAY_FREQ
+                    );
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        imageDisplayFreq_ = displayFreq;
+
         return true;
     }
 
 
     bool CameraWindow::setConfigFileFromMap(QVariantMap configFileMap)
     {
-        // -------------------------------------------------
-        // TO DO 
-        // -------------------------------------------------
+        QString errMsgTitle("Load Configuration Error (File)");
+
+        // Set Directory
+        if (!configFileMap.contains("Directory"))
+        {
+            QString errMsgText("Configuration file - \"Directory\"");
+            errMsgText += " is not present";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!configFileMap["Directory"].canConvert<QString>())
+        {
+            QString errMsgText("Configuratoin file - unable to convert");
+            errMsgText += " \"Directory\" to string";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        QString directoryString = configFileMap["Directory"].toString();
+        QDir directory = QDir(directoryString);
+        if (!directory.exists())
+        {
+            QString errMsgText("Configuration file - \"Directory\"");
+            errMsgText += " does not exist";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        currentConfigFileDir_ = directory;
+
+        // Set File Name
+        if (!configFileMap.contains("File Name"))
+        {
+            QString errMsgText("Configuration file - \"File Name\"");
+            errMsgText += " is not present";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!configFileMap["File Name"].canConvert<QString>())
+        {
+            QString errMsgText("Configuratoin file - unable to convert");
+            errMsgText += " \"File Name\" to string";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        QString fileName = configFileMap["File Name"].toString();
+        currentConfigFileName_ = fileName;
+
         return true;
     }
 
@@ -2957,7 +3176,6 @@ namespace bias
                 return false;
             }
         }
-
         return true;
     }
 
@@ -2984,7 +3202,7 @@ namespace bias
         if (!aviMap["Frame Skip"].canConvert<unsigned int>())
         {
             QString errMsgText("Logging configuration - unable to convert");
-            errMsgText += "\"Frame Skip\" to unsigned int";
+            errMsgText += " \"Frame Skip\" to unsigned int";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
@@ -2992,11 +3210,34 @@ namespace bias
         if (aviFrameSkip == 0)
         {
             QString errMsgText("Logging configuration - avi \"Frame Skip\"");
-            errMsgText += "must be greater than 0"; 
+            errMsgText += " must be greater than zero"; 
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
         videoWriterParams_.avi.frameSkip = aviFrameSkip;
+
+        if (!aviMap.contains("Codec"))
+        {
+            QString errMsgText("Logging configuration - avi \"Codec\" not present");
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!aviMap["Codec"].canConvert<QString>())
+        {
+            QString errMsgText("Logging configuration - unable to convert");
+            errMsgText += " avi \"Codec\" to string";
+            QMessageBox::critical(this, errMsgTitle,errMsgText);
+            return false;
+        }
+        QString aviCodec = aviMap["Codec"].toString();
+        if (!VideoWriter_avi::isAllowedCodec(aviCodec))
+        {
+            QString errMsgText = QString("Logging configuration - avi \"Codec\" %1").arg(aviCodec);
+            errMsgText += " is not allowed";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        videoWriterParams_.avi.codec = aviCodec;
 
 
         // Get bmp values
@@ -3008,6 +3249,28 @@ namespace bias
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
+        if (!bmpMap.contains("Frame Skip"))
+        {
+            QString errMsgText("Logging configuration - bmp \"Frame Skip\" not present");
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!bmpMap["Frame Skip"].canConvert<unsigned int>())
+        {
+            QString errMsgText("Logging configuration - bmp unable to convert");
+            errMsgText += " \"Frame Skip\" to unsigned int";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        unsigned int bmpFrameSkip = bmpMap["Frame Skip"].toUInt();
+        if (bmpFrameSkip == 0)
+        {
+            QString errMsgText("Logging configuration - bmp \"Frame Skip\" must");
+            errMsgText += " be greater than zero";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        videoWriterParams_.bmp.frameSkip = bmpFrameSkip;
 
         // Get fmf values
         // --------------
@@ -3018,6 +3281,28 @@ namespace bias
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
+        if (!fmfMap.contains("Frame Skip"))
+        {
+            QString errMsgText("Logging configuration - fmf \"Frame Skip\" not present");
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!fmfMap["Frame Skip"].canConvert<unsigned int>())
+        {
+            QString errMsgText("Logging configuration - fmf unable to convert");
+            errMsgText += " \"Frame Skip\" to unsigned int";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        unsigned int fmfFrameSkip = fmfMap["Frame Skip"].toUInt();
+        if (fmfFrameSkip == 0)
+        {
+            QString errMsgText("Logging configuration - fmf \"Frame Skip\" must");
+            errMsgText += " be greater than zero";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        videoWriterParams_.fmf.frameSkip = fmfFrameSkip;
         
         // Get ufmf values
         // ---------------
@@ -3028,7 +3313,205 @@ namespace bias
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
+        // ufmf Frame Skip
+        if (!ufmfMap.contains("Frame Skip"))
+        {
+            QString errMsgText("Logging configuration - ufmf \"Frame Skip\" not present");
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!ufmfMap["Frame Skip"].canConvert<unsigned int>())
+        {
+            QString errMsgText("Logging configuration - ufmf unable to convert");
+            errMsgText += " \"Frame Skip\" to unsigned int";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        unsigned int ufmfFrameSkip = ufmfMap["Frame Skip"].toUInt();
+        if (ufmfFrameSkip == 0)
+        {
+            QString errMsgText("Logging configuration - ufmf \"Frame Skip\" must");
+            errMsgText += " be greater than zero";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        videoWriterParams_.ufmf.frameSkip = ufmfFrameSkip;
 
+        // ufmf Background threshold
+        if (!ufmfMap.contains("Background Threshold"))
+        {
+            QString errMsgText("Logging configuration - ufmf"); 
+            errMsgText += " \"Background Threshold\" not present";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!ufmfMap["Background Threshold"].canConvert<unsigned int>())
+        {
+            QString errMsgText("Logging configuration - ufmf unable");
+            errMsgText += " to convert \"Background Threshold\" to unsigned int";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        unsigned int ufmfBackgroundThreshold = ufmfMap["Background Threshold"].toUInt();
+        if (ufmfBackgroundThreshold < VideoWriter_ufmf::MIN_BACKGROUND_THRESHOLD)
+        {
+            QString errMsgText("Logging configuration - ufmf \"Background Threshold\""); 
+            errMsgText += QString(" must be greater than %1").arg(
+                    VideoWriter_ufmf::MIN_BACKGROUND_THRESHOLD
+                    );
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (ufmfBackgroundThreshold > VideoWriter_ufmf::MAX_BACKGROUND_THRESHOLD)
+        {
+            QString errMsgText("Logging configuration - ufmf \"Background Threshold\"");
+            errMsgText += QString(" msut be less than %1").arg(
+                    VideoWriter_ufmf::MAX_BACKGROUND_THRESHOLD
+                    );
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        videoWriterParams_.ufmf.backgroundThreshold = ufmfBackgroundThreshold;
+
+        // ufmf Box length
+        if (!ufmfMap.contains("Box Length"))
+        {
+            QString errMsgText("Logging configuration - ufmf"); 
+            errMsgText += " \"Box Length\" not present";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!ufmfMap["Box Length"].canConvert<unsigned int>())
+        {
+            QString errMsgText("Logging configuration - ufmf unable");
+            errMsgText += " to convert \"Box Length\" to unsigned int";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        unsigned int ufmfBoxLength = ufmfMap["Box Length"].toUInt();
+        if (ufmfBoxLength < VideoWriter_ufmf::MIN_BOX_LENGTH)
+        {
+            QString errMsgText("Logging configuration - ufmf \"Box Length\""); 
+            errMsgText += QString(" must be greater than %1").arg(
+                    VideoWriter_ufmf::MIN_BOX_LENGTH
+                    );
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (ufmfBoxLength > VideoWriter_ufmf::MAX_BOX_LENGTH)
+        {
+            QString errMsgText("Logging configuration - ufmf \"Box Length\"");
+            errMsgText += QString(" must be less than %1").arg(
+                    VideoWriter_ufmf::MAX_BOX_LENGTH
+                    );
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        videoWriterParams_.ufmf.boxLength = ufmfBoxLength;
+
+        // ufmf Compression Threads
+        if (!ufmfMap.contains("Compression Threads"))
+        {
+            QString errMsgText("Logging configuration - ufmf"); 
+            errMsgText += " \"Compression Threads\" not present";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!ufmfMap["Compression Threads"].canConvert<unsigned int>())
+        {
+            QString errMsgText("Logging configuration - ufmf unable");
+            errMsgText += " to convert \"Compression Threads\" to unsigned int";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        unsigned int ufmfCompressionThreads = ufmfMap["Compression Threads"].toUInt();
+        if (ufmfCompressionThreads < VideoWriter_ufmf::MIN_NUMBER_OF_COMPRESSORS)
+        {
+            QString errMsgText("Logging configuration - ufmf \"Compression Threads\""); 
+            errMsgText += QString(" must be greater than %1").arg(
+                    VideoWriter_ufmf::MIN_NUMBER_OF_COMPRESSORS
+                    );
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        videoWriterParams_.ufmf.numberOfCompressors = ufmfCompressionThreads;
+
+        // ufmf median update count
+        if (!ufmfMap.contains("Median Update Count"))
+        {
+            QString errMsgText("Logging configuration - ufmf"); 
+            errMsgText += " \"Median Update Count\" not present";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!ufmfMap["Median Update Count"].canConvert<unsigned int>())
+        {
+            QString errMsgText("Logging configuration - ufmf unable");
+            errMsgText += " to convert \"Median Update Count\" to unsigned int";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        unsigned int ufmfMedianUpdateCount = ufmfMap["Median Update Count"].toUInt();
+        if (ufmfMedianUpdateCount < BackgroundHistogram_ufmf::MIN_MEDIAN_UPDATE_COUNT )
+        {
+            QString errMsgText("Logging configuration - ufmf \"Median Update Count\""); 
+            errMsgText += QString(" must be greater than %1").arg(
+                    BackgroundHistogram_ufmf::MIN_MEDIAN_UPDATE_COUNT
+                    );
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        videoWriterParams_.ufmf.medianUpdateCount = ufmfMedianUpdateCount;
+
+        // ufmf Dilate
+        QVariantMap ufmfDilateMap = ufmfMap["Dilate"].toMap();
+        if (ufmfDilateMap.isEmpty())
+        {
+            QString errMsgText("Logging configuration - ufmf \"Dilate\"");
+            errMsgText += " is not present";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+
+        // ufmf Dilate On
+        if (!ufmfDilateMap.contains("On"))
+        {
+            QString errMsgText("Logging configuration - ufmf \"Dilate\"");
+            errMsgText += " \"On\" is not present";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!ufmfDilateMap["On"].canConvert<bool>())
+        {
+            QString errMsgText("Logging configuration - unable to convert");
+            errMsgText += " ufmf \"Dilate\" \"On\" to bool";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        bool ufmfDilateOn = ufmfDilateMap["On"].toBool();
+        videoWriterParams_.ufmf.dilateState = ufmfDilateOn;
+
+
+        // ufmf Dilate Window Size
+        if (!ufmfDilateMap.contains("Window Size"))
+        {
+            QString errMsgText("Logging configuration - ufmf \"Dilate\"");
+            errMsgText += " \"Window Size\" is not present";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!ufmfDilateMap["Window Size"].canConvert<unsigned int>())
+        {
+            QString errMsgText("Logging configuration - unable to convert");
+            errMsgText += " ufmf \"Dilate\" \"Window Size\" to unsigned int";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        unsigned int ufmfDilateWindowSize = ufmfDilateMap["Window Size"].toUInt();
+        // ---------------------------------------------------------------------
+        // TO DO ... add ufmf check of ufmf Dilate window size range
+        // ----------------------------------------------------------------------
+        videoWriterParams_.ufmf.dilateWindowSize = ufmfDilateWindowSize;
 
         return true;
     }

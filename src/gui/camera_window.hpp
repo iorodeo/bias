@@ -194,11 +194,15 @@ namespace bias
             void updateCameraMenu();
             void updateLoggingMenu();
             void updateTimerMenu();
+            void updateDisplayMenu();
 
             void updateCameraVideoModeMenu();
             void updateCameraFrameRateMenu();
             void updateCameraPropertiesMenu();
             void updateCameraTriggerMenu();
+
+            void updateDisplayOrientMenu();
+            void updateDisplayRotMenu();
 
             void updatePreviewImageLabel();
             void updateCameraInfoMessage();

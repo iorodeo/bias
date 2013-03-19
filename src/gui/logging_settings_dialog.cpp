@@ -176,6 +176,10 @@ namespace bias
         validatorPtr = new IntValidatorWithFixup(ufmfCompressionThreadsLineEditPtr_);
         validatorPtr -> setBottom(VideoWriter_ufmf::MIN_NUMBER_OF_COMPRESSORS);
         ufmfCompressionThreadsLineEditPtr_ -> setValidator(validatorPtr);
+
+        // -------------------------------------------------------------------
+        // TO DO - validatpor for ufmf dilate window size
+        // --------------------------------------------------------------------
     }
 
 
