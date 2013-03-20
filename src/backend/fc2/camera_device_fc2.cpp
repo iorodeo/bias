@@ -994,7 +994,6 @@ namespace bias {
             printFormat7Info_fc2(format7Info);
         }
 
-
         // Create desired format7 configuration
         imageSettings.mode = format7Info.mode;
         imageSettings.offsetX = 0;
@@ -1021,7 +1020,7 @@ namespace bias {
         {
             std::stringstream ssError; 
             ssError << __PRETTY_FUNCTION__; 
-            ssError << ": unable to validate FlyCapture2 format 7 settings"; 
+            ssError << ": FlyCapture2 format 7 settings invalid"; 
             throw RuntimeError(ERROR_FC2_INVALID_FORMAT7_SETTINGS, ssError.str());
         }
 

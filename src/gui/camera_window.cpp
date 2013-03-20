@@ -2240,7 +2240,7 @@ namespace bias
             valueMap.insert("On", prop.on);
             valueMap.insert("Auto Active", prop.autoActive);
             valueMap.insert("Value", prop.value);
-            valueMap.insert("Absolute Value", prop.absoluteValue);
+            valueMap.insert("Absolute Value", double(prop.absoluteValue));
             cameraPropMap.insert(propName, valueMap);
         }
         cameraMap.insert("Properties", cameraPropMap);
