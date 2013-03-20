@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iostream>
 #include <algorithm>
+#include <bitset>
 
 
 namespace bias {
@@ -992,7 +993,35 @@ namespace bias {
         if (1) // Print format7 information for selected mode
         {
             printFormat7Info_fc2(format7Info);
+            unsigned int test0 = format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_RAW8;
+            unsigned int test1 = format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_MONO8;
+            std::cout << "FC2_PIXEL_FORMAT_RAW8  | pixelFormatBitField = "<< std::bitset<32>(test0) << std::endl;
+            std::cout << "FC2_PIXEL_FORMAT_MONO8 | pixelFormatBitField = "<< std::bitset<32>(test1) << std::endl;
         }
+
+        // --------------------------------------------------------------------------
+        // TEMPORARY HACK - determine pixel format currently only allow raw8 or mono8
+        // --------------------------------------------------------------------------
+        fc2PixelFormat pixelFormat;
+
+        if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_RAW8)
+        {
+            pixelFormat = FC2_PIXEL_FORMAT_RAW8;
+            std::cout << "pixelFormat = FC2_PIXEL_FORMAT_RAW8" << std::endl;
+        }
+        else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_MONO8)
+        {
+            pixelFormat = FC2_PIXEL_FORMAT_MONO8;
+            std::cout << "pixelFormat = FC2_PIXEL_FORMAT_MONO8" << std::endl;
+        }
+        else
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": no supported pixel formats";
+            throw RuntimeError(ERROR_FC2_NOSUPPORTED_PIXEL_FORMAT, ssError.str());
+        }
+        // --------------------------------------------------------------------------
 
         // Create desired format7 configuration
         imageSettings.mode = format7Info.mode;
@@ -1000,7 +1029,7 @@ namespace bias {
         imageSettings.offsetY = 0;
         imageSettings.width = format7Info.maxWidth;
         imageSettings.height = format7Info.maxHeight;
-        imageSettings.pixelFormat = FC2_PIXEL_FORMAT_RAW8;
+        imageSettings.pixelFormat = pixelFormat;
 
         // Check that settings are valid and get packet info
         error = fc2ValidateFormat7Settings(

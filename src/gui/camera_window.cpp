@@ -16,6 +16,7 @@
 #include "timer_settings_dialog.hpp"
 #include "logging_settings_dialog.hpp"
 #include "background_histogram_ufmf.hpp"
+#include "json.hpp"
 #include <cstdlib>
 #include <cmath>
 #include <QtGui>
@@ -27,7 +28,6 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
 
-#include "json.hpp"
 
 
 namespace bias
