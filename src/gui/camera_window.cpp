@@ -455,6 +455,7 @@ namespace bias
 
     void CameraWindow::actionLoggingSettingsTriggered()
     {
+        // If logging settings dialog does exist create it otherwise raise
         if (loggingSettingsDialogPtr_.isNull()) 
         {
             loggingSettingsDialogPtr_ = new LoggingSettingsDialog(
@@ -474,6 +475,30 @@ namespace bias
         else
         {
             loggingSettingsDialogPtr_ -> raise();
+        }
+
+        // Set current tab based on current logging format
+        QTabWidget *dialogTabWidgetPtr = loggingSettingsDialogPtr_ -> tabWidgetPtr_;
+        switch (videoFileFormat_)
+        {
+            case VIDEOFILE_FORMAT_BMP:
+                dialogTabWidgetPtr -> setCurrentWidget(loggingSettingsDialogPtr_ -> bmpTabPtr_);
+                break;
+                
+            case VIDEOFILE_FORMAT_AVI:
+                dialogTabWidgetPtr -> setCurrentWidget(loggingSettingsDialogPtr_ -> aviTabPtr_);
+                break;
+
+            case VIDEOFILE_FORMAT_FMF:
+                dialogTabWidgetPtr -> setCurrentWidget(loggingSettingsDialogPtr_ -> fmfTabPtr_);
+                break;
+
+            case VIDEOFILE_FORMAT_UFMF:
+                dialogTabWidgetPtr -> setCurrentWidget(loggingSettingsDialogPtr_ -> ufmfTabPtr_);
+                break;
+
+            default:
+                break;
         }
     }
 
@@ -2257,6 +2282,7 @@ namespace bias
         ufmfSettingsMap.insert("Background Threshold", videoWriterParams_.ufmf.backgroundThreshold);
         ufmfSettingsMap.insert("Box Length", videoWriterParams_.ufmf.boxLength);
         ufmfSettingsMap.insert("Median Update Count", videoWriterParams_.ufmf.medianUpdateCount);
+        ufmfSettingsMap.insert("Median Update Interval", videoWriterParams_.ufmf.medianUpdateInterval);
         ufmfSettingsMap.insert("Compression Threads", videoWriterParams_.ufmf.numberOfCompressors);
 
         QVariantMap ufmfDilateMap;
@@ -3462,6 +3488,33 @@ namespace bias
             return false;
         }
         videoWriterParams_.ufmf.medianUpdateCount = ufmfMedianUpdateCount;
+
+        // ufmf median update interval
+        if (!ufmfMap.contains("Median Update Interval"))
+        {
+            QString errMsgText("Logging configuration - ufmf");
+            errMsgText += " \"Median Update Interval\" not present";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!ufmfMap["Median Update Interval"].canConvert<unsigned int>())
+        {
+            QString errMsgText("Logging configuration - ufmf unable");
+            errMsgText += " to convert \"Median Update Interval\" to unsigned int";
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        unsigned int ufmfMedianUpdateInterval = ufmfMap["Median Update Interval"].toUInt();
+        if (ufmfMedianUpdateInterval < BackgroundHistogram_ufmf::MIN_MEDIAN_UPDATE_INTERVAL )
+        {
+            QString errMsgText("Logging configuration - ufmf \"Median Update Interval\"");
+            errMsgText += QString(" must be greater than %1").arg(
+                    BackgroundHistogram_ufmf::MIN_MEDIAN_UPDATE_INTERVAL
+                    );
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        videoWriterParams_.ufmf.medianUpdateInterval = ufmfMedianUpdateInterval;
 
         // ufmf Dilate
         QVariantMap ufmfDilateMap = ufmfMap["Dilate"].toMap();
