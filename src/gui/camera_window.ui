@@ -348,11 +348,19 @@
     <addaction name="separator"/>
     <addaction name="actionNoPluginsFoundPtr_"/>
    </widget>
+   <widget class="QMenu" name="menuServerPtr_">
+    <property name="title">
+     <string>&amp;Server</string>
+    </property>
+    <addaction name="actionServerEnabledPtr_"/>
+    <addaction name="actionServerSettingsPtr_"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuCameraPtr_"/>
    <addaction name="menuLoggingPtr_"/>
    <addaction name="menuTimerPtr_"/>
    <addaction name="menuDisplayPtr_"/>
+   <addaction name="menuServerPtr_"/>
    <addaction name="menuPluginsPtr_"/>
    <addaction name="menuHelpPtr_"/>
   </widget>
@@ -626,6 +634,19 @@
    </property>
    <property name="text">
     <string>ifmf</string>
+   </property>
+  </action>
+  <action name="actionServerEnabledPtr_">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Enabled</string>
+   </property>
+  </action>
+  <action name="actionServerSettingsPtr_">
+   <property name="text">
+    <string>Settings...</string>
    </property>
   </action>
  </widget>

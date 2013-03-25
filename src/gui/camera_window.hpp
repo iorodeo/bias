@@ -31,6 +31,7 @@ namespace bias
     class ImageLogger; 
     class TimerSettingsDialog;
     class LoggingSettingsDialog;
+    class BasicHttpServer;
     template <class T> class Lockable;
     template <class T> class LockableQueue;
 
@@ -95,8 +96,10 @@ namespace bias
             void actionDisplayFlipHorzTriggered();
             void actionDisplayRotTriggered();
             void actionHelpUserManualTriggered();
-            void actionHelpAboutTriggered();
             void actionPluginsSettingsTriggered();
+            void actionServerEnabledTriggered();
+            void actionServerSettingsTriggered();
+            void actionHelpAboutTriggered();
 
             // Signal mappers for videomode, framerate and properties
             void actionVideoModeTriggered(int vidModeInt);
@@ -106,6 +109,10 @@ namespace bias
             // Dialog slots
             void timerDurationChanged(unsigned long duration);
             void loggingSettingsChanged(VideoWriterParams params);
+
+            // Http server
+            void handleHttpRequest(QMap<QString,QString> paramsMap);
+
 
         private:
 
@@ -167,6 +174,8 @@ namespace bias
             QPointer<LoggingSettingsDialog> loggingSettingsDialogPtr_;
 
             VideoWriterParams videoWriterParams_;
+
+            QPointer<BasicHttpServer> httpServerPtr_;
 
             void connectWidgets();
             void initialize(Guid guid);

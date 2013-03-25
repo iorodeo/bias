@@ -36,6 +36,7 @@ set(
     timer_settings_dialog.hpp
     logging_settings_dialog.hpp
     json.hpp
+    basic_http_server.hpp
     )
 
 set(
@@ -64,6 +65,7 @@ set(
     timer_settings_dialog.cpp
     logging_settings_dialog.cpp
     json.cpp
+    basic_http_server.cpp
     )
 
 qt4_wrap_ui(bias_gui_FORMS_HEADERS ${bias_gui_FORMS}) 

@@ -17,17 +17,22 @@
 #include "logging_settings_dialog.hpp"
 #include "background_histogram_ufmf.hpp"
 #include "json.hpp"
+#include "basic_http_server.hpp"
+
 #include <cstdlib>
 #include <cmath>
+#include <iostream>
+
 #include <QtGui>
 #include <QTimer>
 #include <QThreadPool>
 #include <QSignalMapper>
 #include <QFile>
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <iostream>
 
+#include <QTcpServer>
 
 
 namespace bias
@@ -589,28 +594,6 @@ namespace bias
     }
 
 
-    void CameraWindow::actionHelpUserManualTriggered()
-    {
-        QString msgTitle("Development");
-        QString msgText("User manual not fully implemented");
-        QMessageBox::information(this, msgTitle, msgText);
-    }
-
-
-    void CameraWindow::actionHelpAboutTriggered()
-    {
-        QString msgTitle("Development");
-        QString msgText("About not fully implemented");
-        QMessageBox::information(this, msgTitle, msgText);
-    }
-
-    void CameraWindow::actionPluginsSettingsTriggered()
-    {
-        QString msgTitle("Development");
-        QString msgText("Plugin settings not fully implemented");
-        QMessageBox::information(this, msgTitle, msgText);
-    }
-
     void CameraWindow::actionVideoModeTriggered(int vidModeInt)
     {
         VideoMode vidMode = VideoMode(vidModeInt);
@@ -646,7 +629,6 @@ namespace bias
         }
     }
 
-
     void CameraWindow::actionFrameRateTriggered(int frmRateInt)
     {
         FrameRate frmRate = FrameRate(frmRateInt);
@@ -661,6 +643,75 @@ namespace bias
         QPointer<PropertyDialog> propDialogPtr = new PropertyDialog(cameraPtr_, propType, this);
         propDialogPtr -> show();
     }
+    
+
+    void CameraWindow::actionPluginsSettingsTriggered()
+    {
+        QString msgTitle("Development");
+        QString msgText("Plugin settings not fully implemented");
+        QMessageBox::information(this, msgTitle, msgText);
+    }
+
+
+    void CameraWindow::actionServerEnabledTriggered()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+
+        if (actionServerEnabledPtr_ -> isChecked())
+        {
+            httpServerPtr_ -> listen(QHostAddress::Any, 5000);
+
+        }
+        else
+        {
+            httpServerPtr_ -> close();
+        }
+    }
+
+
+    void CameraWindow::actionServerSettingsTriggered()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+    }
+
+
+    void CameraWindow::actionHelpUserManualTriggered()
+    {
+        QString msgTitle("Development");
+        QString msgText("User manual not fully implemented");
+        QMessageBox::information(this, msgTitle, msgText);
+    }
+
+
+    void CameraWindow::actionHelpAboutTriggered()
+    {
+        QString msgTitle("Development");
+        QString msgText("About not fully implemented");
+        QMessageBox::information(this, msgTitle, msgText);
+    }
+
+
+    void CameraWindow::handleHttpRequest(QMap<QString, QString> paramsMap)
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        if (paramsMap.size() == 1)
+        {
+            if (paramsMap.contains("connect"))
+            {
+                std::cout << "connect" << std::endl;
+            }
+            else if (paramsMap.contains("start"))
+            {
+                std::cout << "start" << std::endl;
+            }
+            else if (paramsMap.contains("stop"))
+            {
+                std::cout << "stop" << std::endl;
+            }
+        }
+
+    }
+
 
 
     // Private methods
@@ -686,6 +737,7 @@ namespace bias
         threadPoolPtr_ -> setMaxThreadCount(MAX_THREAD_COUNT);
         newImageQueuePtr_ = std::make_shared<LockableQueue<StampedImage>>();
         logImageQueuePtr_ = std::make_shared<LockableQueue<StampedImage>>();
+
 
         setDefaultFileDirs();
         currentVideoFileDir_ = defaultVideoFileDir_;
@@ -719,7 +771,16 @@ namespace bias
 
         // Assign thread cpu affinity
         assignThreadAffinity(false,1);
+
+        httpServerPtr_ = new BasicHttpServer(this);
+        connect(
+                httpServerPtr_,
+                SIGNAL(httpRequest(QMap<QString,QString>)),
+                this,
+                SLOT(handleHttpRequest(QMap<QString,QString>))
+               );
     }
+
 
     void CameraWindow::setupImageLabels()
     {
@@ -753,6 +814,34 @@ namespace bias
                 this, 
                 SLOT(connectButtonClicked())
                 );
+
+        connect(
+                actionFileLoadConfigPtr_,
+                SIGNAL(triggered()),
+                this,
+                SLOT(actionFileLoadConfigTriggered())
+               );
+
+        connect(
+                actionFileSaveConfigPtr_,
+                SIGNAL(triggered()),
+                this,
+                SLOT(actionFileSaveConfigTriggered())
+               );
+
+        connect(
+                actionFileCloseWindowPtr_,
+                SIGNAL(triggered()),
+                this,
+                SLOT(close())
+               );
+
+        connect(
+                actionFileHideWindowPtr_,
+                SIGNAL(triggered()),
+                this,
+                SLOT(actionFileHideWindowTriggered())
+               );
 
         connect(
                 actionCameraInfoPtr_, 
@@ -902,6 +991,27 @@ namespace bias
                );
 
         connect(
+                actionPluginsSettingsPtr_,
+                SIGNAL(triggered()),
+                this,
+                SLOT(actionPluginsSettingsTriggered())
+               );
+
+        connect(
+                actionServerEnabledPtr_,
+                SIGNAL(triggered()),
+                this,
+                SLOT(actionServerEnabledTriggered())
+               );
+
+        connect(
+                actionServerSettingsPtr_,
+                SIGNAL(triggered()),
+                this,
+                SLOT(actionServerSettingsTriggered())
+               );
+
+        connect(
                 actionHelpUserManualPtr_,
                 SIGNAL(triggered()),
                 this,
@@ -913,41 +1023,6 @@ namespace bias
                 SIGNAL(triggered()),
                 this,
                 SLOT(actionHelpAboutTriggered())
-               );
-
-        connect(
-                actionFileLoadConfigPtr_,
-                SIGNAL(triggered()),
-                this,
-                SLOT(actionFileLoadConfigTriggered())
-               );
-
-        connect(
-                actionFileSaveConfigPtr_,
-                SIGNAL(triggered()),
-                this,
-                SLOT(actionFileSaveConfigTriggered())
-               );
-
-        connect(
-                actionFileCloseWindowPtr_,
-                SIGNAL(triggered()),
-                this,
-                SLOT(close())
-               );
-
-        connect(
-                actionFileHideWindowPtr_,
-                SIGNAL(triggered()),
-                this,
-                SLOT(actionFileHideWindowTriggered())
-               );
-
-        connect(
-                actionPluginsSettingsPtr_,
-                SIGNAL(triggered()),
-                this,
-                SLOT(actionPluginsSettingsTriggered())
                );
 
         connect(

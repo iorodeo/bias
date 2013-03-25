@@ -41,15 +41,14 @@ endif()
 # ------------------------------------------------------------------------------
 if(with_qt_gui)
     set(QT_BINARY_DIR "C:/users/wbd/work/qt/qt_activestate/bin")
-    find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
+    find_package(Qt4 COMPONENTS QtCore QtGui QtNetwork REQUIRED)
 endif()
 
 # Compiler flags
 # -----------------------------------------------------------------------------
 #set(CMAKE_CXX_FLAGS "-std=gnu++0x -O2 -Wall")
 set(CMAKE_CXX_FLAGS "-std=gnu++0x -O2")
-#set(CMAKE_CXX_FLAGS "-std=gnu++0x -mwindows")
-#set(CMAKE_CXX_FLAGS "-std=gnu++0x")
+#set(CMAKE_CXX_FLAGS "-std=gnu++0x -mwindows -O2")
 
 
 # Definitions 
@@ -90,6 +89,7 @@ endif()
 if(with_dc1394)
     set(bias_ext_link_LIBS ${bias_ext_link_LIBS} dc1394)
 endif()
+set(bias_ext_link_LIBS ${bias_ext_link_LIBS})
 
 
 # Output directory for executables - puts executables in build directory
