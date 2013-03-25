@@ -31,11 +31,11 @@ namespace bias
             if (tokens[0] == "GET") 
             {
                 handleGetRequest(socketPtr, tokens);
-                socketPtr->close();
-                if (socketPtr->state() == QTcpSocket::UnconnectedState) 
+                socketPtr -> close();
+                if (socketPtr -> state() == QTcpSocket::UnconnectedState)
                 {
                     delete socketPtr;
-                } 
+                }
             } 
         } 
     }
@@ -47,10 +47,12 @@ namespace bias
         socketPtr->deleteLater();
     }
 
+
     void BasicHttpServer::handleGetRequest(QTcpSocket *socketPtr, QStringList &tokens)
     { 
         QTextStream os(socketPtr);
         os.setAutoDetectUnicode(true);
+
         os << "HTTP/1.0 200 Ok\r\n";
         os << "Content-Type: text/html; charset=\"utf-8\"\r\n\r\n";
         os << "<html>\n";
@@ -72,6 +74,7 @@ namespace bias
             os << QDateTime::currentDateTime().toString() << "\n";
             os << "</body>\n";
             os << "</html>\n";
+            return;
         }
         else if (paramsString.length() > 1)
         {
@@ -93,9 +96,19 @@ namespace bias
                 os << "</body>\n";
                 os << "</html>\n";
 
-                // TEMPORARY - need to deal with requests with values 
                 QMap<QString, QString> paramsMap;
-                paramsMap.insert(paramsList[0], QString(""));
+                for (unsigned int i=0; i<paramsList.size(); i++)
+                {
+                    QStringList parts = paramsList[i].split("=",QString::SkipEmptyParts);
+                    if (parts.size() == 1)
+                    {
+                        paramsMap.insert(parts[0], QString(""));
+                    }
+                    else if (parts.size() == 2)
+                    {
+                        paramsMap.insert(parts[0], parts[1]);
+                    }
+                }
                 emit httpRequest(paramsMap);
                 return;
             }

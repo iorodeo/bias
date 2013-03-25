@@ -44,8 +44,14 @@ namespace bias
         public:
 
             CameraWindow(Guid cameraGuid, QWidget *parent=0);
+            void connectCamera();
+            void disconnectCamera();
+            void startImageCapture();
+            void stopImageCapture();
             void saveConfiguration(QString filename);
             void loadConfiguration(QString fileName);
+            bool setConfigurationFromJson(QByteArray jsonConfig);
+            bool setConfigurationFromMap(QVariantMap configMap);
 
         signals:
 
@@ -110,7 +116,7 @@ namespace bias
             void timerDurationChanged(unsigned long duration);
             void loggingSettingsChanged(VideoWriterParams params);
 
-            // Http server
+            // http server
             void handleHttpRequest(QMap<QString,QString> paramsMap);
 
 
@@ -180,11 +186,6 @@ namespace bias
             void connectWidgets();
             void initialize(Guid guid);
 
-            void connectCamera();
-            void disconnectCamera();
-
-            void startImageCapture();
-            void stopImageCapture();
 
             void setDefaultFileDirs();
             void setupImageDisplayTimer();
@@ -246,8 +247,6 @@ namespace bias
             QByteArray getConfigurationJson();
             QVariantMap getConfigurationMap();
 
-            bool setConfigurationFromJson(QByteArray jsonConfig);
-            bool setConfigurationFromMap(QVariantMap configMap);
             bool setCameraFromMap(QVariantMap cameraMap);
             bool setLoggingFromMap(QVariantMap loggingMap);
             bool setTimerFromMap(QVariantMap timerMap);

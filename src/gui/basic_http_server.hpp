@@ -2,6 +2,7 @@
 #define BIAS_BASIC_HTTP_SERVER_HPP
 
 #include <QTcpServer>
+#include <QPointer>
 #include <QString>
 #include <QMap>
 
@@ -16,7 +17,6 @@ namespace bias
         Q_OBJECT
 
         public:
-
             BasicHttpServer(QObject *parent=0);
             void incomingConnection(int socket);
 
@@ -27,6 +27,9 @@ namespace bias
             void readClient();
             void discardClient();
             void handleGetRequest(QTcpSocket *socket, QStringList &tokens);
+
+        private:
+            QPointer<QTcpServer> socketPtr_;
 
     };
 

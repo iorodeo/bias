@@ -77,6 +77,312 @@ namespace bias
     }
 
 
+    void CameraWindow::connectCamera() 
+    {
+        bool error = false;
+        unsigned int errorId;
+        QString errorMsg;
+
+        if (connected_)
+        {
+            return;
+        }
+
+        cameraPtr_ -> acquireLock();
+        try
+        {
+            cameraPtr_ -> connect();
+            // TEMPORARY - set camera to known videomode and trigger type
+            // ------------------------------------------------------------
+            cameraPtr_ -> setVideoMode(VIDEOMODE_FORMAT7);
+            cameraPtr_ -> setTriggerInternal();
+            // ------------------------------------------------------------
+        }
+        catch (RuntimeError &runtimeError)
+        {
+            error = true;
+            errorId = runtimeError.id();
+            errorMsg = QString::fromStdString(runtimeError.what());
+        }
+        cameraPtr_ -> releaseLock();
+
+        if (error)
+        {
+            QString msgTitle("Connection Error");
+            QString msgText("Failed to connect camera:\n\nError ID: ");
+            msgText += QString::number(errorId);
+            msgText += "\n\n";
+            msgText += errorMsg;
+            QMessageBox::critical(this, msgTitle, msgText);
+            return;
+        }
+        connected_ = true;
+        connectButtonPtr_ -> setText(QString("Disconnect"));
+        statusbarPtr_ -> showMessage(QString("Connected, Stopped"));
+        startButtonPtr_ -> setEnabled(true);
+        menuCameraPtr_ -> setEnabled(true);
+
+        updateCameraInfoMessage();
+        updateAllMenus();
+    }
+
+
+    void CameraWindow::disconnectCamera()
+    {
+        bool error = false;
+        unsigned int errorId;
+        QString errorMsg; 
+
+        if (capturing_) 
+        {
+            stopImageCapture();
+        }
+
+        cameraPtr_ -> acquireLock();
+        try
+        {
+            cameraPtr_ -> disconnect();
+        }
+        catch (RuntimeError &runtimeError)
+        {
+            error = true;
+            errorId = runtimeError.id();
+            errorMsg = QString::fromStdString(runtimeError.what());
+        }
+        cameraPtr_ -> releaseLock();
+
+        if (error)
+        {
+            QString msgTitle("Disconnection Error");
+            QString msgText("Failed to disconnect camera:\n\nError ID: ");
+            msgText += QString::number(errorId);
+            msgText += "\n\n";
+            msgText += errorMsg;
+            QMessageBox::critical(this, msgTitle, msgText);
+            return;
+        }
+        connected_ = false;
+        connectButtonPtr_ -> setText(QString("Connect"));
+        statusbarPtr_ -> showMessage(QString("Disconnected"));
+        startButtonPtr_ -> setEnabled(false);
+        menuCameraPtr_ -> setEnabled(false);
+        updateCameraInfoMessage();
+        setCaptureTimeLabel(0.0);
+
+        updateAllMenus();
+    }
+
+
+    void CameraWindow::startImageCapture() 
+    {
+        if (!connected_)
+        {
+            QString msgTitle("Capture Error");
+            QString msgText("Unable to start image capture: not connected");
+            QMessageBox::critical(this, msgTitle, msgText);
+            return;
+        }
+
+        newImageQueuePtr_ -> clear();
+        logImageQueuePtr_ -> clear();
+
+        imageGrabberPtr_ = new ImageGrabber(cameraPtr_, newImageQueuePtr_);
+        imageDispatcherPtr_ = new ImageDispatcher(
+                logging_, 
+                newImageQueuePtr_,
+                logImageQueuePtr_
+                );
+
+        connect(
+                imageGrabberPtr_, 
+                SIGNAL(startCaptureError(unsigned int, QString)),
+                this,
+                SLOT(startImageCaptureError(unsigned int, QString))
+               );
+
+        connect(
+                imageGrabberPtr_,
+                SIGNAL(captureError(unsigned int, QString)),
+                this,
+                SLOT(imageCaptureError(unsigned int, QString))
+               );
+
+        connect(
+                imageGrabberPtr_,
+                SIGNAL(stopCaptureError(unsigned int, QString)),
+                this,
+                SLOT(stopImageCaptureError(unsigned int, QString))
+               );
+
+        threadPoolPtr_ -> start(imageGrabberPtr_);
+        threadPoolPtr_ -> start(imageDispatcherPtr_);
+
+        if (logging_)
+        {
+            // Create video writer based on video file format type
+            std::shared_ptr<VideoWriter> videoWriterPtr; 
+            QString videoFileFullPath = getVideoFileFullPathWithGuid();
+
+            switch (videoFileFormat_)
+            {
+                case VIDEOFILE_FORMAT_BMP:
+                    videoWriterPtr = std::make_shared<VideoWriter_bmp>(
+                            videoWriterParams_.bmp,
+                            videoFileFullPath
+                            );
+                    break;
+
+                case VIDEOFILE_FORMAT_AVI:  
+                    videoWriterPtr = std::make_shared<VideoWriter_avi>(
+                            videoWriterParams_.avi,
+                            videoFileFullPath
+                            );
+                    break;
+
+                case VIDEOFILE_FORMAT_FMF:
+                    videoWriterPtr = std::make_shared<VideoWriter_fmf>(
+                            videoWriterParams_.fmf,
+                            videoFileFullPath
+                            );
+                    break;
+
+                case VIDEOFILE_FORMAT_UFMF:
+                    videoWriterPtr = std::make_shared<VideoWriter_ufmf>(
+                            videoWriterParams_.ufmf,
+                            videoFileFullPath
+                            );
+                    break;
+
+                default:
+                    videoWriterPtr = std::make_shared<VideoWriter>(
+                            videoFileFullPath
+                            );
+                    break;
+            }
+
+            // Set output file
+            //QString videoFileFullPath = getVideoFileFullPathWithGuid();
+            videoWriterPtr -> setFileName(videoFileFullPath);
+
+            imageLoggerPtr_ = new ImageLogger(videoWriterPtr, logImageQueuePtr_);
+
+            // Connect image logger error signals
+            connect(
+                    imageLoggerPtr_,
+                    SIGNAL(imageLoggingError(unsigned int, QString)),
+                    this,
+                    SLOT(imageLoggingError(unsigned int, QString))
+                   );
+
+            connect(
+                    videoWriterPtr.get(),
+                    SIGNAL(imageLoggingError(unsigned int, QString)),
+                    this,
+                    SLOT(imageLoggingError(unsigned int, QString))
+                   );
+
+            threadPoolPtr_ -> start(imageLoggerPtr_);
+        }
+
+        // Start display update timer
+        unsigned int imageDisplayDt = int(1000.0/imageDisplayFreq_);
+        imageDisplayTimerPtr_ -> start(imageDisplayDt);
+
+        // Set Capture start and stop time
+        captureStartDateTime_ = QDateTime::currentDateTime();
+        captureStopDateTime_ = captureStartDateTime_.addSecs(captureDurationSec_);
+
+        // Start duration timer - if enabled
+        if (actionTimerEnabledPtr_ -> isChecked())
+        {
+            captureDurationTimerPtr_ -> start();
+        }
+
+        // Update GUI widget for capturing state
+        startButtonPtr_ -> setText(QString("Stop"));
+        connectButtonPtr_ -> setEnabled(false);
+        statusbarPtr_ -> showMessage(QString("Capturing"));
+        capturing_ = true;
+        updateAllMenus();
+
+        emit imageCaptureStarted();
+    }
+
+
+    void CameraWindow::stopImageCapture()
+    {
+        if (!connected_)
+        {
+            QString msgTitle("Capture Error");
+            QString msgText("Unable to stop image capture: not connected");
+            QMessageBox::critical(this, msgTitle, msgText);
+            return;
+        }
+
+        // Stop timers.
+        imageDisplayTimerPtr_ -> stop();
+        if (actionTimerEnabledPtr_ -> isChecked())
+        {
+            captureDurationTimerPtr_ -> stop();
+        }
+
+        // Note, image grabber and dispatcher are destroyed by the 
+        // threadPool when their run methods exit.
+
+        // Send stop singals to threads
+        if (!imageGrabberPtr_.isNull())
+        {
+            imageGrabberPtr_ -> acquireLock();
+            imageGrabberPtr_ -> stop();
+            imageGrabberPtr_ -> releaseLock();
+        }
+
+        if (!imageDispatcherPtr_.isNull())
+        {
+            imageDispatcherPtr_ -> acquireLock();
+            imageDispatcherPtr_ -> stop();
+            imageDispatcherPtr_ -> releaseLock();
+
+            newImageQueuePtr_ -> acquireLock();
+            newImageQueuePtr_ -> signalNotEmpty();
+            newImageQueuePtr_ -> releaseLock();
+        }
+
+        if (!imageLoggerPtr_.isNull())
+        {
+            imageLoggerPtr_ -> acquireLock();
+            imageLoggerPtr_ -> stop();
+            imageLoggerPtr_ -> releaseLock();
+
+            logImageQueuePtr_ -> acquireLock();
+            logImageQueuePtr_ -> signalNotEmpty();
+            logImageQueuePtr_ -> releaseLock();
+        }
+
+        // Wait until threads are finished
+        threadPoolPtr_ -> waitForDone();
+
+        // Clear any stale data out of existing queues
+        newImageQueuePtr_ -> acquireLock();
+        newImageQueuePtr_ -> clear();
+        newImageQueuePtr_ -> releaseLock();
+
+        logImageQueuePtr_ -> acquireLock();
+        logImageQueuePtr_ -> clear();
+        logImageQueuePtr_ -> releaseLock();
+
+        // Update data GUI information
+        startButtonPtr_ -> setText(QString("Start"));
+        connectButtonPtr_ -> setEnabled(true);
+        statusbarPtr_ -> showMessage(QString("Connected, Stopped"));
+        capturing_ = false;
+
+        updateAllMenus();
+
+        emit imageCaptureStopped();
+    }
+
+
     void CameraWindow::saveConfiguration(QString fileName)
     {
         // --------------------------------------------------------------------
@@ -693,25 +999,30 @@ namespace bias
 
     void CameraWindow::handleHttpRequest(QMap<QString, QString> paramsMap)
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
         if (paramsMap.size() == 1)
         {
             if (paramsMap.contains("connect"))
             {
-                std::cout << "connect" << std::endl;
+                connectCamera();
             }
-            else if (paramsMap.contains("start"))
+            else if(paramsMap.contains("disconnect"))
             {
-                std::cout << "start" << std::endl;
+                disconnectCamera();
             }
-            else if (paramsMap.contains("stop"))
+            else if (paramsMap.contains("start-capture"))
             {
-                std::cout << "stop" << std::endl;
+                startImageCapture();
+            }
+            else if (paramsMap.contains("stop-capture"))
+            {
+                stopImageCapture();
+            }
+            else if (paramsMap.contains("set-config"))
+            {
+                //setConfigurationFromJson(paramsMap["set-config"].toLatin1());
             }
         }
-
     }
-
 
 
     // Private methods
@@ -771,7 +1082,6 @@ namespace bias
 
         // Assign thread cpu affinity
         assignThreadAffinity(false,1);
-
         httpServerPtr_ = new BasicHttpServer(this);
         connect(
                 httpServerPtr_,
@@ -1295,12 +1605,14 @@ namespace bias
         }
     }
 
+
     void CameraWindow::resizeAllImageLabels()
     { 
         resizeImageLabel(previewImageLabelPtr_, previewPixmapOriginal_, true);
         resizeImageLabel(pluginImageLabelPtr_, pluginPixmapOriginal_, false);
         resizeImageLabel(histogramImageLabelPtr_, histogramPixmapOriginal_, false);
     }
+
 
     void CameraWindow::updateHistogramPixmap(cv::Mat hist)
     {
@@ -1321,306 +1633,6 @@ namespace bias
             painter.drawLine(i,y0,i,y1);
         }
 
-    }
-
-    void CameraWindow::connectCamera() 
-    {
-        bool error = false;
-        unsigned int errorId;
-        QString errorMsg;
-
-        cameraPtr_ -> acquireLock();
-        try
-        {
-            cameraPtr_ -> connect();
-            // TEMPORARY - set camera to known videomode and trigger type
-            // ------------------------------------------------------------
-            cameraPtr_ -> setVideoMode(VIDEOMODE_FORMAT7);
-            cameraPtr_ -> setTriggerInternal();
-            // ------------------------------------------------------------
-        }
-        catch (RuntimeError &runtimeError)
-        {
-            error = true;
-            errorId = runtimeError.id();
-            errorMsg = QString::fromStdString(runtimeError.what());
-        }
-        cameraPtr_ -> releaseLock();
-
-        if (error)
-        {
-            QString msgTitle("Connection Error");
-            QString msgText("Failed to connect camera:\n\nError ID: ");
-            msgText += QString::number(errorId);
-            msgText += "\n\n";
-            msgText += errorMsg;
-            QMessageBox::critical(this, msgTitle, msgText);
-            return;
-        }
-        connected_ = true;
-        connectButtonPtr_ -> setText(QString("Disconnect"));
-        statusbarPtr_ -> showMessage(QString("Connected, Stopped"));
-        startButtonPtr_ -> setEnabled(true);
-        menuCameraPtr_ -> setEnabled(true);
-
-        updateCameraInfoMessage();
-        updateAllMenus();
-    }
-
-
-    void CameraWindow::disconnectCamera()
-    {
-        bool error = false;
-        unsigned int errorId;
-        QString errorMsg; 
-
-        if (capturing_) 
-        {
-            stopImageCapture();
-        }
-
-        cameraPtr_ -> acquireLock();
-        try
-        {
-            cameraPtr_ -> disconnect();
-        }
-        catch (RuntimeError &runtimeError)
-        {
-            error = true;
-            errorId = runtimeError.id();
-            errorMsg = QString::fromStdString(runtimeError.what());
-        }
-        cameraPtr_ -> releaseLock();
-
-        if (error)
-        {
-            QString msgTitle("Disconnection Error");
-            QString msgText("Failed to disconnect camera:\n\nError ID: ");
-            msgText += QString::number(errorId);
-            msgText += "\n\n";
-            msgText += errorMsg;
-            QMessageBox::critical(this, msgTitle, msgText);
-            return;
-        }
-        connected_ = false;
-        connectButtonPtr_ -> setText(QString("Connect"));
-        statusbarPtr_ -> showMessage(QString("Disconnected"));
-        startButtonPtr_ -> setEnabled(false);
-        menuCameraPtr_ -> setEnabled(false);
-        updateCameraInfoMessage();
-        setCaptureTimeLabel(0.0);
-
-        updateAllMenus();
-    }
-
-    
-    void CameraWindow::startImageCapture() 
-    {
-        if (!connected_)
-        {
-            QString msgTitle("Capture Error");
-            QString msgText("Unable to start image capture: not connected");
-            QMessageBox::critical(this, msgTitle, msgText);
-            return;
-        }
-
-        newImageQueuePtr_ -> clear();
-        logImageQueuePtr_ -> clear();
-
-        imageGrabberPtr_ = new ImageGrabber(cameraPtr_, newImageQueuePtr_);
-        imageDispatcherPtr_ = new ImageDispatcher(
-                logging_, 
-                newImageQueuePtr_,
-                logImageQueuePtr_
-                );
-
-        connect(
-                imageGrabberPtr_, 
-                SIGNAL(startCaptureError(unsigned int, QString)),
-                this,
-                SLOT(startImageCaptureError(unsigned int, QString))
-               );
-
-        connect(
-                imageGrabberPtr_,
-                SIGNAL(captureError(unsigned int, QString)),
-                this,
-                SLOT(imageCaptureError(unsigned int, QString))
-               );
-
-        connect(
-                imageGrabberPtr_,
-                SIGNAL(stopCaptureError(unsigned int, QString)),
-                this,
-                SLOT(stopImageCaptureError(unsigned int, QString))
-               );
-
-        threadPoolPtr_ -> start(imageGrabberPtr_);
-        threadPoolPtr_ -> start(imageDispatcherPtr_);
-
-        if (logging_)
-        {
-            // Create video writer based on video file format type
-            std::shared_ptr<VideoWriter> videoWriterPtr; 
-            QString videoFileFullPath = getVideoFileFullPathWithGuid();
-
-            switch (videoFileFormat_)
-            {
-                case VIDEOFILE_FORMAT_BMP:
-                    videoWriterPtr = std::make_shared<VideoWriter_bmp>(
-                            videoWriterParams_.bmp,
-                            videoFileFullPath
-                            );
-                    break;
-
-                case VIDEOFILE_FORMAT_AVI:  
-                    videoWriterPtr = std::make_shared<VideoWriter_avi>(
-                            videoWriterParams_.avi,
-                            videoFileFullPath
-                            );
-                    break;
-
-                case VIDEOFILE_FORMAT_FMF:
-                    videoWriterPtr = std::make_shared<VideoWriter_fmf>(
-                            videoWriterParams_.fmf,
-                            videoFileFullPath
-                            );
-                    break;
-
-                case VIDEOFILE_FORMAT_UFMF:
-                    videoWriterPtr = std::make_shared<VideoWriter_ufmf>(
-                            videoWriterParams_.ufmf,
-                            videoFileFullPath
-                            );
-                    break;
-
-                default:
-                    videoWriterPtr = std::make_shared<VideoWriter>(
-                            videoFileFullPath
-                            );
-                    break;
-            }
-
-            // Set output file
-            //QString videoFileFullPath = getVideoFileFullPathWithGuid();
-            videoWriterPtr -> setFileName(videoFileFullPath);
-
-            imageLoggerPtr_ = new ImageLogger(videoWriterPtr, logImageQueuePtr_);
-
-            // Connect image logger error signals
-            connect(
-                    imageLoggerPtr_,
-                    SIGNAL(imageLoggingError(unsigned int, QString)),
-                    this,
-                    SLOT(imageLoggingError(unsigned int, QString))
-                   );
-
-            connect(
-                    videoWriterPtr.get(),
-                    SIGNAL(imageLoggingError(unsigned int, QString)),
-                    this,
-                    SLOT(imageLoggingError(unsigned int, QString))
-                   );
-
-            threadPoolPtr_ -> start(imageLoggerPtr_);
-        }
-
-        // Start display update timer
-        unsigned int imageDisplayDt = int(1000.0/imageDisplayFreq_);
-        imageDisplayTimerPtr_ -> start(imageDisplayDt);
-
-        // Set Capture start and stop time
-        captureStartDateTime_ = QDateTime::currentDateTime();
-        captureStopDateTime_ = captureStartDateTime_.addSecs(captureDurationSec_);
-
-        // Start duration timer - if enabled
-        if (actionTimerEnabledPtr_ -> isChecked())
-        {
-            captureDurationTimerPtr_ -> start();
-        }
-
-        // Update GUI widget for capturing state
-        startButtonPtr_ -> setText(QString("Stop"));
-        connectButtonPtr_ -> setEnabled(false);
-        statusbarPtr_ -> showMessage(QString("Capturing"));
-        capturing_ = true;
-        updateAllMenus();
-
-        emit imageCaptureStarted();
-    }
-
-
-    void CameraWindow::stopImageCapture()
-    {
-        if (!connected_)
-        {
-            QString msgTitle("Capture Error");
-            QString msgText("Unable to stop image capture: not connected");
-            QMessageBox::critical(this, msgTitle, msgText);
-            return;
-        }
-
-        // Stop timers.
-        imageDisplayTimerPtr_ -> stop();
-        if (actionTimerEnabledPtr_ -> isChecked())
-        {
-            captureDurationTimerPtr_ -> stop();
-        }
-
-        // Note, image grabber and dispatcher are destroyed by the 
-        // threadPool when their run methods exit.
-
-        // Send stop singals to threads
-        if (!imageGrabberPtr_.isNull())
-        {
-            imageGrabberPtr_ -> acquireLock();
-            imageGrabberPtr_ -> stop();
-            imageGrabberPtr_ -> releaseLock();
-        }
-
-        if (!imageDispatcherPtr_.isNull())
-        {
-            imageDispatcherPtr_ -> acquireLock();
-            imageDispatcherPtr_ -> stop();
-            imageDispatcherPtr_ -> releaseLock();
-
-            newImageQueuePtr_ -> acquireLock();
-            newImageQueuePtr_ -> signalNotEmpty();
-            newImageQueuePtr_ -> releaseLock();
-        }
-
-        if (!imageLoggerPtr_.isNull())
-        {
-            imageLoggerPtr_ -> acquireLock();
-            imageLoggerPtr_ -> stop();
-            imageLoggerPtr_ -> releaseLock();
-
-            logImageQueuePtr_ -> acquireLock();
-            logImageQueuePtr_ -> signalNotEmpty();
-            logImageQueuePtr_ -> releaseLock();
-        }
-
-        // Wait until threads are finished
-        threadPoolPtr_ -> waitForDone();
-
-        // Clear any stale data out of existing queues
-        newImageQueuePtr_ -> acquireLock();
-        newImageQueuePtr_ -> clear();
-        newImageQueuePtr_ -> releaseLock();
-
-        logImageQueuePtr_ -> acquireLock();
-        logImageQueuePtr_ -> clear();
-        logImageQueuePtr_ -> releaseLock();
-
-        // Update data GUI information
-        startButtonPtr_ -> setText(QString("Start"));
-        connectButtonPtr_ -> setEnabled(true);
-        statusbarPtr_ -> showMessage(QString("Connected, Stopped"));
-        capturing_ = false;
-
-        updateAllMenus();
-
-        emit imageCaptureStopped();
     }
 
 
