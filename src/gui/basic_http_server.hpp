@@ -28,9 +28,6 @@ namespace bias
             void discardClient();
             void handleGetRequest(QTcpSocket *socket, QStringList &tokens);
 
-        private:
-            QPointer<QTcpServer> socketPtr_;
-
     };
 
 
