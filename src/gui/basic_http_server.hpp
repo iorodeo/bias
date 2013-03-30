@@ -4,12 +4,16 @@
 #include <QTcpServer>
 #include <QPointer>
 #include <QString>
+#include <QTextStream>
 #include <QMap>
+#include <QVariantMap>
 
 class QTcpSockect;
 
 namespace bias
 {
+
+    class CameraWindow;
 
     class BasicHttpServer : public QTcpServer
     {
@@ -17,7 +21,7 @@ namespace bias
         Q_OBJECT
 
         public:
-            BasicHttpServer(QObject *parent=0);
+            BasicHttpServer(CameraWindow *cameraWindow, QObject *parent=0);
             void incomingConnection(int socket);
 
         signals:
@@ -26,7 +30,21 @@ namespace bias
         private slots:
             void readClient();
             void discardClient();
+
+        private:
+            QPointer<CameraWindow> cameraWindowPtr_;
             void handleGetRequest(QTcpSocket *socket, QStringList &tokens);
+            void handleParamsRequest(QTextStream &os, QStringList &paramsList);
+            QVariantMap paramsRequestSwitchYard(QString name, QString value);
+
+            QVariantMap handleConnectRequest();
+            QVariantMap handleDisconnectRequest();
+            QVariantMap handleStartCaptureRequest();
+            QVariantMap handleStopCaptureRequest();
+
+
+            void sendBadRequestResp(QTextStream &os, QString msg);
+            void sendRunningResp(QTextStream &os);
 
     };
 

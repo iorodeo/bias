@@ -1082,7 +1082,7 @@ namespace bias
 
         // Assign thread cpu affinity
         assignThreadAffinity(false,1);
-        httpServerPtr_ = new BasicHttpServer(this);
+        httpServerPtr_ = new BasicHttpServer(this,this);
         connect(
                 httpServerPtr_,
                 SIGNAL(httpRequest(QMap<QString,QString>)),

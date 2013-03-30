@@ -1,16 +1,19 @@
 #include "basic_http_server.hpp"
 #include <QTcpSocket>
-#include <QTextStream>
 #include <QStringList>
 #include <QDateTime>
 #include <iostream>
+#include "camera_window.hpp"
+#include "json.hpp"
 
 namespace bias
 {
 
-    BasicHttpServer::BasicHttpServer(QObject *parent)
+    BasicHttpServer::BasicHttpServer(CameraWindow *cameraWindow, QObject *parent)
         : QTcpServer(parent)
-    { }
+    { 
+        cameraWindowPtr_ = QPointer<CameraWindow>(cameraWindow);
+    }
 
     void BasicHttpServer::incomingConnection(int socket) 
     { 
@@ -53,72 +56,240 @@ namespace bias
         QTextStream os(socketPtr);
         os.setAutoDetectUnicode(true);
 
-        os << "HTTP/1.0 200 Ok\r\n";
-        os << "Content-Type: text/html; charset=\"utf-8\"\r\n\r\n";
-        os << "<html>\n";
-        os << "<body>\n";
-        os << "<h1>BIAS External Control Server</h1>\n";
-
+        // Examine tokens
         if (tokens.size() < 2)
         {
-            os << "no enought tokens\n";
-            os << "</body>\n";
-            os << "</html>\n";
+            sendBadRequestResp(os,"not enought tokens");
             return;
         }
 
+        // Parse tokens
         QString paramsString = tokens[1];
         if (paramsString.length() == 1)
         {
-            os << "Running - ";
-            os << QDateTime::currentDateTime().toString() << "\n";
-            os << "</body>\n";
-            os << "</html>\n";
+            sendRunningResp(os);
             return;
         }
         else if (paramsString.length() > 1)
         {
+            // Check for request parameters character '?'
             QChar secondChar = paramsString[1];
             if (secondChar != QChar('?'))
             {
-                os << "no ? character preceding parameters\n";
-                os << "</body>\n";
-                os << "</html>\n";
+                sendBadRequestResp(os, "no ? character preceeding parameters");
                 return;
             }
 
             paramsString.remove(0,2);
             QStringList paramsList = paramsString.split("&",QString::SkipEmptyParts);
-
             if (!paramsList.isEmpty())
             {
-                os << QString("request = %1").arg(paramsList[0]) << "\n";
-                os << "</body>\n";
-                os << "</html>\n";
-
-                QMap<QString, QString> paramsMap;
-                for (unsigned int i=0; i<paramsList.size(); i++)
-                {
-                    QStringList parts = paramsList[i].split("=",QString::SkipEmptyParts);
-                    if (parts.size() == 1)
-                    {
-                        paramsMap.insert(parts[0], QString(""));
-                    }
-                    else if (parts.size() == 2)
-                    {
-                        paramsMap.insert(parts[0], parts[1]);
-                    }
-                }
-                emit httpRequest(paramsMap);
+                // We have some parameters - send appropriate response
+                handleParamsRequest(os, paramsList);
                 return;
             }
             else
             {
-                os << QString("no argument");
-                os << "</body>\n";
-                os << "</html>\n";
+                // No parameters follow '?' character
+                sendBadRequestResp(os,"not parameters following ? char");
                 return;
             }
         }
+    }
+    
+
+    void BasicHttpServer::handleParamsRequest(QTextStream &os, QStringList &paramsList)
+    { 
+        os << "HTTP/1.0 200 Ok\r\n";
+        os << "Content-Type: application/json; charset=\"utf-8\"\r\n\r\n";
+
+        // Handle requests
+        QVariantMap respMap;
+        QVariantMap cmdMap;
+        for (unsigned int i=0; i<paramsList.size(); i++)
+        {
+            QString name;
+            QString value;
+
+            QStringList parts = paramsList[i].split("=",QString::SkipEmptyParts);
+            if (parts.size() == 0)
+            {
+                // Nothing here - just skip it
+                continue;
+            }
+            name = parts[0];
+
+            if (parts.size() == 1)
+            {
+                // Just command name 
+                cmdMap = paramsRequestSwitchYard(name, QString(""));
+            }
+            else if (parts.size() == 2)
+            {
+                // Command name + parameters
+                cmdMap = paramsRequestSwitchYard(name,parts[1]);
+            }
+            else
+            {
+                // Error unable to parse command
+                cmdMap = QVariantMap();
+                cmdMap.insert("success", false);
+                cmdMap.insert("message", "unable to parse command");
+            }
+            respMap.insert(name,cmdMap);
+        }
+
+        // Send response
+        bool ok;
+        QByteArray jsonResp = QtJson::serialize(respMap,ok);
+        os << QString(jsonResp) << "\n";
+    }
+
+
+    QVariantMap BasicHttpServer::paramsRequestSwitchYard(QString name, QString value)
+    {
+        QVariantMap cmdMap;
+
+        if (name == QString("connect"))
+        {
+            cmdMap = handleConnectRequest();
+        }
+        else if (name == QString("disconnect"))
+        {
+            cmdMap = handleDisconnectRequest();
+        }
+        else if (name == QString("start-capture"))
+        {
+            cmdMap = handleStartCaptureRequest();
+        }
+        else if (name == QString("stop-capture"))
+        {
+            cmdMap = handleStopCaptureRequest();
+        }
+        else if (name == QString("set-config"))
+        {
+            cmdMap.insert("success", true);
+            cmdMap.insert("message", "");
+            cmdMap.insert("value", "");
+        }
+        else if (name == QString("enable-logging"))
+        {
+            cmdMap.insert("success", true);
+            cmdMap.insert("message", "");
+            cmdMap.insert("value", "");
+        }
+        else if (name == QString("disable-logging"))
+        {
+            cmdMap.insert("success", true);
+            cmdMap.insert("message", "");
+            cmdMap.insert("value", "");
+        }
+        else if (name == QString("set-config-file"))
+        {
+            cmdMap.insert("success", true);
+            cmdMap.insert("message", "");
+            cmdMap.insert("value", "");
+        }
+        else if (name == QString("get-frame-count"))
+        {
+            cmdMap.insert("success", true);
+            cmdMap.insert("message", "");
+            cmdMap.insert("value", "");
+        }
+        else if (name == QString("get-camera-guid"))
+        {
+            cmdMap.insert("success", true);
+            cmdMap.insert("message", "");
+            cmdMap.insert("value", "");
+        }
+        else if (name == QString("get-status"))
+        {
+            cmdMap.insert("success", true);
+            cmdMap.insert("message", "");
+            cmdMap.insert("value", "");
+        }
+        else if (name == QString("close"))
+        {
+            cmdMap.insert("success", true);
+            cmdMap.insert("message", "");
+            cmdMap.insert("value", "");
+        }
+        else 
+        {
+            cmdMap.insert("success", false);
+            cmdMap.insert("message", "unknown command");
+            cmdMap.insert("value", "");
+        }
+        return cmdMap;
+    }
+
+
+    QVariantMap BasicHttpServer::handleConnectRequest()
+    { 
+        QVariantMap cmdMap;
+        cameraWindowPtr_ -> connectCamera();
+        cmdMap.insert("success", true);
+        cmdMap.insert("message", "");
+        cmdMap.insert("value", "");
+        return cmdMap;
+    }
+
+
+    QVariantMap BasicHttpServer::handleDisconnectRequest()
+    { 
+        QVariantMap cmdMap;
+        cameraWindowPtr_ -> disconnectCamera();
+        cmdMap.insert("success", true);
+        cmdMap.insert("message", "");
+        cmdMap.insert("value", "");
+        return cmdMap;
+    }
+
+
+    QVariantMap BasicHttpServer::handleStartCaptureRequest()
+    {
+        QVariantMap cmdMap;
+        cameraWindowPtr_ -> startImageCapture();
+        cmdMap.insert("success", true);
+        cmdMap.insert("message", "");
+        cmdMap.insert("value", "");
+        return cmdMap;
+    }
+
+
+    QVariantMap BasicHttpServer::handleStopCaptureRequest()
+    {
+        QVariantMap cmdMap;
+        cameraWindowPtr_ -> stopImageCapture();
+        cmdMap.insert("success", true);
+        cmdMap.insert("message", "");
+        cmdMap.insert("value", "");
+        return cmdMap;
+    }
+
+    void BasicHttpServer::sendBadRequestResp(QTextStream &os, QString msg)
+    { 
+
+        os << "HTTP/1.0 400 Bad Request\r\n";
+        os << "Content-Type: text/html; charset=\"utf-8\"\r\n\r\n";
+        os << "<html>\n";
+        os << "<body>\n";
+        os << "<h1>BIAS External Control Server</h1>\n";
+        os << "Bad request: " << msg << "\n";
+        os << "</body>\n";
+        os << "</html>\n";
+    }
+
+
+    void BasicHttpServer::sendRunningResp(QTextStream &os)
+    { 
+        os << "HTTP/1.0 200 Ok\r\n";
+        os << "Content-Type: text/html; charset=\"utf-8\"\r\n\r\n";
+        os << "<html>\n";
+        os << "<body>\n";
+        os << "<h1>BIAS Server Running</h1>\n";
+        os << QDateTime::currentDateTime().toString() << "\n";
+        os << "</body>\n";
+        os << "</html>\n";
     }
 }
