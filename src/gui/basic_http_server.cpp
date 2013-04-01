@@ -31,34 +31,19 @@ namespace bias
         if (socketPtr->canReadLine()) 
         {
             QString requestString = QString(socketPtr->readLine());
-
-            // --
-            std::cout << requestString.toStdString() << std::endl;
-            // --
-
-            QStringList tokens = requestString.split(QRegExp("[ \r\n][ \r\n]*"));
-            //QStringList tokens = splitRequestString(requestString);
-            if (tokens.isEmpty())
+            QStringList tokens = splitRequestString(requestString);
+            if (!tokens.isEmpty()) 
             {
-                return;
-            }
-
-            // --
-            for (unsigned int i=0; i<tokens.size(); i++) 
-            {
-                std::cout << i << ", " << tokens[i].toStdString() << std::endl;
-            }
-            // --
-
-            if (tokens[0] == "GET") 
-            {
-                handleGetRequest(socketPtr, tokens);
-                socketPtr -> close();
-                if (socketPtr -> state() == QTcpSocket::UnconnectedState)
+                if (tokens[0] == "GET") 
                 {
-                    delete socketPtr;
-                }
-            } 
+                    handleGetRequest(socketPtr, tokens);
+                } 
+            }
+            socketPtr -> close();
+            if (socketPtr -> state() == QTcpSocket::UnconnectedState)
+            {
+                delete socketPtr;
+            }
         } 
     }
 
@@ -353,31 +338,19 @@ namespace bias
         {
             return reqList;
         }
-
-        QString marks;
-        unsigned int parenCnt = 0;
-        for (unsigned int i=0; i<reqString.length(); i++)
+        int len = reqString.length();
+        int n0 = reqString.indexOf(' ');
+        int n1 = reqString.lastIndexOf(' ');
+        if ((n0 == -1) || (n1 == -1) || (n0==n1))
         {
-            if ((reqString[i] == ' ') && (parenCnt == 0))
-            {
-                marks.append('1');
-            }
-            else
-            {
-                marks.append('0');
-            }
-            if (reqString[i] == '{')
-            {
-                parenCnt++;
-            }
-            if (reqString[i] == '}') 
-            {
-                parenCnt--;
-            }
+            return reqList;
         }
-        std::cout << marks.toStdString() << std::endl;
-
-
+        QString token0 = reqString.left(n0); 
+        QString token1 = reqString.mid(n0+1,n1-n0-1).trimmed();
+        QString token2 = reqString.right(len-n1-1);
+        reqList.append(token0);
+        reqList.append(token1);
+        reqList.append(token2);
         return reqList;
     }
 
