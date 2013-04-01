@@ -2,6 +2,7 @@
 #include <QTcpSocket>
 #include <QStringList>
 #include <QDateTime>
+#include <QVariantList>
 #include <iostream>
 #include "camera_window.hpp"
 #include "json.hpp"
@@ -104,7 +105,9 @@ namespace bias
         os << "Content-Type: application/json; charset=\"utf-8\"\r\n\r\n";
 
         // Handle requests
-        QVariantMap respMap;
+        //QVariantMap respMap;
+        //QVariantMap respMap;
+        QVariantList respList;
         QVariantMap cmdMap;
         for (unsigned int i=0; i<paramsList.size(); i++)
         {
@@ -136,12 +139,14 @@ namespace bias
                 cmdMap.insert("success", false);
                 cmdMap.insert("message", "unable to parse command");
             }
-            respMap.insert(name,cmdMap);
+            //respMap.insert(name,cmdMap);
+            respList.append(cmdMap);
         }
 
         // Send response
         bool ok;
-        QByteArray jsonResp = QtJson::serialize(respMap,ok);
+        //QByteArray jsonResp = QtJson::serialize(respMap,ok);
+        QByteArray jsonResp = QtJson::serialize(respList,ok);
         os << QString(jsonResp) << "\n";
     }
 
@@ -166,7 +171,11 @@ namespace bias
         {
             cmdMap = handleStopCaptureRequest();
         }
-        else if (name == QString("set-config"))
+        else if (name == QString("get-configuration"))
+        {
+            cmdMap = handleGetConfiguration();
+        }
+        else if (name == QString("set-configuration"))
         {
             cmdMap.insert("success", true);
             cmdMap.insert("message", "");
@@ -220,6 +229,7 @@ namespace bias
             cmdMap.insert("message", "unknown command");
             cmdMap.insert("value", "");
         }
+        cmdMap.insert("command", name);
         return cmdMap;
     }
 
@@ -227,9 +237,9 @@ namespace bias
     QVariantMap BasicHttpServer::handleConnectRequest()
     { 
         QVariantMap cmdMap;
-        cameraWindowPtr_ -> connectCamera();
-        cmdMap.insert("success", true);
-        cmdMap.insert("message", "");
+        RtnStatus status = cameraWindowPtr_ -> connectCamera(false);
+        cmdMap.insert("success", status.success);
+        cmdMap.insert("message", status.message);
         cmdMap.insert("value", "");
         return cmdMap;
     }
@@ -238,9 +248,9 @@ namespace bias
     QVariantMap BasicHttpServer::handleDisconnectRequest()
     { 
         QVariantMap cmdMap;
-        cameraWindowPtr_ -> disconnectCamera();
-        cmdMap.insert("success", true);
-        cmdMap.insert("message", "");
+        RtnStatus status = cameraWindowPtr_ -> disconnectCamera(false);
+        cmdMap.insert("success", status.success);
+        cmdMap.insert("message", status.message);
         cmdMap.insert("value", "");
         return cmdMap;
     }
@@ -249,9 +259,9 @@ namespace bias
     QVariantMap BasicHttpServer::handleStartCaptureRequest()
     {
         QVariantMap cmdMap;
-        cameraWindowPtr_ -> startImageCapture();
-        cmdMap.insert("success", true);
-        cmdMap.insert("message", "");
+        RtnStatus status = cameraWindowPtr_ -> startImageCapture(false);
+        cmdMap.insert("success", status.success);
+        cmdMap.insert("message", status.message);
         cmdMap.insert("value", "");
         return cmdMap;
     }
@@ -260,10 +270,22 @@ namespace bias
     QVariantMap BasicHttpServer::handleStopCaptureRequest()
     {
         QVariantMap cmdMap;
-        cameraWindowPtr_ -> stopImageCapture();
-        cmdMap.insert("success", true);
-        cmdMap.insert("message", "");
+        RtnStatus status = cameraWindowPtr_ -> stopImageCapture(false);
+        cmdMap.insert("success", status.success);
+        cmdMap.insert("message", status.message);
         cmdMap.insert("value", "");
+        return cmdMap;
+    }
+
+    
+    QVariantMap BasicHttpServer::handleGetConfiguration()
+    {
+        QVariantMap cmdMap;
+        RtnStatus status;
+        QVariantMap configMap = cameraWindowPtr_ -> getConfigurationMap(status,false);
+        cmdMap.insert("success", status.success);
+        cmdMap.insert("message", status.message);
+        cmdMap.insert("value", configMap);
         return cmdMap;
     }
 

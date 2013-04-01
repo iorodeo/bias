@@ -35,6 +35,14 @@ namespace bias
     template <class T> class Lockable;
     template <class T> class LockableQueue;
 
+
+    struct RtnStatus 
+    {
+        bool success;
+        QString message;
+        RtnStatus() { success=true; message=QString(""); }
+    };
+
     class CameraWindow : public QMainWindow, private Ui::CameraWindow
     {
         Q_OBJECT
@@ -44,10 +52,19 @@ namespace bias
         public:
 
             CameraWindow(Guid cameraGuid, QWidget *parent=0);
-            void connectCamera();
-            void disconnectCamera();
-            void startImageCapture();
-            void stopImageCapture();
+            RtnStatus connectCamera(bool showErrorDlg=true);
+            RtnStatus disconnectCamera(bool showErrorDlg=true);
+            RtnStatus startImageCapture(bool showErrorDlg=true);
+            RtnStatus stopImageCapture(bool showErrorDlg=true);
+            QByteArray getConfigurationJson(
+                    RtnStatus &rtnStatus, 
+                    bool showErrorDlg=true
+                    );
+            QVariantMap getConfigurationMap(
+                    RtnStatus &rtnStatus, 
+                    bool showErrorDlg=true
+                    );
+
             void saveConfiguration(QString filename);
             void loadConfiguration(QString fileName);
             bool setConfigurationFromJson(QByteArray jsonConfig);
@@ -115,9 +132,6 @@ namespace bias
             // Dialog slots
             void timerDurationChanged(unsigned long duration);
             void loggingSettingsChanged(VideoWriterParams params);
-
-            // http server
-            void handleHttpRequest(QMap<QString,QString> paramsMap);
 
 
         private:
@@ -244,8 +258,6 @@ namespace bias
             QString getVideoFileFullPathWithGuid();
             QString getConfigFileFullPath();
 
-            QByteArray getConfigurationJson();
-            QVariantMap getConfigurationMap();
 
             bool setCameraFromMap(QVariantMap cameraMap);
             bool setLoggingFromMap(QVariantMap loggingMap);
@@ -275,6 +287,8 @@ namespace bias
     QMap<QString,VideoMode> getStringToVideoModeMap();
     QMap<QString,FrameRate> getStringToFrameRateMap();
     QMap<QString,TriggerType> getStringToTriggerTypeMap();
+
+    QString propNameToCamelCase(QString propName);
 
 }
 

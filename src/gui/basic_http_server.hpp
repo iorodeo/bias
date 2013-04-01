@@ -24,9 +24,6 @@ namespace bias
             BasicHttpServer(CameraWindow *cameraWindow, QObject *parent=0);
             void incomingConnection(int socket);
 
-        signals:
-            void httpRequest(QMap<QString,QString> paramsMap);
-
         private slots:
             void readClient();
             void discardClient();
@@ -41,7 +38,7 @@ namespace bias
             QVariantMap handleDisconnectRequest();
             QVariantMap handleStartCaptureRequest();
             QVariantMap handleStopCaptureRequest();
-
+            QVariantMap handleGetConfiguration();
 
             void sendBadRequestResp(QTextStream &os, QString msg);
             void sendRunningResp(QTextStream &os);

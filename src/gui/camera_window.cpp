@@ -46,7 +46,7 @@ namespace bias
 
     // Default settings
     const unsigned long DEFAULT_CAPTURE_DURATION = 300; // sec
-    const double DEFAULT_IMAGE_DISPLAY_FREQ = 10.0;     // Hz
+    const double DEFAULT_IMAGE_DISPLAY_FREQ = 15.0;     // Hz
     const double MAX_IMAGE_DISPLAY_FREQ = 60.0;         // Hz
     const double MIN_IMAGE_DISPLAY_FREQ = 1.0;          // Hz 
     const QSize DEFAULT_HISTOGRAM_IMAGE_SIZE = QSize(256,204);
@@ -77,15 +77,17 @@ namespace bias
     }
 
 
-    void CameraWindow::connectCamera() 
+    RtnStatus CameraWindow::connectCamera(bool showErrorDlg) 
     {
         bool error = false;
         unsigned int errorId;
         QString errorMsg;
+        RtnStatus rtnStatus;
 
         if (connected_)
         {
-            return;
+            rtnStatus.message = QString("Camera already connected");
+            return rtnStatus;
         }
 
         cameraPtr_ -> acquireLock();
@@ -113,8 +115,13 @@ namespace bias
             msgText += QString::number(errorId);
             msgText += "\n\n";
             msgText += errorMsg;
-            QMessageBox::critical(this, msgTitle, msgText);
-            return;
+            rtnStatus.success = false;
+            rtnStatus.message = msgText;
+            if (showErrorDlg) 
+            {
+                QMessageBox::critical(this, msgTitle, msgText);
+            }
+            return rtnStatus;
         }
         connected_ = true;
         connectButtonPtr_ -> setText(QString("Disconnect"));
@@ -124,18 +131,30 @@ namespace bias
 
         updateCameraInfoMessage();
         updateAllMenus();
+
+        rtnStatus.success = true;
+        rtnStatus.message = QString("Camera connected successfully");
+        return rtnStatus; 
     }
 
 
-    void CameraWindow::disconnectCamera()
+    RtnStatus CameraWindow::disconnectCamera(bool showErrorDlg)
     {
         bool error = false;
         unsigned int errorId;
         QString errorMsg; 
+        RtnStatus rtnStatus;
 
         if (capturing_) 
         {
             stopImageCapture();
+        }
+
+        if (!connected_)
+        {
+            rtnStatus.success = true;
+            rtnStatus.message = QString("Camera already disconnected");
+            return rtnStatus;
         }
 
         cameraPtr_ -> acquireLock();
@@ -158,8 +177,13 @@ namespace bias
             msgText += QString::number(errorId);
             msgText += "\n\n";
             msgText += errorMsg;
-            QMessageBox::critical(this, msgTitle, msgText);
-            return;
+            rtnStatus.success=false;
+            rtnStatus.message=msgText;
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this, msgTitle, msgText);
+            }
+            return rtnStatus;
         }
         connected_ = false;
         connectButtonPtr_ -> setText(QString("Connect"));
@@ -168,19 +192,42 @@ namespace bias
         menuCameraPtr_ -> setEnabled(false);
         updateCameraInfoMessage();
         setCaptureTimeLabel(0.0);
-
         updateAllMenus();
+
+        rtnStatus.success = true;
+        rtnStatus.message = QString("Camera disconnected successfully");
+        return rtnStatus;
     }
 
 
-    void CameraWindow::startImageCapture() 
+    RtnStatus CameraWindow::startImageCapture(bool showErrorDlg) 
     {
+        RtnStatus rtnStatus;
+
         if (!connected_)
         {
             QString msgTitle("Capture Error");
             QString msgText("Unable to start image capture: not connected");
-            QMessageBox::critical(this, msgTitle, msgText);
-            return;
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this, msgTitle, msgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = msgText;
+            return rtnStatus;
+        }
+
+        if (capturing_)
+        {
+            QString msgTitle("Capture Error");
+            QString msgText("Unable to start image capture: capture already in progress");
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this, msgTitle, msgText);
+            }
+            rtnStatus.success = true;
+            rtnStatus.message = msgText;
+            return rtnStatus;
         }
 
         newImageQueuePtr_ -> clear();
@@ -261,7 +308,6 @@ namespace bias
             }
 
             // Set output file
-            //QString videoFileFullPath = getVideoFileFullPathWithGuid();
             videoWriterPtr -> setFileName(videoFileFullPath);
 
             imageLoggerPtr_ = new ImageLogger(videoWriterPtr, logImageQueuePtr_);
@@ -306,17 +352,27 @@ namespace bias
         updateAllMenus();
 
         emit imageCaptureStarted();
+
+        rtnStatus.success = true;
+        rtnStatus.message = QString("Image capture started successfully");
+        return rtnStatus;
     }
 
 
-    void CameraWindow::stopImageCapture()
+    RtnStatus CameraWindow::stopImageCapture(bool showErrorDlg)
     {
+        RtnStatus rtnStatus;
         if (!connected_)
         {
             QString msgTitle("Capture Error");
-            QString msgText("Unable to stop image capture: not connected");
-            QMessageBox::critical(this, msgTitle, msgText);
-            return;
+            QString msgText("Unable to stop image capture: camera not connected");
+            rtnStatus.success = false;
+            rtnStatus.message = msgText;
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this, msgTitle, msgText);
+            }
+            return rtnStatus;
         }
 
         // Stop timers.
@@ -380,6 +436,10 @@ namespace bias
         updateAllMenus();
 
         emit imageCaptureStopped();
+
+        rtnStatus.success = true;
+        rtnStatus.message = QString("Image capture stopped successfully");
+        return rtnStatus;
     }
 
 
@@ -389,7 +449,8 @@ namespace bias
         // TO DO  ... need to add error checking. 
         // --------------------------------------------------------------------
         if (!connected_) { return; }
-        QByteArray jsonConfig = getConfigurationJson();
+        RtnStatus rtnStatus;
+        QByteArray jsonConfig = getConfigurationJson(rtnStatus);
         if (jsonConfig.isEmpty()) 
         { 
             return; 
@@ -419,6 +480,316 @@ namespace bias
         QByteArray jsonConfig = configFile.readAll();
         configFile.close();
         setConfigurationFromJson(jsonConfig);
+    }
+
+
+    QByteArray CameraWindow::getConfigurationJson(RtnStatus &rtnStatus, bool showErrorDlg)
+    {
+        // Get configuration map
+        QVariantMap configurationMap = getConfigurationMap(rtnStatus, showErrorDlg);
+        if (configurationMap.isEmpty())
+        {
+            QByteArray emptyByteArray = QByteArray();
+            return emptyByteArray;
+        }
+
+        // Serialize configuration
+        bool ok;
+        QByteArray jsonConfig = QtJson::serialize(configurationMap,ok);
+        if (!ok)
+        {
+            QString errMsgTitle("Save Configuration Error");
+            QString errMsgText("Error serializing configuration");
+            QMessageBox::critical(this, errMsgTitle, errMsgText);
+            QByteArray emptyByteArray = QByteArray();
+            return emptyByteArray;
+        }
+        return jsonConfig;
+    }
+      
+
+    QVariantMap CameraWindow::getConfigurationMap(RtnStatus &rtnStatus, bool showErrorDlg)
+    {
+        if (!connected_) { 
+            QVariantMap emptyMap = QVariantMap();
+            rtnStatus.success = false;
+            rtnStatus.message = QString("Unable to get configuration: camera is not connected");
+            return emptyMap; 
+        }
+
+        // Get configuration values from camera
+        QString vendorName;
+        QString modelName;
+        QString guidString;
+        PropertyList propList;
+        VideoMode videoMode;
+        FrameRate frameRate;
+        TriggerType trigType;
+        QString errorMsg;
+        bool error = false;
+        unsigned int errorId;
+
+        cameraPtr_ -> acquireLock();
+        try
+        { 
+            vendorName = QString::fromStdString(cameraPtr_ -> getVendorName());
+            modelName = QString::fromStdString(cameraPtr_ -> getModelName());
+            guidString = QString::fromStdString((cameraPtr_ -> getGuid()).toString());
+            propList = cameraPtr_ -> getListOfProperties();
+            videoMode = cameraPtr_ -> getVideoMode();
+            frameRate = cameraPtr_ -> getFrameRate();
+            trigType = cameraPtr_ -> getTriggerType();
+        }
+        catch (RuntimeError &runtimeError)
+        {
+            error = true;
+            errorId = runtimeError.id();
+            errorMsg = QString::fromStdString(runtimeError.what());
+        }
+        cameraPtr_ -> releaseLock();
+
+        if (error)
+        {
+            QString msgTitle("Camera Query Error");
+            QString msgText("Error retrieving values from camera.\n\nError ID: ");
+            msgText += QString::number(errorId);
+            msgText += "\n\n";
+            msgText += errorMsg;
+            if (showErrorDlg) 
+            {
+                QMessageBox::critical(this, msgTitle, msgText);
+            }
+            QVariantMap emptyMap = QVariantMap();
+            rtnStatus.success = false;
+            rtnStatus.message = msgText;
+            return emptyMap;
+        }
+
+        // Create configuration map 
+        QVariantMap configurationMap;
+        QVariantMap cameraMap;
+
+        cameraMap.insert("vendor", vendorName); 
+        cameraMap.insert("model", modelName);
+        cameraMap.insert("guid", guidString);
+
+        // Add camera properties
+        QVariantMap cameraPropMap;
+        for (
+                PropertyList::iterator it = propList.begin();
+                it != propList.end();
+                it++
+            )
+        {
+            Property prop = *it;
+            QString propName = QString::fromStdString(getPropertyTypeString(prop.type));
+            QVariantMap valueMap;
+            valueMap.insert("present", prop.present);
+            valueMap.insert("absoluteControl", prop.absoluteControl);
+            valueMap.insert("onePush", prop.onePush);
+            valueMap.insert("on", prop.on);
+            valueMap.insert("autoActive", prop.autoActive);
+            valueMap.insert("value", prop.value);
+            valueMap.insert("absoluteValue", double(prop.absoluteValue));
+            QString camelCaseName = propNameToCamelCase(propName);
+            cameraPropMap.insert(camelCaseName, valueMap);
+        }
+        cameraMap.insert("properties", cameraPropMap);
+
+        // Add videomode, framerate and trigger information
+        QString videoModeString = QString::fromStdString(getVideoModeString(videoMode));
+        cameraMap.insert("videoMode", videoModeString);
+        QString frameRateString = QString::fromStdString(getFrameRateString(frameRate));
+        cameraMap.insert("frameRate", frameRateString);
+        QString trigTypeString = QString::fromStdString(getTriggerTypeString(trigType));
+        cameraMap.insert("triggerType", trigTypeString);
+        configurationMap.insert("camera", cameraMap);
+
+        // Add logging information
+        QVariantMap loggingMap;
+        loggingMap.insert("enabled", logging_);
+        loggingMap.insert("format", VIDEOFILE_EXTENSION_MAP[videoFileFormat_]);
+        loggingMap.insert("directory", currentVideoFileDir_.canonicalPath());
+        loggingMap.insert("fileName", currentVideoFileName_);
+        
+        // Add logging configuration 
+        QVariantMap loggingSettingsMap;
+        
+        QVariantMap bmpSettingsMap;
+        bmpSettingsMap.insert("frameSkip", videoWriterParams_.bmp.frameSkip);
+        loggingSettingsMap.insert("bmp", bmpSettingsMap);
+
+        QVariantMap aviSettingsMap;
+        aviSettingsMap.insert("frameSkip", videoWriterParams_.avi.frameSkip);
+        aviSettingsMap.insert("codec", videoWriterParams_.avi.codec);
+        loggingSettingsMap.insert("avi", aviSettingsMap);
+
+        QVariantMap fmfSettingsMap;
+        fmfSettingsMap.insert("frameSkip", videoWriterParams_.fmf.frameSkip);
+        loggingSettingsMap.insert("fmf", fmfSettingsMap);
+
+        QVariantMap ufmfSettingsMap;
+        ufmfSettingsMap.insert("frameSkip", videoWriterParams_.ufmf.frameSkip);
+        ufmfSettingsMap.insert("backgroundThreshold", videoWriterParams_.ufmf.backgroundThreshold);
+        ufmfSettingsMap.insert("boxLength", videoWriterParams_.ufmf.boxLength);
+        ufmfSettingsMap.insert("medianUpdateCount", videoWriterParams_.ufmf.medianUpdateCount);
+        ufmfSettingsMap.insert("medianUpdateInterval", videoWriterParams_.ufmf.medianUpdateInterval);
+        ufmfSettingsMap.insert("compressionThreads", videoWriterParams_.ufmf.numberOfCompressors);
+
+        QVariantMap ufmfDilateMap;
+        ufmfDilateMap.insert("on", videoWriterParams_.ufmf.dilateState);
+        ufmfDilateMap.insert("windowSize", videoWriterParams_.ufmf.dilateWindowSize);
+        ufmfSettingsMap.insert("dilate", ufmfDilateMap);
+        
+        loggingSettingsMap.insert("ufmf", ufmfSettingsMap);
+        loggingMap.insert("settings", loggingSettingsMap);
+        configurationMap.insert("logging", loggingMap);
+
+        // Add Timer configuration
+        QVariantMap timerMap;
+        timerMap.insert("enabled", actionTimerEnabledPtr_ -> isChecked());
+        QVariantMap timerSettingsMap;
+        timerSettingsMap.insert("duration", qulonglong(captureDurationSec_));
+        timerMap.insert("settings", timerSettingsMap);
+        configurationMap.insert("timer", timerMap);
+
+        // Add display configuration
+        QVariantMap displayMap;
+        QVariantMap orientationMap;
+        orientationMap.insert("flipVertical", flipVert_ );
+        orientationMap.insert("flipHorizontal", flipHorz_);
+        displayMap.insert("orientation", orientationMap);
+        displayMap.insert("rotation", (unsigned int)(imageRotation_));
+        displayMap.insert("updateFrequency", imageDisplayFreq_);
+        configurationMap.insert("display", displayMap);
+
+        // Add configuration configuration
+        QVariantMap configFileMap;
+        configFileMap.insert("directory", currentConfigFileDir_.canonicalPath());
+        configFileMap.insert("fileName", currentConfigFileName_);
+        configurationMap.insert("configuration", configFileMap);
+
+        rtnStatus.success = true;
+        rtnStatus.message = QString("Retrieved configuration successfully");
+        return configurationMap;
+    }
+
+
+    bool CameraWindow::setConfigurationFromJson(QByteArray jsonConfig)
+    {
+        bool ok;
+        RtnStatus rtnStatus;
+        QVariantMap configMap = QtJson::parse(QString(jsonConfig), ok).toMap();
+        QVariantMap oldConfigMap = getConfigurationMap(rtnStatus);
+        QString errMsgTitle("Load Configuration Error");
+        if (!ok)
+        {
+            QString errMsgText("Error loading configuration - "); 
+            errMsgText += "unable to parse json.";
+            QMessageBox::critical(this, errMsgTitle, errMsgText);
+            return false;
+        }
+
+        ok = setConfigurationFromMap(configMap);
+        if (!ok)
+        {
+            // Something went wrong - try to revert to old configuration
+            ok = setConfigurationFromMap(oldConfigMap);
+            if (!ok)
+            {
+                QString errMsgText("Error loading configuration and ");  
+                errMsgText += "unable to revert to previous configuration";
+                QMessageBox::critical(this, errMsgTitle, errMsgText);
+                return false;
+            }
+            else
+            {
+                QString errMsgText("Error loading configuration - ");  
+                errMsgText += "reverting to previous configuration";
+                QMessageBox::critical(this, errMsgTitle, errMsgText);
+                return false;
+            }
+        }
+        updateAllMenus();
+        return true;
+    }
+
+
+    bool CameraWindow::setConfigurationFromMap(QVariantMap configMap)
+    {
+        bool ok = true;
+        QString errMsgTitle("Load Configuration Error");
+
+        // Set camera properties, videomode, etc.
+        QVariantMap cameraMap = configMap["camera"].toMap();
+        if (cameraMap.isEmpty())
+        {
+            QString errMsgText("Camera configuration is empty");
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!setCameraFromMap(cameraMap))
+        {
+            return false;
+        }
+
+        // Set logging configuration
+        // --------------------------
+        QVariantMap loggingMap = configMap["logging"].toMap();
+        if (loggingMap.isEmpty())
+        {
+            QString errMsgText("Logging configuration is empty");
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!setLoggingFromMap(loggingMap))
+        {
+            return false;
+        }
+
+        // Set timer configuration
+        // ------------------------
+        QVariantMap timerMap = configMap["timer"].toMap();
+        if (timerMap.isEmpty())
+        {
+            QString errMsgText("Timer configuration is empty");
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!setTimerFromMap(timerMap))
+        {
+            return false;
+        }
+
+        // Set display configuration
+        // --------------------------
+        QVariantMap displayMap = configMap["display"].toMap();
+        if (displayMap.isEmpty())
+        {
+            QString errMsgText("Display configuration is empty");
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!setDisplayFromMap(displayMap))
+        {
+            return false;
+        }
+
+        // Set configuration file configuraiton 
+        // -------------------------------------
+        QVariantMap configFileMap = configMap["configuration"].toMap();
+        if (configFileMap.isEmpty())
+        {
+            QString errMsgText("Configuration file information is empty");
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!setConfigFileFromMap(configFileMap))
+        {
+            return false;
+        }
+
+        return true;
     }
 
 
@@ -961,8 +1332,6 @@ namespace bias
 
     void CameraWindow::actionServerEnabledTriggered()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-
         if (actionServerEnabledPtr_ -> isChecked())
         {
             httpServerPtr_ -> listen(QHostAddress::Any, 5000);
@@ -994,34 +1363,6 @@ namespace bias
         QString msgTitle("Development");
         QString msgText("About not fully implemented");
         QMessageBox::information(this, msgTitle, msgText);
-    }
-
-
-    void CameraWindow::handleHttpRequest(QMap<QString, QString> paramsMap)
-    {
-        if (paramsMap.size() == 1)
-        {
-            if (paramsMap.contains("connect"))
-            {
-                connectCamera();
-            }
-            else if(paramsMap.contains("disconnect"))
-            {
-                disconnectCamera();
-            }
-            else if (paramsMap.contains("start-capture"))
-            {
-                startImageCapture();
-            }
-            else if (paramsMap.contains("stop-capture"))
-            {
-                stopImageCapture();
-            }
-            else if (paramsMap.contains("set-config"))
-            {
-                //setConfigurationFromJson(paramsMap["set-config"].toLatin1());
-            }
-        }
     }
 
 
@@ -1083,12 +1424,6 @@ namespace bias
         // Assign thread cpu affinity
         assignThreadAffinity(false,1);
         httpServerPtr_ = new BasicHttpServer(this,this);
-        connect(
-                httpServerPtr_,
-                SIGNAL(httpRequest(QMap<QString,QString>)),
-                this,
-                SLOT(handleHttpRequest(QMap<QString,QString>))
-               );
     }
 
 
@@ -2228,302 +2563,6 @@ namespace bias
     }
     
 
-    QByteArray CameraWindow::getConfigurationJson()
-    {
-        // Get configuration map
-        QVariantMap configurationMap = getConfigurationMap();
-        if (configurationMap.isEmpty())
-        {
-            QByteArray emptyByteArray = QByteArray();
-            return emptyByteArray;
-        }
-
-        // Serialize configuration
-        bool ok;
-        QByteArray jsonConfig = QtJson::serialize(configurationMap,ok);
-        if (!ok)
-        {
-            QString errMsgTitle("Save Configuration Error");
-            QString errMsgText("Error serializing configuration");
-            QMessageBox::critical(this, errMsgTitle, errMsgText);
-            QByteArray emptyByteArray = QByteArray();
-            return emptyByteArray;
-        }
-        return jsonConfig;
-    }
-      
-
-    QVariantMap CameraWindow::getConfigurationMap()
-    {
-        if (!connected_) { 
-            QVariantMap emptyMap = QVariantMap();
-            return emptyMap; 
-        }
-
-        // Get configuration values from camera
-        QString vendorName;
-        QString modelName;
-        QString guidString;
-        PropertyList propList;
-        VideoMode videoMode;
-        FrameRate frameRate;
-        TriggerType trigType;
-        QString errorMsg;
-        bool error = false;
-        unsigned int errorId;
-
-        cameraPtr_ -> acquireLock();
-        try
-        { 
-            vendorName = QString::fromStdString(cameraPtr_ -> getVendorName());
-            modelName = QString::fromStdString(cameraPtr_ -> getModelName());
-            guidString = QString::fromStdString((cameraPtr_ -> getGuid()).toString());
-            propList = cameraPtr_ -> getListOfProperties();
-            videoMode = cameraPtr_ -> getVideoMode();
-            frameRate = cameraPtr_ -> getFrameRate();
-            trigType = cameraPtr_ -> getTriggerType();
-        }
-        catch (RuntimeError &runtimeError)
-        {
-            error = true;
-            errorId = runtimeError.id();
-            errorMsg = QString::fromStdString(runtimeError.what());
-        }
-        cameraPtr_ -> releaseLock();
-
-        if (error)
-        {
-            QString msgTitle("Camera Query Error");
-            QString msgText("Error retrieving values from camera.\n\nError ID: ");
-            msgText += QString::number(errorId);
-            msgText += "\n\n";
-            msgText += errorMsg;
-            QMessageBox::critical(this, msgTitle, msgText);
-            QVariantMap emptyMap = QVariantMap();
-        }
-
-        // Create configuration map 
-        QVariantMap configurationMap;
-        QVariantMap cameraMap;
-
-        cameraMap.insert("Vendor", vendorName); 
-        cameraMap.insert("Model", modelName);
-        cameraMap.insert("GUID", guidString);
-
-        // Add camera properties
-        QVariantMap cameraPropMap;
-        for (
-                PropertyList::iterator it = propList.begin();
-                it != propList.end();
-                it++
-            )
-        {
-            Property prop = *it;
-            QString propName = QString::fromStdString(getPropertyTypeString(prop.type));
-            QVariantMap valueMap;
-            valueMap.insert("Present", prop.present);
-            valueMap.insert("Absolute Control", prop.absoluteControl);
-            valueMap.insert("One Push", prop.onePush);
-            valueMap.insert("On", prop.on);
-            valueMap.insert("Auto Active", prop.autoActive);
-            valueMap.insert("Value", prop.value);
-            valueMap.insert("Absolute Value", double(prop.absoluteValue));
-            cameraPropMap.insert(propName, valueMap);
-        }
-        cameraMap.insert("Properties", cameraPropMap);
-
-        // Add videomode, framerate and trigger information
-        QString videoModeString = QString::fromStdString(getVideoModeString(videoMode));
-        cameraMap.insert("Video Mode", videoModeString);
-        QString frameRateString = QString::fromStdString(getFrameRateString(frameRate));
-        cameraMap.insert("Frame Rate", frameRateString);
-        QString trigTypeString = QString::fromStdString(getTriggerTypeString(trigType));
-        cameraMap.insert("Trigger Type", trigTypeString);
-        configurationMap.insert("Camera", cameraMap);
-
-        // Add logging information
-        QVariantMap loggingMap;
-        loggingMap.insert("Enabled", logging_);
-        loggingMap.insert("Format", VIDEOFILE_EXTENSION_MAP[videoFileFormat_]);
-        loggingMap.insert("Directory", currentVideoFileDir_.canonicalPath());
-        loggingMap.insert("File Name", currentVideoFileName_);
-        
-        // Add logging configuration 
-        QVariantMap loggingSettingsMap;
-        
-        QVariantMap bmpSettingsMap;
-        bmpSettingsMap.insert("Frame Skip", videoWriterParams_.bmp.frameSkip);
-        loggingSettingsMap.insert("bmp", bmpSettingsMap);
-
-        QVariantMap aviSettingsMap;
-        aviSettingsMap.insert("Frame Skip", videoWriterParams_.avi.frameSkip);
-        aviSettingsMap.insert("Codec", videoWriterParams_.avi.codec);
-        loggingSettingsMap.insert("avi", aviSettingsMap);
-
-        QVariantMap fmfSettingsMap;
-        fmfSettingsMap.insert("Frame Skip", videoWriterParams_.fmf.frameSkip);
-        loggingSettingsMap.insert("fmf", fmfSettingsMap);
-
-        QVariantMap ufmfSettingsMap;
-        ufmfSettingsMap.insert("Frame Skip", videoWriterParams_.ufmf.frameSkip);
-        ufmfSettingsMap.insert("Background Threshold", videoWriterParams_.ufmf.backgroundThreshold);
-        ufmfSettingsMap.insert("Box Length", videoWriterParams_.ufmf.boxLength);
-        ufmfSettingsMap.insert("Median Update Count", videoWriterParams_.ufmf.medianUpdateCount);
-        ufmfSettingsMap.insert("Median Update Interval", videoWriterParams_.ufmf.medianUpdateInterval);
-        ufmfSettingsMap.insert("Compression Threads", videoWriterParams_.ufmf.numberOfCompressors);
-
-        QVariantMap ufmfDilateMap;
-        ufmfDilateMap.insert("On", videoWriterParams_.ufmf.dilateState);
-        ufmfDilateMap.insert("Window Size", videoWriterParams_.ufmf.dilateWindowSize);
-        ufmfSettingsMap.insert("Dilate", ufmfDilateMap);
-        
-        loggingSettingsMap.insert("ufmf", ufmfSettingsMap);
-        loggingMap.insert("Settings", loggingSettingsMap);
-        configurationMap.insert("Logging", loggingMap);
-
-        // Add Timer configuration
-        QVariantMap timerMap;
-        timerMap.insert("Enabled", actionTimerEnabledPtr_ -> isChecked());
-        QVariantMap timerSettingsMap;
-        timerSettingsMap.insert("Duration", qulonglong(captureDurationSec_));
-        timerMap.insert("Settings", timerSettingsMap);
-        configurationMap.insert("Timer", timerMap);
-
-        // Add display configuration
-        QVariantMap displayMap;
-        QVariantMap orientationMap;
-        orientationMap.insert("Flip Vertical", flipVert_ );
-        orientationMap.insert("Flip Horizontal", flipHorz_);
-        displayMap.insert("Orientation", orientationMap);
-        displayMap.insert("Rotation", (unsigned int)(imageRotation_));
-        displayMap.insert("Update Frequency", imageDisplayFreq_);
-        configurationMap.insert("Display", displayMap);
-
-        // Add configuration configuration
-        QVariantMap configFileMap;
-        configFileMap.insert("Directory", currentConfigFileDir_.canonicalPath());
-        configFileMap.insert("File Name", currentConfigFileName_);
-        configurationMap.insert("Configuration", configFileMap);
-
-        return configurationMap;
-    }
-
-
-    bool CameraWindow::setConfigurationFromJson(QByteArray jsonConfig)
-    {
-        bool ok;
-        QVariantMap configMap = QtJson::parse(QString(jsonConfig), ok).toMap();
-        QVariantMap oldConfigMap = getConfigurationMap();
-        QString errMsgTitle("Load Configuration Error");
-        if (!ok)
-        {
-            QString errMsgText("Error loading configuration - "); 
-            errMsgText += "unable to parse json.";
-            QMessageBox::critical(this, errMsgTitle, errMsgText);
-            return false;
-        }
-
-        ok = setConfigurationFromMap(configMap);
-        if (!ok)
-        {
-            // Something went wrong - try to revert to old configuration
-            ok = setConfigurationFromMap(oldConfigMap);
-            if (!ok)
-            {
-                QString errMsgText("Error loading configuration and ");  
-                errMsgText += "unable to revert to previous configuration";
-                QMessageBox::critical(this, errMsgTitle, errMsgText);
-                return false;
-            }
-            else
-            {
-                QString errMsgText("Error loading configuration - ");  
-                errMsgText += "reverting to previous configuration";
-                QMessageBox::critical(this, errMsgTitle, errMsgText);
-                return false;
-            }
-        }
-        updateAllMenus();
-        return true;
-    }
-
-
-    bool CameraWindow::setConfigurationFromMap(QVariantMap configMap)
-    {
-        bool ok = true;
-        QString errMsgTitle("Load Configuration Error");
-
-        // Set camera properties, videomode, etc.
-        QVariantMap cameraMap = configMap["Camera"].toMap();
-        if (cameraMap.isEmpty())
-        {
-            QString errMsgText("Camera configuration is empty");
-            QMessageBox::critical(this,errMsgTitle,errMsgText);
-            return false;
-        }
-        if (!setCameraFromMap(cameraMap))
-        {
-            return false;
-        }
-
-        // Set logging configuration
-        // --------------------------
-        QVariantMap loggingMap = configMap["Logging"].toMap();
-        if (loggingMap.isEmpty())
-        {
-            QString errMsgText("Logging configuration is empty");
-            QMessageBox::critical(this,errMsgTitle,errMsgText);
-            return false;
-        }
-        if (!setLoggingFromMap(loggingMap))
-        {
-            return false;
-        }
-
-        // Set timer configuration
-        // ------------------------
-        QVariantMap timerMap = configMap["Timer"].toMap();
-        if (timerMap.isEmpty())
-        {
-            QString errMsgText("Timer configuration is empty");
-            QMessageBox::critical(this,errMsgTitle,errMsgText);
-            return false;
-        }
-        if (!setTimerFromMap(timerMap))
-        {
-            return false;
-        }
-
-        // Set display configuration
-        // --------------------------
-        QVariantMap displayMap = configMap["Display"].toMap();
-        if (displayMap.isEmpty())
-        {
-            QString errMsgText("Display configuration is empty");
-            QMessageBox::critical(this,errMsgTitle,errMsgText);
-            return false;
-        }
-        if (!setDisplayFromMap(displayMap))
-        {
-            return false;
-        }
-
-        // Set configuration file configuraiton 
-        // -------------------------------------
-        QVariantMap configFileMap = configMap["Configuration"].toMap();
-        if (configFileMap.isEmpty())
-        {
-            QString errMsgText("Configuration file information is empty");
-            QMessageBox::critical(this,errMsgTitle,errMsgText);
-            return false;
-        }
-        if (!setConfigFileFromMap(configFileMap))
-        {
-            return false;
-        }
-
-        return true;
-    }
 
 
     bool CameraWindow::setCameraFromMap(QVariantMap cameraMap)
@@ -2566,38 +2605,38 @@ namespace bias
             return false;
         }
 
-        QString vendorName = cameraMap["Vendor"].toString();
+        QString vendorName = cameraMap["vendor"].toString();
         if (vendorName.isEmpty())
         {
-            QString errMsgText("Camera vendor name is not present");
+            QString errMsgText("Camera: vendor name is not present");
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
         if (vendorName != currVendorName)
         {
-            QString errMsgText("Current camera vendor does not match that in configuration file");
+            QString errMsgText("Camera: current vendor does not match that in configuration file");
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        QString modelName = cameraMap["Model"].toString();
+        QString modelName = cameraMap["model"].toString();
         if (modelName.isEmpty())
         {
-            QString errMsgText("Camera model name is not present");
+            QString errMsgText("Camera: model name is not present");
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
         if (modelName != currModelName)
         {
-            QString errMsgText("Current camera model does not match that in configuration file");
+            QString errMsgText("Camera: current  model does not match that in configuration file");
             QMessageBox::critical(this,errMsgTitle, errMsgText);
             return false;
         }
 
         // Try to set the camera properties
-        QVariantMap cameraPropMap = cameraMap["Properties"].toMap();
+        QVariantMap cameraPropMap = cameraMap["properties"].toMap();
         if (cameraPropMap.isEmpty())
         {
-            QString errMsgText("Camera properties are not present");
+            QString errMsgText("Camera: properties are not present");
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
@@ -2621,14 +2660,15 @@ namespace bias
             // -----------------------------------------------------------------------
             std::cout << prop.toString() << std::endl;
             std::cout << propInfo.toString() << std::endl;
-            QString name = QString::fromStdString(getPropertyTypeString(prop.type));
+            QString propName = QString::fromStdString(getPropertyTypeString(prop.type));
+            QString camelCaseName = propNameToCamelCase(propName);
 
-            QVariantMap propValueMap = cameraPropMap[name].toMap();
+            QVariantMap propValueMap = cameraPropMap[camelCaseName].toMap();
             if (propValueMap.isEmpty())
             {
                 QString errMsgText = QString(
-                        "Camera property %1 is not present"
-                        ).arg(name);
+                        "Camera: property %1 is not present"
+                        ).arg(camelCaseName);
                 QMessageBox::critical(this,errMsgTitle,errMsgText);
                 return false;
             }
@@ -2641,10 +2681,10 @@ namespace bias
 
         // Video Mode
         // ----------
-        QString videoModeString = cameraMap["Video Mode"].toString();
+        QString videoModeString = cameraMap["videoMode"].toString();
         if (videoModeString.isEmpty())
         {
-            QString errMsgText("Video mode is not present in configuration");
+            QString errMsgText("VideoMode: is not present in configuration");
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
@@ -2652,10 +2692,10 @@ namespace bias
 
         // Frame Rate
         // ----------
-        QString frameRateString = cameraMap["Frame Rate"].toString();
+        QString frameRateString = cameraMap["frameRate"].toString();
         if (frameRateString.isEmpty())
         {
-            QString errMsgText("Camera frame rate is not present");
+            QString errMsgText("Camera: frameRate is not present");
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
@@ -2686,10 +2726,10 @@ namespace bias
         // --------------------------------------------------------------------
 
         // Trigger Type
-        QString triggerTypeString = cameraMap["Trigger Type"].toString();
+        QString triggerTypeString = cameraMap["triggerType"].toString();
         if (triggerTypeString.isEmpty())
         {
-            QString errMsgText("Camera trigger type is not present");
+            QString errMsgText("Camera: triggerType is not present");
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
@@ -2720,41 +2760,41 @@ namespace bias
 
         // Get "Enabled" value
         // -------------------
-        if (!loggingMap.contains("Enabled"))
+        if (!loggingMap.contains("enabled"))
         {
-            QString errMsgText("Logging configuration \"Enabled\" not present");
+            QString errMsgText("Logging configuration: enabled not present");
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!loggingMap["Enabled"].canConvert<bool>())
+        if (!loggingMap["enabled"].canConvert<bool>())
         {
-            QString errMsgText("Logging configuration unable to convert \"Enabled\" to bool");
+            QString errMsgText("Logging configuration: unable to convert enabled to bool");
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        logging_ = loggingMap["Enabled"].toBool();
+        logging_ = loggingMap["enabled"].toBool();
 
         // Get "Format" value
         // -------------------
-        if (!loggingMap.contains("Format"))
+        if (!loggingMap.contains("format"))
         {
-            QString errMsgText("Logging configuration \"Format\" not present");
+            QString errMsgText("Logging configuration: format not present");
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!loggingMap["Format"].canConvert<QString>())
+        if (!loggingMap["format"].canConvert<QString>())
         {
-            QString errMsgText("Logging configuration - unable to convert");
-            errMsgText += " \"Format\" to string";
+            QString errMsgText("Logging configuration: unable to convert");
+            errMsgText += " format to string";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        QString formatString = loggingMap["Format"].toString();
+        QString formatString = loggingMap["format"].toString();
         VideoFileFormat format = convertStringToVideoFileFormat(formatString);
         if (format == VIDEOFILE_FORMAT_UNSPECIFIED)
         {
             QString errMsgText = QString(
-                    "Logging configuration - unknown video file format %1"
+                    "Logging configuration: unknown video file format %1"
                     ).arg(formatString); 
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
@@ -2763,24 +2803,24 @@ namespace bias
 
         // Get "Directory" value
         // ----------------------
-        if (!loggingMap.contains("Directory"))
+        if (!loggingMap.contains("directory"))
         {
-            QString errMsgText( "Logging configuration \"Directory\" not present");
+            QString errMsgText( "Logging configuration: directory not present");
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!loggingMap["Directory"].canConvert<QString>())
+        if (!loggingMap["directory"].canConvert<QString>())
         {
-            QString errMsgText("Logging configuration - unable to convert");
-            errMsgText += " \"Directory\" to string";
+            QString errMsgText("Logging configuration: unable to convert");
+            errMsgText += " directory to string";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        QString directoryString = loggingMap["Directory"].toString();
+        QString directoryString = loggingMap["directory"].toString();
         QDir directory = QDir(directoryString);
         if (!directory.exists())
         {
-            QString errMsgText("Logging configuration \"Directory\" does not exist");
+            QString errMsgText("Logging configuration: directory does not exist");
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
@@ -2789,28 +2829,28 @@ namespace bias
 
         // Get "File Name" value
         // ---------------------
-        if (!loggingMap.contains("File Name"))
+        if (!loggingMap.contains("fileName"))
         {
-            QString errMsgText("Logging configuration \"File Name\" not present");
+            QString errMsgText("Logging configuration: fileName not present");
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!loggingMap["File Name"].canConvert<QString>())
+        if (!loggingMap["fileName"].canConvert<QString>())
         {
-            QString errMsgText("Logging configuration - unable to convert");
-            errMsgText += " \"File Name\" to string";
+            QString errMsgText("Logging configuration: unable to convert");
+            errMsgText += " fileName to string";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        QString fileNameString = loggingMap["File Name"].toString();
+        QString fileNameString = loggingMap["fileName"].toString();
         currentVideoFileName_ = fileNameString;
 
         // Set the logging format settings
         // -------------------------------
-        QVariantMap formatSettingsMap = loggingMap["Settings"].toMap();
+        QVariantMap formatSettingsMap = loggingMap["settings"].toMap();
         if (formatSettingsMap.isEmpty())
         { 
-            QString errMsgText("Logging configuration \"Settings\" not present");
+            QString errMsgText("Logging configuration: settings not present");
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
@@ -2828,49 +2868,49 @@ namespace bias
         QString errMsgTitle("Load Configuration Error (Timer)");
 
         // Set "Enabled" value
-        if (!timerMap.contains("Enabled"))
+        if (!timerMap.contains("enabled"))
         {
-            QString errMsgText("Timer configuration - \"Enabled\"");
+            QString errMsgText("Timer configuration: enabled");
             errMsgText += " is not present";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!timerMap["Enabled"].canConvert<bool>())
+        if (!timerMap["enabled"].canConvert<bool>())
         {
-            QString errMsgText("Timer configuration - unable to ");
-            errMsgText += " convert \"Enabled\" to bool";
+            QString errMsgText("Timer configuration: unable to ");
+            errMsgText += " convert enabled to bool";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        bool timerEnabled = timerMap["Enabled"].toBool();
+        bool timerEnabled = timerMap["enabled"].toBool();
         actionTimerEnabledPtr_ -> setChecked(timerEnabled);
 
         // Get Settings map
-        QVariantMap settingsMap = timerMap["Settings"].toMap();
+        QVariantMap settingsMap = timerMap["settings"].toMap();
         if (settingsMap.isEmpty())
         {
-            QString errMsgText("Timer configuration - \"Settings\"");
-            errMsgText += " is not present";
+            QString errMsgText("Timer configuration: settings");
+            errMsgText += " not present";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
 
         // Set "Duration" value
-        if (!settingsMap.contains("Duration"))
+        if (!settingsMap.contains("duration"))
         {
-            QString errMsgText("Timer configuration - \"Settings\"");
-            errMsgText += " \"Duration\" is not present";
+            QString errMsgText("Timer configuration: settings");
+            errMsgText += " duration is not present";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!settingsMap["Duration"].canConvert<unsigned long long>())
+        if (!settingsMap["duration"].canConvert<unsigned long long>())
         {
-            QString errMsgText("Timer configuration - unable to convert");
-            errMsgText += " \"Settings\" \"Duration\" to unsigned long";
+            QString errMsgText("Timer configuration: unable to convert");
+            errMsgText += " settings duration to unsigned long";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        captureDurationSec_ = (unsigned long)(settingsMap["Duration"].toULongLong());
+        captureDurationSec_ = (unsigned long)(settingsMap["duration"].toULongLong());
         return true;
     }
 
@@ -2880,67 +2920,67 @@ namespace bias
         QString errMsgTitle("Load Congifuration Error (Display)");
 
         // Get Orientation map
-        QVariantMap orientMap = displayMap["Orientation"].toMap();
+        QVariantMap orientMap = displayMap["orientation"].toMap();
         if (orientMap.isEmpty())
         {
-            QString errMsgText("Display configuration - \"Orientation\"");
+            QString errMsgText("Display configuration: orientation");
             errMsgText += " is not present";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
 
         // Set Orientation Flip Vertical
-        if (!orientMap.contains("Flip Vertical"))
+        if (!orientMap.contains("flipVertical"))
         {
-            QString errMsgText("Display configuration - \"Orientation\"");
-            errMsgText += " \"Flip Vertical\" is not present";
+            QString errMsgText("Display configuration: orientation");
+            errMsgText += " flipVertical is not present";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!orientMap["Flip Vertical"].canConvert<bool>())
+        if (!orientMap["flipVertical"].canConvert<bool>())
         {
-            QString errMsgText("Display configuration - unable to convert");
-            errMsgText += " \"Orientation\" \"Flip Vertical\" to bool";
+            QString errMsgText("Display configuration: unable to convert");
+            errMsgText += " orientation flipVertical to bool";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        flipVert_ = orientMap["Flip Vertical"].toBool();
+        flipVert_ = orientMap["flipVertical"].toBool();
         std::cout << "flipVert_ " << flipVert_ << std::endl;
 
         // Set Orientation Flip Horizontal
-        if (!orientMap.contains("Flip Horizontal"))
+        if (!orientMap.contains("flipHorizontal"))
         {
-            QString errMsgText("Display configuration - \"Orientation\"");
-            errMsgText += " \"Flip Horizontal\" is not present";
+            QString errMsgText("Display configuration: orientation");
+            errMsgText += " flipHorizontal is not present";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!orientMap["Flip Horizontal"].canConvert<bool>())
+        if (!orientMap["flipHorizontal"].canConvert<bool>())
         {
-            QString errMsgText("Display configuration - unable to convert");
-            errMsgText += " \"Orientation\" \"Flip Horizontal\" to bool";
+            QString errMsgText("Display configuration: unable to convert");
+            errMsgText += " orientation flipHorizontal to bool";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        flipHorz_ = orientMap["Flip Horizontal"].toBool();
+        flipHorz_ = orientMap["flipHorizontal"].toBool();
         std::cout << "flipHorz_ " << flipHorz_ << std::endl;
 
         // Set Rotation
-        if (!displayMap.contains("Rotation"))
+        if (!displayMap.contains("rotation"))
         {
-            QString errMsgText("Display configuration - \"Rotation\"");
+            QString errMsgText("Display configuration: rotation");
             errMsgText += " is not present";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!displayMap["Rotation"].canConvert<unsigned int>())
+        if (!displayMap["rotation"].canConvert<unsigned int>())
         {
-            QString errMsgText("Display configuration - unable to convert");
-            errMsgText += " \"Rotation\" to unsigned int";
+            QString errMsgText("Display configuration: unable to convert");
+            errMsgText += " rotation to unsigned int";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        unsigned int rotationUInt = displayMap["Rotation"].toUInt();
+        unsigned int rotationUInt = displayMap["rotation"].toUInt();
         if ( 
                 (rotationUInt != IMAGE_ROTATION_0 )  && 
                 (rotationUInt != IMAGE_ROTATION_90)  &&
@@ -2948,7 +2988,7 @@ namespace bias
                 (rotationUInt != IMAGE_ROTATION_270) 
            )
         {
-            QString errMsgText("Display configuration - \"Rotation\"");
+            QString errMsgText("Display configuration: rotation");
             errMsgText += " must be 0, 90, 180, or 270";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
@@ -2956,24 +2996,24 @@ namespace bias
         imageRotation_ = ImageRotationType(rotationUInt);
 
         // Set Image Display frequency
-        if (!displayMap.contains("Update Frequency"))
+        if (!displayMap.contains("updateFrequency"))
         {
-            QString errMsgText("Display configuration - \"Update Frequency\"");
+            QString errMsgText("Display configuration: updateFrequency");
             errMsgText += " is not present";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!displayMap["Update Frequency"].canConvert<double>())
+        if (!displayMap["updateFrequency"].canConvert<double>())
         {
-            QString errMsgText("Display configuration - unable to convert");
-            errMsgText += " \"Update Frequency\" to double";
+            QString errMsgText("Display configuration: unable to convert");
+            errMsgText += " updateFrequency to double";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        double displayFreq = displayMap["Update Frequency"].toDouble();
+        double displayFreq = displayMap["updateFrequency"].toDouble();
         if (displayFreq < MIN_IMAGE_DISPLAY_FREQ)
         {
-            QString errMsgText("Display configuration - \"Update Frequency\"");
+            QString errMsgText("Display configuration: updateFrequency");
             errMsgText += QString(" must be greater than or equal to %1").arg(
                     MIN_IMAGE_DISPLAY_FREQ
                     );
@@ -2982,7 +3022,7 @@ namespace bias
         }
         if (displayFreq > MAX_IMAGE_DISPLAY_FREQ)
         {
-            QString errMsgText("Display configuration - \"Update Frequency\"");
+            QString errMsgText("Display configuration: updateFrequency");
             errMsgText += QString(" must be less than or equal to %1").arg(
                     MIN_IMAGE_DISPLAY_FREQ
                     );
@@ -3000,25 +3040,25 @@ namespace bias
         QString errMsgTitle("Load Configuration Error (File)");
 
         // Set Directory
-        if (!configFileMap.contains("Directory"))
+        if (!configFileMap.contains("directory"))
         {
-            QString errMsgText("Configuration file - \"Directory\"");
+            QString errMsgText("Configuration file: directory");
             errMsgText += " is not present";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!configFileMap["Directory"].canConvert<QString>())
+        if (!configFileMap["directory"].canConvert<QString>())
         {
-            QString errMsgText("Configuratoin file - unable to convert");
-            errMsgText += " \"Directory\" to string";
+            QString errMsgText("Configuration file: unable to convert");
+            errMsgText += " directory to string";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        QString directoryString = configFileMap["Directory"].toString();
+        QString directoryString = configFileMap["directory"].toString();
         QDir directory = QDir(directoryString);
         if (!directory.exists())
         {
-            QString errMsgText("Configuration file - \"Directory\"");
+            QString errMsgText("Configuration file: directory");
             errMsgText += " does not exist";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
@@ -3026,21 +3066,21 @@ namespace bias
         currentConfigFileDir_ = directory;
 
         // Set File Name
-        if (!configFileMap.contains("File Name"))
+        if (!configFileMap.contains("fileName"))
         {
-            QString errMsgText("Configuration file - \"File Name\"");
+            QString errMsgText("Configuration file: fileName");
             errMsgText += " is not present";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!configFileMap["File Name"].canConvert<QString>())
+        if (!configFileMap["fileName"].canConvert<QString>())
         {
-            QString errMsgText("Configuratoin file - unable to convert");
-            errMsgText += " \"File Name\" to string";
+            QString errMsgText("Configuration file: unable to convert");
+            errMsgText += " fileName to string";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        QString fileName = configFileMap["File Name"].toString();
+        QString fileName = configFileMap["fileName"].toString();
         currentConfigFileName_ = fileName;
 
         return true;
@@ -3055,156 +3095,156 @@ namespace bias
         QString name = QString::fromStdString(getPropertyTypeString(propInfo.type));
 
         // Get value for "Present"
-        if (!propValueMap.contains("Present"))
+        if (!propValueMap.contains("present"))
         {
             QString errMsgText = QString(
-                    "Camera property %1 has no value for \"Present\""
+                    "Camera: property %1 has no value for present"
                     ).arg(name);
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!propValueMap["Present"].canConvert<bool>())
+        if (!propValueMap["present"].canConvert<bool>())
         {
             QString errMsgText = QString(
-                    "Camera property %1 unable to cast \"Present\" value to bool"
+                    "Camera: property %1 unable to cast present to bool"
                     ).arg(name);
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        newProp.present =  propValueMap["Present"].toBool();
+        newProp.present =  propValueMap["present"].toBool();
         if (newProp.present != propInfo.present)
         {
             QString errMsgText = QString(
-                    "Camera property %1 \"Present\" value does not match that in property info"
+                    "Camera: property %1 present value does not match that in property info"
                     ).arg(name);
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
 
         // Get value for "Absolute Control"
-        if (!propValueMap.contains("Absolute Control"))
+        if (!propValueMap.contains("absoluteControl"))
         {
             QString errMsgText = QString(
-                    "Camera property %1 has no value for \"Absolute Control\""
+                    "Camera: property %1 has no value for absoluteControl"
                     ).arg(name);
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!propValueMap["Absolute Control"].canConvert<bool>())
+        if (!propValueMap["absoluteControl"].canConvert<bool>())
         {
             QString errMsgText = QString(
-                    "Camera property %1 unable to convedrt \"Absolute Control\" to bool"
+                    "Camera: property %1 unable to convedrt absoluteControl to bool"
                     ).arg(name);
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        newProp.absoluteControl = propValueMap["Absolute Control"].toBool();
+        newProp.absoluteControl = propValueMap["absoluteControl"].toBool();
         if (newProp.absoluteControl && !propInfo.absoluteCapable)
         {
             QString errMsgText = QString(
-                    "Camera property %1 is not capable of \"Absolute Control\""
+                    "Camera: property %1 is not capable of absoluteControl"
                     ).arg(name);
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
 
         // Get value for "One Push"
-        if (!propValueMap.contains("One Push"))
+        if (!propValueMap.contains("onePush"))
         {
             QString errMsgText = QString(
-                    "Camera property %1 has no value for \"One Push\""
+                    "Camera: property %1 has no value for onePush"
                     ).arg(name);
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!propValueMap["One Push"].canConvert<bool>())
+        if (!propValueMap["onePush"].canConvert<bool>())
         {
             QString errMsgText = QString(
-                    "Camera property %1 unable to convert \"One Push\" to bool"
+                    "Camera: property %1 unable to convert onePush to bool"
                     ).arg(name);
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        newProp.onePush = propValueMap["One Push"].toBool();
+        newProp.onePush = propValueMap["onePush"].toBool();
         if (newProp.onePush && !propInfo.onePushCapable)
         {
             QString errMsgText = QString(
-                    "Camera property %1 is not capable of \"One Push\""
+                    "Camera: property %1 is not capable of onePush"
                     ).arg(name);
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
 
         // Get value for "On"
-        if (!propValueMap.contains("On"))
+        if (!propValueMap.contains("on"))
         {
             QString errMsgText = QString(
-                    "Camera property %1 has no value for \"On\""
+                    "Camera: property %1 has no value for on"
                     ).arg(name);
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!propValueMap["On"].canConvert<bool>())
+        if (!propValueMap["on"].canConvert<bool>())
         {
             QString errMsgText = QString(
-                    "Camera property %1 unable to convert \"On\" to bool"
+                    "Camera: property %1 unable to convert on to bool"
                     ).arg(name);
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        newProp.on = propValueMap["On"].toBool();
+        newProp.on = propValueMap["on"].toBool();
 
         // Get Value for "Auto Active"
-        if (!propValueMap.contains("Auto Active"))
+        if (!propValueMap.contains("autoActive"))
         {
             QString errMsgText = QString(
-                    "Camera property %1 has no value for \"Auto Active\""
+                    "Camera: property %1 has no value for autoActive"
                     ).arg(name);
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!propValueMap["Auto Active"].canConvert<bool>())
+        if (!propValueMap["autoActive"].canConvert<bool>())
         {
             QString errMsgText = QString(
-                    "Camera property %1 unable to convert \"Auto Active\" to bool"
+                    "Camera: property %1 unable to convert autoActive to bool"
                     ).arg(name);
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        newProp.autoActive = propValueMap["Auto Active"].toBool();
+        newProp.autoActive = propValueMap["autoActive"].toBool();
         if (newProp.autoActive && !propInfo.autoCapable)
         {
             QString errMsgText = QString(
-                    "Camera property %1 is not auto capable"
+                    "Camera: property %1 is not auto capable"
                     ).arg(name);
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
 
         // Get "Value" 
-        if (!propValueMap.contains("Value"))
+        if (!propValueMap.contains("value"))
         {
             QString errMsgText = QString(
-                    "Camera property %1 has no \"Value\""
+                    "Camera: property %1 has no value"
                     ).arg(name);
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!propValueMap["Value"].canConvert<unsigned int>())
+        if (!propValueMap["value"].canConvert<unsigned int>())
         {
             QString errMsgText = QString(
-                    "Camera property %1 unable to convert \"Value\" to unsigned int"
+                    "Camera: property %1 unable to convert value to unsigned int"
                     ).arg(name);
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        newProp.value = propValueMap["Value"].toUInt();
+        newProp.value = propValueMap["value"].toUInt();
         if (!newProp.absoluteControl) 
         {
             if (newProp.value < propInfo.minValue)
             {
                 QString errMsgText = QString(
-                        "Value for camera property %1 is out of range (too low)"
+                        "Camera: property %1 value is out of range (too low)"
                         ).arg(name);
                 QMessageBox::critical(this,errMsgTitle,errMsgText);
                 return false;
@@ -3212,7 +3252,7 @@ namespace bias
             else if (newProp.value > propInfo.maxValue)
             {
                 QString errMsgText = QString(
-                        "Value for camera property %1 is out of range (too high)"
+                        "Camera: property %1 value is out of range (too high)"
                         ).arg(name);
                 QMessageBox::critical(this,errMsgTitle,errMsgText);
                 return false;
@@ -3220,29 +3260,29 @@ namespace bias
         }
 
         // Get "Absolute Value"
-        if (!propValueMap.contains("Absolute Value"))
+        if (!propValueMap.contains("absoluteValue"))
         {
             QString errMsgText = QString(
-                    "Camera property %1 has no \"Absolute Value\""
+                    "Camera: property %1 has no absoluteValue"
                     ).arg(name);
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!propValueMap["Absolute Value"].canConvert<float>())
+        if (!propValueMap["absoluteValue"].canConvert<float>())
         {
             QString errMsgText = QString(
-                    "Camera property %1 unable to convert \"Absolute Value\" to float"
+                    "Camera: property %1 unable to convert absoluteValue to float"
                     ).arg(name);
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        newProp.absoluteValue = propValueMap["Absolute Value"].toFloat();
+        newProp.absoluteValue = propValueMap["absoluteValue"].toFloat();
         if (newProp.absoluteControl)
         {
             if (newProp.absoluteValue < propInfo.minAbsoluteValue)
             {
                 QString errMsgText = QString(
-                        "Absolute value for camera property %1 is out of range (too low)"
+                        "Camera: property %1 absoluteValue is out of range (too low)"
                         ).arg(name);
                 QMessageBox::critical(this,errMsgTitle,errMsgText);
                 return false;
@@ -3250,7 +3290,7 @@ namespace bias
             else if (newProp.absoluteValue > propInfo.maxAbsoluteValue)
             {
                 QString errMsgText = QString(
-                        "Absolute value for camera property %1 is out of range (too high)"
+                        "Camera: property %1 absoluteValue is out of range (too high)"
                         ).arg(name);
                 QMessageBox::critical(this,errMsgTitle,errMsgText);
                 return false;
@@ -3302,50 +3342,50 @@ namespace bias
         QVariantMap aviMap = settingsMap["avi"].toMap();
         if (aviMap.isEmpty())
         {
-            QString errMsgText("Logging configuration - \"avi\" settings not present");
+            QString errMsgText("Logging Settings : avi settings not present");
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!aviMap.contains("Frame Skip"))
+        if (!aviMap.contains("frameSkip"))
         {
-            QString errMsgText("Logging configuration - avi \"Frame Skip\" not present");
+            QString errMsgText("Logging Settings: avi frameSkip not present");
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!aviMap["Frame Skip"].canConvert<unsigned int>())
+        if (!aviMap["frameSkip"].canConvert<unsigned int>())
         {
-            QString errMsgText("Logging configuration - unable to convert");
-            errMsgText += " \"Frame Skip\" to unsigned int";
+            QString errMsgText("Logging Settings: unable to convert");
+            errMsgText += " frameSkip to unsigned int";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        unsigned int aviFrameSkip = aviMap["Frame Skip"].toUInt();
+        unsigned int aviFrameSkip = aviMap["frameSkip"].toUInt();
         if (aviFrameSkip == 0)
         {
-            QString errMsgText("Logging configuration - avi \"Frame Skip\"");
+            QString errMsgText("Logging Settings: avi frameSkip");
             errMsgText += " must be greater than zero"; 
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
         videoWriterParams_.avi.frameSkip = aviFrameSkip;
 
-        if (!aviMap.contains("Codec"))
+        if (!aviMap.contains("codec"))
         {
-            QString errMsgText("Logging configuration - avi \"Codec\" not present");
+            QString errMsgText("Logging Settings: avi codec not present");
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!aviMap["Codec"].canConvert<QString>())
+        if (!aviMap["codec"].canConvert<QString>())
         {
-            QString errMsgText("Logging configuration - unable to convert");
-            errMsgText += " avi \"Codec\" to string";
+            QString errMsgText("Logging Settings: unable to convert");
+            errMsgText += " avi codec to string";
             QMessageBox::critical(this, errMsgTitle,errMsgText);
             return false;
         }
-        QString aviCodec = aviMap["Codec"].toString();
+        QString aviCodec = aviMap["codec"].toString();
         if (!VideoWriter_avi::isAllowedCodec(aviCodec))
         {
-            QString errMsgText = QString("Logging configuration - avi \"Codec\" %1").arg(aviCodec);
+            QString errMsgText = QString("Logging Settings: avi codec %1").arg(aviCodec);
             errMsgText += " is not allowed";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
@@ -3358,27 +3398,27 @@ namespace bias
         QVariantMap bmpMap = settingsMap["bmp"].toMap();
         if (bmpMap.isEmpty())
         {
-            QString errMsgText("Logging configuration - \"bmp\" settings not present");
+            QString errMsgText("Logging Settings: bmp settings not present");
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!bmpMap.contains("Frame Skip"))
+        if (!bmpMap.contains("frameSkip"))
         {
-            QString errMsgText("Logging configuration - bmp \"Frame Skip\" not present");
+            QString errMsgText("Logging Settings: bmp frameSkip not present");
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!bmpMap["Frame Skip"].canConvert<unsigned int>())
+        if (!bmpMap["frameSkip"].canConvert<unsigned int>())
         {
-            QString errMsgText("Logging configuration - bmp unable to convert");
-            errMsgText += " \"Frame Skip\" to unsigned int";
+            QString errMsgText("Logging Settings: bmp unable to convert");
+            errMsgText += " frameSkip to unsigned int";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        unsigned int bmpFrameSkip = bmpMap["Frame Skip"].toUInt();
+        unsigned int bmpFrameSkip = bmpMap["frameSkip"].toUInt();
         if (bmpFrameSkip == 0)
         {
-            QString errMsgText("Logging configuration - bmp \"Frame Skip\" must");
+            QString errMsgText("Logging Settings: bmp frameSkip must");
             errMsgText += " be greater than zero";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
@@ -3390,27 +3430,27 @@ namespace bias
         QVariantMap fmfMap = settingsMap["fmf"].toMap();
         if (fmfMap.isEmpty())
         {
-            QString errMsgText("Logging configuration - \"fmf\" settings not present");
+            QString errMsgText("Logging Settings: fmf settings not present");
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!fmfMap.contains("Frame Skip"))
+        if (!fmfMap.contains("frameSkip"))
         {
-            QString errMsgText("Logging configuration - fmf \"Frame Skip\" not present");
+            QString errMsgText("Logging Settings: fmf frameSkip not present");
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!fmfMap["Frame Skip"].canConvert<unsigned int>())
+        if (!fmfMap["frameSkip"].canConvert<unsigned int>())
         {
-            QString errMsgText("Logging configuration - fmf unable to convert");
-            errMsgText += " \"Frame Skip\" to unsigned int";
+            QString errMsgText("Logging Settings: fmf unable to convert");
+            errMsgText += " frameSkip to unsigned int";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        unsigned int fmfFrameSkip = fmfMap["Frame Skip"].toUInt();
+        unsigned int fmfFrameSkip = fmfMap["frameSkip"].toUInt();
         if (fmfFrameSkip == 0)
         {
-            QString errMsgText("Logging configuration - fmf \"Frame Skip\" must");
+            QString errMsgText("Logging Settings: fmf frameSkip must");
             errMsgText += " be greater than zero";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
@@ -3422,28 +3462,28 @@ namespace bias
         QVariantMap ufmfMap = settingsMap["ufmf"].toMap();
         if (ufmfMap.isEmpty())
         {
-            QString errMsgText("Logging configuration - \"ufmf\" settings not present");
+            QString errMsgText("Logging Settings: ufmf settings not present");
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
         // ufmf Frame Skip
-        if (!ufmfMap.contains("Frame Skip"))
+        if (!ufmfMap.contains("frameSkip"))
         {
-            QString errMsgText("Logging configuration - ufmf \"Frame Skip\" not present");
+            QString errMsgText("Logging Settings: ufmf frameSkip not present");
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!ufmfMap["Frame Skip"].canConvert<unsigned int>())
+        if (!ufmfMap["frameSkip"].canConvert<unsigned int>())
         {
-            QString errMsgText("Logging configuration - ufmf unable to convert");
-            errMsgText += " \"Frame Skip\" to unsigned int";
+            QString errMsgText("Logging Settings: ufmf unable to convert");
+            errMsgText += " frameSkip to unsigned int";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        unsigned int ufmfFrameSkip = ufmfMap["Frame Skip"].toUInt();
+        unsigned int ufmfFrameSkip = ufmfMap["frameSkip"].toUInt();
         if (ufmfFrameSkip == 0)
         {
-            QString errMsgText("Logging configuration - ufmf \"Frame Skip\" must");
+            QString errMsgText("Logging Settings: ufmf frameSkip must");
             errMsgText += " be greater than zero";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
@@ -3451,24 +3491,24 @@ namespace bias
         videoWriterParams_.ufmf.frameSkip = ufmfFrameSkip;
 
         // ufmf Background threshold
-        if (!ufmfMap.contains("Background Threshold"))
+        if (!ufmfMap.contains("backgroundThreshold"))
         {
-            QString errMsgText("Logging configuration - ufmf"); 
-            errMsgText += " \"Background Threshold\" not present";
+            QString errMsgText("Logging Settings: ufmf"); 
+            errMsgText += " backgroundThreshold not present";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!ufmfMap["Background Threshold"].canConvert<unsigned int>())
+        if (!ufmfMap["backgroundThreshold"].canConvert<unsigned int>())
         {
-            QString errMsgText("Logging configuration - ufmf unable");
-            errMsgText += " to convert \"Background Threshold\" to unsigned int";
+            QString errMsgText("Logging Settings: ufmf unable");
+            errMsgText += " to convert backgroundThreshold to unsigned int";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        unsigned int ufmfBackgroundThreshold = ufmfMap["Background Threshold"].toUInt();
+        unsigned int ufmfBackgroundThreshold = ufmfMap["backgroundThreshold"].toUInt();
         if (ufmfBackgroundThreshold < VideoWriter_ufmf::MIN_BACKGROUND_THRESHOLD)
         {
-            QString errMsgText("Logging configuration - ufmf \"Background Threshold\""); 
+            QString errMsgText("Logging Settings: ufmf backgroundThreshold"); 
             errMsgText += QString(" must be greater than %1").arg(
                     VideoWriter_ufmf::MIN_BACKGROUND_THRESHOLD
                     );
@@ -3477,7 +3517,7 @@ namespace bias
         }
         if (ufmfBackgroundThreshold > VideoWriter_ufmf::MAX_BACKGROUND_THRESHOLD)
         {
-            QString errMsgText("Logging configuration - ufmf \"Background Threshold\"");
+            QString errMsgText("Logging Settings: ufmf backgroundThreshold");
             errMsgText += QString(" msut be less than %1").arg(
                     VideoWriter_ufmf::MAX_BACKGROUND_THRESHOLD
                     );
@@ -3487,24 +3527,24 @@ namespace bias
         videoWriterParams_.ufmf.backgroundThreshold = ufmfBackgroundThreshold;
 
         // ufmf Box length
-        if (!ufmfMap.contains("Box Length"))
+        if (!ufmfMap.contains("boxLength"))
         {
-            QString errMsgText("Logging configuration - ufmf"); 
-            errMsgText += " \"Box Length\" not present";
+            QString errMsgText("Logging Settings: ufmf"); 
+            errMsgText += " boxLength not present";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!ufmfMap["Box Length"].canConvert<unsigned int>())
+        if (!ufmfMap["boxLength"].canConvert<unsigned int>())
         {
-            QString errMsgText("Logging configuration - ufmf unable");
-            errMsgText += " to convert \"Box Length\" to unsigned int";
+            QString errMsgText("Logging Settings: ufmf unable");
+            errMsgText += " to convert boxLength to unsigned int";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        unsigned int ufmfBoxLength = ufmfMap["Box Length"].toUInt();
+        unsigned int ufmfBoxLength = ufmfMap["boxLength"].toUInt();
         if (ufmfBoxLength < VideoWriter_ufmf::MIN_BOX_LENGTH)
         {
-            QString errMsgText("Logging configuration - ufmf \"Box Length\""); 
+            QString errMsgText("Logging Settings: ufmf boxLength"); 
             errMsgText += QString(" must be greater than %1").arg(
                     VideoWriter_ufmf::MIN_BOX_LENGTH
                     );
@@ -3513,7 +3553,7 @@ namespace bias
         }
         if (ufmfBoxLength > VideoWriter_ufmf::MAX_BOX_LENGTH)
         {
-            QString errMsgText("Logging configuration - ufmf \"Box Length\"");
+            QString errMsgText("Logging Settings: ufmf boxLength");
             errMsgText += QString(" must be less than %1").arg(
                     VideoWriter_ufmf::MAX_BOX_LENGTH
                     );
@@ -3523,24 +3563,24 @@ namespace bias
         videoWriterParams_.ufmf.boxLength = ufmfBoxLength;
 
         // ufmf Compression Threads
-        if (!ufmfMap.contains("Compression Threads"))
+        if (!ufmfMap.contains("compressionThreads"))
         {
-            QString errMsgText("Logging configuration - ufmf"); 
-            errMsgText += " \"Compression Threads\" not present";
+            QString errMsgText("Logging Settings: ufmf"); 
+            errMsgText += " compressionThreads not present";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!ufmfMap["Compression Threads"].canConvert<unsigned int>())
+        if (!ufmfMap["compressionThreads"].canConvert<unsigned int>())
         {
-            QString errMsgText("Logging configuration - ufmf unable");
-            errMsgText += " to convert \"Compression Threads\" to unsigned int";
+            QString errMsgText("Logging Settings: ufmf unable");
+            errMsgText += " to convert compressionThreads to unsigned int";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        unsigned int ufmfCompressionThreads = ufmfMap["Compression Threads"].toUInt();
+        unsigned int ufmfCompressionThreads = ufmfMap["compressionThreads"].toUInt();
         if (ufmfCompressionThreads < VideoWriter_ufmf::MIN_NUMBER_OF_COMPRESSORS)
         {
-            QString errMsgText("Logging configuration - ufmf \"Compression Threads\""); 
+            QString errMsgText("Logging Settings: ufmf compressionThreads"); 
             errMsgText += QString(" must be greater than %1").arg(
                     VideoWriter_ufmf::MIN_NUMBER_OF_COMPRESSORS
                     );
@@ -3550,24 +3590,24 @@ namespace bias
         videoWriterParams_.ufmf.numberOfCompressors = ufmfCompressionThreads;
 
         // ufmf median update count
-        if (!ufmfMap.contains("Median Update Count"))
+        if (!ufmfMap.contains("medianUpdateCount"))
         {
-            QString errMsgText("Logging configuration - ufmf"); 
-            errMsgText += " \"Median Update Count\" not present";
+            QString errMsgText("Logging Settings: ufmf"); 
+            errMsgText += " medianUpdateCount not present";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!ufmfMap["Median Update Count"].canConvert<unsigned int>())
+        if (!ufmfMap["medianUpdateCount"].canConvert<unsigned int>())
         {
-            QString errMsgText("Logging configuration - ufmf unable");
-            errMsgText += " to convert \"Median Update Count\" to unsigned int";
+            QString errMsgText("Logging Settings: ufmf unable");
+            errMsgText += " to convert medianUpdateCount to unsigned int";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        unsigned int ufmfMedianUpdateCount = ufmfMap["Median Update Count"].toUInt();
+        unsigned int ufmfMedianUpdateCount = ufmfMap["medianUpdateCount"].toUInt();
         if (ufmfMedianUpdateCount < BackgroundHistogram_ufmf::MIN_MEDIAN_UPDATE_COUNT )
         {
-            QString errMsgText("Logging configuration - ufmf \"Median Update Count\""); 
+            QString errMsgText("Logging Settings: ufmf medianUpdateCount"); 
             errMsgText += QString(" must be greater than %1").arg(
                     BackgroundHistogram_ufmf::MIN_MEDIAN_UPDATE_COUNT
                     );
@@ -3577,24 +3617,24 @@ namespace bias
         videoWriterParams_.ufmf.medianUpdateCount = ufmfMedianUpdateCount;
 
         // ufmf median update interval
-        if (!ufmfMap.contains("Median Update Interval"))
+        if (!ufmfMap.contains("medianUpdateInterval"))
         {
-            QString errMsgText("Logging configuration - ufmf");
-            errMsgText += " \"Median Update Interval\" not present";
+            QString errMsgText("Logging Settings: ufmf");
+            errMsgText += " medianUpdateInterval not present";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!ufmfMap["Median Update Interval"].canConvert<unsigned int>())
+        if (!ufmfMap["medianUpdateInterval"].canConvert<unsigned int>())
         {
-            QString errMsgText("Logging configuration - ufmf unable");
-            errMsgText += " to convert \"Median Update Interval\" to unsigned int";
+            QString errMsgText("Logging Settings: ufmf unable");
+            errMsgText += " to convert medianUpdateInterval to unsigned int";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        unsigned int ufmfMedianUpdateInterval = ufmfMap["Median Update Interval"].toUInt();
+        unsigned int ufmfMedianUpdateInterval = ufmfMap["medianUpdateInterval"].toUInt();
         if (ufmfMedianUpdateInterval < BackgroundHistogram_ufmf::MIN_MEDIAN_UPDATE_INTERVAL )
         {
-            QString errMsgText("Logging configuration - ufmf \"Median Update Interval\"");
+            QString errMsgText("Logging Settings: ufmf medianUpdateInterval");
             errMsgText += QString(" must be greater than %1").arg(
                     BackgroundHistogram_ufmf::MIN_MEDIAN_UPDATE_INTERVAL
                     );
@@ -3604,50 +3644,50 @@ namespace bias
         videoWriterParams_.ufmf.medianUpdateInterval = ufmfMedianUpdateInterval;
 
         // ufmf Dilate
-        QVariantMap ufmfDilateMap = ufmfMap["Dilate"].toMap();
+        QVariantMap ufmfDilateMap = ufmfMap["dilate"].toMap();
         if (ufmfDilateMap.isEmpty())
         {
-            QString errMsgText("Logging configuration - ufmf \"Dilate\"");
+            QString errMsgText("Logging Settings: ufmf dilate");
             errMsgText += " is not present";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
 
         // ufmf Dilate On
-        if (!ufmfDilateMap.contains("On"))
+        if (!ufmfDilateMap.contains("on"))
         {
-            QString errMsgText("Logging configuration - ufmf \"Dilate\"");
-            errMsgText += " \"On\" is not present";
+            QString errMsgText("Logging Settins: ufmf dilate");
+            errMsgText += " on is not present";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!ufmfDilateMap["On"].canConvert<bool>())
+        if (!ufmfDilateMap["on"].canConvert<bool>())
         {
-            QString errMsgText("Logging configuration - unable to convert");
-            errMsgText += " ufmf \"Dilate\" \"On\" to bool";
+            QString errMsgText("Logging Settings: unable to convert");
+            errMsgText += " ufmf dilate on to bool";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        bool ufmfDilateOn = ufmfDilateMap["On"].toBool();
+        bool ufmfDilateOn = ufmfDilateMap["on"].toBool();
         videoWriterParams_.ufmf.dilateState = ufmfDilateOn;
 
 
         // ufmf Dilate Window Size
-        if (!ufmfDilateMap.contains("Window Size"))
+        if (!ufmfDilateMap.contains("windowSize"))
         {
-            QString errMsgText("Logging configuration - ufmf \"Dilate\"");
-            errMsgText += " \"Window Size\" is not present";
+            QString errMsgText("Logging Settings: ufmf dilate");
+            errMsgText += " windowSize is not present";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        if (!ufmfDilateMap["Window Size"].canConvert<unsigned int>())
+        if (!ufmfDilateMap["windowSize"].canConvert<unsigned int>())
         {
-            QString errMsgText("Logging configuration - unable to convert");
-            errMsgText += " ufmf \"Dilate\" \"Window Size\" to unsigned int";
+            QString errMsgText("Logging Settings: unable to convert");
+            errMsgText += " ufmf dilate windowSize to unsigned int";
             QMessageBox::critical(this,errMsgTitle,errMsgText);
             return false;
         }
-        unsigned int ufmfDilateWindowSize = ufmfDilateMap["Window Size"].toUInt();
+        unsigned int ufmfDilateWindowSize = ufmfDilateMap["windowSize"].toUInt();
         // ---------------------------------------------------------------------
         // TO DO ... add ufmf check of ufmf Dilate window size range
         // ----------------------------------------------------------------------
@@ -3897,6 +3937,20 @@ namespace bias
         return map;
     }
 
+    
+    QString propNameToCamelCase(QString propName)
+    {
+        QString camelCaseName; 
+        camelCaseName.append(propName[0].toLower());
+        for (unsigned int i=1; i<propName.length(); i++)
+        {
+            if (propName[i] != QChar(' '))
+            {
+                camelCaseName.append(propName[i]);
+            }
+        }
+        return camelCaseName;
+    }
 } // namespace bias
 
        
