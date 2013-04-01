@@ -56,6 +56,16 @@ namespace bias
             RtnStatus disconnectCamera(bool showErrorDlg=true);
             RtnStatus startImageCapture(bool showErrorDlg=true);
             RtnStatus stopImageCapture(bool showErrorDlg=true);
+
+            RtnStatus setConfigurationFromJson(
+                    QByteArray jsonConfig, 
+                    bool showErrorDlg=true
+                    );
+            RtnStatus setConfigurationFromMap(
+                    QVariantMap configMap, 
+                    bool showErrorDlg=true
+                    );
+
             QByteArray getConfigurationJson(
                     RtnStatus &rtnStatus, 
                     bool showErrorDlg=true
@@ -64,11 +74,8 @@ namespace bias
                     RtnStatus &rtnStatus, 
                     bool showErrorDlg=true
                     );
-
             void saveConfiguration(QString filename);
             void loadConfiguration(QString fileName);
-            bool setConfigurationFromJson(QByteArray jsonConfig);
-            bool setConfigurationFromMap(QVariantMap configMap);
 
         signals:
 

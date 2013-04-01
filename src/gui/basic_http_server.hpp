@@ -4,6 +4,7 @@
 #include <QTcpServer>
 #include <QPointer>
 #include <QString>
+#include <QStringList>
 #include <QTextStream>
 #include <QMap>
 #include <QVariantMap>
@@ -39,11 +40,14 @@ namespace bias
             QVariantMap handleStartCaptureRequest();
             QVariantMap handleStopCaptureRequest();
             QVariantMap handleGetConfiguration();
+            QVariantMap handleSetConfiguration(QString jsonConfig);
 
             void sendBadRequestResp(QTextStream &os, QString msg);
             void sendRunningResp(QTextStream &os);
 
     };
+
+    QStringList splitRequestString(QString reqString);
 
 
 } // namespace bias

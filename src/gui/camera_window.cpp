@@ -675,49 +675,74 @@ namespace bias
     }
 
 
-    bool CameraWindow::setConfigurationFromJson(QByteArray jsonConfig)
+    RtnStatus CameraWindow::setConfigurationFromJson(
+            QByteArray jsonConfig, 
+            bool showErrorDlg
+            )
     {
-        bool ok;
         RtnStatus rtnStatus;
-        QVariantMap configMap = QtJson::parse(QString(jsonConfig), ok).toMap();
-        QVariantMap oldConfigMap = getConfigurationMap(rtnStatus);
         QString errMsgTitle("Load Configuration Error");
+
+        bool ok;
+        QVariantMap configMap = QtJson::parse(QString(jsonConfig), ok).toMap();
         if (!ok)
         {
             QString errMsgText("Error loading configuration - "); 
             errMsgText += "unable to parse json.";
-            QMessageBox::critical(this, errMsgTitle, errMsgText);
-            return false;
+            if (showErrorDlg) 
+            {
+                QMessageBox::critical(this, errMsgTitle, errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
         }
 
-        ok = setConfigurationFromMap(configMap);
-        if (!ok)
+        QVariantMap oldConfigMap = getConfigurationMap(rtnStatus);
+
+        rtnStatus = setConfigurationFromMap(configMap);
+        if (!rtnStatus.success)
         {
             // Something went wrong - try to revert to old configuration
-            ok = setConfigurationFromMap(oldConfigMap);
-            if (!ok)
+            rtnStatus = setConfigurationFromMap(oldConfigMap);
+            if (!rtnStatus.success)
             {
-                QString errMsgText("Error loading configuration and ");  
-                errMsgText += "unable to revert to previous configuration";
-                QMessageBox::critical(this, errMsgTitle, errMsgText);
-                return false;
+                QString errMsgText("Error loading configuration, worse yet");  
+                errMsgText += " unable to revert to previous configuration";
+                if (showErrorDlg)
+                {
+                    QMessageBox::critical(this, errMsgTitle, errMsgText);
+                }
+                rtnStatus.success = false;
+                rtnStatus.message = errMsgText;
+                return rtnStatus;
             }
             else
             {
-                QString errMsgText("Error loading configuration - ");  
-                errMsgText += "reverting to previous configuration";
-                QMessageBox::critical(this, errMsgTitle, errMsgText);
-                return false;
+                QString errMsgText("Error loading configuration");  
+                errMsgText += " reverting to previous configuration";
+                if (showErrorDlg)
+                {
+                    QMessageBox::critical(this, errMsgTitle, errMsgText);
+                }
+                rtnStatus.success = false;
+                rtnStatus.message = errMsgText;
+                return rtnStatus;
             }
         }
         updateAllMenus();
-        return true;
+        rtnStatus.success = true;
+        rtnStatus.message = QString("Configuration set successfully");
+        return rtnStatus;
     }
 
 
-    bool CameraWindow::setConfigurationFromMap(QVariantMap configMap)
+    RtnStatus CameraWindow::setConfigurationFromMap(
+            QVariantMap configMap, 
+            bool showErrorDlg
+            )
     {
-        bool ok = true;
+        RtnStatus rtnStatus;
         QString errMsgTitle("Load Configuration Error");
 
         // Set camera properties, videomode, etc.
@@ -725,12 +750,23 @@ namespace bias
         if (cameraMap.isEmpty())
         {
             QString errMsgText("Camera configuration is empty");
-            QMessageBox::critical(this,errMsgTitle,errMsgText);
-            return false;
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
         }
+
+        // --------------------------------------------
+        // TO DO ... add rtnStatus to setCameraFrommap
+        // --------------------------------------------
         if (!setCameraFromMap(cameraMap))
         {
-            return false;
+            rtnStatus.success = false;
+            rtnStatus.message = QString("Unable to set camera values");
+            return rtnStatus;
         }
 
         // Set logging configuration
@@ -739,12 +775,23 @@ namespace bias
         if (loggingMap.isEmpty())
         {
             QString errMsgText("Logging configuration is empty");
-            QMessageBox::critical(this,errMsgTitle,errMsgText);
-            return false;
+            if (showErrorDlg) 
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
         }
+
+        //------------------------------------------------
+        //  TO DO ... add RtnStatus to  setLoggingFromMap
+        //------------------------------------------------
         if (!setLoggingFromMap(loggingMap))
         {
-            return false;
+            rtnStatus.success = false;
+            rtnStatus.message = QString("Unable to set logging values");
+            return rtnStatus;
         }
 
         // Set timer configuration
@@ -753,12 +800,22 @@ namespace bias
         if (timerMap.isEmpty())
         {
             QString errMsgText("Timer configuration is empty");
-            QMessageBox::critical(this,errMsgTitle,errMsgText);
-            return false;
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
         }
+        // --------------------------------------------
+        // TO DO  .. add RtnStatus to setTimerFromMap
+        // --------------------------------------------
         if (!setTimerFromMap(timerMap))
         {
-            return false;
+            rtnStatus.success = false;
+            rtnStatus.message = QString("Unable to set timer from map");
+            return rtnStatus;
         }
 
         // Set display configuration
@@ -767,12 +824,22 @@ namespace bias
         if (displayMap.isEmpty())
         {
             QString errMsgText("Display configuration is empty");
-            QMessageBox::critical(this,errMsgTitle,errMsgText);
-            return false;
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
         }
+        // ----------------------------------------------
+        // TO DO ... add RtnStatus to setDisplayFromMap
+        // ----------------------------------------------
         if (!setDisplayFromMap(displayMap))
         {
-            return false;
+            rtnStatus.success = false;
+            rtnStatus.message = QString("Unable to set display");
+            return rtnStatus;
         }
 
         // Set configuration file configuraiton 
@@ -781,15 +848,27 @@ namespace bias
         if (configFileMap.isEmpty())
         {
             QString errMsgText("Configuration file information is empty");
-            QMessageBox::critical(this,errMsgTitle,errMsgText);
-            return false;
+            if (showErrorDlg) 
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
         }
+        // -------------------------------------------------
+        // TO DO ... add RtnStatus to setConfigFileFromMap
+        // -------------------------------------------------
         if (!setConfigFileFromMap(configFileMap))
         {
-            return false;
+            rtnStatus.success = false;
+            rtnStatus.message = QString("Unable to set configuration file");
+            return rtnStatus;
         }
 
-        return true;
+        rtnStatus.success = true;
+        rtnStatus.message = QString("configuration set successfully");
+        return rtnStatus;
     }
 
 

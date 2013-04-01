@@ -31,7 +31,25 @@ namespace bias
         if (socketPtr->canReadLine()) 
         {
             QString requestString = QString(socketPtr->readLine());
+
+            // --
+            std::cout << requestString.toStdString() << std::endl;
+            // --
+
             QStringList tokens = requestString.split(QRegExp("[ \r\n][ \r\n]*"));
+            //QStringList tokens = splitRequestString(requestString);
+            if (tokens.isEmpty())
+            {
+                return;
+            }
+
+            // --
+            for (unsigned int i=0; i<tokens.size(); i++) 
+            {
+                std::cout << i << ", " << tokens[i].toStdString() << std::endl;
+            }
+            // --
+
             if (tokens[0] == "GET") 
             {
                 handleGetRequest(socketPtr, tokens);
@@ -177,9 +195,7 @@ namespace bias
         }
         else if (name == QString("set-configuration"))
         {
-            cmdMap.insert("success", true);
-            cmdMap.insert("message", "");
-            cmdMap.insert("value", "");
+            cmdMap = handleSetConfiguration(value);
         }
         else if (name == QString("enable-logging"))
         {
@@ -289,6 +305,20 @@ namespace bias
         return cmdMap;
     }
 
+
+    QVariantMap BasicHttpServer::handleSetConfiguration(QString jsonConfig)
+    {
+        std::cout << jsonConfig.toStdString() << std::endl;
+        QVariantMap cmdMap;
+        QByteArray jsonArray = jsonConfig.toLatin1();
+        RtnStatus status = cameraWindowPtr_ -> setConfigurationFromJson(jsonArray);
+        cmdMap.insert("success", status.success);
+        cmdMap.insert("message", status.message);
+        cmdMap.insert("value", "");
+        return cmdMap;
+    }
+
+
     void BasicHttpServer::sendBadRequestResp(QTextStream &os, QString msg)
     { 
 
@@ -314,4 +344,41 @@ namespace bias
         os << "</body>\n";
         os << "</html>\n";
     }
-}
+
+
+    QStringList splitRequestString(QString reqString)
+    {
+        QStringList reqList;
+        if (reqString.isEmpty())
+        {
+            return reqList;
+        }
+
+        QString marks;
+        unsigned int parenCnt = 0;
+        for (unsigned int i=0; i<reqString.length(); i++)
+        {
+            if ((reqString[i] == ' ') && (parenCnt == 0))
+            {
+                marks.append('1');
+            }
+            else
+            {
+                marks.append('0');
+            }
+            if (reqString[i] == '{')
+            {
+                parenCnt++;
+            }
+            if (reqString[i] == '}') 
+            {
+                parenCnt--;
+            }
+        }
+        std::cout << marks.toStdString() << std::endl;
+
+
+        return reqList;
+    }
+
+} // namespace bias
