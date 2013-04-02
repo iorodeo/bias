@@ -206,9 +206,7 @@ namespace bias
         }
         else if (name == QString("get-status"))
         {
-            cmdMap.insert("success", true);
-            cmdMap.insert("message", "");
-            cmdMap.insert("value", "");
+            cmdMap = handleGetStatus();
         }
         else if (name == QString("close"))
         {
@@ -364,6 +362,25 @@ namespace bias
         {
             cmdMap.insert("value", "");
         }
+        return cmdMap;
+    }
+
+
+    QVariantMap BasicHttpServer::handleGetStatus()
+    {
+        QVariantMap cmdMap;
+        QVariantMap statusMap;
+        bool connected = cameraWindowPtr_ -> isConnected();
+        bool capturing = cameraWindowPtr_ -> isCapturing();
+        bool logging = cameraWindowPtr_ -> isLoggingEnabled();
+        unsigned long frameCount = cameraWindowPtr_ -> getFrameCount();
+        statusMap.insert("connected", connected);
+        statusMap.insert("capturing", capturing);
+        statusMap.insert("logging", logging);
+        statusMap.insert("frameCount", qulonglong(frameCount));
+        cmdMap.insert("success", true);
+        cmdMap.insert("message", QString("Status retrieved successfully"));
+        cmdMap.insert("value", statusMap);
         return cmdMap;
     }
 

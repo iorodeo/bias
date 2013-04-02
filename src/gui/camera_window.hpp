@@ -87,10 +87,12 @@ namespace bias
                     QString fileName, 
                     bool showErrorDlg=true
                     );
-
             QString getCameraGuidString(RtnStatus &rtnStatus);
 
             unsigned long getFrameCount();
+            bool isConnected();
+            bool isCapturing();
+            bool isLoggingEnabled();
 
 
         signals:

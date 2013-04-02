@@ -396,6 +396,7 @@ namespace bias
         if (!imageDispatcherPtr_.isNull())
         {
             imageDispatcherPtr_ -> acquireLock();
+            frameCount_ = imageDispatcherPtr_ -> getFrameCount();
             imageDispatcherPtr_ -> stop();
             imageDispatcherPtr_ -> releaseLock();
 
@@ -433,6 +434,7 @@ namespace bias
         statusbarPtr_ -> showMessage(QString("Connected, Stopped"));
         capturing_ = false;
 
+        updateAllImageLabels();
         updateAllMenus();
 
         emit imageCaptureStopped();
@@ -1030,6 +1032,24 @@ namespace bias
     unsigned long CameraWindow::getFrameCount()
     {
         return frameCount_;
+    }
+
+
+    bool CameraWindow::isConnected()
+    {
+        return connected_;
+    }
+
+
+    bool CameraWindow::isCapturing()
+    {
+        return capturing_;
+    }
+
+    
+    bool CameraWindow::isLoggingEnabled()
+    {
+        return logging_;
     }
 
     // Protected methods
