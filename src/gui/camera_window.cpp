@@ -443,43 +443,92 @@ namespace bias
     }
 
 
-    void CameraWindow::saveConfiguration(QString fileName)
+    RtnStatus CameraWindow::saveConfiguration(QString fileName, bool showErrorDlg)
     {
         // --------------------------------------------------------------------
-        // TO DO  ... need to add error checking. 
+        // TO DO  ... need to work on error checking. 
         // --------------------------------------------------------------------
-        if (!connected_) { return; }
         RtnStatus rtnStatus;
-        QByteArray jsonConfig = getConfigurationJson(rtnStatus);
-        if (jsonConfig.isEmpty()) 
+        QString msgTitle("Save Configuration Error");
+
+        if (!connected_) 
         { 
-            return; 
+            QString msgText("Unable to determine configuration: camera not connected");
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this, msgTitle, msgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = msgText;
+            return rtnStatus; 
         }
+
+        QByteArray jsonConfig = getConfigurationJson(rtnStatus);
+        if ( (!rtnStatus.success) || (jsonConfig.isEmpty()) ) 
+        { 
+            return rtnStatus; 
+        }
+
         QByteArray jsonConfigPretty = prettyIndentJson(jsonConfig); 
         QFile configFile(fileName);
-        configFile.open(QIODevice::WriteOnly);
+
+        bool ok = configFile.open(QIODevice::WriteOnly);
+        if (!ok)
+        {
+            QString msgText = QString("Unable to open file %s").arg(fileName);
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this, msgTitle, msgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = msgText;
+            return rtnStatus;
+        }
         configFile.write(jsonConfigPretty);
         configFile.close(); 
+        rtnStatus.success = true;
+        rtnStatus.message = QString("Configuration saved successfully");
+        return rtnStatus;
     } 
     
 
-    void CameraWindow::loadConfiguration(QString fileName) 
+    RtnStatus CameraWindow::loadConfiguration(QString fileName, bool showErrorDlg) 
     {
         // --------------------------------------------------------------------
         // TO DO  ... need to add error checking. 
         // --------------------------------------------------------------------
+        RtnStatus rtnStatus;
+        QString msgTitle("Load Configuration Error");
         QFile configFile(fileName);
+
         if (!configFile.exists())
         {
-            QString errMsgTitle("Load Configuration Error");
-            QString errMsgText("Error configuration file does not exist");
-            QMessageBox::critical(this, errMsgTitle, errMsgText);
-            return;
+            QString msgText = QString("Configuration file, %s, does not exist").arg(fileName);
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this, msgTitle, msgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = msgText;
+            return rtnStatus;
         }
-        configFile.open(QIODevice::ReadOnly);
+
+        bool ok = configFile.open(QIODevice::ReadOnly);
+        if (!ok)
+        {
+            QString msgText = QString("Unable to open configuration file %s").arg(fileName);
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this, msgTitle, msgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = msgText;
+            return rtnStatus;
+        }
         QByteArray jsonConfig = configFile.readAll();
         configFile.close();
-        setConfigurationFromJson(jsonConfig);
+        rtnStatus = setConfigurationFromJson(jsonConfig,showErrorDlg);
+        return rtnStatus;
     }
 
 
@@ -871,6 +920,117 @@ namespace bias
         return rtnStatus;
     }
 
+
+    RtnStatus CameraWindow::enableLogging(bool showErrorDlg)
+    {
+        RtnStatus rtnStatus;
+        QString msgTitle("Logging Enable Error");
+
+        if (actionLoggingEnabledPtr_ -> isChecked())
+        {
+            QString msgText("Logging already enabled");
+            if (showErrorDlg) 
+            {
+                QMessageBox::critical(this, msgTitle, msgText);
+            }
+            rtnStatus.success = true;
+            rtnStatus.message = msgText;
+        }
+        else 
+        {
+            if (!haveDefaultVideoFileDir_)
+            {
+                QString msgText("Unable to determine default location for video files");
+                if (showErrorDlg)
+                {
+                    QMessageBox::critical(this, msgTitle, msgText);
+                }
+                rtnStatus.success = false;
+                rtnStatus.message = msgText;
+            }
+            else if (capturing_)
+            {
+                QString msgText("Unable to enable logging: capturing images");
+                if (showErrorDlg)
+                {
+                    QMessageBox::critical(this, msgTitle, msgText);
+                }
+                rtnStatus.success = false;
+                rtnStatus.message = msgText;
+            }
+            else
+            {
+                logging_ = true;
+                actionLoggingEnabledPtr_ -> setChecked(true);
+                rtnStatus.success = true;
+                rtnStatus.message = QString("Logging enabled");
+            }
+        }
+        return rtnStatus;
+    }
+
+
+    RtnStatus CameraWindow::disableLogging(bool showErrorDlg)
+    {
+        RtnStatus rtnStatus;
+        QString msgTitle("Logging Disable Error");
+
+        if (!(actionLoggingEnabledPtr_ -> isChecked()))
+        {
+            QString msgText("Logging already disabled");
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this, msgTitle, msgText);
+            }
+            rtnStatus.success = true;
+            rtnStatus.message = msgText;
+        }
+        else
+        {
+            if (capturing_)
+            {
+                QString msgText("Unable to disable logging: capturing images");
+                if (showErrorDlg)
+                {
+                    QMessageBox::critical(this, msgTitle, msgText);
+                }
+                rtnStatus.success = false;
+                rtnStatus.message = msgText;
+            }
+            else
+            {
+                logging_ = false;
+                actionLoggingEnabledPtr_ -> setChecked(false);
+                rtnStatus.success = true;
+                rtnStatus.message = QString("Logging disabled");
+            }
+        }
+        return rtnStatus;
+    }
+
+    
+    QString CameraWindow::getCameraGuidString(RtnStatus &rtnStatus)
+    {
+        if (!connected_)
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("Unable to get camera Guid: camera not connected");
+            QString emptyString;
+            return emptyString;
+        }
+
+        Guid guid = cameraPtr_ -> getGuid();
+        QString guidString = QString::fromStdString(guid.toString());
+        rtnStatus.success = true;
+        rtnStatus.message = QString("Camera guid acquired successfully");
+        return guidString;
+    }
+
+
+    unsigned long CameraWindow::getFrameCount()
+    {
+        return frameCount_;
+    }
 
     // Protected methods
     // ----------------------------------------------------------------------------------

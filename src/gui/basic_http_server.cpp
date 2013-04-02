@@ -108,8 +108,6 @@ namespace bias
         os << "Content-Type: application/json; charset=\"utf-8\"\r\n\r\n";
 
         // Handle requests
-        //QVariantMap respMap;
-        //QVariantMap respMap;
         QVariantList respList;
         QVariantMap cmdMap;
         for (unsigned int i=0; i<paramsList.size(); i++)
@@ -184,33 +182,27 @@ namespace bias
         }
         else if (name == QString("enable-logging"))
         {
-            cmdMap.insert("success", true);
-            cmdMap.insert("message", "");
-            cmdMap.insert("value", "");
+            cmdMap = handleLoggingEnable();
         }
         else if (name == QString("disable-logging"))
         {
-            cmdMap.insert("success", true);
-            cmdMap.insert("message", "");
-            cmdMap.insert("value", "");
+            cmdMap = handleLoggingDisable();
         }
-        else if (name == QString("set-config-file"))
+        else if (name == QString("load-configuration"))
         {
-            cmdMap.insert("success", true);
-            cmdMap.insert("message", "");
-            cmdMap.insert("value", "");
+            cmdMap = handleLoadConfiguration(value);
+        }
+        else if (name == QString("save-configuration"))
+        {
+            cmdMap = handleSaveConfiguration(value);
         }
         else if (name == QString("get-frame-count"))
         {
-            cmdMap.insert("success", true);
-            cmdMap.insert("message", "");
-            cmdMap.insert("value", "");
+            cmdMap = handleGetFrameCount();
         }
         else if (name == QString("get-camera-guid"))
         {
-            cmdMap.insert("success", true);
-            cmdMap.insert("message", "");
-            cmdMap.insert("value", "");
+            cmdMap = handleGetCameraGuid();
         }
         else if (name == QString("get-status"))
         {
@@ -293,13 +285,85 @@ namespace bias
 
     QVariantMap BasicHttpServer::handleSetConfiguration(QString jsonConfig)
     {
-        std::cout << jsonConfig.toStdString() << std::endl;
         QVariantMap cmdMap;
         QByteArray jsonArray = jsonConfig.toLatin1();
         RtnStatus status = cameraWindowPtr_ -> setConfigurationFromJson(jsonArray);
         cmdMap.insert("success", status.success);
         cmdMap.insert("message", status.message);
         cmdMap.insert("value", "");
+        return cmdMap;
+    }
+
+
+    QVariantMap BasicHttpServer::handleLoggingEnable()
+    {
+        QVariantMap cmdMap;
+        RtnStatus status = cameraWindowPtr_ -> enableLogging(false);
+        cmdMap.insert("success", status.success);
+        cmdMap.insert("message", status.message);
+        cmdMap.insert("value", "");
+        return cmdMap;
+    }
+
+
+    QVariantMap BasicHttpServer::handleLoggingDisable()
+    {
+        QVariantMap cmdMap;
+        RtnStatus status = cameraWindowPtr_ -> disableLogging(false);
+        cmdMap.insert("success", status.success);
+        cmdMap.insert("message", status.message);
+        cmdMap.insert("value", "");
+        return cmdMap;
+    }
+
+
+    QVariantMap BasicHttpServer::handleSaveConfiguration(QString fileName)
+    {
+        QVariantMap cmdMap;
+        RtnStatus status = cameraWindowPtr_ -> saveConfiguration(fileName,false);
+        cmdMap.insert("success", status.success);
+        cmdMap.insert("message", status.message);
+        cmdMap.insert("value", "");
+        return cmdMap;
+    }
+
+
+    QVariantMap BasicHttpServer::handleLoadConfiguration(QString fileName)
+    {
+        QVariantMap cmdMap;
+        RtnStatus status = cameraWindowPtr_ -> loadConfiguration(fileName,false);
+        cmdMap.insert("success", status.success);
+        cmdMap.insert("message", status.message);
+        cmdMap.insert("value", "");
+        return cmdMap;
+    }
+
+    
+    QVariantMap BasicHttpServer::handleGetFrameCount()
+    {
+        QVariantMap cmdMap;
+        unsigned long frameCount = cameraWindowPtr_ -> getFrameCount();
+        cmdMap.insert("success", true);
+        cmdMap.insert("message", QString("Frame count retrieved successfully"));
+        cmdMap.insert("value", qulonglong(frameCount));
+        return cmdMap;
+    }
+
+    QVariantMap BasicHttpServer::handleGetCameraGuid()
+    {
+        QVariantMap cmdMap;
+        RtnStatus status; 
+        QString guid = cameraWindowPtr_ -> getCameraGuidString(status);
+        cmdMap.insert("success", status.success);
+        cmdMap.insert("message", status.message);
+        if (status.success)
+        {
+            cmdMap.insert("value", guid);
+        }
+        else
+        {
+            cmdMap.insert("value", "");
+        }
         return cmdMap;
     }
 

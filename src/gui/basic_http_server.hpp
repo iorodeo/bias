@@ -41,6 +41,12 @@ namespace bias
             QVariantMap handleStopCaptureRequest();
             QVariantMap handleGetConfiguration();
             QVariantMap handleSetConfiguration(QString jsonConfig);
+            QVariantMap handleLoggingEnable();
+            QVariantMap handleLoggingDisable();
+            QVariantMap handleSaveConfiguration(QString fileName);
+            QVariantMap handleLoadConfiguration(QString fileName);
+            QVariantMap handleGetCameraGuid();
+            QVariantMap handleGetFrameCount();
 
             void sendBadRequestResp(QTextStream &os, QString msg);
             void sendRunningResp(QTextStream &os);

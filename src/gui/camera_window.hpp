@@ -74,8 +74,24 @@ namespace bias
                     RtnStatus &rtnStatus, 
                     bool showErrorDlg=true
                     );
-            void saveConfiguration(QString filename);
-            void loadConfiguration(QString fileName);
+
+            RtnStatus enableLogging(bool showErrorDlg=true);
+            RtnStatus disableLogging(bool showErrorDlg=true);
+
+            RtnStatus saveConfiguration(
+                    QString filename, 
+                    bool showErrorDlg=true
+                    );
+
+            RtnStatus loadConfiguration(
+                    QString fileName, 
+                    bool showErrorDlg=true
+                    );
+
+            QString getCameraGuidString(RtnStatus &rtnStatus);
+
+            unsigned long getFrameCount();
+
 
         signals:
 
