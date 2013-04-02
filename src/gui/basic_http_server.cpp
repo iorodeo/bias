@@ -208,6 +208,14 @@ namespace bias
         {
             cmdMap = handleGetStatus();
         }
+        else if (name == QString("set-video-file"))
+        {
+            cmdMap = handleSetVideoFile(value);
+        }
+        else if (name == QString("get-video-file"))
+        {
+            cmdMap = handleGetVideoFile();
+        }
         else if (name == QString("close"))
         {
             cmdMap.insert("success", true);
@@ -385,9 +393,30 @@ namespace bias
     }
 
 
+    QVariantMap BasicHttpServer::handleSetVideoFile(QString fileName)
+    {
+        QVariantMap cmdMap;
+        RtnStatus status = cameraWindowPtr_ -> setVideoFile(fileName);
+        cmdMap.insert("success", status.success);
+        cmdMap.insert("message", status.message);
+        cmdMap.insert("value", "");
+        return cmdMap;
+    }
+
+
+    QVariantMap BasicHttpServer::handleGetVideoFile()
+    {
+        QVariantMap cmdMap;
+        QString fileName = cameraWindowPtr_ -> getVideoFileFullPath();
+        cmdMap.insert("success", true);
+        cmdMap.insert("message", "Video file name retrieved successfully");
+        cmdMap.insert("value", fileName);
+        return cmdMap;
+    }
+
+
     void BasicHttpServer::sendBadRequestResp(QTextStream &os, QString msg)
     { 
-
         os << "HTTP/1.0 400 Bad Request\r\n";
         os << "Content-Type: text/html; charset=\"utf-8\"\r\n\r\n";
         os << "<html>\n";

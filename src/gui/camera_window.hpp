@@ -87,7 +87,10 @@ namespace bias
                     QString fileName, 
                     bool showErrorDlg=true
                     );
+
             QString getCameraGuidString(RtnStatus &rtnStatus);
+            RtnStatus setVideoFile(QString videoFileString);
+            QString getVideoFileFullPath();
 
             unsigned long getFrameCount();
             bool isConnected();
@@ -279,10 +282,8 @@ namespace bias
             void setMenuChildrenEnabled(QWidget *parentWidgetPtr, bool value);
             void setCaptureTimeLabel(double timeStamp);
 
-            QString getVideoFileFullPath();
             QString getVideoFileFullPathWithGuid();
             QString getConfigFileFullPath();
-
 
             bool setCameraFromMap(QVariantMap cameraMap);
             bool setLoggingFromMap(QVariantMap loggingMap);

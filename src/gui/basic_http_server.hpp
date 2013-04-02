@@ -48,6 +48,8 @@ namespace bias
             QVariantMap handleGetCameraGuid();
             QVariantMap handleGetFrameCount();
             QVariantMap handleGetStatus();
+            QVariantMap handleSetVideoFile(QString fileName);
+            QVariantMap handleGetVideoFile();
 
             void sendBadRequestResp(QTextStream &os, QString msg);
             void sendRunningResp(QTextStream &os);

@@ -1029,6 +1029,81 @@ namespace bias
     }
 
 
+    RtnStatus CameraWindow::setVideoFile(QString videoFileString)
+    {
+        RtnStatus rtnStatus;
+
+        if (logging_)
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("Unable to set video file: logging in progress");
+            return rtnStatus;
+        }
+        
+        QFileInfo videoFileInfo = QFileInfo(videoFileString);
+        QDir videoFileDir = videoFileInfo.dir();
+        QString videoFileName = videoFileInfo.baseName();
+
+        rtnStatus.success = true;
+        rtnStatus.message = QString("Video file name set successfully");
+        if (videoFileName.isEmpty())
+        {
+            if (currentVideoFileName_.isEmpty())
+            {
+                videoFileName = DEFAULT_VIDEO_FILE_NAME;
+            }
+            else
+            {
+                videoFileName = currentVideoFileName_;
+            }
+            videoFileDir = currentVideoFileDir_;
+            rtnStatus.success = false;
+            rtnStatus.message = QString("Video file name is missing");
+        }
+
+        if (!videoFileDir.exists())
+        {
+            videoFileDir = defaultVideoFileDir_;
+            QString msgText("Directory does not exist");
+            if (!rtnStatus.success)
+            {
+                rtnStatus.message = QString("%s, %s").arg(rtnStatus.message).arg(msgText);
+            }
+            else
+            {
+                rtnStatus.success = false;
+                rtnStatus.message = msgText;
+            }
+        }
+        currentVideoFileDir_ = videoFileDir;
+        currentVideoFileName_ = videoFileName;
+        return rtnStatus;
+    }
+
+
+    QString CameraWindow::getVideoFileFullPath()
+    {
+        QString fileExtension;
+        if (videoFileFormat_ != VIDEOFILE_FORMAT_BMP)
+        {
+            fileExtension = VIDEOFILE_EXTENSION_MAP[videoFileFormat_];
+        }
+        else
+        {
+            fileExtension = "";
+
+        }
+        QString fileName = currentVideoFileName_;
+        if (!fileExtension.isEmpty())
+        {
+            fileName +=  "." + fileExtension;
+        }
+        QFileInfo videoFileInfo(currentVideoFileDir_, fileName);
+        QString videoFileFullPath = videoFileInfo.absoluteFilePath();
+        return videoFileFullPath;
+    }
+
+
     unsigned long CameraWindow::getFrameCount()
     {
         return frameCount_;
@@ -1330,20 +1405,24 @@ namespace bias
 
     void CameraWindow::actionLoggingEnabledTriggered()
     {
-        if (haveDefaultVideoFileDir_) {
-            logging_ = actionLoggingEnabledPtr_ -> isChecked();
+        if (actionLoggingEnabledPtr_ -> isChecked())
+        {
+            if (haveDefaultVideoFileDir_) {
+                logging_ = true; 
+            }
+            else
+            {
+                actionLoggingEnabledPtr_ -> setChecked(false);
+                logging_ = false;
+                QString msgTitle("Logging Enable Error");
+                QString msgText("Unable to determine default location for video files.");
+                QMessageBox::critical(this, msgTitle, msgText);
+            }
         }
         else
         {
-            actionLoggingEnabledPtr_ -> setChecked(false);
             logging_ = false;
-            QString msgTitle("Initialization Error");
-            QString msgText("Unable to determine default location for video files.");
-            QMessageBox::critical(this, msgTitle, msgText);
         }
-        std::cout << "logging: ";
-        std::cout << std::boolalpha << logging_ << std::noboolalpha;
-        std::cout << std::endl;
     }
 
 
@@ -1363,34 +1442,8 @@ namespace bias
                 QString("Select Video File"),
                 videoFileInfo.absoluteFilePath()
                 );
-        videoFileInfo = QFileInfo(videoFileString);
 
-        QDir videoFileDir = videoFileInfo.dir();
-        QString videoFileName = videoFileInfo.baseName();
-
-        // Check return results and assign values
-        if (videoFileName.isEmpty())
-        {
-            if (currentVideoFileName_.isEmpty())
-            {
-                videoFileName = DEFAULT_VIDEO_FILE_NAME;
-            }
-            else
-            {
-                videoFileName = currentVideoFileName_;
-            }
-            videoFileDir = currentVideoFileDir_;
-        }
-        if (!videoFileDir.exists())
-        {
-            videoFileDir = defaultVideoFileDir_;
-        }
-
-        currentVideoFileDir_ = videoFileDir;
-        currentVideoFileName_ = videoFileName;
-
-        std::cout << "dir:  " << currentVideoFileDir_.absolutePath().toStdString() << std::endl;
-        std::cout << "file: " << currentVideoFileName_.toStdString() << std::endl;
+        setVideoFile(videoFileString);
     }
     
 
@@ -2759,28 +2812,6 @@ namespace bias
         }
     }
 
-
-    QString CameraWindow::getVideoFileFullPath()
-    {
-        QString fileExtension;
-        if (videoFileFormat_ != VIDEOFILE_FORMAT_BMP)
-        {
-            fileExtension = VIDEOFILE_EXTENSION_MAP[videoFileFormat_];
-        }
-        else
-        {
-            fileExtension = "";
-
-        }
-        QString fileName = currentVideoFileName_;
-        if (!fileExtension.isEmpty())
-        {
-            fileName +=  "." + fileExtension;
-        }
-        QFileInfo videoFileInfo(currentVideoFileDir_, fileName);
-        QString videoFileFullPath = videoFileInfo.absoluteFilePath();
-        return videoFileFullPath;
-    }
 
     QString CameraWindow::getVideoFileFullPathWithGuid()
     {
