@@ -92,10 +92,12 @@ namespace bias
             RtnStatus setVideoFile(QString videoFileString);
             QString getVideoFileFullPath();
 
-            unsigned long getFrameCount();
             bool isConnected();
             bool isCapturing();
             bool isLoggingEnabled();
+            double getTimeStamp();
+            double getFramesPerSec();
+            unsigned long getFrameCount();
 
 
         signals:
@@ -180,6 +182,8 @@ namespace bias
             QDir currentConfigFileDir_;
             QString currentConfigFileName_;
 
+            double timeStamp_;
+            double framesPerSec_;
             double imageDisplayFreq_;
             ImageRotationType imageRotation_;
             VideoFileFormat videoFileFormat_;

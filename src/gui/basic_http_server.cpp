@@ -216,6 +216,14 @@ namespace bias
         {
             cmdMap = handleGetVideoFile();
         }
+        else if (name == QString("get-time-stamp"))
+        {
+            cmdMap = handleGetTimeStamp();
+        }
+        else if (name == QString("get-frames-per-sec"))
+        {
+            cmdMap = handleGetFramesPerSec();
+        }
         else if (name == QString("close"))
         {
             cmdMap.insert("success", true);
@@ -350,7 +358,7 @@ namespace bias
         QVariantMap cmdMap;
         unsigned long frameCount = cameraWindowPtr_ -> getFrameCount();
         cmdMap.insert("success", true);
-        cmdMap.insert("message", QString("Frame count retrieved successfully"));
+        cmdMap.insert("message", "");
         cmdMap.insert("value", qulonglong(frameCount));
         return cmdMap;
     }
@@ -382,12 +390,16 @@ namespace bias
         bool capturing = cameraWindowPtr_ -> isCapturing();
         bool logging = cameraWindowPtr_ -> isLoggingEnabled();
         unsigned long frameCount = cameraWindowPtr_ -> getFrameCount();
+        double framesPerSec = cameraWindowPtr_ -> getFramesPerSec();
+        double timeStamp = cameraWindowPtr_ -> getTimeStamp();
         statusMap.insert("connected", connected);
         statusMap.insert("capturing", capturing);
         statusMap.insert("logging", logging);
         statusMap.insert("frameCount", qulonglong(frameCount));
+        statusMap.insert("framesPerSec", framesPerSec);
+        statusMap.insert("timeStamp", timeStamp);
         cmdMap.insert("success", true);
-        cmdMap.insert("message", QString("Status retrieved successfully"));
+        cmdMap.insert("message", "");
         cmdMap.insert("value", statusMap);
         return cmdMap;
     }
@@ -409,8 +421,30 @@ namespace bias
         QVariantMap cmdMap;
         QString fileName = cameraWindowPtr_ -> getVideoFileFullPath();
         cmdMap.insert("success", true);
-        cmdMap.insert("message", "Video file name retrieved successfully");
+        cmdMap.insert("message", "");
         cmdMap.insert("value", fileName);
+        return cmdMap;
+    }
+
+
+    QVariantMap BasicHttpServer::handleGetTimeStamp()
+    {
+        QVariantMap cmdMap;
+        double timeStamp = cameraWindowPtr_ -> getTimeStamp();
+        cmdMap.insert("success", true);
+        cmdMap.insert("message", "");
+        cmdMap.insert("value", timeStamp);
+        return cmdMap;
+    }
+
+
+    QVariantMap BasicHttpServer::handleGetFramesPerSec()
+    {
+        QVariantMap cmdMap;
+        double framesPerSec = cameraWindowPtr_ -> getFramesPerSec();
+        cmdMap.insert("success", true);
+        cmdMap.insert("message", "");
+        cmdMap.insert("value", framesPerSec);
         return cmdMap;
     }
 

@@ -133,7 +133,7 @@ namespace bias
         updateAllMenus();
 
         rtnStatus.success = true;
-        rtnStatus.message = QString("Camera connected successfully");
+        rtnStatus.message = QString("");
         return rtnStatus; 
     }
 
@@ -195,7 +195,7 @@ namespace bias
         updateAllMenus();
 
         rtnStatus.success = true;
-        rtnStatus.message = QString("Camera disconnected successfully");
+        rtnStatus.message = QString("");
         return rtnStatus;
     }
 
@@ -203,6 +203,7 @@ namespace bias
     RtnStatus CameraWindow::startImageCapture(bool showErrorDlg) 
     {
         RtnStatus rtnStatus;
+
 
         if (!connected_)
         {
@@ -229,6 +230,10 @@ namespace bias
             rtnStatus.message = msgText;
             return rtnStatus;
         }
+
+        frameCount_ = 0;
+        timeStamp_ = 0.0;
+        framesPerSec_ = 0.0;
 
         newImageQueuePtr_ -> clear();
         logImageQueuePtr_ -> clear();
@@ -354,7 +359,7 @@ namespace bias
         emit imageCaptureStarted();
 
         rtnStatus.success = true;
-        rtnStatus.message = QString("Image capture started successfully");
+        rtnStatus.message = QString("");
         return rtnStatus;
     }
 
@@ -434,13 +439,14 @@ namespace bias
         statusbarPtr_ -> showMessage(QString("Connected, Stopped"));
         capturing_ = false;
 
+        framesPerSec_ = 0.0;
         updateAllImageLabels();
         updateAllMenus();
 
         emit imageCaptureStopped();
 
         rtnStatus.success = true;
-        rtnStatus.message = QString("Image capture stopped successfully");
+        rtnStatus.message = QString("");
         return rtnStatus;
     }
 
@@ -489,7 +495,7 @@ namespace bias
         configFile.write(jsonConfigPretty);
         configFile.close(); 
         rtnStatus.success = true;
-        rtnStatus.message = QString("Configuration saved successfully");
+        rtnStatus.message = QString("");
         return rtnStatus;
     } 
     
@@ -721,7 +727,7 @@ namespace bias
         configurationMap.insert("configuration", configFileMap);
 
         rtnStatus.success = true;
-        rtnStatus.message = QString("Retrieved configuration successfully");
+        rtnStatus.message = QString("");
         return configurationMap;
     }
 
@@ -783,7 +789,7 @@ namespace bias
         }
         updateAllMenus();
         rtnStatus.success = true;
-        rtnStatus.message = QString("Configuration set successfully");
+        rtnStatus.message = QString("");
         return rtnStatus;
     }
 
@@ -918,7 +924,7 @@ namespace bias
         }
 
         rtnStatus.success = true;
-        rtnStatus.message = QString("configuration set successfully");
+        rtnStatus.message = QString("");
         return rtnStatus;
     }
 
@@ -965,7 +971,7 @@ namespace bias
                 logging_ = true;
                 actionLoggingEnabledPtr_ -> setChecked(true);
                 rtnStatus.success = true;
-                rtnStatus.message = QString("Logging enabled");
+                rtnStatus.message = QString("");
             }
         }
         return rtnStatus;
@@ -1004,7 +1010,7 @@ namespace bias
                 logging_ = false;
                 actionLoggingEnabledPtr_ -> setChecked(false);
                 rtnStatus.success = true;
-                rtnStatus.message = QString("Logging disabled");
+                rtnStatus.message = QString("");
             }
         }
         return rtnStatus;
@@ -1024,7 +1030,7 @@ namespace bias
         Guid guid = cameraPtr_ -> getGuid();
         QString guidString = QString::fromStdString(guid.toString());
         rtnStatus.success = true;
-        rtnStatus.message = QString("Camera guid acquired successfully");
+        rtnStatus.message = QString("");
         return guidString;
     }
 
@@ -1045,7 +1051,7 @@ namespace bias
         QString videoFileName = videoFileInfo.baseName();
 
         rtnStatus.success = true;
-        rtnStatus.message = QString("Video file name set successfully");
+        rtnStatus.message = QString("");
         if (videoFileName.isEmpty())
         {
             if (currentVideoFileName_.isEmpty())
@@ -1101,6 +1107,18 @@ namespace bias
         QFileInfo videoFileInfo(currentVideoFileDir_, fileName);
         QString videoFileFullPath = videoFileInfo.absoluteFilePath();
         return videoFileFullPath;
+    }
+
+
+    double CameraWindow::getTimeStamp()
+    {
+        return timeStamp_;
+    }
+
+
+    double CameraWindow::getFramesPerSec()
+    {
+        return framesPerSec_;
     }
 
 
@@ -1200,8 +1218,8 @@ namespace bias
 
         cv::Mat imgMat = imageDispatcherPtr_ -> getImage();
         QImage img = matToQImage(imgMat);
-        double fps = imageDispatcherPtr_ -> getFPS();
-        double stamp = imageDispatcherPtr_ -> getTimeStamp();
+        framesPerSec_ = imageDispatcherPtr_ -> getFPS();
+        timeStamp_ = imageDispatcherPtr_ -> getTimeStamp();
         frameCount_ = imageDispatcherPtr_ -> getFrameCount();
         cv::Mat histMat = calcHistogram(imgMat);
         cv::Size imgSize = imgMat.size();
@@ -1224,7 +1242,7 @@ namespace bias
         statusMsg += QString(", timer = ");
         statusMsg += boolToOnOffQString(actionTimerEnabledPtr_ -> isChecked());
         statusMsg += QString().sprintf(",  %dx%d", imgSize.width, imgSize.height);
-        statusMsg += QString().sprintf(",  %1.1f fps", fps);
+        statusMsg += QString().sprintf(",  %1.1f fps", framesPerSec_);
         statusbarPtr_ -> showMessage(statusMsg);
 
         // Set update caputure time 
@@ -1689,6 +1707,9 @@ namespace bias
         flipVert_ = false;
         flipHorz_ = false;
         haveDefaultVideoFileDir_ = false;
+        timeStamp_ = 0.0;
+        framesPerSec_ = 0.0;
+        frameCount_ = 0;
 
         imageRotation_ = IMAGE_ROTATION_0;
         videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
