@@ -1805,7 +1805,7 @@ namespace bias
         assignThreadAffinity(false,1);
 
         httpServerPort_  = HTTP_SERVER_PORT_BEGIN; 
-        httpServerPort_ += HTTP_SERVER_PORT_STEP*cameraNumber_;
+        httpServerPort_ += HTTP_SERVER_PORT_STEP*(cameraNumber_ + 1);
         httpServerPtr_ = new BasicHttpServer(this,this);
         setServerPortText();
 
