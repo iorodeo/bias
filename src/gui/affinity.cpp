@@ -62,7 +62,6 @@ namespace bias
             std::cout << "Error unable to set thread affinity mask" << std::endl;
             // TO DO - raise error and abort
         }
-
         //std::cout << "isImageGrabber:  " << isImageGrabber << std::endl;
         //std::cout << "grabberProcNum:  " << grabberProcNum << std::endl;
         //std::cout << "processor:       " << GetCurrentProcessorNumber() << std::endl;

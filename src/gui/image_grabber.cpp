@@ -135,6 +135,8 @@ namespace bias {
             }
             cameraPtr_ -> releaseLock();
 
+
+
             // Push image into new image queue
             if (!error) 
             {
@@ -160,6 +162,8 @@ namespace bias {
                 timeStampDbl -= double(timeStampInit.seconds);
                 timeStampDbl += (1.0e-6)*double(timeStamp.microSeconds);
                 timeStampDbl -= (1.0e-6)*double(timeStampInit.microSeconds);
+
+                std::cout << timeStampDbl - timeStampDblLast << std::endl;
 
                 // Skip some number of frames on startup - recommened by Point Grey. 
                 // During this time compute running avg to get estimate of frame interval
@@ -195,6 +199,7 @@ namespace bias {
             }
             else
             {
+                std::cout << "error" << std::endl;
                 errorCount++;
                 if (errorCount > MAX_ERROR_COUNT)
                 {

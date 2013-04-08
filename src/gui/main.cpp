@@ -51,7 +51,7 @@ int main (int argc, char *argv[])
     for (guidIt=guidList.begin(), cnt=0; guidIt!=guidList.end(); guidIt++, cnt++)
     {
         bias::Guid guid = *guidIt;
-        QSharedPointer<bias::CameraWindow> windowPtr(new bias::CameraWindow(guid));
+        QSharedPointer<bias::CameraWindow> windowPtr(new bias::CameraWindow(cnt, guid));
         windowPtr -> show();
         if (cnt==0)
         {

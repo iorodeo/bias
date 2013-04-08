@@ -51,7 +51,7 @@ namespace bias
 
         public:
 
-            CameraWindow(Guid cameraGuid, QWidget *parent=0);
+            CameraWindow(unsigned int cameraNumber, Guid cameraGuid, QWidget *parent=0);
             RtnStatus connectCamera(bool showErrorDlg=true);
             RtnStatus disconnectCamera(bool showErrorDlg=true);
             RtnStatus startImageCapture(bool showErrorDlg=true);
@@ -151,7 +151,8 @@ namespace bias
             void actionHelpUserManualTriggered();
             void actionPluginsSettingsTriggered();
             void actionServerEnabledTriggered();
-            void actionServerSettingsTriggered();
+            void actionServerPortTriggered();
+            void actionServerCommandsTriggered();
             void actionHelpAboutTriggered();
 
             // Signal mappers for videomode, framerate and properties
@@ -173,6 +174,7 @@ namespace bias
             bool flipHorz_;
             bool haveDefaultVideoFileDir_;
             bool haveDefaultConfigFileDir_;
+            unsigned int cameraNumber_;
 
             QDir defaultVideoFileDir_;
             QDir currentVideoFileDir_;
@@ -228,9 +230,10 @@ namespace bias
             VideoWriterParams videoWriterParams_;
 
             QPointer<BasicHttpServer> httpServerPtr_;
+            unsigned int httpServerPort_;
 
             void connectWidgets();
-            void initialize(Guid guid);
+            void initialize(unsigned int cameraNumber, Guid guid);
 
 
             void setDefaultFileDirs();
@@ -285,6 +288,8 @@ namespace bias
             void setCameraInfoMessage(QString vendorName, QString modelName);
             void setMenuChildrenEnabled(QWidget *parentWidgetPtr, bool value);
             void setCaptureTimeLabel(double timeStamp);
+            void setServerPortText();
+
 
             QString getVideoFileFullPathWithGuid();
             QString getConfigFileFullPath();
@@ -293,6 +298,7 @@ namespace bias
             bool setLoggingFromMap(QVariantMap loggingMap);
             bool setTimerFromMap(QVariantMap timerMap);
             bool setDisplayFromMap(QVariantMap displayMap);
+            bool setServerFromMap(QVariantMap serverMap);
             bool setConfigFileFromMap(QVariantMap configFileMap);
             bool setCameraPropertyFromMap(QVariantMap propValueMap, PropertyInfo propInfo);
             bool setFormatSettingsFromMap(QVariantMap settingsMap);

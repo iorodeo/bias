@@ -53,6 +53,9 @@ namespace bias
     const QString DEFAULT_VIDEO_FILE_NAME = QString("bias_video");
     const QString DEFAULT_CONFIG_FILE_NAME = QString("bias_config");
     const QString CONFIG_FILE_EXTENSION = QString("json");
+    const unsigned int HTTP_SERVER_PORT_BEGIN = 5000;
+    const unsigned int HTTP_SERVER_PORT_END = 20000;
+    const unsigned int HTTP_SERVER_PORT_STEP = 10;
 
     QMap<VideoFileFormat, QString> createExtensionMap()
     {
@@ -69,11 +72,12 @@ namespace bias
     // Public methods
     // ----------------------------------------------------------------------------------
 
-    CameraWindow::CameraWindow(Guid cameraGuid, QWidget *parent) : QMainWindow(parent)
+    CameraWindow::CameraWindow(unsigned int cameraNumber, Guid cameraGuid, QWidget *parent) 
+        : QMainWindow(parent)
     {
         setupUi(this);
         connectWidgets();
-        initialize(cameraGuid);
+        initialize(cameraNumber, cameraGuid);
     }
 
 
@@ -720,6 +724,12 @@ namespace bias
         displayMap.insert("updateFrequency", imageDisplayFreq_);
         configurationMap.insert("display", displayMap);
 
+        // Add server configuration
+        QVariantMap serverMap;
+        serverMap.insert("enabled",actionServerEnabledPtr_ -> isChecked());
+        serverMap.insert("port", httpServerPort_);
+        configurationMap.insert("server", serverMap);
+
         // Add configuration configuration
         QVariantMap configFileMap;
         configFileMap.insert("directory", currentConfigFileDir_.canonicalPath());
@@ -896,6 +906,30 @@ namespace bias
         {
             rtnStatus.success = false;
             rtnStatus.message = QString("Unable to set display");
+            return rtnStatus;
+        }
+
+        // Set external control server configuration
+        // -----------------------------------------
+        QVariantMap serverMap = configMap["server"].toMap();
+        if (serverMap.isEmpty())
+        {
+            QString errMsgText("Server configuration is empty");
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        // -------------------------------------------
+        // TO DO .. add RtnStatus to setServerFromMap
+        // -------------------------------------------
+        if (!setServerFromMap(serverMap))
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("Unable to set server configuration");
             return rtnStatus;
         }
 
@@ -1407,17 +1441,25 @@ namespace bias
     
     void CameraWindow::actionCameraTriggerExternalTriggered()
     {
-        QString msgTitle("Development");
-        QString msgText("Set camera trigger external not fully implemented");
-        QMessageBox::information(this, msgTitle, msgText);
+        //QString msgTitle("Development");
+        //QString msgText("Set camera trigger external not fully implemented");
+        //QMessageBox::information(this, msgTitle, msgText);
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        cameraPtr_ -> acquireLock();
+        cameraPtr_ -> setTriggerExternal();
+        cameraPtr_ -> releaseLock();
     }
 
 
     void CameraWindow::actionCameraTriggerInternalTriggered()
     {
-        QString msgTitle("Development");
-        QString msgText("Set camera trigger internal not fully implemented");
-        QMessageBox::information(this, msgTitle, msgText);
+        //QString msgTitle("Development");
+        //QString msgText("Set camera trigger internal not fully implemented");
+        //QMessageBox::information(this, msgTitle, msgText);
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        cameraPtr_ -> acquireLock();
+        cameraPtr_ -> setTriggerInternal();
+        cameraPtr_ -> releaseLock();
     }
 
 
@@ -1664,7 +1706,7 @@ namespace bias
     {
         if (actionServerEnabledPtr_ -> isChecked())
         {
-            httpServerPtr_ -> listen(QHostAddress::Any, 5000);
+            httpServerPtr_ -> listen(QHostAddress::Any, httpServerPort_);
 
         }
         else
@@ -1674,11 +1716,16 @@ namespace bias
     }
 
 
-    void CameraWindow::actionServerSettingsTriggered()
+    void CameraWindow::actionServerPortTriggered()
     {
         std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
 
+
+    void CameraWindow::actionServerCommandsTriggered()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+    }
 
     void CameraWindow::actionHelpUserManualTriggered()
     {
@@ -1699,7 +1746,7 @@ namespace bias
     // Private methods
     // -----------------------------------------------------------------------------------
 
-    void CameraWindow::initialize(Guid guid)
+    void CameraWindow::initialize(unsigned int cameraNumber, Guid guid)
     {
         connected_ = false;
         capturing_ = false;
@@ -1714,8 +1761,9 @@ namespace bias
         imageRotation_ = IMAGE_ROTATION_0;
         videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
         captureDurationSec_ = DEFAULT_CAPTURE_DURATION;
-
         imageDisplayFreq_ = DEFAULT_IMAGE_DISPLAY_FREQ;
+
+        cameraNumber_ = cameraNumber;
         cameraPtr_ = std::make_shared<Lockable<Camera>>(guid);
 
         threadPoolPtr_ = new QThreadPool(this);
@@ -1754,9 +1802,13 @@ namespace bias
         startButtonPtr_ -> setEnabled(false);
         connectButtonPtr_ -> setEnabled(true);
 
-        // Assign thread cpu affinity
         assignThreadAffinity(false,1);
+
+        httpServerPort_  = HTTP_SERVER_PORT_BEGIN; 
+        httpServerPort_ += HTTP_SERVER_PORT_STEP*cameraNumber_;
         httpServerPtr_ = new BasicHttpServer(this,this);
+        setServerPortText();
+
     }
 
 
@@ -1983,10 +2035,17 @@ namespace bias
                );
 
         connect(
-                actionServerSettingsPtr_,
+                actionServerPortPtr_,
                 SIGNAL(triggered()),
                 this,
-                SLOT(actionServerSettingsTriggered())
+                SLOT(actionServerPortTriggered())
+               );
+
+        connect(
+                actionServerCommandsPtr_,
+                SIGNAL(triggered()),
+                this,
+                SLOT(actionServerCommandsTriggered())
                );
 
         connect(
@@ -2710,7 +2769,7 @@ namespace bias
         {
             // TO DO ... temporary, currently only internal trigger supported
             actionCameraTriggerInternalPtr_ -> setEnabled(true);
-            actionCameraTriggerExternalPtr_ -> setEnabled(false);
+            actionCameraTriggerExternalPtr_ -> setEnabled(true);
         }
     }
 
@@ -2831,6 +2890,13 @@ namespace bias
         {
             captureTimeLabelPtr_ -> setText(stampString);
         }
+    }
+
+
+    void CameraWindow::setServerPortText()
+    {
+        QString text = QString("Port (%1)...").arg(httpServerPort_);
+        actionServerPortPtr_ -> setText(text);
     }
 
 
@@ -3341,6 +3407,75 @@ namespace bias
             return false;
         }
         imageDisplayFreq_ = displayFreq;
+
+        return true;
+    }
+
+    bool CameraWindow::setServerFromMap(QVariantMap serverMap)
+    {
+        QString errMsgTitle("Load configuration Error (Server)");
+
+        // Get "enabled" value
+        // -------------------
+        if (!serverMap.contains("enabled"))
+        {
+            QString errMsgText("Server configuration: enabled not present");
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!serverMap["enabled"].canConvert<bool>())
+        {
+            QString errMsgText("Server configuration: unable to convert enabled to bool");
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        bool serverEnabled = serverMap["enabled"].toBool();
+
+        // Get "port" value
+        // ----------------
+        if (!serverMap.contains("port"))
+        {
+            QString errMsgText("Server configuration: port is not present");
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (!serverMap["port"].canConvert<unsigned int>())
+        {
+            QString errMsgText("Server configuration: unable to convert port to unsigned int");
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        unsigned int port = serverMap["port"].toUInt();
+        if (port < HTTP_SERVER_PORT_BEGIN)
+        {
+            QString errMsgText = QString("Server configuration: port is too low, must be >= %1").arg(
+                    HTTP_SERVER_PORT_BEGIN
+                    );
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        if (port > HTTP_SERVER_PORT_END)
+        {
+            QString errMsgText = QString("Server configuration: port is too high, must be <= %1").arg(
+                    HTTP_SERVER_PORT_END
+                    );
+            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            return false;
+        }
+        httpServerPort_ = port;
+
+        if (serverEnabled)
+        {
+            actionServerEnabledPtr_ -> setChecked(true);
+            httpServerPtr_ -> close();
+            httpServerPtr_ -> listen(QHostAddress::Any, httpServerPort_);
+
+        }
+        else
+        {
+            actionServerEnabledPtr_ -> setChecked(false);
+            httpServerPtr_ -> close();
+        }
 
         return true;
     }
