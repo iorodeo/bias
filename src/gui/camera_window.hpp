@@ -31,6 +31,7 @@ namespace bias
     class ImageLogger; 
     class TimerSettingsDialog;
     class LoggingSettingsDialog;
+    class Format7SettingsDialog;
     class BasicHttpServer;
     template <class T> class Lockable;
     template <class T> class LockableQueue;
@@ -226,6 +227,7 @@ namespace bias
 
             QPointer<TimerSettingsDialog> timerSettingsDialogPtr_;
             QPointer<LoggingSettingsDialog> loggingSettingsDialogPtr_;
+            QPointer<Format7SettingsDialog> format7SettingsDialogPtr_;
 
             VideoWriterParams videoWriterParams_;
 

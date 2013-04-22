@@ -8,6 +8,7 @@ set(
     property_dialog.ui
     timer_settings_dialog.ui
     logging_settings_dialog.ui
+    format7_settings_dialog.ui
     )
 
 set(
@@ -35,6 +36,8 @@ set(
     property_dialog.hpp
     timer_settings_dialog.hpp
     logging_settings_dialog.hpp
+    format7_settings_dialog.hpp
+    ar_graphics_view.hpp
     json.hpp
     basic_http_server.hpp
     )
@@ -64,6 +67,8 @@ set(
     property_dialog.cpp
     timer_settings_dialog.cpp
     logging_settings_dialog.cpp
+    format7_settings_dialog.cpp
+    ar_graphics_view.cpp
     json.cpp
     basic_http_server.cpp
     )
@@ -83,6 +88,7 @@ add_executable(
 
 add_dependencies(test_gui ${bias_gui_FORMS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(.)
 target_link_libraries(
     test_gui 
     ${QT_LIBRARIES} 

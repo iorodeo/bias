@@ -15,6 +15,7 @@
 #include "property_dialog.hpp"
 #include "timer_settings_dialog.hpp"
 #include "logging_settings_dialog.hpp"
+#include "format7_settings_dialog.hpp"
 #include "background_histogram_ufmf.hpp"
 #include "json.hpp"
 #include "basic_http_server.hpp"
@@ -1408,9 +1409,20 @@ namespace bias
 
     void CameraWindow::actionCameraFormat7SettingsTriggered()
     {
-        QString msgTitle("Development");
-        QString msgText("Format7 settings not fully implemented");
-        QMessageBox::information(this, msgTitle, msgText);
+        // If format7 settings dialog does exist create it otherwise raise
+        if (format7SettingsDialogPtr_.isNull()) 
+        {
+            format7SettingsDialogPtr_ = new Format7SettingsDialog(this);
+            format7SettingsDialogPtr_ -> show();
+        }
+        else
+        {
+            format7SettingsDialogPtr_ -> raise();
+        }
+
+        //QString msgTitle("Development");
+        //QString msgText("Format7 settings not fully implemented");
+        //QMessageBox::information(this, msgTitle, msgText);
     }
 
     
