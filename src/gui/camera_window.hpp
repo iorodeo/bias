@@ -294,14 +294,21 @@ namespace bias
             QString getVideoFileFullPathWithGuid();
             QString getConfigFileFullPath();
 
-            bool setCameraFromMap(QVariantMap cameraMap);
-            bool setLoggingFromMap(QVariantMap loggingMap);
-            bool setTimerFromMap(QVariantMap timerMap);
-            bool setDisplayFromMap(QVariantMap displayMap);
-            bool setServerFromMap(QVariantMap serverMap);
-            bool setConfigFileFromMap(QVariantMap configFileMap);
-            bool setCameraPropertyFromMap(QVariantMap propValueMap, PropertyInfo propInfo);
-            bool setFormatSettingsFromMap(QVariantMap settingsMap);
+            RtnStatus setCameraFromMap(QVariantMap cameraMap, bool showErrorDlg);
+            RtnStatus setLoggingFromMap(QVariantMap loggingMap, bool showErrorDlg);
+            RtnStatus setCameraPropertyFromMap(
+                    QVariantMap propValueMap, 
+                    PropertyInfo propInfo, 
+                    bool showErrorDlg
+                    );
+            RtnStatus setFormatSettingsFromMap(
+                    QVariantMap settingsMap, 
+                    bool showErrorDlg
+                    );
+            RtnStatus setTimerFromMap(QVariantMap timerMap, bool showErrorDlg);
+            RtnStatus setDisplayFromMap(QVariantMap displayMap, bool showErrorDlg);
+            RtnStatus setServerFromMap(QVariantMap serverMap, bool showErrorDlg);
+            RtnStatus setConfigFileFromMap(QVariantMap configFileMap, bool showErrorDlg);
 
             cv::Mat calcHistogram(cv::Mat mat);
 
