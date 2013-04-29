@@ -37,7 +37,6 @@ set(
     timer_settings_dialog.hpp
     logging_settings_dialog.hpp
     format7_settings_dialog.hpp
-    ar_graphics_view.hpp
     json.hpp
     basic_http_server.hpp
     )
@@ -68,7 +67,6 @@ set(
     timer_settings_dialog.cpp
     logging_settings_dialog.cpp
     format7_settings_dialog.cpp
-    ar_graphics_view.cpp
     json.cpp
     basic_http_server.cpp
     )

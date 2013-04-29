@@ -12,13 +12,8 @@ namespace bias
         Q_OBJECT
 
         public:
-            Format7SettingsDialog(
-                    QWidget *parent=0,
-                    Qt::WindowFlags f=0
-                    );
 
-        protected:
-            void resizeEvent(QResizeEvent *event);
+            Format7SettingsDialog(QWidget *parent=0);
 
         private:
             void initialize();

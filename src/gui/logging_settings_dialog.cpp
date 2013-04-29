@@ -30,6 +30,7 @@ namespace bias
     {
         setupUi(this);
         setAttribute(Qt::WA_DeleteOnClose);
+        setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
         params_ = params;
         setInitialValues();
         setValidators();
