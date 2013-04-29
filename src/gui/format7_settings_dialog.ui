@@ -229,6 +229,12 @@
              <height>16777215</height>
             </size>
            </property>
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
           </widget>
          </item>
          <item>
@@ -348,6 +354,12 @@
              <width>60</width>
              <height>16777215</height>
             </size>
+           </property>
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
            </property>
           </widget>
          </item>
@@ -469,6 +481,12 @@
              <height>16777215</height>
             </size>
            </property>
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
           </widget>
          </item>
          <item>
@@ -588,6 +606,12 @@
              <width>60</width>
              <height>16777215</height>
             </size>
+           </property>
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
            </property>
           </widget>
          </item>

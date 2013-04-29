@@ -2,7 +2,6 @@
 #define BIAS_LOGGING_SETTINGS_DIALOG_HPP
 
 #include <QDialog>
-#include <QIntValidator>
 #include "ui_logging_settings_dialog.h"
 #include "video_writer_params.hpp"
 

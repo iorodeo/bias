@@ -1222,6 +1222,8 @@ namespace bias
 
     void CameraWindow::updateDisplayOnTimer()
     {
+        std::cout << "update display on timer" << std::endl;
+
         // Get information from image dispatcher
         // -------------------------------------------------------------------
         imageDispatcherPtr_ -> acquireLock();
@@ -1419,19 +1421,11 @@ namespace bias
         {
             format7SettingsDialogPtr_ -> raise();
         }
-
-        //QString msgTitle("Development");
-        //QString msgText("Format7 settings not fully implemented");
-        //QMessageBox::information(this, msgTitle, msgText);
     }
 
     
     void CameraWindow::actionCameraTriggerExternalTriggered()
     {
-        //QString msgTitle("Development");
-        //QString msgText("Set camera trigger external not fully implemented");
-        //QMessageBox::information(this, msgTitle, msgText);
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
         cameraPtr_ -> acquireLock();
         cameraPtr_ -> setTriggerExternal();
         cameraPtr_ -> releaseLock();
@@ -1440,10 +1434,6 @@ namespace bias
 
     void CameraWindow::actionCameraTriggerInternalTriggered()
     {
-        //QString msgTitle("Development");
-        //QString msgText("Set camera trigger internal not fully implemented");
-        //QMessageBox::information(this, msgTitle, msgText);
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
         cameraPtr_ -> acquireLock();
         cameraPtr_ -> setTriggerInternal();
         cameraPtr_ -> releaseLock();
