@@ -7,6 +7,7 @@
 #include "basic_types.hpp"
 #include "property.hpp"
 #include "guid.hpp"
+#include "format7.hpp"
 
 namespace bias 
 {
@@ -51,6 +52,11 @@ namespace bias
             virtual void setProperty(Property prop) {};
             virtual void setVideoMode(VideoMode vidMode, FrameRate frmRate) {};
             virtual void setFormat7ImageMode(ImageMode imgMode) {};
+
+            virtual Format7Settings getFormat7Settings();
+            virtual Format7Info getFormat7Info(ImageMode imgMode);
+
+            virtual PixelFormatList getListOfSupportedPixelFormats(ImageMode imgMode);
 
             virtual void setTriggerInternal() {};
             virtual void setTriggerExternal() {};

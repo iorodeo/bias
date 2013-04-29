@@ -2,13 +2,8 @@
 #define BIAS_FORMAT7_HPP
 
 #include "basic_types.hpp"
+#include "format7_fwd.hpp"
 #include <string>
-
-
-//-----------------------------------------------------------------------------
-// TO DO ... not finished yet. Need to figure out what to do wih the pixel
-// format bitfields.
-// ----------------------------------------------------------------------------
 
 namespace bias
 {
@@ -21,6 +16,7 @@ namespace bias
         unsigned int height;
         PixelFormat pixelFormat;
 
+        Format7Settings();
         std::string toString();
         void print();
     };
@@ -28,24 +24,25 @@ namespace bias
     struct Format7Info
     {
         ImageMode mode;
+        bool supported;
         unsigned int maxWidth;
         unsigned int maxHeight;
         unsigned int offsetHStepSize;
         unsigned int offsetVStepSize;
         unsigned int imageHStepSize;
         unsigned int imageVStepSize;
-
-        // ------------------------------------------------
-        // What about these ???
-        // ------------------------------------------------
         unsigned int pixelFormatBitField;
         unsigned int vendorPixelFormatBitField;
-        // ------------------------------------------------
-
         unsigned int packetSize;
         unsigned int minPacketSize;
         unsigned int maxPacketSize;
         float percentage;
+
+        Format7Info();
+        Format7Info(ImageMode imgMode);
+        std::string toString();
+        void print();
+
     };
 
 }

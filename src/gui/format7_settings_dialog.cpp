@@ -1,5 +1,7 @@
 #include "format7_settings_dialog.hpp"
 #include "validators.hpp"
+#include "camera_facade.hpp"
+#include "lockable.hpp"
 #include <algorithm>
 #include <QGraphicsScene>
 #include <QPointer>
@@ -11,9 +13,18 @@ namespace bias
     // ----------------------------------------------------------------------------------
     Format7SettingsDialog::Format7SettingsDialog(QWidget *parent) : QDialog(parent)
     {
-
+        cameraPtr_ = NULL;
         initialize();
-        connectWidgets();
+    }
+
+    Format7SettingsDialog::Format7SettingsDialog(
+            std::shared_ptr<Lockable<Camera>> cameraPtr, 
+            QWidget *parent
+            ) 
+        : QDialog(parent)
+    {
+        cameraPtr_ = cameraPtr;
+        initialize();
     }
 
     // Private slots
@@ -129,22 +140,65 @@ namespace bias
         setupUi(this);
         setAttribute(Qt::WA_DeleteOnClose);
         setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
-        setupLineEditValidators();
 
         roiOffRadioButtonPtr_ -> setChecked(true);
         roiShowRadioButtonPtr_ -> setChecked(false);
         roiEnableRadioButtonPtr_ -> setChecked(false);
 
-        // TEMP-DEVEL
-        // ------------------------------------------------------------------------------
-        modeComboBoxPtr_ -> addItem(QString("0"));
-        modeComboBoxPtr_ -> addItem(QString("1"));
-        modeComboBoxPtr_ -> addItem(QString("2"));
-        pixelFormatComboBoxPtr_ -> addItem(QString("Pixel Format 0"));
-        pixelFormatComboBoxPtr_ -> addItem(QString("Pixel Format 1"));
-        pixelFormatComboBoxPtr_ -> addItem(QString("Pixel Format 2"));
-        // ------------------------------------------------------------------------------
+        connectWidgets();
 
+        cameraPtr_ -> acquireLock();
+        Format7Settings settings = cameraPtr_ -> getFormat7Settings();
+        Format7Info info = cameraPtr_ -> getFormat7Info(settings.mode);
+        ImageModeList modeList = cameraPtr_ -> getListOfSupportedImageModes();
+        PixelFormatList formatList = cameraPtr_ -> getListOfSupportedPixelFormats(
+                settings.mode
+                );
+        cameraPtr_ -> releaseLock();
+
+        // Setup mode list comboBox
+        ImageModeList::iterator modeIt;
+        for (modeIt=modeList.begin(); modeIt!=modeList.end(); modeIt++)
+        {
+            ImageMode mode = *modeIt;
+            std::string modeStdString  = getImageModeString(mode);
+            modeComboBoxPtr_ -> addItem(QString::fromStdString(modeStdString));
+        }
+
+        // Setup pixel format comboBox
+        PixelFormatList::iterator formatIt;
+        for (formatIt=formatList.begin(); formatIt!=formatList.end(); formatIt++)
+        {
+            PixelFormat format = *formatIt;
+            std::string formatStdString = getPixelFormatString(format);
+            pixelFormatComboBoxPtr_ -> addItem(QString::fromStdString(formatStdString));
+        }
+
+        // Set ROI Step labels
+        QString xOffsetStepText = QString("Step = %1").arg(info.offsetHStepSize);
+        roiXOffsetStepLabelPtr_ -> setText(xOffsetStepText);
+
+        QString yOffsetStepText = QString("Step = %1").arg(info.offsetVStepSize);
+        roiYOffsetStepLabelPtr_ -> setText(yOffsetStepText);
+
+        QString xWidthStepText = QString("Step = %1").arg(info.imageHStepSize);
+        roiXWidthStepLabelPtr_ -> setText(xWidthStepText);
+
+        QString yHeightStepText = QString("Step = %1").arg(info.imageVStepSize);
+        roiYHeightStepLabelPtr_ -> setText(yHeightStepText);
+
+
+        setupLineEditValidators(settings, info);
+
+        // TEMP DEBUG
+        // ----------------------------------
+        std::cout << std::endl;
+        std::cout << "settings" << std::endl;
+        settings.print();
+        std::cout << std::endl;
+        std::cout << "info" << std::endl;
+        info.print();
+        // ----------------------------------
     }
 
     void Format7SettingsDialog::connectWidgets()
@@ -242,7 +296,10 @@ namespace bias
     }
 
 
-    void Format7SettingsDialog::setupLineEditValidators()
+    void Format7SettingsDialog::setupLineEditValidators(
+            Format7Settings settings, 
+            Format7Info info
+            )
     {
         QPointer<IntValidatorWithFixup> validatorPtr;
 

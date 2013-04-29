@@ -109,8 +109,15 @@ namespace bias {
             void setTriggerExternal();
             TriggerType getTriggerType();
 
+            // Format 7 settings
+            Format7Settings getFormat7Settings();
+            Format7Info getFormat7Info(ImageMode imgMode);
+
             void setFormat7ImageMode(ImageMode imgMode) {};        // TO DO //
             void setFormat7PixelFormat(PixelFormat pixFormat) {};  // TO DO //
+
+            ImageModeList getListOfSupportedImageModes();
+            PixelFormatList getListOfSupportedPixelFormats(ImageMode imgMode);
 
             // Get basic camera information
             std::string getVendorName();

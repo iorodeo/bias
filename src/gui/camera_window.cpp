@@ -1414,7 +1414,7 @@ namespace bias
         // If format7 settings dialog does exist create it otherwise raise
         if (format7SettingsDialogPtr_.isNull()) 
         {
-            format7SettingsDialogPtr_ = new Format7SettingsDialog(this);
+            format7SettingsDialogPtr_ = new Format7SettingsDialog(cameraPtr_, this);
             format7SettingsDialogPtr_ -> show();
         }
         else

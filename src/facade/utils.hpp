@@ -36,6 +36,8 @@ namespace bias
 
     std::string getTriggerTypeString(TriggerType trigType);
 
+    std::string getImageModeString(ImageMode mode);
+
     // ------------------------------------------------------------------------
     float getFrameRateAsFloat(FrameRate frmRate);
 

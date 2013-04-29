@@ -5,6 +5,7 @@
 #include "guid_fwd.hpp"
 #include "property_fwd.hpp"
 #include "camera_fwd.hpp"
+#include "format7_fwd.hpp"
 
 namespace bias
 {

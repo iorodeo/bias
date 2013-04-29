@@ -225,6 +225,24 @@ namespace bias {
         return timeStamp;
     }
 
+    Format7Settings CameraDevice_dc1394::getFormat7Settings()
+    {
+        return Format7Settings();
+    }
+
+
+    Format7Info CameraDevice_dc1394::getFormat7Info(ImageMode imgMode)
+    {
+        return Format7Info(imgMode);
+    }
+
+
+    PixelFormatList CameraDevice_dc1394::getListOfSupportedPixelFormats(ImageMode imgMode)
+    {
+        return PixelFormatList();
+    }
+
+
     std::string CameraDevice_dc1394::toString()
     {
         std::stringstream ss;

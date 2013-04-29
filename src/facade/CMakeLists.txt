@@ -10,6 +10,7 @@ set(
     camera_finder.cpp 
     exception.cpp
     property.cpp
+    format7.cpp
     )
 
 add_library(bias_camera_facade ${bias_camera_facade_SOURCE})

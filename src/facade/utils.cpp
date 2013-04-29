@@ -271,6 +271,63 @@ namespace bias
         return trigTypeString;
     }
 
+    static std::map<ImageMode, std::string> createImageModeToStringMap()
+    {
+        std::map<ImageMode, std::string> map;
+        map[IMAGEMODE_0] = std::string("0");
+        map[IMAGEMODE_1] = std::string("1");
+        map[IMAGEMODE_2] = std::string("2");
+        map[IMAGEMODE_3] = std::string("3");
+        map[IMAGEMODE_4] = std::string("4");
+        map[IMAGEMODE_5] = std::string("5");
+        map[IMAGEMODE_6] = std::string("6");
+        map[IMAGEMODE_7] = std::string("7");
+        map[IMAGEMODE_8] = std::string("8");
+        map[IMAGEMODE_9] = std::string("9");
+        map[IMAGEMODE_10] = std::string("10");
+        map[IMAGEMODE_11] = std::string("11");
+        map[IMAGEMODE_12] = std::string("12");
+        map[IMAGEMODE_13] = std::string("13");
+        map[IMAGEMODE_14] = std::string("14");
+        map[IMAGEMODE_15] = std::string("15");
+        map[IMAGEMODE_16] = std::string("16");
+        map[IMAGEMODE_17] = std::string("17");
+        map[IMAGEMODE_18] = std::string("18");
+        map[IMAGEMODE_19] = std::string("19");
+        map[IMAGEMODE_20] = std::string("20");
+        map[IMAGEMODE_21] = std::string("21");
+        map[IMAGEMODE_22] = std::string("22");
+        map[IMAGEMODE_23] = std::string("23");
+        map[IMAGEMODE_24] = std::string("24");
+        map[IMAGEMODE_25] = std::string("25");
+        map[IMAGEMODE_26] = std::string("26");
+        map[IMAGEMODE_27] = std::string("27");
+        map[IMAGEMODE_28] = std::string("28");
+        map[IMAGEMODE_29] = std::string("29");
+        map[IMAGEMODE_30] = std::string("30");
+        map[IMAGEMODE_31] = std::string("31");
+        map[IMAGEMODE_UNSPECIFIED] = std::string("Unspecified");
+        return map;
+    };
+
+    static std::map<ImageMode, std::string> imageModeToStringMap = 
+        createImageModeToStringMap();
+
+    std::string getImageModeString(ImageMode mode)
+    {
+        std::string imageModeString;
+
+        if (mode < NUMBER_OF_IMAGEMODE) 
+        {
+            imageModeString = imageModeToStringMap[mode];
+        }
+        else 
+        {
+            imageModeString = imageModeToStringMap[IMAGEMODE_UNSPECIFIED];
+        }
+        return imageModeString;
+    }
+
     // ------------------------------------------------------------------------
     
     static std::map<FrameRate, float> createFrameRateToFloatMap()

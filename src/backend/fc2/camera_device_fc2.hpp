@@ -55,6 +55,11 @@ namespace bias {
             virtual void setVideoMode(VideoMode vidMode, FrameRate frmRate);
             virtual void setFormat7ImageMode(ImageMode imgMode); // TO DO //
 
+            virtual Format7Settings getFormat7Settings();
+            virtual Format7Info getFormat7Info(ImageMode imgMode);
+
+            virtual PixelFormatList getListOfSupportedPixelFormats(ImageMode imgMode);
+
             virtual void setTriggerInternal();
             virtual void setTriggerExternal();
             virtual TriggerType getTriggerType();

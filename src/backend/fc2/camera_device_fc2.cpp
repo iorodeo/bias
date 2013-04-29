@@ -16,6 +16,7 @@ namespace bias {
         convertedImageCreated_ = false;
     }
 
+
     CameraDevice_fc2::CameraDevice_fc2(Guid guid) : CameraDevice(guid)
     {
         rawImageCreated_ = false;
@@ -29,6 +30,7 @@ namespace bias {
             throw RuntimeError(ERROR_FC2_CREATE_CONTEXT, ssError.str());
         }
     }
+
 
     CameraDevice_fc2::~CameraDevice_fc2() 
     {
@@ -50,10 +52,12 @@ namespace bias {
         }
     }
 
+
     CameraLib CameraDevice_fc2::getCameraLib() 
     { 
         return guid_.getCameraLib(); 
     }
+
 
     void CameraDevice_fc2::connect() 
     {
@@ -83,6 +87,7 @@ namespace bias {
         }
     }
 
+
     void CameraDevice_fc2::disconnect()
     {
         if (capturing_) { stopCapture(); }
@@ -99,6 +104,7 @@ namespace bias {
             connected_ = false;
         }
     }
+
 
     void CameraDevice_fc2::startCapture()
     {
@@ -128,6 +134,7 @@ namespace bias {
         }
     }
 
+
     void CameraDevice_fc2::stopCapture()
     {
         if (capturing_) 
@@ -145,12 +152,14 @@ namespace bias {
         }
     }
 
+
     cv::Mat CameraDevice_fc2::grabImage()
     {
         cv::Mat image;  
         grabImage(image);
         return image;
     }
+
 
     void CameraDevice_fc2::grabImage(cv::Mat &image)
     {
@@ -207,6 +216,7 @@ namespace bias {
     {
         return bool(cameraInfo_.isColorCamera);
     } 
+
     
     VideoMode CameraDevice_fc2::getVideoMode() 
     {
@@ -216,6 +226,7 @@ namespace bias {
         return convertVideoMode_from_fc2(vidMode_fc2);
     } 
 
+
     FrameRate CameraDevice_fc2::getFrameRate() 
     {
         fc2VideoMode dummy;
@@ -223,6 +234,7 @@ namespace bias {
         getVideoModeAndFrameRate(dummy, frmRate_fc2);
         return convertFrameRate_from_fc2(frmRate_fc2);
     }
+
 
     ImageMode CameraDevice_fc2::getImageMode()
     {
@@ -239,6 +251,7 @@ namespace bias {
         }
         return mode;
     } 
+
 
     VideoModeList CameraDevice_fc2::getAllowedVideoModes()
     {
@@ -313,6 +326,7 @@ namespace bias {
         return allowedVideoModes;
     }
 
+
     FrameRateList CameraDevice_fc2::getAllowedFrameRates(VideoMode vidMode)
     {
         FrameRateList allowedFramesRates;
@@ -347,6 +361,7 @@ namespace bias {
         return allowedFramesRates;
     }
 
+
     ImageModeList CameraDevice_fc2::getAllowedImageModes()
     {
         ImageModeList allowedImageModes;
@@ -374,6 +389,7 @@ namespace bias {
         return allowedImageModes;
     }
 
+    
     Property CameraDevice_fc2::getProperty(PropertyType propType)
     {
         fc2PropertyType propType_fc2;
@@ -386,6 +402,7 @@ namespace bias {
         return prop;
     }
 
+
     PropertyInfo CameraDevice_fc2::getPropertyInfo(PropertyType propType)
     {
         fc2PropertyType propType_fc2;
@@ -397,6 +414,7 @@ namespace bias {
         propInfo =  convertPropertyInfo_from_fc2(propInfo_fc2);
         return propInfo;
     }
+
    
     ImageInfo CameraDevice_fc2::getImageInfo()
     {
@@ -430,12 +448,107 @@ namespace bias {
         return imgInfo;
     }
 
+
+    Format7Settings CameraDevice_fc2::getFormat7Settings()
+    {
+        fc2Error error;
+        fc2Format7ImageSettings settings_fc2;
+        unsigned int packetSize;
+        float percentage; 
+        Format7Settings settings;
+
+        // Get Current format7 image settings
+        error = fc2GetFormat7Configuration(
+                context_, 
+                &settings_fc2,
+                &packetSize,
+                &percentage
+                );
+        if (error != FC2_ERROR_OK)
+        { 
+            std::stringstream ssError; 
+            ssError << __PRETTY_FUNCTION__; 
+            ssError << ": unable to get FlyCapture2 format 7 configuration"; 
+            throw RuntimeError(ERROR_FC2_GET_FORMAT7_CONFIGURATION, ssError.str());
+        }
+        settings.mode = convertImageMode_from_fc2(settings_fc2.mode);
+        settings.offsetX = settings_fc2.offsetX;
+        settings.offsetY = settings_fc2.offsetY;
+        settings.width = settings_fc2.width;
+        settings.height = settings_fc2.height;
+        settings.pixelFormat = convertPixelFormat_from_fc2(settings_fc2.pixelFormat);
+        return settings;
+    }
+
+
+    Format7Info CameraDevice_fc2::getFormat7Info(ImageMode imgMode)
+    {
+        fc2Error error;
+        fc2Format7Info format7Info_fc2;
+        BOOL supported;
+        Format7Info format7Info;
+
+        format7Info_fc2.mode = convertImageMode_to_fc2(imgMode);
+        error = fc2GetFormat7Info(context_, &format7Info_fc2, &supported);
+        if (error != FC2_ERROR_OK) 
+        {
+            std::stringstream ssError; 
+            ssError << __PRETTY_FUNCTION__; 
+            ssError << ": unable to get FlyCapture2 format7 information"; 
+            throw RuntimeError(ERROR_FC2_GET_FORMAT7_INFO, ssError.str());
+        }
+
+        format7Info.mode = imgMode;
+        format7Info.supported = supported;
+        if (supported) 
+        {
+            format7Info.maxWidth = format7Info_fc2.maxWidth;
+            format7Info.maxHeight = format7Info_fc2.maxHeight;
+            format7Info.offsetHStepSize = format7Info_fc2.offsetHStepSize;
+            format7Info.offsetVStepSize = format7Info_fc2.offsetVStepSize;
+            format7Info.imageHStepSize = format7Info_fc2.imageHStepSize;
+            format7Info.imageVStepSize = format7Info_fc2.imageVStepSize;
+            format7Info.pixelFormatBitField = format7Info_fc2.pixelFormatBitField;
+            format7Info.vendorPixelFormatBitField = format7Info_fc2.vendorPixelFormatBitField;
+            format7Info.packetSize = format7Info_fc2.packetSize;
+            format7Info.minPacketSize = format7Info_fc2.minPacketSize;
+            format7Info.maxPacketSize = format7Info_fc2.maxPacketSize;
+            format7Info.percentage = format7Info.percentage;
+        }
+        return format7Info;
+    }
+
+
+    PixelFormatList CameraDevice_fc2::getListOfSupportedPixelFormats(ImageMode imgMode)
+    {
+        PixelFormatList formatList = getListOfPixelFormats();
+        PixelFormatList supportedList;
+
+        Format7Info info = getFormat7Info(imgMode);
+        if (info.supported)
+        {
+            PixelFormatList::iterator it;
+            for (it=formatList.begin(); it!=formatList.end(); it++)
+            {
+                PixelFormat format = *it;
+                fc2PixelFormat format_fc2 = convertPixelFormat_to_fc2(format);
+                if (format_fc2 & info.pixelFormatBitField)
+                {
+                    supportedList.push_back(format);
+                }
+            }
+        }
+        return supportedList;
+    }
+
+
     void CameraDevice_fc2::setProperty(Property prop)
     {
         fc2Property prop_fc2;
         prop_fc2 = convertProperty_to_fc2(prop);
         setProperty(prop_fc2);
     }
+    
 
     bool CameraDevice_fc2::isSupported(VideoMode vidMode, FrameRate frmRate)
     {
@@ -475,6 +588,7 @@ namespace bias {
         return (supported == TRUE ? true : false);
     }
 
+
     bool CameraDevice_fc2::isSupported(ImageMode imgMode)
     {
         fc2Error error;
@@ -503,6 +617,7 @@ namespace bias {
         }
         return (supported==TRUE ? true : false);
     }
+
 
     void CameraDevice_fc2::setVideoMode(VideoMode vidMode, FrameRate frmRate) 
     {
@@ -555,12 +670,14 @@ namespace bias {
         // -------------------------------------------------
     }
 
+
     void CameraDevice_fc2::setTriggerInternal()
     {
         fc2TriggerMode trigMode = getTriggerMode_fc2();
         trigMode.onOff = FALSE;
         setTriggerMode(trigMode);
     }
+    
 
     void CameraDevice_fc2::setTriggerExternal()
     {
@@ -642,17 +759,20 @@ namespace bias {
             
         }
         return ss.str();
-    };
+    }
+
 
     void CameraDevice_fc2::printGuid() 
     { 
         guid_.printValue(); 
     }
 
+
     void CameraDevice_fc2::printInfo()
     {
         std::cout << toString();
     }
+
        
     // Private methods
     // -------------------------------------------------------------------------
@@ -661,6 +781,7 @@ namespace bias {
     {
         return guid_.getValue_fc2();
     }
+
 
     void CameraDevice_fc2::createRawImage()
     {
@@ -679,6 +800,7 @@ namespace bias {
         rawImageCreated_ = true;
     }
 
+
     void CameraDevice_fc2::createConvertedImage()
     {
         if (convertedImageCreated_) {destroyConvertedImage();}
@@ -695,6 +817,7 @@ namespace bias {
 
         convertedImageCreated_ = true;
     }
+
 
     void CameraDevice_fc2::destroyRawImage()
     {
@@ -713,6 +836,7 @@ namespace bias {
             rawImageCreated_ = false;
         }
     }
+    
 
     void CameraDevice_fc2::destroyConvertedImage()
     {
@@ -731,6 +855,7 @@ namespace bias {
             convertedImageCreated_ = false;
         }
     }
+
 
     void CameraDevice_fc2::grabImageCommon()
     {
@@ -838,6 +963,7 @@ namespace bias {
         }
     }
 
+
     fc2PropertyInfo CameraDevice_fc2::getPropertyInfo_fc2(fc2PropertyType propType)
     {
         fc2Error error;
@@ -855,6 +981,7 @@ namespace bias {
         return propInfo;
     }
 
+
     fc2Property CameraDevice_fc2::getProperty_fc2(fc2PropertyType propType)
     {
         fc2Error error;
@@ -871,6 +998,7 @@ namespace bias {
         }
         return prop;
     }
+
 
     fc2Format7Configuration CameraDevice_fc2::getFormat7Configuration()
     {
@@ -892,6 +1020,7 @@ namespace bias {
         return config;
     }
 
+
     fc2TriggerMode CameraDevice_fc2::getTriggerMode_fc2()
     {
         fc2Error error;
@@ -906,6 +1035,7 @@ namespace bias {
         }
         return triggerMode;
     }
+
 
     fc2TriggerModeInfo CameraDevice_fc2::getTriggerModeInfo_fc2()
     {
@@ -937,6 +1067,7 @@ namespace bias {
         }
     }
 
+
     void CameraDevice_fc2::setTriggerMode(fc2TriggerMode trigMode)
     {
         fc2Error error = fc2SetTriggerMode(context_, &trigMode);
@@ -949,6 +1080,7 @@ namespace bias {
         }
     }
 
+
     // Temporary methods
     // ------------------------------------------------------------------------
 
@@ -958,6 +1090,7 @@ namespace bias {
         mode_fc2 = convertImageMode_to_fc2(mode);
         setVideoModeToFormat7(mode_fc2);
     }
+
 
     void CameraDevice_fc2::setVideoModeToFormat7(fc2Mode mode)
     {

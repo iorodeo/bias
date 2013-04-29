@@ -113,12 +113,29 @@ namespace bias
         return ImageInfo();
     }
 
+    
+    Format7Settings CameraDevice::getFormat7Settings()
+    {
+        return Format7Settings();
+    }
+
+
+    Format7Info CameraDevice::getFormat7Info(ImageMode imgMode)
+    {
+        return Format7Info(imgMode);
+    }
+
+
+    PixelFormatList CameraDevice::getListOfSupportedPixelFormats(ImageMode imgMode)
+    {
+        return PixelFormatList();
+    }
+
 
     TriggerType CameraDevice::getTriggerType()
     {
         return TRIGGER_INTERNAL;
     }
-
 
     TimeStamp CameraDevice::getImageTimeStamp()
     {

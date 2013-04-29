@@ -3,6 +3,7 @@
 #include "exception.hpp"
 #include "utils.hpp"
 #include "guid.hpp"
+#include "format7.hpp"
 #include <sstream>
 #include <opencv2/core/core.hpp>
 #ifdef WITH_FC2
@@ -542,6 +543,42 @@ namespace bias {
         return cameraDevicePtr_ -> getTriggerType();
     }
 
+
+    Format7Settings Camera::getFormat7Settings()
+    {
+        return cameraDevicePtr_ -> getFormat7Settings();
+    }
+
+
+    Format7Info Camera::getFormat7Info(ImageMode imgMode)
+    {
+        return cameraDevicePtr_ -> getFormat7Info(imgMode);
+    }
+
+
+    ImageModeList Camera::getListOfSupportedImageModes()
+    {
+        ImageModeList modeList = getListOfImageModes();
+        ImageModeList supportedModeList;
+
+        ImageModeList::iterator it;
+        for (it=modeList.begin(); it!=modeList.end(); it++)
+        {
+            ImageMode mode = *it;
+            Format7Info info = getFormat7Info(mode);
+            if (info.supported)
+            {
+                supportedModeList.push_back(mode);
+            }
+        }
+        return supportedModeList;
+    }
+
+
+    PixelFormatList Camera::getListOfSupportedPixelFormats(ImageMode imgMode)
+    {
+        return cameraDevicePtr_ -> getListOfSupportedPixelFormats(imgMode);
+    }
 
     std::string Camera::getPropertyString(PropertyType propType)
     {
