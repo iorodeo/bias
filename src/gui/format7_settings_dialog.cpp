@@ -126,8 +126,9 @@ namespace bias
     {
         QString valueString = roiXOffsetLineEditPtr_ -> text();
         int value = valueString.toInt();
+        settings_.offsetX = value;
         roiXOffsetSliderPtr_ -> blockSignals(true);
-        roiXOffsetSliderPtr_ -> setValue(value);
+        roiXOffsetSliderPtr_ -> setValue(value/info_.offsetHStepSize);
         roiXOffsetSliderPtr_ -> blockSignals(false);
         adjustOnXOffsetChange();
     }
@@ -137,8 +138,9 @@ namespace bias
     {
         QString valueString = roiYOffsetLineEditPtr_ -> text();
         int value = valueString.toInt();
+        settings_.offsetY = value;
         roiYOffsetSliderPtr_ -> blockSignals(true);
-        roiYOffsetSliderPtr_ -> setValue(value);
+        roiYOffsetSliderPtr_ -> setValue(value/info_.offsetHStepSize);
         roiYOffsetSliderPtr_ -> blockSignals(false);
         adjustOnYOffsetChange();
     }
@@ -148,8 +150,9 @@ namespace bias
     {
         QString valueString = roiXWidthLineEditPtr_ -> text();
         int value = valueString.toInt();
+        settings_.width = value;
         roiXWidthSliderPtr_ -> blockSignals(true);
-        roiXWidthSliderPtr_ -> setValue(value);
+        roiXWidthSliderPtr_ -> setValue(value/info_.imageHStepSize);
         roiXWidthSliderPtr_ -> blockSignals(false);
         adjustOnXWidthChange();
     }
@@ -159,8 +162,9 @@ namespace bias
     {
         QString valueString = roiYHeightLineEditPtr_ -> text();
         int value = valueString.toInt();
+        settings_.height = value;
         roiYHeightSliderPtr_ -> blockSignals(true);
-        roiYHeightSliderPtr_ -> setValue(value);
+        roiYHeightSliderPtr_ -> setValue(value/info_.imageVStepSize);
         roiYHeightSliderPtr_ -> blockSignals(false);
         adjustOnYHeightChange();
     }
