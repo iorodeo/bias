@@ -1,6 +1,5 @@
 #include "format7_settings_dialog.hpp"
 #include "validators.hpp"
-#include "camera_facade.hpp"
 #include "lockable.hpp"
 #include <algorithm>
 #include <QGraphicsScene>
@@ -9,6 +8,9 @@
 
 namespace bias 
 {
+    const unsigned int sliderSingleStep = 1;
+    const unsigned int sliderPageStep = 10;
+
     // Public methods
     // ----------------------------------------------------------------------------------
     Format7SettingsDialog::Format7SettingsDialog(QWidget *parent) : QDialog(parent)
@@ -16,6 +18,7 @@ namespace bias
         cameraPtr_ = NULL;
         initialize();
     }
+
 
     Format7SettingsDialog::Format7SettingsDialog(
             std::shared_ptr<Lockable<Camera>> cameraPtr, 
@@ -25,6 +28,48 @@ namespace bias
     {
         cameraPtr_ = cameraPtr;
         initialize();
+    }
+
+
+    bool Format7SettingsDialog::isRoiOffChecked()
+    {
+        return roiOffRadioButtonPtr_ -> isChecked();
+    }
+
+
+    bool Format7SettingsDialog::isRoiShowChecked()
+    {
+        return roiShowRadioButtonPtr_ -> isChecked();
+    }
+
+
+    bool Format7SettingsDialog::isRoiEnableChecked()
+    {
+        return roiEnableRadioButtonPtr_ -> isChecked();
+    }
+
+
+    int Format7SettingsDialog::getRoiXOffset()
+    {
+        return settings_.offsetX;
+    }
+
+
+    int Format7SettingsDialog::getRoiYOffset()
+    {
+        return settings_.offsetY;
+    }
+
+
+    int Format7SettingsDialog::getRoiXWidth()
+    {
+        return settings_.width;
+    }
+
+
+    int Format7SettingsDialog::getRoiYHeight()
+    {
+        return settings_.height;
     }
 
     // Private slots
@@ -43,29 +88,37 @@ namespace bias
 
     void Format7SettingsDialog::roiXOffsetSliderChanged(int value)
     {
-        roiXOffsetLineEditPtr_ -> setText(QString::number(value));
-        std::cout << __PRETTY_FUNCTION__ << ", value = " << value << std::endl;
+        int adjustedValue = value*info_.offsetHStepSize;  
+        settings_.offsetX = adjustedValue;
+        roiXOffsetLineEditPtr_ -> setText(QString::number(adjustedValue));
+        adjustOnXOffsetChange();
     }
 
 
     void Format7SettingsDialog::roiYOffsetSliderChanged(int value)
     {
-        roiYOffsetLineEditPtr_ -> setText(QString::number(value));
-        std::cout << __PRETTY_FUNCTION__ << ", value = " << value << std::endl;
+        int adjustedValue = value*info_.offsetVStepSize; 
+        settings_.offsetY = adjustedValue;
+        roiYOffsetLineEditPtr_ -> setText(QString::number(adjustedValue));
+        adjustOnYOffsetChange();
     }
 
 
     void Format7SettingsDialog::roiXWidthSliderChanged(int value)
     {
-        roiXWidthLineEditPtr_ -> setText(QString::number(value));
-        std::cout << __PRETTY_FUNCTION__ << ", value = " << value << std::endl;
+        int adjustedValue = value*info_.imageHStepSize;
+        settings_.width = adjustedValue;
+        roiXWidthLineEditPtr_ -> setText(QString::number(adjustedValue));
+        adjustOnXWidthChange();
     }
 
 
     void Format7SettingsDialog::roiYHeightSliderChanged(int value)
     {
-        roiYHeightLineEditPtr_ -> setText(QString::number(value));
-        std::cout << __PRETTY_FUNCTION__ << ", value = " << value << std::endl;
+        int adjustedValue = value*info_.imageVStepSize;
+        settings_.height = adjustedValue;
+        roiYHeightLineEditPtr_ -> setText(QString::number(adjustedValue));
+        adjustOnYHeightChange();
     }
 
 
@@ -73,8 +126,10 @@ namespace bias
     {
         QString valueString = roiXOffsetLineEditPtr_ -> text();
         int value = valueString.toInt();
-        roiYOffsetSliderPtr_ -> setValue(value);
-        std::cout << __PRETTY_FUNCTION__ << ", value = " << value << std::endl;
+        roiXOffsetSliderPtr_ -> blockSignals(true);
+        roiXOffsetSliderPtr_ -> setValue(value);
+        roiXOffsetSliderPtr_ -> blockSignals(false);
+        adjustOnXOffsetChange();
     }
 
 
@@ -82,8 +137,10 @@ namespace bias
     {
         QString valueString = roiYOffsetLineEditPtr_ -> text();
         int value = valueString.toInt();
+        roiYOffsetSliderPtr_ -> blockSignals(true);
         roiYOffsetSliderPtr_ -> setValue(value);
-        std::cout << __PRETTY_FUNCTION__ << ", value = " << value << std::endl;
+        roiYOffsetSliderPtr_ -> blockSignals(false);
+        adjustOnYOffsetChange();
     }
 
 
@@ -91,8 +148,10 @@ namespace bias
     {
         QString valueString = roiXWidthLineEditPtr_ -> text();
         int value = valueString.toInt();
+        roiXWidthSliderPtr_ -> blockSignals(true);
         roiXWidthSliderPtr_ -> setValue(value);
-        std::cout << __PRETTY_FUNCTION__ << ", value = " << value << std::endl;
+        roiXWidthSliderPtr_ -> blockSignals(false);
+        adjustOnXWidthChange();
     }
 
 
@@ -100,8 +159,10 @@ namespace bias
     {
         QString valueString = roiYHeightLineEditPtr_ -> text();
         int value = valueString.toInt();
+        roiYHeightSliderPtr_ -> blockSignals(true);
         roiYHeightSliderPtr_ -> setValue(value);
-        std::cout << __PRETTY_FUNCTION__ << ", value = " << value << std::endl;
+        roiYHeightSliderPtr_ -> blockSignals(false);
+        adjustOnYHeightChange();
     }
 
 
@@ -132,6 +193,12 @@ namespace bias
         }
     }
 
+
+    void Format7SettingsDialog::roiMaxSizePushButtonClicked()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+    }
+
     
     // Private methods
     // ----------------------------------------------------------------------------------
@@ -144,15 +211,20 @@ namespace bias
         roiOffRadioButtonPtr_ -> setChecked(true);
         roiShowRadioButtonPtr_ -> setChecked(false);
         roiEnableRadioButtonPtr_ -> setChecked(false);
+        changed_ = false;
 
-        connectWidgets();
+
+        if (cameraPtr_ == NULL)
+        {
+            return;
+        }
 
         cameraPtr_ -> acquireLock();
-        Format7Settings settings = cameraPtr_ -> getFormat7Settings();
-        Format7Info info = cameraPtr_ -> getFormat7Info(settings.mode);
+        settings_ = cameraPtr_ -> getFormat7Settings();
+        info_ = cameraPtr_ -> getFormat7Info(settings_.mode);
         ImageModeList modeList = cameraPtr_ -> getListOfSupportedImageModes();
         PixelFormatList formatList = cameraPtr_ -> getListOfSupportedPixelFormats(
-                settings.mode
+                settings_.mode
                 );
         cameraPtr_ -> releaseLock();
 
@@ -175,29 +247,42 @@ namespace bias
         }
 
         // Set ROI Step labels
-        QString xOffsetStepText = QString("Step = %1").arg(info.offsetHStepSize);
+        QString xOffsetStepText = QString("Step = %1").arg(info_.offsetHStepSize);
         roiXOffsetStepLabelPtr_ -> setText(xOffsetStepText);
 
-        QString yOffsetStepText = QString("Step = %1").arg(info.offsetVStepSize);
+        QString yOffsetStepText = QString("Step = %1").arg(info_.offsetVStepSize); 
         roiYOffsetStepLabelPtr_ -> setText(yOffsetStepText);
 
-        QString xWidthStepText = QString("Step = %1").arg(info.imageHStepSize);
+        QString xWidthStepText = QString("Step = %1").arg(info_.imageHStepSize);
         roiXWidthStepLabelPtr_ -> setText(xWidthStepText);
 
-        QString yHeightStepText = QString("Step = %1").arg(info.imageVStepSize);
-        roiYHeightStepLabelPtr_ -> setText(yHeightStepText);
+        QString yHeightInfoText = QString("Step = %1").arg(info_.imageVStepSize); 
+        roiYHeightStepLabelPtr_ -> setText(yHeightInfoText);
 
+        setRanges();
 
-        setupLineEditValidators(settings, info);
+        // Set Slider values
+        roiXOffsetSliderPtr_ -> setValue(settings_.offsetX/info_.offsetHStepSize);
+        roiYOffsetSliderPtr_ -> setValue(settings_.offsetY/info_.offsetVStepSize);
+        roiXWidthSliderPtr_ -> setValue(settings_.width/info_.imageHStepSize);
+        roiYHeightSliderPtr_ -> setValue(settings_.height/info_.imageVStepSize);
+
+        // Set line edit values
+        roiXOffsetLineEditPtr_ -> setText(QString::number(settings_.offsetX));
+        roiYOffsetLineEditPtr_ -> setText(QString::number(settings_.offsetY));
+        roiXWidthLineEditPtr_ -> setText(QString::number(settings_.width));
+        roiYHeightLineEditPtr_ -> setText(QString::number(settings_.height));
+
+        connectWidgets();
 
         // TEMP DEBUG
         // ----------------------------------
         std::cout << std::endl;
         std::cout << "settings" << std::endl;
-        settings.print();
+        settings_.print();
         std::cout << std::endl;
         std::cout << "info" << std::endl;
-        info.print();
+        info_.print();
         // ----------------------------------
     }
 
@@ -293,42 +378,118 @@ namespace bias
                 this,
                 SLOT(roiEnableRadioButtonChanged(bool))
                );
+
+        connect(
+                roiMaxSizePushButtonPtr_,
+                SIGNAL(clicked()),
+                this,
+                SLOT(roiMaxSizePushButtonClicked())
+               );
     }
 
 
-    void Format7SettingsDialog::setupLineEditValidators(
-            Format7Settings settings, 
-            Format7Info info
-            )
+    void Format7SettingsDialog::setRanges()
     {
         QPointer<IntValidatorWithFixup> validatorPtr;
+        int bottom;
+        int top;
+        int step;
 
-        // Fixup for x offset lineEdit 
+        // Set fixup and slider range for x offset
+        bottom = 0;
+        top = info_.maxWidth - info_.imageHStepSize;
+        step = info_.offsetHStepSize;
         validatorPtr = new IntValidatorWithFixup(roiXOffsetLineEditPtr_);
-        validatorPtr -> setBottom(0);
-        validatorPtr -> setTop(100);
+        validatorPtr -> setRange(bottom,top);
         roiXOffsetLineEditPtr_ -> setValidator(validatorPtr);
+        roiXOffsetSliderPtr_ -> setRange(bottom/step, top/step);
+        roiXOffsetSliderPtr_ -> setSingleStep(sliderSingleStep);
+        roiXOffsetSliderPtr_ -> setPageStep(sliderPageStep);
 
-        // Fixup for y offset lineEdit
+        // Set fixup and slider range for y offset 
+        bottom = 0;
+        top = info_.maxHeight - info_.imageVStepSize;
+        step = info_.offsetVStepSize;
         validatorPtr = new IntValidatorWithFixup(roiYOffsetLineEditPtr_);
-        validatorPtr -> setBottom(0);
-        validatorPtr -> setTop(100);
-        roiXOffsetLineEditPtr_ -> setValidator(validatorPtr);
+        validatorPtr -> setRange(bottom,top);
+        roiYOffsetLineEditPtr_ -> setValidator(validatorPtr);
+        roiYOffsetSliderPtr_ -> setRange(bottom/step, top/step);
+        roiXOffsetSliderPtr_ -> setSingleStep(sliderSingleStep);
+        roiXOffsetSliderPtr_ -> setPageStep(sliderPageStep);
 
-        // Fixup for x width lineEdit
+        // Set fixup and slider range for x width 
+        bottom = info_.imageHStepSize;
+        top = info_.maxWidth;
+        step = info_.imageHStepSize;
         validatorPtr = new IntValidatorWithFixup(roiXWidthLineEditPtr_);
-        validatorPtr -> setBottom(0);
-        validatorPtr -> setTop(100);
+        validatorPtr -> setRange(bottom, top);
         roiXWidthLineEditPtr_ -> setValidator(validatorPtr);
+        roiXWidthSliderPtr_ -> setRange(bottom/step, top/step);
+        roiXWidthSliderPtr_ -> setSingleStep(sliderSingleStep);
+        roiXWidthSliderPtr_ -> setPageStep(sliderPageStep);
 
-        // Fixup for y height lineEdit
+        // Set fixup and slider range for y height 
+        bottom = info_.imageVStepSize;
+        top = info_.maxHeight;
+        step = info_.imageVStepSize;
         validatorPtr = new IntValidatorWithFixup(roiYHeightLineEditPtr_);
-        validatorPtr -> setBottom(0);
-        validatorPtr -> setTop(100);
-        roiXWidthLineEditPtr_ -> setValidator(validatorPtr);
+        validatorPtr -> setRange(bottom,top);
+        roiYHeightLineEditPtr_ -> setValidator(validatorPtr);
+        roiYHeightSliderPtr_ -> setRange(bottom/step, top/step);
+        roiYHeightSliderPtr_ -> setSingleStep(sliderSingleStep);
+        roiYHeightSliderPtr_ -> setPageStep(sliderPageStep);
         
     }
 
-    
+
+    void Format7SettingsDialog::adjustOnXOffsetChange()
+    {
+        while ((settings_.width + settings_.offsetX) > info_.maxWidth)
+        {
+            settings_.width -= info_.imageHStepSize;
+        }
+        roiXWidthSliderPtr_ -> blockSignals(true);
+        roiXWidthSliderPtr_ -> setValue(settings_.width/info_.imageHStepSize);
+        roiXWidthSliderPtr_ -> blockSignals(false);
+        roiXWidthLineEditPtr_ -> setText(QString::number(settings_.width));
+    }
+
+
+    void  Format7SettingsDialog::adjustOnYOffsetChange()
+    {
+        while ((settings_.height + settings_.offsetY) > info_.maxHeight)
+        {
+            settings_.height -= info_.imageVStepSize;
+        }
+        roiYHeightSliderPtr_ -> blockSignals(true);
+        roiYHeightSliderPtr_ -> setValue(settings_.height/info_.imageVStepSize);
+        roiYHeightSliderPtr_ -> blockSignals(false);
+        roiYHeightLineEditPtr_ -> setText(QString::number(settings_.height));
+    }
+
+
+    void Format7SettingsDialog::adjustOnXWidthChange()
+    {
+        while ((settings_.width + settings_.offsetX) > info_.maxWidth)
+        {
+            settings_.offsetX -= info_.offsetHStepSize;
+        }
+        roiXOffsetSliderPtr_ -> blockSignals(true);
+        roiXOffsetSliderPtr_ -> setValue(settings_.offsetX/info_.offsetHStepSize);
+        roiXOffsetSliderPtr_ -> blockSignals(false);
+        roiXOffsetLineEditPtr_ -> setText(QString::number(settings_.offsetX));
+    }
+
+    void Format7SettingsDialog::adjustOnYHeightChange()
+    {
+        while((settings_.height + settings_.offsetY) > info_.maxHeight)
+        {
+            settings_.offsetY -= info_.offsetVStepSize;
+        }
+        roiYOffsetSliderPtr_ -> blockSignals(true);
+        roiYOffsetSliderPtr_ -> setValue(settings_.offsetY/info_.offsetVStepSize);
+        roiYOffsetSliderPtr_ -> blockSignals(false);
+        roiYOffsetLineEditPtr_ -> setText(QString::number(settings_.offsetY));
+    }
 
 } // namespace bias

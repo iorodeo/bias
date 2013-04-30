@@ -1222,7 +1222,7 @@ namespace bias
 
     void CameraWindow::updateDisplayOnTimer()
     {
-        std::cout << "update display on timer" << std::endl;
+        //std::cout << "update display on timer" << std::endl;
 
         // Get information from image dispatcher
         // -------------------------------------------------------------------
@@ -2232,13 +2232,40 @@ namespace bias
             bool addFrameCount
             )
     {
-        // Updates pixmap of image on Qlabel - sizing based on QLabel size
+        // Draw ROI
+        QPixmap pixmapCopy = QPixmap(pixmapOriginal);
 
-        QPixmap pixmapScaled =  pixmapOriginal.scaled(
+        if (addFrameCount && (!format7SettingsDialogPtr_.isNull()))
+        {
+            if (format7SettingsDialogPtr_ -> isRoiShowChecked())
+            {
+                int x = format7SettingsDialogPtr_ -> getRoiXOffset();
+                int y = format7SettingsDialogPtr_ -> getRoiYOffset();
+                int w = format7SettingsDialogPtr_ -> getRoiXWidth();
+                int h = format7SettingsDialogPtr_ -> getRoiYHeight();
+                QPainter roiPainter(&pixmapCopy);
+                QPen roiPen = QPen(QColor(255,0,0));
+                roiPen.setWidth(4);
+                roiPainter.setPen(roiPen);
+                roiPainter.drawRect(QRect(x,y,w,h));
+                roiPainter.end();
+
+            }
+        }
+
+
+        //// Updates pixmap of image on Qlabel - sizing based on QLabel size
+        //QPixmap pixmapScaled =  pixmapOriginal.scaled(
+        //        imageLabelPtr -> size(),
+        //        Qt::KeepAspectRatio, 
+        //        Qt::SmoothTransformation
+        //        );
+        QPixmap pixmapScaled =  pixmapCopy.scaled(
                 imageLabelPtr -> size(),
                 Qt::KeepAspectRatio, 
                 Qt::SmoothTransformation
                 );
+
         
         // Flip and rotate pixmap if required
         if (flipAndRotate) {

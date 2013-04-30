@@ -2,7 +2,7 @@
 #define BIAS_FORMAT7_SETTINGS_DIALOG_HPP
 
 #include "ui_format7_settings_dialog.h"
-#include "camera_facade_fwd.hpp"
+#include "camera_facade.hpp"
 #include <QDialog>
 #include <memory>
 
@@ -21,6 +21,13 @@ namespace bias
                     std::shared_ptr<Lockable<Camera>> cameraPtr,
                     QWidget *parent=0
                     );
+            bool isRoiOffChecked();
+            bool isRoiShowChecked();
+            bool isRoiEnableChecked();
+            int getRoiXOffset();
+            int getRoiYOffset();
+            int getRoiXWidth();
+            int getRoiYHeight();
 
         private slots:
             void modeComboBoxChanged(int index);
@@ -36,17 +43,24 @@ namespace bias
             void roiOffRadioButtonChanged(bool checked);
             void roiShowRadioButtonChanged(bool checked);
             void roiEnableRadioButtonChanged(bool checked);
+            void roiMaxSizePushButtonClicked();
 
         private:
 
             std::shared_ptr<Lockable<Camera>> cameraPtr_;
+            Format7Settings settings_;
+            Format7Info info_;
+            bool changed_;
 
             void initialize();
             void connectWidgets();
-            void setupLineEditValidators(
-                    Format7Settings settings, 
-                    Format7Info info
-                    );
+            void setRanges();
+
+            void adjustOnXOffsetChange();
+            void adjustOnYOffsetChange();
+            void adjustOnXWidthChange();
+            void adjustOnYHeightChange();
+
 
     }; // class Format7SettingsDialog
 

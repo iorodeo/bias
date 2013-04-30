@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>570</width>
-    <height>389</height>
+    <width>609</width>
+    <height>393</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -68,6 +68,12 @@
              <height>16777215</height>
             </size>
            </property>
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
           </widget>
          </item>
          <item>
@@ -118,6 +124,12 @@
              <width>200</width>
              <height>16777215</height>
             </size>
+           </property>
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
            </property>
           </widget>
          </item>
@@ -190,6 +202,12 @@
           <widget class="QSlider" name="roiXOffsetSliderPtr_">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="tickPosition">
+            <enum>QSlider::NoTicks</enum>
+           </property>
+           <property name="tickInterval">
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -264,7 +282,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Step = __</string>
+            <string> Step = __</string>
            </property>
           </widget>
          </item>
@@ -316,6 +334,12 @@
           <widget class="QSlider" name="roiYOffsetSliderPtr_">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="tickPosition">
+            <enum>QSlider::NoTicks</enum>
+           </property>
+           <property name="tickInterval">
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -390,7 +414,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Step = __</string>
+            <string> Step = __</string>
            </property>
           </widget>
          </item>
@@ -442,6 +466,12 @@
           <widget class="QSlider" name="roiXWidthSliderPtr_">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="tickPosition">
+            <enum>QSlider::NoTicks</enum>
+           </property>
+           <property name="tickInterval">
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -569,6 +599,12 @@
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
+           <property name="tickPosition">
+            <enum>QSlider::NoTicks</enum>
+           </property>
+           <property name="tickInterval">
+            <number>0</number>
+           </property>
           </widget>
          </item>
          <item>
@@ -642,7 +678,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Step = __</string>
+            <string> Step = __</string>
            </property>
           </widget>
          </item>
@@ -662,6 +698,37 @@
       <item>
        <widget class="QWidget" name="widget_5" native="true">
         <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QPushButton" name="roiMaxSizePushButtonPtr_">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>100</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Maximum Size</string>
+           </property>
+          </widget>
+         </item>
          <item>
           <spacer name="horizontalSpacer_2">
            <property name="orientation">
