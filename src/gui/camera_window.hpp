@@ -163,6 +163,7 @@ namespace bias
             // Dialog slots
             void timerDurationChanged(unsigned long duration);
             void loggingSettingsChanged(VideoWriterParams params);
+            void format7RoiEnableStateChanged();
 
         private:
 

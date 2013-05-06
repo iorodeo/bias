@@ -10,6 +10,11 @@
 
 namespace bias 
 {
+    enum ROI_ENABLE_STATE
+    {
+        ROI_ENABLE_OFF=0,
+        ROI_ENABLE_ON,
+    };
     const unsigned int sliderSingleStep = 1;
     const unsigned int sliderPageStep = 10;
 
@@ -92,13 +97,25 @@ namespace bias
     // ----------------------------------------------------------------------------------
     void Format7SettingsDialog::modeComboBoxChanged(int index)
     {
-        std::cout << __PRETTY_FUNCTION__ << ", index = " << index << std::endl;
+        // ------------------------------------------------------------------------------
+        // TO DO 
+        // ------------------------------------------------------------------------------
     }
 
 
     void Format7SettingsDialog::pixelFormatComboBoxChanged(int index)
     {
-        std::cout << __PRETTY_FUNCTION__ << ", index = " << index << std::endl;
+        PixelFormat format = formatToIndexMap_.key(index);
+        settings_.pixelFormat = format;
+        if (isRoiEnableChecked())
+        {
+            updateFormat7Settings();
+           
+        }
+        else
+        {
+            updateFormat7SettingsFullSize();
+        }
     }
 
 
@@ -216,6 +233,11 @@ namespace bias
         {
             updateFormat7SettingsFullSize();
             setRoiControlsEnabled(true);
+            if (lastRoiEnableState_ == ROI_ENABLE_ON)
+            {
+                emit roiEnableStateChanged();
+                lastRoiEnableState_ = ROI_ENABLE_OFF;
+            }
         }
     }
 
@@ -226,6 +248,11 @@ namespace bias
         {
             updateFormat7SettingsFullSize();
             setRoiControlsEnabled(true);
+            if (lastRoiEnableState_ == ROI_ENABLE_ON)
+            {
+                emit roiEnableStateChanged();
+                lastRoiEnableState_ = ROI_ENABLE_OFF;
+            }
         }
     }
 
@@ -237,6 +264,11 @@ namespace bias
         {
             updateFormat7Settings();
             setRoiControlsEnabled(false);
+            if (lastRoiEnableState_ == ROI_ENABLE_OFF)
+            {
+                emit roiEnableStateChanged();
+                lastRoiEnableState_ = ROI_ENABLE_ON;
+            }
         }
     }
 
@@ -288,32 +320,47 @@ namespace bias
             return;
         }
 
-        cameraPtr_ -> acquireLock();
-        settings_ = cameraPtr_ -> getFormat7Settings();
-        info_ = cameraPtr_ -> getFormat7Info(settings_.mode);
-        ImageModeList modeList = cameraPtr_ -> getListOfSupportedImageModes();
-        PixelFormatList formatList = cameraPtr_ -> getListOfSupportedPixelFormats(
-                settings_.mode
-                );
-        cameraPtr_ -> releaseLock();
+        // Get current settings from Camera
+        getFormat7SettingsAndInfo();
+
 
         // Setup mode list comboBox
+        int index = 0;
         ImageModeList::iterator modeIt;
-        for (modeIt=modeList.begin(); modeIt!=modeList.end(); modeIt++)
+        for (modeIt=modeList_.begin(); modeIt!=modeList_.end(); modeIt++)
         {
             ImageMode mode = *modeIt;
             std::string modeStdString  = getImageModeString(mode);
             modeComboBoxPtr_ -> addItem(QString::fromStdString(modeStdString));
+            modeToIndexMap_[mode] = index;
+            index++;
         }
 
         // Setup pixel format comboBox
+        index = 0;
         PixelFormatList::iterator formatIt;
-        for (formatIt=formatList.begin(); formatIt!=formatList.end(); formatIt++)
+        for (formatIt=formatList_.begin(); formatIt!=formatList_.end(); formatIt++)
         {
             PixelFormat format = *formatIt;
             std::string formatStdString = getPixelFormatString(format);
-            pixelFormatComboBoxPtr_ -> addItem(QString::fromStdString(formatStdString));
+            // --------------------------------------------------------------------------
+            // TEMPORARY - only allow RAW8 ro MONO8
+            // --------------------------------------------------------------------------
+            if ((format == PIXEL_FORMAT_RAW8) || (format == PIXEL_FORMAT_MONO8))
+            { 
+                pixelFormatComboBoxPtr_ -> addItem(QString::fromStdString(formatStdString));
+                formatToIndexMap_[format] = index;
+                index++;
+            }
+            // --------------------------------------------------------------------------
+            //pixelFormatComboBoxPtr_ -> addItem(QString::fromStdString(formatStdString));
+            //formatToIndexMap_[index] = format;
+            //index++;
         }
+
+        // Set combobox indices
+        setModeComboBoxIndex();
+        setPixelFormatComboBoxIndex();
 
         // Set ROI Step labels
         QString xOffsetStepText = QString("Step = %1").arg(info_.offsetHStepSize);
@@ -350,16 +397,14 @@ namespace bias
             roiGroupBoxPtr_ -> setEnabled(true);
         }
 
-        // --------------------------------------------------------------------
-        // TEMP - need to check if ROI is smaller that full image and if so set
-        // roi enabled radio button.
-        // --------------------------------------------------------------------
+        // Set radio button checked based whether or not ROI is enabled.
         if (isRoiMaxSize())
         {
             roiOffRadioButtonPtr_ -> setChecked(true);
             roiShowRadioButtonPtr_ -> setChecked(false);
             roiEnableRadioButtonPtr_ -> setChecked(false);
             setRoiControlsEnabled(true);
+            lastRoiEnableState_ = ROI_ENABLE_OFF;
         }
         else 
         {
@@ -367,10 +412,30 @@ namespace bias
             roiShowRadioButtonPtr_ -> setChecked(false);
             roiEnableRadioButtonPtr_ -> setChecked(true);
             setRoiControlsEnabled(false);
+            lastRoiEnableState_ = ROI_ENABLE_ON;
         }
+
+        // ------------------------------------------------------------------------------
+        // TEMPORARY - only allow mode 0 (disable mode setting)
+        // ------------------------------------------------------------------------------
+        modeComboBoxPtr_ -> setEnabled(false);
+        // ------------------------------------------------------------------------------
 
         connectWidgets();
     }
+
+
+    void Format7SettingsDialog::getFormat7SettingsAndInfo()
+    {
+        // Reads format7 settings and infomartion from camera
+        cameraPtr_ -> acquireLock();
+        settings_ = cameraPtr_ -> getFormat7Settings();
+        info_ = cameraPtr_ -> getFormat7Info(settings_.mode);
+        modeList_ = cameraPtr_ -> getListOfSupportedImageModes();
+        formatList_ = cameraPtr_ -> getListOfSupportedPixelFormats(settings_.mode);
+        cameraPtr_ -> releaseLock();
+    }
+
 
     void Format7SettingsDialog::updateSlidersAndLineEdits()
     {
@@ -500,6 +565,20 @@ namespace bias
                 this,
                 SLOT(imageCaptureStopped())
                );
+    }
+
+
+    void Format7SettingsDialog::setModeComboBoxIndex()
+    {
+        int index = modeToIndexMap_[settings_.mode];
+        modeComboBoxPtr_ -> setCurrentIndex(index);
+    }
+
+
+    void Format7SettingsDialog::setPixelFormatComboBoxIndex()
+    {
+        int index = formatToIndexMap_[settings_.pixelFormat];
+        pixelFormatComboBoxPtr_ -> setCurrentIndex(index);
     }
 
 
@@ -663,13 +742,14 @@ namespace bias
         roiYOffsetWidgetPtr_ -> setEnabled(value);
         roiXWidthWidgetPtr_ -> setEnabled(value);
         roiYHeightWidgetPtr_ -> setEnabled(value);
+        roiMaxSizePushButtonPtr_ -> setEnabled(value);
         if (value)
         {
             roiInfoLabelPtr_ -> setText(QString(""));
         }
         else
         {
-            roiInfoLabelPtr_ -> setText(QString("Set to off or show to adjust ROI"));
+            roiInfoLabelPtr_ -> setText(QString("To Adjust ROI set to off or show"));
         }
     }
 

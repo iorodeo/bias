@@ -33,7 +33,12 @@ namespace bias
             int getRoiXWidthMax();
             int getRoiYHeightMax();
 
+        signals:
+
+            void roiEnableStateChanged();
+
         private slots:
+
             void modeComboBoxChanged(int index);
             void pixelFormatComboBoxChanged(int index);
             void roiXOffsetSliderChanged(int value);
@@ -56,13 +61,21 @@ namespace bias
             std::shared_ptr<Lockable<Camera>> cameraPtr_;
             Format7Settings settings_;
             Format7Info info_;
+            ImageModeList modeList_;
+            PixelFormatList formatList_;
+            unsigned int lastRoiEnableState_;
+            QMap<ImageMode, int> modeToIndexMap_;
+            QMap<PixelFormat, int> formatToIndexMap_;
 
             void initialize(bool capturing, bool logging);
+            void getFormat7SettingsAndInfo();
             void updateSlidersAndLineEdits();
             void connectWidgets();
+            void setModeComboBoxIndex();
+            void setPixelFormatComboBoxIndex();
             void setRanges();
-            void setFormat7Settings(Format7Settings settings, float percentSpeed=100.0);
             void setRoiControlsEnabled(bool value);
+            void setFormat7Settings(Format7Settings settings, float percentSpeed=100.0);
             void updateFormat7SettingsFullSize();
             void updateFormat7Settings();
             void adjustOnXOffsetChange();

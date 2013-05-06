@@ -1424,12 +1424,26 @@ namespace bias
                     this 
                     );
 
+            connect(
+                    format7SettingsDialogPtr_,
+                    SIGNAL(roiEnableStateChanged()),
+                    this,
+                    SLOT(format7RoiEnableStateChanged())
+                   );
+
             format7SettingsDialogPtr_ -> show();
+
         }
         else
         {
             format7SettingsDialogPtr_ -> raise();
         }
+    }
+
+
+    void CameraWindow::format7RoiEnableStateChanged()
+    {
+        haveImagePixmap_ = false;
     }
 
     
