@@ -56,6 +56,9 @@ namespace bias
             virtual Format7Settings getFormat7Settings();
             virtual Format7Info getFormat7Info(ImageMode imgMode);
 
+            virtual bool validateFormat7Settings(Format7Settings settings);
+            virtual void setFormat7Configuration(Format7Settings settings, float percentSpeed);
+
             virtual PixelFormatList getListOfSupportedPixelFormats(ImageMode imgMode);
 
             virtual void setTriggerInternal() {};

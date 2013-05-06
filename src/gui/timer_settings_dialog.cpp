@@ -24,7 +24,7 @@ namespace bias
     }
 
 
-    void TimerSettingsDialog::imageCaptureStarted()
+    void TimerSettingsDialog::imageCaptureStarted(bool logging)
     {
         setEnabled(false);
     }
@@ -61,9 +61,9 @@ namespace bias
 
         connect(
                 parent(),
-                SIGNAL(imageCaptureStarted()),
+                SIGNAL(imageCaptureStarted(bool)),
                 this,
-                SLOT(imageCaptureStarted())
+                SLOT(imageCaptureStarted(bool))
                );
 
         connect(

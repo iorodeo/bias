@@ -100,10 +100,9 @@ namespace bias
             double getFramesPerSec();
             unsigned long getFrameCount();
 
-
         signals:
 
-            void imageCaptureStarted();
+            void imageCaptureStarted(bool logging);
             void imageCaptureStopped();
 
         protected:
@@ -165,11 +164,11 @@ namespace bias
             void timerDurationChanged(unsigned long duration);
             void loggingSettingsChanged(VideoWriterParams params);
 
-
         private:
 
             bool connected_;
             bool capturing_;
+            bool haveImagePixmap_;
             bool logging_;
             bool flipVert_;
             bool flipHorz_;
@@ -273,7 +272,8 @@ namespace bias
                     QLabel *imageLabelPtr, 
                     QPixmap &pixmapOriginal, 
                     bool flipAndRotate=true,
-                    bool addFrameCount=true
+                    bool addFrameCount=true,
+                    bool addRoiBoundary=true
                     );
             void updateAllImageLabels();
 
@@ -281,7 +281,8 @@ namespace bias
                     QLabel *imageLabelPtr, 
                     QPixmap &pixmapOriginal, 
                     bool flipAndRotate=true,
-                    bool addFrameCount=true
+                    bool addFrameCount=true,
+                    bool addRoiBoundary=true
                     );
             void resizeAllImageLabels();
             void updateHistogramPixmap(cv::Mat hist);

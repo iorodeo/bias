@@ -255,6 +255,19 @@ namespace bias {
         }
     }
 
+
+    fc2Format7ImageSettings convertFormat7Settings_to_fc2(Format7Settings settings)
+    {
+        fc2Format7ImageSettings settings_fc2;
+        settings_fc2.mode = convertImageMode_to_fc2(settings.mode);
+        settings_fc2.offsetX = settings.offsetX;
+        settings_fc2.offsetY = settings.offsetY;
+        settings_fc2.width = settings.width;
+        settings_fc2.height = settings.height;
+        settings_fc2.pixelFormat = convertPixelFormat_to_fc2(settings.pixelFormat);
+        return settings_fc2;
+    }
+
     // Conversion from FlyCapture2 types to BIAS types
     // ------------------------------------------------------------------------
      
@@ -514,6 +527,19 @@ namespace bias {
             ssError << ": unable to convert pixel format from FlyCaptuer2";
             throw RuntimeError(ERROR_FC2_CONVERT_PROPERTY_TYPE, ssError.str());
         }
+    }
+
+
+    Format7Settings convertFormat7Settings_from_fc2(fc2Format7ImageSettings settings_fc2)
+    {
+        Format7Settings settings;
+        settings.mode = convertImageMode_from_fc2(settings_fc2.mode);
+        settings.offsetX = settings_fc2.offsetX;
+        settings.offsetY = settings_fc2.offsetY;
+        settings.width = settings_fc2.width;
+        settings.height = settings_fc2.height;
+        settings.pixelFormat = convertPixelFormat_from_fc2(settings_fc2.pixelFormat);
+        return settings;
     }
 
     // Functions for printing information

@@ -126,6 +126,18 @@ namespace bias
     }
 
 
+    bool CameraDevice::validateFormat7Settings(Format7Settings settings)
+    {
+        return false;
+    }
+
+
+    void CameraDevice::setFormat7Configuration(Format7Settings settings, float percentSpeed)
+    {
+        return;
+    }
+
+
     PixelFormatList CameraDevice::getListOfSupportedPixelFormats(ImageMode imgMode)
     {
         return PixelFormatList();

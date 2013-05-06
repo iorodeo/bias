@@ -44,11 +44,23 @@ namespace bias {
         {
             ready_ = false;
         }
+        errorCountEnabled_ = true;
     }
 
     void ImageGrabber::stop()
     {
         stopped_ = true;
+    }
+
+
+    void ImageGrabber::enableErrorCount()
+    {
+        errorCountEnabled_ = true;
+    }
+   
+    void ImageGrabber::disableErrorCount()
+    {
+        errorCountEnabled_ = false;
     }
 
     void ImageGrabber::run()
@@ -140,8 +152,7 @@ namespace bias {
             // Push image into new image queue
             if (!error) 
             {
-                //errorCount = 0;                  // Reset error count
-                errorCount++;
+                errorCount = 0;                  // Reset error count 
                 timeStampDblLast = timeStampDbl; // Save last timestamp
                 
                 // Set initial time stamp for fps estimate
@@ -198,19 +209,22 @@ namespace bias {
             }
             else
             {
-                std::cout << "error" << std::endl;
-                errorCount++;
-                if (errorCount > MAX_ERROR_COUNT)
+                if (errorCountEnabled_ ) 
                 {
-                    errorId = ERROR_CAPTURE_MAX_ERROR_COUNT;
-                    errorMsg = QString("Maximum allowed capture error count reached");
-                    if (!errorEmitted) 
+                    errorCount++;
+                    if (errorCount > MAX_ERROR_COUNT)
                     {
-                        emit captureError(errorId, errorMsg);
-                        errorEmitted = true;
+                        errorId = ERROR_CAPTURE_MAX_ERROR_COUNT;
+                        errorMsg = QString("Maximum allowed capture error count reached");
+                        if (!errorEmitted) 
+                        {
+                            emit captureError(errorId, errorMsg);
+                            errorEmitted = true;
+                        }
                     }
                 }
             }
+
 
         } // while (!done) 
 

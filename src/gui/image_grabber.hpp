@@ -32,6 +32,8 @@ namespace bias
                     );
 
             void stop();
+            void enableErrorCount();
+            void disableErrorCount();
 
             static unsigned int NUM_STARTUP_SKIP;
             static unsigned int MAX_ERROR_COUNT;
@@ -45,6 +47,7 @@ namespace bias
             bool ready_;
             bool stopped_;
             bool capturing_;
+            bool errorCountEnabled_;
 
             std::shared_ptr<Lockable<Camera>> cameraPtr_;
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr_;

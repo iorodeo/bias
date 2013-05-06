@@ -49,8 +49,11 @@ namespace bias {
             virtual void setVideoModeAndFrameRate(VideoMode vidMode, FrameRate frameRate) {}; // TO DO //
             virtual void setFormat7ImageMode(ImageMode imgMode) {}; // TO DO //
 
-            virtual Format7Settings getFormat7Settings();
-            virtual Format7Info getFormat7Info(ImageMode imgMode);
+            virtual Format7Settings getFormat7Settings(); // TO DO // 
+            virtual Format7Info getFormat7Info(ImageMode imgMode); // TO DO //
+
+            virtual bool validateFormat7Settings(Format7Settings settings);
+            virtual void setFormat7Configuration(Format7Settings settings, float percentSpeed);
 
             virtual PixelFormatList getListOfSupportedPixelFormats(ImageMode imgMode);
 

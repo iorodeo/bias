@@ -113,6 +113,9 @@ namespace bias {
             Format7Settings getFormat7Settings();
             Format7Info getFormat7Info(ImageMode imgMode);
 
+            bool validateFormat7Settings(Format7Settings settings);
+            void setFormat7Configuration(Format7Settings settings, float percentSpeed);
+
             void setFormat7ImageMode(ImageMode imgMode) {};        // TO DO //
             void setFormat7PixelFormat(PixelFormat pixFormat) {};  // TO DO //
 

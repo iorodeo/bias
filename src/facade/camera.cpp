@@ -556,6 +556,21 @@ namespace bias {
     }
 
 
+    bool Camera::validateFormat7Settings(Format7Settings settings)
+    {
+        return cameraDevicePtr_ -> validateFormat7Settings(settings);
+    }
+
+
+    void Camera::setFormat7Configuration(
+            Format7Settings settings, 
+            float percentSpeed
+            )
+    {
+        return cameraDevicePtr_ -> setFormat7Configuration(settings, percentSpeed);
+    }
+
+
     ImageModeList Camera::getListOfSupportedImageModes()
     {
         ImageModeList modeList = getListOfImageModes();

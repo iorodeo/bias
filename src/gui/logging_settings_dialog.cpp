@@ -277,9 +277,9 @@ namespace bias
 
         connect(
                 parent(),
-                SIGNAL(imageCaptureStarted()),
+                SIGNAL(imageCaptureStarted(bool)),
                 this,
-                SLOT(imageCaptureStarted())
+                SLOT(imageCaptureStarted(bool))
                );
 
         connect(
@@ -388,7 +388,7 @@ namespace bias
     }
 
 
-    void LoggingSettingsDialog::imageCaptureStarted()
+    void LoggingSettingsDialog::imageCaptureStarted(bool logging)
     {
         setEnabled(false);
     }

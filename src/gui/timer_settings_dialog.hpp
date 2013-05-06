@@ -22,15 +22,13 @@ namespace bias
         private slots:
 
             void spinBoxValueChanged();
-            void imageCaptureStarted();
+            void imageCaptureStarted(bool logging);
             void imageCaptureStopped();
 
         private:
 
             void connectWidgets();
             void initialize(unsigned long duration);
-
-
 
     };
 

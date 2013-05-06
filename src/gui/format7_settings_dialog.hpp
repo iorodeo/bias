@@ -19,6 +19,8 @@ namespace bias
             Format7SettingsDialog(QWidget *parent=0);
             Format7SettingsDialog( 
                     std::shared_ptr<Lockable<Camera>> cameraPtr,
+                    bool capturing,
+                    bool logging,
                     QWidget *parent=0
                     );
             bool isRoiOffChecked();
@@ -28,6 +30,8 @@ namespace bias
             int getRoiYOffset();
             int getRoiXWidth();
             int getRoiYHeight();
+            int getRoiXWidthMax();
+            int getRoiYHeightMax();
 
         private slots:
             void modeComboBoxChanged(int index);
@@ -44,22 +48,28 @@ namespace bias
             void roiShowRadioButtonChanged(bool checked);
             void roiEnableRadioButtonChanged(bool checked);
             void roiMaxSizePushButtonClicked();
+            void imageCaptureStarted(bool logging);
+            void imageCaptureStopped();
 
         private:
 
             std::shared_ptr<Lockable<Camera>> cameraPtr_;
             Format7Settings settings_;
             Format7Info info_;
-            bool changed_;
 
-            void initialize();
+            void initialize(bool capturing, bool logging);
+            void updateSlidersAndLineEdits();
             void connectWidgets();
             void setRanges();
-
+            void setFormat7Settings(Format7Settings settings, float percentSpeed=100.0);
+            void setRoiControlsEnabled(bool value);
+            void updateFormat7SettingsFullSize();
+            void updateFormat7Settings();
             void adjustOnXOffsetChange();
             void adjustOnYOffsetChange();
             void adjustOnXWidthChange();
             void adjustOnYHeightChange();
+            bool isRoiMaxSize();
 
 
     }; // class Format7SettingsDialog

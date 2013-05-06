@@ -35,7 +35,7 @@ namespace bias
             void ufmfCompressionThreads_EditingFinished();
             void ufmfDilateCheckBox_StateChanged(int state);
             void ufmfDilate_EditingFinished();
-            void imageCaptureStarted();
+            void imageCaptureStarted(bool logging);
             void imageCaptureStopped();
 
         private:

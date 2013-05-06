@@ -237,6 +237,17 @@ namespace bias {
     }
 
 
+    bool CameraDevice_dc1394::validateFormat7Settings(Format7Settings settings)
+    {
+        return false;
+    }
+
+   
+    void CameraDevice_dc1394::setFormat7Configuration(Format7Settings settings, float percentSpeed)
+    {
+    }
+
+
     PixelFormatList CameraDevice_dc1394::getListOfSupportedPixelFormats(ImageMode imgMode)
     {
         return PixelFormatList();

@@ -4,6 +4,7 @@
 
 #include "basic_types.hpp"
 #include "property.hpp"
+#include "format7.hpp"
 #include <string>
 #include "FlyCapture2_C.h"
 
@@ -24,6 +25,9 @@ namespace bias {
 
     fc2PixelFormat convertPixelFormat_to_fc2(PixelFormat pixFormat);
 
+    fc2Format7ImageSettings convertFormat7Settings_to_fc2(Format7Settings settings);
+
+
     // Conversion from FlyCapture2 types to BIAS types
     // ------------------------------------------------------------------------
 
@@ -40,6 +44,8 @@ namespace bias {
     PropertyInfo convertPropertyInfo_from_fc2(fc2PropertyInfo propInfo_fc2); 
 
     PixelFormat convertPixelFormat_from_fc2(fc2PixelFormat pixFormat_fc2);
+
+    Format7Settings convertFormat7Settings_from_fc2(fc2Format7ImageSettings settings_fc2);
 
 
     // Print functions for FlyCapture2 configurations, settings and info

@@ -57,6 +57,8 @@ namespace bias
     const unsigned int HTTP_SERVER_PORT_BEGIN = 5000;
     const unsigned int HTTP_SERVER_PORT_END = 20000;
     const unsigned int HTTP_SERVER_PORT_STEP = 10;
+    const unsigned int ROI_BOUNDARY_LINE_WIDTH = 5;
+    const QColor ROI_BOUNDARY_COLOR = QColor(255,0,0);
 
     QMap<VideoFileFormat, QString> createExtensionMap()
     {
@@ -340,10 +342,6 @@ namespace bias
             threadPoolPtr_ -> start(imageLoggerPtr_);
         }
 
-        // Start display update timer
-        unsigned int imageDisplayDt = int(1000.0/imageDisplayFreq_);
-        imageDisplayTimerPtr_ -> start(imageDisplayDt);
-
         // Set Capture start and stop time
         captureStartDateTime_ = QDateTime::currentDateTime();
         captureStopDateTime_ = captureStartDateTime_.addSecs(captureDurationSec_);
@@ -361,7 +359,7 @@ namespace bias
         capturing_ = true;
         updateAllMenus();
 
-        emit imageCaptureStarted();
+        emit imageCaptureStarted(logging_);
 
         rtnStatus.success = true;
         rtnStatus.message = QString("");
@@ -372,6 +370,7 @@ namespace bias
     RtnStatus CameraWindow::stopImageCapture(bool showErrorDlg)
     {
         RtnStatus rtnStatus;
+
         if (!connected_)
         {
             QString msgTitle("Capture Error");
@@ -385,8 +384,8 @@ namespace bias
             return rtnStatus;
         }
 
-        // Stop timers.
-        imageDisplayTimerPtr_ -> stop();
+        capturing_ = false;
+
         if (actionTimerEnabledPtr_ -> isChecked())
         {
             captureDurationTimerPtr_ -> stop();
@@ -442,7 +441,6 @@ namespace bias
         startButtonPtr_ -> setText(QString("Start"));
         connectButtonPtr_ -> setEnabled(true);
         statusbarPtr_ -> showMessage(QString("Connected, Stopped"));
-        capturing_ = false;
 
         framesPerSec_ = 0.0;
         updateAllImageLabels();
@@ -1224,44 +1222,49 @@ namespace bias
     {
         //std::cout << "update display on timer" << std::endl;
 
-        // Get information from image dispatcher
-        // -------------------------------------------------------------------
-        imageDispatcherPtr_ -> acquireLock();
-
-        cv::Mat imgMat = imageDispatcherPtr_ -> getImage();
-        QImage img = matToQImage(imgMat);
-        framesPerSec_ = imageDispatcherPtr_ -> getFPS();
-        timeStamp_ = imageDispatcherPtr_ -> getTimeStamp();
-        frameCount_ = imageDispatcherPtr_ -> getFrameCount();
-        cv::Mat histMat = calcHistogram(imgMat);
-        cv::Size imgSize = imgMat.size();
-
-        imageDispatcherPtr_ -> releaseLock();
-        // -------------------------------------------------------------------
-
-        // Set pixmaps and update image labels - note need to add pluginPixmap
-        if (!img.isNull()) 
+        if (capturing_) 
         {
-            previewPixmapOriginal_ = QPixmap::fromImage(img);
+            // Get information from image dispatcher
+            // -------------------------------------------------------------------
+            imageDispatcherPtr_ -> acquireLock();
+
+            cv::Mat imgMat = imageDispatcherPtr_ -> getImage();
+            QImage img = matToQImage(imgMat);
+            framesPerSec_ = imageDispatcherPtr_ -> getFPS();
+            timeStamp_ = imageDispatcherPtr_ -> getTimeStamp();
+            frameCount_ = imageDispatcherPtr_ -> getFrameCount();
+            cv::Mat histMat = calcHistogram(imgMat);
+            cv::Size imgSize = imgMat.size();
+
+            imageDispatcherPtr_ -> releaseLock();
+            // -------------------------------------------------------------------
+
+            // Set pixmaps and update image labels - note need to add pluginPixmap
+            if (!img.isNull()) 
+            {
+                previewPixmapOriginal_ = QPixmap::fromImage(img);
+                haveImagePixmap_ = true;
+            }
+
+            // Update statusbar message
+            QString statusMsg("Capturing,  logging = ");
+            statusMsg += boolToOnOffQString(logging_);
+            statusMsg += QString(", timer = ");
+            statusMsg += boolToOnOffQString(actionTimerEnabledPtr_ -> isChecked());
+            statusMsg += QString().sprintf(",  %dx%d", imgSize.width, imgSize.height);
+            statusMsg += QString().sprintf(",  %1.1f fps", framesPerSec_);
+            statusbarPtr_ -> showMessage(statusMsg);
+
+            // Set update capture time 
+            QDateTime currentDateTime = QDateTime::currentDateTime();
+            qint64 captureDt = currentDateTime.toMSecsSinceEpoch();
+            captureDt -= captureStartDateTime_.toMSecsSinceEpoch();
+            setCaptureTimeLabel(double(1.0e-3*captureDt));
+
+            updateHistogramPixmap(histMat);
         }
-        updateHistogramPixmap(histMat);
 
         updateAllImageLabels();
-
-        // Update statusbar message
-        QString statusMsg("Capturing,  logging = ");
-        statusMsg += boolToOnOffQString(logging_);
-        statusMsg += QString(", timer = ");
-        statusMsg += boolToOnOffQString(actionTimerEnabledPtr_ -> isChecked());
-        statusMsg += QString().sprintf(",  %dx%d", imgSize.width, imgSize.height);
-        statusMsg += QString().sprintf(",  %1.1f fps", framesPerSec_);
-        statusbarPtr_ -> showMessage(statusMsg);
-
-        // Set update caputure time 
-        QDateTime currentDateTime = QDateTime::currentDateTime();
-        qint64 captureDt = currentDateTime.toMSecsSinceEpoch();
-        captureDt -= captureStartDateTime_.toMSecsSinceEpoch();
-        setCaptureTimeLabel(double(1.0e-3*captureDt));
     }
 
 
@@ -1411,10 +1414,16 @@ namespace bias
 
     void CameraWindow::actionCameraFormat7SettingsTriggered()
     {
-        // If format7 settings dialog does exist create it otherwise raise
+        // If format7 settings dialog doesn't exist create it otherwise raise
         if (format7SettingsDialogPtr_.isNull()) 
         {
-            format7SettingsDialogPtr_ = new Format7SettingsDialog(cameraPtr_, this);
+            format7SettingsDialogPtr_ = new Format7SettingsDialog(
+                    cameraPtr_, 
+                    capturing_, 
+                    logging_,
+                    this 
+                    );
+
             format7SettingsDialogPtr_ -> show();
         }
         else
@@ -1727,6 +1736,7 @@ namespace bias
     {
         connected_ = false;
         capturing_ = false;
+        haveImagePixmap_ = false;
         logging_ = false;
         flipVert_ = false;
         flipHorz_ = false;
@@ -2130,6 +2140,9 @@ namespace bias
                 this, 
                 SLOT(updateDisplayOnTimer())
                 );
+
+        unsigned int imageDisplayDt = int(1000.0/imageDisplayFreq_);
+        imageDisplayTimerPtr_ -> start(imageDisplayDt);
     }
 
     void CameraWindow::setupCaptureDurationTimer()
@@ -2229,13 +2242,14 @@ namespace bias
             QLabel *imageLabelPtr, 
             QPixmap &pixmapOriginal,
             bool flipAndRotate,
-            bool addFrameCount
+            bool addFrameCount,
+            bool addRoiBoundary
             )
     {
         // Draw ROI
         QPixmap pixmapCopy = QPixmap(pixmapOriginal);
 
-        if (addFrameCount && (!format7SettingsDialogPtr_.isNull()))
+        if (haveImagePixmap_ && addRoiBoundary && (!format7SettingsDialogPtr_.isNull()))
         {
             if (format7SettingsDialogPtr_ -> isRoiShowChecked())
             {
@@ -2244,22 +2258,14 @@ namespace bias
                 int w = format7SettingsDialogPtr_ -> getRoiXWidth();
                 int h = format7SettingsDialogPtr_ -> getRoiYHeight();
                 QPainter roiPainter(&pixmapCopy);
-                QPen roiPen = QPen(QColor(255,0,0));
-                roiPen.setWidth(4);
+                QPen roiPen = QPen(ROI_BOUNDARY_COLOR);
+                roiPen.setWidth(ROI_BOUNDARY_LINE_WIDTH);
                 roiPainter.setPen(roiPen);
                 roiPainter.drawRect(QRect(x,y,w,h));
                 roiPainter.end();
-
             }
         }
 
-
-        //// Updates pixmap of image on Qlabel - sizing based on QLabel size
-        //QPixmap pixmapScaled =  pixmapOriginal.scaled(
-        //        imageLabelPtr -> size(),
-        //        Qt::KeepAspectRatio, 
-        //        Qt::SmoothTransformation
-        //        );
         QPixmap pixmapScaled =  pixmapCopy.scaled(
                 imageLabelPtr -> size(),
                 Qt::KeepAspectRatio, 
@@ -2286,7 +2292,7 @@ namespace bias
         }
 
         // Add frame count
-        if (addFrameCount && (frameCount_ > 0))
+        if (haveImagePixmap_ && addFrameCount && (frameCount_ > 0))
         {
             QPainter painter(&pixmapScaled);
             QString msg;  
@@ -2301,9 +2307,9 @@ namespace bias
 
     void CameraWindow::updateAllImageLabels()
     { 
-        updateImageLabel(previewImageLabelPtr_, previewPixmapOriginal_, true, true);
-        updateImageLabel(pluginImageLabelPtr_, pluginPixmapOriginal_, true, false);
-        updateImageLabel(histogramImageLabelPtr_, histogramPixmapOriginal_, false, false);
+        updateImageLabel(previewImageLabelPtr_, previewPixmapOriginal_, true, true, true);
+        updateImageLabel(pluginImageLabelPtr_, pluginPixmapOriginal_, true, false, false);
+        updateImageLabel(histogramImageLabelPtr_, histogramPixmapOriginal_, false, false, false);
     }
 
 
@@ -2311,7 +2317,8 @@ namespace bias
             QLabel *imageLabelPtr, 
             QPixmap &pixmapOriginal, 
             bool flipAndRotate,
-            bool addFrameCount
+            bool addFrameCount,
+            bool addRoiBoundary
             )
     {
         // Determines if resize of pixmap of image on Qlabel is required and 
@@ -2321,6 +2328,7 @@ namespace bias
         {
             return;
         }
+
         QSize sizeImageLabel = imageLabelPtr -> size();
         QSize sizeAdjusted = pixmapOriginal.size();
         sizeAdjusted.scale(sizeImageLabel, Qt::KeepAspectRatio);
@@ -2331,7 +2339,8 @@ namespace bias
                     imageLabelPtr,
                     pixmapOriginal,
                     flipAndRotate,
-                    addFrameCount
+                    addFrameCount,
+                    addRoiBoundary
                     );
         }
     }
@@ -2339,9 +2348,9 @@ namespace bias
 
     void CameraWindow::resizeAllImageLabels()
     { 
-        resizeImageLabel(previewImageLabelPtr_, previewPixmapOriginal_, true);
-        resizeImageLabel(pluginImageLabelPtr_, pluginPixmapOriginal_, false);
-        resizeImageLabel(histogramImageLabelPtr_, histogramPixmapOriginal_, false);
+        resizeImageLabel(previewImageLabelPtr_, previewPixmapOriginal_, true, true, true);
+        resizeImageLabel(pluginImageLabelPtr_, pluginPixmapOriginal_, false, false, false);
+        resizeImageLabel(histogramImageLabelPtr_, histogramPixmapOriginal_, false, false, false);
     }
 
 
@@ -2456,15 +2465,6 @@ namespace bias
         else
         {
             setMenuChildrenEnabled(menuCameraPtr_,false);
-        }
-
-        if (capturing_ || !connected_)
-        {
-            actionCameraFormat7SettingsPtr_ -> setEnabled(false);
-        }
-        else
-        {
-            actionCameraFormat7SettingsPtr_ -> setEnabled(true);
         }
     }
 

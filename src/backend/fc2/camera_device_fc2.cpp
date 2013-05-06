@@ -451,20 +451,20 @@ namespace bias {
 
     Format7Settings CameraDevice_fc2::getFormat7Settings()
     {
-        fc2Error error;
+        fc2Error error_fc2;
         fc2Format7ImageSettings settings_fc2;
         unsigned int packetSize;
         float percentage; 
         Format7Settings settings;
 
         // Get Current format7 image settings
-        error = fc2GetFormat7Configuration(
+        error_fc2 = fc2GetFormat7Configuration(
                 context_, 
                 &settings_fc2,
                 &packetSize,
                 &percentage
                 );
-        if (error != FC2_ERROR_OK)
+        if (error_fc2 != FC2_ERROR_OK)
         { 
             std::stringstream ssError; 
             ssError << __PRETTY_FUNCTION__; 
@@ -483,14 +483,14 @@ namespace bias {
 
     Format7Info CameraDevice_fc2::getFormat7Info(ImageMode imgMode)
     {
-        fc2Error error;
+        fc2Error error_fc2;
         fc2Format7Info format7Info_fc2;
         BOOL supported;
         Format7Info format7Info;
 
         format7Info_fc2.mode = convertImageMode_to_fc2(imgMode);
-        error = fc2GetFormat7Info(context_, &format7Info_fc2, &supported);
-        if (error != FC2_ERROR_OK) 
+        error_fc2 = fc2GetFormat7Info(context_, &format7Info_fc2, &supported);
+        if (error_fc2 != FC2_ERROR_OK) 
         {
             std::stringstream ssError; 
             ssError << __PRETTY_FUNCTION__; 
@@ -516,6 +516,45 @@ namespace bias {
             format7Info.percentage = format7Info.percentage;
         }
         return format7Info;
+    }
+
+
+    bool CameraDevice_fc2::validateFormat7Settings(Format7Settings settings)
+    {
+        fc2Format7ImageSettings settings_fc2 = convertFormat7Settings_to_fc2(settings);
+
+        BOOL settingsAreValid_fc2;
+        fc2Format7PacketInfo packetInfo_fc2;
+
+        fc2Error error_fc2 = fc2ValidateFormat7Settings(
+                context_, 
+                &settings_fc2, 
+                &settingsAreValid_fc2,
+                &packetInfo_fc2
+                );
+
+        if (error_fc2 != FC2_ERROR_OK)
+        {
+            std::stringstream ssError; 
+            ssError << __PRETTY_FUNCTION__; 
+            ssError << ": unable to validate FlyCapture2 format 7 settings"; 
+            throw RuntimeError(ERROR_FC2_VALIDATE_FORMAT7_SETTINGS, ssError.str());
+        }
+        return bool(settingsAreValid_fc2);
+    }
+
+
+    void CameraDevice_fc2::setFormat7Configuration(Format7Settings settings, float percentSpeed)
+    {
+        fc2Format7ImageSettings settings_fc2 = convertFormat7Settings_to_fc2(settings);
+        fc2Error error_fc2 = fc2SetFormat7Configuration(context_, &settings_fc2, percentSpeed);
+        if (error_fc2 != FC2_ERROR_OK)
+        {
+            std::stringstream ssError; 
+            ssError << __PRETTY_FUNCTION__; 
+            ssError << ": unable to set FlyCapture2 format 7 configuration"; 
+            throw RuntimeError(ERROR_FC2_SET_FORMAT7_CONFIGURATION, ssError.str());
+        }
     }
 
 

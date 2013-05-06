@@ -1,9 +1,11 @@
 #include "format7_settings_dialog.hpp"
 #include "validators.hpp"
 #include "lockable.hpp"
+#include "camera_window.hpp"
 #include <algorithm>
 #include <QGraphicsScene>
 #include <QPointer>
+#include <QMessageBox>
 #include <iostream>
 
 namespace bias 
@@ -16,18 +18,20 @@ namespace bias
     Format7SettingsDialog::Format7SettingsDialog(QWidget *parent) : QDialog(parent)
     {
         cameraPtr_ = NULL;
-        initialize();
+        initialize(true,true);
     }
 
 
     Format7SettingsDialog::Format7SettingsDialog(
             std::shared_ptr<Lockable<Camera>> cameraPtr, 
+            bool capturing,
+            bool logging,
             QWidget *parent
             ) 
         : QDialog(parent)
     {
         cameraPtr_ = cameraPtr;
-        initialize();
+        initialize(capturing, logging);
     }
 
 
@@ -70,6 +74,18 @@ namespace bias
     int Format7SettingsDialog::getRoiYHeight()
     {
         return settings_.height;
+    }
+
+
+    int Format7SettingsDialog::getRoiXWidthMax()
+    {
+        return info_.maxWidth;
+    }
+
+
+    int Format7SettingsDialog::getRoiYHeightMax()
+    {
+        return info_.maxHeight;
     }
 
     // Private slots
@@ -126,6 +142,12 @@ namespace bias
     {
         QString valueString = roiXOffsetLineEditPtr_ -> text();
         int value = valueString.toInt();
+        if ((value%info_.offsetHStepSize) != 0)
+        {
+            int n = value/info_.offsetHStepSize;
+            value = (n+1)*info_.offsetHStepSize;
+            roiXOffsetLineEditPtr_ -> setText(QString::number(value));
+        }
         settings_.offsetX = value;
         roiXOffsetSliderPtr_ -> blockSignals(true);
         roiXOffsetSliderPtr_ -> setValue(value/info_.offsetHStepSize);
@@ -138,9 +160,15 @@ namespace bias
     {
         QString valueString = roiYOffsetLineEditPtr_ -> text();
         int value = valueString.toInt();
+        if ((value%info_.offsetVStepSize) != 0)
+        {
+            int n = value/info_.offsetVStepSize;
+            value = (n+1)*info_.offsetVStepSize;
+            roiYOffsetLineEditPtr_ -> setText(QString::number(value));
+        }
         settings_.offsetY = value;
         roiYOffsetSliderPtr_ -> blockSignals(true);
-        roiYOffsetSliderPtr_ -> setValue(value/info_.offsetHStepSize);
+        roiYOffsetSliderPtr_ -> setValue(value/info_.offsetVStepSize);
         roiYOffsetSliderPtr_ -> blockSignals(false);
         adjustOnYOffsetChange();
     }
@@ -150,6 +178,12 @@ namespace bias
     {
         QString valueString = roiXWidthLineEditPtr_ -> text();
         int value = valueString.toInt();
+        if ((value%info_.imageHStepSize) != 0)
+        {
+            int n = value/info_.imageHStepSize;
+            value = (n+1)*info_.imageHStepSize;
+            roiXWidthLineEditPtr_ -> setText(QString::number(value));
+        }
         settings_.width = value;
         roiXWidthSliderPtr_ -> blockSignals(true);
         roiXWidthSliderPtr_ -> setValue(value/info_.imageHStepSize);
@@ -162,6 +196,12 @@ namespace bias
     {
         QString valueString = roiYHeightLineEditPtr_ -> text();
         int value = valueString.toInt();
+        if ((value%info_.imageVStepSize) != 0) 
+        {
+            int n = value/info_.imageVStepSize;
+            value = (n+1)*info_.imageVStepSize;
+            roiYHeightLineEditPtr_ -> setText(QString::number(value));
+        }
         settings_.height = value;
         roiYHeightSliderPtr_ -> blockSignals(true);
         roiYHeightSliderPtr_ -> setValue(value/info_.imageVStepSize);
@@ -174,7 +214,8 @@ namespace bias
     {
         if (checked)
         {
-            std::cout << __PRETTY_FUNCTION__ << ", " << checked << std::endl; 
+            updateFormat7SettingsFullSize();
+            setRoiControlsEnabled(true);
         }
     }
 
@@ -183,7 +224,8 @@ namespace bias
     {
         if (checked) 
         {
-            std::cout << __PRETTY_FUNCTION__ << ", " << checked << std::endl;
+            updateFormat7SettingsFullSize();
+            setRoiControlsEnabled(true);
         }
     }
 
@@ -193,29 +235,52 @@ namespace bias
     {
         if (checked)
         {
-            std::cout << __PRETTY_FUNCTION__ << ", " << checked << std::endl; 
+            updateFormat7Settings();
+            setRoiControlsEnabled(false);
         }
     }
 
 
     void Format7SettingsDialog::roiMaxSizePushButtonClicked()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        settings_.offsetX = 0;
+        settings_.offsetY = 0;
+        settings_.width = info_.maxWidth;
+        settings_.height = info_.maxHeight;
+        updateSlidersAndLineEdits();
+    }
+
+
+    void Format7SettingsDialog::imageCaptureStarted(bool logging)
+    {
+        imageParamGroupBoxPtr_ -> setEnabled(false);
+        if (logging)
+        {
+            roiGroupBoxPtr_ -> setEnabled(false);
+            if (isRoiShowChecked())
+            {
+                roiShowRadioButtonPtr_ -> setChecked(false);
+                roiOffRadioButtonPtr_ -> setChecked(true);
+            }
+
+        }
+    }
+
+
+    void Format7SettingsDialog::imageCaptureStopped()
+    { 
+        imageParamGroupBoxPtr_ -> setEnabled(true); 
+        roiGroupBoxPtr_ -> setEnabled(true);
     }
 
     
     // Private methods
     // ----------------------------------------------------------------------------------
-    void Format7SettingsDialog::initialize()
+    void Format7SettingsDialog::initialize(bool capturing, bool logging)
     {
         setupUi(this);
         setAttribute(Qt::WA_DeleteOnClose);
         setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
-
-        roiOffRadioButtonPtr_ -> setChecked(true);
-        roiShowRadioButtonPtr_ -> setChecked(false);
-        roiEnableRadioButtonPtr_ -> setChecked(false);
-        changed_ = false;
 
 
         if (cameraPtr_ == NULL)
@@ -264,7 +329,51 @@ namespace bias
         roiYHeightStepLabelPtr_ -> setText(yHeightInfoText);
 
         setRanges();
+        updateSlidersAndLineEdits();
 
+        // Set enable values for group boxes
+        if (capturing)
+        {
+            imageParamGroupBoxPtr_ -> setEnabled(false);
+        }
+        else
+        {
+            imageParamGroupBoxPtr_ -> setEnabled(true);
+        }
+
+        if (capturing && logging)
+        {
+            roiGroupBoxPtr_ -> setEnabled(false);
+        }
+        else
+        {
+            roiGroupBoxPtr_ -> setEnabled(true);
+        }
+
+        // --------------------------------------------------------------------
+        // TEMP - need to check if ROI is smaller that full image and if so set
+        // roi enabled radio button.
+        // --------------------------------------------------------------------
+        if (isRoiMaxSize())
+        {
+            roiOffRadioButtonPtr_ -> setChecked(true);
+            roiShowRadioButtonPtr_ -> setChecked(false);
+            roiEnableRadioButtonPtr_ -> setChecked(false);
+            setRoiControlsEnabled(true);
+        }
+        else 
+        {
+            roiOffRadioButtonPtr_ -> setChecked(false);
+            roiShowRadioButtonPtr_ -> setChecked(false);
+            roiEnableRadioButtonPtr_ -> setChecked(true);
+            setRoiControlsEnabled(false);
+        }
+
+        connectWidgets();
+    }
+
+    void Format7SettingsDialog::updateSlidersAndLineEdits()
+    {
         // Set Slider values
         roiXOffsetSliderPtr_ -> setValue(settings_.offsetX/info_.offsetHStepSize);
         roiYOffsetSliderPtr_ -> setValue(settings_.offsetY/info_.offsetVStepSize);
@@ -276,18 +385,6 @@ namespace bias
         roiYOffsetLineEditPtr_ -> setText(QString::number(settings_.offsetY));
         roiXWidthLineEditPtr_ -> setText(QString::number(settings_.width));
         roiYHeightLineEditPtr_ -> setText(QString::number(settings_.height));
-
-        connectWidgets();
-
-        // TEMP DEBUG
-        // ----------------------------------
-        std::cout << std::endl;
-        std::cout << "settings" << std::endl;
-        settings_.print();
-        std::cout << std::endl;
-        std::cout << "info" << std::endl;
-        info_.print();
-        // ----------------------------------
     }
 
     void Format7SettingsDialog::connectWidgets()
@@ -389,6 +486,20 @@ namespace bias
                 this,
                 SLOT(roiMaxSizePushButtonClicked())
                );
+
+        connect(
+                parent(),
+                SIGNAL(imageCaptureStarted(bool)),
+                this,
+                SLOT(imageCaptureStarted(bool))
+               );
+
+        connect(
+                parent(),
+                SIGNAL(imageCaptureStopped()),
+                this,
+                SLOT(imageCaptureStopped())
+               );
     }
 
 
@@ -446,6 +557,123 @@ namespace bias
     }
 
 
+    void Format7SettingsDialog::setFormat7Settings(
+            Format7Settings settings, 
+            float percentSpeed
+            )
+    { 
+        bool error = false;
+        unsigned int errorId;
+        QString errorMsg;
+        bool settingsAreValid;
+
+        CameraWindow* cameraWindowPtr = qobject_cast<CameraWindow *>(parent());
+        bool isCapturing = cameraWindowPtr -> isCapturing();
+
+        if (isCapturing) 
+        {
+            cameraWindowPtr -> stopImageCapture();
+        }
+
+        cameraPtr_ -> acquireLock();
+        try
+        {
+            settingsAreValid = cameraPtr_ -> validateFormat7Settings(settings);
+        }
+        catch (RuntimeError &runtimeError)
+        {
+            error = true;
+            errorId = runtimeError.id();
+            errorMsg = QString::fromStdString(runtimeError.what());
+        }
+        cameraPtr_ -> releaseLock();
+
+        if (error)
+        {
+            QString msgTitle("Camera Query Error");
+            QString msgText("Failed to validate format7 settings:");
+            msgText += QString("\n\nError ID: ") + QString::number(errorId);
+            msgText += "\n\n";
+            msgText += errorMsg;
+            QMessageBox::critical(this, msgTitle, msgText);
+            return;
+        }
+
+        if (settingsAreValid)
+        {
+            cameraPtr_ -> acquireLock();
+            try
+            {
+                cameraPtr_ -> setFormat7Configuration(settings, percentSpeed);
+            }
+            catch (RuntimeError &runtimeError)
+            {
+                error = true;
+                errorId = runtimeError.id();
+                errorMsg = QString::fromStdString(runtimeError.what());
+            }
+            cameraPtr_ -> releaseLock();
+            
+            if (error)
+            {
+                QString msgTitle("Set Format7 Error");
+                QString msgText("Failed to set format7 configuration:");
+                msgText += QString("\n\nError ID: ") + QString::number(errorId);
+                msgText += "\n\n";
+                msgText += errorMsg;
+                QMessageBox::critical(this, msgTitle, msgText);
+                return;
+            }
+        }
+        else
+        { 
+            QString msgTitle("Set Format7 Error");
+            QString msgText("Format7 settings invalid");
+            QMessageBox::critical(this, msgTitle, msgText);
+            return;
+        }
+
+        if (isCapturing)
+        {
+            cameraWindowPtr -> startImageCapture();
+        }
+    }
+
+
+    void Format7SettingsDialog::updateFormat7Settings()
+    {
+        setFormat7Settings(settings_);
+    }
+
+
+    void Format7SettingsDialog::updateFormat7SettingsFullSize()
+    { 
+        Format7Settings settingsFullSize = settings_;
+        settingsFullSize.offsetX = 0;
+        settingsFullSize.offsetY = 0;
+        settingsFullSize.width = info_.maxWidth;
+        settingsFullSize.height = info_.maxHeight;
+        setFormat7Settings(settingsFullSize);
+    }
+
+    
+    void Format7SettingsDialog::setRoiControlsEnabled(bool value)
+    {
+        roiXOffsetWidgetPtr_ -> setEnabled(value);
+        roiYOffsetWidgetPtr_ -> setEnabled(value);
+        roiXWidthWidgetPtr_ -> setEnabled(value);
+        roiYHeightWidgetPtr_ -> setEnabled(value);
+        if (value)
+        {
+            roiInfoLabelPtr_ -> setText(QString(""));
+        }
+        else
+        {
+            roiInfoLabelPtr_ -> setText(QString("Set to off or show to adjust ROI"));
+        }
+    }
+
+
     void Format7SettingsDialog::adjustOnXOffsetChange()
     {
         while ((settings_.width + settings_.offsetX) > info_.maxWidth)
@@ -459,7 +687,7 @@ namespace bias
     }
 
 
-    void  Format7SettingsDialog::adjustOnYOffsetChange()
+    void Format7SettingsDialog::adjustOnYOffsetChange()
     {
         while ((settings_.height + settings_.offsetY) > info_.maxHeight)
         {
@@ -494,6 +722,12 @@ namespace bias
         roiYOffsetSliderPtr_ -> setValue(settings_.offsetY/info_.offsetVStepSize);
         roiYOffsetSliderPtr_ -> blockSignals(false);
         roiYOffsetLineEditPtr_ -> setText(QString::number(settings_.offsetY));
+    }
+
+
+    bool Format7SettingsDialog::isRoiMaxSize()
+    {
+        return ((settings_.width == info_.maxWidth) && (settings_.height == info_.maxHeight));
     }
 
 } // namespace bias
