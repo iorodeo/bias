@@ -89,8 +89,12 @@ namespace bias
                     bool showErrorDlg=true
                     );
 
-            QString getCameraGuidString(RtnStatus &rtnStatus);
             RtnStatus setVideoFile(QString videoFileString);
+            void setUserCameraName(QString cameraName);
+            RtnStatus setWindowGeometry(QRect windowGeom);
+            RtnStatus setWindowGeometryFromJson(QByteArray jsonGeomArray);
+
+            QString getCameraGuidString(RtnStatus &rtnStatus);
             QString getVideoFileFullPath();
 
             bool isConnected();
@@ -177,6 +181,7 @@ namespace bias
             bool haveDefaultConfigFileDir_;
             unsigned int cameraNumber_;
 
+
             QDir defaultVideoFileDir_;
             QDir currentVideoFileDir_;
             QString currentVideoFileName_;
@@ -184,6 +189,8 @@ namespace bias
             QDir defaultConfigFileDir_;
             QDir currentConfigFileDir_;
             QString currentConfigFileName_;
+
+            QString userCameraName_;
 
             double timeStamp_;
             double framesPerSec_;
@@ -241,6 +248,7 @@ namespace bias
             void setDefaultFileDirs();
             void setupImageDisplayTimer();
             void setupCaptureDurationTimer();
+            void updateWindowTitle();
             
             // Menu setup methods
             void setupCameraMenu();

@@ -1095,6 +1095,81 @@ namespace bias
     }
 
 
+    void CameraWindow::setUserCameraName(QString cameraName)
+    {
+        RtnStatus rtnStatus;
+        userCameraName_ = cameraName;
+        updateWindowTitle();
+    }
+
+
+    RtnStatus CameraWindow::setWindowGeometry(QRect windowGeom)
+    {
+        // -------------------------------------------------------
+        // TO DO ... check geometry - make sure it is reasonable
+        // -------------------------------------------------------
+        RtnStatus rtnStatus;
+        setGeometry(windowGeom);
+        return rtnStatus;
+    }
+
+    RtnStatus CameraWindow::setWindowGeometryFromJson(QByteArray jsonGeomArray)
+    {
+        RtnStatus rtnStatus;
+
+        bool ok;
+        QString jsonGeomString = QString(jsonGeomArray);
+
+        // --------------------------------------------------------------------
+        // TO DO ... TEMPORARY 
+        // --------------------------------------------------------------------
+        jsonGeomString = jsonGeomString.replace(QString("%22"), QString("\""));
+        jsonGeomString = jsonGeomString.replace(QString("%20"), QString(" "));
+        // ---------------------------------------------------------------------
+
+        QVariantMap windowGeomMap = QtJson::parse(jsonGeomString, ok).toMap();
+
+        QList<QString> nameList;
+        nameList << QString("x") << QString("y") << QString("width") << QString("height");
+        std::cout << "jsonWindowGeom: " << jsonGeomString.toStdString() << std::endl;
+
+        QList<QString>::iterator it;
+        QMap<QString, int> nameToValueMap;
+        for (it=nameList.begin(); it!=nameList.end(); it++)
+        {
+            QString name = *it;
+            std::cout << "name: " << name.toStdString() << std::endl;
+            if (!windowGeomMap.contains(name))
+            {
+                QString errMsgText; 
+                errMsgText = QString("Set Window Geometry: '%1' position not present").arg(name);
+                rtnStatus.success = false;
+                rtnStatus.message = errMsgText;
+                return rtnStatus;
+            }
+            if (!windowGeomMap[name].canConvert<int>())
+            {
+                QString errMsgText;
+                errMsgText = QString("Set Window Geometry: unable to convert '%1' to int").arg(name);
+                rtnStatus.success = false;
+                rtnStatus.message = errMsgText;
+                return rtnStatus;
+            }
+            nameToValueMap[name] = windowGeomMap[name].toInt();
+        }
+        
+        QRect windowGeom(
+                nameToValueMap["x"], 
+                nameToValueMap["y"], 
+                nameToValueMap["width"], 
+                nameToValueMap["height"]
+                );
+        rtnStatus = setWindowGeometry(windowGeom);
+
+        return rtnStatus;
+    }
+
+
     QString CameraWindow::getVideoFileFullPath()
     {
         QString fileExtension;
@@ -1758,6 +1833,7 @@ namespace bias
         timeStamp_ = 0.0;
         framesPerSec_ = 0.0;
         frameCount_ = 0;
+        userCameraName_ = QString("");
 
         imageRotation_ = IMAGE_ROTATION_0;
         videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
@@ -1789,10 +1865,11 @@ namespace bias
 
         tabWidgetPtr_ -> setCurrentWidget(previewTabPtr_);
 
-        QString windowTitle("BIAS Camera Window, Guid: ");
-        windowTitle += QString::fromStdString(guid.toString());
-        setWindowTitle(windowTitle);
+        //QString windowTitle("BIAS Camera Window, Guid: ");
+        //windowTitle += QString::fromStdString(guid.toString());
+        //setWindowTitle(windowTitle);
 
+        updateWindowTitle();
         updateCameraInfoMessage();
         setCaptureTimeLabel(0.0);
 
@@ -2159,6 +2236,7 @@ namespace bias
         imageDisplayTimerPtr_ -> start(imageDisplayDt);
     }
 
+
     void CameraWindow::setupCaptureDurationTimer()
     {
         captureDurationTimerPtr_ = new QTimer(this);
@@ -2169,6 +2247,25 @@ namespace bias
                 this,
                 SLOT(checkDurationOnTimer())
                );
+    }
+
+
+    void CameraWindow::updateWindowTitle()
+    {
+        QString windowTitle;
+        if (userCameraName_.isEmpty())
+        {
+            cameraPtr_ -> acquireLock();
+            Guid guid = cameraPtr_ -> getGuid(); 
+            cameraPtr_ -> releaseLock();
+            QString guidString = QString::fromStdString(guid.toString());
+            windowTitle = QString("BIAS Camera Window, Guid: %1").arg(guidString);
+        }
+        else
+        {
+            windowTitle = QString("BIAS Camera Window, Name: %1").arg(userCameraName_);
+        }
+        setWindowTitle(windowTitle);
     }
 
 

@@ -224,8 +224,19 @@ namespace bias
         {
             cmdMap = handleGetFramesPerSec();
         }
+        else if (name == QString("set-camera-name"))
+        {
+            cmdMap = handleSetCameraName(value);
+        }
+        else if (name == QString("set-window-geometry"))
+        {
+            cmdMap = handleSetWindowGeometry(value);
+        }
         else if (name == QString("close"))
         {
+            // ----------------------------------------------------------------
+            // TO DO
+            // ----------------------------------------------------------------
             cmdMap.insert("success", true);
             cmdMap.insert("message", "");
             cmdMap.insert("value", "");
@@ -448,6 +459,39 @@ namespace bias
         return cmdMap;
     }
 
+
+    QVariantMap BasicHttpServer::handleSetCameraName(QString cameraName)
+    {
+        QVariantMap cmdMap;
+        cameraWindowPtr_ -> setUserCameraName(cameraName);
+        cmdMap.insert("success", true);
+        cmdMap.insert("message", "");
+        cmdMap.insert("value", "");
+        return cmdMap;
+    }
+
+
+    QVariantMap BasicHttpServer::handleSetWindowGeometry(QString jsonGeom)
+    {
+        QVariantMap cmdMap;
+        std::cout << "jsonGeom: " << jsonGeom.toStdString() << std::endl;
+        QByteArray jsonGeomArray = jsonGeom.toLatin1();
+        RtnStatus status = cameraWindowPtr_ -> setWindowGeometryFromJson(jsonGeomArray);
+        cmdMap.insert("success", status.success);
+        cmdMap.insert("message", status.message);
+        cmdMap.insert("value", "");
+        return cmdMap;
+    }
+
+
+    QVariantMap BasicHttpServer::handleClose()
+    {
+        // --------------------------------------------------------------------
+        // TO DO
+        // --------------------------------------------------------------------
+        QVariantMap cmdMap;
+        return cmdMap;
+    }
 
     void BasicHttpServer::sendBadRequestResp(QTextStream &os, QString msg)
     { 
