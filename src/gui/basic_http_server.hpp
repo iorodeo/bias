@@ -62,6 +62,7 @@ namespace bias
     };
 
     QStringList splitRequestString(QString reqString);
+    QString replaceEscapeChars(QString input);
 
 
 } // namespace bias

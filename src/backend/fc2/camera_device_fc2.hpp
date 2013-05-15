@@ -83,10 +83,15 @@ namespace bias {
             fc2Image rawImage_;
             fc2Image convertedImage_;
 
+            TimeStamp timeStamp_;
+            unsigned int cycleSecondsLast_;   // Used with embedded timestamp only
+
+            bool isFirst_;
             bool rawImageCreated_;
             bool convertedImageCreated_;
+            bool haveEmbeddedTimeStamp_;
 
-
+            void initialize();
             void createRawImage();
             void destroyRawImage();
             void grabImageCommon();
@@ -97,6 +102,7 @@ namespace bias {
             //void createPropertyMap();
 
             void setupTimeStamping();
+            void updateTimeStamp();
 
             // fc2 get methods
             // ---------------

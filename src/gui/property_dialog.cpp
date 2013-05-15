@@ -402,6 +402,7 @@ namespace bias
         property.value = value;
         property.absoluteControl = false;
         setProperty(property);
+        std::cout << property.toString() << std::endl;
     }
 
 

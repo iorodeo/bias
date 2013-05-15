@@ -10,7 +10,7 @@ namespace bias
     const uchar CompressedFrame_ufmf::BACKGROUND_MEMBER_VALUE = 255; 
     const uchar CompressedFrame_ufmf::FOREGROUND_MEMBER_VALUE = 0;
     const unsigned int CompressedFrame_ufmf::DEFAULT_BOX_LENGTH = 30; 
-    const double CompressedFrame_ufmf::DEFAULT_FG_MAX_FRAC_COMPRESS = 1.0;
+    const double CompressedFrame_ufmf::DEFAULT_FG_MAX_FRAC_COMPRESS = 0.2;
 
 
     // Methods

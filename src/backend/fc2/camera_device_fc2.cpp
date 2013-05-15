@@ -10,25 +10,42 @@
 
 namespace bias {
 
+    const unsigned int MAX_CYCLE_SECONDS = 128;
+    const unsigned int MAX_CYCLE_COUNT = 8000; 
+    const unsigned int MAX_CYCLE_OFFSET = 3072;
+    const unsigned int USEC_PER_CYCLE_COUNT = (1000000/MAX_CYCLE_COUNT);
+    const unsigned int CYCLE_OFFSET_MASK = 0b111111110000;
+
     CameraDevice_fc2::CameraDevice_fc2() : CameraDevice()
     {
-        rawImageCreated_ = false;
-        convertedImageCreated_ = false;
+        initialize();
     }
 
 
     CameraDevice_fc2::CameraDevice_fc2(Guid guid) : CameraDevice(guid)
     {
-        rawImageCreated_ = false;
-        convertedImageCreated_ = false;
+        initialize();
         fc2Error error= fc2CreateContext(&context_);
         if (error != FC2_ERROR_OK) 
         {
+            // TODO ... shouldn't throw exception in construction change this
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
             ssError << ": unable to create FlyCapture2 context"; 
             throw RuntimeError(ERROR_FC2_CREATE_CONTEXT, ssError.str());
         }
+    }
+
+
+    void CameraDevice_fc2::initialize()
+    {
+        isFirst_ = true;
+        rawImageCreated_ = false;
+        convertedImageCreated_ = false;
+        haveEmbeddedTimeStamp_ = false;
+        timeStamp_.seconds = 0;
+        timeStamp_.microSeconds = 0;
+        cycleSecondsLast_ = 0;
     }
 
 
@@ -131,6 +148,7 @@ namespace bias {
                 throw RuntimeError(ERROR_FC2_START_CAPTURE, ssError.str());
             }
             capturing_ = true;
+            isFirst_ = true;
         }
     }
 
@@ -748,12 +766,12 @@ namespace bias {
 
     TimeStamp CameraDevice_fc2::getImageTimeStamp()
     {
-        TimeStamp timeStamp;
-        fc2TimeStamp timeStamp_fc2 = fc2GetImageTimeStamp(&rawImage_);
-
-        timeStamp.seconds = (unsigned long long)(timeStamp_fc2.seconds);
-        timeStamp.microSeconds = timeStamp_fc2.microSeconds;
-        return timeStamp;
+        //TimeStamp timeStamp;
+        //fc2TimeStamp timeStamp_fc2 = fc2GetImageTimeStamp(&rawImage_);
+        //timeStamp.seconds = (unsigned long long)(timeStamp_fc2.seconds);
+        //timeStamp.microSeconds = timeStamp_fc2.microSeconds;
+        //return timeStamp;
+        return timeStamp_;
     }
 
     std::string CameraDevice_fc2::getVendorName()
@@ -921,6 +939,9 @@ namespace bias {
             throw RuntimeError(ERROR_FC2_RETRIEVE_BUFFER, ssError.str());
         }
 
+        updateTimeStamp();
+        isFirst_ = false;
+
         // --------------------------------------------------------------
         // Convert image ...
         // --------------------------------------------------------------
@@ -964,12 +985,14 @@ namespace bias {
         }
 
         // If embedded time stamping available enable it
-        if (embeddedInfo.timestamp.available != 0)
+        if (embeddedInfo.timestamp.available == TRUE)
         {
+            haveEmbeddedTimeStamp_ = true;
             embeddedInfo.timestamp.onOff = true;
         }
         else
         {
+            haveEmbeddedTimeStamp_ = false;
             embeddedInfo.timestamp.onOff = false;
         }
 
@@ -980,6 +1003,79 @@ namespace bias {
             ssError << __PRETTY_FUNCTION__;
             ssError << ": unable to set FlyCapture2 embedded image info";
             throw RuntimeError(ERROR_FC2_SET_EMBEDDED_IMAGE_INFO, ssError.str());
+        }
+
+        // Initalize time stamp data
+        timeStamp_.seconds = 0;
+        timeStamp_.microSeconds = 0;
+        cycleSecondsLast_ = 0;
+    }
+
+
+    void CameraDevice_fc2::updateTimeStamp()
+    {
+        fc2TimeStamp timeStamp_fc2 = fc2GetImageTimeStamp(&rawImage_);
+
+        if (haveEmbeddedTimeStamp_)
+        {
+            // DEVEL - get raw time stamp data from image 
+            // ----------------------------------------------------------------
+            //unsigned int  stamp;
+            //unsigned char* pStamp = (unsigned char*) &stamp;
+            //for (int i=0; i<4; i++)
+            //{
+            //    pStamp[i] = rawImage_.pData[3-i];
+            //}
+            // ----------------------------------------------------------------
+
+            if (isFirst_)
+            {
+                timeStamp_.seconds = 0;
+                timeStamp_.microSeconds = 0;
+                cycleSecondsLast_ = timeStamp_fc2.cycleSeconds;
+            }
+            else
+            {
+                unsigned int cycleSeconds;
+                unsigned int cycleCount;
+                unsigned int cycleOffset;
+                unsigned int deltaCycleSeconds;
+
+                // DEVEL - convert raw time stamp data to cycleSeconds, etc.
+                // --------------------------------------------------------------------------
+                //cycleSeconds = (stamp >> 25) & 0b1111111;
+                //cycleCount   = (stamp >> 12) & 0b1111111111111;  
+                //cycleOffset  = (stamp >> 0 ) & 0b111111110000;   
+                //std::cout << cycleSeconds << ", " << cycleCount << ", " << cycleOffset << std::endl;
+                //std::cout << cycleSeconds << ", " << cycleCount << ", " << cycleOffset << std::endl;
+                //std::cout << std::endl;
+                // ---------------------------------------------------------------------------
+
+                cycleSeconds = timeStamp_fc2.cycleSeconds;
+                cycleCount = timeStamp_fc2.cycleCount;
+                cycleOffset = timeStamp_fc2.cycleOffset;
+                cycleOffset &= CYCLE_OFFSET_MASK;
+                if (timeStamp_fc2.cycleSeconds >= cycleSecondsLast_)
+                {
+                    deltaCycleSeconds = cycleSeconds; 
+                    deltaCycleSeconds -= cycleSecondsLast_;
+                }
+                else
+                {
+                    deltaCycleSeconds = MAX_CYCLE_SECONDS; 
+                    deltaCycleSeconds += timeStamp_fc2.cycleSeconds; 
+                    deltaCycleSeconds -= cycleSecondsLast_;
+                }
+                timeStamp_.seconds += (unsigned long long)(deltaCycleSeconds);
+                timeStamp_.microSeconds = USEC_PER_CYCLE_COUNT*cycleCount;
+                timeStamp_.microSeconds += (USEC_PER_CYCLE_COUNT*cycleOffset)/MAX_CYCLE_OFFSET;
+                cycleSecondsLast_ = timeStamp_fc2.cycleSeconds;
+            }
+        }
+        else
+        {
+            timeStamp_.seconds = (unsigned long long)(timeStamp_fc2.seconds);
+            timeStamp_.microSeconds = timeStamp_fc2.microSeconds;
         }
     }
 

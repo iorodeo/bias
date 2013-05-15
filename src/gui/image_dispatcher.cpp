@@ -4,6 +4,14 @@
 #include <iostream>
 #include <QThread>
 
+// DEVEL
+// ----------------------------------------------------------------------------
+#include "camera_window.hpp"
+#include <QDir>
+#include <QFileInfo>
+#include <fstream>
+// ----------------------------------------------------------------------------
+
 namespace bias
 {
 
@@ -93,6 +101,18 @@ namespace bias
         fpsEstimator_.reset();
         releaseLock();
 
+        // DEVEL
+        // --------------------------------------------------------------------
+        CameraWindow* cameraWindowPtr = qobject_cast<CameraWindow *>(parent());
+        QDir videoFileDir = cameraWindowPtr -> getVideoFileDir();
+        QFileInfo stampFileInfo = QFileInfo(videoFileDir, "stamp_log.txt");
+        std::string stampFileName = stampFileInfo.absoluteFilePath().toStdString();
+        std::cout << stampFileName << std::endl;
+        std::ofstream stampOutStream;
+        stampOutStream.open(stampFileName);
+
+        // --------------------------------------------------------------------
+
         while (!done) 
         {
 
@@ -120,12 +140,21 @@ namespace bias
             currentTimeStamp_ = newStampImage.timeStamp;
             frameCount_ = newStampImage.frameCount;
             fpsEstimator_.update(newStampImage.timeStamp);
-            releaseLock();
-
-            acquireLock();
             done = stopped_;
             releaseLock();
+
+            // DEVEL
+            // ----------------------------------------------------------------
+            stampOutStream << QString::number(currentTimeStamp_,'g',15).toStdString(); 
+            stampOutStream << std::endl;
+            // ----------------------------------------------------------------
+
         }
+
+        // DEVEL
+        // --------------------------------------------------------------------
+        stampOutStream.close();
+        // --------------------------------------------------------------------
     }
 
 } // namespace bias

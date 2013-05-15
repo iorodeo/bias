@@ -96,6 +96,7 @@ namespace bias
 
             QString getCameraGuidString(RtnStatus &rtnStatus);
             QString getVideoFileFullPath();
+            QDir getVideoFileDir();
 
             bool isConnected();
             bool isCapturing();

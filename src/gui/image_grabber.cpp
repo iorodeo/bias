@@ -126,6 +126,14 @@ namespace bias {
         // Grab images from camera until the done signal is given
         while (!done)
         {
+            //// DEVEL
+            //// ---------------------------------------------------
+            //if (!isFirst) 
+            //{
+            //    TSleepThread::msleep(1);
+            //}
+            //// ---------------------------------------------------
+
             acquireLock();
             done = stopped_;
             releaseLock();
@@ -224,7 +232,6 @@ namespace bias {
                     }
                 }
             }
-
 
         } // while (!done) 
 

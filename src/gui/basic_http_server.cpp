@@ -9,7 +9,43 @@
 
 namespace bias
 {
+    // Constants
+    // ------------------------------------------------------------------------
+    static QMap<QString,QString> createEscapeToCharMap()
+    {
+        QMap<QString,QString> map;
+        map[QString("%20")] = QString(" ");
+        map[QString("%24")] = QString("$");
+        map[QString("%26")] = QString("&");
+        map[QString("%60")] = QString("`");
+        map[QString("%3A")] = QString(":");
+        map[QString("%3C")] = QString("<");
+        map[QString("%3E")] = QString(">");
+        map[QString("%5B")] = QString("[");
+        map[QString("%5D")] = QString("]");
+        map[QString("%7B")] = QString("{");
+        map[QString("%7D")] = QString("}");
+        map[QString("%22")] = QString("\"");
+        map[QString("%23")] = QString("#");
+        map[QString("%25")] = QString("%");
+        map[QString("%40")] = QString("@");
+        map[QString("%2F")] = QString("/");
+        map[QString("%3B")] = QString(";");
+        map[QString("%3D")] = QString("=");
+        map[QString("%3F")] = QString("?");
+        map[QString("%5C")] = QString("\\"); 
+        map[QString("%5E")] = QString("^");
+        map[QString("%7C")] = QString("|");
+        map[QString("%7E")] = QString("~"); 
+        map[QString("%27")] = QString("'");
+        map[QString("%5C")] = QString("\\"); 
+        map[QString("%2C")] = QString(",");
+        return map;
+    }
+    QMap<QString,QString> ESCAPE_TO_CHAR_MAP = createEscapeToCharMap();
 
+    // Methods
+    // -------------------------------------------------------------------------
     BasicHttpServer::BasicHttpServer(CameraWindow *cameraWindow, QObject *parent)
         : QTcpServer(parent)
     { 
@@ -69,6 +105,10 @@ namespace bias
 
         // Parse tokens
         QString paramsString = tokens[1];
+        std::cout << "1: paramsString = " << paramsString.toStdString() << std::endl;
+        paramsString = replaceEscapeChars(paramsString);
+        std::cout << "2: paramsString = " << paramsString.toStdString() << std::endl;
+
         if (paramsString.length() == 1)
         {
             sendRunningResp(os);
@@ -474,7 +514,6 @@ namespace bias
     QVariantMap BasicHttpServer::handleSetWindowGeometry(QString jsonGeom)
     {
         QVariantMap cmdMap;
-        std::cout << "jsonGeom: " << jsonGeom.toStdString() << std::endl;
         QByteArray jsonGeomArray = jsonGeom.toLatin1();
         RtnStatus status = cameraWindowPtr_ -> setWindowGeometryFromJson(jsonGeomArray);
         cmdMap.insert("success", status.success);
@@ -540,6 +579,17 @@ namespace bias
         reqList.append(token1);
         reqList.append(token2);
         return reqList;
+    }
+
+    QString replaceEscapeChars(QString input)
+    {
+        QString output(input);
+        QMap<QString,QString>::iterator it;
+        for (it=ESCAPE_TO_CHAR_MAP.begin(); it!=ESCAPE_TO_CHAR_MAP.end(); it++)
+        {
+            output.replace(it.key(), it.value());
+        }
+        return output;
     }
 
 } // namespace bias

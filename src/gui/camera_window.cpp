@@ -245,11 +245,17 @@ namespace bias
         newImageQueuePtr_ -> clear();
         logImageQueuePtr_ -> clear();
 
-        imageGrabberPtr_ = new ImageGrabber(cameraPtr_, newImageQueuePtr_);
+        imageGrabberPtr_ = new ImageGrabber(
+                cameraPtr_, 
+                newImageQueuePtr_, 
+                this
+                );
+
         imageDispatcherPtr_ = new ImageDispatcher(
                 logging_, 
                 newImageQueuePtr_,
-                logImageQueuePtr_
+                logImageQueuePtr_,
+                this
                 );
 
         connect(
@@ -322,7 +328,11 @@ namespace bias
             // Set output file
             videoWriterPtr -> setFileName(videoFileFullPath);
 
-            imageLoggerPtr_ = new ImageLogger(videoWriterPtr, logImageQueuePtr_);
+            imageLoggerPtr_ = new ImageLogger(
+                    videoWriterPtr, 
+                    logImageQueuePtr_, 
+                    this
+                    );
 
             // Connect image logger error signals
             connect(
@@ -1123,22 +1133,20 @@ namespace bias
         // --------------------------------------------------------------------
         // TO DO ... TEMPORARY 
         // --------------------------------------------------------------------
-        jsonGeomString = jsonGeomString.replace(QString("%22"), QString("\""));
-        jsonGeomString = jsonGeomString.replace(QString("%20"), QString(" "));
+        //jsonGeomString = jsonGeomString.replace(QString("%22"), QString("\""));
+        //jsonGeomString = jsonGeomString.replace(QString("%20"), QString(" "));
         // ---------------------------------------------------------------------
 
         QVariantMap windowGeomMap = QtJson::parse(jsonGeomString, ok).toMap();
 
         QList<QString> nameList;
         nameList << QString("x") << QString("y") << QString("width") << QString("height");
-        std::cout << "jsonWindowGeom: " << jsonGeomString.toStdString() << std::endl;
 
         QList<QString>::iterator it;
         QMap<QString, int> nameToValueMap;
         for (it=nameList.begin(); it!=nameList.end(); it++)
         {
             QString name = *it;
-            std::cout << "name: " << name.toStdString() << std::endl;
             if (!windowGeomMap.contains(name))
             {
                 QString errMsgText; 
@@ -1190,6 +1198,11 @@ namespace bias
         QFileInfo videoFileInfo(currentVideoFileDir_, fileName);
         QString videoFileFullPath = videoFileInfo.absoluteFilePath();
         return videoFileFullPath;
+    }
+
+    QDir CameraWindow::getVideoFileDir()
+    {
+        return currentVideoFileDir_;
     }
 
 
@@ -1865,10 +1878,6 @@ namespace bias
 
         tabWidgetPtr_ -> setCurrentWidget(previewTabPtr_);
 
-        //QString windowTitle("BIAS Camera Window, Guid: ");
-        //windowTitle += QString::fromStdString(guid.toString());
-        //setWindowTitle(windowTitle);
-
         updateWindowTitle();
         updateCameraInfoMessage();
         setCaptureTimeLabel(0.0);
@@ -2538,6 +2547,7 @@ namespace bias
         }
     } 
 
+
     void CameraWindow::updateAllMenus()
     {
         updateFileMenu();
@@ -2547,16 +2557,24 @@ namespace bias
         updateDisplayMenu();
     }
 
+
     void CameraWindow::updateFileMenu()
     {
         if (capturing_ || !connected_)
         {
             actionFileLoadConfigPtr_ -> setEnabled(false);
-            actionFileSaveConfigPtr_ -> setEnabled(false);
         }
         else
         {
             actionFileLoadConfigPtr_ -> setEnabled(true);
+        }
+
+        if (!connected_)
+        {
+            actionFileSaveConfigPtr_ -> setEnabled(false);
+        }
+        else 
+        {
             actionFileSaveConfigPtr_ -> setEnabled(true);
         }
     }
