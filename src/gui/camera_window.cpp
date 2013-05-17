@@ -484,6 +484,18 @@ namespace bias
             return rtnStatus; 
         }
 
+        if (fileName.isEmpty() || fileName.isNull())
+        {
+            QString msgText("Unable to open file: no filename given");
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this, msgTitle, msgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = msgText;
+            return rtnStatus;
+        }
+
         QByteArray jsonConfig = getConfigurationJson(rtnStatus);
         if ( (!rtnStatus.success) || (jsonConfig.isEmpty()) ) 
         { 
@@ -496,7 +508,7 @@ namespace bias
         bool ok = configFile.open(QIODevice::WriteOnly);
         if (!ok)
         {
-            QString msgText = QString("Unable to open file %s").arg(fileName);
+            QString msgText = QString("Unable to open file %1").arg(fileName);
             if (showErrorDlg)
             {
                 QMessageBox::critical(this, msgTitle, msgText);
@@ -524,7 +536,7 @@ namespace bias
 
         if (!configFile.exists())
         {
-            QString msgText = QString("Configuration file, %s, does not exist").arg(fileName);
+            QString msgText = QString("Configuration file, %1, does not exist").arg(fileName);
             if (showErrorDlg)
             {
                 QMessageBox::critical(this, msgTitle, msgText);
@@ -537,7 +549,7 @@ namespace bias
         bool ok = configFile.open(QIODevice::ReadOnly);
         if (!ok)
         {
-            QString msgText = QString("Unable to open configuration file %s").arg(fileName);
+            QString msgText = QString("Unable to open configuration file %1").arg(fileName);
             if (showErrorDlg)
             {
                 QMessageBox::critical(this, msgTitle, msgText);
@@ -776,15 +788,18 @@ namespace bias
 
         QVariantMap oldConfigMap = getConfigurationMap(rtnStatus);
 
-        rtnStatus = setConfigurationFromMap(configMap);
+        rtnStatus = setConfigurationFromMap(configMap,showErrorDlg);
         if (!rtnStatus.success)
         {
+            QString origErrMsg = rtnStatus.message;
+
             // Something went wrong - try to revert to old configuration
-            rtnStatus = setConfigurationFromMap(oldConfigMap);
+            rtnStatus = setConfigurationFromMap(oldConfigMap,showErrorDlg);
             if (!rtnStatus.success)
             {
-                QString errMsgText("Error loading configuration, worse yet");  
-                errMsgText += " unable to revert to previous configuration";
+                QString errMsgText("Error loading configuration and ");  
+                errMsgText += " unable to revert to previous configuration, ";
+                errMsgText += origErrMsg;
                 if (showErrorDlg)
                 {
                     QMessageBox::critical(this, errMsgTitle, errMsgText);
@@ -795,8 +810,9 @@ namespace bias
             }
             else
             {
-                QString errMsgText("Error loading configuration");  
-                errMsgText += " reverting to previous configuration";
+                QString errMsgText = QString("Error loading configuration, ");  
+                errMsgText += origErrMsg;
+                errMsgText += ", reverting to previous configuration";
                 if (showErrorDlg)
                 {
                     QMessageBox::critical(this, errMsgTitle, errMsgText);
@@ -1091,7 +1107,7 @@ namespace bias
             QString msgText("Directory does not exist");
             if (!rtnStatus.success)
             {
-                rtnStatus.message = QString("%s, %s").arg(rtnStatus.message).arg(msgText);
+                rtnStatus.message = QString("%1, %2").arg(rtnStatus.message).arg(msgText);
             }
             else
             {
