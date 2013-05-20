@@ -34,6 +34,7 @@ namespace bias
             void handleGetRequest(QTcpSocket *socket, QStringList &tokens);
             void handleParamsRequest(QTextStream &os, QStringList &paramsList);
             QVariantMap paramsRequestSwitchYard(QString name, QString value);
+            bool closeFlag_;
 
             QVariantMap handleConnectRequest();
             QVariantMap handleDisconnectRequest();
@@ -54,6 +55,7 @@ namespace bias
             QVariantMap handleGetFramesPerSec();
             QVariantMap handleSetCameraName(QString cameaName);
             QVariantMap handleSetWindowGeometry(QString jsonGeom);
+            QVariantMap handleGetWindowGeometry();
             QVariantMap handleClose();
 
             void sendBadRequestResp(QTextStream &os, QString msg);

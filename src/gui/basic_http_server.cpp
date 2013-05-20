@@ -50,6 +50,7 @@ namespace bias
         : QTcpServer(parent)
     { 
         cameraWindowPtr_ = QPointer<CameraWindow>(cameraWindow);
+        closeFlag_ = false;
     }
 
     void BasicHttpServer::incomingConnection(int socket) 
@@ -81,6 +82,10 @@ namespace bias
                 delete socketPtr;
             }
         } 
+        if (closeFlag_)
+        {
+            cameraWindowPtr_ -> close();
+        }
     }
 
 
@@ -272,14 +277,13 @@ namespace bias
         {
             cmdMap = handleSetWindowGeometry(value);
         }
+        else if (name == QString("get-window-geometry"))
+        {
+            cmdMap = handleGetWindowGeometry();
+        }
         else if (name == QString("close"))
         {
-            // ----------------------------------------------------------------
-            // TO DO
-            // ----------------------------------------------------------------
-            cmdMap.insert("success", true);
-            cmdMap.insert("message", "");
-            cmdMap.insert("value", "");
+            cmdMap = handleClose();
         }
         else 
         {
@@ -523,12 +527,33 @@ namespace bias
     }
 
 
+    QVariantMap BasicHttpServer::handleGetWindowGeometry()
+    {
+        QVariantMap cmdMap;
+        QVariantMap windowGeomMap = cameraWindowPtr_ -> getWindowGeometryMap();
+        cmdMap.insert("success", true);
+        cmdMap.insert("message", "");
+        cmdMap.insert("value", windowGeomMap);
+        return cmdMap;
+    }
+
+
     QVariantMap BasicHttpServer::handleClose()
     {
-        // --------------------------------------------------------------------
-        // TO DO
-        // --------------------------------------------------------------------
         QVariantMap cmdMap;
+        if (cameraWindowPtr_ -> isCapturing())
+        {
+            cmdMap.insert("success", false);
+            cmdMap.insert("message", "unable to close window, capturing images");
+            cmdMap.insert("value", "");
+        }
+        else
+        {
+            closeFlag_ = true; // Delay closing window until after we send the response
+            cmdMap.insert("success", true);
+            cmdMap.insert("message", "");
+            cmdMap.insert("value","");
+        }
         return cmdMap;
     }
 

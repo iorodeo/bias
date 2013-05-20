@@ -29,6 +29,7 @@
 #include <QThreadPool>
 #include <QSignalMapper>
 #include <QFile>
+#include <QApplication>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -1131,13 +1132,27 @@ namespace bias
 
     RtnStatus CameraWindow::setWindowGeometry(QRect windowGeom)
     {
-        // -------------------------------------------------------
-        // TO DO ... check geometry - make sure it is reasonable
-        // -------------------------------------------------------
         RtnStatus rtnStatus;
+        if (!windowGeom.isValid())
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("window geometry is not a valid rectangle");
+            return rtnStatus;
+        }
+
+        QPointer<QDesktopWidget> desktopWidgetPtr = QApplication::desktop();
+        int screenNumber = desktopWidgetPtr -> screenNumber();
+        QRect desktopGeom = desktopWidgetPtr -> availableGeometry(screenNumber);
+        if (!desktopGeom.contains(windowGeom))
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("window geometery is not contain within desktop");
+            return rtnStatus;
+        }
         setGeometry(windowGeom);
         return rtnStatus;
     }
+
 
     RtnStatus CameraWindow::setWindowGeometryFromJson(QByteArray jsonGeomArray)
     {
@@ -1145,14 +1160,6 @@ namespace bias
 
         bool ok;
         QString jsonGeomString = QString(jsonGeomArray);
-
-        // --------------------------------------------------------------------
-        // TO DO ... TEMPORARY 
-        // --------------------------------------------------------------------
-        //jsonGeomString = jsonGeomString.replace(QString("%22"), QString("\""));
-        //jsonGeomString = jsonGeomString.replace(QString("%20"), QString(" "));
-        // ---------------------------------------------------------------------
-
         QVariantMap windowGeomMap = QtJson::parse(jsonGeomString, ok).toMap();
 
         QList<QString> nameList;
@@ -1191,6 +1198,24 @@ namespace bias
         rtnStatus = setWindowGeometry(windowGeom);
 
         return rtnStatus;
+    }
+
+
+    QRect CameraWindow::getWindowGeometry()
+    {
+        return geometry();
+    }
+
+
+    QVariantMap CameraWindow::getWindowGeometryMap()
+    {
+        QVariantMap windowGeomMap;
+        QRect windowGeom = getWindowGeometry();
+        windowGeomMap.insert("x", windowGeom.x());
+        windowGeomMap.insert("y", windowGeom.y());
+        windowGeomMap.insert("width", windowGeom.width());
+        windowGeomMap.insert("height", windowGeom.height());
+        return windowGeomMap;
     }
 
 

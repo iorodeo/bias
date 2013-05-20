@@ -93,6 +93,8 @@ namespace bias
             void setUserCameraName(QString cameraName);
             RtnStatus setWindowGeometry(QRect windowGeom);
             RtnStatus setWindowGeometryFromJson(QByteArray jsonGeomArray);
+            QRect getWindowGeometry();
+            QVariantMap getWindowGeometryMap();
 
             QString getCameraGuidString(RtnStatus &rtnStatus);
             QString getVideoFileFullPath();
