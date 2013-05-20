@@ -305,7 +305,6 @@ namespace bias
             void setCaptureTimeLabel(double timeStamp);
             void setServerPortText();
 
-
             QString getVideoFileFullPathWithGuid();
             QString getConfigFileFullPath();
 
@@ -316,8 +315,13 @@ namespace bias
                     PropertyInfo propInfo, 
                     bool showErrorDlg
                     );
-            RtnStatus setFormatSettingsFromMap(
-                    QVariantMap settingsMap, 
+            RtnStatus setFormat7SettingsFromMap(
+                    QVariantMap settingsMap,
+                    Format7Info format7Info,
+                    bool showErrorDlg
+                    );
+            RtnStatus setLoggingFormatFromMap(
+                    QVariantMap formatMap, 
                     bool showErrorDlg
                     );
             RtnStatus setTimerFromMap(QVariantMap timerMap, bool showErrorDlg);
@@ -341,10 +345,14 @@ namespace bias
     FrameRate convertStringToFrameRate(QString frameRateString);
     TriggerType convertStringToTriggerType(QString trigTypeString);
     VideoFileFormat convertStringToVideoFileFormat(QString formatString);
+    ImageMode convertStringToImageMode(QString imageModeString);
+    PixelFormat convertStringToPixelFormat(QString pixelFormatString);
 
-    QMap<QString,VideoMode> getStringToVideoModeMap();
-    QMap<QString,FrameRate> getStringToFrameRateMap();
-    QMap<QString,TriggerType> getStringToTriggerTypeMap();
+    QMap<QString, VideoMode> getStringToVideoModeMap();
+    QMap<QString, FrameRate> getStringToFrameRateMap();
+    QMap<QString, TriggerType> getStringToTriggerTypeMap();
+    QMap<QString, ImageMode> getStringToImageModeMap();
+    QMap<QString, PixelFormat> getStringToPixelFormatMap();
 
     QString propNameToCamelCase(QString propName);
 

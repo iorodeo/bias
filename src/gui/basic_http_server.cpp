@@ -110,9 +110,7 @@ namespace bias
 
         // Parse tokens
         QString paramsString = tokens[1];
-        std::cout << "1: paramsString = " << paramsString.toStdString() << std::endl;
         paramsString = replaceEscapeChars(paramsString);
-        std::cout << "2: paramsString = " << paramsString.toStdString() << std::endl;
 
         if (paramsString.length() == 1)
         {

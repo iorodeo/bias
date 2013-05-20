@@ -608,6 +608,7 @@ namespace bias
         VideoMode videoMode;
         FrameRate frameRate;
         TriggerType trigType;
+        Format7Settings format7Settings;
         QString errorMsg;
         bool error = false;
         unsigned int errorId;
@@ -622,6 +623,7 @@ namespace bias
             videoMode = cameraPtr_ -> getVideoMode();
             frameRate = cameraPtr_ -> getFrameRate();
             trigType = cameraPtr_ -> getTriggerType();
+            format7Settings = cameraPtr_ -> getFormat7Settings();
         }
         catch (RuntimeError &runtimeError)
         {
@@ -686,6 +688,21 @@ namespace bias
         cameraMap.insert("frameRate", frameRateString);
         QString trigTypeString = QString::fromStdString(getTriggerTypeString(trigType));
         cameraMap.insert("triggerType", trigTypeString);
+
+        // Create format7 settings map
+        QVariantMap format7SettingsMap;
+        std::string imageModeStdString = getImageModeString(format7Settings.mode);
+        QString imageModeString = QString::fromStdString(imageModeStdString);
+        format7SettingsMap.insert("mode", imageModeString);
+        format7SettingsMap.insert("offsetX", format7Settings.offsetX);
+        format7SettingsMap.insert("offsetY", format7Settings.offsetY);
+        format7SettingsMap.insert("width", format7Settings.width);
+        format7SettingsMap.insert("height", format7Settings.height);
+        std::string pixFormatStdString = getPixelFormatString(format7Settings.pixelFormat);
+        QString pixFormatString = QString::fromStdString(pixFormatStdString);
+        format7SettingsMap.insert("pixelFormat",pixFormatString);
+        cameraMap.insert("format7Settings", format7SettingsMap);
+
         configurationMap.insert("camera", cameraMap);
 
         // Add logging information
@@ -3123,6 +3140,8 @@ namespace bias
         QString currModelName;
         PropertyList currCameraPropList;
         PropertyInfoMap cameraPropInfoMap;
+        Format7Settings format7Settings;
+        Format7Info format7Info;
         QString errorMsg;
         bool error = false;
         unsigned int errorId;
@@ -3135,6 +3154,8 @@ namespace bias
             currModelName = QString::fromStdString(cameraPtr_ -> getModelName());
             currCameraPropList = cameraPtr_ -> getListOfProperties();
             cameraPropInfoMap = cameraPtr_ -> getMapOfPropertyInfos();
+            format7Settings = cameraPtr_ -> getFormat7Settings();
+            format7Info = cameraPtr_ -> getFormat7Info(format7Settings.mode);
         }
         catch (RuntimeError &runtimeError)
         {
@@ -3263,6 +3284,7 @@ namespace bias
             {
                 return rtnStatus;
             }
+
         } // for ( propListIt ...
 
         // Video Mode
@@ -3365,6 +3387,25 @@ namespace bias
         // --------------------------------------------------------------------
         // TO DO - Check if trigger type is allowed and if so set to new value
         // --------------------------------------------------------------------
+
+        // Format7 settings
+        QVariantMap format7SettingsMap = cameraMap["format7Settings"].toMap();
+        if (cameraPropMap.isEmpty())
+        {
+            QString errMsgText("Camera: format7 settings are not present");
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        rtnStatus = setFormat7SettingsFromMap(format7SettingsMap, format7Info, showErrorDlg);
+        if (!rtnStatus.success)
+        {
+            return rtnStatus;
+        }
 
         rtnStatus.success = true;
         rtnStatus.message = QString("");
@@ -3528,7 +3569,7 @@ namespace bias
             rtnStatus.message = errMsgText;
             return rtnStatus;
         }
-        rtnStatus = setFormatSettingsFromMap(formatSettingsMap,showErrorDlg);
+        rtnStatus = setLoggingFormatFromMap(formatSettingsMap,showErrorDlg);
         if (!rtnStatus.success)
         {
             return rtnStatus;
@@ -4356,17 +4397,220 @@ namespace bias
     }
 
 
-    RtnStatus CameraWindow::setFormatSettingsFromMap(QVariantMap settingsMap, bool showErrorDlg)
+    RtnStatus CameraWindow::setFormat7SettingsFromMap(
+            QVariantMap settingsMap, 
+            Format7Info format7Info, 
+            bool showErrorDlg
+            )
     {
         RtnStatus rtnStatus;
-        QString errMsgTitle("Load Configuration Error (Format Settings)");
+        QString errMsgTitle("Load Configuration Error (Format7 Settings)");
+
+        // Mode
+        if (!settingsMap.contains("mode"))
+        {
+            QString errMsgText("Format7 Settings: mode not present"); 
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        if (!settingsMap["mode"].canConvert<QString>())
+        {
+            QString errMsgText("Format7 Settings: unable to convert mode to string");
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        QString imageModeString = settingsMap["mode"].toString();
+        ImageMode imageMode = convertStringToImageMode(imageModeString);
+        if (imageMode == IMAGEMODE_UNSPECIFIED)
+        {
+            QString errMsgText = QString(
+                    "Format7 Settings: unknown image mode %1"
+                    ).arg(imageModeString);
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+
+        // OffsetX
+        if (!settingsMap.contains("offsetX"))
+        {
+            QString errMsgText("Format7 Settings: offsetX not present");
+            if (showErrorDlg)
+            { 
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        if (!settingsMap["offsetX"].canConvert<unsigned int>())
+        {
+            QString errMsgText("Format7 Settings: unable to convert offsetX to unsigned int");
+            if (showErrorDlg)
+            { 
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        unsigned int offsetX = settingsMap["offsetX"].toUInt();
+        if (offsetX > (format7Info.maxWidth-format7Info.offsetHStepSize))
+        {
+            QString errMsgText("Format7 Settings: offsetX out of range");
+            if (showErrorDlg)
+            { 
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        if ((offsetX%format7Info.offsetHStepSize)!=0)
+        {
+            QString errMsgText = QString(
+                    "Format7 Settings: offsetX must be divisible by step size = %1"
+                    ).arg(format7Info.offsetHStepSize);
+            if (showErrorDlg)
+            { 
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+
+        // offsetY
+        if (!settingsMap.contains("offsetY"))
+        { 
+            QString errMsgText("Format7 Settings: offsetY not present");
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        if (!settingsMap["offsetY"].canConvert<unsigned int>())
+        {
+            QString errMsgText("Format7 Settings: unable to convert offsetY to unsigned int");
+            if (showErrorDlg)
+            { 
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        unsigned int offsetY = settingsMap["offsetY"].toUInt();
+        if (offsetY > (format7Info.maxHeight-format7Info.offsetVStepSize))
+        {
+            QString errMsgText("Format7 Settings: offsetX out of range");
+            if (showErrorDlg)
+            { 
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        if ((offsetY%format7Info.offsetVStepSize)!=0)
+        {
+            QString errMsgText = QString(
+                    "Format7 Settings: offsetY must be divisible by step size = %1"
+                    ).arg(format7Info.offsetVStepSize);
+            if (showErrorDlg)
+            { 
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+
+        // --------------------------------------------------------------------
+        // TO DO
+        // --------------------------------------------------------------------
+        
+        // Width
+        if (!settingsMap.contains("width"))
+        {
+        } 
+        if (!settingsMap["width"].canConvert<unsigned int>())
+        {
+        }
+        unsigned int width = settingsMap["width"].toUInt();
+        if (width > format7Info.maxWidth)
+        {
+        }
+        if ((width%format7Info.imageHStepSize)!=0)
+        {
+        }
+        if(offsetX >= width)
+        {
+        }
+
+        // Height
+        if (!settingsMap.contains("height"))
+        {
+        }
+        if (!settingsMap["width"].canConvert<unsigned int>())
+        {
+        }
+        unsigned int height = settingsMap["height"].toUInt();
+        if (height > format7Info.maxHeight)
+        {
+        }
+        if ((height%format7Info.imageVStepSize)!=0)
+        {
+        }
+        if (offsetY >= height)
+        {
+        }
+
+        // Pixel Format
+        if (!settingsMap.contains("pixelFormat"))
+        {
+        }
+        if (!settingsMap["pixelFormat"].canConvert<QString>())
+        {
+        }
+        QString pixForamtString;
+
+        // --------------------------------------------------------------------
+
+
+
+        return rtnStatus;
+    }
+
+
+    RtnStatus CameraWindow::setLoggingFormatFromMap(QVariantMap formatMap, bool showErrorDlg)
+    {
+        RtnStatus rtnStatus;
+        QString errMsgTitle("Load Configuration Error (Logging Format Settings)");
 
         // Get avi values
         // --------------
-        QVariantMap aviMap = settingsMap["avi"].toMap();
+        QVariantMap aviMap = formatMap["avi"].toMap();
         if (aviMap.isEmpty())
         {
-            QString errMsgText("Logging Settings : avi settings not present");
+            QString errMsgText("Logging Settings: avi settings not present");
             if (showErrorDlg)
             {
                 QMessageBox::critical(this,errMsgTitle,errMsgText);
@@ -4454,7 +4698,7 @@ namespace bias
 
         // Get bmp values
         // --------------
-        QVariantMap bmpMap = settingsMap["bmp"].toMap();
+        QVariantMap bmpMap = formatMap["bmp"].toMap();
         if (bmpMap.isEmpty())
         {
             QString errMsgText("Logging Settings: bmp settings not present");
@@ -4506,7 +4750,7 @@ namespace bias
 
         // Get fmf values
         // --------------
-        QVariantMap fmfMap = settingsMap["fmf"].toMap();
+        QVariantMap fmfMap = formatMap["fmf"].toMap();
         if (fmfMap.isEmpty())
         {
             QString errMsgText("Logging Settings: fmf settings not present");
@@ -4558,7 +4802,7 @@ namespace bias
         
         // Get ufmf values
         // ---------------
-        QVariantMap ufmfMap = settingsMap["ufmf"].toMap();
+        QVariantMap ufmfMap = formatMap["ufmf"].toMap();
         if (ufmfMap.isEmpty())
         {
             QString errMsgText("Logging Settings: ufmf settings not present");
@@ -5124,6 +5368,38 @@ namespace bias
     }
 
 
+    ImageMode convertStringToImageMode(QString imageModeString)
+    {
+        QMap<QString, ImageMode> map = getStringToImageModeMap();
+        ImageMode  imageMode;
+        if (map.contains(imageModeString))
+        {
+            imageMode = map[imageModeString];
+        }
+        else
+        {
+            imageMode = IMAGEMODE_UNSPECIFIED;
+        }
+        return imageMode;
+    }
+
+
+    PixelFormat convertStringToPixelFormat(QString pixelFormatString)
+    {
+        QMap<QString, PixelFormat> map = getStringToPixelFormatMap();
+        PixelFormat pixelFormat;
+        if (map.contains(pixelFormatString))
+        {
+            pixelFormat = map[pixelFormatString];
+        }
+        else
+        {
+            pixelFormat = PIXEL_FORMAT_UNSPECIFIED;
+        }
+        return pixelFormat;
+    }
+
+
     QMap<QString,VideoMode> getStringToVideoModeMap()
     {
         QMap<QString,VideoMode> map;
@@ -5164,6 +5440,36 @@ namespace bias
             TriggerType trigType = *it;
             QString typeString = QString::fromStdString(getTriggerTypeString(trigType));
             map[typeString] = trigType;
+        }
+        return map;
+    }
+
+
+    QMap<QString,ImageMode> getStringToImageModeMap()
+    {
+        QMap<QString,ImageMode> map;
+        ImageModeList modeList = getListOfImageModes();
+        ImageModeList::iterator it;
+        for (it=modeList.begin(); it!=modeList.end(); it++)
+        {
+            ImageMode mode = *it;
+            QString modeString = QString::fromStdString(getImageModeString(mode));
+            map[modeString] = mode;
+        }
+        return map;
+    }
+
+
+    QMap<QString,PixelFormat> getStringToPixelFormatMap()
+    {
+        QMap<QString, PixelFormat> map;
+        PixelFormatList formatList = getListOfPixelFormats();
+        PixelFormatList::iterator it;
+        for (it=formatList.begin(); it!=formatList.end(); it++)
+        {
+            PixelFormat format = *it;
+            QString formatString = QString::fromStdString(getPixelFormatString(format));
+            map[formatString] = format;
         }
         return map;
     }
