@@ -55,9 +55,12 @@ namespace bias
     const QString DEFAULT_VIDEO_FILE_NAME = QString("bias_video");
     const QString DEFAULT_CONFIG_FILE_NAME = QString("bias_config");
     const QString CONFIG_FILE_EXTENSION = QString("json");
+    const float DEFAULT_FORMAT7_PERCENT_SPEED = 100.0;
+
     const unsigned int HTTP_SERVER_PORT_BEGIN = 5000;
     const unsigned int HTTP_SERVER_PORT_END = 20000;
     const unsigned int HTTP_SERVER_PORT_STEP = 10;
+
     const unsigned int ROI_BOUNDARY_LINE_WIDTH = 5;
     const QColor ROI_BOUNDARY_COLOR = QColor(255,0,0);
 
@@ -694,15 +697,17 @@ namespace bias
         std::string imageModeStdString = getImageModeString(format7Settings.mode);
         QString imageModeString = QString::fromStdString(imageModeStdString);
         format7SettingsMap.insert("mode", imageModeString);
-        format7SettingsMap.insert("offsetX", format7Settings.offsetX);
-        format7SettingsMap.insert("offsetY", format7Settings.offsetY);
-        format7SettingsMap.insert("width", format7Settings.width);
-        format7SettingsMap.insert("height", format7Settings.height);
         std::string pixFormatStdString = getPixelFormatString(format7Settings.pixelFormat);
         QString pixFormatString = QString::fromStdString(pixFormatStdString);
         format7SettingsMap.insert("pixelFormat",pixFormatString);
-        cameraMap.insert("format7Settings", format7SettingsMap);
 
+        QVariantMap roiMap;
+        roiMap.insert("offsetX", format7Settings.offsetX);
+        roiMap.insert("offsetY", format7Settings.offsetY);
+        roiMap.insert("width", format7Settings.width);
+        roiMap.insert("height", format7Settings.height);
+        format7SettingsMap.insert("roi", roiMap);
+        cameraMap.insert("format7Settings", format7SettingsMap);
         configurationMap.insert("camera", cameraMap);
 
         // Add logging information
@@ -815,9 +820,7 @@ namespace bias
             rtnStatus = setConfigurationFromMap(oldConfigMap,showErrorDlg);
             if (!rtnStatus.success)
             {
-                QString errMsgText("Error loading configuration and ");  
-                errMsgText += " unable to revert to previous configuration, ";
-                errMsgText += origErrMsg;
+                QString errMsgText("Unable to revert to previous configuration");
                 if (showErrorDlg)
                 {
                     QMessageBox::critical(this, errMsgTitle, errMsgText);
@@ -828,15 +831,8 @@ namespace bias
             }
             else
             {
-                QString errMsgText = QString("Error loading configuration, ");  
-                errMsgText += origErrMsg;
-                errMsgText += ", reverting to previous configuration";
-                if (showErrorDlg)
-                {
-                    QMessageBox::critical(this, errMsgTitle, errMsgText);
-                }
                 rtnStatus.success = false;
-                rtnStatus.message = errMsgText;
+                rtnStatus.message = origErrMsg;
                 return rtnStatus;
             }
         }
@@ -854,6 +850,14 @@ namespace bias
     {
         RtnStatus rtnStatus;
         QString errMsgTitle("Load Configuration Error");
+
+        // Check if camera is capturing
+        // ----------------------------
+        if (capturing_)
+        {
+            QString errMsgText("unable to set configuration - capturing");
+            return onError(errMsgText, errMsgTitle, showErrorDlg);
+        }
 
         // Set camera properties, videomode, etc.
         // --------------------------------------
@@ -1279,6 +1283,12 @@ namespace bias
     unsigned long CameraWindow::getFrameCount()
     {
         return frameCount_;
+    }
+
+
+    float CameraWindow::getFormat7PercentSpeed()
+    {
+        return format7PercentSpeed_;
     }
 
 
@@ -1905,6 +1915,7 @@ namespace bias
         framesPerSec_ = 0.0;
         frameCount_ = 0;
         userCameraName_ = QString("");
+        format7PercentSpeed_ = DEFAULT_FORMAT7_PERCENT_SPEED;
 
         imageRotation_ = IMAGE_ROTATION_0;
         videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
@@ -4410,192 +4421,242 @@ namespace bias
         if (!settingsMap.contains("mode"))
         {
             QString errMsgText("Format7 Settings: mode not present"); 
-            if (showErrorDlg)
-            {
-                QMessageBox::critical(this,errMsgTitle,errMsgText);
-            }
-            rtnStatus.success = false;
-            rtnStatus.message = errMsgText;
-            return rtnStatus;
+            return onError(errMsgText,errMsgTitle,showErrorDlg);
         }
         if (!settingsMap["mode"].canConvert<QString>())
         {
             QString errMsgText("Format7 Settings: unable to convert mode to string");
-            if (showErrorDlg)
-            {
-                QMessageBox::critical(this,errMsgTitle,errMsgText);
-            }
-            rtnStatus.success = false;
-            rtnStatus.message = errMsgText;
-            return rtnStatus;
+            return onError(errMsgText,errMsgTitle,showErrorDlg);
         }
         QString imageModeString = settingsMap["mode"].toString();
         ImageMode imageMode = convertStringToImageMode(imageModeString);
         if (imageMode == IMAGEMODE_UNSPECIFIED)
         {
-            QString errMsgText = QString(
-                    "Format7 Settings: unknown image mode %1"
-                    ).arg(imageModeString);
-            if (showErrorDlg)
-            {
-                QMessageBox::critical(this,errMsgTitle,errMsgText);
-            }
-            rtnStatus.success = false;
-            rtnStatus.message = errMsgText;
-            return rtnStatus;
-        }
-
-        // OffsetX
-        if (!settingsMap.contains("offsetX"))
-        {
-            QString errMsgText("Format7 Settings: offsetX not present");
-            if (showErrorDlg)
-            { 
-                QMessageBox::critical(this,errMsgTitle,errMsgText);
-            }
-            rtnStatus.success = false;
-            rtnStatus.message = errMsgText;
-            return rtnStatus;
-        }
-        if (!settingsMap["offsetX"].canConvert<unsigned int>())
-        {
-            QString errMsgText("Format7 Settings: unable to convert offsetX to unsigned int");
-            if (showErrorDlg)
-            { 
-                QMessageBox::critical(this,errMsgTitle,errMsgText);
-            }
-            rtnStatus.success = false;
-            rtnStatus.message = errMsgText;
-            return rtnStatus;
-        }
-        unsigned int offsetX = settingsMap["offsetX"].toUInt();
-        if (offsetX > (format7Info.maxWidth-format7Info.offsetHStepSize))
-        {
-            QString errMsgText("Format7 Settings: offsetX out of range");
-            if (showErrorDlg)
-            { 
-                QMessageBox::critical(this,errMsgTitle,errMsgText);
-            }
-            rtnStatus.success = false;
-            rtnStatus.message = errMsgText;
-            return rtnStatus;
-        }
-        if ((offsetX%format7Info.offsetHStepSize)!=0)
-        {
-            QString errMsgText = QString(
-                    "Format7 Settings: offsetX must be divisible by step size = %1"
-                    ).arg(format7Info.offsetHStepSize);
-            if (showErrorDlg)
-            { 
-                QMessageBox::critical(this,errMsgTitle,errMsgText);
-            }
-            rtnStatus.success = false;
-            rtnStatus.message = errMsgText;
-            return rtnStatus;
-        }
-
-        // offsetY
-        if (!settingsMap.contains("offsetY"))
-        { 
-            QString errMsgText("Format7 Settings: offsetY not present");
-            if (showErrorDlg)
-            {
-                QMessageBox::critical(this,errMsgTitle,errMsgText);
-            }
-            rtnStatus.success = false;
-            rtnStatus.message = errMsgText;
-            return rtnStatus;
-        }
-        if (!settingsMap["offsetY"].canConvert<unsigned int>())
-        {
-            QString errMsgText("Format7 Settings: unable to convert offsetY to unsigned int");
-            if (showErrorDlg)
-            { 
-                QMessageBox::critical(this,errMsgTitle,errMsgText);
-            }
-            rtnStatus.success = false;
-            rtnStatus.message = errMsgText;
-            return rtnStatus;
-        }
-        unsigned int offsetY = settingsMap["offsetY"].toUInt();
-        if (offsetY > (format7Info.maxHeight-format7Info.offsetVStepSize))
-        {
-            QString errMsgText("Format7 Settings: offsetX out of range");
-            if (showErrorDlg)
-            { 
-                QMessageBox::critical(this,errMsgTitle,errMsgText);
-            }
-            rtnStatus.success = false;
-            rtnStatus.message = errMsgText;
-            return rtnStatus;
-        }
-        if ((offsetY%format7Info.offsetVStepSize)!=0)
-        {
-            QString errMsgText = QString(
-                    "Format7 Settings: offsetY must be divisible by step size = %1"
-                    ).arg(format7Info.offsetVStepSize);
-            if (showErrorDlg)
-            { 
-                QMessageBox::critical(this,errMsgTitle,errMsgText);
-            }
-            rtnStatus.success = false;
-            rtnStatus.message = errMsgText;
-            return rtnStatus;
-        }
-
-        // --------------------------------------------------------------------
-        // TO DO
-        // --------------------------------------------------------------------
-        
-        // Width
-        if (!settingsMap.contains("width"))
-        {
-        } 
-        if (!settingsMap["width"].canConvert<unsigned int>())
-        {
-        }
-        unsigned int width = settingsMap["width"].toUInt();
-        if (width > format7Info.maxWidth)
-        {
-        }
-        if ((width%format7Info.imageHStepSize)!=0)
-        {
-        }
-        if(offsetX >= width)
-        {
-        }
-
-        // Height
-        if (!settingsMap.contains("height"))
-        {
-        }
-        if (!settingsMap["width"].canConvert<unsigned int>())
-        {
-        }
-        unsigned int height = settingsMap["height"].toUInt();
-        if (height > format7Info.maxHeight)
-        {
-        }
-        if ((height%format7Info.imageVStepSize)!=0)
-        {
-        }
-        if (offsetY >= height)
-        {
+            QString errMsgText = QString("Format7 Settings: unknown image mode ");
+            errMsgText += QString("%1").arg(imageModeString);
+            return onError(errMsgText,errMsgTitle,showErrorDlg);
         }
 
         // Pixel Format
         if (!settingsMap.contains("pixelFormat"))
         {
+            QString errMsgText("Format7 Settings: pixelFormat not present");
+            return onError(errMsgText,errMsgTitle,showErrorDlg);
         }
         if (!settingsMap["pixelFormat"].canConvert<QString>())
         {
+            QString errMsgText("Format7 Settings: unable to convert pixelFormat to string");
+            return onError(errMsgText,errMsgTitle,showErrorDlg);
+
         }
-        QString pixForamtString;
+        QString pixelFormatString = settingsMap["pixelFormat"].toString();
+        PixelFormat pixelFormat = convertStringToPixelFormat(pixelFormatString);
+        if (pixelFormat == PIXEL_FORMAT_UNSPECIFIED)
+        {
+            QString errMsgText("Format7 Settings: unknown pixelFormat, ");
+            errMsgText += QString("%1").arg(pixelFormatString);
+            return onError(errMsgText,errMsgTitle,showErrorDlg);
+        }
 
-        // --------------------------------------------------------------------
+        QVariantMap roiMap = settingsMap["roi"].toMap();
+        if (roiMap.isEmpty())
+        {
+            QString errMsgText("Format7 Settings: roi no present");
+            return onError(errMsgText,errMsgTitle,showErrorDlg);
+        }
 
+        // OffsetX
+        if (!roiMap.contains("offsetX"))
+        {
+            QString errMsgText("Format7 Settings: ROI offsetX not present");
+            return onError(errMsgText,errMsgTitle,showErrorDlg);
+        }
+        if (!roiMap["offsetX"].canConvert<unsigned int>())
+        {
+            QString errMsgText("Format7 Settings: unable to convert ROI offsetX to unsigned int");
+            return onError(errMsgText,errMsgTitle,showErrorDlg);
+        }
+        unsigned int offsetX = roiMap["offsetX"].toUInt();
+        if (offsetX > (format7Info.maxWidth-format7Info.offsetHStepSize))
+        {
+            QString errMsgText("Format7 Settings: ROI offsetX out of range");
+            return onError(errMsgText,errMsgTitle,showErrorDlg);
+        }
+        if ((offsetX%format7Info.offsetHStepSize)!=0)
+        {
+            QString errMsgText = QString("Format7 Settings: ROI offsetX must be "); 
+            errMsgText += QString("divisible by step size = %1").arg(format7Info.offsetHStepSize);
+            return onError(errMsgText,errMsgTitle,showErrorDlg);
+        }
 
+        // offsetY
+        if (!roiMap.contains("offsetY"))
+        { 
+            QString errMsgText("Format7 Settings: ROI offsetY not present");
+            return onError(errMsgText,errMsgTitle,showErrorDlg);
+        }
+        if (!roiMap["offsetY"].canConvert<unsigned int>())
+        {
+            QString errMsgText("Format7 Settings: unable to convert ROI offsetY "); 
+            errMsgText += "to unsigned int";
+            return onError(errMsgText,errMsgTitle,showErrorDlg);
+        }
+        unsigned int offsetY = roiMap["offsetY"].toUInt();
+        if (offsetY > (format7Info.maxHeight-format7Info.offsetVStepSize))
+        {
+            QString errMsgText("Format7 Settings: ROI offsetY out of range");
+            return onError(errMsgText,errMsgTitle,showErrorDlg);
+        }
+        if ((offsetY%format7Info.offsetVStepSize)!=0)
+        {
+            QString errMsgText = QString("Format7 Settings: offsetY must be divisible "); 
+            errMsgText += QString("by step size = %1").arg(format7Info.offsetVStepSize);
+            return onError(errMsgText,errMsgTitle,showErrorDlg);
+        }
+        
+        // Width
+        if (!roiMap.contains("width"))
+        {
+            QString errMsgText("Format7 Settings: ROI width not present");
+            return onError(errMsgText,errMsgTitle,showErrorDlg);
+        } 
+        if (!roiMap["width"].canConvert<unsigned int>())
+        {
+            QString errMsgText("Format7 Settings: unable to convert ROI width"); 
+            errMsgText += "to unsigned int";
+            return onError(errMsgText,errMsgTitle,showErrorDlg);
+        }
+        unsigned int width = roiMap["width"].toUInt();
+        if (width > format7Info.maxWidth)
+        {
+            QString errMsgText("Format7 Settings: ROI width > maxWidth"); 
+            return onError(errMsgText,errMsgTitle,showErrorDlg);
+        }
+        if ((width%format7Info.imageHStepSize)!=0)
+        {
+            QString errMsgText("Format7 Settings: ROI width must be divisible by "); 
+            errMsgText += QString("step size = %1").arg(format7Info.imageHStepSize);
+            return onError(errMsgText,errMsgTitle,showErrorDlg);
+        }
+        if((offsetX + width) > format7Info.maxWidth)
+        {
+            QString errMsgText("Format7 Settings: ROI offsetX + width > maxWidth"); 
+            return onError(errMsgText,errMsgTitle,showErrorDlg);
+        }
 
+        // Height
+        if (!roiMap.contains("height"))
+        {
+            QString errMsgText("Format7 Settings: ROI height not present");
+            return onError(errMsgText,errMsgTitle,showErrorDlg);
+        }
+        if (!roiMap["height"].canConvert<unsigned int>())
+        {
+            QString errMsgText("Format7 Settings: unablel to convert ROI height ");
+            errMsgText += QString("to unsigned int");
+            return onError(errMsgText,errMsgTitle,showErrorDlg);
+        }
+        unsigned int height = roiMap["height"].toUInt();
+        if (height > format7Info.maxHeight)
+        {
+            QString errMsgText("Format7 Settings: ROI height > maxHeight");
+            return onError(errMsgText,errMsgTitle,showErrorDlg);
+        }
+        if ((height%format7Info.imageVStepSize)!=0)
+        {
+            QString errMsgText("Format7 Settings: ROI height must be divisible by ");
+            errMsgText += QString("step size = %1").arg(format7Info.imageVStepSize);
+            return onError(errMsgText,errMsgTitle,showErrorDlg);
+        }
+        if ((offsetY + height) > format7Info.maxHeight)
+        {
+            QString errMsgText("Format7 Settings: ROI offsetY + height > maxHeight");
+            return onError(errMsgText,errMsgTitle,showErrorDlg);
+        }
+
+        // Set format7 settings
+        Format7Settings format7Settings;
+        format7Settings.mode = imageMode;
+        format7Settings.pixelFormat = pixelFormat;
+        format7Settings.offsetX = offsetX;
+        format7Settings.offsetY = offsetY;
+        format7Settings.width = width;
+        format7Settings.height = height;
+        format7Settings.print();
+
+        bool captureStopped = false;
+        if (capturing_) 
+        {
+            stopImageCapture();
+            captureStopped = true;
+        }
+
+        bool error = false;
+        bool settingsAreValid = false;
+        unsigned int errorId;
+        QString errorMsg;
+
+        cameraPtr_ -> acquireLock();
+        try
+        {
+            settingsAreValid = cameraPtr_ -> validateFormat7Settings(format7Settings);
+        }
+        catch (RuntimeError &runtimeError)
+        {
+            error = true;
+            errorId = runtimeError.id();
+            errorMsg = QString::fromStdString(runtimeError.what());
+        }
+        cameraPtr_ -> releaseLock();
+
+        if (error)
+        {
+            QString errMsgText("Failed to validate format7 settings, ");
+            errMsgText += QString("Error ID: ") + QString::number(errorId);
+            errMsgText += QString(", %1").arg(errorMsg);
+            return onError(errMsgText, errMsgTitle, showErrorDlg);
+        }
+
+        if (settingsAreValid)
+        {
+            cameraPtr_ -> acquireLock();
+            try
+            {
+                cameraPtr_ -> setFormat7Configuration(
+                        format7Settings, 
+                        format7PercentSpeed_
+                        );
+            }
+            catch (RuntimeError &runtimeError)
+            {
+                error = true;
+                errorId = runtimeError.id();
+                errorMsg = QString::fromStdString(runtimeError.what());
+            }
+            cameraPtr_ -> releaseLock();
+            
+            if (error)
+            {
+                QString errMsgText("Failed to set format7 settings, ");
+                errMsgText += QString("Error ID: ") + QString::number(errorId);
+                errMsgText += QString(", %1").arg(errorMsg);;
+                return onError(errMsgText, errMsgTitle, showErrorDlg);
+            }
+        }
+        else
+        { 
+            QString errMsgText("Format7 settings invalid");
+            return onError(errMsgText, errMsgTitle, showErrorDlg);
+        }
+
+        if (captureStopped)
+        { 
+            startImageCapture();
+        }
+
+        emit format7SettingsChanged();
+        rtnStatus.success = true;
+        rtnStatus.message = "";
         return rtnStatus;
     }
 
@@ -5190,6 +5251,18 @@ namespace bias
         minMaxLoc(hist,&minVal,&maxVal,NULL,NULL);
         hist = hist*(float(histImageMaxY)/float(maxVal));
         return hist;
+    }
+
+    RtnStatus CameraWindow::onError(QString message, QString title, bool showErrorDlg)
+    { 
+        RtnStatus rtnStatus;
+        if (showErrorDlg)
+        { 
+            QMessageBox::critical(this,title,message);
+        }
+        rtnStatus.success = false;
+        rtnStatus.message = message;
+        return rtnStatus;
     }
 
 

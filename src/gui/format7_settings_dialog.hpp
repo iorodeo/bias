@@ -55,6 +55,7 @@ namespace bias
             void roiMaxSizePushButtonClicked();
             void imageCaptureStarted(bool logging);
             void imageCaptureStopped();
+            void format7SettingsChanged();
 
         private:
 
@@ -68,8 +69,10 @@ namespace bias
             QMap<PixelFormat, int> formatToIndexMap_;
 
             void initialize(bool capturing, bool logging);
+            void updateWidgets(bool capturing, bool logging);
             void getFormat7SettingsAndInfo();
             void updateSlidersAndLineEdits();
+            void updateRoiRadioButtons();
             void connectWidgets();
             void setModeComboBoxIndex();
             void setPixelFormatComboBoxIndex();

@@ -106,11 +106,13 @@ namespace bias
             double getTimeStamp();
             double getFramesPerSec();
             unsigned long getFrameCount();
+            float getFormat7PercentSpeed();
 
         signals:
 
             void imageCaptureStarted(bool logging);
             void imageCaptureStopped();
+            void format7SettingsChanged();
 
         protected:
 
@@ -183,7 +185,7 @@ namespace bias
             bool haveDefaultVideoFileDir_;
             bool haveDefaultConfigFileDir_;
             unsigned int cameraNumber_;
-
+            unsigned int format7PercentSpeed_;
 
             QDir defaultVideoFileDir_;
             QDir currentVideoFileDir_;
@@ -330,6 +332,7 @@ namespace bias
             RtnStatus setConfigFileFromMap(QVariantMap configFileMap, bool showErrorDlg);
 
             cv::Mat calcHistogram(cv::Mat mat);
+            RtnStatus onError(QString message, QString title, bool showErrorDlg);
 
     }; // class CameraWindow
 

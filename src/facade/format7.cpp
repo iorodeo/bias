@@ -23,11 +23,12 @@ namespace bias
     std::string Format7Settings::toString()
     {
         std::stringstream ss;
-        ss << "mode:     " << getImageModeString(mode) << std::endl;
-        ss << "offsetX:  " << offsetX << std::endl;
-        ss << "offsetY:  " << offsetY << std::endl;
-        ss << "width:    " << width << std::endl;
-        ss << "height:   " << height << std::endl;
+        ss << "mode:        " << getImageModeString(mode) << std::endl;
+        ss << "pixelFormat: " << getPixelFormatString(pixelFormat) << std::endl;
+        ss << "offsetX:     " << offsetX << std::endl;
+        ss << "offsetY:     " << offsetY << std::endl;
+        ss << "width:       " << width << std::endl;
+        ss << "height:      " << height << std::endl;
         ss << std::endl;
         return ss.str();
     }

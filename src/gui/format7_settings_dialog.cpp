@@ -305,6 +305,19 @@ namespace bias
         roiGroupBoxPtr_ -> setEnabled(true);
     }
 
+
+    void Format7SettingsDialog::format7SettingsChanged()
+    {
+        QPointer<CameraWindow> cameraWindowPtr = qobject_cast<CameraWindow *>(parent());
+        if (cameraWindowPtr.isNull())
+        {
+            return;
+        }
+        bool capturing = cameraWindowPtr -> isCapturing();
+        bool logging = cameraWindowPtr -> isLoggingEnabled();
+        updateWidgets(capturing,logging);
+    }
+
     
     // Private methods
     // ----------------------------------------------------------------------------------
@@ -313,8 +326,12 @@ namespace bias
         setupUi(this);
         setAttribute(Qt::WA_DeleteOnClose);
         setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
-
-
+        updateWidgets(capturing,logging);
+        connectWidgets();
+    } 
+    
+    void Format7SettingsDialog::updateWidgets(bool capturing, bool logging)
+    {
         if (cameraPtr_ == NULL)
         {
             return;
@@ -322,7 +339,6 @@ namespace bias
 
         // Get current settings from Camera
         getFormat7SettingsAndInfo();
-
 
         // Setup mode list comboBox
         int index = 0;
@@ -398,22 +414,7 @@ namespace bias
         }
 
         // Set radio button checked based whether or not ROI is enabled.
-        if (isRoiMaxSize())
-        {
-            roiOffRadioButtonPtr_ -> setChecked(true);
-            roiShowRadioButtonPtr_ -> setChecked(false);
-            roiEnableRadioButtonPtr_ -> setChecked(false);
-            setRoiControlsEnabled(true);
-            lastRoiEnableState_ = ROI_ENABLE_OFF;
-        }
-        else 
-        {
-            roiOffRadioButtonPtr_ -> setChecked(false);
-            roiShowRadioButtonPtr_ -> setChecked(false);
-            roiEnableRadioButtonPtr_ -> setChecked(true);
-            setRoiControlsEnabled(false);
-            lastRoiEnableState_ = ROI_ENABLE_ON;
-        }
+        updateRoiRadioButtons();
 
         // ------------------------------------------------------------------------------
         // TEMPORARY - only allow mode 0 (disable mode setting)
@@ -421,7 +422,6 @@ namespace bias
         modeComboBoxPtr_ -> setEnabled(false);
         // ------------------------------------------------------------------------------
 
-        connectWidgets();
     }
 
 
@@ -450,7 +450,29 @@ namespace bias
         roiYOffsetLineEditPtr_ -> setText(QString::number(settings_.offsetY));
         roiXWidthLineEditPtr_ -> setText(QString::number(settings_.width));
         roiYHeightLineEditPtr_ -> setText(QString::number(settings_.height));
+    } 
+    
+
+    void Format7SettingsDialog::updateRoiRadioButtons()
+    {
+        if (isRoiMaxSize())
+        {
+            roiOffRadioButtonPtr_ -> setChecked(true);
+            roiShowRadioButtonPtr_ -> setChecked(false);
+            roiEnableRadioButtonPtr_ -> setChecked(false);
+            setRoiControlsEnabled(true);
+            lastRoiEnableState_ = ROI_ENABLE_OFF;
+        }
+        else 
+        {
+            roiOffRadioButtonPtr_ -> setChecked(false);
+            roiShowRadioButtonPtr_ -> setChecked(false);
+            roiEnableRadioButtonPtr_ -> setChecked(true);
+            setRoiControlsEnabled(false);
+            lastRoiEnableState_ = ROI_ENABLE_ON;
+        }
     }
+
 
     void Format7SettingsDialog::connectWidgets()
     {
@@ -565,6 +587,13 @@ namespace bias
                 this,
                 SLOT(imageCaptureStopped())
                );
+
+        connect(
+                parent(),
+                SIGNAL(format7SettingsChanged()),
+                this,
+                SLOT(format7SettingsChanged())
+               );
     }
 
 
@@ -646,7 +675,12 @@ namespace bias
         QString errorMsg;
         bool settingsAreValid;
 
-        CameraWindow* cameraWindowPtr = qobject_cast<CameraWindow *>(parent());
+        QPointer<CameraWindow> cameraWindowPtr = qobject_cast<CameraWindow *>(parent());
+        if (cameraWindowPtr.isNull())
+        {
+            return;
+        }
+
         bool isCapturing = cameraWindowPtr -> isCapturing();
 
         if (isCapturing) 
@@ -721,7 +755,13 @@ namespace bias
 
     void Format7SettingsDialog::updateFormat7Settings()
     {
-        setFormat7Settings(settings_);
+        QPointer<CameraWindow> cameraWindowPtr = qobject_cast<CameraWindow *>(parent());
+        if (cameraWindowPtr.isNull())
+        {
+            return;
+        }
+        float percentSpeed = cameraWindowPtr -> getFormat7PercentSpeed();
+        setFormat7Settings(settings_,percentSpeed);
     }
 
 
