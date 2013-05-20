@@ -60,6 +60,7 @@ namespace bias
     const unsigned int HTTP_SERVER_PORT_BEGIN = 5000;
     const unsigned int HTTP_SERVER_PORT_END = 20000;
     const unsigned int HTTP_SERVER_PORT_STEP = 10;
+    const bool DEFAULT_HTTP_SERVER_ENABLED = true;
 
     const unsigned int ROI_BOUNDARY_LINE_WIDTH = 5;
     const QColor ROI_BOUNDARY_COLOR = QColor(255,0,0);
@@ -1964,7 +1965,16 @@ namespace bias
         httpServerPort_ += HTTP_SERVER_PORT_STEP*(cameraNumber_ + 1);
         httpServerPtr_ = new BasicHttpServer(this,this);
         setServerPortText();
+        if (DEFAULT_HTTP_SERVER_ENABLED)
+        {
+            actionServerEnabledPtr_ -> setChecked(true);
+            httpServerPtr_ -> listen(QHostAddress::Any, httpServerPort_);
 
+        }
+        else
+        {
+            actionServerEnabledPtr_ -> setChecked(false);
+        }
     }
 
 
