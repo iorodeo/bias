@@ -743,11 +743,23 @@ namespace bias {
         // ------------------------------------------------
         //
         // Currently only sets to mode 0, doesn't check for
-        // support, doesn't set polarity, etc.
+        // support, etc.
         // ------------------------------------------------ 
+        fc2Error error = fc2SetGPIOPinDirection(context_, 0, 0);
+        if (error != FC2_ERROR_OK) 
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to set GPIO direction";
+            throw RuntimeError(ERROR_FC2_CREATE_IMAGE, ssError.str());
+        }
+        
         fc2TriggerMode trigMode = getTriggerMode_fc2();
         trigMode.onOff = TRUE;
         trigMode.mode = 0;
+        trigMode.source = 0;
+        trigMode.parameter = 0;
+        trigMode.polarity = 0;
         setTriggerMode(trigMode);
     }
 
@@ -766,11 +778,6 @@ namespace bias {
 
     TimeStamp CameraDevice_fc2::getImageTimeStamp()
     {
-        //TimeStamp timeStamp;
-        //fc2TimeStamp timeStamp_fc2 = fc2GetImageTimeStamp(&rawImage_);
-        //timeStamp.seconds = (unsigned long long)(timeStamp_fc2.seconds);
-        //timeStamp.microSeconds = timeStamp_fc2.microSeconds;
-        //return timeStamp;
         return timeStamp_;
     }
 

@@ -328,6 +328,7 @@
     </widget>
     <addaction name="menuDisplayOrientationPtr_"/>
     <addaction name="menuDisplayRotPtr_"/>
+    <addaction name="actionDisplayAlignToolsPtr_"/>
     <addaction name="actionDisplayUpdateFreqPtr_"/>
    </widget>
    <widget class="QMenu" name="menuFile">
@@ -653,6 +654,11 @@
   <action name="actionServerCommandsPtr_">
    <property name="text">
     <string>Commands...</string>
+   </property>
+  </action>
+  <action name="actionDisplayAlignToolsPtr_">
+   <property name="text">
+    <string>Alignment Tools...</string>
    </property>
   </action>
  </widget>

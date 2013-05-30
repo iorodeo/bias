@@ -13,6 +13,7 @@
 #include "ui_camera_window.h"
 #include "camera_facade_fwd.hpp"
 #include "video_writer_params.hpp"
+#include "alignment_settings.hpp"
 
 
 // External lib forward declarations
@@ -32,6 +33,7 @@ namespace bias
     class TimerSettingsDialog;
     class LoggingSettingsDialog;
     class Format7SettingsDialog;
+    class AlignmentSettingsDialog;
     class BasicHttpServer;
     template <class T> class Lockable;
     template <class T> class LockableQueue;
@@ -157,6 +159,7 @@ namespace bias
             void actionDisplayFlipVertTriggered();
             void actionDisplayFlipHorzTriggered();
             void actionDisplayRotTriggered();
+            void actionDisplayAlignToolsTriggered();
             void actionHelpUserManualTriggered();
             void actionPluginsSettingsTriggered();
             void actionServerEnabledTriggered();
@@ -209,6 +212,7 @@ namespace bias
             QPixmap pluginPixmapOriginal_;
             QPixmap histogramPixmapOriginal_;
 
+
             QPointer<QActionGroup> videoModeActionGroupPtr_; 
             QPointer<QActionGroup> frameRateActionGroupPtr_; 
             QPointer<QActionGroup> cameraTriggerActionGroupPtr_;
@@ -240,6 +244,8 @@ namespace bias
             QPointer<TimerSettingsDialog> timerSettingsDialogPtr_;
             QPointer<LoggingSettingsDialog> loggingSettingsDialogPtr_;
             QPointer<Format7SettingsDialog> format7SettingsDialogPtr_;
+            AlignmentSettings alignmentSettings_;
+            QPointer<AlignmentSettingsDialog> alignmentSettingsDialogPtr_;
 
             VideoWriterParams videoWriterParams_;
 
@@ -287,7 +293,8 @@ namespace bias
                     QPixmap &pixmapOriginal, 
                     bool flipAndRotate=true,
                     bool addFrameCount=true,
-                    bool addRoiBoundary=true
+                    bool addRoiBoundary=true,
+                    bool addAlignmentObjs=true
                     );
             void updateAllImageLabels();
 
@@ -296,8 +303,10 @@ namespace bias
                     QPixmap &pixmapOriginal, 
                     bool flipAndRotate=true,
                     bool addFrameCount=true,
-                    bool addRoiBoundary=true
+                    bool addRoiBoundary=true,
+                    bool addAlignmentObjs=true
                     );
+
             void resizeAllImageLabels();
             void updateHistogramPixmap(cv::Mat hist);
 

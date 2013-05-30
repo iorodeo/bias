@@ -16,6 +16,7 @@
 #include "timer_settings_dialog.hpp"
 #include "logging_settings_dialog.hpp"
 #include "format7_settings_dialog.hpp"
+#include "alignment_settings_dialog.hpp"
 #include "background_histogram_ufmf.hpp"
 #include "json.hpp"
 #include "basic_http_server.hpp"
@@ -1800,6 +1801,21 @@ namespace bias
     }
 
 
+    void CameraWindow::actionDisplayAlignToolsTriggered()
+    {
+        // If alignment settings dialog does exist create it otherwise raise
+        if (alignmentSettingsDialogPtr_.isNull()) 
+        {
+            alignmentSettingsDialogPtr_ = new AlignmentSettingsDialog(this);
+            alignmentSettingsDialogPtr_ -> show();
+        }
+        else
+        {
+            alignmentSettingsDialogPtr_ -> raise();
+        }
+    }
+
+
     void CameraWindow::actionVideoModeTriggered(int vidModeInt)
     {
         VideoMode vidMode = VideoMode(vidModeInt);
@@ -2187,6 +2203,13 @@ namespace bias
                );
 
         connect(
+                actionDisplayAlignToolsPtr_,
+                SIGNAL(triggered()),
+                this,
+                SLOT(actionDisplayAlignToolsTriggered())
+               );
+
+        connect(
                 actionPluginsSettingsPtr_,
                 SIGNAL(triggered()),
                 this,
@@ -2442,7 +2465,8 @@ namespace bias
             QPixmap &pixmapOriginal,
             bool flipAndRotate,
             bool addFrameCount,
-            bool addRoiBoundary
+            bool addRoiBoundary,
+            bool addAlignmentObjs
             )
     {
         // Draw ROI
@@ -2465,11 +2489,67 @@ namespace bias
             }
         }
 
+        // Scale pixmap
         QPixmap pixmapScaled =  pixmapCopy.scaled(
                 imageLabelPtr -> size(),
                 Qt::KeepAspectRatio, 
                 Qt::SmoothTransformation
                 );
+
+        // Add alignment objects
+        if (haveImagePixmap_ && addAlignmentObjs)
+        { 
+            QSize scaledPixmapSize = pixmapScaled.size();
+            QSize origPixmapSize = pixmapOriginal.size();
+
+            unsigned int scaledPixmapWidth = scaledPixmapSize.width();
+            unsigned int scaledPixmapHeight = scaledPixmapSize.height();
+            unsigned int origPixmapWidth = origPixmapSize.width();
+            unsigned int origPixmapHeight = origPixmapSize.height();
+
+            // Draw alignment grid
+            if (alignmentSettings_.gridVisible)
+            {
+                QPainter gridPainter(&pixmapScaled);
+                QPen gridPen = QPen(alignmentSettings_.gridQColor);
+                gridPen.setWidth(alignmentSettings_.gridPenWidth);
+                gridPainter.setPen(gridPen);
+
+                unsigned int posX;
+                unsigned int posY; 
+
+                for (unsigned int i=0;i<alignmentSettings_.gridNumCol; i++)
+                {
+                    posX = (i+1)*(scaledPixmapWidth/(alignmentSettings_.gridNumCol+1));
+                    gridPainter.drawLine(posX,0, posX, scaledPixmapHeight);
+                }
+
+                for (unsigned int i=0; i<alignmentSettings_.gridNumRow; i++)
+                {
+                    posY = (i+1)*(scaledPixmapHeight/(alignmentSettings_.gridNumRow+1));
+                    gridPainter.drawLine(0,posY,scaledPixmapWidth,posY);
+                }
+                gridPainter.end();
+            }
+
+            // Draw alignement circle
+            if (alignmentSettings_.circleVisible)
+            {
+                float scaleX = float(scaledPixmapWidth)/float(origPixmapWidth);
+                float scaleY = float(scaledPixmapHeight)/float(origPixmapHeight);
+                QPainter circlePainter(&pixmapScaled);
+                QPen circlePen = QPen(alignmentSettings_.circleQColor);
+                circlePen.setWidth(alignmentSettings_.circlePenWidth);
+                circlePainter.setPen(circlePen);
+                circlePainter.drawEllipse(
+                        (unsigned int)(scaleX*alignmentSettings_.circlePosX),
+                        (unsigned int)(scaleY*alignmentSettings_.circlePosY),
+                        (unsigned int)(2*scaleX*alignmentSettings_.circleRadius),
+                        (unsigned int)(2*scaleY*alignmentSettings_.circleRadius)
+                        );
+                circlePainter.end();
+            }
+        }
 
         
         // Flip and rotate pixmap if required
@@ -2506,9 +2586,32 @@ namespace bias
 
     void CameraWindow::updateAllImageLabels()
     { 
-        updateImageLabel(previewImageLabelPtr_, previewPixmapOriginal_, true, true, true);
-        updateImageLabel(pluginImageLabelPtr_, pluginPixmapOriginal_, true, false, false);
-        updateImageLabel(histogramImageLabelPtr_, histogramPixmapOriginal_, false, false, false);
+        updateImageLabel(
+                previewImageLabelPtr_,   
+                previewPixmapOriginal_,   
+                true,  
+                true,  
+                true,
+                true
+                );
+
+        updateImageLabel(
+                pluginImageLabelPtr_,    
+                pluginPixmapOriginal_,    
+                true,  
+                false, 
+                false,
+                false
+                );
+
+        updateImageLabel(
+                histogramImageLabelPtr_, 
+                histogramPixmapOriginal_, 
+                false, 
+                false, 
+                false,
+                false
+                );
     }
 
 
@@ -2517,7 +2620,8 @@ namespace bias
             QPixmap &pixmapOriginal, 
             bool flipAndRotate,
             bool addFrameCount,
-            bool addRoiBoundary
+            bool addRoiBoundary,
+            bool addAlignmentObjs
             )
     {
         // Determines if resize of pixmap of image on Qlabel is required and 
@@ -2539,7 +2643,8 @@ namespace bias
                     pixmapOriginal,
                     flipAndRotate,
                     addFrameCount,
-                    addRoiBoundary
+                    addRoiBoundary,
+                    addAlignmentObjs
                     );
         }
     }
@@ -2547,9 +2652,32 @@ namespace bias
 
     void CameraWindow::resizeAllImageLabels()
     { 
-        resizeImageLabel(previewImageLabelPtr_, previewPixmapOriginal_, true, true, true);
-        resizeImageLabel(pluginImageLabelPtr_, pluginPixmapOriginal_, false, false, false);
-        resizeImageLabel(histogramImageLabelPtr_, histogramPixmapOriginal_, false, false, false);
+        resizeImageLabel(
+                previewImageLabelPtr_, 
+                previewPixmapOriginal_, 
+                true, 
+                true, 
+                true, 
+                true
+                );
+
+        resizeImageLabel(
+                pluginImageLabelPtr_, 
+                pluginPixmapOriginal_, 
+                true, 
+                false, 
+                false, 
+                false
+                );
+
+        resizeImageLabel(
+                histogramImageLabelPtr_, 
+                histogramPixmapOriginal_, 
+                false, 
+                false, 
+                false, 
+                false
+                );
     }
 
 
@@ -3390,24 +3518,39 @@ namespace bias
         TriggerType triggerType = convertStringToTriggerType(triggerTypeString);
 
         // --------------------------------------------------------------------
-        // TEMPORARY - currently only allow internal trigger
+        // TO DO - Check if trigger type is allowed 
         // --------------------------------------------------------------------
-        if (triggerType != TRIGGER_INTERNAL)
+        switch (triggerType)
         {
-            QString errMsgText = QString("Development Error: triggerType = %1").arg(triggerTypeString); 
-            errMsgText += "\n\n";
-            errMsgText += "currently only triggerType=Internal supported";
-            if (showErrorDlg)
-            {
-                QMessageBox::critical(this,errMsgTitle,errMsgText);
-            }
-            rtnStatus.success = false;
-            rtnStatus.message = errMsgText;
-            return rtnStatus;
-        }
-        // --------------------------------------------------------------------
-        // TO DO - Check if trigger type is allowed and if so set to new value
-        // --------------------------------------------------------------------
+            case TRIGGER_INTERNAL:
+                cameraPtr_ -> acquireLock();
+                cameraPtr_ -> setTriggerInternal();
+                cameraPtr_ -> releaseLock();
+                actionCameraTriggerInternalPtr_ -> setChecked(true);
+                actionCameraTriggerExternalPtr_ -> setChecked(false);
+                break;
+
+            case TRIGGER_EXTERNAL:
+                cameraPtr_ -> acquireLock();
+                cameraPtr_ -> setTriggerExternal();
+                cameraPtr_ -> releaseLock();
+                actionCameraTriggerInternalPtr_ -> setChecked(false);
+                actionCameraTriggerExternalPtr_ -> setChecked(true);
+                break;
+
+            default:
+                {
+                    QString errMsgText = QString("Unknown triggerType = %1").arg(triggerType); 
+                    if (showErrorDlg)
+                    {
+                        QMessageBox::critical(this,errMsgTitle,errMsgText);
+                    }
+                    rtnStatus.success = false;
+                    rtnStatus.message = errMsgText;
+                    return rtnStatus;
+                }
+
+        } // swtich(triggerType)
 
         // Format7 settings
         QVariantMap format7SettingsMap = cameraMap["format7Settings"].toMap();

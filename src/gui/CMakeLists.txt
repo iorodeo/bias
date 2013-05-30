@@ -9,6 +9,7 @@ set(
     timer_settings_dialog.ui
     logging_settings_dialog.ui
     format7_settings_dialog.ui
+    alignment_settings_dialog.ui
     )
 
 set(
@@ -39,6 +40,8 @@ set(
     format7_settings_dialog.hpp
     json.hpp
     basic_http_server.hpp
+    alignment_settings.hpp
+    alignment_settings_dialog.hpp
     )
 
 set(
@@ -69,6 +72,8 @@ set(
     format7_settings_dialog.cpp
     json.cpp
     basic_http_server.cpp
+    alignment_settings.cpp
+    alignment_settings_dialog.cpp
     )
 
 qt4_wrap_ui(bias_gui_FORMS_HEADERS ${bias_gui_FORMS}) 
