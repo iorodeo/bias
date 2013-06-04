@@ -2,19 +2,24 @@
 
 namespace bias
 {
+    const unsigned int AlignmentSettings::GRID_MIN_NUM_COL = 1;
+    const unsigned int AlignmentSettings::GRID_MAX_NUM_COL = 20; 
+    const unsigned int AlignmentSettings::GRID_MIN_NUM_ROW = 1;
+    const unsigned int AlignmentSettings::GRID_MAX_NUM_ROW = 20; 
 
-    const bool DEFAULT_GRID_VISIBLE = true;
-    const unsigned int DEFAULT_GRID_NUM_COL = 5;
-    const unsigned int DEFAULT_GRID_NUM_ROW = 5;
-    const unsigned int DEFAULT_GRID_PEN_WIDTH = 1;
-    const QColor DEFAULT_GRID_QCOLOR = QColor(0,0,255);
+    const bool AlignmentSettings::DEFAULT_GRID_VISIBLE = true;
+    const unsigned int AlignmentSettings::DEFAULT_GRID_NUM_COL = 5;
+    const unsigned int AlignmentSettings::DEFAULT_GRID_NUM_ROW = 5;
+    const unsigned int AlignmentSettings::DEFAULT_GRID_PEN_WIDTH = 1;
+    const QColor AlignmentSettings::DEFAULT_GRID_QCOLOR = QColor(0,0,255);
 
-    const bool DEFAULT_CIRCLE_VISIBLE = true;
-    const unsigned int DEFAULT_CIRCLE_RADIUS = 50;
-    const unsigned int DEFAULT_CIRCLE_POS_X = 100;
-    const unsigned int DEFAULT_CIRCLE_POS_Y = 100;
-    const unsigned int DEFAULT_CIRCLE_PEN_WIDTH = 1;
-    const QColor DEFAULT_CIRCLE_QCOLOR = QColor(255,255,0);
+    const bool AlignmentSettings::DEFAULT_ELLIPSE_VISIBLE = true;
+    const unsigned int AlignmentSettings::DEFAULT_ELLIPSE_POS_X = 100;
+    const unsigned int AlignmentSettings::DEFAULT_ELLIPSE_POS_Y = 100;
+    const unsigned int AlignmentSettings::DEFAULT_ELLIPSE_RADIUS_X = 50;
+    const unsigned int AlignmentSettings::DEFAULT_ELLIPSE_RADIUS_Y = 25;
+    const unsigned int AlignmentSettings::DEFAULT_ELLIPSE_PEN_WIDTH = 1;
+    const QColor AlignmentSettings::DEFAULT_ELLIPSE_QCOLOR = QColor(255,255,0);
 
     AlignmentSettings::AlignmentSettings()
     {
@@ -24,13 +29,13 @@ namespace bias
         gridPenWidth = DEFAULT_GRID_PEN_WIDTH;
         gridQColor = DEFAULT_GRID_QCOLOR;
 
-        circleVisible = DEFAULT_CIRCLE_VISIBLE;
-        circleRadius = DEFAULT_CIRCLE_RADIUS;
-        circlePosX = DEFAULT_CIRCLE_POS_X;
-        circlePosY = DEFAULT_CIRCLE_POS_Y;
-        circlePenWidth = DEFAULT_CIRCLE_PEN_WIDTH;
-        circleQColor = DEFAULT_CIRCLE_QCOLOR;
-
+        ellipseVisible = DEFAULT_ELLIPSE_VISIBLE;
+        ellipsePosX = DEFAULT_ELLIPSE_POS_X;
+        ellipsePosY = DEFAULT_ELLIPSE_POS_Y;
+        ellipseRadiusX = DEFAULT_ELLIPSE_RADIUS_X;
+        ellipseRadiusY = DEFAULT_ELLIPSE_RADIUS_Y;
+        ellipsePenWidth = DEFAULT_ELLIPSE_PEN_WIDTH;
+        ellipseQColor = DEFAULT_ELLIPSE_QCOLOR;
     };
 
 } // namespace bias

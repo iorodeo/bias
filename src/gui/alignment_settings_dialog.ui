@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>527</width>
-    <height>330</height>
+    <width>546</width>
+    <height>377</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="gridTabPtr">
       <attribute name="title">
@@ -295,16 +295,16 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="circleTabPtr_">
+     <widget class="QWidget" name="ellipseTabPtr_">
       <attribute name="title">
-       <string>Circle</string>
+       <string>Ellipse</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QWidget" name="circleVisibleWidgetPtr_" native="true">
+        <widget class="QWidget" name="ellipseVisibleWidgetPtr_" native="true">
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
-           <widget class="QCheckBox" name="circleVisibleCheckBoxPtr_">
+           <widget class="QCheckBox" name="ellipseVisibleCheckBoxPtr_">
             <property name="layoutDirection">
              <enum>Qt::LeftToRight</enum>
             </property>
@@ -337,10 +337,10 @@
         </widget>
        </item>
        <item>
-        <widget class="QWidget" name="circlePosXWidgetPtr_" native="true">
+        <widget class="QWidget" name="ellipsePosXWidgetPtr_" native="true">
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
-           <widget class="QLabel" name="circlePosXLabelPtr_">
+           <widget class="QLabel" name="ellipsePosXLabelPtr_">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -349,13 +349,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>30</width>
+              <width>40</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>30</width>
+              <width>40</width>
               <height>16777215</height>
              </size>
             </property>
@@ -381,7 +381,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QSlider" name="circlePosXSliderPtr_">
+           <widget class="QSlider" name="ellipsePosXSliderPtr_">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -404,7 +404,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QLineEdit" name="circlePosXLineEditPtr_">
+           <widget class="QLineEdit" name="ellipsePosXLineEditPtr_">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -439,7 +439,7 @@
         <widget class="QWidget" name="widget_5" native="true">
          <layout class="QHBoxLayout" name="horizontalLayout_5">
           <item>
-           <widget class="QLabel" name="circlePosYLabelPtr_">
+           <widget class="QLabel" name="ellipsePosYLabelPtr_">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -448,13 +448,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>30</width>
+              <width>40</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>30</width>
+              <width>40</width>
               <height>16777215</height>
              </size>
             </property>
@@ -480,7 +480,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QSlider" name="circlePosYSliderPtr_">
+           <widget class="QSlider" name="ellipsePosYSliderPtr_">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -503,7 +503,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QLineEdit" name="circlePosYLineEditPtr_">
+           <widget class="QLineEdit" name="ellipsePosYLineEditPtr_">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -535,10 +535,10 @@
         </widget>
        </item>
        <item>
-        <widget class="QWidget" name="circleRadiusWidgetPtr_" native="true">
+        <widget class="QWidget" name="ellipseRadiusXWidgetPtr_" native="true">
          <layout class="QHBoxLayout" name="horizontalLayout_6">
           <item>
-           <widget class="QLabel" name="circleRadiusLabelPtr_">
+           <widget class="QLabel" name="ellipseRadiusXLabelPtr_">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -547,18 +547,18 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>30</width>
+              <width>40</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>30</width>
+              <width>40</width>
               <height>16777215</height>
              </size>
             </property>
             <property name="text">
-             <string>Radius </string>
+             <string>Radius X</string>
             </property>
            </widget>
           </item>
@@ -579,7 +579,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QSlider" name="circleRadiusSliderPtr_">
+           <widget class="QSlider" name="ellipseRadiusXSliderPtr_">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -602,7 +602,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QLineEdit" name="circleRadiusLineEditPtr_">
+           <widget class="QLineEdit" name="ellipseRadiusXLineEditPtr_">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -634,17 +634,116 @@
         </widget>
        </item>
        <item>
+        <widget class="QWidget" name="ellipseRadiusYWidgetPtr_" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout_10">
+          <item>
+           <widget class="QLabel" name="ellipseRadiusYLabelPtr_">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>40</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>40</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Radius Y </string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_15">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>15</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QSlider" name="ellipseRadiusYSliderPtr_">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_16">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>15</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="ellipseRadiusYLineEditPtr_">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>60</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>60</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="Line" name="line_8">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QWidget" name="widget_7" native="true">
          <layout class="QHBoxLayout" name="horizontalLayout_7">
           <item>
-           <widget class="QLabel" name="circleColorLabelPtr_">
+           <widget class="QLabel" name="ellipseColorLabelPtr_">
             <property name="text">
              <string>Color:</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="circleColorImageLabelPtr_">
+           <widget class="QLabel" name="ellipseColorImageLabelPtr_">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -691,7 +790,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="circleColorChangePushButtonPtr_">
+           <widget class="QPushButton" name="ellipseColorChangePushButtonPtr_">
             <property name="text">
              <string>Change</string>
             </property>

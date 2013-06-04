@@ -2533,21 +2533,21 @@ namespace bias
             }
 
             // Draw alignement circle
-            if (alignmentSettings_.circleVisible)
+            if (alignmentSettings_.ellipseVisible)
             {
                 float scaleX = float(scaledPixmapWidth)/float(origPixmapWidth);
                 float scaleY = float(scaledPixmapHeight)/float(origPixmapHeight);
-                QPainter circlePainter(&pixmapScaled);
-                QPen circlePen = QPen(alignmentSettings_.circleQColor);
-                circlePen.setWidth(alignmentSettings_.circlePenWidth);
-                circlePainter.setPen(circlePen);
-                circlePainter.drawEllipse(
-                        (unsigned int)(scaleX*alignmentSettings_.circlePosX),
-                        (unsigned int)(scaleY*alignmentSettings_.circlePosY),
-                        (unsigned int)(2*scaleX*alignmentSettings_.circleRadius),
-                        (unsigned int)(2*scaleY*alignmentSettings_.circleRadius)
+                QPainter ellipsePainter(&pixmapScaled);
+                QPen ellipsePen = QPen(alignmentSettings_.ellipseQColor);
+                ellipsePen.setWidth(alignmentSettings_.ellipsePenWidth);
+                ellipsePainter.setPen(ellipsePen);
+                ellipsePainter.drawEllipse(
+                        (unsigned int)(scaleX*alignmentSettings_.ellipsePosX),
+                        (unsigned int)(scaleY*alignmentSettings_.ellipsePosY),
+                        (unsigned int)(2*scaleX*alignmentSettings_.ellipseRadiusX),
+                        (unsigned int)(2*scaleY*alignmentSettings_.ellipseRadiusY)
                         );
-                circlePainter.end();
+                ellipsePainter.end();
             }
         }
 

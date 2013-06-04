@@ -2,6 +2,7 @@
 #define BIAS_ALIGNMENT_SETTINSG_DIALOG_HPP
 
 #include <QDialog>
+#include <QMap>
 #include "ui_alignment_settings_dialog.h"
 #include "alignment_settings.hpp"
 
@@ -24,8 +25,12 @@ namespace bias
         private:
 
             AlignmentSettings settings_;
+            QMap<unsigned int, unsigned int> gridRowsValueToIndexMap_;
+            QMap<unsigned int, unsigned int> gridColsValueToIndexMap_;
              
             void initialize();
+            void initializeGridTab();
+            void initializeEllipseTab();
             void connectWidgets();
             void updateSettings(AlignmentSettings settings);
 
