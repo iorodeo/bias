@@ -22,6 +22,16 @@ namespace bias
 
             void alignmentSettingsChanged(AlignmentSettings settings);
 
+        private slots:
+
+            void gridVisibleChanged(int state);
+            void gridRowsChanged(int index);
+            void gridColsChanged(int index);
+            void gridColorChangeClicked();
+
+            void ellipseVisibleChanged(int state);
+            void ellipseColorChangeClicked();
+
         private:
 
             AlignmentSettings settings_;
@@ -33,9 +43,8 @@ namespace bias
             void initializeEllipseTab();
             void connectWidgets();
             void updateSettings(AlignmentSettings settings);
-
-
-
+            void setGridColorLabel(QColor color);
+            void setEllipseColorLabel(QColor color);
     };
 
 } // namespace bias

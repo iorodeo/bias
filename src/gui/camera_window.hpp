@@ -176,6 +176,7 @@ namespace bias
             void timerDurationChanged(unsigned long duration);
             void loggingSettingsChanged(VideoWriterParams params);
             void format7RoiEnableStateChanged();
+            void alignmentSettingsChanged(AlignmentSettings);
 
         private:
 

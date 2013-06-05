@@ -1806,13 +1806,29 @@ namespace bias
         // If alignment settings dialog does exist create it otherwise raise
         if (alignmentSettingsDialogPtr_.isNull()) 
         {
-            alignmentSettingsDialogPtr_ = new AlignmentSettingsDialog(this);
+            alignmentSettingsDialogPtr_ = new AlignmentSettingsDialog(
+                    alignmentSettings_,
+                    this
+                    );
+
             alignmentSettingsDialogPtr_ -> show();
+
+            connect(
+                    alignmentSettingsDialogPtr_,
+                    SIGNAL(alignmentSettingsChanged(AlignmentSettings)),
+                    this,
+                    SLOT(alignmentSettingsChanged(AlignmentSettings))
+                   );
         }
         else
         {
             alignmentSettingsDialogPtr_ -> raise();
         }
+    }
+
+    void CameraWindow::alignmentSettingsChanged(AlignmentSettings settings)
+    {
+        alignmentSettings_ = settings;
     }
 
 
