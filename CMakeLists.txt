@@ -40,7 +40,7 @@ endif()
 # Qt library
 # ------------------------------------------------------------------------------
 if(with_qt_gui)
-    set(QT_BINARY_DIR "C:/users/wbd/work/qt/qt_activestate/bin")
+    set(QT_BINARY_DIR "$ENV{QTDIR}/bin")
     find_package(Qt4 COMPONENTS QtCore QtGui QtNetwork REQUIRED)
 endif()
 
