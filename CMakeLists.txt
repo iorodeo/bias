@@ -29,6 +29,7 @@ if(${OpenCV_FOUND})
 else()
     message(STATUS "OpenCv not found")
 endif()
+message(STATUS "OpenCV_INCLUDE_DIRS = ${OpenCV_INCLUDE_DIRS}") 
 
 
 # FlyCapture2 library location - replace this this custom find_package
