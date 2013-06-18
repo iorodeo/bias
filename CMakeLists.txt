@@ -10,10 +10,14 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 option(with_qt_gui  "include image acquisition GUI"   ON ) 
 option(with_fc2     "include the FlyCapture2 backend" ON )
 option(with_dc1394  "include the libdc1394 backend"   OFF)
+option(with_demos   "include demos" ON)
+option(with_tests   "include tests" ON)
 
 message(STATUS "Option: with_fc2     = ${with_fc2}")
 message(STATUS "Option: with_dc1394  = ${with_dc1394}")
 message(STATUS "Option: with_qt_gui  = ${with_qt_gui}")
+message(STATUS "Option: with_demos   = ${with_demos}")
+message(STATUS "Option: with_tests   = ${with_tests}") 
 
 if( NOT( with_fc2 OR with_dc1394 ) )
     message(FATAL_ERROR "their must be at least one camera backend")
@@ -29,7 +33,6 @@ if(${OpenCV_FOUND})
 else()
     message(STATUS "OpenCv not found")
 endif()
-message(STATUS "OpenCV_INCLUDE_DIRS = ${OpenCV_INCLUDE_DIRS}") 
 
 
 # FlyCapture2 library location - replace this this custom find_package
@@ -110,9 +113,16 @@ if(with_dc1394)
 endif() 
 
 add_subdirectory("src/facade")
-add_subdirectory("src/test")
 
 if(with_qt_gui)
     add_subdirectory("src/gui")
+endif()
+
+if (with_demos)
+    add_subdirectory("src/demo/blob_finder")
+endif()
+
+if (with_tests)
+    add_subdirectory("src/test")
 endif()
 

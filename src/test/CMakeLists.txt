@@ -1,8 +1,16 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
-project(blob_finder)
-add_executable(blob_finder blob_finder_main.cpp blob_finder.cpp)
-target_link_libraries(blob_finder ${bias_ext_link_LIBS} bias_camera_facade)
+if(with_fc2)
+    project(bias_test_fc2)
+    add_executable(test_fc2 test_fc2.cpp)
+    target_link_libraries(test_fc2 ${bias_ext_link_LIBS} bias_camera_facade)
 
+endif()
+
+if(with_dc1394) 
+    project(bias_test_dc1394)
+    add_EXECUTABLE(test_dc1394 test_dc1394.cpp)
+    target_link_libraries(test_dc1394 ${bias_ext_link_LIBS} bias_camera_facade)
+endif()
 
 
