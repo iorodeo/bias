@@ -13,6 +13,9 @@ class BlobFinderParam
         static const double DEFAULT_MINIMUM_AREA;
         static const double DEFAULT_MAXIMUM_AREA;
         static const double DEFAULT_THRESHOLD_MAXVAL;
+        static const unsigned int DEFAULT_SERVER_PORT;
+        static const std::string DEFAULT_SERVER_ADDR;
+        static const bool DEFAULT_SERVER_ENABLED;
 
         float frameRate;
         float displayScale;
@@ -20,6 +23,9 @@ class BlobFinderParam
         double maximumArea;
         double threshold;
         double thresholdMaxVal;
+        unsigned int serverPort;
+        std::string serverAddress;
+        bool serverEnabled;
 
         BlobFinderParam();
 

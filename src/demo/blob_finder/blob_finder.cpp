@@ -1,12 +1,17 @@
 #include "blob_finder.hpp"
 #include "camera_facade.hpp"
-#include "blob_data.hpp"
 #include <cmath>
 #include <iostream>
 #include <algorithm>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+
+#include <QUrl>
+#include <QEventLoop>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
 
 BlobFinder::BlobFinder() {}
 
@@ -31,8 +36,8 @@ bool BlobFinder::run()
     }
     std::cout << std::endl;
 
+    cv::namedWindow("Blob Image",   CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED); 
     cv::namedWindow("Threshold Image", CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED); 
-    cv::namedWindow("Contour Image",   CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED); 
 
     unsigned long cnt = 0;
 
@@ -76,9 +81,7 @@ bool BlobFinder::run()
 
             if ((blobData.area >= param_.minimumArea) && (blobData.area <= param_.maximumArea))
             {
-                blobCnt++;
                 blobDataList.push_back(blobData);
-
                 std::cout << "    blob #: " << blobDataList.size() << std::endl;
                 blobData.print(2);
                 std::cout << std::endl;
@@ -87,12 +90,18 @@ bool BlobFinder::run()
         }
         std::cout << std::endl;
 
+        // Show images 
+        cv::resize(imageBlobs, imageTemp, cv::Size(0,0), param_.displayScale, param_.displayScale); 
+        cv::imshow("Blob Image", imageTemp);
 
         cv::resize(imageThresh,imageTemp, cv::Size(0,0), param_.displayScale, param_.displayScale);
         cv::imshow("Threshold Image", imageTemp);
 
-        cv::resize(imageBlobs, imageTemp, cv::Size(0,0), param_.displayScale, param_.displayScale); 
-        cv::imshow("Contour Image", imageTemp);
+        //  Send http request
+        if (param_.serverEnabled)
+        {
+            sendHttpRequest(blobDataList);
+        }
 
         // Look for 'q' key press as signal to quit
         int key = cv::waitKey(1);
@@ -265,5 +274,35 @@ bool BlobFinder::stopCapture()
     std::cout << "done" << std::endl;
 
     return true;
+}
+
+
+bool BlobFinder::sendHttpRequest(BlobDataList blobDataList)
+{
+    // create custom temporary event loop on stack
+    QEventLoop eventLoop;
+
+    // "quit()" the eventl-loop, when the network request "finished()"
+    QNetworkAccessManager mgr;
+    QObject::connect(&mgr, SIGNAL(finished(QNetworkReply*)), &eventLoop, SLOT(quit()));
+
+    QString reqString = QString("http://%1").arg(QString::fromStdString(param_.serverAddress));
+    reqString += QString(":%1").arg(param_.serverPort); 
+
+    QUrl reqUrl = QUrl(reqString);
+    reqUrl.addQueryItem("numblobs", QString::number(blobDataList.size()));
+    QNetworkRequest req(reqUrl);
+
+    QNetworkReply *reply = mgr.get(req);
+    eventLoop.exec(); // blocks stack until "finished()" has been called
+
+    if (reply->error() == QNetworkReply::NoError) {
+        delete reply;
+        return true;
+    }
+    else {
+        delete reply;
+        return false;
+    }
 }
 

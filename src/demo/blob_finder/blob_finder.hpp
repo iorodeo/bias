@@ -2,6 +2,7 @@
 #define BLOB_FINDER_HPP
 #include "camera_facade_fwd.hpp"
 #include "blob_finder_param.hpp"
+#include "blob_data.hpp"
 
 using namespace bias;
 
@@ -24,7 +25,9 @@ class BlobFinder
         bool startCapture();
         bool stopCapture();
         bool sendData();
+        bool sendHttpRequest(BlobDataList blobDataList);
 };
+
 
 #endif // #ifndef BLOB_FINDER_HPP
 

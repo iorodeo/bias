@@ -5,11 +5,14 @@
 #include <cstdlib>
 #include <iostream>
 #include "blob_finder.hpp"
+#include <QCoreApplication>
 
 using namespace bias;
 
 int main(int argc, char** argv)
 {        
+    QCoreApplication app(argc, argv);
+
     std::cout << std::endl;
     std::cout << "--------------------------------------- " << std::endl;
     std::cout << "  Blob Finder Demo                      " << std::endl;
