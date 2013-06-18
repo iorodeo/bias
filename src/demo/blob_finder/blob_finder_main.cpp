@@ -16,8 +16,8 @@ int main(int argc, char** argv)
     std::cout << "--------------------------------------- " << std::endl;
 
     bool success = true;
-    const float frameRate = 50.0;
-    BlobFinder blobFinder(frameRate); 
+
+    BlobFinder blobFinder; 
 
     success = blobFinder.setupCamera();
     if (!success)
