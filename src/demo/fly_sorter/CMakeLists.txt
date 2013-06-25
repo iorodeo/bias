@@ -11,6 +11,7 @@ set(
     fly_sorter_HEADERS
     fly_sorter_window.hpp
     image_grabber.hpp
+    parameters.hpp
     )
 
 set(
@@ -18,6 +19,7 @@ set(
     fly_sorter_main.cpp
     fly_sorter_window.cpp
     image_grabber.cpp
+    parameters.cpp
     )
 
 qt4_wrap_ui(fly_sorter_FORMS_HEADERS ${fly_sorter_FORMS}) 
@@ -41,6 +43,7 @@ target_link_libraries(
     ${QT_LIBRARIES} 
     ${bias_ext_link_LIBS} 
     bias_camera_facade
+    bias_utility
     )
 
 

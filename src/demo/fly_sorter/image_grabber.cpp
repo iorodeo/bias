@@ -34,7 +34,6 @@ ImageGrabber::ImageGrabber(ImageGrabberParam param, QObject *parent)
 
 void ImageGrabber::stopCapture()
 {
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
     stopped_ = true;
 }
 
@@ -69,7 +68,7 @@ void ImageGrabber::run()
     {
         try
         {
-            imageData.image = cameraPtr_ -> grabImage();
+            imageData.mat = cameraPtr_ -> grabImage();
         }
         catch (RuntimeError &runtimeError)
         {

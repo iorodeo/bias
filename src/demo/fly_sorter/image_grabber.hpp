@@ -23,7 +23,7 @@ class CameraInfo
 class ImageData
 {
     public:
-        cv::Mat image;
+        cv::Mat mat;
         unsigned long frameCount;
         ImageData();
 };

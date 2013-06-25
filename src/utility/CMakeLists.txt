@@ -5,11 +5,17 @@ project(bias_utility)
 set(
     bias_utility_HEADERS
     mat_to_qimage.hpp
+    blob_data.hpp
+    blob_finder.hpp
+    blob_finder_param.hpp
     )
 
 set(
     bias_utility_SOURCES
     mat_to_qimage.cpp
+    blob_data.cpp
+    blob_finder.cpp
+    blob_finder_param.cpp
     )
 
 qt4_wrap_cpp(bias_utility_HEADERS_MOC ${bias_utility_HEADERS})
