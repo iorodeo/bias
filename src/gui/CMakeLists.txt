@@ -16,7 +16,6 @@ set(
     bias_gui_HEADERS 
     camera_window.hpp 
     lockable.hpp
-    mat_to_qimage.hpp
     validators.hpp
     image_grabber.hpp
     image_logger.hpp
@@ -48,7 +47,6 @@ set(
     bias_gui_SOURCES 
     main.cpp 
     camera_window.cpp 
-    mat_to_qimage.cpp
     validators.cpp
     image_grabber.cpp
     image_logger.cpp
@@ -97,5 +95,6 @@ target_link_libraries(
     ${QT_LIBRARIES} 
     ${bias_ext_link_LIBS} 
     bias_camera_facade
+    bias_utility
     )
 

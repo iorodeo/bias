@@ -1,0 +1,36 @@
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+
+project(bias_utility)
+
+set(
+    bias_utility_HEADERS
+    mat_to_qimage.hpp
+    )
+
+set(
+    bias_utility_SOURCES
+    mat_to_qimage.cpp
+    )
+
+qt4_wrap_cpp(bias_utility_HEADERS_MOC ${bias_utility_HEADERS})
+
+include(${QT_USE_FILE})
+add_definitions(${QT_DEFINITIONS})
+
+add_library(
+    bias_utility
+    ${bias_utility_HEADERS_MOC}
+    ${bias_utility_SOURCES} 
+    )
+
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(.)
+target_link_libraries(
+    bias_utility 
+    ${QT_LIBRARIES} 
+    ${bias_ext_link_LIBS} 
+    bias_camera_facade
+    )
+
+
+

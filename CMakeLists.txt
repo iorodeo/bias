@@ -72,6 +72,8 @@ endif()
 # -----------------------------------------------------------------------------
 include_directories("./src/backend/base")
 include_directories("./src/facade")
+include_directories("./src/utility")
+
 if(with_fc2)
     include_directories(${FlyCapture2_INCLUDE_DIRS})
     include_directories("./src/backend/fc2")
@@ -113,6 +115,7 @@ if(with_dc1394)
 endif() 
 
 add_subdirectory("src/facade")
+add_subdirectory("src/utility")
 
 if(with_qt_gui)
     add_subdirectory("src/gui")

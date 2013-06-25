@@ -52,5 +52,6 @@ namespace bias
         }
         return colorTable;
     }
+
 } // namespace bias
 

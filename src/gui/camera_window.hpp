@@ -50,7 +50,6 @@ namespace bias
     {
         Q_OBJECT
 
-        static const unsigned int MAX_THREAD_COUNT=10;
 
         public:
 

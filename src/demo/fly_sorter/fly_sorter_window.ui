@@ -21,7 +21,7 @@
        <bool>true</bool>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="previewTabPtr_">
        <attribute name="title">
@@ -57,7 +57,7 @@
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
-         <widget class="QTextEdit" name="textEdit">
+         <widget class="QTextEdit" name="paramsTextEditPtr_">
           <property name="enabled">
            <bool>true</bool>
           </property>

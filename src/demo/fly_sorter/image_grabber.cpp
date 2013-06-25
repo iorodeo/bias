@@ -4,7 +4,28 @@
 #include <QPointer>
 #include <iostream>
 
-ImageGrabber::ImageGrabber(ImageGrabberParam param, QObject *parent) : QObject(parent) 
+// CameraInfo
+// ----------------------------------------------------------------------------
+
+CameraInfo::CameraInfo()
+{
+    vendor = QString("");
+    model = QString("");
+    guid = QString("");
+}
+
+// ImageData
+// ----------------------------------------------------------------------------
+ImageData::ImageData()
+{
+    frameCount = 0;
+}
+
+// ImageGrabber
+// ----------------------------------------------------------------------------
+
+ImageGrabber::ImageGrabber(ImageGrabberParam param, QObject *parent) 
+: QObject(parent) 
 { 
     param_ = param;
     stopped_ = false;
@@ -13,6 +34,7 @@ ImageGrabber::ImageGrabber(ImageGrabberParam param, QObject *parent) : QObject(p
 
 void ImageGrabber::stopCapture()
 {
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
     stopped_ = true;
 }
 
@@ -35,26 +57,26 @@ void ImageGrabber::run()
         unsigned int errorId = runtimeError.id();
         QString errorMsg = QString("Unable to start capture: ");
         errorMsg += QString::fromStdString(runtimeError.what());
-        emit imageGrabberError(errorMsg);
+        emit cameraSetupError(errorMsg);
         return;
     }
 
 
     // Grab images
+    ImageData imageData;
+
     while (!stopped_)
     {
-
-        cv::Mat image;
         try
         {
-            image = cameraPtr_ -> grabImage();
+            imageData.image = cameraPtr_ -> grabImage();
         }
         catch (RuntimeError &runtimeError)
         {
             continue;
         }
-        emit imageGrabberNewImage(image);
-
+        imageData.frameCount++; 
+        emit newImage(imageData);
     } 
 
     // Clean up
@@ -67,10 +89,24 @@ void ImageGrabber::run()
         unsigned int errorId = runtimeError.id();
         QString errorMsg = QString("Unable to start capture: ");
         errorMsg += QString::fromStdString(runtimeError.what());
-        emit imageGrabberError(errorMsg);
+        emit cameraSetupError(errorMsg);
     }
 
-    emit imageGrabberStopped();
+    try
+    {
+        cameraPtr_ -> disconnect();
+    }
+    catch (RuntimeError &runtimeError)
+    {
+        unsigned int errorId = runtimeError.id();
+        QString errorMsg = QString("Unable to disconnect from camera: ");
+        errorMsg += QString::fromStdString(runtimeError.what());
+        emit cameraSetupError(errorMsg);
+    }
+
+    CameraInfo emptyInfo;
+    emit newCameraInfo(emptyInfo);
+    emit stopped();
 }
 
 
@@ -88,7 +124,7 @@ bool ImageGrabber::setupCamera()
     {
         QString errorMsg = QString("Unable to enumerate cameras: ");
         errorMsg += QString::fromStdString(runtimeError.what());
-        emit imageGrabberError(errorMsg);
+        emit cameraSetupError(errorMsg);
         return false;
     }
 
@@ -96,7 +132,7 @@ bool ImageGrabber::setupCamera()
     if (cameraPtrList.empty()) 
     {
         QString errorMsg = QString("No cameras found");
-        emit imageGrabberError(errorMsg);
+        emit cameraSetupError(errorMsg);
         return false;
     }
 
@@ -105,7 +141,7 @@ bool ImageGrabber::setupCamera()
     if (cameraPtr_ -> isConnected()) 
     {
         QString errorMsg = QString("Camera is already connected");
-        emit imageGrabberError(errorMsg);
+        emit cameraSetupError(errorMsg);
         return false;
     }
     try
@@ -116,7 +152,7 @@ bool ImageGrabber::setupCamera()
     {
         QString errorMsg = QString("Unable to connect to camera: ");
         errorMsg += QString::fromStdString(runtimeError.what());
-        emit imageGrabberError(errorMsg);
+        emit cameraSetupError(errorMsg);
         return false;
     }
 
@@ -124,7 +160,7 @@ bool ImageGrabber::setupCamera()
     cameraInfo.vendor = QString::fromStdString(cameraPtr_ -> getVendorName());
     cameraInfo.model = QString::fromStdString(cameraPtr_ -> getModelName());
     cameraInfo.guid = QString::fromStdString((cameraPtr_ -> getGuid()).toString());
-    emit imageGrabberCameraInfo(cameraInfo);
+    emit newCameraInfo(cameraInfo);
 
     // Set video mode and frame rate
     try
@@ -135,7 +171,7 @@ bool ImageGrabber::setupCamera()
     {
         QString errorMsg = QString("Unable to set Video Mode: ");
         errorMsg += QString::fromStdString(runtimeError.what());
-        emit imageGrabberError(errorMsg);
+        emit cameraSetupError(errorMsg);
         return false;
     }
 
@@ -147,7 +183,7 @@ bool ImageGrabber::setupCamera()
     {
         QString errorMsg = QString("Unable to set trigger: ");
         errorMsg += QString::fromStdString(runtimeError.what());
-        emit imageGrabberError(errorMsg);
+        emit cameraSetupError(errorMsg);
         return false;
     }
 
@@ -165,7 +201,7 @@ bool ImageGrabber::setupCamera()
     {
         QString errorMsg = QString("Unable to framerate: ");
         errorMsg += QString::fromStdString(runtimeError.what());
-        emit imageGrabberError(errorMsg);
+        emit cameraSetupError(errorMsg);
         return false;
     }
 

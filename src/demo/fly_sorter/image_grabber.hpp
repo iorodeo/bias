@@ -1,25 +1,31 @@
 #ifndef IMAGE_GRABBER_HPP  
 #define IMAGE_GRABBER_HPP
 
+#include "camera_facade_fwd.hpp"
+#include "parameters.hpp"
 #include <QObject>
 #include <QRunnable>
 #include <QThread>
 #include <memory>
-#include "camera_facade_fwd.hpp"
 #include <opencv2/core/core.hpp>
 
 using namespace bias;
 
-struct ImageGrabberParam
+class CameraInfo
 {
-    float frameRate;
+    public:
+        QString vendor;
+        QString model;
+        QString guid;
+        CameraInfo();
 };
 
-struct CameraInfo
+class ImageData
 {
-    QString vendor;
-    QString model;
-    QString guid;
+    public:
+        cv::Mat image;
+        unsigned long frameCount;
+        ImageData();
 };
 
 
@@ -37,10 +43,10 @@ class ImageGrabber : public QObject, public QRunnable
 
     signals:
 
-        void imageGrabberError(QString errorMsg);
-        void imageGrabberCameraInfo(CameraInfo info);
-        void imageGrabberNewImage(cv::Mat image);
-        void imageGrabberStopped();
+        void cameraSetupError(QString errorMsg);
+        void newCameraInfo(CameraInfo info);
+        void newImage(ImageData imageData);
+        void stopped();
 
     private:
 
@@ -52,6 +58,7 @@ class ImageGrabber : public QObject, public QRunnable
 
         void run();
         bool setupCamera();
+
 };
 
 
