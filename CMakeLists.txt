@@ -120,6 +120,7 @@ endif()
 
 if (with_demos)
     add_subdirectory("src/demo/blob_finder")
+    add_subdirectory("src/demo/fly_sorter")
 endif()
 
 if (with_tests)
