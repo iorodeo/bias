@@ -1,10 +1,13 @@
 #include "fly_sorter_window.hpp"
 #include "mat_to_qimage.hpp"
+#include "json.hpp"
 #include <QMessageBox>
 #include <QThreadPool>
 #include <QTimer>
 #include <QPainter>
 #include <QVariant>
+#include <QVariantMap>
+#include <QVariantList>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -289,11 +292,41 @@ void FlySorterWindow::sendDataViaHttpRequest()
 { 
     QString reqString = QString("http://%1").arg(param_.server.address);
     reqString += QString(":%1").arg(param_.server.port); 
+    QString jsonString = QString(dataToJson());
+    jsonString.replace(" ", "");
     QUrl reqUrl = QUrl(reqString);
-    reqUrl.addQueryItem("numblobs", QString::number(blobFinderData_.blobDataList.size()));
-
+    reqUrl.addQueryItem("sendData", jsonString);
     std::cout << "http request: " << reqUrl.toString().toStdString() << std::endl;
-
     QNetworkRequest req(reqUrl);
     QNetworkReply *reply = networkAccessManagerPtr_ -> get(req);
+}
+
+
+QVariantMap FlySorterWindow::dataToMap()
+{
+    QVariantMap map;
+    map.insert("ndetections", blobFinderData_.blobDataList.size());
+    //BlobDataList::iterator it;
+    //for (it=blobFinderData_.blobDataList.begin(); it!=blobFinderData_.blobDataList.end(); it++)
+    //{
+    //    QVariantMap blobMap;
+    //    BlobData *it;
+
+    //}
+    return map;
+}
+
+
+QByteArray FlySorterWindow::dataToJson()
+{
+    QVariantMap map = dataToMap();
+    bool ok;
+    QByteArray json = QtJson::serialize(map,ok);
+    if (!ok)
+    {
+        QByteArray emptyByteArray = QByteArray();
+        return emptyByteArray;
+    }
+    return json;
+
 }

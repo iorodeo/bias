@@ -1,4 +1,5 @@
 #include "blob_data.hpp"
+#include "json.hpp"
 #include <sstream>
 #include <iostream>
 
@@ -192,6 +193,8 @@ void BlobData::draw(cv::Mat &img)
 
 // Utility functions
 // ----------------------------------------------------------------------------
+
+
 std::string getIndentString(unsigned int indent, unsigned indentStep)
 {
     std::string indentString;

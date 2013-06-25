@@ -16,6 +16,8 @@ class ImageGrabber;
 class QTimer;
 class QNetworkAccessManager;
 class QNetworkReply;
+class QVarianMap;
+class QByteArray;
 
 class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
 {
@@ -68,6 +70,8 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         void setupDisplayTimer();
         void setupNetworkAccessManager();
         void sendDataViaHttpRequest();
+        QVariantMap dataToMap();
+        QByteArray dataToJson();
 
 };
 
