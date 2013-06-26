@@ -306,13 +306,17 @@ QVariantMap FlySorterWindow::dataToMap()
 {
     QVariantMap map;
     map.insert("ndetections", blobFinderData_.blobDataList.size());
-    //BlobDataList::iterator it;
-    //for (it=blobFinderData_.blobDataList.begin(); it!=blobFinderData_.blobDataList.end(); it++)
-    //{
-    //    QVariantMap blobMap;
-    //    BlobData *it;
-
-    //}
+    BlobDataList::iterator it;
+    QVariantList blobList;
+    for (it=blobFinderData_.blobDataList.begin(); it!=blobFinderData_.blobDataList.end(); it++)
+    {
+        QVariantMap blobMap;
+        BlobData blobData = *it;
+        blobMap.insert("x",blobData.centroid.x);
+        blobMap.insert("y",blobData.centroid.y);
+        blobList.push_back(blobMap);
+    }
+    map.insert("blobs", blobList);
     return map;
 }
 

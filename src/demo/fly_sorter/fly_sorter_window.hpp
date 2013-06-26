@@ -59,7 +59,6 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         ImageData imageData_;
         BlobFinderData blobFinderData_;
 
-
         void connectWidgets();
         void initialize();
         void updateAllImageLabels();
