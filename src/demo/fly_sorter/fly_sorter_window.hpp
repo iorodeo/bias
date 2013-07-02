@@ -44,6 +44,7 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         void newImage(ImageData imageData);
         void updateDisplayOnTimer(); 
         void networkAccessManagerFinished(QNetworkReply *reply);
+        void cameraSetupError(QString errorMsg);
 
     private:
 
@@ -58,6 +59,7 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         QPixmap thresholdPixmapOrig_;
         ImageData imageData_;
         BlobFinderData blobFinderData_;
+        unsigned int httpRequestErrorCount_;
 
         void connectWidgets();
         void initialize();

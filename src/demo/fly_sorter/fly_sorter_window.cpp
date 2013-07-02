@@ -13,12 +13,14 @@
 #include <QNetworkRequest>
 #include <iostream>
 #include <list>
+#include <random>
 
 // Constants
 // ----------------------------------------------------------------------------
 const unsigned int MAX_THREAD_COUNT=5;
-const QSize PREVIEW_DUMMY_IMAGE_SIZE = QSize(320,256);
+const unsigned int MAX_HTTP_REQUEST_ERROR = 10;
 const double DEFAULT_DISPLAY_FREQ = 15.0; // Hz
+const QSize PREVIEW_DUMMY_IMAGE_SIZE = QSize(320,256);
 
 
 // Public Methods
@@ -82,7 +84,14 @@ void FlySorterWindow::startPushButtonClicked()
     if (running_ == false)
     {
         imageGrabberPtr_ = new ImageGrabber(param_.imageGrabber); 
-        threadPoolPtr_ -> start(imageGrabberPtr_);
+
+        connect(
+                imageGrabberPtr_,
+                SIGNAL(cameraSetupError(QString)),
+                this,
+                SLOT(cameraSetupError(QString))
+               );
+                  
 
         connect(
                 this,
@@ -99,6 +108,8 @@ void FlySorterWindow::startPushButtonClicked()
                 SLOT(newImage(ImageData))
                 );
 
+
+        threadPoolPtr_ -> start(imageGrabberPtr_);
         running_ = true;
         startPushButtonPtr_ -> setText("Stop");
     }
@@ -112,7 +123,13 @@ void FlySorterWindow::startPushButtonClicked()
 }
 
 
-void FlySorterWindow::httpOutputCheckBoxChanged(int state) { }
+void FlySorterWindow::httpOutputCheckBoxChanged(int state) 
+{ 
+    if (state == Qt::Checked)
+    {
+        httpRequestErrorCount_=0;
+    }
+}
 
 
 void FlySorterWindow::newImage(ImageData imageData)
@@ -121,7 +138,7 @@ void FlySorterWindow::newImage(ImageData imageData)
     BlobFinder blobFinder = BlobFinder(param_.blobFinder);
     blobFinderData_ = blobFinder.findBlobs(imageData.mat);
 
-    if (httpOutputCheckBoxPtr_ -> checkState() == Qt::Checked)
+    if ((httpOutputCheckBoxPtr_ -> checkState()) == Qt::Checked)
     {
         sendDataViaHttpRequest();
     }
@@ -153,8 +170,23 @@ void FlySorterWindow::networkAccessManagerFinished(QNetworkReply *reply)
     else
     {
         std::cout << "http request error" << std::endl;
+        httpRequestErrorCount_++;
+        if (httpRequestErrorCount_ == MAX_HTTP_REQUEST_ERROR)
+        { 
+            httpOutputCheckBoxPtr_ -> setCheckState(Qt::Unchecked);
+            QString errMsgTitle("Http Request Error");
+            QString errMsgText("Too many request errors - stopping http output");
+            QMessageBox::critical(this, errMsgTitle, errMsgText);
+        }
     }
     delete reply;
+}
+
+
+void FlySorterWindow::cameraSetupError(QString message)
+{ 
+    QString errMsgTitle("Camera Setup Error");
+    QMessageBox::critical(this, errMsgTitle, message);
 }
 
 
@@ -183,6 +215,7 @@ void FlySorterWindow::connectWidgets()
 void FlySorterWindow::initialize()
 {
     running_ = false;
+    httpRequestErrorCount_ = 0;
     displayFreq_ = DEFAULT_DISPLAY_FREQ;
     threadPoolPtr_ = new QThreadPool(this);
     threadPoolPtr_ -> setMaxThreadCount(MAX_THREAD_COUNT);
@@ -294,8 +327,9 @@ void FlySorterWindow::sendDataViaHttpRequest()
     reqString += QString(":%1").arg(param_.server.port); 
     QString jsonString = QString(dataToJson());
     jsonString.replace(" ", "");
+    reqString += QString("/sendData/") + jsonString;
     QUrl reqUrl = QUrl(reqString);
-    reqUrl.addQueryItem("sendData", jsonString);
+    //reqUrl.addQueryItem("sendData", jsonString);
     std::cout << "http request: " << reqUrl.toString().toStdString() << std::endl;
     QNetworkRequest req(reqUrl);
     QNetworkReply *reply = networkAccessManagerPtr_ -> get(req);
@@ -304,20 +338,38 @@ void FlySorterWindow::sendDataViaHttpRequest()
 
 QVariantMap FlySorterWindow::dataToMap()
 {
-    QVariantMap map;
-    map.insert("ndetections", blobFinderData_.blobDataList.size());
+    QVariantMap dataMap;
+    dataMap.insert("ndetections", blobFinderData_.blobDataList.size());
+
+    QVariantList detectionList;
     BlobDataList::iterator it;
-    QVariantList blobList;
+    unsigned int cnt = 0;
+
+    std::default_random_engine generator;
+    std::uniform_int_distribution<unsigned int> distribution(0,1);
+
+
     for (it=blobFinderData_.blobDataList.begin(); it!=blobFinderData_.blobDataList.end(); it++)
     {
-        QVariantMap blobMap;
         BlobData blobData = *it;
-        blobMap.insert("x",blobData.centroid.x);
-        blobMap.insert("y",blobData.centroid.y);
-        blobList.push_back(blobMap);
+        QVariantMap detectionMap;
+        unsigned int coinFlip = distribution(generator);
+        if (coinFlip == 0)
+        {
+            detectionMap.insert("fly_type", "male");
+        }
+        else
+        {
+            detectionMap.insert("fly_type", "female");
+        }
+        detectionMap.insert("fly_id", cnt);
+        detectionMap.insert("x",blobData.centroid.x);
+        detectionMap.insert("y",blobData.centroid.y);
+        detectionList.push_back(detectionMap);
+        cnt++;
     }
-    map.insert("blobs", blobList);
-    return map;
+    dataMap.insert("detections", detectionList);
+    return dataMap;
 }
 
 

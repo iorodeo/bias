@@ -1,7 +1,10 @@
 #ifndef PARAMETERS_HPP
 #define PARAMETERS_HPP
 #include <QString>
+#include <QVariantMap>
+#include <QFile>
 #include "blob_finder_param.hpp"
+#include "common.hpp"
 
 class ImageGrabberParam
 {
@@ -31,6 +34,13 @@ class FlySorterParam
         ImageGrabberParam imageGrabber;
         BlobFinderParam blobFinder;
         FlySorterParam();
+
+        QVariantMap toMap();
+        QByteArray toJson();
+        RtnStatus fromJson(QByteArray paramJson);
+        RtnStatus fromMap(QVariantMap paramMap);
+        RtnStatus fromFile(QFile file);
+        RtnStatus toFile(QFile file);
 };
 
 #endif // #ifndef PARAMETERS_HPP
