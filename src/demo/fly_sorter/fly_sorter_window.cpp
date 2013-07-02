@@ -2,6 +2,7 @@
 #include "mat_to_qimage.hpp"
 #include "json.hpp"
 #include "json_utils.hpp"
+#include "rtn_status.hpp"
 #include <QMessageBox>
 #include <QThreadPool>
 #include <QTimer>
@@ -22,7 +23,7 @@ const unsigned int MAX_THREAD_COUNT=5;
 const unsigned int MAX_HTTP_REQUEST_ERROR = 10;
 const double DEFAULT_DISPLAY_FREQ = 15.0; // Hz
 const QSize PREVIEW_DUMMY_IMAGE_SIZE = QSize(320,256);
-
+const QString DEFAULT_PARAMETER_FILENAME = QString("fly_sorter_param.json");
 
 // Public Methods
 // ----------------------------------------------------------------------------
@@ -39,14 +40,12 @@ FlySorterWindow::FlySorterWindow(QWidget *parent) : QMainWindow(parent)
 
 void FlySorterWindow::showEvent(QShowEvent *event)
 {
-    std::cout << "show" << std::endl;
     resizeAllImageLabels();
 }
 
 
 void FlySorterWindow::resizeEvent(QResizeEvent *event)
 {
-    std::cout << "resize" << std::endl;
     resizeAllImageLabels();
 }
 
@@ -57,7 +56,7 @@ void FlySorterWindow::closeEvent(QCloseEvent *event)
     {
         QMessageBox msgBox;
         msgBox.setWindowTitle("Close Request");
-        msgBox.setText("The application is currently running:");
+        msgBox.setText("The application is currently capturing images:");
         msgBox.setInformativeText("Do you want to stop and close the window?");
         msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
         msgBox.setDefaultButton(QMessageBox::Cancel);
@@ -82,7 +81,20 @@ void FlySorterWindow::closeEvent(QCloseEvent *event)
 
 void FlySorterWindow::startPushButtonClicked()
 {
-    if (running_ == false)
+    if (!running_)
+    {
+        startImageCapture();
+    }
+    else
+    {
+        stopImageCapture();
+    }
+}
+
+
+void FlySorterWindow::startImageCapture()
+{
+    if (!running_)
     {
         imageGrabberPtr_ = new ImageGrabber(param_.imageGrabber); 
 
@@ -114,12 +126,32 @@ void FlySorterWindow::startPushButtonClicked()
         running_ = true;
         startPushButtonPtr_ -> setText("Stop");
     }
-    else
+}
+
+void FlySorterWindow::stopImageCapture()
+{
+    if (running_)
     {
         emit stopCapture();
         threadPoolPtr_ -> waitForDone();
         running_ = false;
         startPushButtonPtr_ -> setText("Start");
+    }
+}
+
+
+void FlySorterWindow::reloadPushButtonClicked()
+{
+    bool isRunning = running_;
+    if (isRunning)
+    { 
+        stopImageCapture();
+    }
+    loadParamFromFile();
+    updateParamText();
+    if (isRunning)
+    {
+        startImageCapture();
     }
 }
 
@@ -205,11 +237,20 @@ void FlySorterWindow::connectWidgets()
            );
 
     connect(
+            reloadPushButtonPtr_,
+            SIGNAL(clicked()),
+            this,
+            SLOT(reloadPushButtonClicked())
+           );
+
+    connect(
             httpOutputCheckBoxPtr_,
             SIGNAL(stateChanged(int)),
             this,
             SLOT(httpOutputCheckBoxChanged(int))
            );
+
+
 }
 
 
@@ -218,21 +259,18 @@ void FlySorterWindow::initialize()
     running_ = false;
     httpRequestErrorCount_ = 0;
     displayFreq_ = DEFAULT_DISPLAY_FREQ;
+    parameterFileName_ = DEFAULT_PARAMETER_FILENAME;
     threadPoolPtr_ = new QThreadPool(this);
     threadPoolPtr_ -> setMaxThreadCount(MAX_THREAD_COUNT);
 
     setupImageLabels();
     setupDisplayTimer();
     setupNetworkAccessManager();
+    loadParamFromFile();
+    updateParamText();
 
-    // Temp
-    // -----------------------------------
-    param_ = FlySorterParam();
-
-    QByteArray paramJson = param_.toJson();
-
-    QByteArray prettyParamJson = prettyIndentJson(paramJson);
-    paramsTextEditPtr_ -> setPlainText(QString(prettyParamJson));
+    QString appDirPath = QCoreApplication::applicationDirPath();
+    std::cout << "applicationDirPath = " << appDirPath.toStdString() << std::endl;
 
 }
 
@@ -257,7 +295,7 @@ void FlySorterWindow::updateImageLabel(QLabel *labelPtr,QPixmap &pixmap)
         QPainter painter(&pixmapScaled);
         QString msg;  
         msg.sprintf("# Blobs: %d", blobFinderData_.blobDataList.size());
-        painter.setPen(QColor(0,0,255));
+        painter.setPen(QColor(0,255,0));
         painter.drawText(5,12, msg);
     }
    
@@ -391,4 +429,62 @@ QByteArray FlySorterWindow::dataToJson()
     }
     return json;
 
+}
+
+
+void FlySorterWindow::loadParamFromFile()
+{ 
+    QString errMsgTitle("Load Parameter Error");
+
+    QFile parameterFile(parameterFileName_);
+    if (!parameterFile.exists())
+    {
+        QString errMsgText = QString("Parameter file, %1").arg(parameterFileName_);
+        errMsgText += QString(", does not exist - using default values");
+        QMessageBox::critical(this, errMsgTitle, errMsgText);
+        param_ = FlySorterParam(); 
+        return;
+    }
+
+    bool ok = parameterFile.open(QIODevice::ReadOnly);
+    if (!ok)
+    {
+        QString errMsgText = QString("Unable to open parameter file %1").arg(parameterFileName_);
+        errMsgText += QString(" - using default values");
+        QMessageBox::critical(this, errMsgTitle, errMsgText);
+        param_ = FlySorterParam();
+        return;
+    }
+
+    QByteArray paramJson = parameterFile.readAll();
+    parameterFile.close();
+
+    QVariantMap paramMap = QtJson::parse(QString(paramJson), ok).toMap();
+    if (!ok)
+    {
+        QString errMsgText = QString("Unable to parse configuration in %1").arg(parameterFileName_); 
+        errMsgText += " - using default values";
+        QMessageBox::critical(this, errMsgTitle, errMsgText);
+        param_ = FlySorterParam();
+        return;
+    }
+    FlySorterParam paramNew;
+    RtnStatus rtnStatus = paramNew.fromMap(paramMap);
+    if (!rtnStatus.success)
+    {
+        QString errMsgText = QString("%1: ").arg(parameterFileName_);
+        errMsgText += rtnStatus.message + QString(" - using default values");
+        QMessageBox::critical(this, errMsgTitle, errMsgText);
+        param_ = FlySorterParam();
+        return;
+    }
+    param_ = paramNew;
+}
+
+
+void FlySorterWindow::updateParamText()
+{
+    QByteArray paramJson = param_.toJson();
+    QByteArray prettyParamJson = prettyIndentJson(paramJson);
+    paramsTextEditPtr_ -> setPlainText(QString(prettyParamJson));
 }

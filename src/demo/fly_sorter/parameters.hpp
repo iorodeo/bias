@@ -12,7 +12,24 @@ class ImageGrabberParam
 {
     public:
         static const float DEFAULT_FRAMERATE;
+        static const float MINIMUM_FRAMERATE;
+        static const float MAXIMUM_FRAMERATE;
+
+        static const float DEFAULT_GAIN;
+        static const float MINIMUM_GAIN;
+        static const float MAXIMUM_GAIN;
+
+        static const float DEFAULT_SHUTTER;
+        static const float MINIMUM_SHUTTER;
+        static const float MAXIMUM_SHUTTER;
+
+        static const unsigned int DEFAULT_BRIGHTNESS;
+        static const unsigned int MAXIMUM_BRIGHTNESS;
+
         float frameRate;
+        float gain;
+        float shutter;
+        unsigned int brightness;
 
         ImageGrabberParam();
         QVariantMap toMap();
@@ -48,8 +65,6 @@ class FlySorterParam
 
         RtnStatus fromJson(QByteArray paramJson);
         RtnStatus fromMap(QVariantMap paramMap);
-        RtnStatus fromFile(QFile file);
-        RtnStatus toFile(QFile file);
 };
 
 #endif // #ifndef PARAMETERS_HPP

@@ -40,6 +40,7 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
     private slots:
 
         void startPushButtonClicked();
+        void reloadPushButtonClicked();
         void httpOutputCheckBoxChanged(int state);
         void newImage(ImageData imageData);
         void updateDisplayOnTimer(); 
@@ -60,9 +61,12 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         ImageData imageData_;
         BlobFinderData blobFinderData_;
         unsigned int httpRequestErrorCount_;
+        QString parameterFileName_;
 
         void connectWidgets();
         void initialize();
+        void startImageCapture();
+        void stopImageCapture();
         void updateAllImageLabels();
         void updateImageLabel(QLabel *labelPtr, QPixmap &pixmap); 
         void resizeAllImageLabels();
@@ -73,6 +77,8 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         void sendDataViaHttpRequest();
         QVariantMap dataToMap();
         QByteArray dataToJson();
+        void loadParamFromFile();
+        void updateParamText();
 
 };
 
