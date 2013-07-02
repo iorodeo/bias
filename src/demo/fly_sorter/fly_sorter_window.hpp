@@ -80,6 +80,11 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         void loadParamFromFile();
         void updateParamText();
 
+        // Temporary
+        // ---------------------------------------------------------
+        std::default_random_engine generator_;
+        std::uniform_int_distribution<unsigned int> distribution_;
+
 };
 
 #endif // #ifndef FLY_SORTER_WINDOW_HPP

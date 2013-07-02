@@ -269,8 +269,13 @@ void FlySorterWindow::initialize()
     loadParamFromFile();
     updateParamText();
 
+    // Temporary
+    // --------------------------------------------------------------------------
     QString appDirPath = QCoreApplication::applicationDirPath();
     std::cout << "applicationDirPath = " << appDirPath.toStdString() << std::endl;
+
+    distribution_ = std::uniform_int_distribution<unsigned int>(0,1);
+
 
 }
 
@@ -389,15 +394,11 @@ QVariantMap FlySorterWindow::dataToMap()
     BlobDataList::iterator it;
     unsigned int cnt = 0;
 
-    std::default_random_engine generator;
-    std::uniform_int_distribution<unsigned int> distribution(0,1);
-
-
     for (it=blobFinderData_.blobDataList.begin(); it!=blobFinderData_.blobDataList.end(); it++)
     {
         BlobData blobData = *it;
         QVariantMap detectionMap;
-        unsigned int coinFlip = distribution(generator);
+        unsigned int coinFlip = distribution_(generator_);
         if (coinFlip == 0)
         {
             detectionMap.insert("fly_type", "male");
