@@ -14,6 +14,7 @@
 #include "camera_facade_fwd.hpp"
 #include "video_writer_params.hpp"
 #include "alignment_settings.hpp"
+#include "rtn_status.hpp"
 
 
 // External lib forward declarations
@@ -37,14 +38,6 @@ namespace bias
     class BasicHttpServer;
     template <class T> class Lockable;
     template <class T> class LockableQueue;
-
-
-    struct RtnStatus 
-    {
-        bool success;
-        QString message;
-        RtnStatus() { success=true; message=QString(""); }
-    };
 
     class CameraWindow : public QMainWindow, private Ui::CameraWindow
     {
@@ -349,9 +342,6 @@ namespace bias
     // Utilitiy functions
     QString boolToOnOffQString(bool value);
     QString timeStampToQString(double timeStamp);
-    QByteArray prettyIndentJson(QByteArray jsonArray);
-    void addIndentToByteArray(QByteArray &array, unsigned int width);
-    void addNewLineToByteArray(QByteArray &array);
 
     VideoMode convertStringToVideoMode(QString videoModeString);
     FrameRate convertStringToFrameRate(QString frameRateString);

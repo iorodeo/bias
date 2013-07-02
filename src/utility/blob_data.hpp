@@ -7,57 +7,62 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-class Centroid
+namespace bias
 {
-    public:
-        double x;
-        double y;
 
-        Centroid();
-        Centroid(cv::Moments moments);
-        void setFromMoments(cv::Moments moments);
-        std::string toStdString(unsigned int indent=0);
-        void print(unsigned int indent=0);
-};
+    class Centroid
+    {
+        public:
+            double x;
+            double y;
 
-class Ellipse
-{
-    public:
-        double centerX;
-        double centerY;
-        double semiMajor;
-        double semiMinor;
-        double angle;
+            Centroid();
+            Centroid(cv::Moments moments);
+            void setFromMoments(cv::Moments moments);
+            std::string toStdString(unsigned int indent=0);
+            void print(unsigned int indent=0);
+    };
 
-        Ellipse();
-        Ellipse(std::vector<cv::Point> contour);
-        void setFromContour(std::vector<cv::Point> contour);
-        std::string toStdString(unsigned int indent=0);
-        void print(unsigned int indent=0);
-        void draw(cv::Mat &img);
-};
+    class Ellipse
+    {
+        public:
+            double centerX;
+            double centerY;
+            double semiMajor;
+            double semiMinor;
+            double angle;
 
-class BlobData
-{
-    public:
-        double area;
-        Centroid centroid;
-        Ellipse ellipse;
-        std::vector<cv::Point> contourVector;
+            Ellipse();
+            Ellipse(std::vector<cv::Point> contour);
+            void setFromContour(std::vector<cv::Point> contour);
+            std::string toStdString(unsigned int indent=0);
+            void print(unsigned int indent=0);
+            void draw(cv::Mat &img);
+    };
 
-        BlobData();
-        BlobData(std::vector<cv::Point> contour);
-        void setFromContour(std::vector<cv::Point> contour);
-        std::string toStdString(unsigned int indent=0);
-        void print(unsigned int indent=0);
-        void draw(cv::Mat &img);
+    class BlobData
+    {
+        public:
+            double area;
+            Centroid centroid;
+            Ellipse ellipse;
+            std::vector<cv::Point> contourVector;
 
-};
+            BlobData();
+            BlobData(std::vector<cv::Point> contour);
+            void setFromContour(std::vector<cv::Point> contour);
+            std::string toStdString(unsigned int indent=0);
+            void print(unsigned int indent=0);
+            void draw(cv::Mat &img);
+
+    };
 
 
-typedef std::list<BlobData> BlobDataList;
+    typedef std::list<BlobData> BlobDataList;
 
-std::string getIndentString(unsigned int indent, unsigned int indentStep=2);
+    std::string getIndentString(unsigned int indent, unsigned int indentStep=2);
+
+} // namespace bias
 
 
 #endif // #ifndef BLOB_DATA_HPP

@@ -1,6 +1,7 @@
 #include "fly_sorter_window.hpp"
 #include "mat_to_qimage.hpp"
 #include "json.hpp"
+#include "json_utils.hpp"
 #include <QMessageBox>
 #include <QThreadPool>
 #include <QTimer>
@@ -227,6 +228,11 @@ void FlySorterWindow::initialize()
     // Temp
     // -----------------------------------
     param_ = FlySorterParam();
+
+    QByteArray paramJson = param_.toJson();
+
+    QByteArray prettyParamJson = prettyIndentJson(paramJson);
+    paramsTextEditPtr_ -> setPlainText(QString(prettyParamJson));
 
 }
 

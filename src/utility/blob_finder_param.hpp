@@ -2,26 +2,33 @@
 #define BLOB_FINDER_PARAM_HPP
 
 #include <string>
+#include <QVariantMap>
+#include "rtn_status.hpp"
 
-class BlobFinderParam
+namespace bias
 {
-    public:
 
-        static const float  DEFAULT_FRAMERATE;
-        static const float  DEFAULT_DISPLAY_SCALE;
-        static const double DEFAULT_THRESHOLD;
-        static const double DEFAULT_MINIMUM_AREA;
-        static const double DEFAULT_MAXIMUM_AREA;
-        static const double DEFAULT_THRESHOLD_MAXVAL;
-        float frameRate;
-        float displayScale;
-        double minimumArea;
-        double maximumArea;
-        double threshold;
-        double thresholdMaxVal;
-        BlobFinderParam();
-        std::string toStdString();
-        void print();
-};
+    class BlobFinderParam
+    {
+        public:
+    
+            static const double DEFAULT_THRESHOLD;
+            static const double DEFAULT_MINIMUM_AREA;
+            static const double DEFAULT_MAXIMUM_AREA;
+            static const double DEFAULT_THRESHOLD_MAXVAL;
+
+            double minimumArea;
+            double maximumArea;
+            double threshold;
+            double thresholdMaxVal;
+    
+            BlobFinderParam();
+            QVariantMap toMap();
+            RtnStatus fromMap(QVariantMap paramMap);
+            std::string toStdString();
+            void print();
+    };
+
+}
 
 #endif // #ifndef BLOB_FINDER_PARAMS_HPP

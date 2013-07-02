@@ -4,14 +4,19 @@
 #include <QVariantMap>
 #include <QFile>
 #include "blob_finder_param.hpp"
-#include "common.hpp"
+#include "rtn_status.hpp"
+
+using namespace bias;
 
 class ImageGrabberParam
 {
     public:
         static const float DEFAULT_FRAMERATE;
         float frameRate;
+
         ImageGrabberParam();
+        QVariantMap toMap();
+        RtnStatus fromMap(QVariantMap paramMap);
 };
 
 
@@ -24,7 +29,10 @@ class ServerParam
         bool enabled;
         QString address;
         unsigned int port;
+
         ServerParam();
+        QVariantMap toMap();
+        RtnStatus fromMap(QVariantMap paramMap);
 };
 
 class FlySorterParam
@@ -33,10 +41,11 @@ class FlySorterParam
         ServerParam server;
         ImageGrabberParam imageGrabber;
         BlobFinderParam blobFinder;
-        FlySorterParam();
 
+        FlySorterParam();
         QVariantMap toMap();
         QByteArray toJson();
+
         RtnStatus fromJson(QByteArray paramJson);
         RtnStatus fromMap(QVariantMap paramMap);
         RtnStatus fromFile(QFile file);

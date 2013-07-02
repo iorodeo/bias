@@ -12,7 +12,6 @@ set(
     fly_sorter_window.hpp
     image_grabber.hpp
     parameters.hpp
-    common.hpp
     )
 
 set(

@@ -5,30 +5,35 @@
 #include <opencv2/core/core.hpp>
 
 
-class BlobFinderData
+namespace bias
 {
-    public:
-        BlobDataList blobDataList;
-        cv::Mat blobDataImage;
-        cv::Mat thresholdImage;
-        bool success;
-        BlobFinderData();
-};
 
-class BlobFinder
-{
-    public:
+    class BlobFinderData
+    {
+        public:
+            BlobDataList blobDataList;
+            cv::Mat blobDataImage;
+            cv::Mat thresholdImage;
+            bool success;
+            BlobFinderData();
+    };
 
-        BlobFinder();
-        BlobFinder(BlobFinderParam param);
-        BlobFinderData findBlobs(cv::Mat image);
-        void setParam(BlobFinderParam param);
+    class BlobFinder
+    {
+        public:
 
-    private:
+            BlobFinder();
+            BlobFinder(BlobFinderParam param);
+            BlobFinderData findBlobs(cv::Mat image);
+            void setParam(BlobFinderParam param);
 
-        BlobFinderParam param_;
+        private:
 
-};
+            BlobFinderParam param_;
+
+    };
+
+} // namespace bias
 
 
 #endif // #ifndef BLOB_FINDER_HPP

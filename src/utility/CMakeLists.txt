@@ -9,6 +9,8 @@ set(
     blob_finder.hpp
     blob_finder_param.hpp
     json.hpp
+    json_utils.hpp
+    rtn_status.hpp
     )
 
 set(
@@ -18,6 +20,7 @@ set(
     blob_finder.cpp
     blob_finder_param.cpp
     json.cpp
+    json_utils.cpp
     )
 
 qt4_wrap_cpp(bias_utility_HEADERS_MOC ${bias_utility_HEADERS})
