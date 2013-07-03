@@ -12,6 +12,7 @@ set(
     fly_sorter_window.hpp
     image_grabber.hpp
     parameters.hpp
+    identity_tracker.hpp
     )
 
 set(
@@ -20,6 +21,7 @@ set(
     fly_sorter_window.cpp
     image_grabber.cpp
     parameters.cpp
+    identity_tracker.cpp
     )
 
 qt4_wrap_ui(fly_sorter_FORMS_HEADERS ${fly_sorter_FORMS}) 

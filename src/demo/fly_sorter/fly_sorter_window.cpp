@@ -13,6 +13,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
+#include <QDateTime>
 #include <iostream>
 #include <list>
 #include <random>
@@ -160,7 +161,7 @@ void FlySorterWindow::httpOutputCheckBoxChanged(int state)
 { 
     if (state == Qt::Checked)
     {
-        httpRequestErrorCount_=0;
+        httpRequestErrorCount_ = 0;
     }
 }
 
@@ -414,6 +415,10 @@ QVariantMap FlySorterWindow::dataToMap()
         cnt++;
     }
     dataMap.insert("detections", detectionList);
+    dataMap.insert("time_acquired", imageData_.dateTime);
+    QDateTime currentDateTime = QDateTime::currentDateTime();
+    double sendDateTime = double(currentDateTime.toMSecsSinceEpoch())*(1.0e-3);
+    dataMap.insert("time_sent", sendDateTime);
     return dataMap;
 }
 

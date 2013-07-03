@@ -3,6 +3,7 @@
 
 #include "camera_facade_fwd.hpp"
 #include "parameters.hpp"
+#include <QDateTime>
 #include <QObject>
 #include <QRunnable>
 #include <QThread>
@@ -25,6 +26,7 @@ class ImageData
     public:
         cv::Mat mat;
         unsigned long frameCount;
+        double dateTime;
         ImageData();
 };
 

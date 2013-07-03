@@ -4,6 +4,7 @@
 #include <QPointer>
 #include <iostream>
 
+
 // CameraInfo
 // ----------------------------------------------------------------------------
 
@@ -19,6 +20,7 @@ CameraInfo::CameraInfo()
 ImageData::ImageData()
 {
     frameCount = 0;
+    dateTime = 0.0;
 }
 
 // ImageGrabber
@@ -75,6 +77,8 @@ void ImageGrabber::run()
             continue;
         }
         imageData.frameCount++; 
+        QDateTime currentDateTime = QDateTime::currentDateTime();
+        imageData.dateTime = double(currentDateTime.toMSecsSinceEpoch())*(1.0e-3);
         emit newImage(imageData);
     } 
 

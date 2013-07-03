@@ -52,6 +52,25 @@ class ServerParam
         RtnStatus fromMap(QVariantMap paramMap);
 };
 
+
+class IdentityTrackerParam
+{
+    public:
+
+        static const float DEFAULT_RADIUS;
+        static const float DEFAULT_VELOCITY_X;
+        static const float DEFAULT_VELOCITY_Y;
+
+        float radius;
+        float velocityX;
+        float velocityY; 
+
+        IdentityTrackerParam();
+        QVariantMap toMap();
+        RtnStatus fromMap(QVariantMap paramMap);
+};
+
+
 class FlySorterParam
 {
     public:

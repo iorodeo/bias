@@ -257,6 +257,38 @@ RtnStatus ServerParam::fromMap(QVariantMap paramMap)
     return rtnStatus;
 }
 
+
+// IdentityTrackerParam
+// -----------------------------------------------------------------------------
+
+const float IdentityTrackerParam::DEFAULT_RADIUS = 40.0;       // pixel
+const float IdentityTrackerParam::DEFAULT_VELOCITY_X = 50.0;   // pixel/sec
+const float IdentityTrackerParam::DEFAULT_VELOCITY_Y = 0.0;    // pixel/sec
+
+
+IdentityTrackerParam::IdentityTrackerParam()
+{
+    radius = DEFAULT_RADIUS;
+    velocityX = DEFAULT_VELOCITY_X;
+    velocityY = DEFAULT_VELOCITY_Y;
+}
+
+
+QVariantMap IdentityTrackerParam::toMap()
+{
+    // TO DO ///////////////////////////////////////
+    QVariantMap paramMap;
+    return paramMap;
+}
+
+
+RtnStatus IdentityTrackerParam::fromMap(QVariantMap paramMap)
+{
+    // TO DO /////////////////////////////////////
+    RtnStatus rtnStatus;
+    return rtnStatus;
+}
+
 // FlySorterParam
 // ----------------------------------------------------------------------------
 
