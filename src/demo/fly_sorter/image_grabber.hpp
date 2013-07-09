@@ -46,6 +46,7 @@ class ImageGrabber : public QObject, public QRunnable
     signals:
 
         void cameraSetupError(QString errorMsg);
+        void fileReadError(QString errorMsg);
         void newCameraInfo(CameraInfo info);
         void newImage(ImageData imageData);
         void stopped();
@@ -59,8 +60,23 @@ class ImageGrabber : public QObject, public QRunnable
         ImageGrabberParam param_;
 
         void run();
+        void runCaptureFromCamera();
+        void runCaptureFromFile();
         bool setupCamera();
 
+};
+
+
+class ThreadHelper: public QThread
+{
+    // Helper to make protected msleep method available in QRunnable
+    
+    public:
+
+        static void msleep(int ms)
+        {
+            QThread::msleep(ms);
+        }
 };
 
 

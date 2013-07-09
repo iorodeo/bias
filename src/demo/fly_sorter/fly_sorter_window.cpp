@@ -105,7 +105,13 @@ void FlySorterWindow::startImageCapture()
                 this,
                 SLOT(cameraSetupError(QString))
                );
-                  
+
+        connect(
+                imageGrabberPtr_,
+                SIGNAL(fileReadError(QString)),
+                this,
+                SLOT(imageGrabberFileReadError(QString))
+               );
 
         connect(
                 this,
@@ -113,6 +119,14 @@ void FlySorterWindow::startImageCapture()
                 imageGrabberPtr_,
                 SLOT(stopCapture())
                 );
+
+        connect(
+                imageGrabberPtr_,
+                SIGNAL(stopped()),
+                this,
+                SLOT(OnImageCaptureStopped())
+               );
+
 
         qRegisterMetaType<ImageData>("ImageData");
         connect(
@@ -122,10 +136,11 @@ void FlySorterWindow::startImageCapture()
                 SLOT(newImage(ImageData))
                 );
 
-
         threadPoolPtr_ -> start(imageGrabberPtr_);
         running_ = true;
         startPushButtonPtr_ -> setText("Stop");
+        reloadPushButtonPtr_ -> setEnabled(false);
+
     }
 }
 
@@ -134,9 +149,7 @@ void FlySorterWindow::stopImageCapture()
     if (running_)
     {
         emit stopCapture();
-        threadPoolPtr_ -> waitForDone();
-        running_ = false;
-        startPushButtonPtr_ -> setText("Start");
+        OnImageCaptureStopped();
     }
 }
 
@@ -168,7 +181,9 @@ void FlySorterWindow::httpOutputCheckBoxChanged(int state)
 
 void FlySorterWindow::newImage(ImageData imageData)
 {
+    std::cout << "newImage" << std::endl;
     imageData_ = imageData;
+
     BlobFinder blobFinder = BlobFinder(param_.blobFinder);
     blobFinderData_ = blobFinder.findBlobs(imageData.mat);
 
@@ -221,6 +236,20 @@ void FlySorterWindow::cameraSetupError(QString message)
 { 
     QString errMsgTitle("Camera Setup Error");
     QMessageBox::critical(this, errMsgTitle, message);
+}
+
+void FlySorterWindow::imageGrabberFileReadError(QString message)
+{
+    QString errMsgTitle("Image Grabber File Read Error");
+    QMessageBox::critical(this, errMsgTitle, message);
+}
+
+void FlySorterWindow::OnImageCaptureStopped()
+{
+        threadPoolPtr_ -> waitForDone();
+        running_ = false;
+        startPushButtonPtr_ -> setText("Start");
+        reloadPushButtonPtr_ -> setEnabled(true);
 }
 
 

@@ -3,6 +3,7 @@
 #include "exception.hpp"
 #include <QPointer>
 #include <iostream>
+#include <opencv2/highgui/highgui.hpp>
 
 
 // CameraInfo
@@ -43,6 +44,28 @@ void ImageGrabber::stopCapture()
 void ImageGrabber::run()
 { 
 
+    if (param_.captureMode == QString("camera"))
+    {
+        runCaptureFromCamera();
+    }
+    else if (param_.captureMode == QString("file"))
+    {
+        runCaptureFromFile();
+    }
+    else
+    {
+        QString errorMsg = QString("Unable to start capture: unknown capture mode ");
+        errorMsg += param_.captureMode;
+        emit cameraSetupError(errorMsg);
+    }
+
+    CameraInfo emptyInfo;
+    emit newCameraInfo(emptyInfo);
+    emit stopped();
+}
+
+void ImageGrabber::runCaptureFromCamera()
+{
     // Setup camera and start capture
     if (!setupCamera())
     {
@@ -107,9 +130,124 @@ void ImageGrabber::run()
         emit cameraSetupError(errorMsg);
     }
 
-    CameraInfo emptyInfo;
-    emit newCameraInfo(emptyInfo);
-    emit stopped();
+}
+
+void ImageGrabber::runCaptureFromFile()
+{
+    cv::VideoCapture fileCapture;
+
+    // Open the capture input file
+    try
+    {
+        fileCapture.open(param_.captureInputFile.toStdString());
+    }
+    catch(cv::Exception& exception)
+    {
+        QString errorMsg = QString("Error opening captureInputFile, ");
+        errorMsg += param_.captureInputFile + QString(", - ");
+        errorMsg += QString::fromStdString(exception.what());
+        emit cameraSetupError(errorMsg);
+        return;
+    }
+    if (!fileCapture.isOpened())
+    {
+        QString errorMsg = QString("Unable to open captureInputFile, ");
+        errorMsg += param_.captureInputFile; 
+        emit cameraSetupError(errorMsg);
+        return;
+    }
+
+    // Get number of frames and fourcc
+    unsigned int numFrames;
+    int fourcc;
+    try
+    {
+        numFrames = (unsigned int)(fileCapture.get(CV_CAP_PROP_FRAME_COUNT));
+        fourcc = int(fileCapture.get(CV_CAP_PROP_FOURCC));
+    }
+    catch(cv::Exception& exception)
+    {
+        QString errorMsg = QString("Unable to get properties from captureInputFile, ");
+        errorMsg += param_.captureInputFile + QString(", "); 
+        errorMsg += QString::fromStdString(exception.what());
+        emit cameraSetupError(errorMsg);
+        return;
+    }
+    std::cout << "fourcc: " << fourcc << std::endl;
+    std::cout << "numFrames: " << numFrames << std::endl;
+    if (fourcc == 0)
+    {
+        // --------------------------------------------------------------------
+        // TEMPORARY - currently having problems with DIB/raw formats need to 
+        // fix this
+        // --------------------------------------------------------------------
+        QString errorMsg = QString("Fourcc code is equal to 0 - this is currently not supported");
+        emit cameraSetupError(errorMsg);
+        return;
+    }
+
+    // Read frame from input file at frameRate.
+    unsigned long frameCount = 0;
+    float sleepDt = 1.0e3/param_.frameRate;
+    
+
+    while ((!stopped_) && (frameCount < numFrames))
+    {
+        std::cout << param_.captureInputFile.toStdString() << ", frame = " << frameCount << std::endl;
+
+        ImageData imageData;
+
+        try
+        {
+            fileCapture >> imageData.mat;
+        }
+        catch (cv::Exception &exception)
+        {
+            QString errorMsg = QString("Unable to read frame %1: ").arg(frameCount);
+            errorMsg += QString::fromStdString(exception.what());
+            emit fileReadError(errorMsg);
+            stopped_ = true;
+            continue;
+        }
+        catch (...)
+        {
+            QString errorMsg = QString("Unable to read frame %1: ").arg(frameCount);
+            errorMsg += QString("an uknown exception occured");
+            emit fileReadError(errorMsg);
+            stopped_ = true;
+            continue;
+
+        }
+        if (imageData.mat.empty())
+        {
+            // This shouldn't happen, but just in case 
+            // skip any frames that come back empty.
+            continue;
+        }
+
+
+        imageData.frameCount = frameCount; 
+        QDateTime currentDateTime = QDateTime::currentDateTime();
+        imageData.dateTime = double(currentDateTime.toMSecsSinceEpoch())*(1.0e-3);
+        emit newImage(imageData);
+
+        ThreadHelper::msleep(sleepDt);
+        frameCount++;
+    }
+
+    // Release file
+    try
+    {
+        fileCapture.release();
+    }
+    catch(cv::Exception& exception)
+    {
+        QString errorMsg = QString("Error releasing captureInputFile, ");
+        errorMsg += param_.captureInputFile + QString(", - ");
+        errorMsg += QString::fromStdString(exception.what());
+        emit cameraSetupError(errorMsg);
+        return;
+    }
 }
 
 

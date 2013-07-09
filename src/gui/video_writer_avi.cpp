@@ -12,6 +12,7 @@ namespace bias
     const double VideoWriter_avi::MIN_ALLOWED_DT_ESTIMATE = 0.00001; 
     const unsigned int VideoWriter_avi::DEFAULT_FRAME_SKIP = 4;
     const int VideoWriter_avi::DEFAULT_FOURCC = CV_FOURCC('X','V','I','D');
+    //const int VideoWriter_avi::DEFAULT_FOURCC = CV_FOURCC('D','I','B',' ');
     const VideoWriterParams_avi VideoWriter_avi::DEFAULT_PARAMS = 
         VideoWriterParams_avi();
 

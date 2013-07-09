@@ -46,6 +46,8 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         void updateDisplayOnTimer(); 
         void networkAccessManagerFinished(QNetworkReply *reply);
         void cameraSetupError(QString errorMsg);
+        void imageGrabberFileReadError(QString errorMsg);
+        void OnImageCaptureStopped();
 
     private:
 

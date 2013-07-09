@@ -21,12 +21,24 @@ const float ImageGrabberParam::MAXIMUM_SHUTTER = 99.0;
 const unsigned int ImageGrabberParam::DEFAULT_BRIGHTNESS = 16;
 const unsigned int ImageGrabberParam::MAXIMUM_BRIGHTNESS = 255;
 
+QStringList getAllowedCaptureModes()
+{
+    QStringList modes;
+    modes << QString("camera"); // first is default value
+    modes << QString("file");
+    return modes;
+}
+const QStringList ImageGrabberParam::ALLOWED_CAPTURE_MODES = getAllowedCaptureModes();
+const QString ImageGrabberParam::DEFAULT_CAPTURE_INPUT_FILE = QString("test.avi");
+
 ImageGrabberParam::ImageGrabberParam()
 {
     frameRate = DEFAULT_FRAMERATE;
     gain = DEFAULT_GAIN;
     shutter = DEFAULT_SHUTTER;
     brightness = DEFAULT_BRIGHTNESS;
+    captureMode = ALLOWED_CAPTURE_MODES.front();
+    captureInputFile = DEFAULT_CAPTURE_INPUT_FILE;
 }
 
 QVariantMap ImageGrabberParam::toMap()
@@ -36,6 +48,8 @@ QVariantMap ImageGrabberParam::toMap()
     paramMap.insert("gain", gain);
     paramMap.insert("shutter", shutter);
     paramMap.insert("brightness", brightness);
+    paramMap.insert("captureMode", captureMode);
+    paramMap.insert("captureInputFile", captureInputFile);
     return paramMap;
 }
 
@@ -167,6 +181,46 @@ RtnStatus ImageGrabberParam::fromMap(QVariantMap paramMap)
         rtnStatus.message = QString("Image grabber parameter 'brightness' greater than maximum");
         return rtnStatus;
     }
+
+    // Get capture mode
+    // -----------------
+    if (!paramMap.contains("captureMode"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'captureMode' not found in image grabber parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["captureMode"].canConvert<QString>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert image grabber parameter 'captureMode' to string");
+        return rtnStatus;
+    }
+    QString captureModeTemp = paramMap["captureMode"].toString().toLower();
+    if (!ALLOWED_CAPTURE_MODES.contains(captureModeTemp))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Image grabber parameter 'captureMode' not found in list of allowed values");
+        return rtnStatus;
+    }
+    captureMode = captureModeTemp;
+
+    // Get capture file
+    // -----------------
+    if (!paramMap.contains("captureInputFile"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'captureInputFile' not found in image grabber parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["captureInputFile"].canConvert<QString>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert image grabber parameter 'captureInputFile' to string");
+        return rtnStatus;
+    }
+    captureInputFile = paramMap["captureInputFile"].toString();
+
 
     rtnStatus.success = true;
     rtnStatus.message = QString("");

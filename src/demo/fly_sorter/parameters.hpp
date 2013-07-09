@@ -1,6 +1,7 @@
 #ifndef PARAMETERS_HPP
 #define PARAMETERS_HPP
 #include <QString>
+#include <QStringList>
 #include <QVariantMap>
 #include <QFile>
 #include "blob_finder_param.hpp"
@@ -26,10 +27,15 @@ class ImageGrabberParam
         static const unsigned int DEFAULT_BRIGHTNESS;
         static const unsigned int MAXIMUM_BRIGHTNESS;
 
+        static const QStringList  ALLOWED_CAPTURE_MODES;
+        static const QString DEFAULT_CAPTURE_INPUT_FILE;
+
         float frameRate;
         float gain;
         float shutter;
         unsigned int brightness;
+        QString captureMode;
+        QString captureInputFile;
 
         ImageGrabberParam();
         QVariantMap toMap();

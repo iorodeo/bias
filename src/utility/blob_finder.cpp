@@ -40,10 +40,15 @@ namespace bias
     BlobFinderData BlobFinder::findBlobs(cv::Mat image)
     {
         BlobFinderData data;
-        std::vector<std::vector<cv::Point>> contours;
 
+        // Convert image to 8UC1 - for use with find contours
+        cv::Mat image8UC1 = cv::Mat(image.size(), CV_8UC1, cv::Scalar(0));
+        cvtColor(image,image8UC1,CV_BGR2GRAY);
+
+
+        // Threshold and find contours
         cv::threshold(
-                image,
+                image8UC1,
                 data.thresholdImage, 
                 param_.threshold, 
                 param_.thresholdMaxVal, 
@@ -52,11 +57,12 @@ namespace bias
 
         data.thresholdImage = param_.thresholdMaxVal - data.thresholdImage;
         cv::Mat imageTemp = data.thresholdImage.clone();
+        std::vector<std::vector<cv::Point>> contours;
         cv::findContours(imageTemp, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 
-        data.blobDataImage = cv::Mat(image.size(), CV_8UC3, cv::Scalar(0,0,0));
-        cvtColor(image,data.blobDataImage,CV_GRAY2BGR);
-
+        // Draw contours on image
+        data.blobDataImage = cv::Mat(image8UC1.size(), CV_8UC3, cv::Scalar(0,0,0));
+        cvtColor(image8UC1,data.blobDataImage,CV_GRAY2BGR);
         for (size_t index=0; index < contours.size(); index++)
         {
             cv::Moments contourMoments = cv::moments(contours[index]);
