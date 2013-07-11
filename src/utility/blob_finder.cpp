@@ -42,9 +42,16 @@ namespace bias
         BlobFinderData data;
 
         // Convert image to 8UC1 - for use with find contours
-        cv::Mat image8UC1 = cv::Mat(image.size(), CV_8UC1, cv::Scalar(0));
-        cvtColor(image,image8UC1,CV_BGR2GRAY);
-
+        cv::Mat image8UC1;
+        if (image.channels() > 1)
+        {
+            image8UC1 = cv::Mat(image.size(), CV_8UC1, cv::Scalar(0));
+            cvtColor(image,image8UC1,CV_BGR2GRAY);
+        }
+        else
+        {
+            image8UC1 = image;
+        }
 
         // Threshold and find contours
         cv::threshold(
