@@ -46,6 +46,7 @@ namespace bias
             double area;
             Centroid centroid;
             Ellipse ellipse;
+            cv::Rect boundingRect;
             std::vector<cv::Point> contourVector;
 
             BlobData();

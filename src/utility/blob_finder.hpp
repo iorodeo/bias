@@ -33,7 +33,16 @@ namespace bias
 
     };
 
+    cv::Mat reconstruct(
+            cv::Mat image, 
+            double thresholdUpper, 
+            double thresholdLower,
+            double thresholdMaxVal
+            );
+
 } // namespace bias
+
+
 
 
 #endif // #ifndef BLOB_FINDER_HPP

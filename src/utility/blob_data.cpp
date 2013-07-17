@@ -162,6 +162,7 @@ namespace bias
         if (contour.size() >= 5)
         {
             ellipse = Ellipse(contour);
+            boundingRect = cv::boundingRect(cv::Mat(contour));
         }
     }
 
@@ -189,8 +190,9 @@ namespace bias
     { 
         std::vector<std::vector<cv::Point>> contourArray;
         contourArray.push_back(contourVector);
-        cv::drawContours(img, contourArray, 0, cv::Scalar(0,0,255),2,8);
-        ellipse.draw(img);
+        //cv::drawContours(img, contourArray, 0, cv::Scalar(0,0,255),2,8);
+        //ellipse.draw(img);
+        cv::rectangle(img, boundingRect, cv::Scalar(0,0,255),2,8);
     }
 
 

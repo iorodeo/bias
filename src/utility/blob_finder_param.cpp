@@ -4,7 +4,12 @@
 
 namespace bias 
 {
+    // OLD
+    // -------------------------------------------------------------
     const double BlobFinderParam::DEFAULT_THRESHOLD         = 100.0;
+    // -------------------------------------------------------------
+    const double BlobFinderParam::DEFAULT_THRESHOLD_UPPER   = 150.0;
+    const double BlobFinderParam::DEFAULT_THRESHOLD_LOWER   = 100.0;
     const double BlobFinderParam::DEFAULT_THRESHOLD_MAXVAL  = 255.0;
     const double BlobFinderParam::DEFAULT_MINIMUM_AREA      = 100.0;
     const double BlobFinderParam::DEFAULT_MAXIMUM_AREA      = 640.0*480.0;
@@ -18,7 +23,12 @@ namespace bias
     
     BlobFinderParam::BlobFinderParam()
     {
+        thresholdUpper = DEFAULT_THRESHOLD_UPPER;
+        thresholdLower = DEFAULT_THRESHOLD_LOWER;
+        // OLD
+        // ------------------------------------------
         threshold = DEFAULT_THRESHOLD;
+        // ------------------------------------------
         thresholdMaxVal = DEFAULT_THRESHOLD_MAXVAL;
         minimumArea = DEFAULT_MINIMUM_AREA;
         maximumArea = DEFAULT_MAXIMUM_AREA;
@@ -29,6 +39,8 @@ namespace bias
     {
         QVariantMap paramMap;
         paramMap.insert("threshold", threshold);
+        paramMap.insert("thresholdUpper", thresholdUpper);
+        paramMap.insert("thresholdLower", thresholdLower);
         paramMap.insert("thresholdMaxVal", thresholdMaxVal);
         paramMap.insert("minimumArea", minimumArea);
         paramMap.insert("maximumArea", maximumArea);
@@ -75,6 +87,69 @@ namespace bias
             return rtnStatus;
         }
         threshold = thresholdTemp;
+
+        // Get thresholdLower
+        if (!paramMap.contains("thresholdLower"))
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("'thresholdLower' not found in Blob finder parameters");
+            return rtnStatus;
+        }
+        if (!paramMap["thresholdLower"].canConvert<double>())
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("Unable to convert blob finder parameter 'thresholdLower' to double");
+            return rtnStatus;
+        }
+        double thresholdLowerTemp = paramMap["thresholdLower"].toDouble();
+        if (thresholdLowerTemp < THRESHOLD_MIN) 
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("Blob finder parameter 'thresholdLower' less than minimum"); 
+            return rtnStatus;
+        }
+        if (thresholdLowerTemp > THRESHOLD_MAX)
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("Blob finder parameter 'thresholdLower' greater than maximum");
+            return rtnStatus;
+        }
+        thresholdLower = thresholdLowerTemp;
+
+        // Get thresholdUpperUpper
+        if (!paramMap.contains("thresholdUpper"))
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("'thresholdUpper' not found in Blob finder parameters");
+            return rtnStatus;
+        }
+        if (!paramMap["thresholdUpper"].canConvert<double>())
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("Unable to convert blob finder parameter 'thresholdUpper' to double");
+            return rtnStatus;
+        }
+        double thresholdUpperTemp = paramMap["thresholdUpper"].toDouble();
+        if (thresholdUpperTemp < THRESHOLD_MIN) 
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("Blob finder parameter 'thresholdUpper' less than minimum"); 
+            return rtnStatus;
+        }
+        if (thresholdUpperTemp > THRESHOLD_MAX)
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("Blob finder parameter 'thresholdUpper' greater than maximum");
+            return rtnStatus;
+        }
+        if (thresholdUpperTemp < thresholdLower)
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("Blob finder parameter 'thresholdUpper' less than 'thresholdLower'");
+            return rtnStatus;
+        }
+        thresholdUpper = thresholdUpperTemp;
+
 
         // Get thresholdMaxVal
         // -------------------
