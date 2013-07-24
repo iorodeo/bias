@@ -30,15 +30,11 @@ namespace bias
         private:
 
             BlobFinderParam param_;
+            bool withinAreaBounds(BlobData blobData);
+            bool containsStrictThreshold(BlobData blobData, cv::Mat image);
 
     };
 
-    cv::Mat reconstruct(
-            cv::Mat image, 
-            double thresholdUpper, 
-            double thresholdLower,
-            double thresholdMaxVal
-            );
 
 } // namespace bias
 

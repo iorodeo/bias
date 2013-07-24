@@ -15,14 +15,9 @@ namespace bias
             static const double DEFAULT_MINIMUM_AREA;
             static const double DEFAULT_MAXIMUM_AREA;
 
+            static const double DEFAULT_THRESHOLD_LAX;
+            static const double DEFAULT_THRESHOLD_STRICT;
             static const double DEFAULT_THRESHOLD_MAXVAL;
-            static const double DEFAULT_THRESHOLD_UPPER;
-            static const double DEFAULT_THRESHOLD_LOWER;
-            
-            // OLD 
-            // --------------------------------------- 
-            static const double DEFAULT_THRESHOLD;
-            // ---------------------------------------
 
             static const double MINIMUM_AREA_MIN;
             static const double MAXIMUM_AREA_MIN;
@@ -33,15 +28,10 @@ namespace bias
 
             double minimumArea;
             double maximumArea;
-            double thresholdUpper;
-            double thresholdLower;
+            double thresholdLax;
+            double thresholdStrict;
             double thresholdMaxVal;
 
-            // OLD
-            // ---------------------------------------
-            double threshold;
-            // ---------------------------------------
-    
             BlobFinderParam();
             QVariantMap toMap();
             RtnStatus fromMap(QVariantMap paramMap);

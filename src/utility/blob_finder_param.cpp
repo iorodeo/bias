@@ -5,11 +5,8 @@
 namespace bias 
 {
     // OLD
-    // -------------------------------------------------------------
-    const double BlobFinderParam::DEFAULT_THRESHOLD         = 100.0;
-    // -------------------------------------------------------------
-    const double BlobFinderParam::DEFAULT_THRESHOLD_UPPER   = 150.0;
-    const double BlobFinderParam::DEFAULT_THRESHOLD_LOWER   = 100.0;
+    const double BlobFinderParam::DEFAULT_THRESHOLD_LAX     = 100.0;
+    const double BlobFinderParam::DEFAULT_THRESHOLD_STRICT  = 80.0;
     const double BlobFinderParam::DEFAULT_THRESHOLD_MAXVAL  = 255.0;
     const double BlobFinderParam::DEFAULT_MINIMUM_AREA      = 100.0;
     const double BlobFinderParam::DEFAULT_MAXIMUM_AREA      = 640.0*480.0;
@@ -23,12 +20,8 @@ namespace bias
     
     BlobFinderParam::BlobFinderParam()
     {
-        thresholdUpper = DEFAULT_THRESHOLD_UPPER;
-        thresholdLower = DEFAULT_THRESHOLD_LOWER;
-        // OLD
-        // ------------------------------------------
-        threshold = DEFAULT_THRESHOLD;
-        // ------------------------------------------
+        thresholdLax = DEFAULT_THRESHOLD_LAX;
+        thresholdStrict = DEFAULT_THRESHOLD_STRICT;
         thresholdMaxVal = DEFAULT_THRESHOLD_MAXVAL;
         minimumArea = DEFAULT_MINIMUM_AREA;
         maximumArea = DEFAULT_MAXIMUM_AREA;
@@ -38,9 +31,8 @@ namespace bias
     QVariantMap BlobFinderParam::toMap()
     {
         QVariantMap paramMap;
-        paramMap.insert("threshold", threshold);
-        paramMap.insert("thresholdUpper", thresholdUpper);
-        paramMap.insert("thresholdLower", thresholdLower);
+        paramMap.insert("thresholdLax", thresholdLax);
+        paramMap.insert("thresholdStrict", thresholdStrict);
         paramMap.insert("thresholdMaxVal", thresholdMaxVal);
         paramMap.insert("minimumArea", minimumArea);
         paramMap.insert("maximumArea", maximumArea);
@@ -59,96 +51,67 @@ namespace bias
             return rtnStatus;
         }
 
-        // Get threshold
-        // -------------
-        if (!paramMap.contains("threshold"))
+        // Get thresholdStrict
+        if (!paramMap.contains("thresholdStrict"))
         {
             rtnStatus.success = false;
-            rtnStatus.message = QString("'threshold' not found in Blob finder parameters");
+            rtnStatus.message = QString("'thresholdStrict' not found in Blob finder parameters");
             return rtnStatus;
         }
-        if (!paramMap["threshold"].canConvert<double>())
+        if (!paramMap["thresholdStrict"].canConvert<double>())
         {
             rtnStatus.success = false;
-            rtnStatus.message = QString("Unable to convert blob finder parameter 'threshold' to double");
+            rtnStatus.message = QString("Unable to convert blob finder parameter 'thresholdStrict' to double");
             return rtnStatus;
         }
-        double thresholdTemp = paramMap["threshold"].toDouble();
-        if (thresholdTemp < THRESHOLD_MIN) 
+        double thresholdStrictTemp = paramMap["thresholdStrict"].toDouble();
+        if (thresholdStrictTemp < THRESHOLD_MIN) 
         {
             rtnStatus.success = false;
-            rtnStatus.message = QString("Blob finder parameter 'threshold' less than minimum"); 
+            rtnStatus.message = QString("Blob finder parameter 'thresholdStrict' less than minimum"); 
             return rtnStatus;
         }
-        if (thresholdTemp > THRESHOLD_MAX)
+        if (thresholdStrictTemp > THRESHOLD_MAX)
         {
             rtnStatus.success = false;
-            rtnStatus.message = QString("Blob finder parameter 'threshold' greater than maximum");
+            rtnStatus.message = QString("Blob finder parameter 'thresholdStrict' greater than maximum");
             return rtnStatus;
         }
-        threshold = thresholdTemp;
+        thresholdStrict = thresholdStrictTemp;
 
-        // Get thresholdLower
-        if (!paramMap.contains("thresholdLower"))
+        // Get thresholdLaxUpper
+        if (!paramMap.contains("thresholdLax"))
         {
             rtnStatus.success = false;
-            rtnStatus.message = QString("'thresholdLower' not found in Blob finder parameters");
+            rtnStatus.message = QString("'thresholdLax' not found in Blob finder parameters");
             return rtnStatus;
         }
-        if (!paramMap["thresholdLower"].canConvert<double>())
+        if (!paramMap["thresholdLax"].canConvert<double>())
         {
             rtnStatus.success = false;
-            rtnStatus.message = QString("Unable to convert blob finder parameter 'thresholdLower' to double");
+            rtnStatus.message = QString("Unable to convert blob finder parameter 'thresholdLax' to double");
             return rtnStatus;
         }
-        double thresholdLowerTemp = paramMap["thresholdLower"].toDouble();
-        if (thresholdLowerTemp < THRESHOLD_MIN) 
+        double thresholdLaxTemp = paramMap["thresholdLax"].toDouble();
+        if (thresholdLaxTemp < THRESHOLD_MIN) 
         {
             rtnStatus.success = false;
-            rtnStatus.message = QString("Blob finder parameter 'thresholdLower' less than minimum"); 
+            rtnStatus.message = QString("Blob finder parameter 'thresholdLax' less than minimum"); 
             return rtnStatus;
         }
-        if (thresholdLowerTemp > THRESHOLD_MAX)
+        if (thresholdLaxTemp > THRESHOLD_MAX)
         {
             rtnStatus.success = false;
-            rtnStatus.message = QString("Blob finder parameter 'thresholdLower' greater than maximum");
+            rtnStatus.message = QString("Blob finder parameter 'thresholdLax' greater than maximum");
             return rtnStatus;
         }
-        thresholdLower = thresholdLowerTemp;
-
-        // Get thresholdUpperUpper
-        if (!paramMap.contains("thresholdUpper"))
+        if (thresholdLaxTemp < thresholdStrict)
         {
             rtnStatus.success = false;
-            rtnStatus.message = QString("'thresholdUpper' not found in Blob finder parameters");
+            rtnStatus.message = QString("Blob finder parameter 'thresholdLax' less than 'thresholdStrict'");
             return rtnStatus;
         }
-        if (!paramMap["thresholdUpper"].canConvert<double>())
-        {
-            rtnStatus.success = false;
-            rtnStatus.message = QString("Unable to convert blob finder parameter 'thresholdUpper' to double");
-            return rtnStatus;
-        }
-        double thresholdUpperTemp = paramMap["thresholdUpper"].toDouble();
-        if (thresholdUpperTemp < THRESHOLD_MIN) 
-        {
-            rtnStatus.success = false;
-            rtnStatus.message = QString("Blob finder parameter 'thresholdUpper' less than minimum"); 
-            return rtnStatus;
-        }
-        if (thresholdUpperTemp > THRESHOLD_MAX)
-        {
-            rtnStatus.success = false;
-            rtnStatus.message = QString("Blob finder parameter 'thresholdUpper' greater than maximum");
-            return rtnStatus;
-        }
-        if (thresholdUpperTemp < thresholdLower)
-        {
-            rtnStatus.success = false;
-            rtnStatus.message = QString("Blob finder parameter 'thresholdUpper' less than 'thresholdLower'");
-            return rtnStatus;
-        }
-        thresholdUpper = thresholdUpperTemp;
+        thresholdLax = thresholdLaxTemp;
 
 
         // Get thresholdMaxVal
@@ -241,7 +204,8 @@ namespace bias
     std::string BlobFinderParam::toStdString()
     {
         std::stringstream ss;
-        ss << "threshold:       " << threshold        << std::endl;
+        ss << "thresholdLax:    " << thresholdLax     << std::endl;
+        ss << "thresholdStrict: " << thresholdStrict  << std::endl;
         ss << "thresholdMaxVal: " << thresholdMaxVal  << std::endl;
         ss << "minimumArea:     " << minimumArea      << std::endl;
         ss << "maximumArea:     " << maximumArea      << std::endl;
