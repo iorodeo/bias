@@ -183,50 +183,38 @@ namespace bias {
     {
         bool resize = false;
 
-        //std::cout << "B " << __PRETTY_FUNCTION__ << std::endl;
-
         grabImageCommon();
 
-        // Only create new image if the size is incorrect - 
-        // --------------------------------------------------------------------
-        // TO DO ... currently only handles 8 bit mono images
-        // --------------------------------------------------------------------
-        //std::cout << "  check image size" << std::endl;
+        // Use either raw or converted image
+        fc2Image *imagePtr_fc2;
+        if (useConverted)
+        {
+            imagePtr_fc2 = &convertedImage_;
+        }
+        else
+        {
+            imagePtr_fc2 = &rawImage_;
+        }
 
-        if ((image.cols != rawImage_.cols) | (image.rows != rawImage_.rows))
+        // Check image size and type
+        if ((image.cols != (imagePtr_fc2->cols)) | (image.rows != (imagePtr_fc2->rows)))
         {
             resize = true;
         }
-        
-        // ---------------------------------------------------------------------
-        // TO DO .. also test for image type.
-        // ---------------------------------------------------------------------
-        
-        if (resize) {
 
-            //std::cout << "  resize image" << std::endl;
-            // -----------------------------------------------------------------
-            // TO DO .. need to handle Pixel type conversions again currently
-            // only supports 8 bit mono images
-            // -----------------------------------------------------------------
-
-            image = cv::Mat(rawImage_.rows, rawImage_.cols, CV_8UC1);
+        // Check image type
+        int currType = CV_MAKETYPE(image.depth(),image.channels());
+        int compType = getCompatibleOpencvFormat(imagePtr_fc2->format);
+        
+        // If size or type changed remake image
+        if ((resize) || (currType != compType)) {
+            image = cv::Mat(imagePtr_fc2->rows, imagePtr_fc2->cols, compType);
         }
 
         // Copy data -- TO DO might be able to do this without copying.
-        // ---------------------------------------------------------------------
-
-        // TEMPORARY
-        // ---------------------------------------------------------------------
-        //TimeStamp ts = getImageTimeStamp();
-        //std::cout  << ts.seconds << " " << ts.microSeconds << std::endl;
-        // ---------------------------------------------------------------------
-
-        unsigned char *pData0 = rawImage_.pData;
-        unsigned char *pData1 = rawImage_.pData + rawImage_.dataSize - 1;
-        //std::cout << "  copy data" << std::endl;
+        unsigned char *pData0 = imagePtr_fc2->pData;
+        unsigned char *pData1 = imagePtr_fc2->pData + imagePtr_fc2->dataSize - 1;
         std::copy(pData0,pData1,image.data);
-        //std::cout << "E " << __PRETTY_FUNCTION__ << std::endl;
     }
 
 
@@ -949,29 +937,29 @@ namespace bias {
         updateTimeStamp();
         isFirst_ = false;
 
-        // --------------------------------------------------------------
-        // Convert image ...
-        // --------------------------------------------------------------
-        //
-        //printImageInfo_fc2(rawImage_);
-        //std::cout << std::flush;
-        //
-        //error = fc2ConvertImageTo(
-        //        FC2_PIXEL_FORMAT_MONO8, 
-        //        &rawImage_, 
-        //        &convertedImage_
-        //        );
-        //if ( error != FC2_ERROR_OK ) 
-        //{
-        //    std::stringstream ssError;
-        //    ssError << __PRETTY_FUNCTION__;
-        //    ssError << ": unable to convert image";
-        //    throw RuntimeError(ERROR_FC2_CONVERT_IMAGE, ssError.str());
-        //}
-        //
-        //printImageInfo_fc2(convertedImage_);
-        //std::cout << std::flush;
-        //----------------------------------------------------------------
+        // Convert image to suitable format 
+        fc2PixelFormat convertedFormat = getSuitablePixelFormat(rawImage_.format);
+        if (rawImage_.format != convertedFormat)
+        {
+            error = fc2ConvertImageTo(
+                    convertedFormat,
+                    &rawImage_, 
+                    &convertedImage_
+                    );
+            if ( error != FC2_ERROR_OK ) 
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to convert image";
+                throw RuntimeError(ERROR_FC2_CONVERT_IMAGE, ssError.str());
+            }
+            useConverted = true;
+        }
+        else
+        {
+            useConverted = false;
+        }
+        
 
         //std::cout << "E " << __PRETTY_FUNCTION__ << std::endl;
     }
@@ -1274,29 +1262,115 @@ namespace bias {
             std::cout << "FC2_PIXEL_FORMAT_MONO8 | pixelFormatBitField = "<< std::bitset<32>(test1) << std::endl;
         }
 
-        // --------------------------------------------------------------------------
-        // TEMPORARY HACK - determine pixel format currently only allow raw8 or mono8
-        // --------------------------------------------------------------------------
+        // Select pixel format currently - this is a bit of a hack 
         fc2PixelFormat pixelFormat;
+        bool havePixelFormat = false;
 
-        if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_RAW8)
+        if (isColor())
         {
-            pixelFormat = FC2_PIXEL_FORMAT_RAW8;
-            //std::cout << "pixelFormat = FC2_PIXEL_FORMAT_RAW8" << std::endl;
+            // Camera is color - try to find a suitable color format
+            if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_BGRU)
+            {
+                pixelFormat = FC2_PIXEL_FORMAT_BGRU;
+                havePixelFormat = true;
+            }
+            else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_RGBU)
+            {
+                pixelFormat = FC2_PIXEL_FORMAT_RGBU;
+                havePixelFormat = true;
+            }
+            else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_BGR)
+            {
+                pixelFormat = FC2_PIXEL_FORMAT_BGR;
+                havePixelFormat = true;
+            }
+            else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_RGB)
+            {
+                pixelFormat = FC2_PIXEL_FORMAT_RGB;
+                havePixelFormat = true;
+            }
+            else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_BGRU16)
+            {
+                pixelFormat = FC2_PIXEL_FORMAT_BGRU16;
+                havePixelFormat = true;
+            }
+            else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_BGR16)
+            {
+                pixelFormat = FC2_PIXEL_FORMAT_BGR16;
+                havePixelFormat = true;
+            }
+            else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_RGB16)
+            {
+                pixelFormat = FC2_PIXEL_FORMAT_RGB16;
+                havePixelFormat = true;
+            }
+            else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_S_RGB16)
+            {
+                pixelFormat = FC2_PIXEL_FORMAT_S_RGB16;
+                havePixelFormat = true;
+            }
+            else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_411YUV8)
+            {
+                pixelFormat = FC2_PIXEL_FORMAT_411YUV8;
+                havePixelFormat = true;
+            }
+            else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_422YUV8)
+            {
+                pixelFormat = FC2_PIXEL_FORMAT_422YUV8;
+                havePixelFormat = true;
+            }
+            else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_444YUV8)
+            {
+                pixelFormat = FC2_PIXEL_FORMAT_444YUV8;
+                havePixelFormat = true;
+            }
+            else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_422YUV8_JPEG)
+            {
+                pixelFormat = FC2_PIXEL_FORMAT_422YUV8_JPEG;
+                havePixelFormat = true;
+            }
         }
-        else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_MONO8)
+
+
+        if (!havePixelFormat)
         {
-            pixelFormat = FC2_PIXEL_FORMAT_MONO8;
-            //std::cout << "pixelFormat = FC2_PIXEL_FORMAT_MONO8" << std::endl;
+            // Monochrome camera or couldn't find color pixel format which will work.
+            if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_RAW8)
+            {
+                pixelFormat = FC2_PIXEL_FORMAT_RAW8;
+            }
+            else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_MONO8)
+            {
+                pixelFormat = FC2_PIXEL_FORMAT_MONO8;
+            }
+            else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_RAW16)
+            {
+                pixelFormat = FC2_PIXEL_FORMAT_RAW16;
+            }
+            else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_MONO16)
+            {
+                pixelFormat = FC2_PIXEL_FORMAT_MONO16;
+            }
+            else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_RAW12)
+            {
+                pixelFormat = FC2_PIXEL_FORMAT_RAW12;
+            }
+            else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_MONO12)
+            {
+                pixelFormat = FC2_PIXEL_FORMAT_MONO12;
+            }
+            else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_S_MONO16)
+            {
+                pixelFormat = FC2_PIXEL_FORMAT_S_MONO16;
+            }
+            else
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": no supported pixel formats";
+                throw RuntimeError(ERROR_FC2_NO_SUPPORTED_PIXEL_FORMAT, ssError.str());
+            }
         }
-        else
-        {
-            std::stringstream ssError;
-            ssError << __PRETTY_FUNCTION__;
-            ssError << ": no supported pixel formats";
-            throw RuntimeError(ERROR_FC2_NOSUPPORTED_PIXEL_FORMAT, ssError.str());
-        }
-        // --------------------------------------------------------------------------
 
         // Create desired format7 configuration
         imageSettings.mode = format7Info.mode;

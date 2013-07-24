@@ -82,6 +82,7 @@ namespace bias {
             fc2CameraInfo cameraInfo_;
             fc2Image rawImage_;
             fc2Image convertedImage_;
+            bool useConverted;
 
             TimeStamp timeStamp_;
             unsigned int cycleSecondsLast_;   // Used with embedded timestamp only

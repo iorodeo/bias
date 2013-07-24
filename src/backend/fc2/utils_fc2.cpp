@@ -1,12 +1,94 @@
 #ifdef WITH_FC2
 #include "utils_fc2.hpp"
 #include "exception.hpp"
+#include <opencv2/core/core.hpp>
 #include <map>
 #include <iostream>
 #include <sstream>
 #include <bitset>
 
 namespace bias {
+
+    // Image conversion - for mapping from FlyCapture2 to opencv 
+    // -----------------------------------------------------------------------
+    
+    fc2PixelFormat getSuitablePixelFormat(fc2PixelFormat pixFormat)
+    {
+        fc2PixelFormat convPixFormat = FC2_PIXEL_FORMAT_MONO8;
+
+        switch (pixFormat)
+        {
+            case FC2_PIXEL_FORMAT_RAW8:
+                convPixFormat = FC2_PIXEL_FORMAT_RAW8;
+                break;
+
+            case FC2_PIXEL_FORMAT_MONO8:
+                convPixFormat = FC2_PIXEL_FORMAT_MONO8;
+                break;
+
+            case FC2_PIXEL_FORMAT_RAW12:
+            case FC2_PIXEL_FORMAT_RAW16:
+            case FC2_PIXEL_FORMAT_MONO12:
+            case FC2_PIXEL_FORMAT_MONO16:
+            case FC2_PIXEL_FORMAT_S_MONO16:
+                convPixFormat = FC2_PIXEL_FORMAT_MONO16;
+                break;
+
+            case FC2_PIXEL_FORMAT_RGB16:
+            case FC2_PIXEL_FORMAT_S_RGB16:
+            case FC2_PIXEL_FORMAT_BGR:
+            case FC2_PIXEL_FORMAT_BGRU:
+            case FC2_PIXEL_FORMAT_RGB:
+            case FC2_PIXEL_FORMAT_RGBU:
+            case FC2_PIXEL_FORMAT_BGR16:
+	        case FC2_PIXEL_FORMAT_BGRU16:
+            case FC2_PIXEL_FORMAT_422YUV8_JPEG:
+            case FC2_PIXEL_FORMAT_411YUV8:
+            case FC2_PIXEL_FORMAT_422YUV8:
+            case FC2_PIXEL_FORMAT_444YUV8:
+                convPixFormat = FC2_PIXEL_FORMAT_BGRU;
+                break;
+
+            default:
+                break;
+        }
+
+        return convPixFormat;
+
+    }
+
+
+    int getCompatibleOpencvFormat(fc2PixelFormat pixFormat)
+    {
+        int opencvFormat = CV_8UC1;
+
+        switch (pixFormat)
+        {
+            case FC2_PIXEL_FORMAT_RAW8:
+            case FC2_PIXEL_FORMAT_MONO8:
+                opencvFormat = CV_8UC1;
+                break;
+
+            case FC2_PIXEL_FORMAT_MONO16:
+                opencvFormat = CV_16UC1;
+                break;
+
+            case FC2_PIXEL_FORMAT_BGRU:
+                opencvFormat = CV_8UC3;
+                break;
+
+            default:
+                std::stringstream ssError;
+                ssError << "no compatible opencv format" << std::endl;
+                throw RuntimeError(
+                        ERROR_FC2_NO_COMPATIBLE_OPENCV_FORMAT, 
+                        ssError.str()
+                        );
+                break;
+
+        }
+        return opencvFormat;
+    }
     
     // Conversion from BIAS types to FlyCapture2 types
     // ------------------------------------------------------------------------

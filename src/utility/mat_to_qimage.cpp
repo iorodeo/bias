@@ -1,5 +1,6 @@
 #include "mat_to_qimage.hpp"
 #include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 namespace bias
 {
@@ -7,7 +8,7 @@ namespace bias
 
     QImage matToQImage(const cv::Mat& mat)
     {
-        if(mat.type()==CV_8UC1)
+        if (mat.type()==CV_8UC1)
         {
             const uchar *qImageBuffer = (const uchar*) mat.data;
             QImage img = QImage(
@@ -21,8 +22,21 @@ namespace bias
             img.setColorTable(colorTable);
             return img;
         }
-
-        if(mat.type()==CV_8UC3)
+        else if (mat.type()==CV_16UC1)
+        {
+            cv::Mat matBGR = cv::Mat(mat.size(), CV_8UC3, cv::Scalar(0,0,0));
+            cvtColor(mat,matBGR,CV_GRAY2BGR);
+            const uchar *qImageBuffer = (const uchar*)mat.data;
+            QImage img = QImage(
+                    qImageBuffer, 
+                    matBGR.cols, 
+                    matBGR.rows, 
+                    matBGR.step, 
+                    QImage::Format_RGB888
+                    );
+            return img.rgbSwapped();
+        }
+        else if (mat.type()==CV_8UC3)
         {
             const uchar *qImageBuffer = (const uchar*)mat.data;
             QImage img = QImage(
@@ -43,7 +57,7 @@ namespace bias
         }
     }
 
-    QVector<QRgb> createColorTable()
+    QVector<QRgb> createColorTable() 
     {
         QVector<QRgb> colorTable;
         for (int i=0; i<256; i++)

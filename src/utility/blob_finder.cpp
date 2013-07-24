@@ -43,7 +43,7 @@ namespace bias
 
         // Convert image to 8UC1 - for use with find contours
         cv::Mat image8UC1;
-        if (image.channels() > 1)
+        if ((image.channels() > 1) || (image.depth() != CV_8U))
         {
             image8UC1 = cv::Mat(image.size(), CV_8UC1, cv::Scalar(0));
             cvtColor(image,image8UC1,CV_BGR2GRAY);

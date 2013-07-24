@@ -10,6 +10,14 @@
 
 namespace bias {
 
+    // Image conversion - for mapping from FlyCapture2 to opencv 
+    // -----------------------------------------------------------------------
+
+    fc2PixelFormat getSuitablePixelFormat(fc2PixelFormat pixFormat);
+
+    int getCompatibleOpencvFormat(fc2PixelFormat pixFormat);
+
+
     // Conversion from BIAS types to FlyCapture2  types
     // ------------------------------------------------------------------------
     
