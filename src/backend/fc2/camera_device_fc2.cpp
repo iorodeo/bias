@@ -1381,6 +1381,8 @@ namespace bias {
             }
         }
 
+        std::cout << "desired format: " << getPixelFormatString_fc2(pixelFormat) << std::endl;
+
         // Create desired format7 configuration
         imageSettings.mode = format7Info.mode;
         imageSettings.offsetX = 0;
@@ -1411,8 +1413,9 @@ namespace bias {
             throw RuntimeError(ERROR_FC2_INVALID_FORMAT7_SETTINGS, ssError.str());
         }
 
-        if (0)  // Print packet info
+        if (1)  // Print packet info
         {
+            std::cout << std::endl << "Sent" << std::endl;
             printFormat7ImageSettings_fc2(imageSettings);
             printFormat7PacketInfo_fc2(packetInfo);
         }
@@ -1444,6 +1447,7 @@ namespace bias {
 
         if (1) // Print current configuration settings
         {
+            std::cout << "Actual" << std::endl;
             printFormat7Configuration_fc2(imageSettings,packetSize,percentage);
         }
 
