@@ -72,7 +72,7 @@ namespace bias
 
         if (image.channels() > 1)
         {
-            data.blobDataImage = cv::Mat(image.size(), CV_8UC3, cv::Scalar(0,0,0));
+            data.blobDataImage = cv::Mat(image);
         }
         else
         {
