@@ -181,12 +181,9 @@ void FlySorterWindow::httpOutputCheckBoxChanged(int state)
 
 void FlySorterWindow::newImage(ImageData imageData)
 {
-    std::cout << "newImage" << std::endl;
     imageData_ = imageData;
-
     BlobFinder blobFinder = BlobFinder(param_.blobFinder);
     blobFinderData_ = blobFinder.findBlobs(imageData.mat);
-
     if ((httpOutputCheckBoxPtr_ -> checkState()) == Qt::Checked)
     {
         sendDataViaHttpRequest();

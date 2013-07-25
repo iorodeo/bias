@@ -40,9 +40,9 @@ namespace bias
     BlobFinderData BlobFinder::findBlobs(cv::Mat image)
     {
         BlobFinderData data;
+        cv::Mat image8UC1;
 
         // Convert image to 8UC1 - for use with find contours
-        cv::Mat image8UC1;
         if ((image.channels() > 1) || (image.depth() != CV_8U))
         {
             image8UC1 = cv::Mat(image.size(), CV_8UC1, cv::Scalar(0));
@@ -69,6 +69,18 @@ namespace bias
         // Filter blob data and draw contours on image
         data.blobDataImage = cv::Mat(image8UC1.size(), CV_8UC3, cv::Scalar(0,0,0));
         cvtColor(image8UC1,data.blobDataImage,CV_GRAY2BGR);
+
+        if (image.channels() > 1)
+        {
+            data.blobDataImage = cv::Mat(image.size(), CV_8UC3, cv::Scalar(0,0,0));
+        }
+        else
+        {
+            data.blobDataImage = cv::Mat(image8UC1.size(), CV_8UC3, cv::Scalar(0,0,0));
+            cvtColor(image8UC1,data.blobDataImage,CV_GRAY2BGR);
+        }
+
+
         for (size_t index=0; index < contours.size(); index++)
         {
             cv::Moments contourMoments = cv::moments(contours[index]);

@@ -211,8 +211,6 @@ namespace bias {
             image = cv::Mat(imagePtr_fc2->rows, imagePtr_fc2->cols, compType);
         }
 
-        //std::cout << "raw dataSize       = " << rawImage_.dataSize << std::endl;
-        //std::cout << "converted dataSize = " << convertedImage_.dataSize << std::endl;
         // Copy data -- TO DO might be able to do this without copying.
         unsigned char *pData0 = imagePtr_fc2->pData;
         unsigned char *pData1 = imagePtr_fc2->pData + imagePtr_fc2->dataSize - 1;
@@ -913,8 +911,6 @@ namespace bias {
 
     void CameraDevice_fc2::grabImageCommon()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-
         fc2Error error;
 
         if (!capturing_) 
@@ -941,20 +937,14 @@ namespace bias {
         // Convert image to suitable format 
         fc2PixelFormat convertedFormat = getSuitablePixelFormat(rawImage_.format);
 
-        std::cout << "original Format:  " << getPixelFormatString_fc2(rawImage_.format) << std::endl;
-        std::cout << "converted Format: " << getPixelFormatString_fc2(convertedFormat) << std::endl;
-
         if (rawImage_.format != convertedFormat)
         {
-            std::cout << "converting ... ";
             useConverted = true;
             error = fc2ConvertImageTo(
                     convertedFormat,
                     &rawImage_, 
                     &convertedImage_
                     );
-            std::cout << "error == FC2_ERROR_OK: " << (error==FC2_ERROR_OK) << std::endl;
-
             if ( error != FC2_ERROR_OK ) 
             {
                 std::stringstream ssError;
@@ -967,10 +957,6 @@ namespace bias {
         {
             useConverted = false;
         }
-
-        std::cout << std::endl;
-        
-
     }
 
 
@@ -1273,20 +1259,20 @@ namespace bias {
             std::cout << "FC2_PIXEL_FORMAT_MONO8 & pixelFormatBitField = "<< std::bitset<32>(test1) << std::endl;
         }
 
-        // Debug
-        // ---------------------------------------------------------------
-        PixelFormatList pList = getListOfSupportedPixelFormats(convertImageMode_from_fc2(mode));
-        PixelFormatList::iterator it;
-        std::cout << std::endl;
-        std::cout << "-----------------" << std::endl;
-        std::cout << "Supported formats" << std::endl;
-        std::cout << "-----------------" << std::endl;
-        for (it=pList.begin(); it!=pList.end(); it++)
-        {
-            std::cout << getPixelFormatString(*it) << std::endl;
-        }
-        std::cout << std::endl;
-        // -----------------------------------------------------------------
+        //// Debug
+        //// ---------------------------------------------------------------
+        //PixelFormatList pList = getListOfSupportedPixelFormats(convertImageMode_from_fc2(mode));
+        //PixelFormatList::iterator it;
+        //std::cout << std::endl;
+        //std::cout << "-----------------" << std::endl;
+        //std::cout << "Supported formats" << std::endl;
+        //std::cout << "-----------------" << std::endl;
+        //for (it=pList.begin(); it!=pList.end(); it++)
+        //{
+        //    std::cout << getPixelFormatString(*it) << std::endl;
+        //}
+        //std::cout << std::endl;
+        //// -----------------------------------------------------------------
 
         // Select pixel format currently - this is a bit of a hack 
         fc2PixelFormat pixelFormat;
@@ -1294,26 +1280,30 @@ namespace bias {
 
         if (isColor())
         {
-            //// Camera is color - try to find a suitable color format
-            //if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_BGRU)
-            //{
-            //    pixelFormat = FC2_PIXEL_FORMAT_BGRU;
-            //    havePixelFormat = true;
-            //}
-            //else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_RGBU)
-            //{
-            //    pixelFormat = FC2_PIXEL_FORMAT_RGBU;
-            //    havePixelFormat = true;
-            //}
-            //else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_BGR)
-            //{
-            //    pixelFormat = FC2_PIXEL_FORMAT_BGR;
-            //    havePixelFormat = true;
-            //}
-            //else 
+            // Camera is color - try to find a suitable color format
+            //
+            // TEMPORARY  - this is a bit broken at the moment as it appears
+            // that even though a pixel format may appear to be supported via
+            // the bitfield you will be unable to set it to this value. So you
+            // really need to check that you where able to set the format.
             if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_RGB)
             {
                 pixelFormat = FC2_PIXEL_FORMAT_RGB;
+                havePixelFormat = true;
+            }
+            else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_BGRU)
+            {
+                pixelFormat = FC2_PIXEL_FORMAT_BGRU;
+                havePixelFormat = true;
+            }
+            else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_RGBU)
+            {
+                pixelFormat = FC2_PIXEL_FORMAT_RGBU;
+                havePixelFormat = true;
+            }
+            else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_BGR)
+            {
+                pixelFormat = FC2_PIXEL_FORMAT_BGR;
                 havePixelFormat = true;
             }
             else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_BGRU16)
@@ -1399,8 +1389,6 @@ namespace bias {
             }
         }
 
-        std::cout << "desired format: " << getPixelFormatString_fc2(pixelFormat) << std::endl;
-
         // Create desired format7 configuration
         imageSettings.mode = format7Info.mode;
         imageSettings.offsetX = 0;
@@ -1431,7 +1419,7 @@ namespace bias {
             throw RuntimeError(ERROR_FC2_INVALID_FORMAT7_SETTINGS, ssError.str());
         }
 
-        if (1)  // Print packet info
+        if (0)  // Print packet info
         {
             std::cout << std::endl << "Sent - to camera" << std::endl;
             printFormat7ImageSettings_fc2(imageSettings);
@@ -1446,12 +1434,6 @@ namespace bias {
             ssError << __PRETTY_FUNCTION__; 
             ssError << ": unable to sete FlyCapture2 format 7 configuration"; 
             throw RuntimeError(ERROR_FC2_SET_FORMAT7_CONFIGURATION, ssError.str());
-        }
-
-        if (1)
-        {
-            std::cout << std::endl << "imageSettings - after fc2SetFormat7Configuration" << std::endl;
-            printFormat7ImageSettings_fc2(imageSettings);
         }
 
         // Get Current format7 image settings

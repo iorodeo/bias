@@ -46,7 +46,6 @@ namespace bias
                     mat.step, 
                     QImage::Format_RGB888
                     );
-            //return img.rgbSwapped();
             return img;
         }
         else
