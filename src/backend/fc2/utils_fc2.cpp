@@ -46,7 +46,7 @@ namespace bias {
             case FC2_PIXEL_FORMAT_411YUV8:
             case FC2_PIXEL_FORMAT_422YUV8:
             case FC2_PIXEL_FORMAT_444YUV8:
-                convPixFormat = FC2_PIXEL_FORMAT_RGB;
+                convPixFormat = FC2_PIXEL_FORMAT_BGR;
                 break;
 
             default:
@@ -73,7 +73,7 @@ namespace bias {
                 opencvFormat = CV_16UC1;
                 break;
 
-            case FC2_PIXEL_FORMAT_RGB:
+            case FC2_PIXEL_FORMAT_BGR:
                 opencvFormat = CV_8UC3;
                 break;
 

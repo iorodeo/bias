@@ -360,7 +360,7 @@ namespace bias
             PixelFormat format = *formatIt;
             std::string formatStdString = getPixelFormatString(format);
             // --------------------------------------------------------------------------
-            // TEMPORARY - only allow RAW8 ro MONO8
+            // TEMPORARY - only allow RAW8, MONO8, RGB8
             // --------------------------------------------------------------------------
             if ( 
                     (format == PIXEL_FORMAT_RAW8)  || 

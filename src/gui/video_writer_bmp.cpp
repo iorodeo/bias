@@ -9,7 +9,6 @@
 namespace bias
 {
 
-    // VideoWriter_pmp methods
     const QString VideoWriter_bmp::IMAGE_FILE_BASE = QString("image_");
     const QString VideoWriter_bmp::IMAGE_FILE_EXT = QString(".bmp");
     const QString DUMMY_FILENAME("dummy.bmp");
@@ -17,6 +16,7 @@ namespace bias
     const VideoWriterParams_bmp VideoWriter_bmp::DEFAULT_PARAMS = 
         VideoWriterParams_bmp();
 
+    // VideoWriter_bmp methods
     VideoWriter_bmp::VideoWriter_bmp(QObject *parent) 
         : VideoWriter_bmp(DEFAULT_PARAMS,DUMMY_FILENAME,parent) 
     {}
