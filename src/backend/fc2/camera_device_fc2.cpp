@@ -211,12 +211,12 @@ namespace bias {
             image = cv::Mat(imagePtr_fc2->rows, imagePtr_fc2->cols, compType);
         }
 
-        std::cout << "raw dataSize       = " << rawImage_.dataSize << std::endl;
-        std::cout << "converted dataSize = " << convertedImage_.dataSize << std::endl;
-        //// Copy data -- TO DO might be able to do this without copying.
-        //unsigned char *pData0 = imagePtr_fc2->pData;
-        //unsigned char *pData1 = imagePtr_fc2->pData + imagePtr_fc2->dataSize - 1;
-        //std::copy(pData0,pData1,image.data);
+        //std::cout << "raw dataSize       = " << rawImage_.dataSize << std::endl;
+        //std::cout << "converted dataSize = " << convertedImage_.dataSize << std::endl;
+        // Copy data -- TO DO might be able to do this without copying.
+        unsigned char *pData0 = imagePtr_fc2->pData;
+        unsigned char *pData1 = imagePtr_fc2->pData + imagePtr_fc2->dataSize - 1;
+        std::copy(pData0,pData1,image.data);
     }
 
 
