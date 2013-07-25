@@ -405,7 +405,7 @@ void FlySorterWindow::sendDataViaHttpRequest()
     reqString += QString(":%1").arg(param_.server.port); 
     QString jsonString = QString(dataToJson());
     jsonString.replace(" ", "");
-    reqString += QString("/sendData/") + jsonString;
+    reqString += QString("/sendCmdGetRsp/sendData/") + jsonString;
     QUrl reqUrl = QUrl(reqString);
     //reqUrl.addQueryItem("sendData", jsonString);
     std::cout << "http request: " << reqUrl.toString().toStdString() << std::endl;
