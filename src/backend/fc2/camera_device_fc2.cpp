@@ -911,7 +911,7 @@ namespace bias {
 
     void CameraDevice_fc2::grabImageCommon()
     {
-        //std::cout << "B " << __PRETTY_FUNCTION__ << std::endl;
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
 
         fc2Error error;
 
@@ -924,7 +924,6 @@ namespace bias {
         }
 
         // Retrieve image from buffer
-        //std::cout << "  retrieve image buffer" << std::endl;
         error = fc2RetrieveBuffer(context_, &rawImage_);
         if ( error != FC2_ERROR_OK ) 
         {
@@ -939,13 +938,21 @@ namespace bias {
 
         // Convert image to suitable format 
         fc2PixelFormat convertedFormat = getSuitablePixelFormat(rawImage_.format);
+
+        std::cout << "original Format:  " << getPixelFormatString_fc2(rawImage_.format) << std::endl;
+        std::cout << "converted Format: " << getPixelFormatString_fc2(convertedFormat) << std::endl;
+
         if (rawImage_.format != convertedFormat)
         {
+            std::cout << "converting ... ";
+            useConverted = true;
             error = fc2ConvertImageTo(
                     convertedFormat,
                     &rawImage_, 
                     &convertedImage_
                     );
+            std::cout << "error = " << error << std::endl;
+
             if ( error != FC2_ERROR_OK ) 
             {
                 std::stringstream ssError;
@@ -953,15 +960,15 @@ namespace bias {
                 ssError << ": unable to convert image";
                 throw RuntimeError(ERROR_FC2_CONVERT_IMAGE, ssError.str());
             }
-            useConverted = true;
         }
         else
         {
             useConverted = false;
         }
+
+        std::cout << std::endl;
         
 
-        //std::cout << "E " << __PRETTY_FUNCTION__ << std::endl;
     }
 
 
@@ -1224,6 +1231,8 @@ namespace bias {
 
     void CameraDevice_fc2::setVideoModeToFormat7(fc2Mode mode)
     {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+
         fc2Error error;
         fc2Format7Info format7Info;
         fc2Format7ImageSettings imageSettings;
@@ -1334,7 +1343,7 @@ namespace bias {
 
         if (!havePixelFormat)
         {
-            // Monochrome camera or couldn't find color pixel format which will work.
+            // This is a monochrome camera or couldn't find color pixel format which will work.
             if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_RAW8)
             {
                 pixelFormat = FC2_PIXEL_FORMAT_RAW8;
@@ -1433,10 +1442,12 @@ namespace bias {
             throw RuntimeError(ERROR_FC2_GET_FORMAT7_CONFIGURATION, ssError.str());
         }
 
-        if (0) // Print current configuration settings
+        if (1) // Print current configuration settings
         {
             printFormat7Configuration_fc2(imageSettings,packetSize,percentage);
         }
+
+        std::cout << std::endl;
     }
 }
 #endif
