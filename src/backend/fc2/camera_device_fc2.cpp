@@ -211,10 +211,10 @@ namespace bias {
             image = cv::Mat(imagePtr_fc2->rows, imagePtr_fc2->cols, compType);
         }
 
-        // Copy data -- TO DO might be able to do this without copying.
-        unsigned char *pData0 = imagePtr_fc2->pData;
-        unsigned char *pData1 = imagePtr_fc2->pData + imagePtr_fc2->dataSize - 1;
-        std::copy(pData0,pData1,image.data);
+        //// Copy data -- TO DO might be able to do this without copying.
+        //unsigned char *pData0 = imagePtr_fc2->pData;
+        //unsigned char *pData1 = imagePtr_fc2->pData + imagePtr_fc2->dataSize - 1;
+        //std::copy(pData0,pData1,image.data);
     }
 
 
@@ -951,7 +951,7 @@ namespace bias {
                     &rawImage_, 
                     &convertedImage_
                     );
-            std::cout << "error == FC2_ERROR_OK" << (error==FC2_ERROR_OK) << std::endl;
+            std::cout << "error == FC2_ERROR_OK: " << (error==FC2_ERROR_OK) << std::endl;
 
             if ( error != FC2_ERROR_OK ) 
             {
