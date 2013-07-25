@@ -362,7 +362,11 @@ namespace bias
             // --------------------------------------------------------------------------
             // TEMPORARY - only allow RAW8 ro MONO8
             // --------------------------------------------------------------------------
-            if ((format == PIXEL_FORMAT_RAW8) || (format == PIXEL_FORMAT_MONO8))
+            if ( 
+                    (format == PIXEL_FORMAT_RAW8)  || 
+                    (format == PIXEL_FORMAT_MONO8) || 
+                    (format == PIXEL_FORMAT_RGB8)
+                ) 
             { 
                 pixelFormatComboBoxPtr_ -> addItem(QString::fromStdString(formatStdString));
                 formatToIndexMap_[format] = index;
