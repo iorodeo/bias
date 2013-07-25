@@ -1292,23 +1292,24 @@ namespace bias {
 
         if (isColor())
         {
-            // Camera is color - try to find a suitable color format
-            if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_BGRU)
-            {
-                pixelFormat = FC2_PIXEL_FORMAT_BGRU;
-                havePixelFormat = true;
-            }
-            else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_RGBU)
-            {
-                pixelFormat = FC2_PIXEL_FORMAT_RGBU;
-                havePixelFormat = true;
-            }
-            else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_BGR)
-            {
-                pixelFormat = FC2_PIXEL_FORMAT_BGR;
-                havePixelFormat = true;
-            }
-            else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_RGB)
+            //// Camera is color - try to find a suitable color format
+            //if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_BGRU)
+            //{
+            //    pixelFormat = FC2_PIXEL_FORMAT_BGRU;
+            //    havePixelFormat = true;
+            //}
+            //else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_RGBU)
+            //{
+            //    pixelFormat = FC2_PIXEL_FORMAT_RGBU;
+            //    havePixelFormat = true;
+            //}
+            //else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_BGR)
+            //{
+            //    pixelFormat = FC2_PIXEL_FORMAT_BGR;
+            //    havePixelFormat = true;
+            //}
+            //else 
+            if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_RGB)
             {
                 pixelFormat = FC2_PIXEL_FORMAT_RGB;
                 havePixelFormat = true;
