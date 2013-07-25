@@ -1430,7 +1430,7 @@ namespace bias {
 
         if (1)  // Print packet info
         {
-            std::cout << std::endl << "Sent" << std::endl;
+            std::cout << std::endl << "Sent - to camera" << std::endl;
             printFormat7ImageSettings_fc2(imageSettings);
             printFormat7PacketInfo_fc2(packetInfo);
         }
@@ -1443,6 +1443,12 @@ namespace bias {
             ssError << __PRETTY_FUNCTION__; 
             ssError << ": unable to sete FlyCapture2 format 7 configuration"; 
             throw RuntimeError(ERROR_FC2_SET_FORMAT7_CONFIGURATION, ssError.str());
+        }
+
+        if (1)
+        {
+            std::cout << std::endl << "imageSettings - after fc2SetFormat7Configuration" << std::endl;
+            printFormat7ImageSettings_fc2(imageSettings);
         }
 
         // Get Current format7 image settings
@@ -1462,7 +1468,7 @@ namespace bias {
 
         if (1) // Print current configuration settings
         {
-            std::cout << "Actual" << std::endl;
+            std::cout << "Actual - from camera" << std::endl;
             printFormat7Configuration_fc2(imageSettings,packetSize,percentage);
         }
 
