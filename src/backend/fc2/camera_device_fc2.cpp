@@ -1267,9 +1267,24 @@ namespace bias {
             printFormat7Info_fc2(format7Info);
             unsigned int test0 = format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_RAW8;
             unsigned int test1 = format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_MONO8;
-            std::cout << "FC2_PIXEL_FORMAT_RAW8  | pixelFormatBitField = "<< std::bitset<32>(test0) << std::endl;
-            std::cout << "FC2_PIXEL_FORMAT_MONO8 | pixelFormatBitField = "<< std::bitset<32>(test1) << std::endl;
+            std::cout << "FC2_PIXEL_FORMAT_RAW8  & pixelFormatBitField = "<< std::bitset<32>(test0) << std::endl;
+            std::cout << "FC2_PIXEL_FORMAT_MONO8 & pixelFormatBitField = "<< std::bitset<32>(test1) << std::endl;
         }
+
+        // Debug
+        // ---------------------------------------------------------------
+        PixelFormatList pList = getListOfSupportedPixelFormats(convertImageMode_from_fc2(mode));
+        PixelFormatList::iterator it;
+        std::cout << std::endl;
+        std::cout << "-----------------" << std::endl;
+        std::cout << "Supported formats" << std::endl;
+        std::cout << "-----------------" << std::endl;
+        for (it=pList.begin(); it!=pList.end(); it++)
+        {
+            std::cout << getPixelFormatString(*it) << std::endl;
+        }
+        std::cout << std::endl;
+        // -----------------------------------------------------------------
 
         // Select pixel format currently - this is a bit of a hack 
         fc2PixelFormat pixelFormat;
