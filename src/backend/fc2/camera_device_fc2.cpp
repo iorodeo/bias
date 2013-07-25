@@ -951,7 +951,7 @@ namespace bias {
                     &rawImage_, 
                     &convertedImage_
                     );
-            std::cout << "error = " << error << std::endl;
+            std::cout << "error == FC2_ERROR_OK" << (error==FC2_ERROR_OK) << std::endl;
 
             if ( error != FC2_ERROR_OK ) 
             {
