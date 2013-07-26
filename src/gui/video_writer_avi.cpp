@@ -10,7 +10,7 @@ namespace bias
     const QString DUMMY_FILENAME("dummy.avi");
     const double VideoWriter_avi::DEFAULT_FPS = 30.0;
     const double VideoWriter_avi::MIN_ALLOWED_DT_ESTIMATE = 0.00001; 
-    const unsigned int VideoWriter_avi::DEFAULT_FRAME_SKIP = 4;
+    const unsigned int VideoWriter_avi::DEFAULT_FRAME_SKIP = 1;
     const int VideoWriter_avi::DEFAULT_FOURCC = CV_FOURCC('X','V','I','D');
     //const int VideoWriter_avi::DEFAULT_FOURCC = CV_FOURCC('D','I','B',' ');
     const VideoWriterParams_avi VideoWriter_avi::DEFAULT_PARAMS = 
@@ -72,9 +72,25 @@ namespace bias
             fps_ = 1.0;
         }
 
+        bool isColorImage;
+        if (stampedImg.image.channels() > 1)
+        {
+            isColorImage = true;
+        }
+        else
+        {
+            isColorImage = false;
+        }
+
         try
         {
-            openOK = videoWriter_.open(incrFileName,fourcc_,fps_,size_,false);
+            openOK = videoWriter_.open(
+                    incrFileName,
+                    fourcc_,
+                    fps_,
+                    size_,
+                    isColorImage
+                    );
         }
         catch (cv::Exception &e)
         {
