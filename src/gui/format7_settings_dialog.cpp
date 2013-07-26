@@ -107,7 +107,6 @@ namespace bias
     {
         PixelFormat format = formatToIndexMap_.key(index);
         settings_.pixelFormat = format;
-        std::cout << getPixelFormatString(settings_.pixelFormat) << std::endl;
         if (isRoiEnableChecked())
         {
             updateFormat7Settings();
@@ -611,12 +610,7 @@ namespace bias
 
     void Format7SettingsDialog::setPixelFormatComboBoxIndex()
     {
-        std::cout << "settings_.pixelFormat:     " << getPixelFormatString(settings_.pixelFormat) << std::endl;
-        std::cout << "formatToIndexMap_[MONO8]:  " << formatToIndexMap_[PIXEL_FORMAT_MONO8] << std::endl;
-        std::cout << "formatToIndexMap_[RAW8]:   " << formatToIndexMap_[PIXEL_FORMAT_RAW8] << std::endl;
-        std::cout << "formatToIndexMap_[RGB8]:   " << formatToIndexMap_[PIXEL_FORMAT_RGB8] << std::endl;
         int index = formatToIndexMap_[settings_.pixelFormat];
-        std::cout << "index:                     " << index << std::endl;
         pixelFormatComboBoxPtr_ -> setCurrentIndex(index);
     }
 

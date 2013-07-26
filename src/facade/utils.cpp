@@ -213,10 +213,8 @@ namespace bias
         map[PIXEL_FORMAT_RAW16]         =   std::string("RAW16");
         map[PIXEL_FORMAT_MONO12]        =   std::string("MONO12");
         map[PIXEL_FORMAT_RAW12]         =   std::string("RAW12");
-        //map[PIXEL_FORMAT_BGR]           =   std::string("BGR");
         map[PIXEL_FORMAT_BGR8]          =   std::string("BGR8");
         map[PIXEL_FORMAT_BGRU]          =   std::string("BGRU");
-        //map[PIXEL_FORMAT_RGB]           =   std::string("RGB");
         map[PIXEL_FORMAT_RGBU]          =   std::string("RGBU");
         map[PIXEL_FORMAT_BGR16]         =   std::string("BGR16");
         map[PIXEL_FORMAT_BGRU16]        =   std::string("BGRU16");

@@ -308,10 +308,8 @@ namespace bias {
         map[PIXEL_FORMAT_RAW16]         =   FC2_PIXEL_FORMAT_RAW16;
         map[PIXEL_FORMAT_MONO12]        =   FC2_PIXEL_FORMAT_MONO12;
         map[PIXEL_FORMAT_RAW12]         =   FC2_PIXEL_FORMAT_RAW12;
-        //map[PIXEL_FORMAT_BGR]           =   FC2_PIXEL_FORMAT_BGR;
         map[PIXEL_FORMAT_BGR8]          =   FC2_PIXEL_FORMAT_BGR;
         map[PIXEL_FORMAT_BGRU]          =   FC2_PIXEL_FORMAT_BGRU;
-        //map[PIXEL_FORMAT_RGB]           =   FC2_PIXEL_FORMAT_RGB;
         map[PIXEL_FORMAT_RGBU]          =   FC2_PIXEL_FORMAT_RGBU;
         map[PIXEL_FORMAT_BGR16]         =   FC2_PIXEL_FORMAT_BGR16;
 	    map[PIXEL_FORMAT_BGRU16]        =   FC2_PIXEL_FORMAT_BGRU16;
@@ -584,10 +582,8 @@ namespace bias {
         map[FC2_PIXEL_FORMAT_RAW16]         =   PIXEL_FORMAT_RAW16;
         map[FC2_PIXEL_FORMAT_MONO12]        =   PIXEL_FORMAT_MONO12;
         map[FC2_PIXEL_FORMAT_RAW12]         =   PIXEL_FORMAT_RAW12;
-        //map[FC2_PIXEL_FORMAT_BGR]           =   PIXEL_FORMAT_BGR;
         map[FC2_PIXEL_FORMAT_BGR]           =   PIXEL_FORMAT_BGR8;
         map[FC2_PIXEL_FORMAT_BGRU]          =   PIXEL_FORMAT_BGRU;
-        //map[FC2_PIXEL_FORMAT_RGB]           =   PIXEL_FORMAT_RGB;
         map[FC2_PIXEL_FORMAT_RGBU]          =   PIXEL_FORMAT_RGBU;
         map[FC2_PIXEL_FORMAT_BGR16]         =   PIXEL_FORMAT_BGR16;
 	    map[FC2_PIXEL_FORMAT_BGRU16]        =   PIXEL_FORMAT_BGRU16;
