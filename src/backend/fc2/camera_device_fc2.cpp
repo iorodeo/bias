@@ -1288,9 +1288,14 @@ namespace bias {
             // that even though a pixel format may appear to be supported via
             // the bitfield you will be unable to set it to this value. So you
             // really need to check that you where able to set the format.
-            if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_RGB)
+            //if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_RGB)
+            //{
+            //    pixelFormat = FC2_PIXEL_FORMAT_RGB;
+            //    havePixelFormat = true;
+            //}
+            if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_RGB8)
             {
-                pixelFormat = FC2_PIXEL_FORMAT_RGB;
+                pixelFormat = FC2_PIXEL_FORMAT_RGB8;
                 havePixelFormat = true;
             }
             else if (format7Info.pixelFormatBitField & FC2_PIXEL_FORMAT_BGRU)
