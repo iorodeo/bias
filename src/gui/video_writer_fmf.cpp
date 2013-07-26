@@ -7,7 +7,7 @@
 
 namespace bias
 {
-    const unsigned int VideoWriter_fmf::DEFAULT_FRAME_SKIP = 3;
+    const unsigned int VideoWriter_fmf::DEFAULT_FRAME_SKIP = 1;
     const unsigned int VideoWriter_fmf::FMF_VERSION = 1;
     const QString DUMMY_FILENAME("dummy.fmf");
     const VideoWriterParams_fmf VideoWriter_fmf::DEFAULT_PARAMS =
@@ -82,6 +82,15 @@ namespace bias
 
     void VideoWriter_fmf::setupOutput(StampedImage stampedImg)
     {
+        // Check image format - must be CV_8UC1
+        if ((stampedImg.image.channels() > 1) || (stampedImg.image.depth()!=CV_8U))
+        {
+            unsigned int errorId = ERROR_VIDEO_WRITER_INITIALIZE;
+            std::string errorMsg("image format must be CV_8UC1 for fmf video recording");
+            throw RuntimeError(errorId, errorMsg);
+        }
+
+
         // Set error control state, set exceptions mask
         file_.clear();
         file_.exceptions(std::ifstream::failbit | std::ifstream::badbit);
