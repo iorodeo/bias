@@ -83,13 +83,21 @@ namespace bias
     void VideoWriter_fmf::setupOutput(StampedImage stampedImg)
     {
         // Check image format - must be CV_8UC1
-        if ((stampedImg.image.channels() > 1) || (stampedImg.image.depth()!=CV_8U))
+        if (stampedImg.image.channels() != 1)
         {
             unsigned int errorId = ERROR_VIDEO_WRITER_INITIALIZE;
-            std::string errorMsg("image format must be CV_8UC1 for fmf video recording");
-            throw RuntimeError(errorId, errorMsg);
+            std::string errorMsg("video writer fmf setup failed:\n\n"); 
+            errorMsg += "images must be single channel";
+            throw RuntimeError(errorId,errorMsg);
         }
 
+        if (stampedImg.image.depth() != CV_8U)
+        {
+            unsigned int errorId = ERROR_VIDEO_WRITER_INITIALIZE;
+            std::string errorMsg("video writer fmf setup failed:\n\n"); 
+            errorMsg += "image depth must be CV_8U";
+            throw RuntimeError(errorId,errorMsg);
+        }
 
         // Set error control state, set exceptions mask
         file_.clear();

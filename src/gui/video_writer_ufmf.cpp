@@ -301,7 +301,7 @@ namespace bias
         {
             unsigned int errorId = ERROR_VIDEO_WRITER_INITIALIZE;
             std::string errorMsg("video writer ufmf setup failed:\n\n"); 
-            errorMsg += "image depth must be CV_8U or CV_16U";
+            errorMsg += "image depth must be CV_8U";
             throw RuntimeError(errorId,errorMsg);
         }
     }
