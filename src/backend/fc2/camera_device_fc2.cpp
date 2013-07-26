@@ -133,6 +133,8 @@ namespace bias {
             throw RuntimeError(ERROR_FC2_START_CAPTURE, ssError.str());
         }
 
+        printFormat7Configuration();
+
         if (!capturing_) 
         {
             createRawImage();
@@ -1458,6 +1460,34 @@ namespace bias {
         }
 
         std::cout << std::endl;
+    }
+
+
+    void CameraDevice_fc2::printFormat7Configuration()
+    {
+        fc2Error error;
+        fc2Format7ImageSettings imageSettings;
+        unsigned int packetSize;
+        float percentage; 
+
+        // Get Current format7 image settings
+        error = fc2GetFormat7Configuration(
+                context_, 
+                &imageSettings,
+                &packetSize,
+                &percentage
+                );
+        if (error != FC2_ERROR_OK)
+        { 
+            std::stringstream ssError; 
+            ssError << __PRETTY_FUNCTION__; 
+            ssError << ": unable to get FlyCapture2 format 7 configuration"; 
+            throw RuntimeError(ERROR_FC2_GET_FORMAT7_CONFIGURATION, ssError.str());
+        }
+
+        std::cout << "Format7Configuration" << std::endl;
+        std::cout << "--------------------" << std::endl;
+        printFormat7Configuration_fc2(imageSettings,packetSize,percentage);
     }
 }
 #endif

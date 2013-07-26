@@ -125,6 +125,8 @@ namespace bias {
             void setVideoModeToFormat7(ImageMode mode);
             void setVideoModeToFormat7(fc2Mode mode);
 
+            void printFormat7Configuration();
+
     };
 
     typedef std::shared_ptr<CameraDevice_fc2> CameraDevicePtr_fc2;

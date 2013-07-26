@@ -107,6 +107,7 @@ namespace bias
     {
         PixelFormat format = formatToIndexMap_.key(index);
         settings_.pixelFormat = format;
+        std::cout << getPixelFormatString(settings_.pixelFormat) << std::endl;
         if (isRoiEnableChecked())
         {
             updateFormat7Settings();

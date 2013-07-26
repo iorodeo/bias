@@ -61,8 +61,6 @@ namespace bias
         
         setSize(stampedImg.image.size());
 
-        bool openOK= true;
-
         if (stampedImg.dtEstimate > MIN_ALLOWED_DT_ESTIMATE)
         {
             fps_ = 1.0/(stampedImg.dtEstimate*frameSkip_);
@@ -82,6 +80,7 @@ namespace bias
             isColorImage = false;
         }
 
+        bool openOK= true;
         try
         {
             openOK = videoWriter_.open(
