@@ -5,6 +5,7 @@
 #include "parameters.hpp"
 #include "image_grabber.hpp"
 #include "blob_finder.hpp"
+#include "fly_segmenter.hpp"
 #include <memory>
 #include <QCloseEvent>
 #include <QMainWindow>
@@ -62,6 +63,7 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         QPixmap thresholdPixmapOrig_;
         ImageData imageData_;
         BlobFinderData blobFinderData_;
+        FlySegmenterData flySegmenterData_;
         unsigned int httpRequestErrorCount_;
         QString parameterFileName_;
 

@@ -3,6 +3,72 @@
 #include "json_utils.hpp"
 #include <iostream>
 
+
+// StumpData
+// ---------------------------------------------------------------------------
+StumpData::StumpData()
+{
+    channel = 0;
+    threshold = 0.0;
+    value = 0.0;
+}
+
+
+StumpData::StumpData(unsigned int chan, float thresh, float val)
+{
+    channel = chan;
+    threshold = thresh;
+    value = val;
+}
+
+// ClassifierParam
+// ----------------------------------------------------------------------------
+ClassifierParam::ClassifierParam()
+{
+    offset = 0.0;
+}
+
+// FlySegmenterParam
+// ----------------------------------------------------------------------------
+ClassifierParam FlySegmenterParam::createDefaultClassifierParam()
+{
+    // TEMPORARY - kludgey, but I just need some data for developing 
+    // the fly segmenter. We will read this from a file later.
+    ClassifierParam classifierParam;
+    classifierParam.offset = 1.0784;
+    std::vector<StumpData> stumpVector;
+    stumpVector.push_back(StumpData(1, 0.3104,  1.9041));
+    stumpVector.push_back(StumpData(0, 0.2488, -1.6640));
+    stumpVector.push_back(StumpData(1, 0.3220,  1.2792));
+    stumpVector.push_back(StumpData(0, 0.2755, -1.2068));
+    stumpVector.push_back(StumpData(0, 0.2150, -0.8031));
+    stumpVector.push_back(StumpData(0, 0.2953, -1.0494));
+    stumpVector.push_back(StumpData(0, 0.2488,  0.5447));
+    stumpVector.push_back(StumpData(1, 0.3282,  0.7124));
+    stumpVector.push_back(StumpData(0, 0.2864, -0.7560));
+    stumpVector.push_back(StumpData(1, 0.3104, -0.3242));
+    stumpVector.push_back(StumpData(2, 0.5268,  0.3865));
+    stumpVector.push_back(StumpData(0, 0.2306, -0.3901));
+    stumpVector.push_back(StumpData(1, 0.3104, -0.3375));
+    stumpVector.push_back(StumpData(0, 0.1943, -0.9171));
+    stumpVector.push_back(StumpData(2, 0.4783, -0.8111));
+    stumpVector.push_back(StumpData(1, 0.2925,  0.4803));
+    stumpVector.push_back(StumpData(0, 0.2488,  0.2992));
+    stumpVector.push_back(StumpData(2, 0.5184,  0.2862));
+    stumpVector.push_back(StumpData(1, 0.3220, -0.2660));
+    stumpVector.push_back(StumpData(0, 0.2351, -0.2786));
+    classifierParam.stumpVector = stumpVector;
+    return classifierParam;
+};
+const ClassifierParam FlySegmenterParam::DEFAULT_CLASSIFIER_PARAM = 
+createDefaultClassifierParam();
+
+
+FlySegmenterParam::FlySegmenterParam()
+{
+    classifierParam = DEFAULT_CLASSIFIER_PARAM;
+};
+
 // ImageGrabberParam
 // ----------------------------------------------------------------------------
 

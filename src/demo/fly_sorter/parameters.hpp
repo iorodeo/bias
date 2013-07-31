@@ -4,10 +4,42 @@
 #include <QStringList>
 #include <QVariantMap>
 #include <QFile>
+#include <vector>
 #include "blob_finder_param.hpp"
 #include "rtn_status.hpp"
 
 using namespace bias;
+
+class StumpData 
+{
+    public:
+        unsigned int channel;
+        float threshold;
+        float value;
+        StumpData();
+        StumpData(unsigned int chan, float thresh, float val);
+};
+
+
+class ClassifierParam
+{
+    public:
+        std::vector<StumpData> stumpVector;
+        float offset;
+        ClassifierParam();
+};
+
+
+class FlySegmenterParam : public ClassifierParam
+{
+    public:
+        static const ClassifierParam DEFAULT_CLASSIFIER_PARAM;
+        static ClassifierParam createDefaultClassifierParam();
+
+        ClassifierParam classifierParam;
+        FlySegmenterParam();
+};
+
 
 class ImageGrabberParam
 {
@@ -94,6 +126,8 @@ class FlySorterParam
         ServerParam server;
         ImageGrabberParam imageGrabber;
         BlobFinderParam blobFinder;
+        FlySegmenterParam flySegmenter;
+
         // Devel
         // -------------------
         GenderMode genderMode;
