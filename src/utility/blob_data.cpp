@@ -147,13 +147,14 @@ namespace bias
     }
 
 
-    BlobData::BlobData(std::vector<cv::Point> contour)
+    BlobData::BlobData(std::vector<cv::Point> contour, cv::Mat image)
     {
-        setFromContour(contour);
+        setFromContour(contour,image);
+
     }
 
 
-    void BlobData::setFromContour(std::vector<cv::Point> contour)
+    void BlobData::setFromContour(std::vector<cv::Point> contour, cv::Mat image)
     {
         contourVector = contour;
         cv::Moments moments = cv::moments(contour);
@@ -164,6 +165,10 @@ namespace bias
             ellipse = Ellipse(contour);
             boundingRect = cv::boundingRect(cv::Mat(contour));
         }
+        cv::Mat subImage = image(boundingRect);
+        subImage.copyTo(boundingImage);
+
+
     }
 
 

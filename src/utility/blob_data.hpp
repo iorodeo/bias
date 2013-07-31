@@ -47,11 +47,12 @@ namespace bias
             Centroid centroid;
             Ellipse ellipse;
             cv::Rect boundingRect;
+            cv::Mat boundingImage;
             std::vector<cv::Point> contourVector;
 
             BlobData();
-            BlobData(std::vector<cv::Point> contour);
-            void setFromContour(std::vector<cv::Point> contour);
+            BlobData(std::vector<cv::Point> contour, cv::Mat image);
+            void setFromContour(std::vector<cv::Point> contour, cv::Mat image);
             std::string toStdString(unsigned int indent=0);
             void print(unsigned int indent=0);
             void draw(cv::Mat &img);

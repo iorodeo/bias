@@ -84,7 +84,7 @@ namespace bias
         for (size_t index=0; index < contours.size(); index++)
         {
             cv::Moments contourMoments = cv::moments(contours[index]);
-            BlobData blobData = BlobData(contours[index]);
+            BlobData blobData = BlobData(contours[index],image);
             if (withinAreaBounds(blobData) && containsStrictThreshold(blobData,image8UC1))
             { 
                 data.blobDataList.push_back(blobData); 
