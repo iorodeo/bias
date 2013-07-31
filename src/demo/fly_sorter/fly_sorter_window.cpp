@@ -276,8 +276,6 @@ void FlySorterWindow::connectWidgets()
             this,
             SLOT(httpOutputCheckBoxChanged(int))
            );
-
-
 }
 
 
@@ -405,7 +403,6 @@ void FlySorterWindow::sendDataViaHttpRequest()
     jsonString.replace(" ", "");
     reqString += QString("/sendCmdGetRsp/sendData/") + jsonString;
     QUrl reqUrl = QUrl(reqString);
-    //reqUrl.addQueryItem("sendData", jsonString);
     std::cout << "http request: " << reqUrl.toString().toStdString() << std::endl;
     QNetworkRequest req(reqUrl);
     QNetworkReply *reply = networkAccessManagerPtr_ -> get(req);
@@ -416,24 +413,57 @@ QVariantMap FlySorterWindow::dataToMap()
 {
     QVariantMap dataMap;
     dataMap.insert("ndetections", blobFinderData_.blobDataList.size());
-
+    
     QVariantList detectionList;
     BlobDataList::iterator it;
     unsigned int cnt = 0;
+
+    // Development
+    // ------------------------------------------------------------------------
+    static bool isNextFlyFemale = true;
+    // -------------------------------------------------------------------------
+
 
     for (it=blobFinderData_.blobDataList.begin(); it!=blobFinderData_.blobDataList.end(); it++)
     {
         BlobData blobData = *it;
         QVariantMap detectionMap;
-        unsigned int coinFlip = distribution_(generator_);
-        if (coinFlip == 0)
+
+        // Devel - select fly gender based on genderMode setting
+        // ----------------------------------------------------------------------
+        switch (param_.genderMode)
         {
-            detectionMap.insert("fly_type", "male");
+            case GenderModeMaleOnly:
+                detectionMap.insert("fly_type", "male");
+                break;
+
+            case GenderModeEveryOther:
+                if (isNextFlyFemale)
+                {
+                    detectionMap.insert("fly_type", "female");
+                    isNextFlyFemale = false;
+                }
+                else
+                {
+                    detectionMap.insert("fly_type", "male");
+                    isNextFlyFemale = true;
+                }
+                break;
+
+            default:
+                unsigned int coinFlip = distribution_(generator_);
+                if (coinFlip == 0)
+                {
+                    detectionMap.insert("fly_type", "male");
+                }
+                else
+                {
+                    detectionMap.insert("fly_type", "female");
+                }
+                break;
         }
-        else
-        {
-            detectionMap.insert("fly_type", "female");
-        }
+        // --------------------------------------------------------------------
+        
         detectionMap.insert("fly_id", cnt);
         detectionMap.insert("x",blobData.centroid.x);
         detectionMap.insert("y",blobData.centroid.y);

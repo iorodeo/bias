@@ -82,10 +82,11 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         void loadParamFromFile();
         void updateParamText();
 
-        // Temporary
+        // Devel 
         // ---------------------------------------------------------
         std::default_random_engine generator_;
         std::uniform_int_distribution<unsigned int> distribution_;
+        // ---------------------------------------------------------
 
 };
 

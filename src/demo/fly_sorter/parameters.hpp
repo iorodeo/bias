@@ -77,12 +77,27 @@ class IdentityTrackerParam
 };
 
 
+// Devel
+// ----------------------
+enum GenderMode {
+    GenderModeMaleOnly,
+    GenderModeEveryOther,
+    GenderModeRandom,
+    GenderModeNotFound
+};
+// -----------------------
+
 class FlySorterParam
 {
     public:
+        
         ServerParam server;
         ImageGrabberParam imageGrabber;
         BlobFinderParam blobFinder;
+        // Devel
+        // -------------------
+        GenderMode genderMode;
+        // -------------------
 
         FlySorterParam();
         QVariantMap toMap();
