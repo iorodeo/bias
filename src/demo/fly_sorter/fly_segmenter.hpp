@@ -2,9 +2,16 @@
 #define FLY_SEGMENTER_HPP
 #include "parameters.hpp"
 #include "blob_finder.hpp"
+#include "fast_binary_predictor.hpp"
 
-class FlySegmenterData
-{};
+
+class FlySegmenterData : public FastBinaryPredictorData
+{
+    public:
+        FlySegmenterData();
+        void setPredictorData(FastBinaryPredictorData predictorData);
+};
+
 
 class FlySegmenter
 {
@@ -18,6 +25,7 @@ class FlySegmenter
     private:
 
         FlySegmenterParam param_;
+        FastBinaryPredictor fastBinaryPredictor_;
 
 };
 

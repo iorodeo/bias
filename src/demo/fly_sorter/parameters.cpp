@@ -66,7 +66,7 @@ createDefaultClassifierParam();
 
 FlySegmenterParam::FlySegmenterParam()
 {
-    classifierParam = DEFAULT_CLASSIFIER_PARAM;
+    classifier = DEFAULT_CLASSIFIER_PARAM;
 };
 
 // ImageGrabberParam

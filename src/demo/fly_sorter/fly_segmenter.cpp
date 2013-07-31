@@ -4,6 +4,20 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+// FlySegmenterData
+// ----------------------------------------------------------------------------
+
+FlySegmenterData::FlySegmenterData() {};
+
+void FlySegmenterData::setPredictorData(FastBinaryPredictorData predictorData)
+{
+    fit = predictorData.fit;
+    label = predictorData.label;
+}
+
+
+// FlySegmenter
+// ----------------------------------------------------------------------------
 FlySegmenter::FlySegmenter()
 {
 }
@@ -11,17 +25,24 @@ FlySegmenter::FlySegmenter()
 FlySegmenter::FlySegmenter(FlySegmenterParam param)
 {
     setParam(param);
+
+    //// Develop
+    //// ----------------------------------------------------------
+    //cv::namedWindow(
+    //        "segmenter",
+    //        CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED
+    //        );
+    //// ----------------------------------------------------------
 }
 
 void FlySegmenter::setParam(FlySegmenterParam param)
 {
     param_ = param;
+    fastBinaryPredictor_.setClassifierParam(param_.classifier);
 }
 
 FlySegmenterData FlySegmenter::segment(BlobDataList blobDataList)
 {
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
-
     BlobDataList::iterator it;
 
     for ( it=blobDataList.begin(); it!=blobDataList.end(); it++)
@@ -59,9 +80,17 @@ FlySegmenterData FlySegmenter::segment(BlobDataList blobDataList)
 
         // Segment using fast binary predict.
         // --------------------------------------------------------
-        //int numChan = 3;
-        //int numRows = 1;
-        //cv::Mat boudningImageLUV1D = boundingImageLUV.reshape(numChan,numRows);
+        FastBinaryPredictorData predictorData;
+        predictorData = fastBinaryPredictor_.predict(boundingImageLUV);
 
+        FlySegmenterData segmenterData;
+        segmenterData.setPredictorData(predictorData);
+
+        //// Develop
+        //// ---------------------------------------------------------
+        //cv::imshow("segmenter", segmenterData.label);
+        //// ---------------------------------------------------------
+        
+        return segmenterData;
     }
 }

@@ -36,7 +36,7 @@ class FlySegmenterParam : public ClassifierParam
         static const ClassifierParam DEFAULT_CLASSIFIER_PARAM;
         static ClassifierParam createDefaultClassifierParam();
 
-        ClassifierParam classifierParam;
+        ClassifierParam classifier;
         FlySegmenterParam();
 };
 
