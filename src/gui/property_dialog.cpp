@@ -324,10 +324,12 @@ namespace bias
                 valueARadioButtonPtr -> setChecked(true);
                 valueBRadioButtonPtr -> setChecked(false);
             }
+            resize(0,0);
         }
         else
         {
             valueABSelectionWidgetPtr -> setVisible(false);
+            resize(0,0);
         }
 
         // Set absolute value slider
