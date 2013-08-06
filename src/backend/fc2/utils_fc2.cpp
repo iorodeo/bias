@@ -283,7 +283,16 @@ namespace bias {
         prop_fc2.onePush = (prop.onePush) ? 1 : 0;
         prop_fc2.onOff = (prop.on) ? 1 : 0;
         prop_fc2.autoManualMode = (prop.autoActive) ? 1 : 0;
-        prop_fc2.valueA = prop.value;
+        if (prop.type = PROPERTY_TYPE_WHITE_BALANCE)
+        {   
+            prop_fc2.valueA = prop.valueA;
+            prop_fc2.valueB = prop.valueB;
+        }
+        else
+        {
+            prop_fc2.valueA = prop.value;
+            prop_fc2.valueB = 0;
+        }
         prop_fc2.absValue = prop.absoluteValue;
         for (int i=0; i<8; i++) 
         {
@@ -541,7 +550,18 @@ namespace bias {
         prop.onePush = bool(prop_fc2.onePush);
         prop.on = bool(prop_fc2.onOff);
         prop.autoActive = bool(prop_fc2.autoManualMode);
-        prop.value = prop_fc2.valueA;
+        if (prop.type == PROPERTY_TYPE_WHITE_BALANCE)  
+        {
+            prop.valueA = prop_fc2.valueA;
+            prop.valueB = prop_fc2.valueB;
+            prop.value = 0;
+        }
+        else
+        {
+            prop.value = prop_fc2.valueA;
+            prop.valueA = 0;
+            prop.valueB = 0;
+        }
         prop.absoluteValue = prop_fc2.absValue;
         return prop;
     }

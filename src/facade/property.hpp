@@ -15,6 +15,8 @@ namespace bias
         bool on;
         bool autoActive;
         unsigned int value;
+        unsigned int valueA;
+        unsigned int valueB;
         float absoluteValue;
 
         Property();

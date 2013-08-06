@@ -406,6 +406,12 @@ namespace bias {
 
         propType_fc2 = convertPropertyType_to_fc2(propType);
         prop_fc2 = getProperty_fc2(propType_fc2);
+
+        // DEBUG
+        // --------------------------------------------------------------------
+        printProperty_fc2(prop_fc2);
+        // --------------------------------------------------------------------
+
         prop = convertProperty_from_fc2(prop_fc2);
         return prop;
     }
@@ -419,6 +425,12 @@ namespace bias {
 
         propType_fc2 = convertPropertyType_to_fc2(propType);
         propInfo_fc2 = getPropertyInfo_fc2(propType_fc2);
+
+        // DEBUG
+        // --------------------------------------------------------------------
+        printPropertyInfo_fc2(propInfo_fc2);
+        // --------------------------------------------------------------------
+
         propInfo =  convertPropertyInfo_from_fc2(propInfo_fc2);
         return propInfo;
     }

@@ -28,7 +28,16 @@ namespace bias
         ss << "onePush:          " << onePush << std::endl;
         ss << "on:               " << on << std::endl;
         ss << "autoActive:       " << autoActive << std::endl;
-        ss << "value:            " << value << std::endl;
+        if (type == PROPERTY_TYPE_WHITE_BALANCE)
+        {
+            ss << "value Red:        " << valueA << std::endl;
+            ss << "value Blue:       " << valueB << std::endl;
+
+        }
+        else
+        {
+            ss << "value:            " << value << std::endl;
+        }
         ss << "absoluteValue:    " << absoluteValue << std::endl;
         ss << std::endl;
         ss << std::noboolalpha;
