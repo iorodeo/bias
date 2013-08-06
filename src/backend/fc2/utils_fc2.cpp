@@ -283,7 +283,7 @@ namespace bias {
         prop_fc2.onePush = (prop.onePush) ? 1 : 0;
         prop_fc2.onOff = (prop.on) ? 1 : 0;
         prop_fc2.autoManualMode = (prop.autoActive) ? 1 : 0;
-        if (prop.type = PROPERTY_TYPE_WHITE_BALANCE)
+        if (prop.type == PROPERTY_TYPE_WHITE_BALANCE)
         {   
             prop_fc2.valueA = prop.valueA;
             prop_fc2.valueB = prop.valueB;
