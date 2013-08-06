@@ -257,6 +257,7 @@ namespace bias
 
         refreshTimerPtr_ -> start();
 
+
     }
 
         
@@ -311,6 +312,23 @@ namespace bias
             intValueLineEditPtr -> setValidator(validatorPtr);
         }
         intValueLineEditPtr -> blockSignals(false);
+
+        // Set value AB selection visibility and radio button text - only for white balance
+        if (property.type == PROPERTY_TYPE_WHITE_BALANCE)
+        {
+            valueABSelectionWidgetPtr -> setVisible(true);
+            valueARadioButtonPtr -> setText("Red");
+            valueBRadioButtonPtr -> setText("Blue");
+            if ( !(valueARadioButtonPtr->isChecked()) && !(valueBRadioButtonPtr -> isChecked()))
+            {
+                valueARadioButtonPtr -> setChecked(true);
+                valueBRadioButtonPtr -> setChecked(false);
+            }
+        }
+        else
+        {
+            valueABSelectionWidgetPtr -> setVisible(false);
+        }
 
         // Set absolute value slider
         if (propertyInfo.absoluteCapable) 

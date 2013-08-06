@@ -409,7 +409,7 @@ namespace bias {
 
         // DEBUG
         // --------------------------------------------------------------------
-        printProperty_fc2(prop_fc2);
+        //printProperty_fc2(prop_fc2);
         // --------------------------------------------------------------------
 
         prop = convertProperty_from_fc2(prop_fc2);
@@ -428,7 +428,7 @@ namespace bias {
 
         // DEBUG
         // --------------------------------------------------------------------
-        printPropertyInfo_fc2(propInfo_fc2);
+        //printPropertyInfo_fc2(propInfo_fc2);
         // --------------------------------------------------------------------
 
         propInfo =  convertPropertyInfo_from_fc2(propInfo_fc2);
