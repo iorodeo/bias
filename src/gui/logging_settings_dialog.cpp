@@ -1,9 +1,11 @@
 #include "logging_settings_dialog.hpp"
 #include "video_writer_ufmf.hpp"
+#include "video_writer_avi.hpp"
 #include "background_histogram_ufmf.hpp"
 #include "validators.hpp"
 #include <iostream>
 #include <QPointer>
+#include <QStringList>
 
 namespace bias
 {
@@ -51,8 +53,18 @@ namespace bias
         tmpString = QString::number(params_.avi.frameSkip);
         aviFrameSkipLineEditPtr_ -> setText(tmpString);
         aviFrameSkipRangeLabelPtr_ -> setText(QString(" >= 1 "));
-        aviCodecComboBoxPtr_ -> addItem(params_.avi.codec);
-        aviCodecComboBoxPtr_ -> setEnabled(false); // Temporary
+
+        // avi tabi - codec
+        QStringList allowedCodecList = VideoWriter_avi::getListOfAllowedCodecs();
+        for (unsigned int i=0; i<allowedCodecList.size(); i++)
+        {
+            QString codecString = allowedCodecList.at(i);
+            aviCodecComboBoxPtr_ -> addItem(codecString);
+            if (codecString == params_.avi.codec)
+            {
+                aviCodecComboBoxPtr_ -> setCurrentIndex(i);
+            }
+        }
 
         // fmf tab - frame skip
         tmpString = QString::number(params_.fmf.frameSkip);
@@ -213,6 +225,13 @@ namespace bias
                );
 
         connect(
+                aviCodecComboBoxPtr_,
+                SIGNAL(currentIndexChanged(QString)),
+                this,
+                SLOT(aviCodecComboBox_CurrentIndexChanged(QString))
+               );
+
+        connect(
                 fmfFrameSkipLineEditPtr_,
                 SIGNAL(editingFinished()),
                 this,
@@ -308,6 +327,12 @@ namespace bias
         emit parametersChanged(params_);
     }
 
+
+    void LoggingSettingsDialog::aviCodecComboBox_CurrentIndexChanged(QString text)
+    {
+        params_.avi.codec = text;
+        emit parametersChanged(params_);
+    }
 
     void LoggingSettingsDialog::fmfFrameSkip_EditingFinished()
     {

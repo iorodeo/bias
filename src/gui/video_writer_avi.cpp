@@ -29,7 +29,8 @@ namespace bias
             ) 
         : VideoWriter(fileName,parent)
     {
-        fourcc_ = qStringToFourcc(params.codec);
+        //fourcc_ = qStringToFourcc(params.codec);
+        fourcc_ = stringToFourcc(params.codec);
         setFrameSkip(params.frameSkip);
 
         isFirst_ = true;
@@ -120,62 +121,80 @@ namespace bias
     }
 
 
+    // ---------------------------------------------------------------------
+    // TO DO ... the best way to do this would be to query the codecs which 
+    // are installed on the system and available to opencv and then return
+    // as list of the them ... and somehow create the string to codec map. 
     // ----------------------------------------------------------------------
-    // TO DO .... currently only allow XVID. Will need change when dealing 
-    // with more codecs this is currently just a quick hack.
-    // ----------------------------------------------------------------------
+    QMap<unsigned int, QString> VideoWriter_avi::getFourccToStringMap()
+    {
+        QMap<unsigned int, QString> map;
+        map[CV_FOURCC('X','V','I','D')] = QString("XVID");
+        map[CV_FOURCC('D','I','B',' ')] = QString("DIB"); 
+        map[CV_FOURCC('I','4','2','0')] = QString("I420");
+        map[CV_FOURCC('I','Y','U','V')] = QString("IYUV");
+        map[CV_FOURCC('M','P','4','2')] = QString("MP42");
+        map[CV_FOURCC('D','I','V','3')] = QString("DIV3");
+        map[CV_FOURCC('D','I','V','X')] = QString("DIVX");
+        map[CV_FOURCC('U','2','6','3')] = QString("H263");
+        map[CV_FOURCC('F','L','V','1')] = QString("FLV1");
+        return map;
+    }
+
+    QMap<QString, unsigned int> VideoWriter_avi::getStringToFourccMap()
+    {
+        QMap<unsigned int, QString> fourccToStringMap = getFourccToStringMap();
+        QMap<QString, unsigned int> stringToFourccMap;
+        QMap<unsigned int, QString>::iterator it;
+        for (it=fourccToStringMap.begin(); it!=fourccToStringMap.end(); it++)
+        {
+            unsigned int fourcc = it.key();
+            QString fourccString = it.value();
+            stringToFourccMap[fourccString] = fourcc;
+        }
+        return stringToFourccMap;
+    }
+
+    QStringList VideoWriter_avi::getListOfAllowedCodecs()
+    {
+        QMap<unsigned int ,QString> codecMap = getFourccToStringMap();
+        QStringList codecList = codecMap.values();
+        return codecList;
+    }
+
     bool VideoWriter_avi::isAllowedCodec(QString codecString)
     {
-        if (codecString == QString("XVID"))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        QStringList allowedCodecList = getListOfAllowedCodecs();
+        return allowedCodecList.contains(codecString);
     }
 
-    // -----------------------------------------------------------------------
-    // TO DO ... if we start dealing with auto detection of codecs, etc. these
-    // funcions will need to be improved - they should be viewed as temporary.
-    // ------------------------------------------------------------------------
 
-
-    QString fourccToQString(unsigned int fourcc)
+    QString VideoWriter_avi::fourccToString(unsigned int fourcc)
     {
-        QString fourccQString;
-        if (fourcc == CV_FOURCC('X','V','I','D'))
+        QMap<unsigned int, QString> codecMap = getFourccToStringMap();
+        if (codecMap.contains(fourcc))
         {
-            fourccQString = QString("XVID");
+            return codecMap[fourcc];
         }
         else
         {
-            fourccQString = QString("unknown");
+            return QString("unknown");
         }
-        return fourccQString;
     }
 
 
-    unsigned int qStringToFourcc(QString fourccQString)
+    unsigned int VideoWriter_avi::stringToFourcc(QString fourccString)
     {
-        unsigned int fourcc;
-        if (fourccQString == QString("XVID"))
+        QMap<QString, unsigned int> stringToFourccMap = getStringToFourccMap();
+        if (stringToFourccMap.contains(fourccString))
         {
-            fourcc = CV_FOURCC('X','V','I','D'); 
+            return stringToFourccMap[fourccString];
         }
         else
         {
-            // Set some default codec
-            fourcc = CV_FOURCC('D','I','B',' ');
-            // TO DO - better way to deal with codec not found ? 
-            // ------------------------------------------------------------------
-            std::cout << "Warning - codec not found set to default" << std::endl;
-            // -------------------------------------------------------------------
+            return CV_FOURCC('D','I','B',' ');
         }
-        return fourcc;
     }
-
 
 } // namespace bias
 

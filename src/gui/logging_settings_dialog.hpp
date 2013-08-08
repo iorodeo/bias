@@ -26,6 +26,7 @@ namespace bias
 
             void bmpFrameSkip_EditingFinished();
             void aviFrameSkip_EditingFinished();
+            void aviCodecComboBox_CurrentIndexChanged(QString text);
             void fmfFrameSkip_EditingFinished();
             void ufmfFrameSkip_EditingFinished();
             void ufmfBackgroundThreshold_EditingFinished();

@@ -5,6 +5,8 @@
 #include "video_writer_params.hpp"
 #include <opencv2/highgui/highgui.hpp>
 #include <QString>
+#include <QStringList>
+#include <QMap>
 
 namespace bias
 {
@@ -21,13 +23,20 @@ namespace bias
             virtual ~VideoWriter_avi();
             virtual void addFrame(StampedImage stampedImg);
 
+            // Static constants
             static const int DEFAULT_FOURCC;
             static const double DEFAULT_FPS;
             static const double MIN_ALLOWED_DT_ESTIMATE;
             static const unsigned int DEFAULT_FRAME_SKIP;
             static const VideoWriterParams_avi DEFAULT_PARAMS;
 
+            // Static methods
+            static QStringList getListOfAllowedCodecs();
+            static QMap<unsigned int, QString> getFourccToStringMap();
+            static QMap<QString, unsigned int> getStringToFourccMap();
             static bool isAllowedCodec(QString codecString);
+            static QString fourccToString(unsigned int fourcc);
+            static unsigned int stringToFourcc(QString fouccString);
 
         protected:
 
@@ -38,10 +47,6 @@ namespace bias
             void setupOutput(StampedImage stampedImage);
             
     };
-
-
-    QString fourccToQString(unsigned int fourcc);
-    unsigned int qStringToFourcc(QString fourccQString);
 
 }
 

@@ -26,7 +26,8 @@ namespace bias
     {
         frameSkip = VideoWriter_avi::DEFAULT_FRAME_SKIP;
         unsigned int fourcc = VideoWriter_avi::DEFAULT_FOURCC;
-        codec = fourccToQString(fourcc); 
+        //codec = fourccToQString(fourcc); 
+        codec = VideoWriter_avi::fourccToString(fourcc); 
     }
 
     std::string VideoWriterParams_avi::toString()
