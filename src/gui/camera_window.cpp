@@ -1372,16 +1372,16 @@ namespace bias
     void CameraWindow::connectButtonClicked()
     {
         (!connected_) ? connectCamera() : disconnectCamera();
-        std::cout << "connected: "; 
-        std::cout << std::boolalpha << connected_ << std::noboolalpha << std::endl;
+        //std::cout << "connected: "; 
+        //std::cout << std::boolalpha << connected_ << std::noboolalpha << std::endl;
     }
 
 
     void CameraWindow::startButtonClicked()
     { 
         (!capturing_) ? startImageCapture() : stopImageCapture();
-        std::cout << "capturing: ";
-        std::cout << std::boolalpha << capturing_ << std::noboolalpha << std::endl;
+        //std::cout << "capturing: ";
+        //std::cout << std::boolalpha << capturing_ << std::noboolalpha << std::endl;
     }
    
 
@@ -1441,7 +1441,7 @@ namespace bias
         if (currentDateTime >= captureStopDateTime_)
         {
             stopImageCapture();
-            std::cout << "image caputre stopped by timer" << std::endl;
+            //std::cout << "image caputre stopped by timer" << std::endl;
         }
     }
 
@@ -3433,8 +3433,8 @@ namespace bias
                 continue;
             }
             // -----------------------------------------------------------------------
-            std::cout << prop.toString() << std::endl;
-            std::cout << propInfo.toString() << std::endl;
+            //std::cout << prop.toString() << std::endl;
+            //std::cout << propInfo.toString() << std::endl;
             QString propName = QString::fromStdString(getPropertyTypeString(prop.type));
             QString camelCaseName = propNameToCamelCase(propName);
 

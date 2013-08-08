@@ -133,7 +133,10 @@ namespace bias {
             throw RuntimeError(ERROR_FC2_START_CAPTURE, ssError.str());
         }
 
-        printFormat7Configuration();
+        // DEBUG 
+        // ----------------------------
+        //printFormat7Configuration();
+        // ----------------------------
 
         if (!capturing_) 
         {
@@ -1233,7 +1236,7 @@ namespace bias {
 
     void CameraDevice_fc2::setVideoModeToFormat7(fc2Mode mode)
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        //std::cout << __PRETTY_FUNCTION__ << std::endl;
 
         fc2Error error;
         fc2Format7Info format7Info;
@@ -1465,13 +1468,13 @@ namespace bias {
             throw RuntimeError(ERROR_FC2_GET_FORMAT7_CONFIGURATION, ssError.str());
         }
 
-        if (1) // Print current configuration settings
+        if (0) // Print current configuration settings
         {
             std::cout << "Actual - from camera" << std::endl;
             printFormat7Configuration_fc2(imageSettings,packetSize,percentage);
         }
 
-        std::cout << std::endl;
+        //std::cout << std::endl;
     }
 
 
