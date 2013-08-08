@@ -43,6 +43,8 @@ void FlySegmenter::setParam(FlySegmenterParam param)
 
 FlySegmenterData FlySegmenter::segment(BlobDataList blobDataList)
 {
+    std::cout << __PRETTY_FUNCTION__ << std::endl;
+
     BlobDataList::iterator it;
 
     for ( it=blobDataList.begin(); it!=blobDataList.end(); it++)
@@ -80,8 +82,8 @@ FlySegmenterData FlySegmenter::segment(BlobDataList blobDataList)
 
         //// Segment using fast binary predict.
         //// --------------------------------------------------------
-        //FastBinaryPredictorData predictorData;
-        //predictorData = fastBinaryPredictor_.predict(boundingImageLUV);
+        FastBinaryPredictorData predictorData;
+        predictorData = fastBinaryPredictor_.predict(boundingImageLUV);
 
         FlySegmenterData segmenterData;
         //segmenterData.setPredictorData(predictorData);
