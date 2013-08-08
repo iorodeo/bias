@@ -284,6 +284,38 @@ namespace bias
         bool intGroupBoxEnabled = propertyInfo.manualCapable && (!property.autoActive);
         intValueGroupBoxPtr -> setEnabled(intGroupBoxEnabled);
 
+        // Get property value, set value AB selection visibility and selection radio button 
+        unsigned int value;
+        if (property.type == PROPERTY_TYPE_WHITE_BALANCE)
+        {
+            valueABSelectionWidgetPtr -> setVisible(true);
+            valueARadioButtonPtr -> setText("Red");
+            valueBRadioButtonPtr -> setText("Blue");
+            resize(0,0);
+
+            if ( valueARadioButtonPtr -> isChecked() )
+            {
+                value = property.valueA;
+                
+            }
+            else if ( valueBRadioButtonPtr -> isChecked() )
+            {
+                value = property.valueB;
+            }
+            else
+            {
+                value = property.valueA;
+                valueARadioButtonPtr -> setChecked(true);
+                valueBRadioButtonPtr -> setChecked(false);
+            }
+        }
+        else
+        {
+            value = property.value;
+            valueABSelectionWidgetPtr -> setVisible(false);
+            resize(0,0);
+        }
+
         bool absGroupBoxEnabled = propertyInfo.manualCapable; 
         absGroupBoxEnabled = absGroupBoxEnabled && propertyInfo.absoluteCapable; 
         absGroupBoxEnabled = absGroupBoxEnabled && (!property.autoActive);
@@ -293,7 +325,7 @@ namespace bias
         intValueSliderPtr -> blockSignals(true);
         intValueSliderPtr -> setMinimum(propertyInfo.minValue);
         intValueSliderPtr -> setMaximum(propertyInfo.maxValue);
-        intValueSliderPtr -> setValue(property.value);
+        intValueSliderPtr -> setValue(value);
         intValueSliderPtr -> setSingleStep(1);
         int deltaMaxMin = propertyInfo.maxValue-propertyInfo.minValue;
         intValueSliderPtr -> setPageStep(std::max(2,deltaMaxMin/10));
@@ -303,7 +335,7 @@ namespace bias
         maxIntValueLabelPtr -> setText(QString::number(propertyInfo.maxValue));
 
         intValueLineEditPtr -> blockSignals(true);
-        intValueLineEditPtr -> setText(QString::number(property.value));
+        intValueLineEditPtr -> setText(QString::number(value));
         if (propertyInfo.manualCapable)
         {
             QPointer<IntValidatorWithFixup> validatorPtr; 
@@ -313,24 +345,6 @@ namespace bias
         }
         intValueLineEditPtr -> blockSignals(false);
 
-        // Set value AB selection visibility and radio button text - only for white balance
-        if (property.type == PROPERTY_TYPE_WHITE_BALANCE)
-        {
-            valueABSelectionWidgetPtr -> setVisible(true);
-            valueARadioButtonPtr -> setText("Red");
-            valueBRadioButtonPtr -> setText("Blue");
-            if ( !(valueARadioButtonPtr->isChecked()) && !(valueBRadioButtonPtr -> isChecked()))
-            {
-                valueARadioButtonPtr -> setChecked(true);
-                valueBRadioButtonPtr -> setChecked(false);
-            }
-            resize(0,0);
-        }
-        else
-        {
-            valueABSelectionWidgetPtr -> setVisible(false);
-            resize(0,0);
-        }
 
         // Set absolute value slider
         if (propertyInfo.absoluteCapable) 
@@ -419,10 +433,23 @@ namespace bias
     void PropertyDialog::setPropertyValue(unsigned int value)
     {
         Property property = getProperty();
-        property.value = value;
+        if (property.type == PROPERTY_TYPE_WHITE_BALANCE)
+        {
+            if (valueARadioButtonPtr -> isChecked())
+            {
+                property.valueA = value;
+            }
+            else
+            {
+                property.valueB = value;
+            }
+        }
+        else
+        {
+            property.value = value;
+        }
         property.absoluteControl = false;
         setProperty(property);
-        std::cout << property.toString() << std::endl;
     }
 
 
