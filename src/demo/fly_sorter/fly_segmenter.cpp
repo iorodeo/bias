@@ -32,7 +32,7 @@ void FlySegmenter::setParam(FlySegmenterParam param)
 
 FlySegmenterData FlySegmenter::segment(BlobDataList blobDataList)
 {
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
+    //std::cout << __PRETTY_FUNCTION__ << std::endl;
 
     FlySegmenterData flySegmenterData;
 
