@@ -80,9 +80,9 @@ const float ImageGrabberParam::DEFAULT_FRAMERATE = 10.0;
 const float ImageGrabberParam::MINIMUM_FRAMERATE = 0.5;
 const float ImageGrabberParam::MAXIMUM_FRAMERATE = 50.0;
 
-const float ImageGrabberParam::DEFAULT_GAIN = 0.0;
+const float ImageGrabberParam::DEFAULT_GAIN = 10.0;
 const float ImageGrabberParam::MINIMUM_GAIN = 0.0;
-const float ImageGrabberParam::MAXIMUM_GAIN = 18.0;
+const float ImageGrabberParam::MAXIMUM_GAIN = 24.0;
 
 const float ImageGrabberParam::DEFAULT_SHUTTER = 20.0;
 const float ImageGrabberParam::MINIMUM_SHUTTER = 0.01;
