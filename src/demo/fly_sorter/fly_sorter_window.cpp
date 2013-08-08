@@ -187,7 +187,7 @@ void FlySorterWindow::newImage(ImageData imageData)
     blobFinderData_ = blobFinder.findBlobs(imageData.mat);
 
     FlySegmenter flySegmenter = FlySegmenter(param_.flySegmenter);
-    //flySegmenterData_ = flySegmenter.segment(blobFinderData_.blobDataList);
+    flySegmenterData_ = flySegmenter.segment(blobFinderData_.blobDataList);
 
     if ((httpOutputCheckBoxPtr_ -> checkState()) == Qt::Checked)
     {

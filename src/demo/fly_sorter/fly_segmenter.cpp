@@ -4,17 +4,6 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-// FlySegmenterData
-// ----------------------------------------------------------------------------
-
-FlySegmenterData::FlySegmenterData() {};
-
-void FlySegmenterData::setPredictorData(FastBinaryPredictorData predictorData)
-{
-    fit = predictorData.fit;
-    label = predictorData.label;
-}
-
 
 // FlySegmenter
 // ----------------------------------------------------------------------------
@@ -45,10 +34,14 @@ FlySegmenterData FlySegmenter::segment(BlobDataList blobDataList)
 {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 
+    FlySegmenterData flySegmenterData;
+
     BlobDataList::iterator it;
 
-    for ( it=blobDataList.begin(); it!=blobDataList.end(); it++)
+    for (it=blobDataList.begin(); it!=blobDataList.end(); it++)
     {
+        std::cout << "blobData" << std::endl;
+
         BlobData blobData = *it;
 
         // Convert bounding image to LUV. Note, as I'm developing 
@@ -85,14 +78,17 @@ FlySegmenterData FlySegmenter::segment(BlobDataList blobDataList)
         FastBinaryPredictorData predictorData;
         predictorData = fastBinaryPredictor_.predict(boundingImageLUV);
 
-        FlySegmenterData segmenterData;
-        //segmenterData.setPredictorData(predictorData);
+        SegmentData segmentData;
+        segmentData.blobData = blobData;
+        segmentData.predictorData = predictorData;
+        segmentData.boundingImageLUV = boundingImageLUV;
+        flySegmenterData.segmentDataList.push_back(segmentData);
 
         //// Develop
         //// ---------------------------------------------------------
         //cv::imshow("segmenter", segmenterData.label);
         //// ---------------------------------------------------------
         
-        return segmenterData;
     }
+    return flySegmenterData;
 }

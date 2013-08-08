@@ -3,14 +3,27 @@
 #include "parameters.hpp"
 #include "blob_finder.hpp"
 #include "fast_binary_predictor.hpp"
+#include <list>
 
 
-class FlySegmenterData : public FastBinaryPredictorData
+class SegmentData 
 {
     public:
-        FlySegmenterData();
-        void setPredictorData(FastBinaryPredictorData predictorData);
+        SegmentData() {};
+        FastBinaryPredictorData predictorData;
+        cv::Mat boundingImageLUV;
+        BlobData blobData;
 };
+typedef std::list<SegmentData> SegmentDataList;
+
+
+class FlySegmenterData
+{
+    public:
+        FlySegmenterData() {};
+        SegmentDataList segmentDataList;
+};
+
 
 
 class FlySegmenter
@@ -28,7 +41,6 @@ class FlySegmenter
         FastBinaryPredictor fastBinaryPredictor_;
 
 };
-
 
 
 #endif // #ifndef FLY_SEGMENTER_HPP
