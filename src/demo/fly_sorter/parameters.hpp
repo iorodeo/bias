@@ -33,10 +33,11 @@ class ClassifierParam
 class FlySegmenterParam : public ClassifierParam
 {
     public:
+
+        ClassifierParam classifier;
         static const ClassifierParam DEFAULT_CLASSIFIER_PARAM;
         static ClassifierParam createDefaultClassifierParam();
 
-        ClassifierParam classifier;
         FlySegmenterParam();
 };
 
@@ -44,30 +45,50 @@ class FlySegmenterParam : public ClassifierParam
 class ImageGrabberParam
 {
     public:
+        float frameRate;
         static const float DEFAULT_FRAMERATE;
         static const float MINIMUM_FRAMERATE;
         static const float MAXIMUM_FRAMERATE;
 
+        float gain;
         static const float DEFAULT_GAIN;
         static const float MINIMUM_GAIN;
         static const float MAXIMUM_GAIN;
 
+        float shutter;
         static const float DEFAULT_SHUTTER;
         static const float MINIMUM_SHUTTER;
         static const float MAXIMUM_SHUTTER;
 
+        unsigned int brightness;
         static const unsigned int DEFAULT_BRIGHTNESS;
         static const unsigned int MAXIMUM_BRIGHTNESS;
 
+        QString captureMode;
         static const QStringList  ALLOWED_CAPTURE_MODES;
+
+        QString captureInputFile;
         static const QString DEFAULT_CAPTURE_INPUT_FILE;
 
-        float frameRate;
-        float gain;
-        float shutter;
-        unsigned int brightness;
-        QString captureMode;
-        QString captureInputFile;
+        // New 
+        // -----------------------------------------------------------
+        float gamma;
+        static const float DEFAULT_GAMMA;
+        static const float MINIMUM_GAMMA;
+        static const float MAXIMUM_GAMMA;
+
+        float saturation;
+        static const float DEFAULT_SATURATION;
+        static const float MINIMUM_SATURATION;
+        static const float MAXIMUM_SATURATION;
+
+        unsigned int whiteBalanceRed;
+        unsigned int whiteBalanceBlue;
+        static const unsigned int DEFAULT_WHITE_BALANCE_RED;
+        static const unsigned int DEFAULT_WHITE_BALANCE_BLUE;
+        static const unsigned int MINIMUM_WHITE_BALANCE;
+        static const unsigned int MAXIMUM_WHITE_BALANCE;
+        // -----------------------------------------------------------
 
         ImageGrabberParam();
         QVariantMap toMap();
@@ -78,12 +99,15 @@ class ImageGrabberParam
 class ServerParam
 { 
     public:
-        static const unsigned int DEFAULT_PORT;
-        static const QString DEFAULT_ADDRESS;
-        static const bool DEFAULT_ENABLED;
+
         bool enabled;
+        static const bool DEFAULT_ENABLED;
+
         QString address;
+        static const QString DEFAULT_ADDRESS;
+
         unsigned int port;
+        static const unsigned int DEFAULT_PORT;
 
         ServerParam();
         QVariantMap toMap();
@@ -95,13 +119,14 @@ class IdentityTrackerParam
 {
     public:
 
-        static const float DEFAULT_RADIUS;
-        static const float DEFAULT_VELOCITY_X;
-        static const float DEFAULT_VELOCITY_Y;
-
         float radius;
+        static const float DEFAULT_RADIUS;
+
         float velocityX;
+        static const float DEFAULT_VELOCITY_X;
+
         float velocityY; 
+        static const float DEFAULT_VELOCITY_Y;
 
         IdentityTrackerParam();
         QVariantMap toMap();

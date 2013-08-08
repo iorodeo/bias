@@ -40,7 +40,7 @@ FlySegmenterData FlySegmenter::segment(BlobDataList blobDataList)
 
     for (it=blobDataList.begin(); it!=blobDataList.end(); it++)
     {
-        std::cout << "blobData" << std::endl;
+        //std::cout << "blobData" << std::endl;
 
         BlobData blobData = *it;
 

@@ -32,8 +32,10 @@ ClassifierParam::ClassifierParam()
 // ----------------------------------------------------------------------------
 ClassifierParam FlySegmenterParam::createDefaultClassifierParam()
 {
+    // -------------------------------------------------------------
     // TEMPORARY - kludgey, but I just need some data for developing 
     // the fly segmenter. We will read this from a file later.
+    // -------------------------------------------------------------
     ClassifierParam classifierParam;
     classifierParam.offset = 1.0784;
     std::vector<StumpData> stumpVector;
@@ -72,6 +74,8 @@ FlySegmenterParam::FlySegmenterParam()
 // ImageGrabberParam
 // ----------------------------------------------------------------------------
 
+// Notes:  really should get minimum and maximum values from camera.
+
 const float ImageGrabberParam::DEFAULT_FRAMERATE = 10.0;
 const float ImageGrabberParam::MINIMUM_FRAMERATE = 0.5;
 const float ImageGrabberParam::MAXIMUM_FRAMERATE = 50.0;
@@ -86,6 +90,19 @@ const float ImageGrabberParam::MAXIMUM_SHUTTER = 99.0;
 
 const unsigned int ImageGrabberParam::DEFAULT_BRIGHTNESS = 16;
 const unsigned int ImageGrabberParam::MAXIMUM_BRIGHTNESS = 255;
+
+const float ImageGrabberParam::DEFAULT_GAMMA = 1.0;
+const float ImageGrabberParam::MINIMUM_GAMMA = 0.5;
+const float ImageGrabberParam::MAXIMUM_GAMMA = 4.0;
+
+const float ImageGrabberParam::DEFAULT_SATURATION = 100.0;
+const float ImageGrabberParam::MINIMUM_SATURATION = 0.0;
+const float ImageGrabberParam::MAXIMUM_SATURATION = 399.0;
+
+const unsigned int ImageGrabberParam::DEFAULT_WHITE_BALANCE_RED = 550;
+const unsigned int ImageGrabberParam::DEFAULT_WHITE_BALANCE_BLUE = 500;
+const unsigned int ImageGrabberParam::MINIMUM_WHITE_BALANCE = 0;
+const unsigned int ImageGrabberParam::MAXIMUM_WHITE_BALANCE = 1023;
 
 QStringList getAllowedCaptureModes()
 {
