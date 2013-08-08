@@ -680,7 +680,15 @@ namespace bias
             valueMap.insert("onePush", prop.onePush);
             valueMap.insert("on", prop.on);
             valueMap.insert("autoActive", prop.autoActive);
-            valueMap.insert("value", prop.value);
+            if (prop.type == PROPERTY_TYPE_WHITE_BALANCE)
+            {
+                valueMap.insert("valueRed", prop.valueA);
+                valueMap.insert("valueBlue", prop.valueB);
+            }
+            else
+            {
+                valueMap.insert("value", prop.value);
+            }
             valueMap.insert("absoluteValue", double(prop.absoluteValue));
             QString camelCaseName = propNameToCamelCase(propName);
             cameraPropMap.insert(camelCaseName, valueMap);
@@ -4419,40 +4427,15 @@ namespace bias
             return rtnStatus;
         }
 
-        // Get "Value" 
-        if (!propValueMap.contains("value"))
+
+        // Get Value
+        if (newProp.type == PROPERTY_TYPE_WHITE_BALANCE)
         {
-            QString errMsgText = QString(
-                    "Camera: property %1 has no value"
-                    ).arg(name);
-            if (showErrorDlg)
-            {
-                QMessageBox::critical(this,errMsgTitle,errMsgText);
-            }
-            rtnStatus.success = false;
-            rtnStatus.message = errMsgText;
-            return rtnStatus;
-        }
-        if (!propValueMap["value"].canConvert<unsigned int>())
-        {
-            QString errMsgText = QString(
-                    "Camera: property %1 unable to convert value to unsigned int"
-                    ).arg(name);
-            if (showErrorDlg)
-            {
-                QMessageBox::critical(this,errMsgTitle,errMsgText);
-            }
-            rtnStatus.success = false;
-            rtnStatus.message = errMsgText;
-            return rtnStatus;
-        }
-        newProp.value = propValueMap["value"].toUInt();
-        if (!newProp.absoluteControl) 
-        {
-            if (newProp.value < propInfo.minValue)
+            // Handle special case of white balance
+            if (!propValueMap.contains("valueRed"))
             {
                 QString errMsgText = QString(
-                        "Camera: property %1 value is out of range (too low)"
+                        "Camera: property %1 has no valueRed"
                         ).arg(name);
                 if (showErrorDlg)
                 {
@@ -4462,10 +4445,10 @@ namespace bias
                 rtnStatus.message = errMsgText;
                 return rtnStatus;
             }
-            else if (newProp.value > propInfo.maxValue)
+            if (!propValueMap.contains("valueBlue"))
             {
                 QString errMsgText = QString(
-                        "Camera: property %1 value is out of range (too high)"
+                        "Camera: property %1 has no valueBlue"
                         ).arg(name);
                 if (showErrorDlg)
                 {
@@ -4475,7 +4458,140 @@ namespace bias
                 rtnStatus.message = errMsgText;
                 return rtnStatus;
             }
-        }
+            if (!propValueMap["valueRed"].canConvert<unsigned int>())
+            {
+                QString errMsgText = QString(
+                        "Camera: property %1 unable to convert valueRed to unsigned int"
+                        ).arg(name);
+                rtnStatus.success = false;
+                rtnStatus.message = errMsgText;
+                return rtnStatus;
+            }
+            if (!propValueMap["valueBlue"].canConvert<unsigned int>())
+            {
+                QString errMsgText = QString(
+                        "Camera: property %1 unable to convert valueBlue to unsigned int"
+                        ).arg(name);
+                rtnStatus.success = false;
+                rtnStatus.message = errMsgText;
+                return rtnStatus;
+            }
+            newProp.valueA = propValueMap["valueRed"].toUInt();
+            newProp.valueB = propValueMap["valueBlue"].toUInt();
+
+            if (newProp.valueA < propInfo.minValue)
+            { 
+                QString errMsgText = QString(
+                        "Camera: property %1 valueRed is out of range (too low)"
+                        ).arg(name);
+                if (showErrorDlg)
+                {
+                    QMessageBox::critical(this,errMsgTitle,errMsgText);
+                }
+                rtnStatus.success = false;
+                rtnStatus.message = errMsgText;
+                return rtnStatus;
+            }
+            else if (newProp.valueA > propInfo.maxValue)
+            {
+                QString errMsgText = QString(
+                        "Camera: property %1 valueRed is out of range (too high)"
+                        ).arg(name);
+                if (showErrorDlg)
+                {
+                    QMessageBox::critical(this,errMsgTitle,errMsgText);
+                }
+                rtnStatus.success = false;
+                rtnStatus.message = errMsgText;
+                return rtnStatus;
+            }
+            if (newProp.valueB < propInfo.minValue)
+            { 
+                QString errMsgText = QString(
+                        "Camera: property %1 valueBlue is out of range (too low)"
+                        ).arg(name);
+                if (showErrorDlg)
+                {
+                    QMessageBox::critical(this,errMsgTitle,errMsgText);
+                }
+                rtnStatus.success = false;
+                rtnStatus.message = errMsgText;
+                return rtnStatus;
+            }
+            else if (newProp.valueB > propInfo.maxValue)
+            {
+                QString errMsgText = QString(
+                        "Camera: property %1 valueBlue is out of range (too high)"
+                        ).arg(name);
+                if (showErrorDlg)
+                {
+                    QMessageBox::critical(this,errMsgTitle,errMsgText);
+                }
+                rtnStatus.success = false;
+                rtnStatus.message = errMsgText;
+                return rtnStatus;
+            }
+        } 
+        else
+        {
+            // Handle case of normal (non white balance) properties values
+            if (!propValueMap.contains("value"))
+            {
+                QString errMsgText = QString(
+                        "Camera: property %1 has no value"
+                        ).arg(name);
+                if (showErrorDlg)
+                {
+                    QMessageBox::critical(this,errMsgTitle,errMsgText);
+                }
+                rtnStatus.success = false;
+                rtnStatus.message = errMsgText;
+                return rtnStatus;
+            }
+            if (!propValueMap["value"].canConvert<unsigned int>())
+            {
+                QString errMsgText = QString(
+                        "Camera: property %1 unable to convert value to unsigned int"
+                        ).arg(name);
+                if (showErrorDlg)
+                {
+                    QMessageBox::critical(this,errMsgTitle,errMsgText);
+                }
+                rtnStatus.success = false;
+                rtnStatus.message = errMsgText;
+                return rtnStatus;
+            }
+            newProp.value = propValueMap["value"].toUInt();
+            if (!newProp.absoluteControl) 
+            {
+                if (newProp.value < propInfo.minValue)
+                {
+                    QString errMsgText = QString(
+                            "Camera: property %1 value is out of range (too low)"
+                            ).arg(name);
+                    if (showErrorDlg)
+                    {
+                        QMessageBox::critical(this,errMsgTitle,errMsgText);
+                    }
+                    rtnStatus.success = false;
+                    rtnStatus.message = errMsgText;
+                    return rtnStatus;
+                }
+                else if (newProp.value > propInfo.maxValue)
+                {
+                    QString errMsgText = QString(
+                            "Camera: property %1 value is out of range (too high)"
+                            ).arg(name);
+                    if (showErrorDlg)
+                    {
+                        QMessageBox::critical(this,errMsgTitle,errMsgText);
+                    }
+                    rtnStatus.success = false;
+                    rtnStatus.message = errMsgText;
+                    return rtnStatus;
+                }
+            }
+        }  
 
         // Get "Absolute Value"
         if (!propValueMap.contains("absoluteValue"))
