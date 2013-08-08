@@ -78,13 +78,13 @@ FlySegmenterData FlySegmenter::segment(BlobDataList blobDataList)
                 );
         cv::cvtColor(boundingImageBGR,boundingImageLUV,CV_BGR2Luv);
 
-        // Segment using fast binary predict.
-        // --------------------------------------------------------
-        FastBinaryPredictorData predictorData;
-        predictorData = fastBinaryPredictor_.predict(boundingImageLUV);
+        //// Segment using fast binary predict.
+        //// --------------------------------------------------------
+        //FastBinaryPredictorData predictorData;
+        //predictorData = fastBinaryPredictor_.predict(boundingImageLUV);
 
         FlySegmenterData segmenterData;
-        segmenterData.setPredictorData(predictorData);
+        //segmenterData.setPredictorData(predictorData);
 
         //// Develop
         //// ---------------------------------------------------------
