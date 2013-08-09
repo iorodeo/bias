@@ -675,35 +675,35 @@ bool ImageGrabber::setupCamera()
     {
         std::cout << "setting whiteBalance" << std::endl; 
 
-        if (param_.whiteBalanceRed < whiteBalanceInfo.minAbsoluteValue)
+        if (param_.whiteBalanceRed < whiteBalanceInfo.minValue)
         {
             QString errorMsg = QString(
                     "whiteBalanceRed less than minimum allowed %1"
-                    ).arg(whiteBalanceInfo.minAbsoluteValue);
+                    ).arg(whiteBalanceInfo.minValue);
             emit cameraSetupError(errorMsg);
             return false;
         }
-        if (param_.whiteBalanceRed > whiteBalanceInfo.maxAbsoluteValue)
+        if (param_.whiteBalanceRed > whiteBalanceInfo.maxValue)
         {
             QString errorMsg = QString(
                     "whiteBalanceRed greater than maximum allowed %1"
-                    ).arg(whiteBalanceInfo.maxAbsoluteValue);
+                    ).arg(whiteBalanceInfo.maxValue);
             emit cameraSetupError(errorMsg);
             return false;
         }
-        if (param_.whiteBalanceBlue < whiteBalanceInfo.minAbsoluteValue)
+        if (param_.whiteBalanceBlue < whiteBalanceInfo.minValue)
         {
             QString errorMsg = QString(
                     "whiteBalanceBlue less than minimum allowed %1"
-                    ).arg(whiteBalanceInfo.minAbsoluteValue);
+                    ).arg(whiteBalanceInfo.minValue);
             emit cameraSetupError(errorMsg);
             return false;
         }
-        if (param_.whiteBalanceBlue > whiteBalanceInfo.maxAbsoluteValue)
+        if (param_.whiteBalanceBlue > whiteBalanceInfo.maxValue)
         {
             QString errorMsg = QString(
                     "whiteBalanceBlue greater than maximum allowed %1"
-                    ).arg(whiteBalanceInfo.maxAbsoluteValue);
+                    ).arg(whiteBalanceInfo.maxValue);
             emit cameraSetupError(errorMsg);
             return false;
         }
