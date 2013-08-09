@@ -120,6 +120,10 @@ ImageGrabberParam::ImageGrabberParam()
     gain = DEFAULT_GAIN;
     shutter = DEFAULT_SHUTTER;
     brightness = DEFAULT_BRIGHTNESS;
+    gamma = DEFAULT_GAMMA;
+    saturation = DEFAULT_SATURATION;
+    whiteBalanceRed = DEFAULT_WHITE_BALANCE_RED;
+    whiteBalanceBlue = DEFAULT_WHITE_BALANCE_BLUE;
     captureMode = ALLOWED_CAPTURE_MODES.front();
     captureInputFile = DEFAULT_CAPTURE_INPUT_FILE;
 }
@@ -131,10 +135,15 @@ QVariantMap ImageGrabberParam::toMap()
     paramMap.insert("gain", gain);
     paramMap.insert("shutter", shutter);
     paramMap.insert("brightness", brightness);
+    paramMap.insert("gamma", gamma);
+    paramMap.insert("saturation", saturation);
+    paramMap.insert("whiteBalanceRed", whiteBalanceRed);
+    paramMap.insert("whiteBalanceBlue", whiteBalanceBlue);
     paramMap.insert("captureMode", captureMode);
     paramMap.insert("captureInputFile", captureInputFile);
     return paramMap;
 }
+
 
 
 RtnStatus ImageGrabberParam::fromMap(QVariantMap paramMap)
@@ -243,7 +252,6 @@ RtnStatus ImageGrabberParam::fromMap(QVariantMap paramMap)
 
     // Get brightness
     // ---------------
-
     if (!paramMap.contains("brightness"))
     {
         rtnStatus.success = false;
@@ -264,6 +272,120 @@ RtnStatus ImageGrabberParam::fromMap(QVariantMap paramMap)
         rtnStatus.message = QString("Image grabber parameter 'brightness' greater than maximum");
         return rtnStatus;
     }
+    brightness = brightnessTemp; 
+
+    // Get gamma 
+    // -----------------
+    if (!paramMap.contains("gamma"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'gamma' not found in image grabber parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["gamma"].canConvert<float>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert image grabber parameter 'gamma' to float");
+        return rtnStatus;
+    }
+    float gammaTemp = paramMap["gamma"].toFloat();
+    if (gammaTemp < MINIMUM_GAMMA)
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Image grabber parameter 'gamma' less than minimum");
+        return rtnStatus;
+    }
+    if (gammaTemp > MAXIMUM_GAMMA)
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Image grabber parameter 'gamma' greater than maximum");
+        return rtnStatus;
+    }
+
+    // Get saturation 
+    if (!paramMap.contains("saturation"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'saturation' not found in image grabber parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["saturation"].canConvert<float>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert image grabber parameter 'saturation' to float");
+        return rtnStatus;
+    }
+    float saturationTemp = paramMap["saturation"].toFloat();
+    if (saturationTemp < MINIMUM_SATURATION)
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Image grabber parameter 'saturation' less than minimum");
+        return rtnStatus;
+    }
+    if (saturationTemp > MAXIMUM_SATURATION)
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Image grabber parameter 'saturation' greater than maximum");
+        return rtnStatus;
+    }
+    saturation = saturationTemp;
+
+    
+    // Get whiteBalanceRed 
+    if (!paramMap.contains("whiteBalanceRed"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'whiteBalanceRed' not found in image grabber parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["whiteBalanceRed"].canConvert<unsigned int>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert image grabber parameter 'whiteBalanceRed' to float");
+        return rtnStatus;
+    }
+    unsigned int whiteBalanceRedTemp = paramMap["whiteBalanceRed"].toUInt();
+    if (whiteBalanceRedTemp < MINIMUM_WHITE_BALANCE)
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Image grabber parameter 'whiteBalanceRed' less than minimum");
+        return rtnStatus;
+    }
+    if (whiteBalanceRedTemp > MAXIMUM_WHITE_BALANCE)
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Image grabber parameter 'whiteBalanceRed' greater than maximum");
+        return rtnStatus;
+    }
+    whiteBalanceRed = whiteBalanceRedTemp;
+    
+    // Get whiteBalanceBlue (unsigned int)
+    if (!paramMap.contains("whiteBalanceBlue"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'whiteBalanceBlue' not found in image grabber parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["whiteBalanceBlue"].canConvert<unsigned int>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert image grabber parameter 'whiteBalanceBlue' to float");
+        return rtnStatus;
+    }
+    unsigned int whiteBalanceBlueTemp = paramMap["whiteBalanceBlue"].toUInt();
+    if (whiteBalanceBlueTemp < MINIMUM_WHITE_BALANCE)
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Image grabber parameter 'whiteBalanceBlue' less than minimum");
+        return rtnStatus;
+    }
+    if (whiteBalanceBlueTemp > MAXIMUM_WHITE_BALANCE)
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Image grabber parameter 'whiteBalanceBlue' greater than maximum");
+        return rtnStatus;
+    }
+    whiteBalanceBlue = whiteBalanceBlueTemp;
 
     // Get capture mode
     // -----------------

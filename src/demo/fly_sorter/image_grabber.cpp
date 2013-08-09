@@ -340,7 +340,9 @@ bool ImageGrabber::setupCamera()
     }
     catch (RuntimeError &runtimeError)
     {
-        QString errorMsg = QString("Unable to get framerate property: ");
+        QString errorMsg = QString(
+                "Unable to get framerate property: "
+                );
         errorMsg += QString::fromStdString(runtimeError.what());
         emit cameraSetupError(errorMsg);
         return false;
@@ -348,14 +350,18 @@ bool ImageGrabber::setupCamera()
 
     if (param_.frameRate < frameRateInfo.minAbsoluteValue)
     {
-        QString errorMsg = QString("framerate less than minimum allowed %1").arg(frameRateInfo.minAbsoluteValue);
+        QString errorMsg = QString(
+                "framerate less than minimum allowed %1"
+                ).arg(frameRateInfo.minAbsoluteValue);
         emit cameraSetupError(errorMsg);
         return false;
 
     }
     if (param_.frameRate > frameRateInfo.maxAbsoluteValue)
     {
-        QString errorMsg = QString("framerate greater than maximum allowed %1").arg(frameRateInfo.maxAbsoluteValue);
+        QString errorMsg = QString(
+                "framerate greater than maximum allowed %1"
+                ).arg(frameRateInfo.maxAbsoluteValue);
         emit cameraSetupError(errorMsg);
         return false;
     }
@@ -396,13 +402,17 @@ bool ImageGrabber::setupCamera()
 
     if (param_.gain < gainInfo.minAbsoluteValue)
     {
-        QString errorMsg = QString("gain less than minimum allowed %1").arg(gainInfo.minAbsoluteValue);
+        QString errorMsg = QString(
+                "gain less than minimum allowed %1"
+                ).arg(gainInfo.minAbsoluteValue);
         emit cameraSetupError(errorMsg);
         return false;
     }
     if (param_.gain > gainInfo.maxAbsoluteValue)
     {
-        QString errorMsg = QString("gain greater than maximum allowed %1").arg(gainInfo.minAbsoluteValue);
+        QString errorMsg = QString(
+                "gain greater than maximum allowed %1"
+                ).arg(gainInfo.minAbsoluteValue);
         emit cameraSetupError(errorMsg);
         return false;
     }
@@ -442,13 +452,17 @@ bool ImageGrabber::setupCamera()
 
     if (param_.shutter < shutterInfo.minAbsoluteValue)
     {
-        QString errorMsg = QString("shutter less than minimum allowed %1").arg(shutterInfo.minAbsoluteValue);
+        QString errorMsg = QString(
+                "shutter less than minimum allowed %1"
+                ).arg(shutterInfo.minAbsoluteValue);
         emit cameraSetupError(errorMsg);
         return false;
     }
     if (param_.shutter > shutterInfo.maxAbsoluteValue)
     {
-        QString errorMsg = QString("shutter greater than maximum allowed %1").arg(shutterInfo.minAbsoluteValue);
+        QString errorMsg = QString(
+                "shutter greater than maximum allowed %1"
+                ).arg(shutterInfo.minAbsoluteValue);
         emit cameraSetupError(errorMsg);
         return false;
     }
@@ -468,8 +482,6 @@ bool ImageGrabber::setupCamera()
         emit cameraSetupError(errorMsg);
         return false;
     }
-   
-
 
     // Set brightness
     PropertyInfo brightnessInfo;
@@ -489,13 +501,17 @@ bool ImageGrabber::setupCamera()
 
     if (param_.brightness < brightnessInfo.minValue)
     {
-        QString errorMsg = QString("brightness less than minimum allowed %1").arg(brightnessInfo.minValue);
+        QString errorMsg = QString(
+                "brightness less than minimum allowed %1"
+                ).arg(brightnessInfo.minValue);
         emit cameraSetupError(errorMsg);
         return false;
     }
     if (param_.brightness > brightnessInfo.maxValue)
     {
-        QString errorMsg = QString("brightness greater than maximum allowed %1").arg(brightnessInfo.minValue);
+        QString errorMsg = QString(
+                "brightness greater than maximum allowed %1"
+                ).arg(brightnessInfo.minValue);
         emit cameraSetupError(errorMsg);
         return false;
     }
@@ -516,6 +532,205 @@ bool ImageGrabber::setupCamera()
         return false;
     }
 
+    // Set Gamma - if present
+    PropertyInfo gammaInfo;
+    Property gammaProp;
+    try
+    {
+        gammaInfo = cameraPtr_ -> getPropertyInfo(PROPERTY_TYPE_GAMMA);
+        gammaProp = cameraPtr_ -> getProperty(PROPERTY_TYPE_GAMMA);
+    }
+    catch (RuntimeError &runtimeError)
+    {
+        QString errorMsg = QString("Unable to get gamma property: ");
+        errorMsg += QString::fromStdString(runtimeError.what());
+        emit cameraSetupError(errorMsg);
+        return false;
+    }
+    // Color camera specific - for development dont' set if can't 
+    if ((gammaInfo.present) && (gammaInfo.manualCapable) && (gammaInfo.absoluteCapable))
+    {
+        std::cout << "setting gamma" << std::endl; 
+
+        if (param_.gamma < gammaInfo.minAbsoluteValue)
+        {
+            QString errorMsg = QString(
+                    "gamma less than minimum allowed %1"
+                    ).arg(gammaInfo.minAbsoluteValue);
+            emit cameraSetupError(errorMsg);
+            return false;
+        }
+        if (param_.gamma > gammaInfo.maxAbsoluteValue)
+        {
+            QString errorMsg = QString(
+                    "gamma greater than maximum allowed %1"
+                    ).arg(gammaInfo.maxAbsoluteValue);
+            emit cameraSetupError(errorMsg);
+            return false;
+        }
+
+        gammaProp.absoluteControl = true;
+        gammaProp.absoluteValue = param_.gamma;
+        gammaProp.autoActive = false;
+
+        try
+        {
+            cameraPtr_ -> setProperty(gammaProp);
+        }
+        catch (RuntimeError &runtimeError)
+        {
+            QString errorMsg = QString("Unable to set gamma property: ");
+            errorMsg += QString::fromStdString(runtimeError.what());
+            emit cameraSetupError(errorMsg);
+            return false;
+        }
+    }
+    else
+    {
+        std::cout << "not setting gamma" << std::endl; 
+        // -------------------------------------------
+        // TO DO ... emit warning if not present??
+        // -------------------------------------------
+    }
+
+    // Set Saturation - if present
+    PropertyInfo saturationInfo;
+    Property saturationProp;
+    try
+    {
+        saturationInfo = cameraPtr_ -> getPropertyInfo(PROPERTY_TYPE_SATURATION);
+        saturationProp = cameraPtr_ -> getProperty(PROPERTY_TYPE_SATURATION);
+    }
+    catch (RuntimeError &runtimeError)
+    {
+        QString errorMsg = QString("Unable to get saturation property: ");
+        errorMsg += QString::fromStdString(runtimeError.what());
+        emit cameraSetupError(errorMsg);
+        return false;
+    }
+
+    if ((saturationInfo.present) && (saturationInfo.manualCapable) && (saturationInfo.absoluteCapable))
+    {
+        std::cout << "setting saturation" << std::endl; 
+
+        if (param_.saturation < saturationInfo.minAbsoluteValue)
+        {
+            QString errorMsg = QString(
+                    "saturation less than minimum allowed %1"
+                    ).arg(saturationInfo.minAbsoluteValue);
+            emit cameraSetupError(errorMsg);
+            return false;
+        }
+        if (param_.saturation > saturationInfo.maxAbsoluteValue)
+        {
+            QString errorMsg = QString(
+                    "saturation greater than maximum allowed %1"
+                    ).arg(saturationInfo.maxAbsoluteValue);
+            emit cameraSetupError(errorMsg);
+            return false;
+        }
+
+        saturationProp.absoluteControl = true;
+        saturationProp.absoluteValue = param_.saturation;
+        saturationProp.autoActive = false;
+
+        try
+        {
+            cameraPtr_ -> setProperty(saturationProp);
+        }
+        catch (RuntimeError &runtimeError)
+        {
+            QString errorMsg = QString("Unable to set saturation property: ");
+            errorMsg += QString::fromStdString(runtimeError.what());
+            emit cameraSetupError(errorMsg);
+            return false;
+        }
+    }
+    else
+    {
+        std::cout << "not setting saturation" << std::endl;
+        // ------------------------------------------------
+        // TO DO ... emit waring if not present??
+        // ------------------------------------------------
+    }
+
+
+    // Set whiteBalance (Red and Blue) - if present
+    PropertyInfo whiteBalanceInfo;
+    Property whiteBalanceProp;
+    try
+    {
+        whiteBalanceInfo = cameraPtr_ -> getPropertyInfo(PROPERTY_TYPE_SATURATION);
+        whiteBalanceProp = cameraPtr_ -> getProperty(PROPERTY_TYPE_SATURATION);
+    }
+    catch (RuntimeError &runtimeError)
+    {
+        QString errorMsg = QString("Unable to get whiteBalance property: ");
+        errorMsg += QString::fromStdString(runtimeError.what());
+        emit cameraSetupError(errorMsg);
+        return false;
+    }
+
+    if ((whiteBalanceInfo.present) && (whiteBalanceInfo.manualCapable))
+    {
+        std::cout << "setting whiteBalance" << std::endl; 
+
+        if (param_.whiteBalanceRed < whiteBalanceInfo.minAbsoluteValue)
+        {
+            QString errorMsg = QString(
+                    "whiteBalanceRed less than minimum allowed %1"
+                    ).arg(whiteBalanceInfo.minAbsoluteValue);
+            emit cameraSetupError(errorMsg);
+            return false;
+        }
+        if (param_.whiteBalanceRed > whiteBalanceInfo.maxAbsoluteValue)
+        {
+            QString errorMsg = QString(
+                    "whiteBalanceRed greater than maximum allowed %1"
+                    ).arg(whiteBalanceInfo.maxAbsoluteValue);
+            emit cameraSetupError(errorMsg);
+            return false;
+        }
+        if (param_.whiteBalanceBlue < whiteBalanceInfo.minAbsoluteValue)
+        {
+            QString errorMsg = QString(
+                    "whiteBalanceBlue less than minimum allowed %1"
+                    ).arg(whiteBalanceInfo.minAbsoluteValue);
+            emit cameraSetupError(errorMsg);
+            return false;
+        }
+        if (param_.whiteBalanceBlue > whiteBalanceInfo.maxAbsoluteValue)
+        {
+            QString errorMsg = QString(
+                    "whiteBalanceBlue greater than maximum allowed %1"
+                    ).arg(whiteBalanceInfo.maxAbsoluteValue);
+            emit cameraSetupError(errorMsg);
+            return false;
+        }
+        whiteBalanceProp.absoluteControl = false;
+        whiteBalanceProp.valueA = param_.whiteBalanceRed;
+        whiteBalanceProp.valueB = param_.whiteBalanceBlue;
+        whiteBalanceProp.autoActive = false;
+
+        try
+        {
+            cameraPtr_ -> setProperty(whiteBalanceProp);
+        }
+        catch (RuntimeError &runtimeError)
+        {
+            QString errorMsg = QString("Unable to set whiteBalance property: ");
+            errorMsg += QString::fromStdString(runtimeError.what());
+            emit cameraSetupError(errorMsg);
+            return false;
+        }
+    }
+    else
+    {
+        std::cout << "not setting whiteBalance" << std::endl;
+        // ------------------------------------------------
+        // TO DO ... emit waring if not present??
+        // ------------------------------------------------
+    }
     return true;
 }
 
