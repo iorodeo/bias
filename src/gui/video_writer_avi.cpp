@@ -129,8 +129,9 @@ namespace bias
     QMap<unsigned int, QString> VideoWriter_avi::getFourccToStringMap()
     {
         QMap<unsigned int, QString> map;
+        map[0] = QString("NONE"); 
         map[CV_FOURCC('X','V','I','D')] = QString("XVID");
-        map[CV_FOURCC('D','I','B',' ')] = QString("DIB"); 
+        //map[CV_FOURCC('D','I','B',' ')] = QString("DIB"); 
         map[CV_FOURCC('I','4','2','0')] = QString("I420");
         map[CV_FOURCC('I','Y','U','V')] = QString("IYUV");
         map[CV_FOURCC('M','P','4','2')] = QString("MP42");
@@ -138,6 +139,7 @@ namespace bias
         map[CV_FOURCC('D','I','V','X')] = QString("DIVX");
         map[CV_FOURCC('U','2','6','3')] = QString("H263");
         map[CV_FOURCC('F','L','V','1')] = QString("FLV1");
+        map[CV_FOURCC('H','F','Y','U')] = QString("HFYU");
         return map;
     }
 
@@ -192,7 +194,7 @@ namespace bias
         }
         else
         {
-            return CV_FOURCC('D','I','B',' ');
+            return 0; //CV_FOURCC('D','I','B',' ');
         }
     }
 

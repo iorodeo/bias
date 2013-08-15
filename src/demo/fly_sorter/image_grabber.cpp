@@ -175,7 +175,7 @@ void ImageGrabber::runCaptureFromFile()
     }
     std::cout << "fourcc: " << fourcc << std::endl;
     std::cout << "numFrames: " << numFrames << std::endl;
-    if (fourcc == 0)
+    if ((fourcc == 0) || (fourcc == 808466521))
     {
         // --------------------------------------------------------------------
         // TEMPORARY - currently having problems with DIB/raw formats need to 
@@ -191,15 +191,17 @@ void ImageGrabber::runCaptureFromFile()
     float sleepDt = 1.0e3/param_.frameRate;
     
 
+    std::cout << "begin play back" << std::endl;
+    ImageData imageData;
+
     while ((!stopped_) && (frameCount < numFrames))
     {
-        std::cout << param_.captureInputFile.toStdString() << ", frame = " << frameCount << std::endl;
-
-        ImageData imageData;
+        cv::Mat mat;
+        std::cout << param_.captureInputFile.toStdString() << ", frame = " << frameCount;
 
         try
         {
-            fileCapture >> imageData.mat;
+            fileCapture >> mat;
         }
         catch (cv::Exception &exception)
         {
@@ -218,22 +220,29 @@ void ImageGrabber::runCaptureFromFile()
             continue;
 
         }
-        if (imageData.mat.empty())
+        if (mat.empty())
         {
             // This shouldn't happen, but just in case 
             // skip any frames that come back empty.
+            frameCount++;
+            std::cout << "empty frame" << std::endl;
             continue;
         }
+        else
+        {
+            std::cout << std::endl;
+        }
 
-
+        imageData.mat = mat.clone(); // Get deep copy of image mat (required)
         imageData.frameCount = frameCount; 
         QDateTime currentDateTime = QDateTime::currentDateTime();
         imageData.dateTime = double(currentDateTime.toMSecsSinceEpoch())*(1.0e-3);
         emit newImage(imageData);
+        frameCount++;
 
         ThreadHelper::msleep(sleepDt);
-        frameCount++;
     }
+    std::cout << "play back done" << std::endl;
 
     // Release file
     try
@@ -248,6 +257,8 @@ void ImageGrabber::runCaptureFromFile()
         emit cameraSetupError(errorMsg);
         return;
     }
+    std::cout << "end" << std::endl;
+    return;
 }
 
 

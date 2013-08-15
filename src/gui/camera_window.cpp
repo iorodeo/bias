@@ -295,6 +295,11 @@ namespace bias
             std::shared_ptr<VideoWriter> videoWriterPtr; 
             QString videoFileFullPath = getVideoFileFullPathWithGuid();
 
+            // DEBUG
+            // -------------------------------------------------------------------------------
+            std::cout << "videoFileFullPath: " << videoFileFullPath.toStdString() << std::endl;
+            // --------------------------------------------------------------------------------
+
             switch (videoFileFormat_)
             {
                 case VIDEOFILE_FORMAT_BMP:
@@ -1106,16 +1111,17 @@ namespace bias
     {
         RtnStatus rtnStatus;
 
-        if (logging_)
+        if (capturing_ && logging_)
         {
             rtnStatus.success = false;
-            rtnStatus.message = QString("Unable to set video file: logging in progress");
+            rtnStatus.message = QString("Unable to set video file: recording in progress");
             return rtnStatus;
         }
         
         QFileInfo videoFileInfo = QFileInfo(videoFileString);
         QDir videoFileDir = videoFileInfo.dir();
         QString videoFileName = videoFileInfo.baseName();
+
 
         rtnStatus.success = true;
         rtnStatus.message = QString("");
@@ -1150,6 +1156,11 @@ namespace bias
         }
         currentVideoFileDir_ = videoFileDir;
         currentVideoFileName_ = videoFileName;
+        // DEBUG
+        // ---------------------------------------------------------------------------------------------
+        std::cout << "currentVideoFileDir:  " << currentVideoFileDir_.path().toStdString() << std::endl;
+        std::cout << "currentVideoFileName: " << currentVideoFileName_.toStdString() << std::endl;
+        // ---------------------------------------------------------------------------------------------
         return rtnStatus;
     }
 

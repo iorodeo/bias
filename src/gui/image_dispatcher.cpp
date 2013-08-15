@@ -107,7 +107,7 @@ namespace bias
         QDir videoFileDir = cameraWindowPtr -> getVideoFileDir();
         QFileInfo stampFileInfo = QFileInfo(videoFileDir, "stamp_log.txt");
         std::string stampFileName = stampFileInfo.absoluteFilePath().toStdString();
-        std::cout << stampFileName << std::endl;
+        //std::cout << stampFileName << std::endl;
         std::ofstream stampOutStream;
         stampOutStream.open(stampFileName);
 
