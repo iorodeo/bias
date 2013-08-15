@@ -12,8 +12,9 @@ set(
     fly_sorter_window.hpp
     image_grabber.hpp
     parameters.hpp
-    fly_segmenter.hpp
     fast_binary_predictor.hpp
+    fly_segmenter.hpp
+    hog_position_fitter.hpp
     identity_tracker.hpp
     )
 
@@ -23,8 +24,9 @@ set(
     fly_sorter_window.cpp
     image_grabber.cpp
     parameters.cpp
-    fly_segmenter.cpp
     fast_binary_predictor.cpp
+    fly_segmenter.cpp
+    hog_position_fitter.cpp
     identity_tracker.cpp
     )
 

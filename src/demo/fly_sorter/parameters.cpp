@@ -71,6 +71,20 @@ FlySegmenterParam::FlySegmenterParam()
     classifier = DEFAULT_CLASSIFIER_PARAM;
 };
 
+// HogPositionFitterParam
+// ----------------------------------------------------------------------------
+
+
+
+const unsigned int HogPositionFitterParam::DEFAULT_CLOSE_RADIUS = 15;
+const unsigned int HogPositionFitterParam::DEFAULT_OPEN_AREA = 3400;
+
+HogPositionFitterParam::HogPositionFitterParam()
+{
+    closeRadius = DEFAULT_CLOSE_RADIUS;
+    openArea = DEFAULT_OPEN_AREA;
+}
+
 // ImageGrabberParam
 // ----------------------------------------------------------------------------
 
@@ -553,9 +567,13 @@ RtnStatus IdentityTrackerParam::fromMap(QVariantMap paramMap)
 
 FlySorterParam::FlySorterParam()
 {
-    server = ServerParam();
-    imageGrabber = ImageGrabberParam();
-    blobFinder = BlobFinderParam();
+    
+    //server = ServerParam();
+    //imageGrabber = ImageGrabberParam();
+    //blobFinder = BlobFinderParam();
+    //flySegmenter = FlySegmenterParam();
+    //hogPositionFitter = HogPositionFitterParam();
+    
     // Devel
     // -------------------------------
     genderMode = GenderModeMaleOnly;

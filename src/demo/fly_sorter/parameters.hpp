@@ -30,7 +30,7 @@ class ClassifierParam
 };
 
 
-class FlySegmenterParam : public ClassifierParam
+class FlySegmenterParam 
 {
     public:
 
@@ -39,6 +39,20 @@ class FlySegmenterParam : public ClassifierParam
         static ClassifierParam createDefaultClassifierParam();
 
         FlySegmenterParam();
+};
+
+
+class HogPositionFitterParam 
+{
+    public:
+
+        unsigned int closeRadius;
+        static const unsigned int DEFAULT_CLOSE_RADIUS;
+
+        unsigned int openArea;
+        static const unsigned int DEFAULT_OPEN_AREA;
+
+        HogPositionFitterParam();
 };
 
 
@@ -152,6 +166,7 @@ class FlySorterParam
         ImageGrabberParam imageGrabber;
         BlobFinderParam blobFinder;
         FlySegmenterParam flySegmenter;
+        HogPositionFitterParam hogPositionFitter;
 
         // Devel
         // -------------------

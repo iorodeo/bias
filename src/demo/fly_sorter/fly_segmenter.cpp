@@ -30,12 +30,12 @@ void FlySegmenter::setParam(FlySegmenterParam param)
     fastBinaryPredictor_.setClassifierParam(param_.classifier);
 }
 
-FlySegmenterData FlySegmenter::segment(BlobDataList blobDataList)
+FlySegmenterData FlySegmenter::segment(BlobFinderData blobFinderData)
 {
     //std::cout << __PRETTY_FUNCTION__ << std::endl;
 
     FlySegmenterData flySegmenterData;
-
+    BlobDataList blobDataList = blobFinderData.blobDataList;
     BlobDataList::iterator it;
 
     for (it=blobDataList.begin(); it!=blobDataList.end(); it++)

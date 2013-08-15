@@ -25,7 +25,6 @@ class FlySegmenterData
 };
 
 
-
 class FlySegmenter
 {
     public:
@@ -33,13 +32,12 @@ class FlySegmenter
         FlySegmenter();
         FlySegmenter(FlySegmenterParam param);
         void setParam(FlySegmenterParam param);
-        FlySegmenterData segment(BlobDataList blobDataList);
+        FlySegmenterData segment(BlobFinderData blobFinderData);
 
     private:
 
         FlySegmenterParam param_;
         FastBinaryPredictor fastBinaryPredictor_;
-
 };
 
 
