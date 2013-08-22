@@ -36,6 +36,7 @@ class FlySegmenter
 
     private:
 
+        bool showDebugWindow_;
         FlySegmenterParam param_;
         FastBinaryPredictor fastBinaryPredictor_;
 };

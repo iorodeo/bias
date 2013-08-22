@@ -25,6 +25,7 @@ class HogPositionFitter
         HogPositionData fit(FlySegmenterData flySegmenterData);
 
     private:
+        bool showDebugWindow_;
         HogPositionFitterParam param_;
 
 };

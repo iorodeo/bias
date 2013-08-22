@@ -14,14 +14,14 @@ FlySegmenter::FlySegmenter()
 FlySegmenter::FlySegmenter(FlySegmenterParam param)
 {
     setParam(param);
-
-    //// Develop
-    //// ----------------------------------------------------------
-    //cv::namedWindow(
-    //        "segmenter",
-    //        CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED
-    //        );
-    //// ----------------------------------------------------------
+    showDebugWindow_ = false;
+    if (showDebugWindow_) 
+    {
+        cv::namedWindow(
+                "FlySegmenter",
+                CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED
+                );
+    }
 }
 
 void FlySegmenter::setParam(FlySegmenterParam param)
@@ -32,13 +32,12 @@ void FlySegmenter::setParam(FlySegmenterParam param)
 
 FlySegmenterData FlySegmenter::segment(BlobFinderData blobFinderData)
 {
-    //std::cout << __PRETTY_FUNCTION__ << std::endl;
-
     FlySegmenterData flySegmenterData;
     BlobDataList blobDataList = blobFinderData.blobDataList;
     BlobDataList::iterator it;
+    unsigned int cnt;
 
-    for (it=blobDataList.begin(); it!=blobDataList.end(); it++)
+    for (it=blobDataList.begin(), cnt=0; it!=blobDataList.end(); it++, cnt++)
     {
         //std::cout << "blobData" << std::endl;
 
@@ -73,8 +72,8 @@ FlySegmenterData FlySegmenter::segment(BlobFinderData blobFinderData)
                 );
         cv::cvtColor(boundingImageBGR,boundingImageLUV,CV_BGR2Luv);
 
-        //// Segment using fast binary predict.
-        //// --------------------------------------------------------
+        // Segment using fast binary predict.
+        // --------------------------------------------------------
         FastBinaryPredictorData predictorData;
         predictorData = fastBinaryPredictor_.predict(boundingImageLUV);
 
@@ -82,12 +81,29 @@ FlySegmenterData FlySegmenter::segment(BlobFinderData blobFinderData)
         segmentData.blobData = blobData;
         segmentData.predictorData = predictorData;
         segmentData.boundingImageLUV = boundingImageLUV;
-        flySegmenterData.segmentDataList.push_back(segmentData);
+        // DEVELOP TEMPORARY 
+        // --------------------------------------------------------
+        if (true)
+        {
+            cv::Mat bwImage = cv::Mat(boundingImageBGR.size(),CV_8U);
+            cv::Mat threshImage = cv::Mat(boundingImageBGR.size(),CV_8U);
+            cv::cvtColor(boundingImageBGR,bwImage,CV_BGR2GRAY);
+            cv::threshold( bwImage, threshImage, 100, 255, CV_THRESH_BINARY);
+            segmentData.predictorData.label = 255 - threshImage;
 
-        //// Develop
-        //// ---------------------------------------------------------
-        //cv::imshow("segmenter", segmenterData.label);
-        //// ---------------------------------------------------------
+            //cv::Mat testImage = cv::Mat(boundingImageBGR.size(),CV_8U,cv::Scalar(0));
+            //segmentData.predictorData.label = testImage; 
+        }
+        // --------------------------------------------------------
+        flySegmenterData.segmentDataList.push_back(segmentData);
+        if (showDebugWindow_)
+        {
+            if (cnt==0)
+            {
+                //cv::imshow("FlySegmenter", segmentData.predictorData.label);
+                cv::imshow("FlySegmenter", boundingImageLUV);
+            }
+        }
         
     }
     return flySegmenterData;
