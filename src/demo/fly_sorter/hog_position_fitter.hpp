@@ -5,6 +5,15 @@
 
 class HogPositionData
 {
+    public:
+
+        bool isFly;
+        static const bool DEFAULT_IS_FLY;
+
+        unsigned int bodyArea;
+        static const unsigned int DEFAULT_BODY_AREA;
+
+        HogPositionData();
 };
 
 class HogPositionFitter
@@ -19,5 +28,6 @@ class HogPositionFitter
         HogPositionFitterParam param_;
 
 };
+
 
 #endif

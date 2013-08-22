@@ -310,17 +310,19 @@ void FlySorterWindow::initialize()
     std::cout << "applicationDirPath = " << appDirPath.toStdString() << std::endl;
     distribution_ = std::uniform_int_distribution<unsigned int>(0,1);
 
-    int n = 15;
-    int m = 2*n+1;
-    cv::Mat se = cv::getStructuringElement(cv::MORPH_ELLIPSE,cv::Size(m,m));
-    for (int i=0; i<m; i++)
-    {
-        for (int j=0; j<m; j++)
-        {
-            std::cout << int(se.at<uchar>(i,j)) << " ";
-        }
-        std::cout << std::endl;
-    }
+    //
+    //int n = 15;
+    //int m = 2*n+1;
+    //cv::Mat se = cv::getStructuringElement(cv::MORPH_ELLIPSE,cv::Size(m,m));
+    //for (int i=0; i<m; i++)
+    //{
+    //    for (int j=0; j<m; j++)
+    //    {
+    //        std::cout << int(se.at<uchar>(i,j)) << " ";
+    //    }
+    //    std::cout << std::endl;
+    //}
+    //
 
 }
 

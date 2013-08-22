@@ -74,8 +74,6 @@ FlySegmenterParam::FlySegmenterParam()
 // HogPositionFitterParam
 // ----------------------------------------------------------------------------
 
-
-
 const unsigned int HogPositionFitterParam::DEFAULT_CLOSE_RADIUS = 15;
 const unsigned int HogPositionFitterParam::DEFAULT_OPEN_AREA = 3400;
 
@@ -567,7 +565,6 @@ RtnStatus IdentityTrackerParam::fromMap(QVariantMap paramMap)
 
 FlySorterParam::FlySorterParam()
 {
-    
     //server = ServerParam();
     //imageGrabber = ImageGrabberParam();
     //blobFinder = BlobFinderParam();

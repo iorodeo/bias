@@ -11,6 +11,7 @@ set(
     json.hpp
     json_utils.hpp
     rtn_status.hpp
+    basic_image_proc.hpp
     )
 
 set(
@@ -21,6 +22,7 @@ set(
     blob_finder_param.cpp
     json.cpp
     json_utils.cpp
+    basic_image_proc.cpp
     )
 
 qt4_wrap_cpp(bias_utility_HEADERS_MOC ${bias_utility_HEADERS})
