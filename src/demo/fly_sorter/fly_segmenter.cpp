@@ -7,9 +7,7 @@
 
 // FlySegmenter
 // ----------------------------------------------------------------------------
-FlySegmenter::FlySegmenter()
-{
-}
+FlySegmenter::FlySegmenter() {}
 
 FlySegmenter::FlySegmenter(FlySegmenterParam param)
 {
@@ -85,15 +83,24 @@ FlySegmenterData FlySegmenter::segment(BlobFinderData blobFinderData)
         // --------------------------------------------------------
         if (true)
         {
-            cv::Mat bwImage = cv::Mat(boundingImageBGR.size(),CV_8U);
-            cv::Mat threshImage = cv::Mat(boundingImageBGR.size(),CV_8U);
-            cv::cvtColor(boundingImageBGR,bwImage,CV_BGR2GRAY);
-            cv::threshold( bwImage, threshImage, 100, 255, CV_THRESH_BINARY);
-            segmentData.predictorData.label = 255 - threshImage;
-
-            //cv::Mat testImage = cv::Mat(boundingImageBGR.size(),CV_8U,cv::Scalar(0));
-            //segmentData.predictorData.label = testImage; 
+            if (false)
+            {
+                cv::Mat bwImage = cv::Mat(boundingImageBGR.size(),CV_8U);
+                cv::Mat threshImage = cv::Mat(boundingImageBGR.size(),CV_8U);
+                cv::cvtColor(boundingImageBGR,bwImage,CV_BGR2GRAY);
+                cv::threshold( bwImage, threshImage, 100, 255, CV_THRESH_BINARY);
+                segmentData.predictorData.label = 255 - threshImage;
+            }
+            if (true)
+            {
+                cv::Mat testImage = cv::Mat(cv::Size(300,200),CV_8UC1,cv::Scalar(0));
+                cv::rectangle(testImage,cv::Point(100,75), cv::Point(200,125),cv::Scalar(255),CV_FILLED); 
+                cv::rectangle(testImage,cv::Point(125,100),cv::Point(150,150),cv::Scalar(255),CV_FILLED);
+                cv::rectangle(testImage,cv::Point(110,50),cv::Point(120,100),cv::Scalar(255),CV_FILLED);
+                segmentData.predictorData.label = testImage;
+            }
         }
+
         // --------------------------------------------------------
         flySegmenterData.segmentDataList.push_back(segmentData);
         if (showDebugWindow_)

@@ -80,21 +80,21 @@ HogPositionData HogPositionFitter::fit(FlySegmenterData flySegmenterData)
         std::cout << "    cols:     " << isBodyMat.cols << std::endl;
         std::cout << "    rows:     " << isBodyMat.rows << std::endl;
 
-        if (posData.bodyArea < param_.openArea)
-        {
-            // Note, even with bwAreaOpen you can degenerate cases where bodyArea > 0
-            // but less than openArea. For example when the image is all 255. I'm not 
-            // worrying about this right now, but you fix this to make is more is line
-            // with matlab's function. 
-            posData.isFly = false;
-            std::cout << "    isFly:    " << posData.isFly << std::endl;
-            continue;
-        }
-        else
-        {
-            posData.isFly = true;
-            std::cout << "    isFly:    " << posData.isFly << std::endl;
-        }
+        //if (posData.bodyArea < param_.openArea)
+        //{
+        //    // Note, even with bwAreaOpen you can degenerate cases where bodyArea > 0
+        //    // but less than openArea. For example when the image is all 255. I'm not 
+        //    // worrying about this right now, but you fix this to make is more is line
+        //    // with matlab's function. 
+        //    posData.isFly = false;
+        //    std::cout << "    isFly:    " << posData.isFly << std::endl;
+        //    continue;
+        //}
+        //else
+        //{
+        //    posData.isFly = true;
+        //    std::cout << "    isFly:    " << posData.isFly << std::endl;
+        //}
 
         cv::Mat maxCompMat = findMaxConnectedComponent(isBodyMat);
 
