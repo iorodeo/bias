@@ -52,6 +52,9 @@ class HogPositionFitterParam
         unsigned int openArea;
         static const unsigned int DEFAULT_OPEN_AREA;
 
+        unsigned int maxBodyArea;
+        static const unsigned int DEFAULT_MAX_BODY_AREA;
+
         HogPositionFitterParam();
 };
 

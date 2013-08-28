@@ -35,7 +35,7 @@ FastBinaryPredictorData FastBinaryPredictor::predict(cv::Mat mat)
             {
                 StumpData stumpData = param_.stumpVector[k];
                 cv::Vec3b elem = mat.at<cv::Vec3b>(i,j);
-                uchar chanValue = elem[stumpData.channel];
+                float chanValue = float(elem[stumpData.channel])/255.0; // This is not quite right ...  
                 if (chanValue < stumpData.threshold)
                 {
                     data.fit.at<float>(i,j) = data.fit.at<float>(i,j) - stumpData.value;
@@ -45,8 +45,9 @@ FastBinaryPredictorData FastBinaryPredictor::predict(cv::Mat mat)
     } 
 
     // Get labels - is there any reason not to use binary labels?
-    data.label = cv::Mat(mat.size(), CV_8UC1, cv::Scalar(0)); 
+    data.label = cv::Mat(data.fit.size(),data.fit.type());
     cv::threshold(data.fit,data.label,0.0,255,CV_THRESH_BINARY);
+    data.label.convertTo(data.label,CV_8UC1);
     return data;
 }
 

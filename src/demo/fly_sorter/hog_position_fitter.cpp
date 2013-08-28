@@ -6,16 +6,20 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 
-// HogPositionData
+// PositionData
 // ----------------------------------------------------------------------------
-const bool HogPositionData::DEFAULT_IS_FLY = false;
-const unsigned int HogPositionData::DEFAULT_BODY_AREA = 0;
+const bool PositionData::DEFAULT_IS_FLY = false;
+const unsigned int PositionData::DEFAULT_BODY_AREA = 0;
 
-HogPositionData::HogPositionData()
+PositionData::PositionData()
 {
     isFly = DEFAULT_IS_FLY;
     bodyArea = DEFAULT_BODY_AREA;
 }
+
+// HogPositionFitterData
+// ----------------------------------------------------------------------------
+HogPositionFitterData::HogPositionFitterData() {};
 
 
 //  HogPositionFitter
@@ -25,7 +29,7 @@ HogPositionFitter::HogPositionFitter() {};
 HogPositionFitter::HogPositionFitter(HogPositionFitterParam param)
 {
     setParam(param);
-    showDebugWindow_ = true;
+    showDebugWindow_ = false;
     if (showDebugWindow_)
     {
         cv::namedWindow(
@@ -53,11 +57,11 @@ void HogPositionFitter::setParam(HogPositionFitterParam param)
 }
 
 
-HogPositionData HogPositionFitter::fit(FlySegmenterData flySegmenterData)
+HogPositionFitterData HogPositionFitter::fit(FlySegmenterData flySegmenterData)
 {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 
-    HogPositionData posData;
+    HogPositionFitterData fitterData;
     SegmentDataList segmentDataList = flySegmenterData.segmentDataList;
     SegmentDataList::iterator it;
     unsigned int cnt;
@@ -65,6 +69,7 @@ HogPositionData HogPositionFitter::fit(FlySegmenterData flySegmenterData)
     for (it=segmentDataList.begin(), cnt=0; it!=segmentDataList.end(); it++, cnt++)
     {
         SegmentData segmentData = *it;
+        PositionData posData;
         std::cout << "  processing segment " << cnt << " data " << std::endl;
 
         // Detect Body pixels 
@@ -76,43 +81,46 @@ HogPositionData HogPositionFitter::fit(FlySegmenterData flySegmenterData)
         cv::Mat isBodyMat = bwAreaOpen(closeMat,param_.openArea);
         posData.bodyArea = cv::countNonZero(isBodyMat);
 
-        std::cout << "    bodyArea: " << posData.bodyArea << std::endl;
-        std::cout << "    cols:     " << isBodyMat.cols << std::endl;
-        std::cout << "    rows:     " << isBodyMat.rows << std::endl;
 
-        //if (posData.bodyArea < param_.openArea)
-        //{
-        //    // Note, even with bwAreaOpen you can degenerate cases where bodyArea > 0
-        //    // but less than openArea. For example when the image is all 255. I'm not 
-        //    // worrying about this right now, but you fix this to make is more is line
-        //    // with matlab's function. 
-        //    posData.isFly = false;
-        //    std::cout << "    isFly:    " << posData.isFly << std::endl;
-        //    continue;
-        //}
-        //else
-        //{
-        //    posData.isFly = true;
-        //    std::cout << "    isFly:    " << posData.isFly << std::endl;
-        //}
-
-        cv::Mat maxCompMat = findMaxConnectedComponent(isBodyMat);
-
-
-        if (showDebugWindow_)
+        // Ensure that bodyArea is above minimum for fly
+        if (posData.bodyArea < param_.openArea)
         {
-            if (cnt==0)
+            // Note,  with the current implementation of bwAreaOpen you can
+            // degenerate cases where bodyArea > 0 but less than openArea. For
+            // example when the image is all 255. I'm not worrying about this
+            // right now, but you fix this to make is more is line with
+            // matlab's function. 
+            posData.isFly = false;
+        }
+        else
+        {
+            // This is a fly - get just the largest connected component
+            posData.isFly = true;
+            cv::Mat maxCompMat = findMaxConnectedComponent(isBodyMat);
+
+            if (showDebugWindow_)
             {
-                cv::imshow("hogPosLabel", segmentData.predictorData.label);
-                cv::imshow("hogPosClose", closeMat);
-                cv::imshow("hogPosIsBody", isBodyMat);
-                cv::imshow("hogPosMaxComp", maxCompMat);
+                if (cnt==0)
+                {
+                    cv::imshow("hogPosLabel", segmentData.predictorData.label);
+                    cv::imshow("hogPosClose", closeMat);
+                    cv::imshow("hogPosIsBody", isBodyMat);
+                    cv::imshow("hogPosMaxComp", maxCompMat);
+                }
             }
         }
 
 
-    }
-    return posData;
+        fitterData.positionDataList.push_back(posData);
+
+        std::cout << "    bodyArea:       " << posData.bodyArea << std::endl;
+        std::cout << "    isBodyMat.cols: " << isBodyMat.cols << std::endl;
+        std::cout << "    isBodyMat.rows: " << isBodyMat.rows << std::endl;
+        std::cout << "    isFly:          " << posData.isFly << std::endl;
+       
+    } // for (it=segementDataList.begin() 
+
+    return fitterData;
 
 }
 

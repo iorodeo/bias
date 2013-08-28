@@ -16,6 +16,7 @@ namespace bias
         // but less than openArea. For example when the image is all 255. I'm not 
         // worrying about this right now, but you fix this to make is more is line
         // with matlab's function. 
+
         cv::Mat imgModified = img.clone();
         
         if ((img.channels() !=1) || (img.type() != CV_8U))
@@ -47,8 +48,8 @@ namespace bias
     {
         // Roughly equivalent to Matlab's imclose using disk structural element 
         // with given radius
+
         unsigned int elemDiam = 2*radius + 1;
-        std::cout << "elemDiam: " << elemDiam << std::endl;
         cv::Size elemSize = cv::Size(elemDiam,elemDiam);
         cv::Mat structElem = cv::getStructuringElement(cv::MORPH_ELLIPSE, elemSize);
         cv::Mat imgClose = cv::Mat(img.size(),img.type());
@@ -58,6 +59,9 @@ namespace bias
 
     cv::Mat findMaxConnectedComponent(cv::Mat img)
     {
+        // Finds the maximum area connected component in the given image.
+        // Returns an image which onlly contains this component.
+        
         cv::Mat imgModified = cv::Mat(img.size(), CV_8U, cv::Scalar(0));
 
         // Returns and image with only the maximum connected component.

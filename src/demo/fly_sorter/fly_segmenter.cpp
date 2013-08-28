@@ -12,7 +12,7 @@ FlySegmenter::FlySegmenter() {}
 FlySegmenter::FlySegmenter(FlySegmenterParam param)
 {
     setParam(param);
-    showDebugWindow_ = false;
+    showDebugWindow_ = true;
     if (showDebugWindow_) 
     {
         cv::namedWindow(
@@ -79,9 +79,10 @@ FlySegmenterData FlySegmenter::segment(BlobFinderData blobFinderData)
         segmentData.blobData = blobData;
         segmentData.predictorData = predictorData;
         segmentData.boundingImageLUV = boundingImageLUV;
-        // DEVELOP TEMPORARY 
+
+        // DEVELOP TEMPORARY  - fake images
         // --------------------------------------------------------
-        if (true)
+        if (false)
         {
             if (false)
             {
@@ -107,8 +108,8 @@ FlySegmenterData FlySegmenter::segment(BlobFinderData blobFinderData)
         {
             if (cnt==0)
             {
-                //cv::imshow("FlySegmenter", segmentData.predictorData.label);
-                cv::imshow("FlySegmenter", boundingImageLUV);
+                cv::imshow("FlySegmenter", segmentData.predictorData.label);
+                //cv::imshow("FlySegmenter", boundingImageLUV);
             }
         }
         

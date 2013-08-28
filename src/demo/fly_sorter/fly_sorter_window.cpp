@@ -191,7 +191,7 @@ void FlySorterWindow::newImage(ImageData imageData)
     flySegmenterData_ = flySegmenter.segment(blobFinderData_);
 
     HogPositionFitter hogPositionFitter = HogPositionFitter(param_.hogPositionFitter);
-    hogPositionData_ = hogPositionFitter.fit(flySegmenterData_);
+    hogPositionFitterData_ = hogPositionFitter.fit(flySegmenterData_);
     
 
     if ((httpOutputCheckBoxPtr_ -> checkState()) == Qt::Checked)

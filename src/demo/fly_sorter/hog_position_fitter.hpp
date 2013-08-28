@@ -2,19 +2,27 @@
 #define HOG_POSITION_FITTER
 #include "parameters.hpp"
 #include "fly_segmenter.hpp"
+#include <list>
 
-class HogPositionData
+class PositionData
 {
     public:
-
         bool isFly;
         static const bool DEFAULT_IS_FLY;
-
         unsigned int bodyArea;
         static const unsigned int DEFAULT_BODY_AREA;
-
-        HogPositionData();
+        PositionData();
 };
+typedef std::list<PositionData> PositionDataList;
+
+
+class HogPositionFitterData
+{
+    public:
+        PositionDataList positionDataList;
+        HogPositionFitterData();
+};
+
 
 class HogPositionFitter
 {
@@ -22,7 +30,7 @@ class HogPositionFitter
         HogPositionFitter();
         HogPositionFitter(HogPositionFitterParam param);
         void setParam(HogPositionFitterParam param);
-        HogPositionData fit(FlySegmenterData flySegmenterData);
+        HogPositionFitterData fit(FlySegmenterData flySegmenterData);
 
     private:
         bool showDebugWindow_;

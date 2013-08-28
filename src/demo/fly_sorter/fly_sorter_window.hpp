@@ -65,7 +65,7 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         ImageData imageData_;
         BlobFinderData blobFinderData_;
         FlySegmenterData flySegmenterData_;
-        HogPositionData hogPositionData_;
+        HogPositionFitterData hogPositionFitterData_;
         unsigned int httpRequestErrorCount_;
         QString parameterFileName_;
 

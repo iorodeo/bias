@@ -76,11 +76,13 @@ FlySegmenterParam::FlySegmenterParam()
 
 const unsigned int HogPositionFitterParam::DEFAULT_CLOSE_RADIUS = 15;
 const unsigned int HogPositionFitterParam::DEFAULT_OPEN_AREA = 3400;
+const unsigned int HogPositionFitterParam::DEFAULT_MAX_BODY_AREA=16600;
 
 HogPositionFitterParam::HogPositionFitterParam()
 {
     closeRadius = DEFAULT_CLOSE_RADIUS;
     openArea = DEFAULT_OPEN_AREA;
+    maxBodyArea = DEFAULT_MAX_BODY_AREA;
 }
 
 // ImageGrabberParam
