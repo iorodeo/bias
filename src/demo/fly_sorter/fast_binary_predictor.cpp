@@ -26,7 +26,7 @@ FastBinaryPredictorData FastBinaryPredictor::predict(cv::Mat mat)
     FastBinaryPredictorData data;
 
     // Get fit values - what does fit standfor ... fitness? ask Kristin
-    data.fit = cv::Mat(mat.size(), CV_32FC1, cv::Scalar(param_.offset));
+    data.fit = cv::Mat(mat.size(), CV_32FC1, cv::Scalar(-param_.offset));
     for (int i=0; i<mat.rows;i++)
     {
         for (int j=0; j<mat.cols; j++)
@@ -35,7 +35,7 @@ FastBinaryPredictorData FastBinaryPredictor::predict(cv::Mat mat)
             {
                 StumpData stumpData = param_.stumpVector[k];
                 cv::Vec3b elem = mat.at<cv::Vec3b>(i,j);
-                float chanValue = float(elem[stumpData.channel])/255.0; // This is not quite right ...  
+                float chanValue = float(elem[stumpData.channel])/255.0; // Note, would be better to determine the max value from the image type.  
                 if (chanValue < stumpData.threshold)
                 {
                     data.fit.at<float>(i,j) = data.fit.at<float>(i,j) - stumpData.value;
