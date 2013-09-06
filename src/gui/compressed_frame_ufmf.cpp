@@ -1,4 +1,5 @@
 #include "compressed_frame_ufmf.hpp"
+#include <opencv2/imgproc/imgproc.hpp>
 #include <algorithm>
 #include <iostream>
 #include <QThread>
@@ -158,8 +159,9 @@ namespace bias
 
         // Get background/foreground membership, 255=background, 0=foreground
         cv::inRange(stampedImg_.image, bgLowerBound_, bgUpperBound_, membershipImage_);
-        numForeground_ = numPix - cv::countNonZero(membershipImage_);
+        cv::erode(membershipImage_, membershipImage_, cv::Mat(), cv::Point(-1,-1),1);
 
+        numForeground_ = numPix - cv::countNonZero(membershipImage_);
         numConnectedComp_ = 0;
         numPixWritten_ = 0;
 
