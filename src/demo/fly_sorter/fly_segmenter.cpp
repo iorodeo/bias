@@ -12,7 +12,7 @@ FlySegmenter::FlySegmenter() {}
 FlySegmenter::FlySegmenter(FlySegmenterParam param)
 {
     setParam(param);
-    showDebugWindow_ = true;
+    showDebugWindow_ = false;
     if (showDebugWindow_) 
     {
         cv::namedWindow(
@@ -96,13 +96,13 @@ FlySegmenterData FlySegmenter::segment(BlobFinderData blobFinderData)
             {
                 cv::Mat testImage = cv::Mat(cv::Size(300,200),CV_8UC1,cv::Scalar(0));
                 cv::rectangle(testImage,cv::Point(100,75), cv::Point(200,125),cv::Scalar(255),CV_FILLED); 
-                cv::rectangle(testImage,cv::Point(125,100),cv::Point(150,150),cv::Scalar(255),CV_FILLED);
-                cv::rectangle(testImage,cv::Point(110,50),cv::Point(120,100),cv::Scalar(255),CV_FILLED);
+                //cv::rectangle(testImage,cv::Point(125,100),cv::Point(150,150),cv::Scalar(255),CV_FILLED);
+                //cv::rectangle(testImage,cv::Point(110,50),cv::Point(120,100),cv::Scalar(255),CV_FILLED);
                 segmentData.predictorData.label = testImage;
             }
         }
-
         // --------------------------------------------------------
+        
         flySegmenterData.segmentDataList.push_back(segmentData);
         if (showDebugWindow_)
         {

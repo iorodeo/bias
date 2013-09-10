@@ -3,15 +3,26 @@
 #include "parameters.hpp"
 #include "fly_segmenter.hpp"
 #include <list>
+#include <opencv2/core/core.hpp>
 
 class PositionData
 {
     public:
+
         bool isFly;
-        static const bool DEFAULT_IS_FLY;
+        bool isMultipleFlies;
         unsigned int bodyArea;
-        static const unsigned int DEFAULT_BODY_AREA;
+        double meanX;
+        double meanY;
+        double ellipseMajorAxis;
+        double ellipseMinorAxis;
+        double ellipseAngle;
+        cv::Mat covarianceMatrix;
+
         PositionData();
+
+        static const bool DEFAULT_IS_FLY;
+        static const bool DEFAULT_IS_MULTIPLE_FLIES;
 };
 typedef std::list<PositionData> PositionDataList;
 
@@ -27,6 +38,7 @@ class HogPositionFitterData
 class HogPositionFitter
 {
     public:
+
         HogPositionFitter();
         HogPositionFitter(HogPositionFitterParam param);
         void setParam(HogPositionFitterParam param);

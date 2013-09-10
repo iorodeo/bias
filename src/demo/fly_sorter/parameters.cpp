@@ -77,12 +77,24 @@ FlySegmenterParam::FlySegmenterParam()
 const unsigned int HogPositionFitterParam::DEFAULT_CLOSE_RADIUS = 15;
 const unsigned int HogPositionFitterParam::DEFAULT_OPEN_AREA = 3400;
 const unsigned int HogPositionFitterParam::DEFAULT_MAX_BODY_AREA=16600;
+std::vector<double> HogPositionFitterParam::createDefaultFillValuesLUV()
+{
+    std::vector<double> fillValues;
+    fillValues.push_back(0.3703704);
+    fillValues.push_back(0.3259259);
+    fillValues.push_back(0.4962940);
+    return fillValues;
+}
+const std::vector<double> HogPositionFitterParam::DEFAULT_FILL_VALUES_LUV =
+createDefaultFillValuesLUV();
+
 
 HogPositionFitterParam::HogPositionFitterParam()
 {
     closeRadius = DEFAULT_CLOSE_RADIUS;
     openArea = DEFAULT_OPEN_AREA;
     maxBodyArea = DEFAULT_MAX_BODY_AREA;
+    fillValuesLUV = DEFAULT_FILL_VALUES_LUV;
 }
 
 // ImageGrabberParam

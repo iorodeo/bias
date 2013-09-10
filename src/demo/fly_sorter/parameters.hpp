@@ -55,6 +55,10 @@ class HogPositionFitterParam
         unsigned int maxBodyArea;
         static const unsigned int DEFAULT_MAX_BODY_AREA;
 
+        std::vector<double> fillValuesLUV;
+        static const std::vector<double> DEFAULT_FILL_VALUES_LUV;
+        static std::vector<double> createDefaultFillValuesLUV();
+
         HogPositionFitterParam();
 };
 

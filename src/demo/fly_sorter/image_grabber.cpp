@@ -173,8 +173,8 @@ void ImageGrabber::runCaptureFromFile()
         emit cameraSetupError(errorMsg);
         return;
     }
-    std::cout << "fourcc: " << fourcc << std::endl;
-    std::cout << "numFrames: " << numFrames << std::endl;
+    //std::cout << "fourcc: " << fourcc << std::endl;
+    //std::cout << "numFrames: " << numFrames << std::endl;
     if ((fourcc == 0) || (fourcc == 808466521))
     {
         // --------------------------------------------------------------------
@@ -192,13 +192,13 @@ void ImageGrabber::runCaptureFromFile()
     float sleepDt = 0.25*1.0e3/param_.frameRate;
     
 
-    std::cout << "begin play back" << std::endl;
+    //std::cout << "begin play back" << std::endl;
     ImageData imageData;
 
     while ((!stopped_) && (frameCount < numFrames))
     {
         cv::Mat mat;
-        std::cout << param_.captureInputFile.toStdString() << ", frame = " << frameCount;
+        //std::cout << param_.captureInputFile.toStdString() << ", frame = " << frameCount;
 
         try
         {
@@ -226,12 +226,12 @@ void ImageGrabber::runCaptureFromFile()
             // This shouldn't happen, but just in case 
             // skip any frames that come back empty.
             frameCount++;
-            std::cout << "empty frame" << std::endl;
+            //std::cout << "empty frame" << std::endl;
             continue;
         }
         else
         {
-            std::cout << std::endl;
+            //std::cout << std::endl;
         }
 
         imageData.mat = mat.clone(); // Get deep copy of image mat (required)
@@ -243,7 +243,7 @@ void ImageGrabber::runCaptureFromFile()
 
         ThreadHelper::msleep(sleepDt);
     }
-    std::cout << "play back done" << std::endl;
+    //std::cout << "play back done" << std::endl;
 
     // Release file
     try
@@ -258,7 +258,7 @@ void ImageGrabber::runCaptureFromFile()
         emit cameraSetupError(errorMsg);
         return;
     }
-    std::cout << "end" << std::endl;
+    //std::cout << "end" << std::endl;
     return;
 }
 
@@ -562,7 +562,7 @@ bool ImageGrabber::setupCamera()
     // Color camera specific - for development dont' set if can't 
     if ((gammaInfo.present) && (gammaInfo.manualCapable) && (gammaInfo.absoluteCapable))
     {
-        std::cout << "setting gamma" << std::endl; 
+        //std::cout << "setting gamma" << std::endl; 
 
         if (param_.gamma < gammaInfo.minAbsoluteValue)
         {
@@ -599,7 +599,7 @@ bool ImageGrabber::setupCamera()
     }
     else
     {
-        std::cout << "not setting gamma" << std::endl; 
+        //std::cout << "not setting gamma" << std::endl; 
         // -------------------------------------------
         // TO DO ... emit warning if not present??
         // -------------------------------------------
@@ -623,7 +623,7 @@ bool ImageGrabber::setupCamera()
 
     if ((saturationInfo.present) && (saturationInfo.manualCapable) && (saturationInfo.absoluteCapable))
     {
-        std::cout << "setting saturation" << std::endl; 
+        //std::cout << "setting saturation" << std::endl; 
 
         if (param_.saturation < saturationInfo.minAbsoluteValue)
         {
@@ -660,7 +660,7 @@ bool ImageGrabber::setupCamera()
     }
     else
     {
-        std::cout << "not setting saturation" << std::endl;
+        //std::cout << "not setting saturation" << std::endl;
         // ------------------------------------------------
         // TO DO ... emit waring if not present??
         // ------------------------------------------------
@@ -685,7 +685,7 @@ bool ImageGrabber::setupCamera()
 
     if ((whiteBalanceInfo.present) && (whiteBalanceInfo.manualCapable))
     {
-        std::cout << "setting whiteBalance" << std::endl; 
+        //std::cout << "setting whiteBalance" << std::endl; 
 
         if (param_.whiteBalanceRed < whiteBalanceInfo.minValue)
         {
@@ -738,7 +738,7 @@ bool ImageGrabber::setupCamera()
     }
     else
     {
-        std::cout << "not setting whiteBalance" << std::endl;
+        //std::cout << "not setting whiteBalance" << std::endl;
         // ------------------------------------------------
         // TO DO ... emit waring if not present??
         // ------------------------------------------------
