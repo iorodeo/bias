@@ -7,6 +7,7 @@
 #include <vector>
 #include "blob_finder_param.hpp"
 #include "rtn_status.hpp"
+#include <opencv2/core/core.hpp>
 
 using namespace bias;
 
@@ -55,9 +56,15 @@ class HogPositionFitterParam
         unsigned int maxBodyArea;
         static const unsigned int DEFAULT_MAX_BODY_AREA;
 
-        std::vector<double> fillValuesLUV;
-        static const std::vector<double> DEFAULT_FILL_VALUES_LUV;
-        static std::vector<double> createDefaultFillValuesLUV();
+        cv::Scalar fillValuesLUV;
+        static const cv::Scalar DEFAULT_FILL_VALUES_LUV;
+
+        double padBorder;
+        static const double DEFAULT_PAD_BORDER;
+
+        ClassifierParam orientClassifier;
+        static const ClassifierParam DEFAULT_ORIENT_CLASSIFIER_PARAM;
+        static ClassifierParam createDefaultOrientClassifierParam();
 
         HogPositionFitterParam();
 };

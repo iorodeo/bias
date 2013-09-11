@@ -1,5 +1,6 @@
 #include "hog_position_fitter.hpp"
 #include "basic_image_proc.hpp"
+#include "fast_binary_predictor.hpp"
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <iostream>
@@ -16,6 +17,7 @@ PositionData::PositionData()
 {
     isFly = DEFAULT_IS_FLY;
     isMultipleFlies = DEFAULT_IS_MULTIPLE_FLIES;
+    success = false;
     bodyArea = 0; 
     meanX = 0.0;
     meanY = 0.0;
@@ -37,7 +39,7 @@ HogPositionFitter::HogPositionFitter() {};
 HogPositionFitter::HogPositionFitter(HogPositionFitterParam param)
 {
     setParam(param);
-    showDebugWindow_ = true;
+    showDebugWindow_ = false;
     if (showDebugWindow_)
     {
         //cv::namedWindow(
@@ -54,6 +56,14 @@ HogPositionFitter::HogPositionFitter(HogPositionFitterParam param)
         //        );
         cv::namedWindow(
                 "hogPosMaxComp",
+                CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED
+                );
+        cv::namedWindow(
+                "boundingImageLUV",
+                CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED
+                );
+        cv::namedWindow(
+                "rotBoundingImageLUV",
                 CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED
                 );
     }
@@ -98,6 +108,7 @@ HogPositionFitterData HogPositionFitter::fit(FlySegmenterData flySegmenterData)
             // right now, but you fix this to make is more is line with
             // matlab's function. 
             posData.isFly = false;
+            posData.success = false;
             fitterData.positionDataList.push_back(posData);
             continue;
         }
@@ -123,6 +134,7 @@ HogPositionFitterData HogPositionFitter::fit(FlySegmenterData flySegmenterData)
                 posData.meanX = meanPos.val[0];
                 posData.meanY = meanPos.val[1];
                 fitterData.positionDataList.push_back(posData);
+                posData.success = false;
                 continue;
             }
             else 
@@ -157,10 +169,51 @@ HogPositionFitterData HogPositionFitter::fit(FlySegmenterData flySegmenterData)
             posData.ellipseAngle = std::atan2(eigenVec.at<double>(0,1),eigenVec.at<double>(0,0));
             posData.ellipseAngle = std::fmod(posData.ellipseAngle + 0.5*M_PI,M_PI) - 0.5*M_PI;
 
-            std::cout << "major axis: " << posData.ellipseMajorAxis << std::endl;
-            std::cout << "minor axis: " << posData.ellipseMinorAxis << std::endl;
-            std::cout << "angle:      " << posData.ellipseAngle << std::endl;
+             
+            // Rotate fly image using affine transform
+            double rotAngDeg = (posData.ellipseAngle + 0.5*M_PI)*180.0/M_PI;
+            cv::Point2f rotCenter = cv::Point2f(posData.meanX, posData.meanY);
+            cv::Mat rotMat = cv::getRotationMatrix2D(rotCenter, rotAngDeg, 1.0);
 
+            double shiftX = -rotCenter.x + posData.ellipseMinorAxis + param_.padBorder;
+            double shiftY = -rotCenter.y + posData.ellipseMajorAxis + param_.padBorder;
+            rotMat.at<double>(0,2) = rotMat.at<double>(0,2) + shiftX;
+            rotMat.at<double>(1,2) = rotMat.at<double>(1,2) + shiftY;
+
+            cv::Size imageSize =cv::Size(
+                    2*(posData.ellipseMinorAxis + param_.padBorder),
+                    2*(posData.ellipseMajorAxis + param_.padBorder)
+                    );
+           
+            int imageType = segmentData.boundingImageLUV.type();
+            cv::Mat rotBoundingImageLUV = cv::Mat(imageSize,imageType);
+            cv::warpAffine(
+                    segmentData.boundingImageLUV,
+                    rotBoundingImageLUV,
+                    rotMat,
+                    imageSize,
+                    cv::INTER_LINEAR,
+                    cv::BORDER_CONSTANT,
+                    param_.fillValuesLUV*255.0
+                    );
+
+            // Get pixel feature vector
+            cv::Mat pixelFeatureVector = getPixelFeatureVector(rotBoundingImageLUV);
+
+            // Classify orientation
+            //FastBinaryPredictor predictory = FastBinaryPredictor();
+            //FastBinaryPredictorData predictorData = F
+
+
+            // Flip pixel feature vector and rotated LUV bounding image if required.
+
+
+
+
+            posData.success = true;
+
+            // Temporary
+            // ---------------------------------------------------------------------
             if (showDebugWindow_)
             {
                 if (cnt==0)
@@ -169,8 +222,11 @@ HogPositionFitterData HogPositionFitter::fit(FlySegmenterData flySegmenterData)
                     //cv::imshow("hogPosClose", closeMat);
                     //cv::imshow("hogPosIsBody", isBodyMat);
                     cv::imshow("hogPosMaxComp", maxCompMat);
+                    cv::imshow("boundingImageLUV", segmentData.boundingImageLUV);
+                    cv::imshow("rotBoundingImageLUV", rotBoundingImageLUV);
                 }
             }
+            // ----------------------------------------------------------------------
         }
 
 
@@ -184,6 +240,13 @@ HogPositionFitterData HogPositionFitter::fit(FlySegmenterData flySegmenterData)
 
     return fitterData;
 
+}
+
+
+cv::Mat HogPositionFitter::getPixelFeatureVector(cv::Mat image)
+{
+    cv::Mat pixelFeatureVector;
+    return pixelFeatureVector;
 }
 
 

@@ -12,7 +12,7 @@ FlySegmenter::FlySegmenter() {}
 FlySegmenter::FlySegmenter(FlySegmenterParam param)
 {
     setParam(param);
-    showDebugWindow_ = false;
+    showDebugWindow_ = false; 
     if (showDebugWindow_) 
     {
         cv::namedWindow(
@@ -63,11 +63,13 @@ FlySegmenterData FlySegmenter::segment(BlobFinderData blobFinderData)
         {
             boundingImageBGR = blobData.boundingImage;
         }
+
         cv::Mat boundingImageLUV = cv::Mat(
                 boundingImageBGR.size(), 
                 boundingImageBGR.type(),
                 cv::Scalar(0,0,0)
                 );
+
         cv::cvtColor(boundingImageBGR,boundingImageLUV,CV_BGR2Luv);
 
         // Segment using fast binary predict.
@@ -104,14 +106,18 @@ FlySegmenterData FlySegmenter::segment(BlobFinderData blobFinderData)
         // --------------------------------------------------------
         
         flySegmenterData.segmentDataList.push_back(segmentData);
+
+        // DEVELOP TEMPORARY    
+        // --------------------------------------------------------
         if (showDebugWindow_)
         {
             if (cnt==0)
             {
-                cv::imshow("FlySegmenter", segmentData.predictorData.label);
-                //cv::imshow("FlySegmenter", boundingImageLUV);
+                //cv::imshow("FlySegmenter", segmentData.predictorData.label);
+                cv::imshow("FlySegmenter", boundingImageLUV);
             }
         }
+        // ---------------------------------------------------------
         
     }
     return flySegmenterData;

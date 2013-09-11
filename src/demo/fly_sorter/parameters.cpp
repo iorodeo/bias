@@ -30,12 +30,12 @@ ClassifierParam::ClassifierParam()
 
 // FlySegmenterParam
 // ----------------------------------------------------------------------------
+
+// TEMPORARY - kludgey, but I just need some data for developing 
+// the fly segmenter. We will read this from a file later.
+// ----------------------------------------------------------------------------
 ClassifierParam FlySegmenterParam::createDefaultClassifierParam()
 {
-    // -------------------------------------------------------------
-    // TEMPORARY - kludgey, but I just need some data for developing 
-    // the fly segmenter. We will read this from a file later.
-    // -------------------------------------------------------------
     ClassifierParam classifierParam;
     classifierParam.offset = 1.0784;
     std::vector<StumpData> stumpVector;
@@ -64,6 +64,7 @@ ClassifierParam FlySegmenterParam::createDefaultClassifierParam()
 };
 const ClassifierParam FlySegmenterParam::DEFAULT_CLASSIFIER_PARAM = 
 createDefaultClassifierParam();
+// ----------------------------------------------------------------------------
 
 
 FlySegmenterParam::FlySegmenterParam()
@@ -76,18 +77,124 @@ FlySegmenterParam::FlySegmenterParam()
 
 const unsigned int HogPositionFitterParam::DEFAULT_CLOSE_RADIUS = 15;
 const unsigned int HogPositionFitterParam::DEFAULT_OPEN_AREA = 3400;
-const unsigned int HogPositionFitterParam::DEFAULT_MAX_BODY_AREA=16600;
-std::vector<double> HogPositionFitterParam::createDefaultFillValuesLUV()
-{
-    std::vector<double> fillValues;
-    fillValues.push_back(0.3703704);
-    fillValues.push_back(0.3259259);
-    fillValues.push_back(0.4962940);
-    return fillValues;
-}
-const std::vector<double> HogPositionFitterParam::DEFAULT_FILL_VALUES_LUV =
-createDefaultFillValuesLUV();
+const unsigned int HogPositionFitterParam::DEFAULT_MAX_BODY_AREA = 16600;
+const cv::Scalar HogPositionFitterParam::DEFAULT_FILL_VALUES_LUV =
+cv::Scalar(0.3703704,0.3259259,0.4962940); 
+const double HogPositionFitterParam::DEFAULT_PAD_BORDER = 1.1;
 
+// TEMPORARY - kludgey, but I just need some data for developing 
+// the fly segmenter. We will read this from a file later.
+// ----------------------------------------------------------------------------
+ClassifierParam HogPositionFitterParam::createDefaultOrientClassifierParam()
+{
+    ClassifierParam classifierParam;
+    classifierParam.offset = -16.7966;
+    std::vector<StumpData> stumpVector;
+    stumpVector.push_back(StumpData(112, 0.002833, 1.983723));
+    stumpVector.push_back(StumpData(232, 0.002833, -1.984202));
+    stumpVector.push_back(StumpData(115, 0.008012, -1.959708));
+    stumpVector.push_back(StumpData(235, 0.008211, 1.950887));
+    stumpVector.push_back(StumpData(37, 0.306614, -1.851272));
+    stumpVector.push_back(StumpData(25, 0.306401, 1.875527));
+    stumpVector.push_back(StumpData(236, 0.016120, 1.680340));
+    stumpVector.push_back(StumpData(202, 0.000407, -1.743562));
+    stumpVector.push_back(StumpData(146, 0.027317, -1.706087));
+    stumpVector.push_back(StumpData(142, 0.000407, 1.763328));
+    stumpVector.push_back(StumpData(116, 0.015109, -1.735205));
+    stumpVector.push_back(StumpData(206, 0.027317, 1.629330));
+    stumpVector.push_back(StumpData(115, 0.011560, -1.437190));
+    stumpVector.push_back(StumpData(236, 0.015109, 1.630453));
+    stumpVector.push_back(StumpData(201, 0.011108, -1.603780));
+    stumpVector.push_back(StumpData(141, 0.011108, 1.616170));
+    stumpVector.push_back(StumpData(235, 0.011560, 1.495133));
+    stumpVector.push_back(StumpData(116, 0.016120, -1.601133));
+    stumpVector.push_back(StumpData(899, 0.275501, 1.520732));
+    stumpVector.push_back(StumpData(911, 0.278920, -1.632418));
+    stumpVector.push_back(StumpData(232, 0.003976, -1.556266));
+    stumpVector.push_back(StumpData(202, 0.001525, -1.577791));
+    stumpVector.push_back(StumpData(112, 0.003976, 1.648567));
+    stumpVector.push_back(StumpData(142, 0.001525, 1.586624));
+    stumpVector.push_back(StumpData(204, 0.019942, 1.588415));
+    stumpVector.push_back(StumpData(416, 0.031681, -1.499144));
+    stumpVector.push_back(StumpData(236, 0.012951, 1.621361));
+    stumpVector.push_back(StumpData(111, 0.006901, 1.644504));
+    stumpVector.push_back(StumpData(34, 0.311323, -1.517389));
+    stumpVector.push_back(StumpData(235, 0.011560, 1.553500));
+    stumpVector.push_back(StumpData(202, 0.002242, -1.598525));
+    stumpVector.push_back(StumpData(141, 0.012292, 1.522593));
+    stumpVector.push_back(StumpData(116, 0.012951, -1.594934));
+    stumpVector.push_back(StumpData(232, 0.002833, -1.586161));
+    stumpVector.push_back(StumpData(536, 0.031681, 1.591355));
+    stumpVector.push_back(StumpData(144, 0.019891, -1.513393));
+    stumpVector.push_back(StumpData(201, 0.003731, -1.542618));
+    stumpVector.push_back(StumpData(28, 0.313313, 1.369082));
+    stumpVector.push_back(StumpData(116, 0.016711, -1.449301));
+    stumpVector.push_back(StumpData(142, 0.000071, 1.430221));
+    stumpVector.push_back(StumpData(231, 0.007153, -1.574709));
+    stumpVector.push_back(StumpData(144, 0.019942, -1.558897));
+    stumpVector.push_back(StumpData(536, 0.031681, 1.438624));
+    stumpVector.push_back(StumpData(115, 0.011560, -1.582286));
+    stumpVector.push_back(StumpData(64, 0.329356, -1.562409));
+    stumpVector.push_back(StumpData(384, 0.009421, 1.402641));
+    stumpVector.push_back(StumpData(116, 0.013351, -1.419670));
+    stumpVector.push_back(StumpData(28, 0.313648, 1.458448));
+    stumpVector.push_back(StumpData(124, 0.064568, -1.353391));
+    stumpVector.push_back(StumpData(232, 0.003976, -1.546833));
+    stumpVector.push_back(StumpData(202, 0.000071, -1.448950));
+    stumpVector.push_back(StumpData(112, 0.002833, 1.625674));
+    stumpVector.push_back(StumpData(236, 0.016711, 1.558370));
+    stumpVector.push_back(StumpData(899, 0.278920, 1.478915));
+    stumpVector.push_back(StumpData(224, 0.010015, 1.430835));
+    stumpVector.push_back(StumpData(111, 0.008508, 1.570713));
+    stumpVector.push_back(StumpData(187, 0.267372, -1.617410));
+    stumpVector.push_back(StumpData(807, 0.069382, 1.576354));
+    stumpVector.push_back(StumpData(416, 0.032240, -1.557547));
+    stumpVector.push_back(StumpData(142, 0.000156, 1.445432));
+    stumpVector.push_back(StumpData(25, 0.306548, 1.598108));
+    stumpVector.push_back(StumpData(236, 0.013351, 1.516873));
+    stumpVector.push_back(StumpData(34, 0.313382, -1.527913));
+    stumpVector.push_back(StumpData(115, 0.011560, -1.454917));
+    stumpVector.push_back(StumpData(142, 0.001052, 1.581576));
+    stumpVector.push_back(StumpData(144, 0.019942, -1.538615));
+    stumpVector.push_back(StumpData(37, 0.306727, -1.625760));
+    stumpVector.push_back(StumpData(116, 0.016711, -1.523061));
+    stumpVector.push_back(StumpData(235, 0.011560, 1.427218));
+    stumpVector.push_back(StumpData(202, 0.000914, -1.565892));
+    stumpVector.push_back(StumpData(204, 0.019891, 1.565615));
+    stumpVector.push_back(StumpData(141, 0.012014, 1.623432));
+    stumpVector.push_back(StumpData(236, 0.016711, 1.335551));
+    stumpVector.push_back(StumpData(201, 0.011121, -1.536721));
+    stumpVector.push_back(StumpData(127, 0.228118, 1.583106));
+    stumpVector.push_back(StumpData(911, 0.278920, -1.405823));
+    stumpVector.push_back(StumpData(232, 0.002833, -1.540978));
+    stumpVector.push_back(StumpData(116, 0.012951, -1.595306));
+    stumpVector.push_back(StumpData(536, 0.031681, 1.536796));
+    stumpVector.push_back(StumpData(787, 0.068775, -1.476896));
+    stumpVector.push_back(StumpData(187, 0.272392, -1.488366));
+    stumpVector.push_back(StumpData(112, 0.002833, 1.546401));
+    stumpVector.push_back(StumpData(142, 0.000914, 1.513372));
+    stumpVector.push_back(StumpData(269, 0.112592, 0.809542));
+    stumpVector.push_back(StumpData(269, 0.112592, 0.997646));
+    stumpVector.push_back(StumpData(269, 0.112592, 1.000000));
+    stumpVector.push_back(StumpData(269, 0.112592, 1.000000));
+    stumpVector.push_back(StumpData(269, 0.112592, 1.000000));
+    stumpVector.push_back(StumpData(269, 0.112592, 1.000000));
+    stumpVector.push_back(StumpData(269, 0.112592, 1.000000));
+    stumpVector.push_back(StumpData(269, 0.112592, 1.000000));
+    stumpVector.push_back(StumpData(269, 0.112592, 1.000000));
+    stumpVector.push_back(StumpData(269, 0.112592, 1.000000));
+    stumpVector.push_back(StumpData(269, 0.112592, 1.000000));
+    stumpVector.push_back(StumpData(269, 0.112592, 1.000000));
+    stumpVector.push_back(StumpData(269, 0.112592, 1.000000));
+    stumpVector.push_back(StumpData(269, 0.112592, 1.000000));
+    stumpVector.push_back(StumpData(269, 0.112592, 1.000000));
+    stumpVector.push_back(StumpData(269, 0.112592, 1.000000));
+    stumpVector.push_back(StumpData(269, 0.112592, 1.000000));
+    classifierParam.stumpVector = stumpVector;
+    return classifierParam;
+};
+const ClassifierParam HogPositionFitterParam::DEFAULT_ORIENT_CLASSIFIER_PARAM = 
+createDefaultOrientClassifierParam();
 
 HogPositionFitterParam::HogPositionFitterParam()
 {
@@ -95,6 +202,8 @@ HogPositionFitterParam::HogPositionFitterParam()
     openArea = DEFAULT_OPEN_AREA;
     maxBodyArea = DEFAULT_MAX_BODY_AREA;
     fillValuesLUV = DEFAULT_FILL_VALUES_LUV;
+    padBorder = DEFAULT_PAD_BORDER;
+    orientClassifier = DEFAULT_ORIENT_CLASSIFIER_PARAM;
 }
 
 // ImageGrabberParam

@@ -9,6 +9,7 @@ class PositionData
 {
     public:
 
+        bool success;
         bool isFly;
         bool isMultipleFlies;
         unsigned int bodyArea;
@@ -47,6 +48,7 @@ class HogPositionFitter
     private:
         bool showDebugWindow_;
         HogPositionFitterParam param_;
+        cv::Mat getPixelFeatureVector(cv::Mat image);
 
 };
 

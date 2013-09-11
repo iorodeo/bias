@@ -47,7 +47,7 @@ FastBinaryPredictorData FastBinaryPredictor::predict(cv::Mat mat)
 
     // Get labels - is there any reason not to use binary labels?
     data.label = cv::Mat(data.fit.size(),data.fit.type(),cv::Scalar(0.0));
-    cv::threshold(data.fit,data.label,0.0,255,CV_THRESH_BINARY);
+    cv::threshold(data.fit,data.label,0.0,255.0,CV_THRESH_BINARY);
     data.label.convertTo(data.label,CV_8UC1);
     return data;
 }
