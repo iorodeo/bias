@@ -8,6 +8,8 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 
+
+
 // PositionData
 // ----------------------------------------------------------------------------
 const bool PositionData::DEFAULT_IS_FLY = false;
@@ -88,7 +90,7 @@ HogPositionFitterData HogPositionFitter::fit(FlySegmenterData flySegmenterData)
     {
         SegmentData segmentData = *it;
         PositionData posData;
-        std::cout << "  processing segment " << cnt << " data " << std::endl;
+        //std::cout << "  processing segment " << cnt << " data " << std::endl;
 
         // Detect Body pixels 
         cv::Mat closeMat = imCloseWithDiskElem(
@@ -122,7 +124,8 @@ HogPositionFitterData HogPositionFitter::fit(FlySegmenterData flySegmenterData)
             cv::Mat maxCompPointMat;
             cv::findNonZero(maxCompMat, maxCompPointMat);
 
-            // Recompute body area for maximum connected component. /// Note, double check this w/ Kristin ///
+            // Recompute body area for maximum connected component. 
+            // Note, double check this w/ Kristin
             posData.bodyArea = cv::countNonZero(maxCompMat);
 
             // Check if area is too big for one fly
@@ -204,11 +207,7 @@ HogPositionFitterData HogPositionFitter::fit(FlySegmenterData flySegmenterData)
             //FastBinaryPredictor predictory = FastBinaryPredictor();
             //FastBinaryPredictorData predictorData = F
 
-
             // Flip pixel feature vector and rotated LUV bounding image if required.
-
-
-
 
             posData.success = true;
 
@@ -231,10 +230,10 @@ HogPositionFitterData HogPositionFitter::fit(FlySegmenterData flySegmenterData)
 
 
 
-        std::cout << "    bodyArea:       " << posData.bodyArea << std::endl;
-        std::cout << "    isBodyMat.cols: " << isBodyMat.cols << std::endl;
-        std::cout << "    isBodyMat.rows: " << isBodyMat.rows << std::endl;
-        std::cout << "    isFly:          " << posData.isFly << std::endl;
+        //std::cout << "    bodyArea:       " << posData.bodyArea << std::endl;
+        //std::cout << "    isBodyMat.cols: " << isBodyMat.cols << std::endl;
+        //std::cout << "    isBodyMat.rows: " << isBodyMat.rows << std::endl;
+        //std::cout << "    isFly:          " << posData.isFly << std::endl;
        
     } // for (it=segementDataList.begin() 
 
@@ -245,11 +244,98 @@ HogPositionFitterData HogPositionFitter::fit(FlySegmenterData flySegmenterData)
 
 cv::Mat HogPositionFitter::getPixelFeatureVector(cv::Mat image)
 {
+    //std::cout << __PRETTY_FUNCTION__ << std::endl;
+
     cv::Mat pixelFeatureVector;
+
+    unsigned int normRadius = 3;
+    double normConst = 0.001;
+
+    GradientData gradData = getGradientData(
+            image,
+            normRadius,
+            normConst,
+            GRAD_METHOD_SCHARR
+            );
+
     return pixelFeatureVector;
 }
 
 
+GradientData getGradientData(
+        cv::Mat image, 
+        unsigned int normRadius, 
+        double normConst, 
+        GradientMethod method
+        )
+{
+    //std::cout << __PRETTY_FUNCTION__ << std::endl;
+    
+    GradientData gradData;
 
+    // Find image gradient 
+    double scale = 1.0;
+    double delta = 0.0;
 
+    if (method == GRAD_METHOD_SCHARR)
+    {
+        cv::Scharr(image,gradData.dx,CV_32F,1,0,scale,delta,cv::BORDER_CONSTANT);
+        cv::Scharr(image,gradData.dy,CV_32F,0,1,scale,delta,cv::BORDER_CONSTANT);
+    }
+    else 
+    {
+        int ksize = 3;
+        cv::Sobel(image,gradData.dx,CV_32F,1,0,ksize,scale,delta,cv::BORDER_CONSTANT);
+        cv::Sobel(image,gradData.dy,CV_32F,0,1,ksize,scale,delta,cv::BORDER_CONSTANT);
+    }
 
+    // Find magnitude and orientation of gradient
+    cv::cartToPolar(gradData.dx, gradData.dy, gradData.mag, gradData.orient);
+
+    // Find normalized maginitude and gradient. Note, I don't completely 
+    // understand this normalization - discuss with Kristin.
+    cv::Mat smoothMag;
+    if (normRadius == 0)
+    {
+        smoothMag = gradData.mag;
+    }
+    else
+    {
+        cv::Mat triFilter = getTriangleFilter2D(normRadius);
+        cv::filter2D(
+                gradData.mag,
+                smoothMag,
+                -1,
+                triFilter,
+                cv::Point(-1,-1),
+                0.0,
+                cv::BORDER_CONSTANT
+                );
+    }
+    gradData.normMag = gradData.mag/(smoothMag+normConst);
+    return gradData;
+}
+
+cv::Mat getTriangleFilter1D(unsigned int normRadius)
+{ 
+    float normConst = std::pow(float(normRadius)+1,2);
+    cv::Mat f = cv::Mat(1,2*normRadius+1,CV_32FC1);
+
+    for (unsigned int i=0; i<normRadius+1; i++)
+    {
+        f.at<float>(0,i) = float(i+1)/normConst;
+    }
+    for (unsigned int i=normRadius+1; i<2*normRadius+1;i++)
+    {
+        f.at<float>(0,i) = float(2*normRadius+1-i)/normConst;
+    }
+    return f;
+}
+
+cv::Mat getTriangleFilter2D(unsigned int normRadius)
+{
+    cv::Mat f1D = getTriangleFilter1D(normRadius);
+    cv::Mat f2D = f1D.t()*f1D;
+    std::cout << "f2D: size = " << f2D.rows << " x " << f2D.cols << std::endl;
+    return f2D;
+}

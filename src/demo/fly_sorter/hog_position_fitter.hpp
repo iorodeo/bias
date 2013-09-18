@@ -53,4 +53,33 @@ class HogPositionFitter
 };
 
 
+enum GradientMethod
+{
+    GRAD_METHOD_SOBEL,
+    GRAD_METHOD_SCHARR,
+};
+
+
+class GradientData
+{
+    public:
+        cv::Mat dx;
+        cv::Mat dy;
+        cv::Mat mag;
+        cv::Mat normMag;
+        cv::Mat orient;
+};
+
+
+GradientData getGradientData(
+        cv::Mat image, 
+        unsigned int normRadius, 
+        double normConst,
+        GradientMethod method
+        );
+
+cv::Mat getTriangleFilter1D(unsigned int normRadius);
+cv::Mat getTriangleFilter2D(unsigned int normRadius);
+
+
 #endif

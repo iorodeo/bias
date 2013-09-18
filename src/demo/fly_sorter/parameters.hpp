@@ -43,6 +43,12 @@ class FlySegmenterParam
 };
 
 
+class PixelFeatureVectorParam
+{
+    public:
+};
+
+
 class HogPositionFitterParam 
 {
     public:
