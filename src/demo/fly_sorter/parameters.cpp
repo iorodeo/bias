@@ -72,6 +72,61 @@ FlySegmenterParam::FlySegmenterParam()
     classifier = DEFAULT_CLASSIFIER_PARAM;
 };
 
+
+// PixelFeatureVectorParam
+// ----------------------------------------------------------------------------
+std::vector<cv::Scalar> PixelFeatureVectorParam::createDefaultColorEdgeVector()
+{
+    std::vector<cv::Scalar> colorEdgeVector;
+    colorEdgeVector.push_back(cv::Scalar(0.0000000, 0.0000000, 0.0000000));
+    colorEdgeVector.push_back(cv::Scalar(0.2510943, 0.3135227, 0.4994996));
+    colorEdgeVector.push_back(cv::Scalar(0.2709672, 0.3162611, 0.5043570));
+    colorEdgeVector.push_back(cv::Scalar(0.2850360, 0.3181373, 0.5068931));
+    colorEdgeVector.push_back(cv::Scalar(0.2927038, 0.3213659, 0.5119556));
+    colorEdgeVector.push_back(cv::Scalar(0.3014454, 0.3250251, 0.5217634));
+    colorEdgeVector.push_back(cv::Scalar(0.3122305, 0.3280643, 0.5441338));
+    colorEdgeVector.push_back(cv::Scalar(0.3233073, 0.3335537, 0.5617753));
+    colorEdgeVector.push_back(cv::Scalar(0.3317617, 0.3394488, 0.5740660));
+    colorEdgeVector.push_back(cv::Scalar(0.3351096, 0.3517826, 0.5846382));
+    colorEdgeVector.push_back(cv::Scalar(2.0000000, 2.0000000, 2.0000000));
+    return colorEdgeVector;
+}
+
+const std::vector<cv::Scalar> PixelFeatureVectorParam::DEFAULT_COLOR_EDGE_VECTOR = 
+createDefaultColorEdgeVector();
+
+std::vector<double> PixelFeatureVectorParam::createDefaultGradMagEdgeVector()
+{
+    std::vector<double> gradMagEdgeVector;
+    gradMagEdgeVector.push_back(0.0 );
+    gradMagEdgeVector.push_back(0.0999999493360519);
+    gradMagEdgeVector.push_back(0.447888605296612);
+    gradMagEdgeVector.push_back(0.717480659484863);
+    gradMagEdgeVector.push_back(1.08998268842697);
+    gradMagEdgeVector.push_back(100.0);
+    return gradMagEdgeVector;
+}
+
+const std::vector<double> PixelFeatureVectorParam::DEFAULT_GRAD_MAG_EDGE_VECTOR = 
+createDefaultGradMagEdgeVector();
+
+std::vector<double> PixelFeatureVectorParam::createDefaultGradOriEdgeVector()
+{
+    std::vector<double> gradOriEdgeVector;
+    gradOriEdgeVector.push_back(0.523598775598299);
+    gradOriEdgeVector.push_back(1.5707963267949);
+    gradOriEdgeVector.push_back(2.61799387799149);
+    return gradOriEdgeVector;
+}
+
+const std::vector<double> PixelFeatureVectorParam::DEFAULT_GRAD_ORI_EDGE_VECTOR = 
+createDefaultGradOriEdgeVector();
+
+PixelFeatureVectorParam::PixelFeatureVectorParam()
+{
+
+};
+
 // HogPositionFitterParam
 // ----------------------------------------------------------------------------
 

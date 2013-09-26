@@ -46,6 +46,19 @@ class FlySegmenterParam
 class PixelFeatureVectorParam
 {
     public:
+        std::vector<cv::Scalar> colorEdgeVector;
+        static const std::vector<cv::Scalar> DEFAULT_COLOR_EDGE_VECTOR;
+        static std::vector<cv::Scalar> createDefaultColorEdgeVector();
+
+        std::vector<double> gradMagEdgeVector;     
+        static const std::vector<double> DEFAULT_GRAD_MAG_EDGE_VECTOR;
+        static std::vector<double> createDefaultGradMagEdgeVector();
+
+        std::vector<double> gradOriEdgeVector;
+        static const std::vector<double> DEFAULT_GRAD_ORI_EDGE_VECTOR;
+        static std::vector<double> createDefaultGradOriEdgeVector();
+
+        PixelFeatureVectorParam();
 };
 
 
