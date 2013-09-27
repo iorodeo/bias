@@ -242,17 +242,14 @@ HogPositionFitterData HogPositionFitter::fit(FlySegmenterData flySegmenterData)
     } // for (it=segementDataList.begin() 
 
     return fitterData;
-
 }
 
 
 cv::Mat HogPositionFitter::getPixelFeatureVector(cv::Mat image)
 {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
-    std::cout <<  "(x) image.cols = " << image.cols << ", (y) image.rows = " << image.rows << std::endl;
 
-
-    // Get Gradient data
+    // Get Gradient data, magintude, orientation, etc.
     GradientData gradData = getGradientData(
             image,
             param_.pixelFeatureVector.gradNormRadius,
@@ -260,15 +257,59 @@ cv::Mat HogPositionFitter::getPixelFeatureVector(cv::Mat image)
             GRAD_METHOD_SCHARR
             );
 
+    // Get mask filled (due rotation) from true image data
+    cv::Mat fillMask = getFillMask(image);
+
+    std::vector<double> meanColorVector;
+    std::vector<double> meanGradMagVector;
+    std::vector<double> histColorVector;
+    std::vector<double> histGradMagVector;
+    std::vector<double> histGradOriVector;
+
+    for (int i=0; i<param_.pixelFeatureVector.binParam.size(); i++)
+    {
+        unsigned int numX = param_.pixelFeatureVector.binParam[i].numX;
+        unsigned int numY = param_.pixelFeatureVector.binParam[i].numY;
+        double binWidth = double(image.cols-1)/double(numX);
+        double binHeight = double(image.rows-1)/double(numY);
+
+        // Loop over spacial bins
+        for (int indX=0; indX < numX; indX++)
+        {
+            for (int indY=0; indY < numY; indY++)
+            {
+                int x = int(std::round(indX*binWidth));
+                int y = int(std::round(indY*binHeight));
+
+                // create ROI and get views of image and fill mask 
+                cv::Rect roiRect = cv::Rect(x,y,binWidth,binHeight);
+                cv::Mat subImage = image(roiRect);
+                cv::Mat subFillMask = fillMask(roiRect);
+
+
+                // Compute mean of max normalized gradient magnitude
+                cv::Mat normMagMax = gradData.normMagMax(roiRect);
+                cv::Scalar meanGradMag = cv::mean(normMagMax,subFillMask);
+                meanGradMagVector.push_back(meanGradMag.val[0]);
+
+                //cv::Mat oriOfNormMagMax = gradData.oriOfNormMagMax(roiRect);
+
+                std::cout << meanMag.val[0] << std::endl;
+
+
+            }
+        } 
+    }
+
+
+    cv::Mat pixelFeatureVector;
+    return pixelFeatureVector;
+}
+
+
+cv::Mat HogPositionFitter::getFillMask(cv::Mat image)
+{
     // Create mask which is 0 on filled in values (due to rotation)
-    // Don't need to create whole matrix - figure out how fill values are being cast.
-    cv::Mat fillValuesMat = cv::Mat(
-            image.size(),
-            image.type(), 
-            255.0*param_.fillValuesLUV // Scale
-            ); 
-    //cv::Mat fillMask = image != fillValuesMat;
-   
     cv::Mat fillMask = cv::Mat(image.size(), CV_8UC1, cv::Scalar(255));
 
     for (int i=0; i<image.cols; i++)
@@ -276,13 +317,11 @@ cv::Mat HogPositionFitter::getPixelFeatureVector(cv::Mat image)
         for (int j=0; j<image.rows; j++)
         {
             cv::Vec3b pixVec = image.at<cv::Vec3b>(j,i);
-            cv::Vec3b fillVec = fillValuesMat.at<cv::Vec3b>(j,i);
             bool isEqual = true; 
             for (int k=0; k<3; k++)
             {
                 int val = int(pixVec.val[k]);
-                int fillVal = int(fillVec.val[k]);
-                //std::cout << fillVal << " ";
+                int fillVal = int(std::round(255.0*param_.fillValuesLUV.val[k])); // Scale
                 if (val != fillVal)
                 { 
                     isEqual = false;
@@ -292,55 +331,16 @@ cv::Mat HogPositionFitter::getPixelFeatureVector(cv::Mat image)
             {
                 fillMask.at<uchar>(j,i) = 0;
             }
-            //std::cout << std::endl;
         }
     }
-
 
     // Erode mask slightly to get rid of any gradient at fill bndry 
     unsigned int elemDiam = 2*param_.pixelFeatureVector.fillBndryErodeRadius+1;
     cv::Size elemSize = cv::Size(elemDiam,elemDiam);
     cv::Mat structElem = cv::getStructuringElement(cv::MORPH_ELLIPSE, elemSize);
     cv::erode(fillMask,fillMask,structElem);
-    cv::imshow("maskWindow", fillMask);
 
-
-    std::vector<double> meanColor;
-    std::vector<double> meanGradMag;
-    std::vector<double> histColor;
-    std::vector<double> histGradMag;
-    std::vector<double> histGradOri;
-
-    for (int i=0; i<param_.pixelFeatureVector.binParam.size(); i++)
-    {
-        unsigned int numX = param_.pixelFeatureVector.binParam[i].numX;
-        unsigned int numY = param_.pixelFeatureVector.binParam[i].numY;
-        double binWidth = double(image.cols-1)/double(numX);
-        double binHeight = double(image.rows-1)/double(numY);
-
-        std::cout << "  binParam(" << i << ") = " << numX << ", " << numY << std::endl;
-
-        // Loop over spacial bins
-        for (int indX=0; indX < numX; indX++)
-        {
-            for (int indY=0; indY < numY; indY++)
-            {
-                int x = int(std::round(indX*binWidth));
-                int y = int(std::round(indY*binHeight));
-                cv::Rect roiRect = cv::Rect(x,y,binWidth,binHeight);
-                cv::Mat subImage = image(roiRect);
-                cv::Mat normMagMax = gradData.normMagMax(roiRect);
-                cv::Mat oriOfNormMagMax = gradData.oriOfNormMagMax(roiRect);
-
-                std::cout << "    roiRect: " << roiRect.x << ", " << roiRect.y << ", " << roiRect.width << ", " << roiRect.height << std::endl;
-
-            }
-        } 
-    }
-
-
-    cv::Mat pixelFeatureVector;
-    return pixelFeatureVector;
+    return fillMask;
 }
 
 

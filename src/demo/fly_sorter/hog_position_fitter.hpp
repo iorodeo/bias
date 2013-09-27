@@ -49,6 +49,7 @@ class HogPositionFitter
         bool showDebugWindow_;
         HogPositionFitterParam param_;
         cv::Mat getPixelFeatureVector(cv::Mat image);
+        cv::Mat getFillMask(cv::Mat image);
 
 };
 
