@@ -294,7 +294,7 @@ cv::Mat HogPositionFitter::getPixelFeatureVector(cv::Mat image)
 
                 //cv::Mat oriOfNormMagMax = gradData.oriOfNormMagMax(roiRect);
 
-                std::cout << meanMag.val[0] << std::endl;
+                std::cout << meanGradMag.val[0] << std::endl;
 
 
             }
