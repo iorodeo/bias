@@ -43,9 +43,28 @@ class FlySegmenterParam
 };
 
 
+class BinParam
+{
+    public:
+        unsigned int numX;
+        unsigned int numY;
+        BinParam();
+        BinParam(unsigned int numX_, unsigned int numY_);
+};
+
 class PixelFeatureVectorParam
 {
     public:
+
+        unsigned int gradNormRadius;
+        static const unsigned int DEFAULT_GRAD_NORM_RADIUS;
+
+        double gradNormConst;
+        static const double DEFAULT_GRAD_NORM_CONST;
+
+        unsigned int fillBndryErodeRadius;
+        static const unsigned int DEFAULT_FILL_BNDRY_ERODE_RADIUS;
+
         std::vector<cv::Scalar> colorEdgeVector;
         static const std::vector<cv::Scalar> DEFAULT_COLOR_EDGE_VECTOR;
         static std::vector<cv::Scalar> createDefaultColorEdgeVector();
@@ -57,6 +76,10 @@ class PixelFeatureVectorParam
         std::vector<double> gradOriEdgeVector;
         static const std::vector<double> DEFAULT_GRAD_ORI_EDGE_VECTOR;
         static std::vector<double> createDefaultGradOriEdgeVector();
+
+        std::vector<BinParam> binParam;
+        static const std::vector<BinParam> DEFAULT_BIN_PARAM;
+        static std::vector<BinParam> createDefaultBinParam();
 
         PixelFeatureVectorParam();
 };
@@ -84,6 +107,8 @@ class HogPositionFitterParam
         ClassifierParam orientClassifier;
         static const ClassifierParam DEFAULT_ORIENT_CLASSIFIER_PARAM;
         static ClassifierParam createDefaultOrientClassifierParam();
+
+        PixelFeatureVectorParam pixelFeatureVector;
 
         HogPositionFitterParam();
 };

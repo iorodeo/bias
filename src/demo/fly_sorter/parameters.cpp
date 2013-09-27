@@ -31,9 +31,7 @@ ClassifierParam::ClassifierParam()
 // FlySegmenterParam
 // ----------------------------------------------------------------------------
 
-// TEMPORARY - kludgey, but I just need some data for developing 
-// the fly segmenter. We will read this from a file later.
-// ----------------------------------------------------------------------------
+// TEMPORARY 
 ClassifierParam FlySegmenterParam::createDefaultClassifierParam()
 {
     ClassifierParam classifierParam;
@@ -64,7 +62,6 @@ ClassifierParam FlySegmenterParam::createDefaultClassifierParam()
 };
 const ClassifierParam FlySegmenterParam::DEFAULT_CLASSIFIER_PARAM = 
 createDefaultClassifierParam();
-// ----------------------------------------------------------------------------
 
 
 FlySegmenterParam::FlySegmenterParam()
@@ -72,9 +69,28 @@ FlySegmenterParam::FlySegmenterParam()
     classifier = DEFAULT_CLASSIFIER_PARAM;
 };
 
+// BinParam
+// ----------------------------------------------------------------------------
+BinParam::BinParam()
+{
+    numX = 0;
+    numY = 0;
+}
+
+BinParam::BinParam(unsigned int numX_, unsigned int numY_)
+{
+    numX = numX_;
+    numY = numY_;
+}
+
 
 // PixelFeatureVectorParam
 // ----------------------------------------------------------------------------
+const unsigned int PixelFeatureVectorParam::DEFAULT_GRAD_NORM_RADIUS = 5;
+const double PixelFeatureVectorParam::DEFAULT_GRAD_NORM_CONST = 0.005;  // Needs scaling by 255 (??)
+const unsigned int PixelFeatureVectorParam::DEFAULT_FILL_BNDRY_ERODE_RADIUS = 2;
+
+// TEMPORARY  - needs scaling by 255 (??)
 std::vector<cv::Scalar> PixelFeatureVectorParam::createDefaultColorEdgeVector()
 {
     std::vector<cv::Scalar> colorEdgeVector;
@@ -91,10 +107,10 @@ std::vector<cv::Scalar> PixelFeatureVectorParam::createDefaultColorEdgeVector()
     colorEdgeVector.push_back(cv::Scalar(2.0000000, 2.0000000, 2.0000000));
     return colorEdgeVector;
 }
-
 const std::vector<cv::Scalar> PixelFeatureVectorParam::DEFAULT_COLOR_EDGE_VECTOR = 
 createDefaultColorEdgeVector();
 
+// TEMPORARY  - needs scaling by 255 (??)
 std::vector<double> PixelFeatureVectorParam::createDefaultGradMagEdgeVector()
 {
     std::vector<double> gradMagEdgeVector;
@@ -106,10 +122,10 @@ std::vector<double> PixelFeatureVectorParam::createDefaultGradMagEdgeVector()
     gradMagEdgeVector.push_back(100.0);
     return gradMagEdgeVector;
 }
-
 const std::vector<double> PixelFeatureVectorParam::DEFAULT_GRAD_MAG_EDGE_VECTOR = 
 createDefaultGradMagEdgeVector();
 
+// TEMPORARY 
 std::vector<double> PixelFeatureVectorParam::createDefaultGradOriEdgeVector()
 {
     std::vector<double> gradOriEdgeVector;
@@ -118,13 +134,30 @@ std::vector<double> PixelFeatureVectorParam::createDefaultGradOriEdgeVector()
     gradOriEdgeVector.push_back(2.61799387799149);
     return gradOriEdgeVector;
 }
-
 const std::vector<double> PixelFeatureVectorParam::DEFAULT_GRAD_ORI_EDGE_VECTOR = 
 createDefaultGradOriEdgeVector();
 
+// TEMPORARY 
+std::vector<BinParam> PixelFeatureVectorParam::createDefaultBinParam()
+{
+    std::vector<BinParam> binParam;
+    binParam.push_back(BinParam(1,5));
+    binParam.push_back(BinParam(3,5));
+    binParam.push_back(BinParam(3,1));
+    return binParam;
+}
+const std::vector<BinParam> PixelFeatureVectorParam::DEFAULT_BIN_PARAM = 
+createDefaultBinParam();
+
 PixelFeatureVectorParam::PixelFeatureVectorParam()
 {
-
+    gradNormRadius = DEFAULT_GRAD_NORM_RADIUS;
+    gradNormConst = DEFAULT_GRAD_NORM_CONST;
+    fillBndryErodeRadius = DEFAULT_FILL_BNDRY_ERODE_RADIUS;
+    colorEdgeVector = DEFAULT_COLOR_EDGE_VECTOR;
+    gradMagEdgeVector = DEFAULT_GRAD_MAG_EDGE_VECTOR;
+    gradOriEdgeVector = DEFAULT_GRAD_ORI_EDGE_VECTOR;
+    binParam = DEFAULT_BIN_PARAM;
 };
 
 // HogPositionFitterParam
@@ -137,9 +170,7 @@ const cv::Scalar HogPositionFitterParam::DEFAULT_FILL_VALUES_LUV =
 cv::Scalar(0.3703704,0.3259259,0.4962940); 
 const double HogPositionFitterParam::DEFAULT_PAD_BORDER = 1.1;
 
-// TEMPORARY - kludgey, but I just need some data for developing 
-// the fly segmenter. We will read this from a file later.
-// ----------------------------------------------------------------------------
+// TEMPORARY 
 ClassifierParam HogPositionFitterParam::createDefaultOrientClassifierParam()
 {
     ClassifierParam classifierParam;

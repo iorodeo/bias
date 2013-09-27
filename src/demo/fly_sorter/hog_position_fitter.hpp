@@ -63,11 +63,13 @@ enum GradientMethod
 class GradientData
 {
     public:
-        cv::Mat dx;
-        cv::Mat dy;
-        cv::Mat mag;
-        cv::Mat normMag;
-        cv::Mat orient;
+        cv::Mat dx;              // derivative w.r.t. x
+        cv::Mat dy;              // derivative w.r.t. y
+        cv::Mat mag;             // gradient magnitude
+        cv::Mat ori;             // gradient orientation
+        cv::Mat normMag;         // normalized gradient magnitude
+        cv::Mat normMagMax;      // maximum (over all channels) of normalized gradient magnitude
+        cv::Mat oriOfNormMagMax; // orientation of maximum gradient
 };
 
 
