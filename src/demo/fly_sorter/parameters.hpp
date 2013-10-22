@@ -9,6 +9,8 @@
 #include "rtn_status.hpp"
 #include <opencv2/core/core.hpp>
 
+extern const double PixelScaleFactor;
+
 using namespace bias;
 
 class StumpData 
@@ -69,13 +71,13 @@ class PixelFeatureVectorParam
         static const std::vector<cv::Scalar> DEFAULT_COLOR_EDGE_VECTOR;
         static std::vector<cv::Scalar> createDefaultColorEdgeVector();
 
-        std::vector<double> gradMagEdgeVector;     
-        static const std::vector<double> DEFAULT_GRAD_MAG_EDGE_VECTOR;
-        static std::vector<double> createDefaultGradMagEdgeVector();
+        std::vector<float> gradMagEdgeVector;     
+        static const std::vector<float> DEFAULT_GRAD_MAG_EDGE_VECTOR;
+        static std::vector<float> createDefaultGradMagEdgeVector();
 
-        std::vector<double> gradOriEdgeVector;
-        static const std::vector<double> DEFAULT_GRAD_ORI_EDGE_VECTOR;
-        static std::vector<double> createDefaultGradOriEdgeVector();
+        std::vector<float> gradOriEdgeVector;
+        static const std::vector<float> DEFAULT_GRAD_ORI_EDGE_VECTOR;
+        static std::vector<float> createDefaultGradOriEdgeVector();
 
         std::vector<BinParam> binParam;
         static const std::vector<BinParam> DEFAULT_BIN_PARAM;

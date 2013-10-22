@@ -36,7 +36,7 @@ FastBinaryPredictorData FastBinaryPredictor::predict(cv::Mat mat)
                 StumpData stumpData = param_.stumpVector[k];
                 cv::Vec3b elem = mat.at<cv::Vec3b>(i,j);
                 // Note, would be better to determine the max value from the image type.  
-                float chanValue = float(elem[stumpData.channel])/255.0; 
+                float chanValue = float(elem[stumpData.channel])/PixelScaleFactor;  // Scale
                 if (chanValue < stumpData.threshold)
                 {
                     data.fit.at<float>(i,j) = data.fit.at<float>(i,j) - stumpData.value;

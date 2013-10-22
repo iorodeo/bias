@@ -3,6 +3,7 @@
 #include "json_utils.hpp"
 #include <iostream>
 
+const double PixelScaleFactor = 255.0;
 
 // StumpData
 // ---------------------------------------------------------------------------
@@ -111,9 +112,9 @@ const std::vector<cv::Scalar> PixelFeatureVectorParam::DEFAULT_COLOR_EDGE_VECTOR
 createDefaultColorEdgeVector();
 
 // TEMPORARY  - needs scaling by 255 (??)
-std::vector<double> PixelFeatureVectorParam::createDefaultGradMagEdgeVector()
+std::vector<float> PixelFeatureVectorParam::createDefaultGradMagEdgeVector()
 {
-    std::vector<double> gradMagEdgeVector;
+    std::vector<float> gradMagEdgeVector;
     gradMagEdgeVector.push_back(0.0 );
     gradMagEdgeVector.push_back(0.0999999493360519);
     gradMagEdgeVector.push_back(0.447888605296612);
@@ -122,19 +123,19 @@ std::vector<double> PixelFeatureVectorParam::createDefaultGradMagEdgeVector()
     gradMagEdgeVector.push_back(100.0);
     return gradMagEdgeVector;
 }
-const std::vector<double> PixelFeatureVectorParam::DEFAULT_GRAD_MAG_EDGE_VECTOR = 
+const std::vector<float> PixelFeatureVectorParam::DEFAULT_GRAD_MAG_EDGE_VECTOR = 
 createDefaultGradMagEdgeVector();
 
 // TEMPORARY 
-std::vector<double> PixelFeatureVectorParam::createDefaultGradOriEdgeVector()
+std::vector<float> PixelFeatureVectorParam::createDefaultGradOriEdgeVector()
 {
-    std::vector<double> gradOriEdgeVector;
+    std::vector<float> gradOriEdgeVector;
     gradOriEdgeVector.push_back(0.523598775598299);
     gradOriEdgeVector.push_back(1.5707963267949);
     gradOriEdgeVector.push_back(2.61799387799149);
     return gradOriEdgeVector;
 }
-const std::vector<double> PixelFeatureVectorParam::DEFAULT_GRAD_ORI_EDGE_VECTOR = 
+const std::vector<float> PixelFeatureVectorParam::DEFAULT_GRAD_ORI_EDGE_VECTOR = 
 createDefaultGradOriEdgeVector();
 
 // TEMPORARY 
