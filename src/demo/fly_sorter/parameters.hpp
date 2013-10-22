@@ -75,9 +75,9 @@ class PixelFeatureVectorParam
         static const std::vector<float> DEFAULT_GRAD_MAG_EDGE_VECTOR;
         static std::vector<float> createDefaultGradMagEdgeVector();
 
-        std::vector<float> gradOriEdgeVector;
-        static const std::vector<float> DEFAULT_GRAD_ORI_EDGE_VECTOR;
-        static std::vector<float> createDefaultGradOriEdgeVector();
+        std::vector<float> gradOriCentVector;
+        static const std::vector<float> DEFAULT_GRAD_ORI_CENT_VECTOR;
+        static std::vector<float> createDefaultGradOriCentVector();
 
         std::vector<BinParam> binParam;
         static const std::vector<BinParam> DEFAULT_BIN_PARAM;

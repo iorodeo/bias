@@ -27,6 +27,7 @@ FastBinaryPredictorData FastBinaryPredictor::predict(cv::Mat mat)
 
     // Get fit values - what does fit standfor ... fitness? ask Kristin
     data.fit = cv::Mat(mat.size(), CV_32FC1, cv::Scalar(-param_.offset));
+
     for (int i=0; i<mat.rows;i++)
     {
         for (int j=0; j<mat.cols; j++)
@@ -34,21 +35,34 @@ FastBinaryPredictorData FastBinaryPredictor::predict(cv::Mat mat)
             for (int k=0; k<param_.stumpVector.size(); k++)
             {
                 StumpData stumpData = param_.stumpVector[k];
-                cv::Vec3b elem = mat.at<cv::Vec3b>(i,j);
-                // Note, would be better to determine the max value from the image type.  
-                float chanValue = float(elem[stumpData.channel])/PixelScaleFactor;  // Scale
+
+                float chanValue = 0.0;
+
+                if (mat.type() == CV_8U)
+                {
+                    cv::Vec3b elem = mat.at<cv::Vec3b>(i,j);
+                    chanValue = float(elem[stumpData.channel])/PixelScaleFactor;  // Scale
+                }
+                else if( mat.type() == CV_64F )
+                {
+                }
+
                 if (chanValue < stumpData.threshold)
                 {
                     data.fit.at<float>(i,j) = data.fit.at<float>(i,j) - stumpData.value;
                 }
+
             } 
         } 
     } 
+
+   
 
     // Get labels - is there any reason not to use binary labels?
     data.label = cv::Mat(data.fit.size(),data.fit.type(),cv::Scalar(0.0));
     cv::threshold(data.fit,data.label,0.0,255.0,CV_THRESH_BINARY);
     data.label.convertTo(data.label,CV_8UC1);
+
     return data;
 }
 

@@ -3,10 +3,10 @@
 #include "fast_binary_predictor.hpp"
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <cfloat>
 #include <iostream>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-
 
 
 
@@ -205,11 +205,18 @@ HogPositionFitterData HogPositionFitter::fit(FlySegmenterData flySegmenterData)
                     );
 
             // Get pixel feature vector
-            cv::Mat pixelFeatureVector = getPixelFeatureVector(rotBoundingImageLUV);
+            std::vector<double> pixelFeatureVector = getPixelFeatureVector(rotBoundingImageLUV);
+
+            // Get pixel feature vector as opencv Mat
+            int vectorSize = pixelFeatureVector.size();
+            cv::Mat pixelFeatureMat = cv::Mat(1,1, CV_64F(pixelFeatureVector.size()));
+            //for (int i=0; i<pixelFeatureVector.size(); i++)
+            //{
+            //    pixelFeatureMat.at<cv::Vec<double, >(i,0) = pixelFeatureVector[i];
+            //}
 
             // Classify orientation
             //FastBinaryPredictor predictory = FastBinaryPredictor();
-            //FastBinaryPredictorData predictorData = F
 
             // Flip pixel feature vector and rotated LUV bounding image if required.
 
@@ -245,7 +252,7 @@ HogPositionFitterData HogPositionFitter::fit(FlySegmenterData flySegmenterData)
 }
 
 
-cv::Mat HogPositionFitter::getPixelFeatureVector(cv::Mat image)
+std::vector<double> HogPositionFitter::getPixelFeatureVector(cv::Mat image)
 {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 
@@ -261,25 +268,11 @@ cv::Mat HogPositionFitter::getPixelFeatureVector(cv::Mat image)
     cv::Mat fillMask = getFillMask(image);
 
     // Sub-vectors for storing pixel feature vector data
-    std::vector<double> meanGradMagVector;
-    std::vector<double> histGradMagVector;
+    std::vector<double> meanGradMagVector; // Done
+    std::vector<double> histGradMagVector; // Done
+    std::vector<double> histGradOriVector; // Done
     std::vector<double> meanColorVector;
     std::vector<double> histColorVector;
-    std::vector<double> histGradOriVector;
-
-    // Parameters for creating the normalized gradient magnitude histogram - used in calcHist 
-    int histGradMagNumImages = 1;
-    int histGradMagChannels[] = {0};
-    int histGradMagNumDim = 1;
-    int histGradMagSize[] = {int(param_.pixelFeatureVector.gradMagEdgeVector.size())-1};
-    float *histGradMagEdgeArray = &param_.pixelFeatureVector.gradMagEdgeVector[0];
-    const float *histGradMagRanges[] = {histGradMagEdgeArray};
-    bool histGradMagUniform = false;
-    bool histGradMagAccum = false;
-
-    // Parameters for creating the gradient orientation histogram - used in calcHist
-
-
 
     for (int i=0; i<param_.pixelFeatureVector.binParam.size(); i++)
     {
@@ -296,52 +289,270 @@ cv::Mat HogPositionFitter::getPixelFeatureVector(cv::Mat image)
                 int x = int(std::round(indX*binWidth));
                 int y = int(std::round(indY*binHeight));
 
-                // create ROI and get views of image and fill mask 
+                // Create ROI and get views of image and fill mask 
                 cv::Rect roiRect = cv::Rect(x,y,binWidth,binHeight);
                 cv::Mat subImage = image(roiRect);
                 cv::Mat subFillMask = fillMask(roiRect);
 
-                // Compute mean of max normalized gradient magnitude
-                cv::Mat normGradMagMax = gradData.normMagMax(roiRect);
-                cv::Scalar meanGradMag = cv::mean(normGradMagMax,subFillMask);
+                // Find mean of max normalized gradient magnitude
+                cv::Mat normGradMag = gradData.normMagMax(roiRect);
+                cv::Scalar meanGradMag = cv::mean(normGradMag,subFillMask);
                 meanGradMagVector.push_back(meanGradMag.val[0]);
 
-                // Calculate histogram for normalized gradient magnitudes
-                cv::Mat histNormGradMag;
-                cv::calcHist(
-                        &normGradMagMax,
-                        histGradMagNumImages,
-                        histGradMagChannels,
-                        subFillMask,
-                        histNormGradMag,
-                        histGradMagNumDim,
-                        histGradMagSize,
-                        histGradMagRanges,
-                        histGradMagUniform,
-                        histGradMagAccum
+                // Calculate histogram of the normalized gradient magnitude
+                std::vector<double> histGradMagSubVector = getHistGradMag(
+                        normGradMag,
+                        subFillMask
                         );
-                int histNormGradMagSum = cv::sum(histNormGradMag)[0];
-                for (int ii=0; ii<histNormGradMag.rows; ii++)
+
+                histGradMagVector.insert(
+                        histGradMagVector.end(), 
+                        histGradMagSubVector.begin(), 
+                        histGradMagSubVector.end()
+                        );
+
+                // Calculate histogram of gradient orientation
+                cv::Mat gradOri = gradData.oriOfNormMagMax(roiRect);
+                std::vector<double> histGradOriSubVector = getHistGradOri(
+                        gradOri, 
+                        normGradMag, 
+                        subFillMask
+                        );
+
+                histGradOriVector.insert(
+                        histGradOriVector.end(),
+                        histGradOriSubVector.begin(),
+                        histGradOriSubVector.end()
+                        );
+
+                // Find mean of color values
+                cv::Scalar meanColor = cv::mean(subImage,subFillMask);
+                for (int k=0; k<subImage.channels(); k++)
                 {
-                    float frac = histNormGradMag.at<float>(ii,0)/float(histNormGradMagSum);
-                    histGradMagVector.push_back(frac);
+                    meanColorVector.push_back(meanColor.val[k]);
                 }
 
-                // Calculate histogram for gradient orientation
-              
+                // Calculate histograms of color values.
+                std::vector<double> histColorSubVector = getHistColor(
+                        subImage,
+                        subFillMask
+                        );
+               
+                histColorVector.insert(
+                        histColorVector.end(),
+                        histColorSubVector.begin(),
+                        histColorSubVector.end()
+                        );
 
-                //cv::Mat oriOfNormMagMax = gradData.oriOfNormMagMax(roiRect);
+            } // for (int indY
 
-                //std::cout << meanGradMag.val[0] << std::endl;
+        }  // for (int indX
+
+    } // for( int i
+
+    // Create pixel feature vector
+    std::vector<double> pixelFeatureVector;
+
+    pixelFeatureVector.insert(
+            pixelFeatureVector.end(),
+            meanGradMagVector.begin(),
+            meanGradMagVector.end()
+            );
+
+    pixelFeatureVector.insert(
+            pixelFeatureVector.end(),
+            meanColorVector.begin(),
+            meanColorVector.end()
+            );
+
+    pixelFeatureVector.insert(
+            pixelFeatureVector.end(),
+            histColorVector.begin(),
+            histColorVector.end()
+            );
+
+    pixelFeatureVector.insert(
+            pixelFeatureVector.end(),
+            histGradMagVector.begin(),
+            histGradMagVector.end()
+            );
+
+    pixelFeatureVector.insert(
+            pixelFeatureVector.end(),
+            histGradOriVector.begin(),
+            histGradOriVector.end()
+            );
+
+    //std::cout << pixelFeatureVector.size() << std::endl;
+
+    return pixelFeatureVector;
+}
 
 
+std::vector<double> HogPositionFitter::getHistGradOri(
+        cv::Mat gradOri, 
+        cv::Mat normGradMag, 
+        cv::Mat mask
+        )
+{
+    std::vector<float> centVect = param_.pixelFeatureVector.gradOriCentVector;
+
+    // Create histogram bins
+    std::vector<float> bins;
+    double minValGradOri,  maxValGradOri;
+    cv::minMaxLoc(gradOri,&minValGradOri,&maxValGradOri,0,0,mask);
+    if (centVect.size() == 1)
+    {
+        bins.push_back(minValGradOri);
+        bins.push_back(centVect[0]);
+        bins.push_back(maxValGradOri);
+    }
+    else
+    {
+        for (int i=0; i<centVect.size()-1; i++)
+        {
+            float posLower = centVect[i];
+            float posUpper = centVect[i+1];
+            float binWidth = std::fabs(posUpper - posLower);
+            float binValue;
+            if (i ==0 )
+            {
+                binValue = std::min(posLower - 0.5*binWidth + FLT_EPSILON, minValGradOri);
+                bins.push_back(binValue);
             }
-        } 
+
+            binValue = posLower + 0.5*binWidth + FLT_EPSILON; 
+            bins.push_back(binValue);
+
+            if(i == centVect.size()-2)
+            {
+                binValue =std::max(posUpper + 0.5*binWidth + FLT_EPSILON, maxValGradOri);
+                bins.push_back(binValue);
+            }
+        }
     }
 
+    // Initialize histogram values and compute histogram
+    double totalCount = 0.0;
+    std::vector<double> histValues;
+    for (int i=0; i<bins.size()-1; i++)
+    {
+        histValues.push_back(0.0);
+    }
 
-    cv::Mat pixelFeatureVector;
-    return pixelFeatureVector;
+    for (int i=0; i<gradOri.rows; i++)
+    {
+        for (int j=0; j<gradOri.cols; j++)
+        {
+            for (int k=0; k<bins.size()-1; k++)
+            {
+                float oriValue = gradOri.at<float>(i,j);
+                float weight = normGradMag.at<float>(i,j); 
+                if ((oriValue >= bins[k]) && (oriValue < bins[k+1]))
+                {
+                    histValues[k] = double(histValues[k] + weight);
+                    totalCount += histValues[k]; 
+                }
+            } 
+        }
+    }
+
+    // Normalize histogram values
+    for (int i=0; i<histValues.size(); i++)
+    {
+        histValues[i] = histValues[i]/totalCount;
+    }
+
+    return histValues;
+}
+
+
+std::vector<double> HogPositionFitter::getHistGradMag(cv::Mat normGradMag, cv::Mat mask)
+{
+    cv::Mat histNormGradMagMat;
+    std::vector<double> histNormGradMagVec;
+
+    // Parameters for creating the normalized gradient magnitude histogram - used in calcHist 
+    int histNumImages = 1;
+    int histChannels[] = {0};
+    int histNumDim = 1;
+    int histSize[] = {int(param_.pixelFeatureVector.gradMagEdgeVector.size())-1};
+    float *histEdgeArray = &param_.pixelFeatureVector.gradMagEdgeVector[0];
+    const float *histRanges[] = {histEdgeArray};
+    bool histUniform = false;
+    bool histAccumulate = false;
+
+    // Calculate histogram for normalized gradient magnitudes
+    cv::calcHist(
+            &normGradMag,
+            histNumImages,
+            histChannels,
+            mask,
+            histNormGradMagMat,
+            histNumDim,
+            histSize,
+            histRanges,
+            histUniform,
+            histAccumulate
+            );
+
+    // Normalize histogram 
+    double histSum = cv::sum(histNormGradMagMat)[0];
+    for (int i=0; i<histNormGradMagMat.rows; i++)
+    {
+        double frac = histNormGradMagMat.at<float>(i,0)/histSum;
+        histNormGradMagVec.push_back(frac);
+    }
+    return histNormGradMagVec;
+}
+
+
+std::vector<double> HogPositionFitter::getHistColor(cv::Mat subImage, cv::Mat mask)
+{
+    cv::vector<cv::Scalar> colorEdgeVector = param_.pixelFeatureVector.colorEdgeVector;
+    cv::vector<double> histColorVec;
+
+    for (int k=0; k<subImage.channels(); k++)
+    {
+        cv::Mat histColorMat;
+
+        // Parameters for createing color histogram
+        int histNumImages = 1;
+        int histChannels[] = {k};
+        int histNumDim = 1;
+        int histSize[] = {int(colorEdgeVector.size())-1};
+        std::vector<float> histEdgeVector;
+        for (int i=0; i<colorEdgeVector.size(); i++)
+        {
+            histEdgeVector.push_back(colorEdgeVector[i].val[k]*PixelScaleFactor);
+        }
+        const float *histRanges[] = {&histEdgeVector[0]};
+        bool histUniform = false;
+        bool histAccumulate = false;
+
+        // Calculate histogram
+        cv::calcHist(
+                &subImage,
+                histNumImages,
+                histChannels,
+                mask,
+                histColorMat,
+                histNumDim,
+                histSize,
+                histRanges,
+                histUniform,
+                histAccumulate
+                );
+
+        // Normalize histogram and add to histogram vector
+        double histSum = cv::sum(histColorMat)[0];
+        for (int i=0; i<histColorMat.rows; i++)
+        {
+            double frac = histColorMat.at<float>(i,0)/histSum;
+            histColorVec.push_back(frac);
+        }
+    }
+    return histColorVec;
 }
 
 
@@ -411,6 +622,22 @@ GradientData getGradientData(
 
     // Find magnitude and orientation of gradient
     cv::cartToPolar(gradData.dx, gradData.dy, gradData.mag, gradData.ori);
+
+    // Reduce orientation so that is is modulo pi 
+    for (int i=0; i<gradData.ori.rows; i++) 
+    {
+        for (int j=0; j<gradData.ori.cols; j++)
+        {
+            cv::Vec3f oriVec = gradData.ori.at<cv::Vec3f>(i,j);
+            cv::Vec3f oriVecMod;
+
+            for (int k=0; k<3; k++)
+            {
+                oriVecMod = std::fmod(oriVec[k],M_PI);
+            }
+            gradData.ori.at<cv::Vec3f>(i,j) = oriVecMod;
+        }
+    }
 
     // Find normalized maginitude and gradient. 
     cv::Mat smoothMag;

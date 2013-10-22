@@ -3,6 +3,7 @@
 #include "parameters.hpp"
 #include "fly_segmenter.hpp"
 #include <list>
+#include <vector>
 #include <opencv2/core/core.hpp>
 
 class PositionData
@@ -48,9 +49,11 @@ class HogPositionFitter
     private:
         bool showDebugWindow_;
         HogPositionFitterParam param_;
-        cv::Mat getPixelFeatureVector(cv::Mat image);
         cv::Mat getFillMask(cv::Mat image);
-
+        std::vector<double> getPixelFeatureVector(cv::Mat image);
+        std::vector<double> getHistGradMag(cv::Mat normGradMag, cv::Mat mask);
+        std::vector<double> getHistGradOri(cv::Mat gradOri, cv::Mat normGradMag, cv::Mat mask);
+        std::vector<double> getHistColor(cv::Mat subImage, cv::Mat mask);
 };
 
 
@@ -83,6 +86,11 @@ GradientData getGradientData(
 
 cv::Mat getTriangleFilter1D(unsigned int normRadius);
 cv::Mat getTriangleFilter2D(unsigned int normRadius);
+
+
+
+
+
 
 
 #endif

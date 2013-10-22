@@ -127,16 +127,16 @@ const std::vector<float> PixelFeatureVectorParam::DEFAULT_GRAD_MAG_EDGE_VECTOR =
 createDefaultGradMagEdgeVector();
 
 // TEMPORARY 
-std::vector<float> PixelFeatureVectorParam::createDefaultGradOriEdgeVector()
+std::vector<float> PixelFeatureVectorParam::createDefaultGradOriCentVector()
 {
-    std::vector<float> gradOriEdgeVector;
-    gradOriEdgeVector.push_back(0.523598775598299);
-    gradOriEdgeVector.push_back(1.5707963267949);
-    gradOriEdgeVector.push_back(2.61799387799149);
-    return gradOriEdgeVector;
+    std::vector<float> gradOriCentVector;
+    gradOriCentVector.push_back(0.523598775598299);
+    gradOriCentVector.push_back(1.5707963267949);
+    gradOriCentVector.push_back(2.61799387799149);
+    return gradOriCentVector;
 }
-const std::vector<float> PixelFeatureVectorParam::DEFAULT_GRAD_ORI_EDGE_VECTOR = 
-createDefaultGradOriEdgeVector();
+const std::vector<float> PixelFeatureVectorParam::DEFAULT_GRAD_ORI_CENT_VECTOR = 
+createDefaultGradOriCentVector();
 
 // TEMPORARY 
 std::vector<BinParam> PixelFeatureVectorParam::createDefaultBinParam()
@@ -157,7 +157,7 @@ PixelFeatureVectorParam::PixelFeatureVectorParam()
     fillBndryErodeRadius = DEFAULT_FILL_BNDRY_ERODE_RADIUS;
     colorEdgeVector = DEFAULT_COLOR_EDGE_VECTOR;
     gradMagEdgeVector = DEFAULT_GRAD_MAG_EDGE_VECTOR;
-    gradOriEdgeVector = DEFAULT_GRAD_ORI_EDGE_VECTOR;
+    gradOriCentVector = DEFAULT_GRAD_ORI_CENT_VECTOR;
     binParam = DEFAULT_BIN_PARAM;
 };
 
