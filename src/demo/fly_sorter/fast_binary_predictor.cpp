@@ -43,8 +43,15 @@ FastBinaryPredictorData FastBinaryPredictor::predict(cv::Mat mat)
                     cv::Vec3b elem = mat.at<cv::Vec3b>(i,j);
                     chanValue = float(elem[stumpData.channel])/PixelScaleFactor;  // Scale
                 }
-                else if( mat.type() == CV_64F )
+                else if(mat.type() == CV_32F)
                 {
+                    cv::Vec3f elem = mat.at<cv::Vec3f>(i,j);
+                    chanValue = float(elem[stumpData.channel]);
+                }
+                else if (mat.type() == CV_64F)
+                {
+                    cv::Vec3d elem = mat.at<cv::Vec3d>(i,j);
+                    chanValue = float(elem[stumpData.channel]);
                 }
 
                 if (chanValue < stumpData.threshold)
@@ -56,7 +63,6 @@ FastBinaryPredictorData FastBinaryPredictor::predict(cv::Mat mat)
         } 
     } 
 
-   
 
     // Get labels - is there any reason not to use binary labels?
     data.label = cv::Mat(data.fit.size(),data.fit.type(),cv::Scalar(0.0));
@@ -64,5 +70,12 @@ FastBinaryPredictorData FastBinaryPredictor::predict(cv::Mat mat)
     data.label.convertTo(data.label,CV_8UC1);
 
     return data;
+}
+
+ 
+FastBinaryPredictorData FastBinaryPredictor::predict(std::vector<double> vec)
+{
+
+
 }
 

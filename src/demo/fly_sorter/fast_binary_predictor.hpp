@@ -18,6 +18,7 @@ class FastBinaryPredictor
         FastBinaryPredictor(ClassifierParam param);
         void setClassifierParam(ClassifierParam param);
         FastBinaryPredictorData predict(cv::Mat mat);
+        FastBinaryPredictorData predict(std::vector<double> vec);
 
     private:
         ClassifierParam param_;

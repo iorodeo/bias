@@ -207,13 +207,17 @@ HogPositionFitterData HogPositionFitter::fit(FlySegmenterData flySegmenterData)
             // Get pixel feature vector
             std::vector<double> pixelFeatureVector = getPixelFeatureVector(rotBoundingImageLUV);
 
-            // Get pixel feature vector as opencv Mat
-            int vectorSize = pixelFeatureVector.size();
-            cv::Mat pixelFeatureMat = cv::Mat(1,1, CV_64F(pixelFeatureVector.size()));
+
             //for (int i=0; i<pixelFeatureVector.size(); i++)
             //{
-            //    pixelFeatureMat.at<cv::Vec<double, >(i,0) = pixelFeatureVector[i];
+            //    double val0 = pixelFeatureVector[i];
+            //    //double val1 = pixelFeatureMat.at<double>(0,0,i);
+            //    double val1 = 0.0;
+            //    std::cout << i << ": " << val0 << ", " << val1 << std::endl; 
             //}
+
+
+
 
             // Classify orientation
             //FastBinaryPredictor predictory = FastBinaryPredictor();
