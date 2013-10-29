@@ -3,11 +3,13 @@
 #include "parameters.hpp"
 #include <opencv2/core/core.hpp>
 
-class FastBinaryPredictorData
+
+template <class T>
+class FastBinaryPredictorData 
 {
     public:
-        cv::Mat fit;
-        cv::Mat label;
+        T fit;
+        T label;
 };
 
 
@@ -17,8 +19,8 @@ class FastBinaryPredictor
         FastBinaryPredictor();
         FastBinaryPredictor(ClassifierParam param);
         void setClassifierParam(ClassifierParam param);
-        FastBinaryPredictorData predict(cv::Mat mat);
-        FastBinaryPredictorData predict(std::vector<double> vec);
+        FastBinaryPredictorData<cv::Mat> predict(cv::Mat mat);
+        FastBinaryPredictorData<double> predict(std::vector<double> vec);
 
     private:
         ClassifierParam param_;

@@ -21,9 +21,9 @@ void FastBinaryPredictor::setClassifierParam(ClassifierParam param)
 }
 
 
-FastBinaryPredictorData FastBinaryPredictor::predict(cv::Mat mat)
+FastBinaryPredictorData<cv::Mat> FastBinaryPredictor::predict(cv::Mat mat)
 {
-    FastBinaryPredictorData data;
+    FastBinaryPredictorData<cv::Mat> data;
 
     // Get fit values - what does fit standfor ... fitness? ask Kristin
     data.fit = cv::Mat(mat.size(), CV_32FC1, cv::Scalar(-param_.offset));
@@ -73,9 +73,14 @@ FastBinaryPredictorData FastBinaryPredictor::predict(cv::Mat mat)
 }
 
  
-FastBinaryPredictorData FastBinaryPredictor::predict(std::vector<double> vec)
+FastBinaryPredictorData<double> FastBinaryPredictor::predict(std::vector<double> vec)
 {
+    FastBinaryPredictorData<double> data;
 
-
+    for (int k=0; k<param_.stumpVector.size(); k++)
+    {
+        StumpData stumpData = param_.stumpVector[k];
+    }
+    return data;
 }
 

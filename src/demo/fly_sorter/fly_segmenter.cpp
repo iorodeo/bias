@@ -74,7 +74,7 @@ FlySegmenterData FlySegmenter::segment(BlobFinderData blobFinderData)
 
         // Segment using fast binary predict.
         // --------------------------------------------------------
-        FastBinaryPredictorData predictorData;
+        FastBinaryPredictorData<cv::Mat> predictorData;
         predictorData = fastBinaryPredictor_.predict(boundingImageLUV);
 
         SegmentData segmentData;

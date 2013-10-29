@@ -10,7 +10,7 @@ class SegmentData
 {
     public:
         SegmentData() {};
-        FastBinaryPredictorData predictorData;
+        FastBinaryPredictorData<cv::Mat> predictorData;
         cv::Mat boundingImageLUV;
         BlobData blobData;
 };
