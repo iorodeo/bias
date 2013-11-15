@@ -13,7 +13,7 @@ FlySegmenter::FlySegmenter() {}
 FlySegmenter::FlySegmenter(FlySegmenterParam param)
 {
     setParam(param);
-    showDebugWindow_ = true; 
+    showDebugWindow_ = false; 
     if (showDebugWindow_) 
     {
         cv::namedWindow(

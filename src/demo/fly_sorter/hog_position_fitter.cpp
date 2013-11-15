@@ -46,7 +46,7 @@ HogPositionFitter::HogPositionFitter() { };
 HogPositionFitter::HogPositionFitter(HogPositionFitterParam param)
 {
     setParam(param);
-    showDebugWindow_ = false;
+    showDebugWindow_ = true;
     if (showDebugWindow_)
     {
         cv::namedWindow(
@@ -117,55 +117,10 @@ HogPositionFitterData HogPositionFitter::fit(
             posData.isFly = true;
             cv::Mat maxCompMat = findMaxConnectedComponent(isBodyMat);
 
-            // Write images to file
-            // ----------------------------------------------------------------------
-            //QString imgFileName = QString("is_body_%1_%2.bmp").arg(frameCount).arg(cnt);
-            //cv::imwrite(imgFileName.toStdString(),segmentData.predictorData.label);
-            
-            //QString lDataFileName = QString("l_data_%1.txt").arg(frameCount);
-            //QString uDataFileName = QString("u_data_%1.txt").arg(frameCount);
-            //QString vDataFileName = QString("v_data_%1.txt").arg(frameCount);
-            //std::ofstream lDataStream;
-            //std::ofstream uDataStream;
-            //std::ofstream vDataStream;
-            //lDataStream.open(lDataFileName.toStdString());
-            //uDataStream.open(uDataFileName.toStdString());
-            //vDataStream.open(vDataFileName.toStdString());
-
-            //cv::Mat imgLUV = cv::Mat(img.size(),img.type(),cv::Scalar(0,0,0));
-            //cv::cvtColor(img,imgLUV,CV_BGR2Luv);
-
-            //for (int i=18; i<346; i++) 
-            //{
-            //    for (int j=625; j<916; j++)
-            //    {
-            //        cv::Vec3b pixVec = imgLUV.at<cv::Vec3b>(i,j);
-            //        lDataStream << pixVec[0] << " ";
-            //        uDataStream << pixVec[1] << " ";
-            //        vDataStream << pixVec[2] << " ";
-
-            //    }
-            //    lDataStream << std::endl;
-            //    uDataStream << std::endl;
-            //    vDataStream << std::endl;
-            //}
-
-            //lDataStream.close();
-            //uDataStream.close();
-            //vDataStream.close();
-            // ----------------------------------------------------------------------
-
-            //// Output sample conversions
-            //std::cout << "converting " << std::endl;
-            //cv::Mat imgBRG255 = cv::Mat(10,10,CV_8UC3,cv::Scalar(0,0,255));
-            //cv::Mat imgLuv = BgrToLuvConverter::convert(imgBRG255);
-            //cv::Vec3f pixVec = imgLuv.at<cv::Vec3f>(0,0);
-            //std::cout << "get pixVec elem" << std::endl;
-            //for (int k=0; k<3; k++)
-            //{
-            //    std::cout << k << ": " << pixVec[k] << std::endl;
-            //}
-            //std::cout << std::endl;
+            //// Write images to file
+            //// ----------------------------------------------------------------------
+            //QString imgFileName = QString("maxCompMat_%1_%2.bmp").arg(frameCount).arg(cnt);
+            //cv::imwrite(imgFileName.toStdString(),maxCompMat);
             //// ----------------------------------------------------------------------
 
             // Find pixel nonzero pixel locations of maximum connected component.
@@ -245,7 +200,7 @@ HogPositionFitterData HogPositionFitter::fit(
                     imageSize,
                     cv::INTER_LINEAR,
                     cv::BORDER_CONSTANT,
-                    param_.fillValuesLUV*PixelScaleFactor  // Scale
+                    param_.fillValuesLUV
                     );
 
             // Get pixel feature vector use to classify orientation
@@ -287,7 +242,7 @@ std::vector<double> HogPositionFitter::getPixelFeatureVector(cv::Mat image)
     GradientData gradData = getGradientData(
             image,
             param_.pixelFeatureVector.gradNormRadius,
-            param_.pixelFeatureVector.gradNormConst*PixelScaleFactor, // Scale
+            param_.pixelFeatureVector.gradNormConst, // Scale
             GRAD_METHOD_SCHARR
             );
 
@@ -551,7 +506,7 @@ std::vector<double> HogPositionFitter::getHistColor(cv::Mat subImage, cv::Mat ma
         std::vector<float> histEdgeVector;
         for (int i=0; i<colorEdgeVector.size(); i++)
         {
-            histEdgeVector.push_back(colorEdgeVector[i].val[k]*PixelScaleFactor);
+            histEdgeVector.push_back(colorEdgeVector[i].val[k]);
         }
         const float *histRanges[] = {&histEdgeVector[0]};
         bool histUniform = false;
@@ -597,7 +552,7 @@ cv::Mat HogPositionFitter::getFillMask(cv::Mat image)
             for (int k=0; k<3; k++)
             {
                 int val = int(pixVec.val[k]);
-                int fillVal = int(std::round(PixelScaleFactor*param_.fillValuesLUV.val[k])); // Scale
+                int fillVal = int(std::round(param_.fillValuesLUV.val[k])); // Scale
                 if (val != fillVal)
                 { 
                     isEqual = false;
