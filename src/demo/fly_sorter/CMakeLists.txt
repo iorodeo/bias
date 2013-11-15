@@ -16,6 +16,7 @@ set(
     fly_segmenter.hpp
     hog_position_fitter.hpp
     identity_tracker.hpp
+    bgr_to_luv_converter.hpp
     )
 
 set(
@@ -28,6 +29,7 @@ set(
     fly_segmenter.cpp
     hog_position_fitter.cpp
     identity_tracker.cpp
+    bgr_to_luv_converter.cpp
     )
 
 qt4_wrap_ui(fly_sorter_FORMS_HEADERS ${fly_sorter_FORMS}) 

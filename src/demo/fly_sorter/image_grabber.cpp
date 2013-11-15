@@ -24,6 +24,14 @@ ImageData::ImageData()
     dateTime = 0.0;
 }
 
+
+void ImageData::copy(ImageData imageData)
+{
+    frameCount = imageData.frameCount;
+    dateTime = imageData.dateTime;
+    imageData.mat.copyTo(mat);
+}
+
 // ImageGrabber
 // ----------------------------------------------------------------------------
 

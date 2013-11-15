@@ -6,6 +6,11 @@
 #include <vector>
 #include <opencv2/core/core.hpp>
 
+//Debug 
+//--------------------------------------
+#include <fstream>
+//--------------------------------------
+
 class PositionData
 {
     public:
@@ -20,6 +25,7 @@ class PositionData
         double ellipseMinorAxis;
         double ellipseAngle;
         cv::Mat covarianceMatrix;
+        std::vector<double> pixelFeatureVector;
 
         PositionData();
 
@@ -44,7 +50,7 @@ class HogPositionFitter
         HogPositionFitter();
         HogPositionFitter(HogPositionFitterParam param);
         void setParam(HogPositionFitterParam param);
-        HogPositionFitterData fit(FlySegmenterData flySegmenterData);
+        HogPositionFitterData fit(FlySegmenterData flySegmenterData, unsigned long frameCount, cv::Mat img);
 
     private:
         bool showDebugWindow_;
@@ -86,9 +92,6 @@ GradientData getGradientData(
 
 cv::Mat getTriangleFilter1D(unsigned int normRadius);
 cv::Mat getTriangleFilter2D(unsigned int normRadius);
-
-
-
 
 
 

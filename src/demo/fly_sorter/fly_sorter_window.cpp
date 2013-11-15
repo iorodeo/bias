@@ -85,11 +85,13 @@ void FlySorterWindow::startPushButtonClicked()
 {
     if (!running_)
     {
+        debugStream.open("debug_data.txt");
         startImageCapture();
     }
     else
     {
         stopImageCapture();
+        debugStream.close();
     }
 }
 
@@ -141,7 +143,6 @@ void FlySorterWindow::startImageCapture()
         running_ = true;
         startPushButtonPtr_ -> setText("Stop");
         reloadPushButtonPtr_ -> setEnabled(false);
-
     }
 }
 
@@ -182,21 +183,62 @@ void FlySorterWindow::httpOutputCheckBoxChanged(int state)
 
 void FlySorterWindow::newImage(ImageData imageData)
 {
-    imageData_ = imageData;
-
-    BlobFinder blobFinder = BlobFinder(param_.blobFinder);
-    blobFinderData_ = blobFinder.findBlobs(imageData.mat);
-
-    FlySegmenter flySegmenter = FlySegmenter(param_.flySegmenter);
-    flySegmenterData_ = flySegmenter.segment(blobFinderData_);
-
-    HogPositionFitter hogPositionFitter = HogPositionFitter(param_.hogPositionFitter);
-    hogPositionFitterData_ = hogPositionFitter.fit(flySegmenterData_);
-    
-
-    if ((httpOutputCheckBoxPtr_ -> checkState()) == Qt::Checked)
+    if (running_)
     {
-        sendDataViaHttpRequest();
+        imageData_.copy(imageData);
+
+        BlobFinder blobFinder = BlobFinder(param_.blobFinder);
+        blobFinderData_ = blobFinder.findBlobs(imageData_.mat);
+
+        FlySegmenter flySegmenter = FlySegmenter(param_.flySegmenter);
+        flySegmenterData_ = flySegmenter.segment(blobFinderData_);
+
+        HogPositionFitter hogPositionFitter = HogPositionFitter(param_.hogPositionFitter);
+        hogPositionFitterData_ = hogPositionFitter.fit(flySegmenterData_,imageData.frameCount,imageData.mat);
+
+        // Write pixel feature vector to debug file
+        // -----------------------------------------------------------------------
+        std::cout << imageData.frameCount << std::endl;
+
+        debugStream << "Frame Count: " << imageData.frameCount << std::endl;
+        if (hogPositionFitterData_.positionDataList.empty())
+        {
+            debugStream << "  " << "PositionData: None"  << std::endl;
+        }
+        else
+        {
+            debugStream << "  " << "PositionData: "  << std::endl;
+
+            PositionDataList::iterator it;
+            unsigned int count;
+            for (
+                    it  = hogPositionFitterData_.positionDataList.begin(), count=0;
+                    it != hogPositionFitterData_.positionDataList.end();
+                    it++, count++
+                )
+            {
+                PositionData posData = *it;
+                debugStream << std::endl;
+                debugStream << "    " << "count:            " << count << std::endl;
+                debugStream << "    " << "success:          " << posData.success << std::endl;
+                debugStream << "    " << "isFly:            " << posData.isFly << std::endl; 
+                debugStream << "    " << "isMultipleFlies:  " << posData.isMultipleFlies << std::endl;
+                debugStream << "    " << "bodyArea:         " << posData.bodyArea << std::endl;
+                debugStream << std::endl;
+            }
+        }
+
+        // Write images to file
+        // ----------------------------------------------------------------------
+        //QString imgFileName = QString("image_%1.bmp").arg(imageData.frameCount);
+        //cv::imwrite(imgFileName.toStdString(),imageData.mat);
+        // ----------------------------------------------------------------------
+
+
+        if ((httpOutputCheckBoxPtr_ -> checkState()) == Qt::Checked)
+        {
+            sendDataViaHttpRequest();
+        }
     }
 }
 

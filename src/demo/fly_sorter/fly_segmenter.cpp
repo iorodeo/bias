@@ -3,6 +3,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include "bgr_to_luv_converter.hpp"
 
 
 // FlySegmenter
@@ -12,7 +13,7 @@ FlySegmenter::FlySegmenter() {}
 FlySegmenter::FlySegmenter(FlySegmenterParam param)
 {
     setParam(param);
-    showDebugWindow_ = false; 
+    showDebugWindow_ = true; 
     if (showDebugWindow_) 
     {
         cv::namedWindow(
@@ -37,13 +38,11 @@ FlySegmenterData FlySegmenter::segment(BlobFinderData blobFinderData)
 
     for (it=blobDataList.begin(), cnt=0; it!=blobDataList.end(); it++, cnt++)
     {
-        //std::cout << "blobData" << std::endl;
 
         BlobData blobData = *it;
 
         // Convert bounding image to LUV. Note, as I'm developing 
         // w/ mono camera may need ot convert image to BGR image. 
-        // --------------------------------------------------------
         cv::Mat boundingImageBGR;
         if (blobData.boundingImage.type() != CV_8UC3)
         {
@@ -64,16 +63,12 @@ FlySegmenterData FlySegmenter::segment(BlobFinderData blobFinderData)
             boundingImageBGR = blobData.boundingImage;
         }
 
-        cv::Mat boundingImageLUV = cv::Mat(
-                boundingImageBGR.size(), 
-                boundingImageBGR.type(),
-                cv::Scalar(0,0,0)
-                );
-
-        cv::cvtColor(boundingImageBGR,boundingImageLUV,CV_BGR2Luv);
+        // Convert BGR image to LUV image - use custom converter instead of
+        // cvtColor as Matlab training used Piotr Dollar's rgbConvert which
+        // gives different results than cvtColor.
+        cv::Mat boundingImageLUV = BgrToLuvConverter::convert(boundingImageBGR);
 
         // Segment using fast binary predict.
-        // --------------------------------------------------------
         FastBinaryPredictorData<cv::Mat> predictorData;
         predictorData = fastBinaryPredictor_.predict(boundingImageLUV);
 
@@ -81,30 +76,6 @@ FlySegmenterData FlySegmenter::segment(BlobFinderData blobFinderData)
         segmentData.blobData = blobData;
         segmentData.predictorData = predictorData;
         segmentData.boundingImageLUV = boundingImageLUV;
-
-        // DEVELOP TEMPORARY  - fake images
-        // --------------------------------------------------------
-        if (false)
-        {
-            if (false)
-            {
-                cv::Mat bwImage = cv::Mat(boundingImageBGR.size(),CV_8U);
-                cv::Mat threshImage = cv::Mat(boundingImageBGR.size(),CV_8U);
-                cv::cvtColor(boundingImageBGR,bwImage,CV_BGR2GRAY);
-                cv::threshold( bwImage, threshImage, 100, 255, CV_THRESH_BINARY);
-                segmentData.predictorData.label = 255 - threshImage;
-            }
-            if (true)
-            {
-                cv::Mat testImage = cv::Mat(cv::Size(300,200),CV_8UC1,cv::Scalar(0));
-                cv::rectangle(testImage,cv::Point(100,75), cv::Point(200,125),cv::Scalar(255),CV_FILLED); 
-                //cv::rectangle(testImage,cv::Point(125,100),cv::Point(150,150),cv::Scalar(255),CV_FILLED);
-                //cv::rectangle(testImage,cv::Point(110,50),cv::Point(120,100),cv::Scalar(255),CV_FILLED);
-                segmentData.predictorData.label = testImage;
-            }
-        }
-        // --------------------------------------------------------
-        
         flySegmenterData.segmentDataList.push_back(segmentData);
 
         // DEVELOP TEMPORARY    
@@ -113,8 +84,8 @@ FlySegmenterData FlySegmenter::segment(BlobFinderData blobFinderData)
         {
             if (cnt==0)
             {
-                //cv::imshow("FlySegmenter", segmentData.predictorData.label);
-                cv::imshow("FlySegmenter", boundingImageLUV);
+                cv::imshow("FlySegmenter", segmentData.predictorData.label);
+                //cv::imshow("FlySegmenter", boundingImageLUV);
             }
         }
         // ---------------------------------------------------------

@@ -31,33 +31,32 @@ ClassifierParam::ClassifierParam()
 
 // FlySegmenterParam
 // ----------------------------------------------------------------------------
-
 // TEMPORARY 
 ClassifierParam FlySegmenterParam::createDefaultClassifierParam()
 {
     ClassifierParam classifierParam;
     classifierParam.offset = 1.0784;
     std::vector<StumpData> stumpVector;
-    stumpVector.push_back(StumpData(1, 0.3104,  1.9041));
-    stumpVector.push_back(StumpData(0, 0.2488, -1.6640));
-    stumpVector.push_back(StumpData(1, 0.3220,  1.2792));
-    stumpVector.push_back(StumpData(0, 0.2755, -1.2068));
-    stumpVector.push_back(StumpData(0, 0.2150, -0.8031));
-    stumpVector.push_back(StumpData(0, 0.2953, -1.0494));
-    stumpVector.push_back(StumpData(0, 0.2488,  0.5447));
-    stumpVector.push_back(StumpData(1, 0.3282,  0.7124));
-    stumpVector.push_back(StumpData(0, 0.2864, -0.7560));
-    stumpVector.push_back(StumpData(1, 0.3104, -0.3242));
-    stumpVector.push_back(StumpData(2, 0.5268,  0.3865));
-    stumpVector.push_back(StumpData(0, 0.2306, -0.3901));
-    stumpVector.push_back(StumpData(1, 0.3104, -0.3375));
-    stumpVector.push_back(StumpData(0, 0.1943, -0.9171));
-    stumpVector.push_back(StumpData(2, 0.4783, -0.8111));
-    stumpVector.push_back(StumpData(1, 0.2925,  0.4803));
-    stumpVector.push_back(StumpData(0, 0.2488,  0.2992));
-    stumpVector.push_back(StumpData(2, 0.5184,  0.2862));
-    stumpVector.push_back(StumpData(1, 0.3220, -0.2660));
-    stumpVector.push_back(StumpData(0, 0.2351, -0.2786));
+    stumpVector.push_back(StumpData(1, 0.31038210,  1.90413685));
+    stumpVector.push_back(StumpData(0, 0.24879919, -1.66404788));
+    stumpVector.push_back(StumpData(1, 0.32196228,  1.27919675));
+    stumpVector.push_back(StumpData(0, 0.27552019, -1.20679509));
+    stumpVector.push_back(StumpData(0, 0.21504118, -0.80305969));
+    stumpVector.push_back(StumpData(0, 0.29528950, -1.04935294));
+    stumpVector.push_back(StumpData(0, 0.24879919,  0.54471722));
+    stumpVector.push_back(StumpData(1, 0.32824126,  0.71242407));
+    stumpVector.push_back(StumpData(0, 0.28644574, -0.75598466));
+    stumpVector.push_back(StumpData(1, 0.31038520, -0.32418233));
+    stumpVector.push_back(StumpData(2, 0.52677906,  0.38645774));
+    stumpVector.push_back(StumpData(0, 0.23060922, -0.39011362));
+    stumpVector.push_back(StumpData(1, 0.31038520, -0.33751456));
+    stumpVector.push_back(StumpData(0, 0.19429915, -0.91714671));
+    stumpVector.push_back(StumpData(2, 0.47833817, -0.81114635));
+    stumpVector.push_back(StumpData(1, 0.29249324,  0.48032049));
+    stumpVector.push_back(StumpData(0, 0.24879919,  0.29919018));
+    stumpVector.push_back(StumpData(2, 0.51842082,  0.28624030));
+    stumpVector.push_back(StumpData(1, 0.32204734, -0.26596010));
+    stumpVector.push_back(StumpData(0, 0.23514625, -0.27858646));
     classifierParam.stumpVector = stumpVector;
     return classifierParam;
 };

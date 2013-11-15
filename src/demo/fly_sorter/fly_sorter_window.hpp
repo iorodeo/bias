@@ -13,6 +13,11 @@
 #include <QPointer>
 #include <opencv2/core/core.hpp>
 
+// Debug
+// ------------------------------
+#include <fstream>
+// ------------------------------
+
 class QThreadPool;
 class ImageGrabber;
 class QTimer;
@@ -86,8 +91,10 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         void loadParamFromFile();
         void updateParamText();
 
+
         // Devel 
         // ---------------------------------------------------------
+        std::ofstream debugStream;
         std::default_random_engine generator_;
         std::uniform_int_distribution<unsigned int> distribution_;
         // ---------------------------------------------------------

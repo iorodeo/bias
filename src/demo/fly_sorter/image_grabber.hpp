@@ -28,6 +28,7 @@ class ImageData
         unsigned long frameCount;
         double dateTime;
         ImageData();
+        void copy(ImageData);
 };
 
 

@@ -8,6 +8,11 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
+// DEBUG
+// --------------------------------
+#include <fstream>
+#include "bgr_to_luv_converter.hpp"
+// --------------------------------
 
 
 // PositionData
@@ -36,7 +41,7 @@ HogPositionFitterData::HogPositionFitterData() {};
 //  HogPositionFitter
 //  ---------------------------------------------------------------------------
 
-HogPositionFitter::HogPositionFitter() {};
+HogPositionFitter::HogPositionFitter() { };
 
 HogPositionFitter::HogPositionFitter(HogPositionFitterParam param)
 {
@@ -44,18 +49,6 @@ HogPositionFitter::HogPositionFitter(HogPositionFitterParam param)
     showDebugWindow_ = false;
     if (showDebugWindow_)
     {
-        //cv::namedWindow(
-        //        "hogPosLabel",
-        //        CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED
-        //        );
-        //cv::namedWindow(
-        //        "hogPosClose",
-        //        CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED
-        //        );
-        //cv::namedWindow(
-        //        "hogPosIsBody",
-        //        CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED
-        //        );
         cv::namedWindow(
                 "hogPosMaxComp",
                 CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED
@@ -69,10 +62,6 @@ HogPositionFitter::HogPositionFitter(HogPositionFitterParam param)
                 CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED
                 );
     }
-    //cv::namedWindow(
-    //        "maskWindow",
-    //        CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED
-    //        );
 };
 
 void HogPositionFitter::setParam(HogPositionFitterParam param)
@@ -81,9 +70,13 @@ void HogPositionFitter::setParam(HogPositionFitterParam param)
 }
 
 
-HogPositionFitterData HogPositionFitter::fit(FlySegmenterData flySegmenterData)
+HogPositionFitterData HogPositionFitter::fit(
+        FlySegmenterData flySegmenterData, 
+        unsigned long frameCount,
+        cv::Mat img
+        )
 {
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
+    //std::cout << __PRETTY_FUNCTION__ << std::endl;
 
     HogPositionFitterData fitterData;
     SegmentDataList segmentDataList = flySegmenterData.segmentDataList;
@@ -123,6 +116,57 @@ HogPositionFitterData HogPositionFitter::fit(FlySegmenterData flySegmenterData)
             // This is big enough to be a fly - get the largest connected component
             posData.isFly = true;
             cv::Mat maxCompMat = findMaxConnectedComponent(isBodyMat);
+
+            // Write images to file
+            // ----------------------------------------------------------------------
+            //QString imgFileName = QString("is_body_%1_%2.bmp").arg(frameCount).arg(cnt);
+            //cv::imwrite(imgFileName.toStdString(),segmentData.predictorData.label);
+            
+            //QString lDataFileName = QString("l_data_%1.txt").arg(frameCount);
+            //QString uDataFileName = QString("u_data_%1.txt").arg(frameCount);
+            //QString vDataFileName = QString("v_data_%1.txt").arg(frameCount);
+            //std::ofstream lDataStream;
+            //std::ofstream uDataStream;
+            //std::ofstream vDataStream;
+            //lDataStream.open(lDataFileName.toStdString());
+            //uDataStream.open(uDataFileName.toStdString());
+            //vDataStream.open(vDataFileName.toStdString());
+
+            //cv::Mat imgLUV = cv::Mat(img.size(),img.type(),cv::Scalar(0,0,0));
+            //cv::cvtColor(img,imgLUV,CV_BGR2Luv);
+
+            //for (int i=18; i<346; i++) 
+            //{
+            //    for (int j=625; j<916; j++)
+            //    {
+            //        cv::Vec3b pixVec = imgLUV.at<cv::Vec3b>(i,j);
+            //        lDataStream << pixVec[0] << " ";
+            //        uDataStream << pixVec[1] << " ";
+            //        vDataStream << pixVec[2] << " ";
+
+            //    }
+            //    lDataStream << std::endl;
+            //    uDataStream << std::endl;
+            //    vDataStream << std::endl;
+            //}
+
+            //lDataStream.close();
+            //uDataStream.close();
+            //vDataStream.close();
+            // ----------------------------------------------------------------------
+
+            //// Output sample conversions
+            //std::cout << "converting " << std::endl;
+            //cv::Mat imgBRG255 = cv::Mat(10,10,CV_8UC3,cv::Scalar(0,0,255));
+            //cv::Mat imgLuv = BgrToLuvConverter::convert(imgBRG255);
+            //cv::Vec3f pixVec = imgLuv.at<cv::Vec3f>(0,0);
+            //std::cout << "get pixVec elem" << std::endl;
+            //for (int k=0; k<3; k++)
+            //{
+            //    std::cout << k << ": " << pixVec[k] << std::endl;
+            //}
+            //std::cout << std::endl;
+            //// ----------------------------------------------------------------------
 
             // Find pixel nonzero pixel locations of maximum connected component.
             cv::Mat maxCompPointMat;
@@ -204,27 +248,16 @@ HogPositionFitterData HogPositionFitter::fit(FlySegmenterData flySegmenterData)
                     param_.fillValuesLUV*PixelScaleFactor  // Scale
                     );
 
-            // Get pixel feature vector
-            std::vector<double> pixelFeatureVector = getPixelFeatureVector(rotBoundingImageLUV);
-
-
-            //for (int i=0; i<pixelFeatureVector.size(); i++)
-            //{
-            //    double val0 = pixelFeatureVector[i];
-            //    //double val1 = pixelFeatureMat.at<double>(0,0,i);
-            //    double val1 = 0.0;
-            //    std::cout << i << ": " << val0 << ", " << val1 << std::endl; 
-            //}
-
-
-
-
-            // Classify orientation
-            //FastBinaryPredictor predictory = FastBinaryPredictor();
+            // Get pixel feature vector use to classify orientation
+            posData.pixelFeatureVector = getPixelFeatureVector(rotBoundingImageLUV);
+            FastBinaryPredictor orientPred = FastBinaryPredictor( param_.orientClassifier);
+            FastBinaryPredictorData<double> orientData = orientPred.predict(posData.pixelFeatureVector);
 
             // Flip pixel feature vector and rotated LUV bounding image if required.
 
             posData.success = true;
+
+            fitterData.positionDataList.push_back(posData);
 
             // Temporary
             // ---------------------------------------------------------------------
@@ -232,9 +265,6 @@ HogPositionFitterData HogPositionFitter::fit(FlySegmenterData flySegmenterData)
             {
                 if (cnt==0)
                 {
-                    //cv::imshow("hogPosLabel", segmentData.predictorData.label);
-                    //cv::imshow("hogPosClose", closeMat);
-                    //cv::imshow("hogPosIsBody", isBodyMat);
                     cv::imshow("hogPosMaxComp", maxCompMat);
                     cv::imshow("boundingImageLUV", segmentData.boundingImageLUV);
                     cv::imshow("rotBoundingImageLUV", rotBoundingImageLUV);
@@ -242,13 +272,6 @@ HogPositionFitterData HogPositionFitter::fit(FlySegmenterData flySegmenterData)
             }
             // ----------------------------------------------------------------------
         }
-
-
-
-        //std::cout << "    bodyArea:       " << posData.bodyArea << std::endl;
-        //std::cout << "    isBodyMat.cols: " << isBodyMat.cols << std::endl;
-        //std::cout << "    isBodyMat.rows: " << isBodyMat.rows << std::endl;
-        //std::cout << "    isFly:          " << posData.isFly << std::endl;
        
     } // for (it=segementDataList.begin() 
 
@@ -258,7 +281,7 @@ HogPositionFitterData HogPositionFitter::fit(FlySegmenterData flySegmenterData)
 
 std::vector<double> HogPositionFitter::getPixelFeatureVector(cv::Mat image)
 {
-    std::cout << __PRETTY_FUNCTION__ << std::endl;
+    //std::cout << __PRETTY_FUNCTION__ << std::endl;
 
     // Get Gradient data, magintude, orientation, etc.
     GradientData gradData = getGradientData(
