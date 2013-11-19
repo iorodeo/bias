@@ -11,7 +11,6 @@
 // DEBUG
 // --------------------------------
 #include <fstream>
-#include "bgr_to_luv_converter.hpp"
 // --------------------------------
 
 
@@ -117,11 +116,12 @@ HogPositionFitterData HogPositionFitter::fit(
             posData.isFly = true;
             cv::Mat maxCompMat = findMaxConnectedComponent(isBodyMat);
 
-            //// Write images to file
-            //// ----------------------------------------------------------------------
+            // Write images to file
+            // ----------------------------------------------------------------------
             //QString imgFileName = QString("maxCompMat_%1_%2.bmp").arg(frameCount).arg(cnt);
+            //cv::imwrite(imgFileName.toStdString(), segmentData.predictorData.label);
             //cv::imwrite(imgFileName.toStdString(),maxCompMat);
-            //// ----------------------------------------------------------------------
+            // ----------------------------------------------------------------------
 
             // Find pixel nonzero pixel locations of maximum connected component.
             cv::Mat maxCompPointMat;
@@ -199,12 +199,28 @@ HogPositionFitterData HogPositionFitter::fit(
                     rotMat,
                     imageSize,
                     cv::INTER_LINEAR,
-                    cv::BORDER_CONSTANT,
+                    cv::BORDER_REPLICATE,
                     param_.fillValuesLUV
                     );
 
             // Get pixel feature vector use to classify orientation
             posData.pixelFeatureVector = getPixelFeatureVector(rotBoundingImageLUV);
+
+            // Write pixel feature vector to file
+            // ------------------------------------------------------------------------------------
+            if (0) 
+            {
+                std::ofstream pVecStream;
+                QString pVecFileName = QString("pVec_frm_%1_cnt_%2.txt").arg(frameCount).arg(cnt);
+                pVecStream.open(pVecFileName.toStdString());
+                for (int i=0; i<posData.pixelFeatureVector.size();i++)
+                {
+                    pVecStream << posData.pixelFeatureVector[i] << std::endl;
+                }
+                pVecStream.close();
+            }
+            // ------------------------------------------------------------------------------------
+
             FastBinaryPredictor orientPred = FastBinaryPredictor( param_.orientClassifier);
             FastBinaryPredictorData<double> orientData = orientPred.predict(posData.pixelFeatureVector);
 
@@ -212,8 +228,7 @@ HogPositionFitterData HogPositionFitter::fit(
 
             posData.success = true;
 
-            fitterData.positionDataList.push_back(posData);
-
+            fitterData.positionDataList.push_back(posData); 
             // Temporary
             // ---------------------------------------------------------------------
             if (showDebugWindow_)
@@ -242,7 +257,7 @@ std::vector<double> HogPositionFitter::getPixelFeatureVector(cv::Mat image)
     GradientData gradData = getGradientData(
             image,
             param_.pixelFeatureVector.gradNormRadius,
-            param_.pixelFeatureVector.gradNormConst, // Scale
+            param_.pixelFeatureVector.gradNormConst, 
             GRAD_METHOD_SCHARR
             );
 
@@ -428,16 +443,19 @@ std::vector<double> HogPositionFitter::getHistGradOri(
         {
             for (int k=0; k<bins.size()-1; k++)
             {
+                //std::cout << "(" << i << "," << j << "," << k << ") "; 
                 float oriValue = gradOri.at<float>(i,j);
                 float weight = normGradMag.at<float>(i,j); 
                 if ((oriValue >= bins[k]) && (oriValue < bins[k+1]))
                 {
+                    //std::cout << " add " << weight << std::endl;
                     histValues[k] = double(histValues[k] + weight);
-                    totalCount += histValues[k]; 
+                    totalCount += weight;
                 }
             } 
         }
     }
+    //std::cout << std::endl;
 
     // Normalize histogram values
     for (int i=0; i<histValues.size(); i++)
@@ -592,16 +610,15 @@ GradientData getGradientData(
 
     if (method == GRAD_METHOD_SCHARR)
     {
-        cv::Scharr(image,gradData.dx,CV_32F,1,0,scale,delta,cv::BORDER_CONSTANT);
-        cv::Scharr(image,gradData.dy,CV_32F,0,1,scale,delta,cv::BORDER_CONSTANT);
+        cv::Scharr(image,gradData.dx,CV_32F,1,0,scale,delta,cv::BORDER_REPLICATE);
+        cv::Scharr(image,gradData.dy,CV_32F,0,1,scale,delta,cv::BORDER_REPLICATE);
     }
     else 
     {
         int ksize = 3;
-        cv::Sobel(image,gradData.dx,CV_32F,1,0,ksize,scale,delta,cv::BORDER_CONSTANT);
-        cv::Sobel(image,gradData.dy,CV_32F,0,1,ksize,scale,delta,cv::BORDER_CONSTANT);
-    }
-
+        cv::Sobel(image,gradData.dx,CV_32F,1,0,ksize,scale,delta,cv::BORDER_REPLICATE);
+        cv::Sobel(image,gradData.dy,CV_32F,0,1,ksize,scale,delta,cv::BORDER_REPLICATE);
+    } 
     // Find magnitude and orientation of gradient
     cv::cartToPolar(gradData.dx, gradData.dy, gradData.mag, gradData.ori);
 
@@ -630,15 +647,28 @@ GradientData getGradientData(
     else
     {
         cv::Mat triFilter = getTriangleFilter2D(normRadius);
+        // DEBUG
+        // ---------------------------------------------------------------------
+        //float triSum = 0.0;
+        //for (int i=0; i<triFilter.rows; i++)
+        //{
+        //    for (int j=0; j<triFilter.cols; j++)
+        //    {
+        //        triSum += triFilter.at<float>(i,j);
+        //    }
+        //}
+        //std::cout << "sum " << triSum << std::endl;
+        // ---------------------------------------------------------------------
         cv::filter2D(
-                gradData.mag,
+                gradData.mag, 
                 smoothMag,
                 -1,
                 triFilter,
                 cv::Point(-1,-1),
                 0.0,
-                cv::BORDER_CONSTANT
+                cv::BORDER_REPLICATE
                 );
+
     }
     gradData.normMag = gradData.mag/(smoothMag+normConst);
 
@@ -646,12 +676,12 @@ GradientData getGradientData(
     // Also get the orientation of the gradient with the largest magniude. .  
     gradData.normMagMax = cv::Mat(gradData.normMag.size(), CV_32FC1, cv::Scalar(0.0));
     gradData.oriOfNormMagMax = cv::Mat(gradData.ori.size(), CV_32FC1, cv::Scalar(0.0));
-    for (int i=0; i<image.cols; i++)
+    for (int i=0; i<image.rows; i++)
     {
-        for (int j=0; j<image.rows; j++)
+        for (int j=0; j<image.cols; j++)
         {
-            cv::Vec3f normMagVec = gradData.normMag.at<cv::Vec3f>(j,i);
-            cv::Vec3f oriVec = gradData.ori.at<cv::Vec3f>(j,i);
+            cv::Vec3f normMagVec = gradData.normMag.at<cv::Vec3f>(i,j);
+            cv::Vec3f oriVec = gradData.ori.at<cv::Vec3f>(i,j);
             double normMagMax = 0.0;
             double oriOfNormMagMax = 0.0;
             for (int k=0; k<3; k++)
@@ -662,10 +692,76 @@ GradientData getGradientData(
                     oriOfNormMagMax = oriVec.val[k];
                 }
             }
-            gradData.normMagMax.at<float>(j,i) = normMagMax;
-            gradData.oriOfNormMagMax.at<float>(j,i) = oriOfNormMagMax; 
+            gradData.normMagMax.at<float>(i,j) = normMagMax;
+            gradData.oriOfNormMagMax.at<float>(i,j) = oriOfNormMagMax; 
         }
     }
+
+    // DEBUG
+    // --------------------------------------------------------------------------
+    static int writeCnt = 0;
+    for (int k=0; k<3; k++)
+    {
+        std::ofstream magStream;
+        std::ofstream smoStream;
+        std::ofstream imgStream;
+        std::ofstream nrmStream;
+        std::ofstream maxStream;
+
+        QString magFileName = QString("mag_%1_%2.dat").arg(k).arg(writeCnt);
+        QString smoFileName = QString("smo_%1_%2.dat").arg(k).arg(writeCnt);
+        QString imgFileName = QString("img_%1_%2.dat").arg(k).arg(writeCnt);
+        QString nrmFileName = QString("nrm_%1_%2.dat").arg(k).arg(writeCnt);
+        magStream.open(magFileName.toStdString());
+        smoStream.open(smoFileName.toStdString());
+        imgStream.open(imgFileName.toStdString());
+        nrmStream.open(nrmFileName.toStdString());
+
+        if (k==0)
+        {
+            QString maxFileName = QString("max_%1.dat").arg(writeCnt);
+            maxStream.open(maxFileName.toStdString());
+        }
+
+        for (int i=0; i<gradData.mag.rows; i++)
+        {
+            for (int j=0; j<gradData.mag.cols; j++)
+            {
+                cv::Vec3f magVec = gradData.mag.at<cv::Vec3f>(i,j);
+                cv::Vec3f smoVec = smoothMag.at<cv::Vec3f>(i,j);
+                cv::Vec3f imgVec = image.at<cv::Vec3f>(i,j);
+                cv::Vec3f nrmVec = gradData.normMag.at<cv::Vec3f>(i,j);
+                magStream << magVec[k] << " ";
+                smoStream << smoVec[k] << " ";
+                imgStream << imgVec[k] << " ";
+                nrmStream << nrmVec[k] << " ";
+                if (k==0)
+                {
+                    float maxVec = gradData.normMagMax.at<float>(i,j);
+                    maxStream << maxVec  << " ";
+                }
+            }
+            magStream << std::endl;
+            smoStream << std::endl;
+            imgStream << std::endl;
+            nrmStream << std::endl;
+            if  (k==0)
+            {
+                maxStream << std::endl;
+            }
+        }
+
+        magStream.close();
+        smoStream.close();
+        imgStream.close();
+        nrmStream.close();
+        if (k==0) 
+        {
+            maxStream.close();
+        }
+    }
+    writeCnt++;
+    // --------------------------------------------------------------------------
     return gradData;
 }
 

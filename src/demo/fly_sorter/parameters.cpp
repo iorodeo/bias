@@ -87,10 +87,10 @@ BinParam::BinParam(unsigned int numX_, unsigned int numY_)
 // PixelFeatureVectorParam
 // ----------------------------------------------------------------------------
 const unsigned int PixelFeatureVectorParam::DEFAULT_GRAD_NORM_RADIUS = 5;
-const double PixelFeatureVectorParam::DEFAULT_GRAD_NORM_CONST = 0.005;  // Needs scaling by 255 (??)
+const double PixelFeatureVectorParam::DEFAULT_GRAD_NORM_CONST = 0.005;  
 const unsigned int PixelFeatureVectorParam::DEFAULT_FILL_BNDRY_ERODE_RADIUS = 2;
 
-// TEMPORARY  - needs scaling by 255 (??)
+// TEMPORARY  
 std::vector<cv::Scalar> PixelFeatureVectorParam::createDefaultColorEdgeVector()
 {
     std::vector<cv::Scalar> colorEdgeVector;
@@ -110,7 +110,7 @@ std::vector<cv::Scalar> PixelFeatureVectorParam::createDefaultColorEdgeVector()
 const std::vector<cv::Scalar> PixelFeatureVectorParam::DEFAULT_COLOR_EDGE_VECTOR = 
 createDefaultColorEdgeVector();
 
-// TEMPORARY  - needs scaling by 255 (??)
+// TEMPORARY  
 std::vector<float> PixelFeatureVectorParam::createDefaultGradMagEdgeVector()
 {
     std::vector<float> gradMagEdgeVector;
