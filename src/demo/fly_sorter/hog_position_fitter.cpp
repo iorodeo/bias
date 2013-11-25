@@ -299,9 +299,10 @@ std::vector<double> HogPositionFitter::getPixelFeatureVector(cv::Mat image)
         for (int indX=0; indX < numX; indX++)
         {
             //----------------------------------------------------------
-            // CHECK ... is this correct order of y's reversed????
+            // CHECK ... is this correct? order of y's reversed?
             //----------------------------------------------------------
             //for (int indY=0; indY < numY; indY++)
+            //
             for (int indY=numY-1; indY >=0; indY--)
             {
                 int x = int(std::round(indX*binWidth));
@@ -381,29 +382,29 @@ std::vector<double> HogPositionFitter::getPixelFeatureVector(cv::Mat image)
             meanGradMagVector.end()
             );
 
-    //pixelFeatureVector.insert(
-    //        pixelFeatureVector.end(),
-    //        meanColorVector.begin(),
-    //        meanColorVector.end()
-    //        );
+    pixelFeatureVector.insert(
+            pixelFeatureVector.end(),
+            meanColorVector.begin(),
+            meanColorVector.end()
+            );
 
-    //pixelFeatureVector.insert(
-    //        pixelFeatureVector.end(),
-    //        histColorVector.begin(),
-    //        histColorVector.end()
-    //        );
+    pixelFeatureVector.insert(
+            pixelFeatureVector.end(),
+            histColorVector.begin(),
+            histColorVector.end()
+            );
 
-    //pixelFeatureVector.insert(
-    //        pixelFeatureVector.end(),
-    //        histGradMagVector.begin(),
-    //        histGradMagVector.end()
-    //        );
+    pixelFeatureVector.insert(
+            pixelFeatureVector.end(),
+            histGradMagVector.begin(),
+            histGradMagVector.end()
+            );
 
-    //pixelFeatureVector.insert(
-    //        pixelFeatureVector.end(),
-    //        histGradOriVector.begin(),
-    //        histGradOriVector.end()
-    //        );
+    pixelFeatureVector.insert(
+            pixelFeatureVector.end(),
+            histGradOriVector.begin(),
+            histGradOriVector.end()
+            );
 
 
     return pixelFeatureVector;
@@ -649,7 +650,7 @@ GradientData getGradientData(
     } 
 
     // Find magnitude and orientation of gradient
-    cv::cartToPolar(gradData.dx, gradData.dy, gradData.mag, gradData.ori);
+    cv::cartToPolar(gradData.dx, gradData.dy, gradData.mag, gradData.ori,false);
 
 
     // Reduce orientation so that is is modulo pi 
@@ -662,7 +663,7 @@ GradientData getGradientData(
 
             for (int k=0; k<3; k++)
             {
-                oriVecMod = std::fmod(oriVec[k],M_PI);
+                oriVecMod[k] = std::fmod(oriVec[k],M_PI);
             }
             gradData.ori.at<cv::Vec3f>(i,j) = oriVecMod;
         }
