@@ -2,6 +2,7 @@
 #include "json.hpp"
 #include <sstream>
 #include <iostream>
+#include <algorithm>
 
 namespace bias
 {
@@ -147,14 +148,22 @@ namespace bias
     }
 
 
-    BlobData::BlobData(std::vector<cv::Point> contour, cv::Mat image)
+    BlobData::BlobData(
+            std::vector<cv::Point> contour, 
+            cv::Mat image, 
+            unsigned int numPad
+            )
     {
-        setFromContour(contour,image);
+        setFromContour(contour,image, numPad);
 
     }
 
 
-    void BlobData::setFromContour(std::vector<cv::Point> contour, cv::Mat image)
+    void BlobData::setFromContour(
+            std::vector<cv::Point> contour, 
+            cv::Mat image, 
+            unsigned int numPad
+            )
     {
         contourVector = contour;
         cv::Moments moments = cv::moments(contour);
@@ -163,12 +172,24 @@ namespace bias
         if (contour.size() >= 5)
         {
             ellipse = Ellipse(contour);
-            boundingRect = cv::boundingRect(cv::Mat(contour));
+
+            cv::Rect contourRect = cv::boundingRect(cv::Mat(contour));
+            int x = std::max(0, contourRect.x-int(numPad));
+            int y = std::max(0, contourRect.y-int(numPad));
+            int w = contourRect.width + 2*numPad;
+            int h = contourRect.height + 2*numPad;
+            if ((x+w) > image.cols)
+            {
+                w = image.cols-x; 
+            }
+            if ((y+h) > image.rows)
+            {
+                h = image.rows-y;
+            }
+            boundingRect = cv::Rect(x,y,w,h);
         }
         cv::Mat subImage = image(boundingRect);
         subImage.copyTo(boundingImage);
-
-
     }
 
 

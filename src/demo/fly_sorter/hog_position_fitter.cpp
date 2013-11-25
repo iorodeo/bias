@@ -48,16 +48,20 @@ HogPositionFitter::HogPositionFitter(HogPositionFitterParam param)
     showDebugWindow_ = true;
     if (showDebugWindow_)
     {
-        cv::namedWindow(
-                "hogPosMaxComp",
-                CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED
-                );
+        //cv::namedWindow(
+        //        "hogPosMaxComp",
+        //        CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED
+        //        );
         cv::namedWindow(
                 "boundingImageLUV",
                 CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED
                 );
         cv::namedWindow(
                 "rotBoundingImageLUV",
+                CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED
+                );
+        cv::namedWindow(
+                "fillMask",
                 CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED
                 );
     }
@@ -192,15 +196,14 @@ HogPositionFitterData HogPositionFitter::fit(
                     );
            
             int imageType = segmentData.boundingImageLUV.type();
-            cv::Mat rotBoundingImageLUV = cv::Mat(imageSize,imageType);
+            cv::Mat rotBoundingImageLUV = cv::Mat(imageSize,imageType,param_.fillValuesLUV);
             cv::warpAffine(
                     segmentData.boundingImageLUV,
                     rotBoundingImageLUV,
                     rotMat,
                     imageSize,
                     cv::INTER_LINEAR,
-                    cv::BORDER_REPLICATE,
-                    param_.fillValuesLUV
+                    cv::BORDER_TRANSPARENT
                     );
 
             // Get pixel feature vector use to classify orientation
@@ -208,7 +211,7 @@ HogPositionFitterData HogPositionFitter::fit(
 
             // Write pixel feature vector to file
             // ------------------------------------------------------------------------------------
-            if (0) 
+            if (1) 
             {
                 std::ofstream pVecStream;
                 QString pVecFileName = QString("pVec_frm_%1_cnt_%2.txt").arg(frameCount).arg(cnt);
@@ -221,8 +224,8 @@ HogPositionFitterData HogPositionFitter::fit(
             }
             // ------------------------------------------------------------------------------------
 
-            FastBinaryPredictor orientPred = FastBinaryPredictor( param_.orientClassifier);
-            FastBinaryPredictorData<double> orientData = orientPred.predict(posData.pixelFeatureVector);
+            //FastBinaryPredictor orientPred = FastBinaryPredictor( param_.orientClassifier);
+            //FastBinaryPredictorData<double> orientData = orientPred.predict(posData.pixelFeatureVector);
 
             // Flip pixel feature vector and rotated LUV bounding image if required.
 
@@ -235,7 +238,7 @@ HogPositionFitterData HogPositionFitter::fit(
             {
                 if (cnt==0)
                 {
-                    cv::imshow("hogPosMaxComp", maxCompMat);
+                    //cv::imshow("hogPosMaxComp", maxCompMat);
                     cv::imshow("boundingImageLUV", segmentData.boundingImageLUV);
                     cv::imshow("rotBoundingImageLUV", rotBoundingImageLUV);
                 }
@@ -264,6 +267,11 @@ std::vector<double> HogPositionFitter::getPixelFeatureVector(cv::Mat image)
     // Get mask filled (due rotation) from true image data
     cv::Mat fillMask = getFillMask(image);
 
+    // DEBUG 
+    // -------------------------------------
+    cv::imshow("fillMask", fillMask);
+    // -------------------------------------
+
     // Sub-vectors for storing pixel feature vector data
     std::vector<double> meanGradMagVector; // Done
     std::vector<double> histGradMagVector; // Done
@@ -271,20 +279,37 @@ std::vector<double> HogPositionFitter::getPixelFeatureVector(cv::Mat image)
     std::vector<double> meanColorVector;
     std::vector<double> histColorVector;
 
+    std::cout << " ------" << std::endl;
+    std::cout << " rows = " << image.rows << std::endl;
+    std::cout << " cols = " << image.cols << std::endl;
     for (int i=0; i<param_.pixelFeatureVector.binParam.size(); i++)
     {
         unsigned int numX = param_.pixelFeatureVector.binParam[i].numX;
         unsigned int numY = param_.pixelFeatureVector.binParam[i].numY;
-        double binWidth = double(image.cols-1)/double(numX);
-        double binHeight = double(image.rows-1)/double(numY);
+        //double binWidth = double(image.cols-1)/double(numX);
+        //double binHeight = double(image.rows-1)/double(numY);
+        double binWidth = double(image.cols)/double(numX);
+        double binHeight = double(image.rows)/double(numY);
+
+        std::cout << " i= " << i << std::endl;
+        std::cout << " w = " << binWidth << std::endl;
+        std::cout << " h = " << binHeight << std::endl;
 
         // Loop over spacial bins
         for (int indX=0; indX < numX; indX++)
         {
-            for (int indY=0; indY < numY; indY++)
+            //----------------------------------------------------------
+            // CHECK ... is this correct order of y's reversed????
+            //----------------------------------------------------------
+            //for (int indY=0; indY < numY; indY++)
+            for (int indY=numY-1; indY >=0; indY--)
             {
                 int x = int(std::round(indX*binWidth));
                 int y = int(std::round(indY*binHeight));
+
+                std::cout << " indX, x = " << indX << ", " << x << std::endl;
+                std::cout << " indY, y = " << indY << ", " << y << std::endl;
+                std::cout << std::endl;
 
                 // Create ROI and get views of image and fill mask 
                 cv::Rect roiRect = cv::Rect(x,y,binWidth,binHeight);
@@ -356,31 +381,30 @@ std::vector<double> HogPositionFitter::getPixelFeatureVector(cv::Mat image)
             meanGradMagVector.end()
             );
 
-    pixelFeatureVector.insert(
-            pixelFeatureVector.end(),
-            meanColorVector.begin(),
-            meanColorVector.end()
-            );
+    //pixelFeatureVector.insert(
+    //        pixelFeatureVector.end(),
+    //        meanColorVector.begin(),
+    //        meanColorVector.end()
+    //        );
 
-    pixelFeatureVector.insert(
-            pixelFeatureVector.end(),
-            histColorVector.begin(),
-            histColorVector.end()
-            );
+    //pixelFeatureVector.insert(
+    //        pixelFeatureVector.end(),
+    //        histColorVector.begin(),
+    //        histColorVector.end()
+    //        );
 
-    pixelFeatureVector.insert(
-            pixelFeatureVector.end(),
-            histGradMagVector.begin(),
-            histGradMagVector.end()
-            );
+    //pixelFeatureVector.insert(
+    //        pixelFeatureVector.end(),
+    //        histGradMagVector.begin(),
+    //        histGradMagVector.end()
+    //        );
 
-    pixelFeatureVector.insert(
-            pixelFeatureVector.end(),
-            histGradOriVector.begin(),
-            histGradOriVector.end()
-            );
+    //pixelFeatureVector.insert(
+    //        pixelFeatureVector.end(),
+    //        histGradOriVector.begin(),
+    //        histGradOriVector.end()
+    //        );
 
-    //std::cout << pixelFeatureVector.size() << std::endl;
 
     return pixelFeatureVector;
 }
@@ -561,16 +585,18 @@ cv::Mat HogPositionFitter::getFillMask(cv::Mat image)
     // Create mask which is 0 on filled in values (due to rotation)
     cv::Mat fillMask = cv::Mat(image.size(), CV_8UC1, cv::Scalar(255));
 
-    for (int i=0; i<image.cols; i++)
+    for (int i=0; i<image.rows; i++)
     {
-        for (int j=0; j<image.rows; j++)
+        for (int j=0; j<image.cols; j++)
         {
-            cv::Vec3b pixVec = image.at<cv::Vec3b>(j,i);
+            cv::Vec3f pixVec = image.at<cv::Vec3f>(i,j);
+
             bool isEqual = true; 
             for (int k=0; k<3; k++)
             {
-                int val = int(pixVec.val[k]);
-                int fillVal = int(std::round(param_.fillValuesLUV.val[k])); // Scale
+                float val = pixVec[k];
+                float fillVal = param_.fillValuesLUV.val[k]; 
+
                 if (val != fillVal)
                 { 
                     isEqual = false;
@@ -578,7 +604,7 @@ cv::Mat HogPositionFitter::getFillMask(cv::Mat image)
             }
             if (isEqual)
             {
-                fillMask.at<uchar>(j,i) = 0;
+                fillMask.at<uchar>(i,j) = 0;
             }
         }
     }
@@ -610,17 +636,21 @@ GradientData getGradientData(
 
     if (method == GRAD_METHOD_SCHARR)
     {
+        scale = 1.0/32.0;
         cv::Scharr(image,gradData.dx,CV_32F,1,0,scale,delta,cv::BORDER_REPLICATE);
         cv::Scharr(image,gradData.dy,CV_32F,0,1,scale,delta,cv::BORDER_REPLICATE);
     }
     else 
     {
         int ksize = 3;
+        scale = 1.0/8.0;
         cv::Sobel(image,gradData.dx,CV_32F,1,0,ksize,scale,delta,cv::BORDER_REPLICATE);
         cv::Sobel(image,gradData.dy,CV_32F,0,1,ksize,scale,delta,cv::BORDER_REPLICATE);
     } 
+
     // Find magnitude and orientation of gradient
     cv::cartToPolar(gradData.dx, gradData.dy, gradData.mag, gradData.ori);
+
 
     // Reduce orientation so that is is modulo pi 
     for (int i=0; i<gradData.ori.rows; i++) 
@@ -670,7 +700,10 @@ GradientData getGradientData(
                 );
 
     }
-    gradData.normMag = gradData.mag/(smoothMag+normConst);
+
+    //gradData.normMag = gradData.mag/(smoothMag+normConst);
+    gradData.normMag = cv::Mat(gradData.mag.size(),CV_32FC3,cv::Scalar(0.0));
+
 
     // Loop over image  get maxium of gradient magnitudes (w.r.t. color) for each pixel.  
     // Also get the orientation of the gradient with the largest magniude. .  
@@ -680,18 +713,23 @@ GradientData getGradientData(
     {
         for (int j=0; j<image.cols; j++)
         {
+            cv::Vec3f magVec = gradData.mag.at<cv::Vec3f>(i,j);
+            cv::Vec3f smoothMagVec = smoothMag.at<cv::Vec3f>(i,j);
             cv::Vec3f normMagVec = gradData.normMag.at<cv::Vec3f>(i,j);
             cv::Vec3f oriVec = gradData.ori.at<cv::Vec3f>(i,j);
+
             double normMagMax = 0.0;
             double oriOfNormMagMax = 0.0;
             for (int k=0; k<3; k++)
             {
-                if (normMagVec.val[k] >= normMagMax)
+                normMagVec[k] = magVec[k]/(smoothMagVec[k] + normConst);
+                if (normMagVec[k] >= normMagMax)
                 {
-                    normMagMax = normMagVec.val[k];
-                    oriOfNormMagMax = oriVec.val[k];
+                    normMagMax = normMagVec[k];
+                    oriOfNormMagMax = oriVec[k];
                 }
             }
+            gradData.normMag.at<cv::Vec3f>(i,j) = normMagVec;
             gradData.normMagMax.at<float>(i,j) = normMagMax;
             gradData.oriOfNormMagMax.at<float>(i,j) = oriOfNormMagMax; 
         }
@@ -700,67 +738,70 @@ GradientData getGradientData(
     // DEBUG
     // --------------------------------------------------------------------------
     static int writeCnt = 0;
-    for (int k=0; k<3; k++)
+    if ( (0) && (writeCnt < 1))
     {
-        std::ofstream magStream;
-        std::ofstream smoStream;
-        std::ofstream imgStream;
-        std::ofstream nrmStream;
-        std::ofstream maxStream;
-
-        QString magFileName = QString("mag_%1_%2.dat").arg(k).arg(writeCnt);
-        QString smoFileName = QString("smo_%1_%2.dat").arg(k).arg(writeCnt);
-        QString imgFileName = QString("img_%1_%2.dat").arg(k).arg(writeCnt);
-        QString nrmFileName = QString("nrm_%1_%2.dat").arg(k).arg(writeCnt);
-        magStream.open(magFileName.toStdString());
-        smoStream.open(smoFileName.toStdString());
-        imgStream.open(imgFileName.toStdString());
-        nrmStream.open(nrmFileName.toStdString());
-
-        if (k==0)
+        for (int k=0; k<3; k++)
         {
-            QString maxFileName = QString("max_%1.dat").arg(writeCnt);
-            maxStream.open(maxFileName.toStdString());
-        }
+            std::ofstream magStream;
+            std::ofstream smoStream;
+            std::ofstream imgStream;
+            std::ofstream nrmStream;
+            std::ofstream maxStream;
 
-        for (int i=0; i<gradData.mag.rows; i++)
-        {
-            for (int j=0; j<gradData.mag.cols; j++)
+            QString magFileName = QString("mag_%1_%2.dat").arg(k).arg(writeCnt);
+            QString smoFileName = QString("smo_%1_%2.dat").arg(k).arg(writeCnt);
+            QString imgFileName = QString("img_%1_%2.dat").arg(k).arg(writeCnt);
+            QString nrmFileName = QString("nrm_%1_%2.dat").arg(k).arg(writeCnt);
+            magStream.open(magFileName.toStdString());
+            smoStream.open(smoFileName.toStdString());
+            imgStream.open(imgFileName.toStdString());
+            nrmStream.open(nrmFileName.toStdString());
+
+            if (k==0)
             {
-                cv::Vec3f magVec = gradData.mag.at<cv::Vec3f>(i,j);
-                cv::Vec3f smoVec = smoothMag.at<cv::Vec3f>(i,j);
-                cv::Vec3f imgVec = image.at<cv::Vec3f>(i,j);
-                cv::Vec3f nrmVec = gradData.normMag.at<cv::Vec3f>(i,j);
-                magStream << magVec[k] << " ";
-                smoStream << smoVec[k] << " ";
-                imgStream << imgVec[k] << " ";
-                nrmStream << nrmVec[k] << " ";
-                if (k==0)
+                QString maxFileName = QString("max_%1.dat").arg(writeCnt);
+                maxStream.open(maxFileName.toStdString());
+            }
+
+            for (int i=0; i<gradData.mag.rows; i++)
+            {
+                for (int j=0; j<gradData.mag.cols; j++)
                 {
-                    float maxVec = gradData.normMagMax.at<float>(i,j);
-                    maxStream << maxVec  << " ";
+                    cv::Vec3f magVec = gradData.mag.at<cv::Vec3f>(i,j);
+                    cv::Vec3f smoVec = smoothMag.at<cv::Vec3f>(i,j);
+                    cv::Vec3f imgVec = image.at<cv::Vec3f>(i,j);
+                    cv::Vec3f nrmVec = gradData.normMag.at<cv::Vec3f>(i,j);
+                    magStream << magVec[k] << " ";
+                    smoStream << smoVec[k] << " ";
+                    imgStream << imgVec[k] << " ";
+                    nrmStream << nrmVec[k] << " ";
+                    if (k==0)
+                    {
+                        float maxVec = gradData.normMagMax.at<float>(i,j);
+                        maxStream << maxVec  << " ";
+                    }
+                }
+                magStream << std::endl;
+                smoStream << std::endl;
+                imgStream << std::endl;
+                nrmStream << std::endl;
+                if  (k==0)
+                {
+                    maxStream << std::endl;
                 }
             }
-            magStream << std::endl;
-            smoStream << std::endl;
-            imgStream << std::endl;
-            nrmStream << std::endl;
-            if  (k==0)
+
+            magStream.close();
+            smoStream.close();
+            imgStream.close();
+            nrmStream.close();
+            if (k==0) 
             {
-                maxStream << std::endl;
+                maxStream.close();
             }
         }
-
-        magStream.close();
-        smoStream.close();
-        imgStream.close();
-        nrmStream.close();
-        if (k==0) 
-        {
-            maxStream.close();
-        }
+        writeCnt++;
     }
-    writeCnt++;
     // --------------------------------------------------------------------------
     return gradData;
 }

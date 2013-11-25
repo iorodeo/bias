@@ -10,6 +10,7 @@ namespace bias
     const double BlobFinderParam::DEFAULT_THRESHOLD_MAXVAL  = 255.0;
     const double BlobFinderParam::DEFAULT_MINIMUM_AREA      = 100.0;
     const double BlobFinderParam::DEFAULT_MAXIMUM_AREA      = 640.0*480.0;
+    const unsigned int BlobFinderParam::DEFAULT_NUM_PAD     = 50;
     const double BlobFinderParam::THRESHOLD_MIN             = 0.0;
     const double BlobFinderParam::THRESHOLD_MAX             = 255.0;
     const double BlobFinderParam::THRESHOLD_MAXVAL_MIN      = 255.0;
@@ -25,6 +26,7 @@ namespace bias
         thresholdMaxVal = DEFAULT_THRESHOLD_MAXVAL;
         minimumArea = DEFAULT_MINIMUM_AREA;
         maximumArea = DEFAULT_MAXIMUM_AREA;
+        numPad = DEFAULT_NUM_PAD;
     }
 
 
@@ -209,6 +211,7 @@ namespace bias
         ss << "thresholdMaxVal: " << thresholdMaxVal  << std::endl;
         ss << "minimumArea:     " << minimumArea      << std::endl;
         ss << "maximumArea:     " << maximumArea      << std::endl;
+        ss << "numPad:          " << numPad           << std::endl;
         return ss.str();
     }
     

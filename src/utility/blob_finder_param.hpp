@@ -14,11 +14,10 @@ namespace bias
     
             static const double DEFAULT_MINIMUM_AREA;
             static const double DEFAULT_MAXIMUM_AREA;
-
             static const double DEFAULT_THRESHOLD_LAX;
             static const double DEFAULT_THRESHOLD_STRICT;
             static const double DEFAULT_THRESHOLD_MAXVAL;
-
+            static const unsigned int DEFAULT_NUM_PAD;
             static const double MINIMUM_AREA_MIN;
             static const double MAXIMUM_AREA_MIN;
             static const double THRESHOLD_MIN;
@@ -31,6 +30,7 @@ namespace bias
             double thresholdLax;
             double thresholdStrict;
             double thresholdMaxVal;
+            unsigned int numPad;
 
             BlobFinderParam();
             QVariantMap toMap();

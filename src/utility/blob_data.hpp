@@ -51,9 +51,19 @@ namespace bias
             std::vector<cv::Point> contourVector;
 
             BlobData();
-            BlobData(std::vector<cv::Point> contour, cv::Mat image);
-            void setFromContour(std::vector<cv::Point> contour, cv::Mat image);
-            std::string toStdString(unsigned int indent=0);
+            BlobData(
+                    std::vector<cv::Point> contour, 
+                    cv::Mat image, 
+                    unsigned int numPad
+                    );
+
+            void setFromContour(
+                    std::vector<cv::Point> contour, 
+                    cv::Mat image, 
+                    unsigned int numPad
+                    );
+
+            std::string toStdString( unsigned int indent=0);
             void print(unsigned int indent=0);
             void draw(cv::Mat &img);
 
