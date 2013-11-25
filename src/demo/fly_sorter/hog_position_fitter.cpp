@@ -269,6 +269,7 @@ std::vector<double> HogPositionFitter::getPixelFeatureVector(cv::Mat image)
             param_.pixelFeatureVector.gradNormRadius,
             param_.pixelFeatureVector.gradNormConst, 
             GRAD_METHOD_SCHARR
+            //GRAD_METHOD_SOBEL
             );
 
     // Get mask filled (due rotation) from true image data
