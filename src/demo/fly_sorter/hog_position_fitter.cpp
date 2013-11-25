@@ -23,6 +23,7 @@ PositionData::PositionData()
 {
     isFly = DEFAULT_IS_FLY;
     isMultipleFlies = DEFAULT_IS_MULTIPLE_FLIES;
+    flipped = false;
     success = false;
     bodyArea = 0; 
     meanX = 0.0;
@@ -52,16 +53,12 @@ HogPositionFitter::HogPositionFitter(HogPositionFitterParam param)
         //        "hogPosMaxComp",
         //        CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED
         //        );
-        cv::namedWindow(
-                "boundingImageLUV",
-                CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED
-                );
+        //cv::namedWindow(
+        //        "boundingImageLUV",
+        //        CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED
+        //        );
         cv::namedWindow(
                 "rotBoundingImageLUV",
-                CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED
-                );
-        cv::namedWindow(
-                "fillMask",
                 CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED
                 );
     }
@@ -90,7 +87,6 @@ HogPositionFitterData HogPositionFitter::fit(
     {
         SegmentData segmentData = *it;
         PositionData posData;
-        //std::cout << "  processing segment " << cnt << " data " << std::endl;
 
         // Detect Body pixels 
         cv::Mat closeMat = imCloseWithDiskElem(
@@ -177,11 +173,11 @@ HogPositionFitterData HogPositionFitter::fit(
             posData.ellipseMajorAxis = 2.0*std::sqrt(eigenVal.at<double>(0,0));
             posData.ellipseMinorAxis = 2.0*std::sqrt(eigenVal.at<double>(1,0));
             posData.ellipseAngle = std::atan2(eigenVec.at<double>(0,1),eigenVec.at<double>(0,0));
-            posData.ellipseAngle = std::fmod(posData.ellipseAngle + 0.5*M_PI,M_PI) - 0.5*M_PI;
 
-             
             // Rotate fly image using affine transform
-            double rotAngDeg = (posData.ellipseAngle + 0.5*M_PI)*180.0/M_PI;
+            double angleTemp = std::fmod(posData.ellipseAngle + 0.5*M_PI,M_PI) - 0.5*M_PI;
+            double rotAngDeg = (angleTemp + 0.5*M_PI)*180.0/M_PI;
+            //double rotAngDeg = (posData.ellipseAngle + 0.5*M_PI)*180.0/M_PI;
             cv::Point2f rotCenter = cv::Point2f(posData.meanX, posData.meanY);
             cv::Mat rotMat = cv::getRotationMatrix2D(rotCenter, rotAngDeg, 1.0);
 
@@ -209,7 +205,30 @@ HogPositionFitterData HogPositionFitter::fit(
             // Get pixel feature vector use to classify orientation
             posData.pixelFeatureVector = getPixelFeatureVector(rotBoundingImageLUV);
 
-            // Write pixel feature vector to file
+
+            FastBinaryPredictor orientPred = FastBinaryPredictor( param_.orientClassifier);
+            FastBinaryPredictorData<double> orientData = orientPred.predict(posData.pixelFeatureVector);
+
+            // Flip pixel feature vector and rotate LUV bounding image  - if required
+            if (orientData.fit < 0.0)
+            {
+                posData.flipped = true;
+                posData.ellipseAngle = modRange(posData.ellipseAngle+M_PI,-M_PI, M_PI);
+                cv::Mat rotFlippedBoundingImageLUV;
+                cv::flip(rotBoundingImageLUV, rotFlippedBoundingImageLUV, -1);
+                posData.pixelFeatureVector = getPixelFeatureVector(rotFlippedBoundingImageLUV);
+                posData.rotBoundingImageLUV = rotFlippedBoundingImageLUV;
+            }
+            else
+            {
+                posData.flipped = false;
+                posData.rotBoundingImageLUV = rotBoundingImageLUV;
+            }
+
+            posData.success = true;
+            fitterData.positionDataList.push_back(posData); 
+           
+            // DEBUG - Write pixel feature vector to file
             // ------------------------------------------------------------------------------------
             if (1) 
             {
@@ -222,28 +241,16 @@ HogPositionFitterData HogPositionFitter::fit(
                 }
                 pVecStream.close();
             }
-            // ------------------------------------------------------------------------------------
-
-            //FastBinaryPredictor orientPred = FastBinaryPredictor( param_.orientClassifier);
-            //FastBinaryPredictorData<double> orientData = orientPred.predict(posData.pixelFeatureVector);
-
-            // Flip pixel feature vector and rotated LUV bounding image if required.
-
-            posData.success = true;
-
-            fitterData.positionDataList.push_back(posData); 
-            // Temporary
-            // ---------------------------------------------------------------------
             if (showDebugWindow_)
             {
                 if (cnt==0)
                 {
                     //cv::imshow("hogPosMaxComp", maxCompMat);
                     cv::imshow("boundingImageLUV", segmentData.boundingImageLUV);
-                    cv::imshow("rotBoundingImageLUV", rotBoundingImageLUV);
+                    cv::imshow("rotBoundingImageLUV", posData.rotBoundingImageLUV);
                 }
             }
-            // ----------------------------------------------------------------------
+            // ------------------------------------------------------------------------------------
         }
        
     } // for (it=segementDataList.begin() 
@@ -267,11 +274,6 @@ std::vector<double> HogPositionFitter::getPixelFeatureVector(cv::Mat image)
     // Get mask filled (due rotation) from true image data
     cv::Mat fillMask = getFillMask(image);
 
-    // DEBUG 
-    // -------------------------------------
-    cv::imshow("fillMask", fillMask);
-    // -------------------------------------
-
     // Sub-vectors for storing pixel feature vector data
     std::vector<double> meanGradMagVector; // Done
     std::vector<double> histGradMagVector; // Done
@@ -279,38 +281,22 @@ std::vector<double> HogPositionFitter::getPixelFeatureVector(cv::Mat image)
     std::vector<double> meanColorVector;
     std::vector<double> histColorVector;
 
-    std::cout << " ------" << std::endl;
-    std::cout << " rows = " << image.rows << std::endl;
-    std::cout << " cols = " << image.cols << std::endl;
     for (int i=0; i<param_.pixelFeatureVector.binParam.size(); i++)
     {
         unsigned int numX = param_.pixelFeatureVector.binParam[i].numX;
         unsigned int numY = param_.pixelFeatureVector.binParam[i].numY;
-        //double binWidth = double(image.cols-1)/double(numX);
-        //double binHeight = double(image.rows-1)/double(numY);
         double binWidth = double(image.cols)/double(numX);
         double binHeight = double(image.rows)/double(numY);
 
-        std::cout << " i= " << i << std::endl;
-        std::cout << " w = " << binWidth << std::endl;
-        std::cout << " h = " << binHeight << std::endl;
-
         // Loop over spacial bins
         for (int indX=0; indX < numX; indX++)
+        //for (int indX=numX-1; indX >= 0; indX--)
         {
-            //----------------------------------------------------------
-            // CHECK ... is this correct? order of y's reversed?
-            //----------------------------------------------------------
-            //for (int indY=0; indY < numY; indY++)
-            //
-            for (int indY=numY-1; indY >=0; indY--)
+            for (int indY=0; indY < numY; indY++) 
+            //for (int indY=numY-1; indY >=0; indY--) // Reverse order to match matlab
             {
                 int x = int(std::round(indX*binWidth));
                 int y = int(std::round(indY*binHeight));
-
-                std::cout << " indX, x = " << indX << ", " << x << std::endl;
-                std::cout << " indY, y = " << indY << ", " << y << std::endl;
-                std::cout << std::endl;
 
                 // Create ROI and get views of image and fill mask 
                 cv::Rect roiRect = cv::Rect(x,y,binWidth,binHeight);
@@ -468,19 +454,16 @@ std::vector<double> HogPositionFitter::getHistGradOri(
         {
             for (int k=0; k<bins.size()-1; k++)
             {
-                //std::cout << "(" << i << "," << j << "," << k << ") "; 
                 float oriValue = gradOri.at<float>(i,j);
                 float weight = normGradMag.at<float>(i,j); 
                 if ((oriValue >= bins[k]) && (oriValue < bins[k+1]))
                 {
-                    //std::cout << " add " << weight << std::endl;
                     histValues[k] = double(histValues[k] + weight);
                     totalCount += weight;
                 }
             } 
         }
     }
-    //std::cout << std::endl;
 
     // Normalize histogram values
     for (int i=0; i<histValues.size(); i++)
@@ -678,18 +661,6 @@ GradientData getGradientData(
     else
     {
         cv::Mat triFilter = getTriangleFilter2D(normRadius);
-        // DEBUG
-        // ---------------------------------------------------------------------
-        //float triSum = 0.0;
-        //for (int i=0; i<triFilter.rows; i++)
-        //{
-        //    for (int j=0; j<triFilter.cols; j++)
-        //    {
-        //        triSum += triFilter.at<float>(i,j);
-        //    }
-        //}
-        //std::cout << "sum " << triSum << std::endl;
-        // ---------------------------------------------------------------------
         cv::filter2D(
                 gradData.mag, 
                 smoothMag,
@@ -828,4 +799,9 @@ cv::Mat getTriangleFilter2D(unsigned int normRadius)
     cv::Mat f1D = getTriangleFilter1D(normRadius);
     cv::Mat f2D = f1D.t()*f1D;
     return f2D;
+}
+
+double modRange(double input, double lower, double upper)
+{
+    return std::fmod(input - lower, upper - lower) + lower;
 }

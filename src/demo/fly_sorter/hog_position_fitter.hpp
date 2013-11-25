@@ -18,6 +18,7 @@ class PositionData
         bool success;
         bool isFly;
         bool isMultipleFlies;
+        bool flipped;
         unsigned int bodyArea;
         double meanX;
         double meanY;
@@ -25,6 +26,7 @@ class PositionData
         double ellipseMinorAxis;
         double ellipseAngle;
         cv::Mat covarianceMatrix;
+        cv::Mat rotBoundingImageLUV;
         std::vector<double> pixelFeatureVector;
 
         PositionData();
@@ -92,6 +94,7 @@ GradientData getGradientData(
 
 cv::Mat getTriangleFilter1D(unsigned int normRadius);
 cv::Mat getTriangleFilter2D(unsigned int normRadius);
+double modRange(double input, double lower, double upper);
 
 
 

@@ -185,6 +185,8 @@ void FlySorterWindow::newImage(ImageData imageData)
 {
     if (running_)
     {
+        std::cout << imageData.frameCount << std::endl;
+
         imageData_.copy(imageData);
 
         BlobFinder blobFinder = BlobFinder(param_.blobFinder);
@@ -196,9 +198,6 @@ void FlySorterWindow::newImage(ImageData imageData)
         HogPositionFitter hogPositionFitter = HogPositionFitter(param_.hogPositionFitter);
         hogPositionFitterData_ = hogPositionFitter.fit(flySegmenterData_,imageData.frameCount,imageData.mat);
 
-        // Write pixel feature vector to debug file
-        // -----------------------------------------------------------------------
-        std::cout << imageData.frameCount << std::endl;
 
         debugStream << "Frame Count: " << imageData.frameCount << std::endl;
         if (hogPositionFitterData_.positionDataList.empty())

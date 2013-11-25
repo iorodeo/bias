@@ -87,6 +87,10 @@ FastBinaryPredictorData<double> FastBinaryPredictor::predict(std::vector<double>
     {
         data.label = 1.0;
     }
+    else
+    {
+        data.label = 0.0;
+    }
     return data;
 }
 
