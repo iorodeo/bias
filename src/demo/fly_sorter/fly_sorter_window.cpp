@@ -1,5 +1,6 @@
 #include "fly_sorter_window.hpp"
 #include "mat_to_qimage.hpp"
+#include "fast_binary_predictor.hpp"
 #include "json.hpp"
 #include "json_utils.hpp"
 #include "rtn_status.hpp"

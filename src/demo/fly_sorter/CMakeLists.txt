@@ -17,6 +17,7 @@ set(
     hog_position_fitter.hpp
     identity_tracker.hpp
     bgr_to_luv_converter.hpp
+    gender_sorter.hpp
     )
 
 set(
@@ -30,6 +31,7 @@ set(
     hog_position_fitter.cpp
     identity_tracker.cpp
     bgr_to_luv_converter.cpp
+    gender_sorter.cpp
     )
 
 qt4_wrap_ui(fly_sorter_FORMS_HEADERS ${fly_sorter_FORMS}) 

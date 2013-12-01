@@ -292,6 +292,30 @@ HogPositionFitterParam::HogPositionFitterParam()
     orientClassifier = DEFAULT_ORIENT_CLASSIFIER_PARAM;
 }
 
+// GenderSorterParam
+// ----------------------------------------------------------------------------
+
+ClassifierParam GenderSorterParam::createDefaultGenderClassifierParam()
+{
+    ClassifierParam classifierParam;
+
+    // -------------------------------------------------------------------------
+    // TO DO
+    // -------------------------------------------------------------------------
+
+    return classifierParam;
+}
+const ClassifierParam GenderSorterParam::DEFAULT_GENDER_CLASSIFIER_PARAM = 
+createDefaultGenderClassifierParam();
+
+const double GenderSorterParam::DEFAULT_MIN_CONFIDENCE = 0.1; // TO DO - get actual value ///
+
+GenderSorterParam::GenderSorterParam()
+{
+    minConfidence = DEFAULT_MIN_CONFIDENCE;
+    genderClassifier = DEFAULT_GENDER_CLASSIFIER_PARAM;
+}
+
 // ImageGrabberParam
 // ----------------------------------------------------------------------------
 
