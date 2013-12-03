@@ -242,6 +242,7 @@ class FlySorterParam
         BlobFinderParam blobFinder;
         FlySegmenterParam flySegmenter;
         HogPositionFitterParam hogPositionFitter;
+        GenderSorterParam genderSorter;
 
         // Devel
         // -------------------

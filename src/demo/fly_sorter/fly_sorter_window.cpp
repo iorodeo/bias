@@ -1,6 +1,5 @@
 #include "fly_sorter_window.hpp"
 #include "mat_to_qimage.hpp"
-#include "fast_binary_predictor.hpp"
 #include "json.hpp"
 #include "json_utils.hpp"
 #include "rtn_status.hpp"
@@ -199,6 +198,8 @@ void FlySorterWindow::newImage(ImageData imageData)
         HogPositionFitter hogPositionFitter = HogPositionFitter(param_.hogPositionFitter);
         hogPositionFitterData_ = hogPositionFitter.fit(flySegmenterData_,imageData.frameCount,imageData.mat);
 
+        GenderSorter genderSorter = GenderSorter(param_.genderSorter);
+        genderSorterData_ = genderSorter.sort(hogPositionFitterData_);
 
         debugStream << "Frame Count: " << imageData.frameCount << std::endl;
         if (hogPositionFitterData_.positionDataList.empty())

@@ -18,6 +18,7 @@ class GenderData
     public:
         Gender gender;
         PositionData positionData;
+        bool havePredictorData;
         FastBinaryPredictorData<double> predictorData;
         GenderData();
 };
@@ -36,6 +37,10 @@ class GenderSorter
 {
     public:
         GenderSorter();
+        GenderSorter(GenderSorterParam param);
+        GenderSorterData sort(HogPositionFitterData hogData);
+        void setParam(GenderSorterParam param);
+        static std::string GenderToString(Gender gender);
 
     private:
         GenderSorterParam param_;

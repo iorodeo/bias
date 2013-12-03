@@ -7,6 +7,7 @@
 #include "blob_finder.hpp"
 #include "fly_segmenter.hpp"
 #include "hog_position_fitter.hpp"
+#include "gender_sorter.hpp"
 #include <memory>
 #include <QCloseEvent>
 #include <QMainWindow>
@@ -71,6 +72,7 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         BlobFinderData blobFinderData_;
         FlySegmenterData flySegmenterData_;
         HogPositionFitterData hogPositionFitterData_;
+        GenderSorterData genderSorterData_;
         unsigned int httpRequestErrorCount_;
         QString parameterFileName_;
 
