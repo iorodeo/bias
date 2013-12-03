@@ -53,10 +53,6 @@ GenderSorterData GenderSorter::sort(HogPositionFitterData hogData)
             }
         }
         sorterData.genderDataList.push_back(genderData);
-        if (genderData.havePredictorData)
-        {
-            std::cout << GenderToString(genderData.gender) << ", " << genderData.predictorData.fit << std::endl;
-        }
     }
     return sorterData;
 }

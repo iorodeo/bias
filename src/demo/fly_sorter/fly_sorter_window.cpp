@@ -201,6 +201,7 @@ void FlySorterWindow::newImage(ImageData imageData)
         GenderSorter genderSorter = GenderSorter(param_.genderSorter);
         genderSorterData_ = genderSorter.sort(hogPositionFitterData_);
 
+
         debugStream << "Frame Count: " << imageData.frameCount << std::endl;
         if (hogPositionFitterData_.positionDataList.empty())
         {
