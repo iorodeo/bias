@@ -292,6 +292,128 @@ HogPositionFitterParam::HogPositionFitterParam()
     orientClassifier = DEFAULT_ORIENT_CLASSIFIER_PARAM;
 }
 
+// GenderSorterParam
+// ----------------------------------------------------------------------------
+
+ClassifierParam GenderSorterParam::createDefaultGenderClassifierParam()
+{
+    ClassifierParam classifierParam;
+    classifierParam.offset = -1.604457;
+    std::vector<StumpData> stumpVector;
+    stumpVector.push_back(StumpData(238, 0.084434, 1.674599));
+    stumpVector.push_back(StumpData(24,  0.278435, -1.232384));
+    stumpVector.push_back(StumpData(238, 0.062391, 1.288068));
+    stumpVector.push_back(StumpData(750, 0.001465, -1.190372));
+    stumpVector.push_back(StumpData(238, 0.116674, 1.324515));
+    stumpVector.push_back(StumpData(394, 0.029850, -1.000583));
+    stumpVector.push_back(StumpData(93,  0.239109, 0.899523));
+    stumpVector.push_back(StumpData(744, 0.018012, -0.885773));
+    stumpVector.push_back(StumpData(229, 0.026950, -0.870549));
+    stumpVector.push_back(StumpData(239, 0.001517, 0.764537));
+    stumpVector.push_back(StumpData(749, 0.013050, -1.114222));
+    stumpVector.push_back(StumpData(238, 0.028924, 1.011049));
+    stumpVector.push_back(StumpData(749, 0.126848, -0.915492));
+    stumpVector.push_back(StumpData(238, 0.121497, 1.169906));
+    stumpVector.push_back(StumpData(833, 0.019828, -0.811894));
+    stumpVector.push_back(StumpData(194, 0.053240, 0.994033));
+    stumpVector.push_back(StumpData(185, 0.049640, -0.732560));
+    stumpVector.push_back(StumpData(224, 0.017239, 0.853175));
+    stumpVector.push_back(StumpData(530, 0.006605, 0.644783));
+    stumpVector.push_back(StumpData(849, 0.305672, -0.818103));
+    stumpVector.push_back(StumpData(164, 0.039244, -0.808899));
+    stumpVector.push_back(StumpData(62,  0.527040, -1.090032));
+    stumpVector.push_back(StumpData(538, 0.037647, 0.878776));
+    stumpVector.push_back(StumpData(744, 0.012403, -1.020699));
+    stumpVector.push_back(StumpData(938, 0.422793, 0.910620));
+    stumpVector.push_back(StumpData(748, 0.555650, 0.899145));
+    stumpVector.push_back(StumpData(929, 0.436754, -0.734846));
+    stumpVector.push_back(StumpData(417, 0.077721, 0.843679));
+    stumpVector.push_back(StumpData(510, 0.000547, -0.730515));
+    stumpVector.push_back(StumpData(239, 0.006395, 0.893858));
+    stumpVector.push_back(StumpData(506, 0.073350, 0.755999));
+    stumpVector.push_back(StumpData(184, 0.067602, -0.797213));
+    stumpVector.push_back(StumpData(64,  0.324437, -0.746603));
+    stumpVector.push_back(StumpData(68,  0.499986, 0.692089));
+    stumpVector.push_back(StumpData(126, 0.070462, 0.817883));
+    stumpVector.push_back(StumpData(748, 0.487694, 0.686983));
+    stumpVector.push_back(StumpData(62,  0.527040, -1.055904));
+    stumpVector.push_back(StumpData(744, 0.019774, -0.790157));
+    stumpVector.push_back(StumpData(113, 0.729929, -0.892345));
+    stumpVector.push_back(StumpData(238, 0.038652, 0.754194));
+    stumpVector.push_back(StumpData(185, 0.073443, -0.752404));
+    stumpVector.push_back(StumpData(65,  0.519061, -0.950757));
+    stumpVector.push_back(StumpData(238, 0.116044, 1.012158));
+    stumpVector.push_back(StumpData(394, 0.022576, -0.895473));
+    stumpVector.push_back(StumpData(54,  0.241851, -0.762248));
+    stumpVector.push_back(StumpData(935, 0.380384, 0.768588));
+    stumpVector.push_back(StumpData(510, 0.006829, -1.021979));
+    stumpVector.push_back(StumpData(238, 0.062840, 0.702809));
+    stumpVector.push_back(StumpData(237, 0.166578, -0.920166));
+    stumpVector.push_back(StumpData(150, 0.000204, -0.620677));
+    stumpVector.push_back(StumpData(792, 0.081822, 0.686082));
+    stumpVector.push_back(StumpData(393, 0.490157, 0.879772));
+    stumpVector.push_back(StumpData(501, 0.064878, -0.910076));
+    stumpVector.push_back(StumpData(419, 0.022526, -0.973311));
+    stumpVector.push_back(StumpData(239, 0.013651, 1.028860));
+    stumpVector.push_back(StumpData(209, 0.004232, -0.901006));
+    stumpVector.push_back(StumpData(238, 0.028924, 0.843551));
+    stumpVector.push_back(StumpData(210, 0.000176, -0.659727));
+    stumpVector.push_back(StumpData(106, 0.007611, 0.642773));
+    stumpVector.push_back(StumpData(749, 0.143113, -0.833789));
+    stumpVector.push_back(StumpData(239, 0.001517, 0.678634));
+    stumpVector.push_back(StumpData(506, 0.079232, 0.710684));
+    stumpVector.push_back(StumpData(938, 0.417708, 0.823056));
+    stumpVector.push_back(StumpData(496, 0.131829, 0.790748));
+    stumpVector.push_back(StumpData(197, 0.054917, -0.722815));
+    stumpVector.push_back(StumpData(238, 0.068751, 0.643655));
+    stumpVector.push_back(StumpData(113, 0.747618, -0.783980));
+    stumpVector.push_back(StumpData(480, 0.000589, -0.763001));
+    stumpVector.push_back(StumpData(127, 0.176899, 0.986837));
+    stumpVector.push_back(StumpData(227, 0.022686, -0.662733));
+    stumpVector.push_back(StumpData(538, 0.109119, 0.668535));
+    stumpVector.push_back(StumpData(848, 0.000522, -0.642701));
+    stumpVector.push_back(StumpData(62,  0.526630, -1.079848));
+    stumpVector.push_back(StumpData(184, 0.067184, -0.737352));
+    stumpVector.push_back(StumpData(94,  0.019178, -0.649458));
+    stumpVector.push_back(StumpData(744, 0.013311, -0.873964));
+    stumpVector.push_back(StumpData(154, 0.039989, -1.056767));
+    stumpVector.push_back(StumpData(834, 0.500646, -0.885769));
+    stumpVector.push_back(StumpData(394, 0.022576, -0.836019));
+    stumpVector.push_back(StumpData(538, 0.046264, 0.709547));
+    stumpVector.push_back(StumpData(240, 0.000357, 0.811416));
+    stumpVector.push_back(StumpData(210, 0.004297, -1.040518));
+    stumpVector.push_back(StumpData(229, 0.025967, -0.631054));
+    stumpVector.push_back(StumpData(238, 0.121497, 1.097822));
+    stumpVector.push_back(StumpData(54,  0.241201, -0.725406));
+    stumpVector.push_back(StumpData(714, 0.028121, -0.593168));
+    stumpVector.push_back(StumpData(774, 0.028121, -0.694201));
+    stumpVector.push_back(StumpData(748, 0.553173, 0.830704));
+    stumpVector.push_back(StumpData(183, 0.613997, 0.616241));
+    stumpVector.push_back(StumpData(225, 0.004288, 1.025345));
+    stumpVector.push_back(StumpData(164, 0.033674, -0.662720));
+    stumpVector.push_back(StumpData(201, 0.023513, -1.010363));
+    stumpVector.push_back(StumpData(723, 0.833923, 1.117179));
+    stumpVector.push_back(StumpData(239, 0.005765, 0.717575));
+    stumpVector.push_back(StumpData(493, 0.089478, 0.631682));
+    stumpVector.push_back(StumpData(394, 0.030234, -0.616291));
+    stumpVector.push_back(StumpData(185, 0.048949, -0.608983));
+    stumpVector.push_back(StumpData(929, 0.450759, -0.739179));
+    stumpVector.push_back(StumpData(238, 0.037773, 0.678025));
+    stumpVector.push_back(StumpData(62,  0.527091, -1.006367));
+    classifierParam.stumpVector = stumpVector;
+    return classifierParam;
+}
+const ClassifierParam GenderSorterParam::DEFAULT_GENDER_CLASSIFIER_PARAM = 
+createDefaultGenderClassifierParam();
+
+const double GenderSorterParam::DEFAULT_MIN_CONFIDENCE = 3.9405; 
+
+GenderSorterParam::GenderSorterParam()
+{
+    minConfidence = DEFAULT_MIN_CONFIDENCE;
+    genderClassifier = DEFAULT_GENDER_CLASSIFIER_PARAM;
+}
+
 // ImageGrabberParam
 // ----------------------------------------------------------------------------
 

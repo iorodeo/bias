@@ -26,8 +26,10 @@ PositionData::PositionData()
     flipped = false;
     success = false;
     bodyArea = 0; 
-    meanX = 0.0;
-    meanY = 0.0;
+    meanXRel = 0.0;
+    meanYRel = 0.0;
+    meanXAbs = 0.0;
+    meanYAbs = 0.0;
     ellipseMajorAxis = 0.0;
     ellipseMinorAxis = 0.0;
     ellipseAngle = 0.0;
@@ -46,7 +48,7 @@ HogPositionFitter::HogPositionFitter() { };
 HogPositionFitter::HogPositionFitter(HogPositionFitterParam param)
 {
     setParam(param);
-    showDebugWindow_ = true;
+    showDebugWindow_ = false; 
     if (showDebugWindow_)
     {
         //cv::namedWindow(
@@ -85,12 +87,12 @@ HogPositionFitterData HogPositionFitter::fit(
 
     for (it=segmentDataList.begin(), cnt=0; it!=segmentDataList.end(); it++, cnt++)
     {
-        SegmentData segmentData = *it;
         PositionData posData;
+        posData.segmentData = *it;
 
         // Detect Body pixels 
         cv::Mat closeMat = imCloseWithDiskElem(
-                segmentData.predictorData.label,
+                posData.segmentData.predictorData.label,
                 param_.closeRadius
                 );
 
@@ -119,7 +121,7 @@ HogPositionFitterData HogPositionFitter::fit(
             // Write images to file
             // ----------------------------------------------------------------------
             //QString imgFileName = QString("maxCompMat_%1_%2.bmp").arg(frameCount).arg(cnt);
-            //cv::imwrite(imgFileName.toStdString(), segmentData.predictorData.label);
+            //cv::imwrite(imgFileName.toStdString(), posData.segmentData.predictorData.label);
             //cv::imwrite(imgFileName.toStdString(),maxCompMat);
             // ----------------------------------------------------------------------
 
@@ -137,8 +139,8 @@ HogPositionFitterData HogPositionFitter::fit(
                 // Too big to be single fly
                 posData.isMultipleFlies = true;
                 cv::Scalar meanPos = cv::mean(maxCompPointMat);
-                posData.meanX = meanPos.val[0];
-                posData.meanY = meanPos.val[1];
+                posData.meanXRel = meanPos.val[0];
+                posData.meanYRel = meanPos.val[1];
                 fitterData.positionDataList.push_back(posData);
                 posData.success = false;
                 continue;
@@ -162,8 +164,10 @@ HogPositionFitterData HogPositionFitter::fit(
             cv::Mat meanMat;
             int covarFlags = CV_COVAR_NORMAL | CV_COVAR_SCALE | CV_COVAR_COLS;
             cv::calcCovarMatrix(samplesXY,covMat,meanMat,covarFlags);
-            posData.meanX = meanMat.at<double>(0,0);
-            posData.meanY = meanMat.at<double>(1,0);
+            posData.meanXRel = meanMat.at<double>(0,0);
+            posData.meanYRel = meanMat.at<double>(1,0);
+            posData.meanXAbs = posData.meanXRel + posData.segmentData.blobData.boundingRect.x;
+            posData.meanYAbs = posData.meanYRel + posData.segmentData.blobData.boundingRect.y;
             posData.covarianceMatrix = covMat;
 
             // Fit ellipse using covariance matrix 
@@ -178,7 +182,7 @@ HogPositionFitterData HogPositionFitter::fit(
             double angleTemp = std::fmod(posData.ellipseAngle + 0.5*M_PI,M_PI) - 0.5*M_PI;
             double rotAngDeg = (angleTemp + 0.5*M_PI)*180.0/M_PI;
             //double rotAngDeg = (posData.ellipseAngle + 0.5*M_PI)*180.0/M_PI;
-            cv::Point2f rotCenter = cv::Point2f(posData.meanX, posData.meanY);
+            cv::Point2f rotCenter = cv::Point2f(posData.meanXRel, posData.meanYRel);
             cv::Mat rotMat = cv::getRotationMatrix2D(rotCenter, rotAngDeg, 1.0);
 
             double shiftX = -rotCenter.x + posData.ellipseMinorAxis + param_.padBorder;
@@ -191,10 +195,10 @@ HogPositionFitterData HogPositionFitter::fit(
                     2*(posData.ellipseMajorAxis + param_.padBorder)
                     );
            
-            int imageType = segmentData.boundingImageLUV.type();
+            int imageType = posData.segmentData.boundingImageLUV.type();
             cv::Mat rotBoundingImageLUV = cv::Mat(imageSize,imageType,param_.fillValuesLUV);
             cv::warpAffine(
-                    segmentData.boundingImageLUV,
+                    posData.segmentData.boundingImageLUV,
                     rotBoundingImageLUV,
                     rotMat,
                     imageSize,
@@ -205,8 +209,7 @@ HogPositionFitterData HogPositionFitter::fit(
             // Get pixel feature vector use to classify orientation
             posData.pixelFeatureVector = getPixelFeatureVector(rotBoundingImageLUV);
 
-
-            FastBinaryPredictor orientPred = FastBinaryPredictor( param_.orientClassifier);
+            FastBinaryPredictor orientPred = FastBinaryPredictor(param_.orientClassifier);
             FastBinaryPredictorData<double> orientData = orientPred.predict(posData.pixelFeatureVector);
 
             // Flip pixel feature vector and rotate LUV bounding image  - if required
@@ -230,7 +233,7 @@ HogPositionFitterData HogPositionFitter::fit(
            
             // DEBUG - Write pixel feature vector to file
             // ------------------------------------------------------------------------------------
-            if (1) 
+            if (0) 
             {
                 std::ofstream pVecStream;
                 QString pVecFileName = QString("pVec_frm_%1_cnt_%2.txt").arg(frameCount).arg(cnt);
@@ -246,7 +249,7 @@ HogPositionFitterData HogPositionFitter::fit(
                 if (cnt==0)
                 {
                     //cv::imshow("hogPosMaxComp", maxCompMat);
-                    cv::imshow("boundingImageLUV", segmentData.boundingImageLUV);
+                    //cv::imshow("boundingImageLUV", posData.segmentData.boundingImageLUV);
                     cv::imshow("rotBoundingImageLUV", posData.rotBoundingImageLUV);
                 }
             }

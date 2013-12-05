@@ -116,6 +116,21 @@ class HogPositionFitterParam
 };
 
 
+class GenderSorterParam
+{
+    public:
+
+        ClassifierParam genderClassifier;
+        static const ClassifierParam DEFAULT_GENDER_CLASSIFIER_PARAM;
+        static ClassifierParam createDefaultGenderClassifierParam();
+
+        double minConfidence;
+        static const double DEFAULT_MIN_CONFIDENCE;
+
+        GenderSorterParam();
+};
+
+
 class ImageGrabberParam
 {
     public:
@@ -227,6 +242,7 @@ class FlySorterParam
         BlobFinderParam blobFinder;
         FlySegmenterParam flySegmenter;
         HogPositionFitterParam hogPositionFitter;
+        GenderSorterParam genderSorter;
 
         // Devel
         // -------------------

@@ -20,14 +20,17 @@ class PositionData
         bool isMultipleFlies;
         bool flipped;
         unsigned int bodyArea;
-        double meanX;
-        double meanY;
+        double meanXRel;
+        double meanYRel;
+        double meanXAbs;
+        double meanYAbs;
         double ellipseMajorAxis;
         double ellipseMinorAxis;
         double ellipseAngle;
         cv::Mat covarianceMatrix;
         cv::Mat rotBoundingImageLUV;
         std::vector<double> pixelFeatureVector;
+        SegmentData segmentData;
 
         PositionData();
 
