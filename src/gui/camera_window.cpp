@@ -827,7 +827,8 @@ namespace bias
 
         QVariantMap oldConfigMap = getConfigurationMap(rtnStatus);
 
-        rtnStatus = setConfigurationFromMap(configMap,showErrorDlg);
+        //rtnStatus = setConfigurationFromMap(configMap,showErrorDlg);
+	rtnStatus = setConfigurationFromMap_Lenient(configMap,oldConfigMap,showErrorDlg);
         if (!rtnStatus.success)
         {
             QString origErrMsg = rtnStatus.message;
@@ -1000,6 +1001,109 @@ namespace bias
         return rtnStatus;
     }
 
+    // same as setConfigurationFromMap, but uses the old configuration if 
+    // fields are missing from the new one
+    RtnStatus CameraWindow::setConfigurationFromMap_Lenient(
+            QVariantMap configMap, 
+	    QVariantMap oldConfigMap,
+            bool showErrorDlg
+            )
+    {
+
+        RtnStatus rtnStatus;
+        QString errMsgTitle("Load Configuration Error");
+
+        // Check if camera is capturing
+        // ----------------------------
+        if (capturing_)
+        {
+            QString errMsgText("unable to set configuration - capturing");
+            return onError(errMsgText, errMsgTitle, showErrorDlg);
+        }
+
+        // Set camera properties, videomode, etc.
+        // --------------------------------------
+        QVariantMap cameraMap = configMap["camera"].toMap();
+        if (cameraMap.isEmpty())
+        {
+	  cameraMap = oldConfigMap["camera"].toMap();
+        }
+	rtnStatus = setCameraFromMap(cameraMap,showErrorDlg);
+        if (!rtnStatus.success)
+        {
+            return rtnStatus;
+        }
+
+        // Set logging configuration
+        // --------------------------
+        QVariantMap loggingMap = configMap["logging"].toMap();
+        if (loggingMap.isEmpty())
+        {
+	  loggingMap = oldConfigMap["logging"].toMap();
+        }
+        rtnStatus = setLoggingFromMap(loggingMap,showErrorDlg);
+        if (!rtnStatus.success)
+        {
+            return rtnStatus;
+        }
+
+        // Set timer configuration
+        // ------------------------
+        QVariantMap timerMap = configMap["timer"].toMap();
+        if (timerMap.isEmpty())
+        {
+	  timerMap = oldConfigMap["timer"].toMap();
+        }
+        rtnStatus = setTimerFromMap(timerMap,showErrorDlg);
+        if (!rtnStatus.success)
+        {
+            return rtnStatus;
+        }
+
+        // Set display configuration
+        // --------------------------
+        QVariantMap displayMap = configMap["display"].toMap();
+        if (displayMap.isEmpty())
+        {
+	  displayMap = oldConfigMap["display"].toMap();
+        }
+        rtnStatus = setDisplayFromMap(displayMap,showErrorDlg);
+        if (!rtnStatus.success)
+        {
+            return rtnStatus;
+        }
+
+        // Set external control server configuration
+        // -----------------------------------------
+        QVariantMap serverMap = configMap["server"].toMap();
+        if (serverMap.isEmpty())
+        {
+	  serverMap = oldConfigMap["server"].toMap();
+        }
+        rtnStatus = setServerFromMap(serverMap,showErrorDlg);
+        if (!rtnStatus.success)
+        {
+            return rtnStatus;
+        }
+
+        // Set configuration file configuraiton 
+        // -------------------------------------
+        QVariantMap configFileMap = configMap["configuration"].toMap();
+        if (configFileMap.isEmpty())
+        {
+	  configFileMap = oldConfigMap["configuration"].toMap();
+        }
+        rtnStatus = setConfigFileFromMap(configFileMap,showErrorDlg);
+        if (!rtnStatus.success)
+        {
+            return rtnStatus;
+        }
+
+        rtnStatus.success = true;
+        rtnStatus.message = QString("");
+
+        return rtnStatus;
+    }
 
     RtnStatus CameraWindow::enableLogging(bool showErrorDlg)
     {
