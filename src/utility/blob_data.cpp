@@ -145,6 +145,8 @@ namespace bias
     BlobData::BlobData()
     {
         area = 0;
+        onBorderX = false;
+        onBorderY = false;
     }
 
 
@@ -166,30 +168,54 @@ namespace bias
             )
     {
         contourVector = contour;
+
+        // Calculate moments
         cv::Moments moments = cv::moments(contour);
         area = moments.m00;
         centroid = Centroid(moments);
+
+        // Determine bounding rectangle
+        cv::Rect contourRect = cv::boundingRect(cv::Mat(contour));
+        int x = std::max(0, contourRect.x-int(numPad));
+        int y = std::max(0, contourRect.y-int(numPad));
+        int w = contourRect.width + 2*numPad;
+        int h = contourRect.height + 2*numPad;
+        if ((x+w) > image.cols)
+        {
+            w = image.cols-x; 
+        }
+        if ((y+h) > image.rows)
+        {
+            h = image.rows-y;
+        }
+        boundingRect = cv::Rect(x,y,w,h);
+        cv::Mat subImage = image(boundingRect);
+        subImage.copyTo(boundingImage);
+
+        // Check for data on x and y borders
+        if ((x <= 0) || ((x+w) >= (image.cols-1)))
+        {
+            onBorderX = true;
+        }
+        else
+        {
+            onBorderX = false;
+        }
+        if ((y <= 0) || ((y+h) >= (image.rows-1)))
+        {
+            onBorderY = true;
+        }
+        else
+        {
+            onBorderY = false;
+        }
+
+        // Fit ellipse
         if (contour.size() >= 5)
         {
             ellipse = Ellipse(contour);
-
-            cv::Rect contourRect = cv::boundingRect(cv::Mat(contour));
-            int x = std::max(0, contourRect.x-int(numPad));
-            int y = std::max(0, contourRect.y-int(numPad));
-            int w = contourRect.width + 2*numPad;
-            int h = contourRect.height + 2*numPad;
-            if ((x+w) > image.cols)
-            {
-                w = image.cols-x; 
-            }
-            if ((y+h) > image.rows)
-            {
-                h = image.rows-y;
-            }
-            boundingRect = cv::Rect(x,y,w,h);
         }
-        cv::Mat subImage = image(boundingRect);
-        subImage.copyTo(boundingImage);
+
     }
 
 
@@ -200,6 +226,8 @@ namespace bias
         std::string indentStr1 = getIndentString(indent+1);
         ss << indentStr0 << "blobData:" << std::endl;
         ss << indentStr1 << "area: " << area << std::endl;
+        ss << indentStr1 << "onBorderX: " << onBorderX << std::endl;
+        ss << indentStr1 << "onBorderY: " << onBorderY << std::endl;
         ss << centroid.toStdString(indent+1);
         ss << ellipse.toStdString(indent+1);
         return ss.str();

@@ -85,13 +85,13 @@ void FlySorterWindow::startPushButtonClicked()
 {
     if (!running_)
     {
-        debugStream.open("debug_data.txt");
+        //debugStream.open("debug_data.txt");
         startImageCapture();
     }
     else
     {
         stopImageCapture();
-        debugStream.close();
+        //debugStream.close();
     }
 }
 
@@ -202,33 +202,53 @@ void FlySorterWindow::newImage(ImageData imageData)
         genderSorterData_ = genderSorter.sort(hogPositionFitterData_);
 
 
-        debugStream << "Frame Count: " << imageData.frameCount << std::endl;
-        if (hogPositionFitterData_.positionDataList.empty())
-        {
-            debugStream << "  " << "PositionData: None"  << std::endl;
-        }
-        else
-        {
-            debugStream << "  " << "PositionData: "  << std::endl;
+        //// DEBUG
+        //// ----------------------------------------------------------------------
+        //BlobDataList::iterator it;
+        //for (it=blobFinderData_.blobDataList.begin(); it!=blobFinderData_.blobDataList.end(); it++)
+        //{
+        //    BlobData data = *it;
+        //    std::cout << "onX:      " << data.onBorderX << std::endl;
+        //    std::cout << "onY:      " << data.onBorderY << std::endl;
+        //    std::cout << "x0, x1:   " << data.boundingRect.x << ", " << (data.boundingRect.x + data.boundingRect.width) << std::endl;
+        //    std::cout << "y0, y1:   " << data.boundingRect.y << ", " << (data.boundingRect.y + data.boundingRect.height) << std::endl;
+        //    std::cout << "cols:     " << imageData_.mat.cols << std::endl;
+        //    std::cout << "rows:     " << imageData_.mat.rows << std::endl;
+        //    std::cout << std::endl;
+        //}
+        //// ----------------------------------------------------------------------
 
-            PositionDataList::iterator it;
-            unsigned int count;
-            for (
-                    it  = hogPositionFitterData_.positionDataList.begin(), count=0;
-                    it != hogPositionFitterData_.positionDataList.end();
-                    it++, count++
-                )
-            {
-                PositionData posData = *it;
-                debugStream << std::endl;
-                debugStream << "    " << "count:            " << count << std::endl;
-                debugStream << "    " << "success:          " << posData.success << std::endl;
-                debugStream << "    " << "isFly:            " << posData.isFly << std::endl; 
-                debugStream << "    " << "isMultipleFlies:  " << posData.isMultipleFlies << std::endl;
-                debugStream << "    " << "bodyArea:         " << posData.bodyArea << std::endl;
-                debugStream << std::endl;
-            }
-        }
+
+        // DEBUG
+        // -----------------------------------------------------------------------
+
+        //debugStream << "Frame Count: " << imageData.frameCount << std::endl;
+        //if (hogPositionFitterData_.positionDataList.empty())
+        //{
+        //    debugStream << "  " << "PositionData: None"  << std::endl;
+        //}
+        //else
+        //{
+        //    debugStream << "  " << "PositionData: "  << std::endl;
+
+        //    PositionDataList::iterator it;
+        //    unsigned int count;
+        //    for (
+        //            it  = hogPositionFitterData_.positionDataList.begin(), count=0;
+        //            it != hogPositionFitterData_.positionDataList.end();
+        //            it++, count++
+        //        )
+        //    {
+        //        PositionData posData = *it;
+        //        debugStream << std::endl;
+        //        debugStream << "    " << "count:            " << count << std::endl;
+        //        debugStream << "    " << "success:          " << posData.success << std::endl;
+        //        debugStream << "    " << "isFly:            " << posData.isFly << std::endl; 
+        //        debugStream << "    " << "isMultipleFlies:  " << posData.isMultipleFlies << std::endl;
+        //        debugStream << "    " << "bodyArea:         " << posData.bodyArea << std::endl;
+        //        debugStream << std::endl;
+        //    }
+        //}
 
         // Write images to file
         // ----------------------------------------------------------------------

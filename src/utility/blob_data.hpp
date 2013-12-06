@@ -44,6 +44,8 @@ namespace bias
     {
         public:
             double area;
+            bool onBorderX;
+            bool onBorderY;
             Centroid centroid;
             Ellipse ellipse;
             cv::Rect boundingRect;
