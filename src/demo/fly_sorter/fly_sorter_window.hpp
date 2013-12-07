@@ -12,6 +12,7 @@
 #include <QCloseEvent>
 #include <QMainWindow>
 #include <QPointer>
+#include <QMap>
 #include <opencv2/core/core.hpp>
 
 // Debug
@@ -75,6 +76,7 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         GenderSorterData genderSorterData_;
         unsigned int httpRequestErrorCount_;
         QString parameterFileName_;
+        //QMap<int,int> idToLabelMap_;
 
         void connectWidgets();
         void initialize();
