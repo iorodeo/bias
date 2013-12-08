@@ -81,16 +81,16 @@ void IdentityTracker::assignBlobsGreedy(BlobFinderData &blobFinderData)
         return;
     }
 
-    std::map<int,BlobDataList::iterator> indexToPrevPtrMap = getIndexToBlobDataPtrMap(
+    std::map<int,BlobDataList::iterator> indexToPrevMap = getIndexToBlobDataMap(
             blobFinderDataPrev_
             );
 
-    std::map<int,BlobDataList::iterator> indexToCurrPtrMap = getIndexToBlobDataPtrMap(
+    std::map<int,BlobDataList::iterator> indexToCurrMap = getIndexToBlobDataMap(
             blobFinderData
             );
 
-    int numCurr = indexToCurrPtrMap.size();
-    int numPrev = indexToPrevPtrMap.size();
+    int numCurr = indexToCurrMap.size();
+    int numPrev = indexToPrevMap.size();
 
     // DEBUG
     // ---------------------------------------------------------------------------------
@@ -117,7 +117,7 @@ void IdentityTracker::assignBlobsGreedy(BlobFinderData &blobFinderData)
 
         if (indPrevMin != -1)
         {
-            (indexToCurrPtrMap[indCurr] -> id) = (indexToPrevPtrMap[indPrevMin] -> id);
+            (indexToCurrMap[indCurr] -> id) = (indexToPrevMap[indPrevMin] -> id);
             usedVector[indPrevMin] = true;
 
             // DEBUG
@@ -215,7 +215,7 @@ float IdentityTracker::getCost(BlobData blobCurr, BlobData blobPrev)
 }
 
 
-std::map<int,BlobDataList::iterator> IdentityTracker::getIndexToBlobDataPtrMap(
+std::map<int,BlobDataList::iterator> IdentityTracker::getIndexToBlobDataMap(
         BlobFinderData &blobFinderData
         )
 {
@@ -230,8 +230,6 @@ std::map<int,BlobDataList::iterator> IdentityTracker::getIndexToBlobDataPtrMap(
         {
             continue;
         }
-        //BlobData *blobDataPtr = &(*it);
-        //map[index] = blobDataPtr;
         map[index] = it;
         index++;
     }

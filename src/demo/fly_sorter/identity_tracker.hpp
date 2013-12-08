@@ -27,7 +27,7 @@ class IdentityTracker
         std::vector<std::vector<float>> getCostMatrix(BlobFinderData &blobFinderData);
         float getCost(BlobData blobCurr, BlobData blobPrev);
 
-        std::map<int,BlobDataList::iterator> getIndexToBlobDataPtrMap(
+        std::map<int,BlobDataList::iterator> getIndexToBlobDataMap(
                 BlobFinderData &blobFinderData
                 );
 };
