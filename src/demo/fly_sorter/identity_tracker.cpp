@@ -90,11 +90,6 @@ std::vector<std::vector<int>> IdentityTracker::getCostMatrix(BlobFinderData &blo
         {
             BlobData blobDataPrev = *itPrev;
 
-            int xPrev = blobDataPrev.boundingRect.x + 0.5*blobDataPrev.boundingRect.width;
-            int yPrev = blobDataPrev.boundingRect.y + 0.5*blobDataPrev.boundingRect.height;
-            int widthPrev = blobDataPrev.boundingRect.width;
-            int heightPrev = blobDataPrev.boundingRect.height;
-
             int indCurr;
             BlobDataList::iterator itCurr;
             for (
@@ -104,10 +99,6 @@ std::vector<std::vector<int>> IdentityTracker::getCostMatrix(BlobFinderData &blo
                     )
             {
                 BlobData blobDataCurr = *itCurr;
-                int xCurr = blobDataCurr.boundingRect.x + 0.5*blobDataCurr.boundingRect.width;
-                int yCurr = blobDataCurr.boundingRect.y + 0.5*blobDataCurr.boundingRect.height;
-                int widthCurr = blobDataCurr.boundingRect.width;
-                int heightCurr = blobDataCurr.boundingRect.height;
                 
             }
         }
@@ -117,9 +108,27 @@ std::vector<std::vector<int>> IdentityTracker::getCostMatrix(BlobFinderData &blo
 
 }
 
+int IdentityTracker::getCost(BlobData blob0, BlobData blob1)
+{
+    // Get center and size of blob0
+    int x0 = blob0.boundingRect.x + blob0.boundingRect.width/2;
+    int y0 = blob0.boundingRect.y + blob0.boundingRect.height/2;
+    int width0 = blob0.boundingRect.width;
+    int height0 = blob0.boundingRect.height;
+
+    // Get center and size of blob1
+    int x1 = blob1.boundingRect.x + blob1.boundingRect.width/2;
+    int y1 = blob1.boundingRect.y + blob1.boundingRect.height/2;
+    int width1 = blob1.boundingRect.width;
+    int height1 = blob1.boundingRect.height;
+
+
+}
+
 
 int getNumberOkItems(BlobDataList blobDataList)
 {
+    // Returns number of items not on the border.
     int numOk = 0;
     BlobDataList::iterator it;
     for (it = blobDataList.begin(); it != blobDataList.end(); it++)

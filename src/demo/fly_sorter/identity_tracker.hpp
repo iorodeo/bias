@@ -22,6 +22,7 @@ class IdentityTracker
         BlobFinderData blobFinderDataPrev_;
 
         std::vector<std::vector<int>> getCostMatrix(BlobFinderData &blobFinderData);
+        int getCost(BlobData data0, BlobData data1);
 
 };
 

@@ -208,14 +208,36 @@ class IdentityTrackerParam
 {
     public:
 
-        float radius;
-        static const float DEFAULT_RADIUS;
+        float maxMotion;
+        static const float DEFAULT_MAX_MOTION;
 
-        float velocityX;
-        static const float DEFAULT_VELOCITY_X;
+        float maxCost;
+        static const float DEFAULT_MAX_COST;
 
-        float velocityY; 
-        static const float DEFAULT_VELOCITY_Y;
+        float meanDx;
+        static const float DEFAULT_MEAN_DX;
+
+        float meanDy;
+        static const float DEFAULT_MEAN_DY;
+
+        float meanWidth;
+        static const float DEFAULT_MEAN_WIDTH;
+
+        float meanHeight;
+        static const float DEFAULT_MEAN_HEIGHT;
+
+        float stdDx;
+        static const float DEFAULT_STD_DX;
+
+        float stdDy;
+        static const float DEFAULT_STD_DY;
+
+        float stdWidth;
+        static const float DEFAULT_STD_WIDTH;
+
+        float stdHeight;
+        static const float DEFAULT_STD_HEIGHT;
+
 
         IdentityTrackerParam();
         QVariantMap toMap();
