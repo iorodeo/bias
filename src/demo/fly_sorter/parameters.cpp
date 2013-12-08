@@ -862,8 +862,6 @@ RtnStatus ServerParam::fromMap(QVariantMap paramMap)
 
 // IdentityTrackerParam
 // -----------------------------------------------------------------------------
-const float IdentityTrackerParam::DEFAULT_MAX_MOTION = 100.0;
-const float IdentityTrackerParam::DEFAULT_MAX_COST = 32.7148;
 const float IdentityTrackerParam::DEFAULT_MEAN_DX = -5.5;
 const float IdentityTrackerParam::DEFAULT_MEAN_DY = 574.0;
 const float IdentityTrackerParam::DEFAULT_MEAN_WIDTH = 2.0;
@@ -872,12 +870,11 @@ const float IdentityTrackerParam::DEFAULT_STD_DX = 3.6050;
 const float IdentityTrackerParam::DEFAULT_STD_DY = 14.4201;
 const float IdentityTrackerParam::DEFAULT_STD_WIDTH = 5.7680;
 const float IdentityTrackerParam::DEFAULT_STD_HEIGHT = 8.6521;
+const float IdentityTrackerParam::DEFAULT_MAX_COST = 32.7148;
 
 
 IdentityTrackerParam::IdentityTrackerParam()
 {
-    maxMotion= DEFAULT_MAX_MOTION;
-    maxCost = DEFAULT_MAX_COST;
     meanDx = DEFAULT_MEAN_DX;
     meanDy = DEFAULT_MEAN_DY;
     meanWidth = DEFAULT_MEAN_WIDTH;
@@ -886,6 +883,7 @@ IdentityTrackerParam::IdentityTrackerParam()
     stdDy = DEFAULT_STD_DY;
     stdWidth = DEFAULT_STD_WIDTH;
     stdHeight = DEFAULT_STD_HEIGHT;
+    maxCost = DEFAULT_MAX_COST;
 }
 
 

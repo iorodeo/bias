@@ -208,12 +208,6 @@ class IdentityTrackerParam
 {
     public:
 
-        float maxMotion;
-        static const float DEFAULT_MAX_MOTION;
-
-        float maxCost;
-        static const float DEFAULT_MAX_COST;
-
         float meanDx;
         static const float DEFAULT_MEAN_DX;
 
@@ -237,6 +231,9 @@ class IdentityTrackerParam
 
         float stdHeight;
         static const float DEFAULT_STD_HEIGHT;
+
+        float maxCost;
+        static const float DEFAULT_MAX_COST;
 
 
         IdentityTrackerParam();

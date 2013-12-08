@@ -253,6 +253,12 @@ namespace bias
     }
 
 
+    bool BlobData::isOnBorder()
+    {
+        return onBorderX || onBorderY;
+    }
+
+
     // Utility functions
     // ----------------------------------------------------------------------------
 
@@ -269,5 +275,6 @@ namespace bias
         }
         return indentString;
     }
+
 
 } // namespace bias

@@ -71,6 +71,7 @@ namespace bias
             std::string toStdString( unsigned int indent=0);
             void print(unsigned int indent=0);
             void draw(cv::Mat &img);
+            bool isOnBorder();
 
     };
 
