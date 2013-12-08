@@ -142,8 +142,11 @@ namespace bias
 
     // Blob Data
     // ----------------------------------------------------------------------------
+    const long BlobData::ID_NOT_ASSIGNED = -1;
+
     BlobData::BlobData()
     {
+        id = ID_NOT_ASSIGNED;
         area = 0;
         onBorderX = false;
         onBorderY = false;
@@ -154,7 +157,7 @@ namespace bias
             std::vector<cv::Point> contour, 
             cv::Mat image, 
             unsigned int numPad
-            )
+            ) : BlobData()
     {
         setFromContour(contour,image, numPad);
 

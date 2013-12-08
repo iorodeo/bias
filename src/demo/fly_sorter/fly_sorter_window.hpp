@@ -5,6 +5,7 @@
 #include "parameters.hpp"
 #include "image_grabber.hpp"
 #include "blob_finder.hpp"
+#include "identity_tracker.hpp"
 #include "fly_segmenter.hpp"
 #include "hog_position_fitter.hpp"
 #include "gender_sorter.hpp"
@@ -70,13 +71,24 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         QPixmap previewPixmapOrig_;
         QPixmap thresholdPixmapOrig_;
         ImageData imageData_;
-        BlobFinderData blobFinderData_;
-        FlySegmenterData flySegmenterData_;
-        HogPositionFitterData hogPositionFitterData_;
-        GenderSorterData genderSorterData_;
         unsigned int httpRequestErrorCount_;
         QString parameterFileName_;
-        //QMap<int,int> idToLabelMap_;
+
+        BlobFinder blobFinder_;
+        BlobFinderData blobFinderData_;
+
+        IdentityTracker identityTracker_;
+
+        FlySegmenter flySegmenter_;
+        FlySegmenterData flySegmenterData_;
+
+        HogPositionFitter hogPositionFitter_;
+        HogPositionFitterData hogPositionFitterData_;
+
+        GenderSorter genderSorter_;
+        GenderSorterData genderSorterData_;
+
+
 
         void connectWidgets();
         void initialize();

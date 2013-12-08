@@ -85,12 +85,20 @@ void FlySorterWindow::startPushButtonClicked()
 {
     if (!running_)
     {
-        //debugStream.open("debug_data.txt");
+
+        blobFinder_ = BlobFinder(param_.blobFinder);
+        identityTracker_ = IdentityTracker(param_.identityTracker);
+        flySegmenter_ = FlySegmenter(param_.flySegmenter);
+        hogPositionFitter_ = HogPositionFitter(param_.hogPositionFitter);
+        genderSorter_ = GenderSorter(param_.genderSorter);
         startImageCapture();
+
+        //debugStream.open("debug_data.txt");
     }
     else
     {
         stopImageCapture();
+
         //debugStream.close();
     }
 }
@@ -139,8 +147,8 @@ void FlySorterWindow::startImageCapture()
                 SLOT(newImage(ImageData))
                 );
 
-        threadPoolPtr_ -> start(imageGrabberPtr_);
         running_ = true;
+        threadPoolPtr_ -> start(imageGrabberPtr_);
         startPushButtonPtr_ -> setText("Stop");
         reloadPushButtonPtr_ -> setEnabled(false);
     }
@@ -188,18 +196,11 @@ void FlySorterWindow::newImage(ImageData imageData)
         std::cout << imageData.frameCount << std::endl;
 
         imageData_.copy(imageData);
-
-        BlobFinder blobFinder = BlobFinder(param_.blobFinder);
-        blobFinderData_ = blobFinder.findBlobs(imageData_.mat);
-
-        FlySegmenter flySegmenter = FlySegmenter(param_.flySegmenter);
-        flySegmenterData_ = flySegmenter.segment(blobFinderData_);
-
-        HogPositionFitter hogPositionFitter = HogPositionFitter(param_.hogPositionFitter);
-        hogPositionFitterData_ = hogPositionFitter.fit(flySegmenterData_,imageData.frameCount,imageData.mat);
-
-        GenderSorter genderSorter = GenderSorter(param_.genderSorter);
-        genderSorterData_ = genderSorter.sort(hogPositionFitterData_);
+        blobFinderData_ = blobFinder_.findBlobs(imageData_.mat);
+        identityTracker_.update(blobFinderData_);
+        flySegmenterData_ = flySegmenter_.segment(blobFinderData_);
+        hogPositionFitterData_ = hogPositionFitter_.fit(flySegmenterData_,imageData.frameCount,imageData.mat);
+        genderSorterData_ = genderSorter_.sort(hogPositionFitterData_);
 
 
         //// DEBUG

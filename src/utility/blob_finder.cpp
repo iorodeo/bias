@@ -18,7 +18,6 @@ namespace bias
     }
 
 
-
     // BlobFinder
     // ----------------------------------------------------------------------------
 
@@ -132,7 +131,6 @@ namespace bias
         }
         return false;
     }
-
 
 } // namespace bias
 

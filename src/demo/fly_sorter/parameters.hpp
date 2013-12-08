@@ -240,6 +240,7 @@ class FlySorterParam
         ServerParam server;
         ImageGrabberParam imageGrabber;
         BlobFinderParam blobFinder;
+        IdentityTrackerParam identityTracker;
         FlySegmenterParam flySegmenter;
         HogPositionFitterParam hogPositionFitter;
         GenderSorterParam genderSorter;
