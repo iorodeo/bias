@@ -109,8 +109,6 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         void updateWidgetsOnLoad();
         void setupTrainingDataWrite(QString videoFileName);
 
-
-
         // Devel 
         // ---------------------------------------------------------
         std::ofstream debugStream;

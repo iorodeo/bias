@@ -92,7 +92,16 @@ class HogPositionFitter
                 cv::Mat mask
                 );
 
-        void createTrainingData(cv::Mat img);
+        void createTrainingData(
+                unsigned long frameCount, 
+                PositionData posData,
+                cv::Mat img
+                );
+
+        void writePixelFeatureVector(
+                std::string fileName, 
+                std::vector<double> pixVector
+                );
 
 };
 

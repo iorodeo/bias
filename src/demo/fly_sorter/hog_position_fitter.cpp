@@ -6,13 +6,10 @@
 #include <cfloat>
 #include <sstream>
 #include <iostream>
+#include <fstream>
+#include <iomanip>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-
-// DEBUG
-// --------------------------------
-#include <fstream>
-// --------------------------------
 
 
 // PositionData
@@ -161,8 +158,9 @@ HogPositionFitterData HogPositionFitter::fit(
         cv::Mat isBodyMat = bwAreaOpen(closeMat,param_.openArea);
         posData.bodyArea = cv::countNonZero(isBodyMat);
 
-        // Ensure that bodyArea is above minimum for fly
-        if (posData.bodyArea < param_.openArea)
+        // Ensure not on boarder and that bodyArea is above minimum for fly
+        bool onBorder = posData.segmentData.blobData.isOnBorder();
+        if (onBorder || (posData.bodyArea < param_.openArea))
         {
             // Note,  with the current implementation of bwAreaOpen you can
             // degenerate cases where bodyArea > 0 but less than openArea. For
@@ -295,7 +293,7 @@ HogPositionFitterData HogPositionFitter::fit(
 
             if (writeTrainingData_)
             {
-                createTrainingData(rotBoundingImageLUV);
+                createTrainingData(frameCount, posData, rotBoundingImageLUV);
             }
            
             // DEBUG - Write pixel feature vector to file
@@ -850,21 +848,74 @@ GradientData getGradientData(
 }
 
 
-void HogPositionFitter::createTrainingData(cv::Mat img)
+void HogPositionFitter::createTrainingData(
+        unsigned long frameCount,
+        PositionData posData,
+        cv::Mat img
+        )
 {
-    cv::Mat imgFlipX;
-    cv::Mat imgFlipY;
-    cv::Mat imgFlipXY;
+    // Create base file name
+    std::stringstream baseNameStream;
+    baseNameStream << trainingFileNamePrefix_;
+    baseNameStream << "_frame_" << (frameCount+1);
+    baseNameStream << "_posx_"  << posData.meanXAbs;
+    baseNameStream << "_posy_"  << posData.meanYAbs;
+    baseNameStream << "_id_"    << posData.segmentData.blobData.id;
+    std::string baseName = baseNameStream.str();
 
-    cv::flip(img, imgFlipX,   0);
-    cv::flip(img, imgFlipY,   1);
-    cv::flip(img, imgFlipXY, -1);
-
+    // Write unflipped pixel feature vector
+    std::stringstream fileNameStream;
+    fileNameStream << baseName << ".txt";
     std::vector<double> vector = getPixelFeatureVector(img);
-    std::vector<double> vectorFlipX = getPixelFeatureVector(imgFlipX);
-    std::vector<double> vectorFlipY = getPixelFeatureVector(imgFlipY);
-    std::vector<double> vectorFlipXY = getPixelFeatureVector(imgFlipXY);
+    writePixelFeatureVector(fileNameStream.str(), vector);
 
+    // Write pixel feature vector from image flipped about x
+    fileNameStream.str(std::string());
+    fileNameStream << baseName << "_flip_x.txt";
+    cv::Mat imgFlipX;
+    cv::flip(img, imgFlipX, 0);
+    std::vector<double> vectorFlipX = getPixelFeatureVector(imgFlipX);
+    writePixelFeatureVector(fileNameStream.str(), vectorFlipX);
+
+    // Write pixel feature vector from image flipped about y
+    fileNameStream.str(std::string());
+    fileNameStream << baseName << "_flip_y.txt";
+    cv::Mat imgFlipY;
+    cv::flip(img, imgFlipY, 1);
+    std::vector<double> vectorFlipY = getPixelFeatureVector(imgFlipY);
+    writePixelFeatureVector(fileNameStream.str(), vectorFlipY);
+
+    // Write pixel feature vector from image flipped about x and y
+    fileNameStream.str(std::string());
+    fileNameStream << baseName << "_flip_xy.txt";
+    cv::Mat imgFlipXY;
+    cv::flip(img, imgFlipXY, -1);
+    std::vector<double> vectorFlipXY = getPixelFeatureVector(imgFlipXY);
+    writePixelFeatureVector(fileNameStream.str(), vectorFlipXY);
+}
+
+
+void HogPositionFitter::writePixelFeatureVector(
+        std::string fileName, 
+        std::vector<double> pixVector
+        )
+{
+    std::ofstream outStream; 
+    int numElements = pixVector.size();
+    outStream.open(fileName);
+    outStream << std::scientific;
+    outStream << std::setprecision(10);
+    outStream << 1 << ",";
+    outStream << numElements << ",";
+    for (int i=0; i<numElements; i++)
+    {
+        outStream << pixVector[i];
+        if (i < numElements)
+        {
+            outStream << ","; 
+        }
+    }
+    outStream.close();
 }
 
 
