@@ -86,12 +86,17 @@ HogPositionFitterData::HogPositionFitterData() {};
 //  HogPositionFitter
 //  ---------------------------------------------------------------------------
 
-HogPositionFitter::HogPositionFitter() { };
+HogPositionFitter::HogPositionFitter() 
+{ 
+    showDebugWindow_ = false; 
+    writeTrainingData_ = false;
+    trainingFileNamePrefix_ = std::string("none");
+};
 
-HogPositionFitter::HogPositionFitter(HogPositionFitterParam param)
+
+HogPositionFitter::HogPositionFitter(HogPositionFitterParam param) : HogPositionFitter()
 {
     setParam(param);
-    showDebugWindow_ = false; 
     if (showDebugWindow_)
     {
         //cv::namedWindow(
@@ -109,9 +114,23 @@ HogPositionFitter::HogPositionFitter(HogPositionFitterParam param)
     }
 };
 
+
 void HogPositionFitter::setParam(HogPositionFitterParam param)
 {
     param_ = param;
+}
+
+
+void HogPositionFitter::trainingDataWriteEnable(std::string fileNamePrefix)
+{
+    writeTrainingData_ = true;
+    trainingFileNamePrefix_ = fileNamePrefix;
+}
+
+
+void HogPositionFitter::trainingDataWriteDisable()
+{
+    writeTrainingData_ = false;
 }
 
 
@@ -273,29 +292,34 @@ HogPositionFitterData HogPositionFitter::fit(
 
             posData.success = true;
             fitterData.positionDataList.push_back(posData); 
+
+            if (writeTrainingData_)
+            {
+                createTrainingData(rotBoundingImageLUV);
+            }
            
             // DEBUG - Write pixel feature vector to file
             // ------------------------------------------------------------------------------------
-            if (0) 
-            {
-                std::ofstream pVecStream;
-                QString pVecFileName = QString("pVec_frm_%1_cnt_%2.txt").arg(frameCount).arg(cnt);
-                pVecStream.open(pVecFileName.toStdString());
-                for (int i=0; i<posData.pixelFeatureVector.size();i++)
-                {
-                    pVecStream << posData.pixelFeatureVector[i] << std::endl;
-                }
-                pVecStream.close();
-            }
-            if (showDebugWindow_)
-            {
-                if (cnt==0)
-                {
-                    //cv::imshow("hogPosMaxComp", maxCompMat);
-                    //cv::imshow("boundingImageLUV", posData.segmentData.boundingImageLUV);
-                    cv::imshow("rotBoundingImageLUV", posData.rotBoundingImageLUV);
-                }
-            }
+            //if (0) 
+            //{
+            //    std::ofstream pVecStream;
+            //    QString pVecFileName = QString("pVec_frm_%1_cnt_%2.txt").arg(frameCount).arg(cnt);
+            //    pVecStream.open(pVecFileName.toStdString());
+            //    for (int i=0; i<posData.pixelFeatureVector.size();i++)
+            //    {
+            //        pVecStream << posData.pixelFeatureVector[i] << std::endl;
+            //    }
+            //    pVecStream.close();
+            //}
+            //if (showDebugWindow_)
+            //{
+            //    if (cnt==0)
+            //    {
+            //        //cv::imshow("hogPosMaxComp", maxCompMat);
+            //        //cv::imshow("boundingImageLUV", posData.segmentData.boundingImageLUV);
+            //        cv::imshow("rotBoundingImageLUV", posData.rotBoundingImageLUV);
+            //    }
+            //}
             // ------------------------------------------------------------------------------------
         }
        
@@ -824,6 +848,25 @@ GradientData getGradientData(
     // --------------------------------------------------------------------------
     return gradData;
 }
+
+
+void HogPositionFitter::createTrainingData(cv::Mat img)
+{
+    cv::Mat imgFlipX;
+    cv::Mat imgFlipY;
+    cv::Mat imgFlipXY;
+
+    cv::flip(img, imgFlipX,   0);
+    cv::flip(img, imgFlipY,   1);
+    cv::flip(img, imgFlipXY, -1);
+
+    std::vector<double> vector = getPixelFeatureVector(img);
+    std::vector<double> vectorFlipX = getPixelFeatureVector(imgFlipX);
+    std::vector<double> vectorFlipY = getPixelFeatureVector(imgFlipY);
+    std::vector<double> vectorFlipXY = getPixelFeatureVector(imgFlipXY);
+
+}
+
 
 cv::Mat getTriangleFilter1D(unsigned int normRadius)
 { 

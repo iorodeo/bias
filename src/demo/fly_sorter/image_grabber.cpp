@@ -197,16 +197,19 @@ void ImageGrabber::runCaptureFromFile()
     // Read frame from input file at frameRate.
     unsigned long frameCount = 0;
     //float sleepDt = 1.0e3/param_.frameRate;
-    float sleepDt = 0.25*1.0e3/param_.frameRate;
+    //float sleepDt = 0.25*1.0e3/param_.frameRate;
+    float sleepDt = 0.1*1.0e3/param_.frameRate;
     
 
     //std::cout << "begin play back" << std::endl;
     ImageData imageData;
+    std::cout << param_.captureInputFile.toStdString() << std::endl;
 
     while ((!stopped_) && (frameCount < numFrames))
     {
+        std::cout << (frameCount+1) << "/" << numFrames << std::endl;
+
         cv::Mat mat;
-        //std::cout << param_.captureInputFile.toStdString() << ", frame = " << frameCount;
 
         try
         {
@@ -251,7 +254,7 @@ void ImageGrabber::runCaptureFromFile()
 
         ThreadHelper::msleep(sleepDt);
     }
-    //std::cout << "play back done" << std::endl;
+    std::cout << "play back done" << std::endl;
 
     // Release file
     try

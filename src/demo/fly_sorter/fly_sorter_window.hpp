@@ -52,6 +52,7 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         void startPushButtonClicked();
         void reloadPushButtonClicked();
         void httpOutputCheckBoxChanged(int state);
+        void trainingDataCheckBoxChanged(int state);
         void newImage(ImageData imageData);
         void updateDisplayOnTimer(); 
         void networkAccessManagerFinished(QNetworkReply *reply);
@@ -89,7 +90,6 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         GenderSorterData genderSorterData_;
 
 
-
         void connectWidgets();
         void initialize();
         void startImageCapture();
@@ -106,6 +106,9 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         QByteArray dataToJson();
         void loadParamFromFile();
         void updateParamText();
+        void updateWidgetsOnLoad();
+        void setupTrainingDataWrite(QString videoFileName);
+
 
 
         // Devel 

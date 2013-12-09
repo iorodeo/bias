@@ -58,16 +58,42 @@ class HogPositionFitter
         HogPositionFitter();
         HogPositionFitter(HogPositionFitterParam param);
         void setParam(HogPositionFitterParam param);
-        HogPositionFitterData fit(FlySegmenterData flySegmenterData, unsigned long frameCount, cv::Mat img);
+        void trainingDataWriteEnable(std::string fileNamePrefix);
+        void trainingDataWriteDisable();
+
+        HogPositionFitterData fit(
+                FlySegmenterData flySegmenterData, 
+                unsigned long frameCount, 
+                cv::Mat img
+                );
 
     private:
         bool showDebugWindow_;
+        bool writeTrainingData_;
+        std::string trainingFileNamePrefix_;
         HogPositionFitterParam param_;
+
         cv::Mat getFillMask(cv::Mat image);
         std::vector<double> getPixelFeatureVector(cv::Mat image);
-        std::vector<double> getHistGradMag(cv::Mat normGradMag, cv::Mat mask);
-        std::vector<double> getHistGradOri(cv::Mat gradOri, cv::Mat normGradMag, cv::Mat mask);
-        std::vector<double> getHistColor(cv::Mat subImage, cv::Mat mask);
+
+        std::vector<double> getHistGradMag(
+                cv::Mat normGradMag, 
+                cv::Mat mask
+                );
+
+        std::vector<double> getHistGradOri(
+                cv::Mat gradOri, 
+                cv::Mat normGradMag, 
+                cv::Mat mask
+                );
+
+        std::vector<double> getHistColor(
+                cv::Mat subImage, 
+                cv::Mat mask
+                );
+
+        void createTrainingData(cv::Mat img);
+
 };
 
 
