@@ -111,8 +111,8 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         // Devel 
         // ---------------------------------------------------------
         std::ofstream debugStream;
-        std::default_random_engine generator_;
-        std::uniform_int_distribution<unsigned int> distribution_;
+        //std::default_random_engine generator_;
+        //std::uniform_int_distribution<unsigned int> distribution_;
         // ---------------------------------------------------------
 
 };

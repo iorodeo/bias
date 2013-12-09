@@ -340,24 +340,10 @@ void FlySorterWindow::initialize()
 
     // Temporary
     // --------------------------------------------------------------------------
+    //distribution_ = std::uniform_int_distribution<unsigned int>(0,1);
+
     QString appDirPath = QCoreApplication::applicationDirPath();
     std::cout << "applicationDirPath = " << appDirPath.toStdString() << std::endl;
-    distribution_ = std::uniform_int_distribution<unsigned int>(0,1);
-
-    //
-    //int n = 15;
-    //int m = 2*n+1;
-    //cv::Mat se = cv::getStructuringElement(cv::MORPH_ELLIPSE,cv::Size(m,m));
-    //for (int i=0; i<m; i++)
-    //{
-    //    for (int j=0; j<m; j++)
-    //    {
-    //        std::cout << int(se.at<uchar>(i,j)) << " ";
-    //    }
-    //    std::cout << std::endl;
-    //}
-    //
-
 }
 
 
@@ -468,63 +454,41 @@ void FlySorterWindow::sendDataViaHttpRequest()
 QVariantMap FlySorterWindow::dataToMap()
 {
     QVariantMap dataMap;
-    dataMap.insert("ndetections", blobFinderData_.blobDataList.size());
+
+    int numOkBlobs = getNumberOkItems(blobFinderData_.blobDataList);
+    dataMap.insert("ndetections", numOkBlobs);
     
+    GenderDataList genderDataList = genderSorterData_.genderDataList;
+    GenderDataList::iterator it;
     QVariantList detectionList;
-    BlobDataList::iterator it;
-    unsigned int cnt = 0;
 
-    // Development
-    // ------------------------------------------------------------------------
-    static bool isNextFlyFemale = true;
-    // -------------------------------------------------------------------------
-
-
-    for (it=blobFinderData_.blobDataList.begin(); it!=blobFinderData_.blobDataList.end(); it++)
+    for (it=genderDataList.begin(); it!=genderDataList.end(); it++)
     {
-        BlobData blobData = *it;
+        GenderData genderData = *it;
+
+        bool isOnBorder = genderData.positionData.segmentData.blobData.isOnBorder();
+        bool success = genderData.positionData.success;
+
+        if (isOnBorder ) 
+        {
+            // Throw away data on the border.
+            continue;
+        }
+
         QVariantMap detectionMap;
 
-        // Devel - select fly gender based on genderMode setting
-        // ----------------------------------------------------------------------
-        switch (param_.genderMode)
-        {
-            case GenderModeMaleOnly:
-                detectionMap.insert("fly_type", "male");
-                break;
+        QString genderString = QString::fromStdString( 
+                GenderSorter::GenderToString(genderData.gender)
+                );
+        QVariant id = QVariant::fromValue<long>(
+                genderData.positionData.segmentData.blobData.id
+                );
 
-            case GenderModeEveryOther:
-                if (isNextFlyFemale)
-                {
-                    detectionMap.insert("fly_type", "female");
-                    isNextFlyFemale = false;
-                }
-                else
-                {
-                    detectionMap.insert("fly_type", "male");
-                    isNextFlyFemale = true;
-                }
-                break;
-
-            default:
-                unsigned int coinFlip = distribution_(generator_);
-                if (coinFlip == 0)
-                {
-                    detectionMap.insert("fly_type", "male");
-                }
-                else
-                {
-                    detectionMap.insert("fly_type", "female");
-                }
-                break;
-        }
-        // --------------------------------------------------------------------
-        
-        detectionMap.insert("fly_id", cnt);
-        detectionMap.insert("x",blobData.centroid.x);
-        detectionMap.insert("y",blobData.centroid.y);
+        detectionMap.insert("fly_type", genderString); 
+        detectionMap.insert("fly_id", id);
+        detectionMap.insert("x", genderData.positionData.meanXAbs);
+        detectionMap.insert("y", genderData.positionData.meanYAbs);
         detectionList.push_back(detectionMap);
-        cnt++;
     }
     dataMap.insert("detections", detectionList);
     dataMap.insert("time_acquired", imageData_.dateTime);
