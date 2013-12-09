@@ -4,15 +4,19 @@
 #include "blob_finder.hpp"
 #include "fast_binary_predictor.hpp"
 #include <list>
+#include <string>
 
 
 class SegmentData 
 {
     public:
-        SegmentData() {};
         FastBinaryPredictorData<cv::Mat> predictorData;
         cv::Mat boundingImageLUV;
         BlobData blobData;
+
+        SegmentData();
+        std::string toStdString(unsigned int indent=0);
+        void print(unsigned int indent=0);
 };
 typedef std::list<SegmentData> SegmentDataList;
 

@@ -4,6 +4,7 @@
 #include "fast_binary_predictor.hpp"
 #include "hog_position_fitter.hpp"
 #include <list>
+#include <string>
 
 enum Gender 
 {
@@ -21,6 +22,8 @@ class GenderData
         bool havePredictorData;
         FastBinaryPredictorData<double> predictorData;
         GenderData();
+        std::string toStdString(unsigned int indent=0);
+        void print(unsigned int indent=0);
 };
 typedef std::list<GenderData> GenderDataList;
 

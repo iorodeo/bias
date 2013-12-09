@@ -193,7 +193,6 @@ void FlySorterWindow::newImage(ImageData imageData)
 {
     if (running_)
     {
-        std::cout << imageData.frameCount << std::endl;
 
         imageData_.copy(imageData);
         blobFinderData_ = blobFinder_.findBlobs(imageData_.mat);
@@ -201,67 +200,37 @@ void FlySorterWindow::newImage(ImageData imageData)
         flySegmenterData_ = flySegmenter_.segment(blobFinderData_);
         hogPositionFitterData_ = hogPositionFitter_.fit(flySegmenterData_,imageData.frameCount,imageData.mat);
         genderSorterData_ = genderSorter_.sort(hogPositionFitterData_);
-
-
-        //// DEBUG
-        //// ----------------------------------------------------------------------
-        //BlobDataList::iterator it;
-        //for (it=blobFinderData_.blobDataList.begin(); it!=blobFinderData_.blobDataList.end(); it++)
-        //{
-        //    BlobData data = *it;
-        //    std::cout << "onX:      " << data.onBorderX << std::endl;
-        //    std::cout << "onY:      " << data.onBorderY << std::endl;
-        //    std::cout << "x0, x1:   " << data.boundingRect.x << ", " << (data.boundingRect.x + data.boundingRect.width) << std::endl;
-        //    std::cout << "y0, y1:   " << data.boundingRect.y << ", " << (data.boundingRect.y + data.boundingRect.height) << std::endl;
-        //    std::cout << "cols:     " << imageData_.mat.cols << std::endl;
-        //    std::cout << "rows:     " << imageData_.mat.rows << std::endl;
-        //    std::cout << std::endl;
-        //}
-        //// ----------------------------------------------------------------------
-
-
-        // DEBUG
-        // -----------------------------------------------------------------------
-
-        //debugStream << "Frame Count: " << imageData.frameCount << std::endl;
-        //if (hogPositionFitterData_.positionDataList.empty())
-        //{
-        //    debugStream << "  " << "PositionData: None"  << std::endl;
-        //}
-        //else
-        //{
-        //    debugStream << "  " << "PositionData: "  << std::endl;
-
-        //    PositionDataList::iterator it;
-        //    unsigned int count;
-        //    for (
-        //            it  = hogPositionFitterData_.positionDataList.begin(), count=0;
-        //            it != hogPositionFitterData_.positionDataList.end();
-        //            it++, count++
-        //        )
-        //    {
-        //        PositionData posData = *it;
-        //        debugStream << std::endl;
-        //        debugStream << "    " << "count:            " << count << std::endl;
-        //        debugStream << "    " << "success:          " << posData.success << std::endl;
-        //        debugStream << "    " << "isFly:            " << posData.isFly << std::endl; 
-        //        debugStream << "    " << "isMultipleFlies:  " << posData.isMultipleFlies << std::endl;
-        //        debugStream << "    " << "bodyArea:         " << posData.bodyArea << std::endl;
-        //        debugStream << std::endl;
-        //    }
-        //}
-
-        // Write images to file
-        // ----------------------------------------------------------------------
-        //QString imgFileName = QString("image_%1.bmp").arg(imageData.frameCount);
-        //cv::imwrite(imgFileName.toStdString(),imageData.mat);
-        // ----------------------------------------------------------------------
-
-
         if ((httpOutputCheckBoxPtr_ -> checkState()) == Qt::Checked)
         {
             sendDataViaHttpRequest();
         }
+
+        // DEBUG - display gender data
+        // -------------------------------------------------------------------------
+        if (0)
+        {
+            std::cout << "Frame Count: " << imageData.frameCount << std::endl;
+            GenderDataList genderDataList = genderSorterData_.genderDataList;
+            GenderDataList::iterator it;
+
+            for (it=genderDataList.begin(); it!=genderDataList.end(); it++)
+            {
+                GenderData data = *it;
+                std::cout << data.toStdString(1) << std::endl;
+            }
+        }
+        // -------------------------------------------------------------------------
+
+
+        // DEBUG - write images to file
+        // -------------------------------------------------------------------------
+        if (0)
+        {
+            QString imgFileName = QString("image_%1.bmp").arg(imageData.frameCount);
+            cv::imwrite(imgFileName.toStdString(),imageData.mat);
+        }
+        // -------------------------------------------------------------------------
+
     }
 }
 

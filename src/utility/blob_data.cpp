@@ -228,6 +228,7 @@ namespace bias
         std::string indentStr0 = getIndentString(indent);
         std::string indentStr1 = getIndentString(indent+1);
         ss << indentStr0 << "blobData:" << std::endl;
+        ss << indentStr1 << "id: " << id << std::endl;
         ss << indentStr1 << "area: " << area << std::endl;
         ss << indentStr1 << "onBorderX: " << onBorderX << std::endl;
         ss << indentStr1 << "onBorderY: " << onBorderY << std::endl;

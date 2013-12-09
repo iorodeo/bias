@@ -4,6 +4,7 @@
 #include "fly_segmenter.hpp"
 #include <list>
 #include <vector>
+#include <string>
 #include <opencv2/core/core.hpp>
 
 //Debug 
@@ -33,6 +34,8 @@ class PositionData
         SegmentData segmentData;
 
         PositionData();
+        std::string toStdString(unsigned int indent=0);
+        void print(unsigned int indent=0);
 
         static const bool DEFAULT_IS_FLY;
         static const bool DEFAULT_IS_MULTIPLE_FLIES;

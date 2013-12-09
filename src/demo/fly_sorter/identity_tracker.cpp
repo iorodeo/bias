@@ -41,7 +41,7 @@ void IdentityTracker::update(BlobFinderData &blobFinderData)
     BlobDataList::iterator it;
     for (it=blobFinderData.blobDataList.begin(); it!=blobFinderData.blobDataList.end(); it++)
     {
-        if ( (!(it -> isOnBorder())) && ((it -> id) == BlobData::ID_NOT_ASSIGNED))
+        if ((!(it -> isOnBorder())) && ((it -> id) == BlobData::ID_NOT_ASSIGNED))
         { 
             (it -> id) = idCounter_;
             idCounter_++;

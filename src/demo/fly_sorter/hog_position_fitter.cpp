@@ -4,6 +4,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <cfloat>
+#include <sstream>
 #include <iostream>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -35,6 +36,48 @@ PositionData::PositionData()
     ellipseAngle = 0.0;
     covarianceMatrix = cv::Mat(2,2,CV_64FC1,cv::Scalar(0.0));
 }
+
+
+std::string PositionData::toStdString(unsigned int indent)
+{
+    std::stringstream ss;
+    std::string indentStr0 = getIndentString(indent);
+    std::string indentStr1 = getIndentString(indent+1);
+    std::string indentStr2 = getIndentString(indent+2);
+    ss << indentStr0 << "PositionData:" << std::endl;
+    ss << indentStr1 << "success: " << success << std::endl;
+    ss << indentStr1 << "isFly: " << isFly << std::endl;
+    ss << indentStr1 << "flipped: " << flipped << std::endl;
+    ss << indentStr1 << "bodyArea: " << bodyArea << std::endl;
+    ss << indentStr1 << "meanXRel: " << meanXRel << std::endl;
+    ss << indentStr1 << "meanYRel: " << meanYRel << std::endl;
+    ss << indentStr1 << "meanXAbs: " << meanXAbs << std::endl;
+    ss << indentStr1 << "meanYAbs: " << meanYAbs << std::endl;
+    ss << indentStr1 << "ellipseMajorAxis: " << ellipseMajorAxis << std::endl;
+    ss << indentStr1 << "ellipseMinorAxis: " << ellipseMinorAxis << std::endl;
+    ss << indentStr1 << "ellipseAngle: " << ellipseAngle << std::endl;
+    ss << indentStr1 << "covarianceMatrix: " << std::endl;
+    for (int i=0; i<2; i++)
+    {
+        ss << indentStr2; 
+        for (int j=0; j<2; j++)
+        {
+            ss << covarianceMatrix.at<double>(i,j) << " ";
+        }
+        ss << std::endl;
+    }
+    ss << indentStr1 << "rotBoundingImageLUV: (not shown)" << std::endl;
+    ss << indentStr1 << "pixelFeatureVector: (not shown)" << std::endl;
+    ss << segmentData.toStdString(indent+1);
+    return ss.str();
+}
+
+
+void PositionData::print(unsigned int indent)
+{
+    std::cout << toStdString(indent);
+}
+
 
 // HogPositionFitterData
 // ----------------------------------------------------------------------------

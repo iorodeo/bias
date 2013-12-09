@@ -1,9 +1,33 @@
 #include "fly_segmenter.hpp"
 #include <iostream>
+#include <sstream>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include "bgr_to_luv_converter.hpp"
+
+
+// SegmentData
+// ----------------------------------------------------------------------------
+SegmentData::SegmentData() {};
+
+std::string SegmentData::toStdString(unsigned int indent)
+{
+    std::stringstream ss;
+    std::string indentStr0 = getIndentString(indent);
+    std::string indentStr1 = getIndentString(indent+1);
+    ss << indentStr0 << "SegmentData:" << std::endl;
+    ss << indentStr1 << "predictorData: (not shown)" << std::endl;
+    ss << indentStr1 << "boundingImageLUV: (not shown)" << std::endl;
+    ss << blobData.toStdString(indent+1);
+    return ss.str();
+}
+
+
+void SegmentData::print(unsigned int indent)
+{
+    std::cout << toStdString(indent);
+}
 
 
 // FlySegmenter
