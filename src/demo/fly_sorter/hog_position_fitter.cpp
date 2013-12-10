@@ -858,20 +858,20 @@ void HogPositionFitter::createTrainingData(
     std::stringstream baseNameStream;
     baseNameStream << trainingFileNamePrefix_;
     baseNameStream << "_frame_" << (frameCount+1);
-    baseNameStream << "_posx_"  << posData.meanXAbs;
-    baseNameStream << "_posy_"  << posData.meanYAbs;
+    baseNameStream << "_posx_"  << int(posData.meanXAbs);
+    baseNameStream << "_posy_"  << int(posData.meanYAbs);
     baseNameStream << "_id_"    << posData.segmentData.blobData.id;
     std::string baseName = baseNameStream.str();
 
     // Write unflipped pixel feature vector
     std::stringstream fileNameStream;
-    fileNameStream << baseName << ".txt";
+    fileNameStream << baseName << "_flipxy_00.txt";
     std::vector<double> vector = getPixelFeatureVector(img);
     writePixelFeatureVector(fileNameStream.str(), vector);
 
     // Write pixel feature vector from image flipped about x
     fileNameStream.str(std::string());
-    fileNameStream << baseName << "_flip_x.txt";
+    fileNameStream << baseName << "_flipxy_10.txt";
     cv::Mat imgFlipX;
     cv::flip(img, imgFlipX, 0);
     std::vector<double> vectorFlipX = getPixelFeatureVector(imgFlipX);
@@ -879,7 +879,7 @@ void HogPositionFitter::createTrainingData(
 
     // Write pixel feature vector from image flipped about y
     fileNameStream.str(std::string());
-    fileNameStream << baseName << "_flip_y.txt";
+    fileNameStream << baseName << "_flipxy_01.txt";
     cv::Mat imgFlipY;
     cv::flip(img, imgFlipY, 1);
     std::vector<double> vectorFlipY = getPixelFeatureVector(imgFlipY);
@@ -887,7 +887,7 @@ void HogPositionFitter::createTrainingData(
 
     // Write pixel feature vector from image flipped about x and y
     fileNameStream.str(std::string());
-    fileNameStream << baseName << "_flip_xy.txt";
+    fileNameStream << baseName << "_flipxy_11.txt";
     cv::Mat imgFlipXY;
     cv::flip(img, imgFlipXY, -1);
     std::vector<double> vectorFlipXY = getPixelFeatureVector(imgFlipXY);
