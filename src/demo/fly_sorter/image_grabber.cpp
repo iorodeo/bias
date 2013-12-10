@@ -198,7 +198,7 @@ void ImageGrabber::runCaptureFromFile()
     unsigned long frameCount = 0;
     //float sleepDt = 1.0e3/param_.frameRate;
     //float sleepDt = 0.25*1.0e3/param_.frameRate;
-    float sleepDt = 0.1*1.0e3/param_.frameRate;
+    float sleepDt = 0.2*1.0e3/param_.frameRate;
     
 
     //std::cout << "begin play back" << std::endl;
