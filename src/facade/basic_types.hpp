@@ -17,7 +17,8 @@ namespace bias {
     typedef std::list<CameraLib> CameraLibList;
     typedef std::set<CameraLib> CameraLibSet;
 
-    enum ErrorCode {
+    enum ErrorCode 
+    {
 
         ERROR_OK = 0,
 

@@ -14,6 +14,7 @@
 #include <QMainWindow>
 #include <QPointer>
 #include <QMap>
+#include <QList>
 #include <opencv2/core/core.hpp>
 
 // Debug
@@ -28,6 +29,14 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class QVarianMap;
 class QByteArray;
+
+
+enum TrainingDataMode 
+{
+    TRAINING_DATA_MODE_SINGLE=0,
+    TRAINING_DATA_MODE_BATCH
+};
+
 
 class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
 {
@@ -63,6 +72,7 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
     private:
 
         bool running_;
+
         FlySorterParam param_;
         float displayFreq_;
         QPointer<QThreadPool> threadPoolPtr_;
@@ -89,6 +99,8 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         GenderSorter genderSorter_;
         GenderSorterData genderSorterData_;
 
+        QList<QString> batchVideoFileList_;
+        int batchVideoFileIndex_;
 
         void connectWidgets();
         void initialize();
@@ -107,7 +119,14 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         void loadParamFromFile();
         void updateParamText();
         void updateWidgetsOnLoad();
+
         void setupTrainingDataWrite(QString videoFileName);
+        void setupBatchDataWrite();
+        TrainingDataMode getTrainingDataMode();
+        bool isTrainingDataModeSingle();
+        bool isTrainingDataModeBatch();
+        bool updateBatchVideoFileList();
+        bool createTrainingData();
 
         // Devel 
         // ---------------------------------------------------------

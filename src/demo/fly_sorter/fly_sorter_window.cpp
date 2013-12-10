@@ -20,6 +20,7 @@
 #include <random>
 #include <cmath>
 
+
 // Constants
 // ----------------------------------------------------------------------------
 const unsigned int MAX_THREAD_COUNT=5;
@@ -27,6 +28,9 @@ const unsigned int MAX_HTTP_REQUEST_ERROR = 10;
 const double DEFAULT_DISPLAY_FREQ = 15.0; // Hz
 const QSize PREVIEW_DUMMY_IMAGE_SIZE = QSize(320,256);
 const QString DEFAULT_PARAMETER_FILENAME = QString("fly_sorter_param.json");
+const QString TRAINING_DATA_BASE_STRING = QString("training_data");
+const QString TRAINING_VIDEO_BASE_STRING = QString("training_video");
+
 
 // Public Methods
 // ----------------------------------------------------------------------------
@@ -37,6 +41,7 @@ FlySorterWindow::FlySorterWindow(QWidget *parent) : QMainWindow(parent)
     connectWidgets();
     initialize();
 }
+
 
 // Protected methods
 // ----------------------------------------------------------------------------
@@ -86,7 +91,6 @@ void FlySorterWindow::startPushButtonClicked()
 {
     if (!running_)
     {
-
         // Setup sorting and tracking
         blobFinder_ = BlobFinder(param_.blobFinder);
         identityTracker_ = IdentityTracker(param_.identityTracker);
@@ -95,8 +99,28 @@ void FlySorterWindow::startPushButtonClicked()
         genderSorter_ = GenderSorter(param_.genderSorter);
 
         // Create training data
-        setupTrainingDataWrite(param_.imageGrabber.captureInputFile);
-
+        if (trainingDataCheckBoxPtr_ -> checkState() == Qt::Checked)
+        {
+            if (isTrainingDataModeSingle())
+            {
+                setupTrainingDataWrite(param_.imageGrabber.captureInputFile);
+            }
+            else
+            {
+                // Update vector of batch video files 
+                bool success = updateBatchVideoFileList();
+                if (!success)
+                {
+                    return;
+                }
+                batchVideoFileIndex_ = 0;
+                setupBatchDataWrite();
+            }
+        }
+        else
+        {
+            hogPositionFitter_.trainingDataWriteDisable();
+        }
 
         startImageCapture();
 
@@ -119,7 +143,12 @@ void FlySorterWindow::startImageCapture()
 {
     if (!running_)
     {
-        imageGrabberPtr_ = new ImageGrabber(param_.imageGrabber); 
+        ImageGrabberParam imageGrabberParam = param_.imageGrabber;
+        if (createTrainingData() && isTrainingDataModeBatch())
+        {
+            imageGrabberParam.captureInputFile = batchVideoFileList_[batchVideoFileIndex_];
+        }
+        imageGrabberPtr_ = new ImageGrabber(imageGrabberParam); 
 
         connect(
                 imageGrabberPtr_,
@@ -160,6 +189,7 @@ void FlySorterWindow::startImageCapture()
 
         running_ = true;
         threadPoolPtr_ -> start(imageGrabberPtr_);
+
         startPushButtonPtr_ -> setText("Stop");
         reloadPushButtonPtr_ -> setEnabled(false);
         trainingDataCheckBoxPtr_ -> setEnabled(false);
@@ -204,16 +234,16 @@ void FlySorterWindow::httpOutputCheckBoxChanged(int state)
 
 void FlySorterWindow::trainingDataCheckBoxChanged(int state)
 {
-    //std::cout << "write training data ";
-    //if (state == Qt::Checked)
-    //{
-    //    std::cout << "checked";
-    //}
-    //else
-    //{
-    //    std::cout << "unchecked";
-    //}
-    //std::cout << std::endl;
+    if (state == Qt::Checked)
+    {
+        singleRadioButtonPtr_ -> setEnabled(true);
+        batchRadioButtonPtr_ -> setEnabled(true);
+    }
+    else
+    {
+        singleRadioButtonPtr_ -> setEnabled(false);
+        batchRadioButtonPtr_ -> setEnabled(false);
+    }
 }
 
 
@@ -314,15 +344,34 @@ void FlySorterWindow::cameraSetupError(QString message)
     QMessageBox::critical(this, errMsgTitle, message);
 }
 
+
 void FlySorterWindow::imageGrabberFileReadError(QString message)
 {
     QString errMsgTitle("Image Grabber File Read Error");
     QMessageBox::critical(this, errMsgTitle, message);
 }
 
+
 void FlySorterWindow::OnImageCaptureStopped()
 {
         threadPoolPtr_ -> waitForDone();
+
+        if (createTrainingData() && isTrainingDataModeBatch())
+        {
+            batchVideoFileIndex_++;
+            if (batchVideoFileIndex_ < batchVideoFileList_.size())
+            {
+                setupBatchDataWrite();
+                running_ = false;
+                startImageCapture();
+                return;
+            }
+            else
+            {
+                statusbar -> clearMessage();
+            }
+        }
+
         running_ = false;
         startPushButtonPtr_ -> setText("Start");
         reloadPushButtonPtr_ -> setEnabled(true);
@@ -331,6 +380,7 @@ void FlySorterWindow::OnImageCaptureStopped()
             trainingDataCheckBoxPtr_ -> setEnabled(true);
         }
 }
+
 
 
 // Private Methods
@@ -366,7 +416,9 @@ void FlySorterWindow::connectWidgets()
             this,
             SLOT(trainingDataCheckBoxChanged(int))
            );
+
 }
+
 
 
 void FlySorterWindow::initialize()
@@ -377,6 +429,7 @@ void FlySorterWindow::initialize()
     parameterFileName_ = DEFAULT_PARAMETER_FILENAME;
     threadPoolPtr_ = new QThreadPool(this);
     threadPoolPtr_ -> setMaxThreadCount(MAX_THREAD_COUNT);
+    batchVideoFileIndex_ = 0;
 
     setupImageLabels();
     setupDisplayTimer();
@@ -624,45 +677,162 @@ void FlySorterWindow::updateWidgetsOnLoad()
     if (param_.imageGrabber.captureMode == QString("file"))
     {
         trainingDataCheckBoxPtr_ -> setEnabled(true);
+        if (trainingDataCheckBoxPtr_ -> checkState() == Qt::Checked)
+        {
+            singleRadioButtonPtr_ -> setEnabled(true);
+            batchRadioButtonPtr_ -> setEnabled(true);
+        }
+        else
+        {
+            singleRadioButtonPtr_ -> setEnabled(false);
+            batchRadioButtonPtr_ -> setEnabled(false);
+        }
     }
     else
     {
         trainingDataCheckBoxPtr_ -> setCheckState(Qt::Unchecked);
         trainingDataCheckBoxPtr_ -> setEnabled(false);
+        singleRadioButtonPtr_ -> setEnabled(false);
+        batchRadioButtonPtr_ -> setEnabled(false);
     }
 }
 
 
 void FlySorterWindow::setupTrainingDataWrite(QString videoFileName)
 {
-    if (trainingDataCheckBoxPtr_ -> checkState() == Qt::Checked)
+    // Get application directory
+    QString appPathString = QCoreApplication::applicationDirPath();
+    QDir appDir = QDir(appPathString);
+
+    // Create training data base directory if it doesn't exist
+    QString baseDirString = TRAINING_DATA_BASE_STRING;
+    QDir baseDir = QDir(appDir.absolutePath() + "/" + baseDirString);
+    if (!baseDir.exists())
     {
-        // Get application directory
-        QString appPathString = QCoreApplication::applicationDirPath();
-        QDir appDir = QDir(appPathString);
+        appDir.mkdir(baseDirString);
+    }
 
-        // Create training data base directory if it doesn't exist
-        QString baseDirString = QString("training_data");
-        QDir baseDir = QDir(appDir.absolutePath() + "/" + baseDirString);
-        if (!baseDir.exists())
-        {
-            appDir.mkdir(baseDirString);
-        }
+    // Create training data directory if it doesn't exist
+    QString videoPrefix = videoFileName.split(".", QString::SkipEmptyParts).at(0);
+    QDir dataDir = QDir(baseDir.absolutePath() + "/" + videoPrefix);
+    if (!dataDir.exists())
+    {
+        baseDir.mkdir(videoPrefix);
+    }
 
-        // Create trianing data directory if it doesn't exist
-        QString videoPrefix = videoFileName.split(".", QString::SkipEmptyParts).at(0);
-        QDir dataDir = QDir(baseDir.absolutePath() + "/" + videoPrefix);
-        if (!dataDir.exists())
-        {
-            baseDir.mkdir(videoPrefix);
-        }
+    // Create training data file prefix.
+    QString dataPrefix = dataDir.absoluteFilePath("data");
+    hogPositionFitter_.trainingDataWriteEnable(dataPrefix.toStdString());
+}
 
-        // Create training data file prefix.
-        QString dataPrefix = dataDir.absoluteFilePath("data");
-        hogPositionFitter_.trainingDataWriteEnable(dataPrefix.toStdString());
+
+void FlySorterWindow::setupBatchDataWrite()
+{
+    QFileInfo videoFileInfo(batchVideoFileList_[batchVideoFileIndex_]);
+    setupTrainingDataWrite(videoFileInfo.fileName());
+    QStringList statusMsg; 
+    statusMsg << QString("Batch "); 
+    statusMsg << QString::number(batchVideoFileIndex_+1);
+    statusMsg << QString("/");  
+    statusMsg << QString::number(batchVideoFileList_.size());
+    statusMsg << QString("  "); 
+    statusMsg << videoFileInfo.fileName();
+    statusbar -> showMessage(statusMsg.join(QString("")));
+}
+
+
+TrainingDataMode FlySorterWindow::getTrainingDataMode()
+{
+    if (singleRadioButtonPtr_ -> isChecked())
+    {
+        return TRAINING_DATA_MODE_SINGLE;
     }
     else
     {
-        hogPositionFitter_.trainingDataWriteDisable();
+        return TRAINING_DATA_MODE_BATCH;
+    }
+}
+
+
+bool FlySorterWindow::isTrainingDataModeSingle()
+{
+    if (getTrainingDataMode() == TRAINING_DATA_MODE_SINGLE)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool FlySorterWindow::isTrainingDataModeBatch()
+{
+    if (getTrainingDataMode() == TRAINING_DATA_MODE_BATCH)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+bool FlySorterWindow::updateBatchVideoFileList()
+{
+    // Get application directory
+    QString appPathString = QCoreApplication::applicationDirPath();
+    QDir appDir = QDir(appPathString);
+
+    // Check to see if video file base directory exists 
+    QString videoDirString = TRAINING_VIDEO_BASE_STRING;
+    QDir videoDir = QDir(appDir.absolutePath() + "/" + videoDirString);
+    if (!videoDir.exists())
+    {
+        QString errMsgTitle("Batch Training Data Error");
+        QString message = QString("%1 subdirectory does not exist").arg(videoDirString);
+        QMessageBox::critical(this, errMsgTitle, message);
+        return false;
+    }
+
+    // Get list of '.avi' files in video file directory
+    videoDir.setNameFilters(QStringList()<<"*.avi");
+    QList<QString> videoNameList  = videoDir.entryList();
+    if (videoNameList.empty())
+    {
+        QString errMsgTitle("Batch Training Data Error");
+        QString message = QString("no .avi video files found in %1 subdirectory").arg(videoDirString);
+        QMessageBox::critical(this, errMsgTitle, message);
+        return false;
+    }
+
+    std::cout << std::endl;
+    std::cout << "batch video file list" << std::endl;
+    for (int i=0; i< videoNameList.size(); i++)
+    {
+        std::cout << " " << i << " " << videoNameList[i].toStdString() << std::endl;
+    }
+    std::cout << std::endl;
+
+    // Get absolute path of video files
+    batchVideoFileList_.clear();
+    for (int i=0; i<videoNameList.size(); i++)
+    {
+        QString absoluteFilePath = videoDir.absoluteFilePath(videoNameList[i]);
+        batchVideoFileList_.push_back(absoluteFilePath);
+    }
+    return true;
+}
+
+bool FlySorterWindow::createTrainingData()
+{ 
+    if (trainingDataCheckBoxPtr_ -> checkState() == Qt::Checked)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
     }
 }
