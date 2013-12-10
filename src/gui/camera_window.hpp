@@ -60,6 +60,11 @@ namespace bias
                     QVariantMap configMap, 
                     bool showErrorDlg=true
                     );
+            RtnStatus setConfigurationFromMap_Lenient(
+                    QVariantMap configMap, 
+		    QVariantMap oldConfigMap, 
+                    bool showErrorDlg=true
+                    );
 
             QByteArray getConfigurationJson(
                     RtnStatus &rtnStatus, 

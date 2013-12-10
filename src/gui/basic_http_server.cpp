@@ -398,6 +398,7 @@ namespace bias
     QVariantMap BasicHttpServer::handleLoadConfiguration(QString fileName)
     {
         QVariantMap cmdMap;
+
         RtnStatus status = cameraWindowPtr_ -> loadConfiguration(fileName,false);
         cmdMap.insert("success", status.success);
         cmdMap.insert("message", status.message);
