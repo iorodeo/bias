@@ -241,6 +241,7 @@ void FlySorterWindow::trainingDataCheckBoxChanged(int state)
     }
     else
     {
+        singleRadioButtonPtr_ -> setChecked(true);
         singleRadioButtonPtr_ -> setEnabled(false);
         batchRadioButtonPtr_ -> setEnabled(false);
     }
