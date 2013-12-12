@@ -601,7 +601,6 @@ QVariantMap FlySorterWindow::dataToMap()
            )
         { 
             detectionMap.insert("fly_type", "outofbounds"); 
-            detectionMap.insert("fly_id", id);
             int x = blobData.boundingRect.x + blobData.boundingRect.width/2;
             int y = blobData.boundingRect.y + blobData.boundingRect.height/2;
             detectionMap.insert("x", genderData.positionData.meanXAbs);
@@ -615,15 +614,22 @@ QVariantMap FlySorterWindow::dataToMap()
             }
             else
             {
-                QString genderString = QString::fromStdString( 
-                        GenderSorter::GenderToString(genderData.gender)
-                        );
-                detectionMap.insert("fly_type", genderString); 
+                if (genderData.positionData.isMultipleFlies)
+                {
+                    detectionMap.insert("fly_type", "multiple");
+                }
+                else
+                {
+                    QString genderString = QString::fromStdString( 
+                            GenderSorter::GenderToString(genderData.gender)
+                            );
+                    detectionMap.insert("fly_type", genderString); 
+                }
             }
-            detectionMap.insert("fly_id", id);
             detectionMap.insert("x", genderData.positionData.meanXAbs);
             detectionMap.insert("y", genderData.positionData.meanYAbs);
         }
+        detectionMap.insert("fly_id", id);
         detectionList.push_back(detectionMap);
     }
     dataMap.insert("detections", detectionList);

@@ -2,6 +2,7 @@
 #include <cmath>
 #include <sstream>
 #include <iostream>
+#include <fstream>
 
 // GenderData
 // ----------------------------------------------------------------------------
@@ -59,19 +60,19 @@ GenderSorterData GenderSorter::sort(HogPositionFitterData hogData)
 {
     GenderSorterData sorterData;
     PositionDataList::iterator it;
+    int cnt = 0;
     for (it=hogData.positionDataList.begin(); it!=hogData.positionDataList.end(); it++)
     {
         GenderData genderData;
         genderData.gender = UNKNOWN;
         genderData.havePredictorData = false;
-
         genderData.positionData = *it;
+
         if (genderData.positionData.success)
         {
             FastBinaryPredictor genderPred = FastBinaryPredictor(param_.genderClassifier);
             genderData.predictorData = genderPred.predict(genderData.positionData.pixelFeatureVector);
             genderData.havePredictorData = true;
-            std::cout << "fit: " << genderData.predictorData.fit << std::endl;
             if (genderData.predictorData.fit >= param_.minConfidence)
             {
                 genderData.gender = FEMALE;
@@ -80,6 +81,30 @@ GenderSorterData GenderSorter::sort(HogPositionFitterData hogData)
             {
                 genderData.gender = MALE;
             }
+
+            // DEBUG -- print gender info
+            // ---------------------------------------------------------------------------
+            std::cout << "frame: " << genderData.positionData.frameCount << ", "; 
+            std::cout << "fit: " << genderData.predictorData.fit << ",  "; 
+            std::cout << GenderSorter::GenderToString(genderData.gender) << ", flipped ";
+            std::cout << genderData.positionData.flipped << std::endl;
+            // ----------------------------------------------------------------------------
+            
+            // DEBUG -- write pvec and fitness
+            // ----------------------------------------------------------------------------
+            //QString fileName = QString("pVec_frm_%1_cnt_%2.txt").arg(genderData.positionData.frameCount+1).arg(cnt+1);
+            //std::cout << fileName.toStdString() << std::endl;
+            //std::ofstream outStream;
+            //outStream.open(fileName.toStdString());
+            //outStream << genderData.predictorData.fit << std::endl;
+            //for (int i=0; i<genderData.positionData.pixelFeatureVector.size();i++)
+            //{
+            //    outStream << genderData.positionData.pixelFeatureVector[i] << std::endl;
+            //}
+            //outStream.close();
+            // -----------------------------------------------------------------------------
+
+            cnt++;
         }
         sorterData.genderDataList.push_back(genderData);
     }

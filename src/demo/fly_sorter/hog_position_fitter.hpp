@@ -32,6 +32,7 @@ class PositionData
         cv::Mat rotBoundingImageLUV;
         std::vector<double> pixelFeatureVector;
         SegmentData segmentData;
+        unsigned long frameCount;
 
         PositionData();
         std::string toStdString(unsigned int indent=0);

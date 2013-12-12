@@ -54,6 +54,7 @@ std::string PositionData::toStdString(unsigned int indent)
     ss << indentStr1 << "ellipseMinorAxis: " << ellipseMinorAxis << std::endl;
     ss << indentStr1 << "ellipseAngle: " << ellipseAngle << std::endl;
     ss << indentStr1 << "covarianceMatrix: " << std::endl;
+    ss << indentStr1 << "frameCount: " << frameCount << std::endl;
     for (int i=0; i<2; i++)
     {
         ss << indentStr2; 
@@ -85,7 +86,7 @@ HogPositionFitterData::HogPositionFitterData() {};
 
 HogPositionFitter::HogPositionFitter() 
 { 
-    showDebugWindow_ = false; 
+    showDebugWindow_ = true; 
     writeTrainingData_ = false;
     trainingFileNamePrefix_ = std::string("none");
 };
@@ -148,6 +149,7 @@ HogPositionFitterData HogPositionFitter::fit(
     {
         PositionData posData;
         posData.segmentData = *it;
+        posData.frameCount = frameCount;
 
         // Detect Body pixels 
         cv::Mat closeMat = imCloseWithDiskElem(
@@ -201,6 +203,8 @@ HogPositionFitterData HogPositionFitter::fit(
                 cv::Scalar meanPos = cv::mean(maxCompPointMat);
                 posData.meanXRel = meanPos.val[0];
                 posData.meanYRel = meanPos.val[1];
+                posData.meanXAbs = posData.meanXRel + posData.segmentData.blobData.boundingRect.x;
+                posData.meanYAbs = posData.meanYRel + posData.segmentData.blobData.boundingRect.y;
                 fitterData.positionDataList.push_back(posData);
                 posData.success = false;
                 continue;
@@ -300,7 +304,9 @@ HogPositionFitterData HogPositionFitter::fit(
             // ------------------------------------------------------------------------------------
             //if (0) 
             //{
+
             //    std::ofstream pVecStream;
+            //    QStringList nameList;
             //    QString pVecFileName = QString("pVec_frm_%1_cnt_%2.txt").arg(frameCount).arg(cnt);
             //    pVecStream.open(pVecFileName.toStdString());
             //    for (int i=0; i<posData.pixelFeatureVector.size();i++)
@@ -309,15 +315,15 @@ HogPositionFitterData HogPositionFitter::fit(
             //    }
             //    pVecStream.close();
             //}
-            //if (showDebugWindow_)
-            //{
-            //    if (cnt==0)
-            //    {
-            //        //cv::imshow("hogPosMaxComp", maxCompMat);
-            //        //cv::imshow("boundingImageLUV", posData.segmentData.boundingImageLUV);
-            //        cv::imshow("rotBoundingImageLUV", posData.rotBoundingImageLUV);
-            //    }
-            //}
+            if (showDebugWindow_)
+            {
+                if (cnt==0)
+                {
+                    //cv::imshow("hogPosMaxComp", maxCompMat);
+                    //cv::imshow("boundingImageLUV", posData.segmentData.boundingImageLUV);
+                    cv::imshow("rotBoundingImageLUV", posData.rotBoundingImageLUV);
+                }
+            }
             // ------------------------------------------------------------------------------------
         }
        
