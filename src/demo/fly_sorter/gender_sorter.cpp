@@ -71,6 +71,7 @@ GenderSorterData GenderSorter::sort(HogPositionFitterData hogData)
             FastBinaryPredictor genderPred = FastBinaryPredictor(param_.genderClassifier);
             genderData.predictorData = genderPred.predict(genderData.positionData.pixelFeatureVector);
             genderData.havePredictorData = true;
+            std::cout << "fit: " << genderData.predictorData.fit << std::endl;
             if (genderData.predictorData.fit >= param_.minConfidence)
             {
                 genderData.gender = FEMALE;
@@ -105,4 +106,26 @@ std::string GenderSorter::GenderToString(Gender gender)
 
     }
     return genderString;
+}
+
+
+std::string GenderSorter::GenderToLetter(Gender gender)
+{
+    std::string letterString;
+    switch (gender)
+    {
+        case FEMALE:
+            letterString = std::string("F");
+            break;
+
+        case MALE:
+            letterString = std::string("M");
+            break;
+
+        default:
+            letterString = std::string("U");
+            break;
+
+    }
+    return letterString;
 }

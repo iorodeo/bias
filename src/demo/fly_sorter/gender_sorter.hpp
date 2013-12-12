@@ -44,6 +44,7 @@ class GenderSorter
         GenderSorterData sort(HogPositionFitterData hogData);
         void setParam(GenderSorterParam param);
         static std::string GenderToString(Gender gender);
+        static std::string GenderToLetter(Gender gender);
 
     private:
         GenderSorterParam param_;

@@ -302,6 +302,29 @@ void FlySorterWindow::newImage(ImageData imageData)
 
 void FlySorterWindow::updateDisplayOnTimer()
 {
+    //GenderDataList genderDataList = genderSorterData_.genderDataList;
+    //GenderDataList::iterator it;
+    //for (it=genderDataList.begin(); it!=genderDataList.end(); it++)
+    //{
+    //    GenderData genderData = *it;
+    //    if ((genderData.gender == MALE) || (genderData.gender == FEMALE))
+    //    {
+    //        int x = int(genderData.positionData.meanXAbs);
+    //        int y = int(genderData.positionData.meanYAbs);
+    //        std::string letter = GenderSorter::GenderToLetter(genderData.gender);
+    //        cv::putText(
+    //                blobFinderData_.blobDataImage, 
+    //                letter, 
+    //                cv::Point(x,y),
+    //                cv::FONT_HERSHEY_SIMPLEX,
+    //                2.0,
+    //                cv::Scalar(0,0,255),
+    //                1,
+    //                CV_AA
+    //                );
+    //    }
+    //}
+
     QImage previewImage = matToQImage(blobFinderData_.blobDataImage);
     if (!previewImage.isNull()) 
     {
@@ -558,6 +581,7 @@ QVariantMap FlySorterWindow::dataToMap()
     int numOkBlobs = getNumberOkItems(blobFinderData_.blobDataList);
     dataMap.insert("ndetections", numOkBlobs);
     
+    MotionDirection direction = param_.identityTracker.motionDirection;
     GenderDataList genderDataList = genderSorterData_.genderDataList;
     GenderDataList::iterator it;
     QVariantList detectionList;
@@ -565,30 +589,41 @@ QVariantMap FlySorterWindow::dataToMap()
     for (it=genderDataList.begin(); it!=genderDataList.end(); it++)
     {
         GenderData genderData = *it;
-
-        bool isOnBorder = genderData.positionData.segmentData.blobData.isOnBorder();
-        bool success = genderData.positionData.success;
-
-        if (isOnBorder ) 
-        {
-            // Throw away data on the border.
-            continue;
-        }
-
-        QVariantMap detectionMap;
-
-        QString genderString = QString::fromStdString( 
-                GenderSorter::GenderToString(genderData.gender)
-                );
-
+        BlobData blobData = genderData.positionData.segmentData.blobData;
         QVariant id = QVariant::fromValue<long>(
                 genderData.positionData.segmentData.blobData.id
                 );
+        QVariantMap detectionMap;
 
-        detectionMap.insert("fly_type", genderString); 
-        detectionMap.insert("fly_id", id);
-        detectionMap.insert("x", genderData.positionData.meanXAbs);
-        detectionMap.insert("y", genderData.positionData.meanYAbs);
+        if (
+                (blobData.onBorderX && (direction == MOTION_DIRECTION_Y)) ||
+                (blobData.onBorderY && (direction == MOTION_DIRECTION_X))
+           )
+        { 
+            detectionMap.insert("fly_type", "outofbounds"); 
+            detectionMap.insert("fly_id", id);
+            int x = blobData.boundingRect.x + blobData.boundingRect.width/2;
+            int y = blobData.boundingRect.y + blobData.boundingRect.height/2;
+            detectionMap.insert("x", genderData.positionData.meanXAbs);
+            detectionMap.insert("y", genderData.positionData.meanYAbs);
+        } 
+        else 
+        {
+            if (blobData.old)
+            {
+                detectionMap.insert("fly_type", "old"); 
+            }
+            else
+            {
+                QString genderString = QString::fromStdString( 
+                        GenderSorter::GenderToString(genderData.gender)
+                        );
+                detectionMap.insert("fly_type", genderString); 
+            }
+            detectionMap.insert("fly_id", id);
+            detectionMap.insert("x", genderData.positionData.meanXAbs);
+            detectionMap.insert("y", genderData.positionData.meanYAbs);
+        }
         detectionList.push_back(detectionMap);
     }
     dataMap.insert("detections", detectionList);

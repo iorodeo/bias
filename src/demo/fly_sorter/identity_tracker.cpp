@@ -118,6 +118,7 @@ void IdentityTracker::assignBlobsGreedy(BlobFinderData &blobFinderData)
         if (indPrevMin != -1)
         {
             (indexToCurrMap[indCurr] -> id) = (indexToPrevMap[indPrevMin] -> id);
+            (indexToCurrMap[indCurr] -> old) = true;
             usedVector[indPrevMin] = true;
 
             // DEBUG

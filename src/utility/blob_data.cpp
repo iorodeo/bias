@@ -147,9 +147,10 @@ namespace bias
     BlobData::BlobData()
     {
         id = ID_NOT_ASSIGNED;
-        area = 0;
+        old = false;
         onBorderX = false;
         onBorderY = false;
+        area = 0;
     }
 
 

@@ -204,6 +204,12 @@ class ServerParam
 };
 
 
+enum MotionDirection 
+{
+    MOTION_DIRECTION_X = 0,
+    MOTION_DIRECTION_Y = 1
+};
+
 class IdentityTrackerParam
 {
     public:
@@ -235,6 +241,8 @@ class IdentityTrackerParam
         float maxCost;
         static const float DEFAULT_MAX_COST;
 
+        MotionDirection motionDirection;
+        static const MotionDirection DEFAULT_MOTION_DIRECTION;
 
         IdentityTrackerParam();
         QVariantMap toMap();
