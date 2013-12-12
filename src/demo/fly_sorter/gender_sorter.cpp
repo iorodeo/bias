@@ -86,8 +86,8 @@ GenderSorterData GenderSorter::sort(HogPositionFitterData hogData)
             // ---------------------------------------------------------------------------
             std::cout << "frame: " << genderData.positionData.frameCount << ", "; 
             std::cout << "fit: " << genderData.predictorData.fit << ",  "; 
-            std::cout << GenderSorter::GenderToString(genderData.gender) << ", flipped ";
-            std::cout << genderData.positionData.flipped << std::endl;
+            std::cout << GenderSorter::GenderToString(genderData.gender);
+            std::cout << std::endl;
             // ----------------------------------------------------------------------------
             
             // DEBUG -- write pvec and fitness

@@ -608,7 +608,7 @@ RtnStatus ImageGrabberParam::fromMap(QVariantMap paramMap)
         return rtnStatus;
 
     }
-    float brightnessTemp = paramMap["shutter"].toUInt();
+    float brightnessTemp = paramMap["brightness"].toUInt();
     if (brightnessTemp > MAXIMUM_BRIGHTNESS)
     {
         rtnStatus.success = false;

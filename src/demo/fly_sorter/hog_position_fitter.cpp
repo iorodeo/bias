@@ -86,7 +86,7 @@ HogPositionFitterData::HogPositionFitterData() {};
 
 HogPositionFitter::HogPositionFitter() 
 { 
-    showDebugWindow_ = true; 
+    showDebugWindow_ = false; 
     writeTrainingData_ = false;
     trainingFileNamePrefix_ = std::string("none");
 };

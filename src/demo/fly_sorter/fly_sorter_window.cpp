@@ -302,28 +302,29 @@ void FlySorterWindow::newImage(ImageData imageData)
 
 void FlySorterWindow::updateDisplayOnTimer()
 {
-    //GenderDataList genderDataList = genderSorterData_.genderDataList;
-    //GenderDataList::iterator it;
-    //for (it=genderDataList.begin(); it!=genderDataList.end(); it++)
-    //{
-    //    GenderData genderData = *it;
-    //    if ((genderData.gender == MALE) || (genderData.gender == FEMALE))
-    //    {
-    //        int x = int(genderData.positionData.meanXAbs);
-    //        int y = int(genderData.positionData.meanYAbs);
-    //        std::string letter = GenderSorter::GenderToLetter(genderData.gender);
-    //        cv::putText(
-    //                blobFinderData_.blobDataImage, 
-    //                letter, 
-    //                cv::Point(x,y),
-    //                cv::FONT_HERSHEY_SIMPLEX,
-    //                2.0,
-    //                cv::Scalar(0,0,255),
-    //                1,
-    //                CV_AA
-    //                );
-    //    }
-    //}
+    GenderDataList genderDataList = genderSorterData_.genderDataList;
+    GenderDataList::iterator it;
+    for (it=genderDataList.begin(); it!=genderDataList.end(); it++)
+    {
+        GenderData genderData = *it;
+
+        if ((genderData.gender == MALE) || (genderData.gender == FEMALE))
+        {
+            int x = int(genderData.positionData.meanXAbs);
+            int y = int(genderData.positionData.meanYAbs);
+            std::string letter = GenderSorter::GenderToLetter(genderData.gender);
+            cv::putText(
+                    blobFinderData_.blobDataImage, 
+                    letter, 
+                    cv::Point(x,y),
+                    cv::FONT_HERSHEY_SIMPLEX,
+                    4.0,
+                    cv::Scalar(0,0,255),
+                    2,
+                    CV_AA
+                    );
+        }
+    }
 
     QImage previewImage = matToQImage(blobFinderData_.blobDataImage);
     if (!previewImage.isNull()) 
