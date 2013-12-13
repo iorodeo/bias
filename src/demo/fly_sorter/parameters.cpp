@@ -644,6 +644,7 @@ RtnStatus ImageGrabberParam::fromMap(QVariantMap paramMap)
         rtnStatus.message = QString("Image grabber parameter 'gamma' greater than maximum");
         return rtnStatus;
     }
+    gamma = gammaTemp;
 
     // Get saturation 
     if (!paramMap.contains("saturation"))
