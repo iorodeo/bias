@@ -23,11 +23,16 @@ std::string GenderData::toStdString(unsigned int indent)
     ss << indentStr0 << "GenderData: " << std::endl;
     ss << indentStr1 << "gender: " << genderStr << std::endl; 
     ss << indentStr1 << "havePredictorData: " << havePredictorData << std::endl;
-    ss << indentStr1 << "predictorData: " << std::endl;
+    ss << indentStr1 << "predictorData: "; 
     if (havePredictorData)
     {
-        ss << indentStr2 << "labal: " << predictorData.label << std::endl;
+        ss << std::endl;
+        ss << indentStr2 << "label: " << predictorData.label << std::endl;
         ss << indentStr2 << "fit: " << predictorData.fit << std::endl;
+    }
+    else
+    {
+        ss << " none" << std::endl;
     }
     ss << positionData.toStdString(indent+1);
     return ss.str();

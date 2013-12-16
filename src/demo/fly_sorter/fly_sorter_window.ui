@@ -227,6 +227,14 @@
      <height>20</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuDebugPtr_">
+    <property name="title">
+     <string>Debug</string>
+    </property>
+    <addaction name="actionDebugImagesPtr_"/>
+    <addaction name="actionDebugDataLogPtr_"/>
+   </widget>
+   <addaction name="menuDebugPtr_"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionParametersPtr_">
@@ -253,6 +261,22 @@
    </property>
    <property name="text">
     <string>Playback</string>
+   </property>
+  </action>
+  <action name="actionDebugImagesPtr_">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Images</string>
+   </property>
+  </action>
+  <action name="actionDebugDataLogPtr_">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Data Log</string>
    </property>
   </action>
  </widget>

@@ -14,7 +14,6 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QDateTime>
-#include <QDir>
 #include <iostream>
 #include <list>
 #include <random>
@@ -30,6 +29,7 @@ const QSize PREVIEW_DUMMY_IMAGE_SIZE = QSize(320,256);
 const QString DEFAULT_PARAMETER_FILENAME = QString("fly_sorter_param.json");
 const QString TRAINING_DATA_BASE_STRING = QString("training_data");
 const QString TRAINING_VIDEO_BASE_STRING = QString("training_video");
+const QString DEBUG_IMAGES_BASE_STRING = QString("debug_images");
 
 
 // Public Methods
@@ -122,19 +122,24 @@ void FlySorterWindow::startPushButtonClicked()
             hogPositionFitter_.trainingDataWriteDisable();
         }
 
+        // Create debug image log
+        if (actionDebugImagesPtr_ -> isChecked())
+        {
+            setupDebugImagesWrite();
+        }
+
+        // Create debug data log
+        if (actionDebugDataLogPtr_ -> isChecked())
+        {
+            debugDataLogStream_.open("debug_data_log.txt");
+        }
+
         startImageCapture();
 
-        // DEBUG - open debug output data file
-        // --------------------------------------------------------------------
-        //debugStream.open("debug_data.txt");
     }
     else
     {
         stopImageCapture();
-
-        // DEBUG - close debug output data file
-        // --------------------------------------------------------------------
-        //debugStream.close();
     }
 }
 
@@ -273,20 +278,37 @@ void FlySorterWindow::newImage(ImageData imageData)
             sendDataViaHttpRequest();
         }
 
-        //// DEBUG - display gender data
-        //// -------------------------------------------------------------------------
-        //if (0)
-        //{
-        //    GenderDataList genderDataList = genderSorterData_.genderDataList;
-        //    GenderDataList::iterator it;
+        // Write debug data images
+        if (actionDebugImagesPtr_ -> isChecked())
+        {
+            int cnt;
+            GenderDataList::iterator it;
+            GenderDataList genderDataList = genderSorterData_.genderDataList;
+            for (it=genderDataList.begin(), cnt=0; it!=genderDataList.end(); it++,cnt++)
+            {
+                GenderData data = *it;
+                QString fileName = QString("frm_%1_cnt_%2.bmp").arg(imageData.frameCount).arg(cnt);
+                QString pathName = debugImagesDir_.absoluteFilePath(fileName);
+                cv::Mat debugImage = data.positionData.segmentData.blobData.boundingImage;
+                cv::imwrite(pathName.toStdString(),debugImage);
+            }
+        }
 
-        //    for (it=genderDataList.begin(); it!=genderDataList.end(); it++)
-        //    {
-        //        GenderData data = *it;
-        //        std::cout << data.toStdString(1) << std::endl;
-        //    }
-        //}
-        //// -------------------------------------------------------------------------
+
+        // Write debug data log
+        if (actionDebugDataLogPtr_ -> isChecked())
+        {
+            int cnt;
+            GenderDataList::iterator it;
+            GenderDataList genderDataList = genderSorterData_.genderDataList;
+            for (it=genderDataList.begin(), cnt=0; it!=genderDataList.end(); it++,cnt++)
+            {
+                GenderData data = *it;
+                debugDataLogStream_ << "Frame: " << imageData.frameCount; 
+                debugDataLogStream_ << ", count: " << cnt << std::endl;
+                debugDataLogStream_ << data.toStdString(1) << std::endl;
+            }
+        }
 
         //// DEBUG - write images to file
         //// -------------------------------------------------------------------------
@@ -380,6 +402,7 @@ void FlySorterWindow::imageGrabberFileReadError(QString message)
 void FlySorterWindow::OnImageCaptureStopped()
 {
         threadPoolPtr_ -> waitForDone();
+        running_ = false;
 
         if (createTrainingData() && isTrainingDataModeBatch())
         {
@@ -397,7 +420,15 @@ void FlySorterWindow::OnImageCaptureStopped()
             }
         }
 
-        running_ = false;
+        if (actionDebugImagesPtr_ -> isChecked())
+        {
+        }
+
+        if (actionDebugDataLogPtr_ -> isChecked())
+        {
+            debugDataLogStream_.close();
+        }
+
         startPushButtonPtr_ -> setText("Start");
         reloadPushButtonPtr_ -> setEnabled(true);
         if (param_.imageGrabber.captureMode == QString("file"))
@@ -782,6 +813,33 @@ void FlySorterWindow::setupBatchDataWrite()
     statusMsg << videoFileInfo.fileName();
     statusbar -> showMessage(statusMsg.join(QString("")));
 }
+
+
+void FlySorterWindow::setupDebugImagesWrite()
+{
+    // Get application directory
+    QString appPathString = QCoreApplication::applicationDirPath();
+    QDir appDir = QDir(appPathString);
+
+    // Create images base directory if it doesn't exist
+    QString imagesDirString = DEBUG_IMAGES_BASE_STRING;
+    debugImagesDir_ = QDir(appDir.absolutePath() + "/" + imagesDirString);
+    if (!debugImagesDir_.exists())
+    {
+        appDir.mkdir(imagesDirString);
+    }
+
+    // Get list of '.bmp' files in images directory
+    debugImagesDir_.setNameFilters(QStringList()<<"*.bmp");
+    QList<QString> imageNameList  = debugImagesDir_.entryList();
+    if (!imageNameList.empty())
+    {
+        for (int i=0; i<imageNameList.size(); i++)
+        {
+            debugImagesDir_.remove(imageNameList[i]); 
+        }
+    }
+};
 
 
 TrainingDataMode FlySorterWindow::getTrainingDataMode()

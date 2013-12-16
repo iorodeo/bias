@@ -228,13 +228,22 @@ namespace bias
         std::stringstream ss;
         std::string indentStr0 = getIndentString(indent);
         std::string indentStr1 = getIndentString(indent+1);
+        std::string indentStr2 = getIndentString(indent+2);
         ss << indentStr0 << "blobData:" << std::endl;
         ss << indentStr1 << "id: " << id << std::endl;
+        ss << indentStr1 << "old: " << old << std::endl;
         ss << indentStr1 << "area: " << area << std::endl;
         ss << indentStr1 << "onBorderX: " << onBorderX << std::endl;
         ss << indentStr1 << "onBorderY: " << onBorderY << std::endl;
         ss << centroid.toStdString(indent+1);
         ss << ellipse.toStdString(indent+1);
+        ss << indentStr1 << "boudningRect: " << std::endl;
+        ss << indentStr2 << "x: " << boundingRect.x << std::endl;
+        ss << indentStr2 << "y: " << boundingRect.y << std::endl;
+        ss << indentStr2 << "width: " << boundingRect.width << std::endl;
+        ss << indentStr2 << "height: " << boundingRect.height << std::endl;
+        ss << indentStr1 << "boundingImage: (not shown) " << std::endl;
+        ss << indentStr1 << "contourVector: (not shown) " << std::endl;
         return ss.str();
     }
 

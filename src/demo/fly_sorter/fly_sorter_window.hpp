@@ -15,6 +15,7 @@
 #include <QPointer>
 #include <QMap>
 #include <QList>
+#include <QDir>
 #include <opencv2/core/core.hpp>
 
 // Debug
@@ -122,18 +123,16 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
 
         void setupTrainingDataWrite(QString videoFileName);
         void setupBatchDataWrite();
+        void setupDebugImagesWrite();
         TrainingDataMode getTrainingDataMode();
         bool isTrainingDataModeSingle();
         bool isTrainingDataModeBatch();
         bool updateBatchVideoFileList();
         bool createTrainingData();
 
-        // Devel 
-        // ---------------------------------------------------------
-        std::ofstream debugStream;
-        //std::default_random_engine generator_;
-        //std::uniform_int_distribution<unsigned int> distribution_;
-        // ---------------------------------------------------------
+        // Debug 
+        std::ofstream debugDataLogStream_;
+        QDir debugImagesDir_;
 
 };
 
