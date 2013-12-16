@@ -70,7 +70,8 @@ namespace bias
 
         if (image.channels() > 1)
         {
-            data.blobDataImage = cv::Mat(image);
+            //data.blobDataImage = cv::Mat(image);
+            image.copyTo(data.blobDataImage);
         }
         else
         {
