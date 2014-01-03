@@ -547,7 +547,7 @@ bool ImageGrabber::setupCamera()
     }
 
     brightnessProp.absoluteControl = false;
-    brightnessProp.absoluteValue = param_.brightness;
+    brightnessProp.value = param_.brightness;
     brightnessProp.autoActive = false;
 
     try
