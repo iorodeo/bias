@@ -35,34 +35,33 @@ ClassifierParam::ClassifierParam()
 ClassifierParam FlySegmenterParam::createDefaultClassifierParam()
 {
     ClassifierParam classifierParam;
-    classifierParam.offset = 1.0784;
+    classifierParam.offset = -0.8721;
     std::vector<StumpData> stumpVector;
-    stumpVector.push_back(StumpData(1, 0.31038210,  1.90413685));
-    stumpVector.push_back(StumpData(0, 0.24879919, -1.66404788));
-    stumpVector.push_back(StumpData(1, 0.32196228,  1.27919675));
-    stumpVector.push_back(StumpData(0, 0.27552019, -1.20679509));
-    stumpVector.push_back(StumpData(0, 0.21504118, -0.80305969));
-    stumpVector.push_back(StumpData(0, 0.29528950, -1.04935294));
-    stumpVector.push_back(StumpData(0, 0.24879919,  0.54471722));
-    stumpVector.push_back(StumpData(1, 0.32824126,  0.71242407));
-    stumpVector.push_back(StumpData(0, 0.28644574, -0.75598466));
-    stumpVector.push_back(StumpData(1, 0.31038520, -0.32418233));
-    stumpVector.push_back(StumpData(2, 0.52677906,  0.38645774));
-    stumpVector.push_back(StumpData(0, 0.23060922, -0.39011362));
-    stumpVector.push_back(StumpData(1, 0.31038520, -0.33751456));
-    stumpVector.push_back(StumpData(0, 0.19429915, -0.91714671));
-    stumpVector.push_back(StumpData(2, 0.47833817, -0.81114635));
-    stumpVector.push_back(StumpData(1, 0.29249324,  0.48032049));
-    stumpVector.push_back(StumpData(0, 0.24879919,  0.29919018));
-    stumpVector.push_back(StumpData(2, 0.51842082,  0.28624030));
-    stumpVector.push_back(StumpData(1, 0.32204734, -0.26596010));
-    stumpVector.push_back(StumpData(0, 0.23514625, -0.27858646));
+    stumpVector.push_back(StumpData(1, 0.3150,  1.9093));
+    stumpVector.push_back(StumpData(0, 0.2288, -1.6624));
+    stumpVector.push_back(StumpData(1, 0.3262,  1.12870));
+    stumpVector.push_back(StumpData(0, 0.2573, -1.0649));
+    stumpVector.push_back(StumpData(2, 0.4612, -1.0616));
+    stumpVector.push_back(StumpData(1, 0.3373,  0.8464));
+    stumpVector.push_back(StumpData(0, 0.2845, -0.8007));
+    stumpVector.push_back(StumpData(0, 0.2288,  0.4021));
+    stumpVector.push_back(StumpData(1, 0.3060,  0.5734));
+    stumpVector.push_back(StumpData(0, 0.1959, -0.9434));
+    stumpVector.push_back(StumpData(1, 0.3151, -0.4005));
+    stumpVector.push_back(StumpData(0, 0.2157, -0.3686));
+    stumpVector.push_back(StumpData(2, 0.4714, -0.7371));
+    stumpVector.push_back(StumpData(1, 0.2985,  0.5921));
+    stumpVector.push_back(StumpData(0, 0.2288,  0.2553));
+    stumpVector.push_back(StumpData(0, 0.2830, -0.5507));
+    stumpVector.push_back(StumpData(0, 0.3009,  1.0140));
+    stumpVector.push_back(StumpData(1, 0.3421,  1.0053));
+    stumpVector.push_back(StumpData(2, 0.5436, -0.5496));
+    stumpVector.push_back(StumpData(0, 0.2369, -0.2400));
     classifierParam.stumpVector = stumpVector;
     return classifierParam;
 };
 const ClassifierParam FlySegmenterParam::DEFAULT_CLASSIFIER_PARAM = 
 createDefaultClassifierParam();
-
 
 FlySegmenterParam::FlySegmenterParam()
 {
