@@ -44,6 +44,7 @@ std::string PositionData::toStdString(unsigned int indent)
     ss << indentStr0 << "PositionData:" << std::endl;
     ss << indentStr1 << "success: " << success << std::endl;
     ss << indentStr1 << "isFly: " << isFly << std::endl;
+    ss << indentStr1 << "isMultipleFlies: " << isMultipleFlies << std::endl;
     ss << indentStr1 << "flipped: " << flipped << std::endl;
     ss << indentStr1 << "bodyArea: " << bodyArea << std::endl;
     ss << indentStr1 << "meanXRel: " << meanXRel << std::endl;
