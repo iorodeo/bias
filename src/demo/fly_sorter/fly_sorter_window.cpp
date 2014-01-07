@@ -287,10 +287,11 @@ void FlySorterWindow::newImage(ImageData imageData)
             for (it=genderDataList.begin(), cnt=0; it!=genderDataList.end(); it++,cnt++)
             {
                 GenderData data = *it;
+                // Bounding image
                 QString fileName = QString("frm_%1_cnt_%2.bmp").arg(imageData.frameCount).arg(cnt);
                 QString pathName = debugImagesDir_.absoluteFilePath(fileName);
-                cv::Mat debugImage = data.positionData.segmentData.blobData.boundingImage;
-                cv::imwrite(pathName.toStdString(),debugImage);
+                cv::Mat boundingImage = data.positionData.segmentData.blobData.boundingImage;
+                cv::imwrite(pathName.toStdString(),boundingImage);
             }
         }
 
