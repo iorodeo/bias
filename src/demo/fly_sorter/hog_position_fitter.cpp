@@ -900,15 +900,21 @@ void HogPositionFitter::createTrainingData(
     std::vector<double> vectorFlipXY = getPixelFeatureVector(imgFlipXY);
     writePixelFeatureVector(fileNameStream.str(), vectorFlipXY);
 
-    // Create 
+    // Write rotated image 
     fileNameStream.str(std::string());
     fileNameStream << baseName << "_image.png";
     cv::Mat imgScaled;
     img.convertTo(imgScaled, CV_16UC3, 65535);
     cv::imwrite(fileNameStream.str(), imgScaled);
 
+    // Write position data
+    fileNameStream.str(std::string());
+    fileNameStream << baseName << "_posdata.txt";
+    std::ofstream posDataStream;
+    posDataStream.open(fileNameStream.str());
+    posDataStream << posData.toStdString();
+    posDataStream.close();
 }
-
 
 void HogPositionFitter::writePixelFeatureVector(
         std::string fileName, 
@@ -932,7 +938,6 @@ void HogPositionFitter::writePixelFeatureVector(
     }
     outStream.close();
 }
-
 
 
 cv::Mat getTriangleFilter1D(unsigned int normRadius)
