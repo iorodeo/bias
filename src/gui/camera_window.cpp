@@ -1226,7 +1226,6 @@ namespace bias
         QDir videoFileDir = videoFileInfo.dir();
         QString videoFileName = videoFileInfo.baseName();
 
-
         rtnStatus.success = true;
         rtnStatus.message = QString("");
         if (videoFileName.isEmpty())
@@ -1246,16 +1245,19 @@ namespace bias
 
         if (!videoFileDir.exists())
         {
-            videoFileDir = defaultVideoFileDir_;
-            QString msgText("Directory does not exist");
-            if (!rtnStatus.success)
+            bool ok = videoFileDir.mkpath(".");
+            if (!ok)
             {
-                rtnStatus.message = QString("%1, %2").arg(rtnStatus.message).arg(msgText);
-            }
-            else
-            {
-                rtnStatus.success = false;
-                rtnStatus.message = msgText;
+                QString msgText("Could not create videoFile directory");
+                if (!rtnStatus.success)
+                {
+                    rtnStatus.message = QString("%1, %2").arg(rtnStatus.message).arg(msgText);
+                }
+                else
+                {
+                    rtnStatus.success = false;
+                    rtnStatus.message = msgText;
+                }
             }
         }
         currentVideoFileDir_ = videoFileDir;
