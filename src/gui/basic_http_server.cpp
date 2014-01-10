@@ -44,7 +44,8 @@ namespace bias
     }
     QMap<QString,QString> ESCAPE_TO_CHAR_MAP = createEscapeToCharMap();
 
-    // Methods
+
+    // Methods - public
     // -------------------------------------------------------------------------
     BasicHttpServer::BasicHttpServer(CameraWindow *cameraWindow, QObject *parent)
         : QTcpServer(parent)
@@ -52,6 +53,7 @@ namespace bias
         cameraWindowPtr_ = QPointer<CameraWindow>(cameraWindow);
         closeFlag_ = false;
     }
+
 
     void BasicHttpServer::incomingConnection(int socket) 
     { 
@@ -62,40 +64,8 @@ namespace bias
     }
 
 
-    void BasicHttpServer::readClient()
-    {
-        QTcpSocket* socketPtr = (QTcpSocket*) sender();
-        if (socketPtr->canReadLine()) 
-        {
-            QString requestString = QString(socketPtr->readLine());
-            QStringList tokens = splitRequestString(requestString);
-            if (!tokens.isEmpty()) 
-            {
-                if (tokens[0] == "GET") 
-                {
-                    handleGetRequest(socketPtr, tokens);
-                } 
-            }
-            socketPtr -> close();
-            if (socketPtr -> state() == QTcpSocket::UnconnectedState)
-            {
-                delete socketPtr;
-            }
-        } 
-        if (closeFlag_)
-        {
-            cameraWindowPtr_ -> close();
-        }
-    }
-
-
-    void BasicHttpServer::discardClient()
-    {
-        QTcpSocket* socketPtr = (QTcpSocket*)sender(); 
-        socketPtr->deleteLater();
-    }
-
-
+    // Protected methods
+    // ------------------------------------------------------------------------
     void BasicHttpServer::handleGetRequest(QTcpSocket *socketPtr, QStringList &tokens)
     { 
         QTextStream os(socketPtr);
@@ -195,6 +165,70 @@ namespace bias
     }
 
 
+    void BasicHttpServer::sendBadRequestResp(QTextStream &os, QString msg)
+    { 
+        os << "HTTP/1.0 400 Bad Request\r\n";
+        os << "Content-Type: text/html; charset=\"utf-8\"\r\n\r\n";
+        os << "<html>\n";
+        os << "<body>\n";
+        os << "<h1>BIAS External Control Server</h1>\n";
+        os << "Bad request: " << msg << "\n";
+        os << "</body>\n";
+        os << "</html>\n";
+    }
+
+
+    void BasicHttpServer::sendRunningResp(QTextStream &os)
+    { 
+        os << "HTTP/1.0 200 Ok\r\n";
+        os << "Content-Type: text/html; charset=\"utf-8\"\r\n\r\n";
+        os << "<html>\n";
+        os << "<body>\n";
+        os << "<h1>BIAS Server Running</h1>\n";
+        os << QDateTime::currentDateTime().toString() << "\n";
+        os << "</body>\n";
+        os << "</html>\n";
+    }
+
+
+    // Protected slots
+    // ------------------------------------------------------------------------
+    void BasicHttpServer::readClient()
+    {
+        QTcpSocket* socketPtr = (QTcpSocket*) sender();
+        if (socketPtr->canReadLine()) 
+        {
+            QString requestString = QString(socketPtr->readLine());
+            QStringList tokens = splitRequestString(requestString);
+            if (!tokens.isEmpty()) 
+            {
+                if (tokens[0] == "GET") 
+                {
+                    handleGetRequest(socketPtr, tokens);
+                } 
+            }
+            socketPtr -> close();
+            if (socketPtr -> state() == QTcpSocket::UnconnectedState)
+            {
+                delete socketPtr;
+            }
+        } 
+        if (closeFlag_)
+        {
+            cameraWindowPtr_ -> close();
+        }
+    }
+
+
+    void BasicHttpServer::discardClient()
+    {
+        QTcpSocket* socketPtr = (QTcpSocket*)sender(); 
+        socketPtr->deleteLater();
+    }
+
+
+    // Private methods
+    // ------------------------------------------------------------------------
     QVariantMap BasicHttpServer::paramsRequestSwitchYard(QString name, QString value)
     {
         QVariantMap cmdMap;
@@ -556,32 +590,9 @@ namespace bias
         return cmdMap;
     }
 
-    void BasicHttpServer::sendBadRequestResp(QTextStream &os, QString msg)
-    { 
-        os << "HTTP/1.0 400 Bad Request\r\n";
-        os << "Content-Type: text/html; charset=\"utf-8\"\r\n\r\n";
-        os << "<html>\n";
-        os << "<body>\n";
-        os << "<h1>BIAS External Control Server</h1>\n";
-        os << "Bad request: " << msg << "\n";
-        os << "</body>\n";
-        os << "</html>\n";
-    }
 
-
-    void BasicHttpServer::sendRunningResp(QTextStream &os)
-    { 
-        os << "HTTP/1.0 200 Ok\r\n";
-        os << "Content-Type: text/html; charset=\"utf-8\"\r\n\r\n";
-        os << "<html>\n";
-        os << "<body>\n";
-        os << "<h1>BIAS Server Running</h1>\n";
-        os << QDateTime::currentDateTime().toString() << "\n";
-        os << "</body>\n";
-        os << "</html>\n";
-    }
-
-
+    // Utility functions
+    // ------------------------------------------------------------------------
     QStringList splitRequestString(QString reqString)
     {
         QStringList reqList;

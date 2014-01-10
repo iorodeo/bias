@@ -25,17 +25,21 @@ namespace bias
             BasicHttpServer(CameraWindow *cameraWindow, QObject *parent=0);
             void incomingConnection(int socket);
 
-        private slots:
+        protected:
+
+            void handleGetRequest(QTcpSocket *socket, QStringList &tokens);
+            void handleParamsRequest(QTextStream &os, QStringList &paramsList);
+            void sendBadRequestResp(QTextStream &os, QString msg);
+            void sendRunningResp(QTextStream &os);
+
+        protected slots:
             void readClient();
             void discardClient();
 
         private:
-            QPointer<CameraWindow> cameraWindowPtr_;
-            void handleGetRequest(QTcpSocket *socket, QStringList &tokens);
-            void handleParamsRequest(QTextStream &os, QStringList &paramsList);
-            QVariantMap paramsRequestSwitchYard(QString name, QString value);
             bool closeFlag_;
-
+            QPointer<CameraWindow> cameraWindowPtr_;
+            QVariantMap paramsRequestSwitchYard(QString name, QString value);
             QVariantMap handleConnectRequest();
             QVariantMap handleDisconnectRequest();
             QVariantMap handleStartCaptureRequest();
@@ -57,10 +61,6 @@ namespace bias
             QVariantMap handleSetWindowGeometry(QString jsonGeom);
             QVariantMap handleGetWindowGeometry();
             QVariantMap handleClose();
-
-            void sendBadRequestResp(QTextStream &os, QString msg);
-            void sendRunningResp(QTextStream &os);
-
     };
 
     QStringList splitRequestString(QString reqString);
