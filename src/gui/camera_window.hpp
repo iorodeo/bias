@@ -163,6 +163,7 @@ namespace bias
             void actionServerPortTriggered();
             void actionServerCommandsTriggered();
             void actionHelpAboutTriggered();
+            void actionDumpCameraPropsTriggered();
 
             // Signal mappers for videomode, framerate and properties
             void actionVideoModeTriggered(int vidModeInt);
@@ -273,6 +274,7 @@ namespace bias
             void updateLoggingMenu();
             void updateTimerMenu();
             void updateDisplayMenu();
+            void updateDebugMenu();
 
             void updateCameraVideoModeMenu();
             void updateCameraFrameRateMenu();

@@ -1,4 +1,5 @@
 #include "basic_http_server.hpp"
+#include <QMap>
 #include <QTcpSocket>
 #include <QStringList>
 #include <QDateTime>

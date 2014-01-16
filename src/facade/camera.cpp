@@ -609,6 +609,23 @@ namespace bias {
     }
 
 
+    std::string Camera::getAllPropertiesString()
+    {
+        std::stringstream ss;
+        PropertyTypeList propTypeList = getListOfPropertyTypes();
+        for (
+                PropertyTypeList::iterator it=propTypeList.begin();
+                it != propTypeList.end();
+                it++
+            )
+        {
+            PropertyType propType = *it;
+            ss << getPropertyString(propType); 
+        }
+        return ss.str();
+    }
+
+
     std::string Camera::getVendorName()
     {
         return cameraDevicePtr_ -> getVendorName();
@@ -647,16 +664,18 @@ namespace bias {
 
     void Camera::printAllProperties()
     {
-        PropertyTypeList propTypeList = getListOfPropertyTypes();
-        for (
-                PropertyTypeList::iterator it=propTypeList.begin();
-                it != propTypeList.end();
-                it++
-            )
-        {
-            PropertyType propType = *it;
-            printProperty(propType);
-        }
+        std::string allPropString = getAllPropertiesString();
+        std::cout << getAllPropertiesString();
+        //PropertyTypeList propTypeList = getListOfPropertyTypes();
+        //for (
+        //        PropertyTypeList::iterator it=propTypeList.begin();
+        //        it != propTypeList.end();
+        //        it++
+        //    )
+        //{
+        //    PropertyType propType = *it;
+        //    printProperty(propType);
+        //}
     }
 
 
