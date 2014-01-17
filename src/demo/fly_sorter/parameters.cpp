@@ -164,7 +164,7 @@ PixelFeatureVectorParam::PixelFeatureVectorParam()
 
 const unsigned int HogPositionFitterParam::DEFAULT_CLOSE_RADIUS = 15;
 const unsigned int HogPositionFitterParam::DEFAULT_OPEN_AREA = 3400;
-const unsigned int HogPositionFitterParam::DEFAULT_MAX_BODY_AREA = 16600;
+const unsigned int HogPositionFitterParam::DEFAULT_MAX_BODY_AREA = 22000;
 const cv::Scalar HogPositionFitterParam::DEFAULT_FILL_VALUES_LUV =
 cv::Scalar(0.3703704,0.3259259,0.4962940); 
 const double HogPositionFitterParam::DEFAULT_PAD_BORDER = 15.0;
