@@ -123,7 +123,7 @@ void FlySorterWindow::startPushButtonClicked()
         }
 
         // Create debug image log
-        if (actionDebugImagesPtr_ -> isChecked())
+        if ( (actionDebugBoundingImagesPtr_ -> isChecked()) || (actionDebugRawImagesPtr_ -> isChecked()))
         {
             setupDebugImagesWrite();
         }
@@ -291,7 +291,13 @@ void FlySorterWindow::newImage(ImageData imageData)
         }
 
         // Write debug data images
-        if (actionDebugImagesPtr_ -> isChecked())
+        if (actionDebugRawImagesPtr_ -> isChecked())
+        {
+            QString fileName = QString("raw_frm_%1.bmp").arg(imageData.frameCount);
+            QString pathName = debugImagesDir_.absoluteFilePath(fileName);
+            cv::imwrite(pathName.toStdString(),imageData.mat);
+        }
+        if (actionDebugBoundingImagesPtr_ -> isChecked())
         {
             int cnt;
             GenderDataList::iterator it;
@@ -300,7 +306,7 @@ void FlySorterWindow::newImage(ImageData imageData)
             {
                 GenderData data = *it;
                 // Bounding image
-                QString fileName = QString("frm_%1_cnt_%2.bmp").arg(imageData.frameCount).arg(cnt);
+                QString fileName = QString("bnd_frm_%1_cnt_%2.bmp").arg(imageData.frameCount).arg(cnt);
                 QString pathName = debugImagesDir_.absoluteFilePath(fileName);
                 cv::Mat boundingImage = data.positionData.segmentData.blobData.boundingImage;
                 cv::imwrite(pathName.toStdString(),boundingImage);
@@ -431,10 +437,6 @@ void FlySorterWindow::OnImageCaptureStopped()
             {
                 statusbar -> clearMessage();
             }
-        }
-
-        if (actionDebugImagesPtr_ -> isChecked())
-        {
         }
 
         if (actionDebugDataLogPtr_ -> isChecked())
