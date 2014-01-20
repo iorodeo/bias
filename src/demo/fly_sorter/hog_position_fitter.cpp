@@ -194,7 +194,10 @@ HogPositionFitterData HogPositionFitter::fit(
 
             // Recompute body area for maximum connected component. 
             // Note, double check this w/ Kristin
-            posData.bodyArea = cv::countNonZero(maxCompMat);
+            //posData.bodyArea = cv::countNonZero(maxCompMat);
+
+	    // KB 20140117: Changed this to use isBodyMat
+	    posData.bodyArea = cv::countNonZero(isBodyMat);
 
             // Check if area is too big for one fly
             if (posData.bodyArea > param_.maxBodyArea)
