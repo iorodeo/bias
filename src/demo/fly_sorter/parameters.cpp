@@ -646,7 +646,8 @@ ClassifierParam GenderSorterParam::createDefaultGenderClassifierParam()
 const ClassifierParam GenderSorterParam::DEFAULT_GENDER_CLASSIFIER_PARAM = 
 createDefaultGenderClassifierParam();
 
-const double GenderSorterParam::DEFAULT_MIN_CONFIDENCE = 2.2412; 
+const double GenderSorterParam::DEFAULT_MIN_CONFIDENCE = 2.318072;
+//const double GenderSorterParam::DEFAULT_MIN_CONFIDENCE = 2.2412; 
 
 GenderSorterParam::GenderSorterParam()
 {
@@ -1103,6 +1104,17 @@ RtnStatus ServerParam::fromMap(QVariantMap paramMap)
 
 // IdentityTrackerParam
 // -----------------------------------------------------------------------------
+// motion params updated by Kristin 20140120T095233
+const float IdentityTrackerParam::DEFAULT_MEAN_DX = 0.000000;
+const float IdentityTrackerParam::DEFAULT_MEAN_DY = 542.500000;
+const float IdentityTrackerParam::DEFAULT_MEAN_WIDTH = 6.000000;
+const float IdentityTrackerParam::DEFAULT_MEAN_HEIGHT = 6.000000;
+const float IdentityTrackerParam::DEFAULT_STD_DX = 3.605022;
+const float IdentityTrackerParam::DEFAULT_STD_DY = 8.652053;
+const float IdentityTrackerParam::DEFAULT_STD_WIDTH = 5.768036;
+const float IdentityTrackerParam::DEFAULT_STD_HEIGHT = 10.094062;
+const float IdentityTrackerParam::DEFAULT_MAX_COST = 8.921086;
+/*
 const float IdentityTrackerParam::DEFAULT_MEAN_DX = -5.5;
 const float IdentityTrackerParam::DEFAULT_MEAN_DY = 574.0;
 const float IdentityTrackerParam::DEFAULT_MEAN_WIDTH = 2.0;
@@ -1112,8 +1124,8 @@ const float IdentityTrackerParam::DEFAULT_STD_DY = 14.4201;
 const float IdentityTrackerParam::DEFAULT_STD_WIDTH = 5.7680;
 const float IdentityTrackerParam::DEFAULT_STD_HEIGHT = 8.6521;
 const float IdentityTrackerParam::DEFAULT_MAX_COST = 32.7148;
+*/
 const MotionDirection IdentityTrackerParam::DEFAULT_MOTION_DIRECTION = MOTION_DIRECTION_Y;
-
 
 IdentityTrackerParam::IdentityTrackerParam()
 {
