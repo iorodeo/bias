@@ -50,6 +50,7 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
     signals:
 
         void stopCapture();
+        void dumpCameraProperties();
 
     protected:
 
@@ -69,6 +70,7 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         void cameraSetupError(QString errorMsg);
         void imageGrabberFileReadError(QString errorMsg);
         void OnImageCaptureStopped();
+        void actionDumpCameraPropsTriggered();
 
     private:
 

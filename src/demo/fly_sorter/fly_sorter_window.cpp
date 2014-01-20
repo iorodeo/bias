@@ -148,6 +148,7 @@ void FlySorterWindow::startImageCapture()
 {
     if (!running_)
     {
+
         ImageGrabberParam imageGrabberParam = param_.imageGrabber;
         if (createTrainingData() && isTrainingDataModeBatch())
         {
@@ -177,6 +178,13 @@ void FlySorterWindow::startImageCapture()
                 );
 
         connect(
+                this,
+                SIGNAL(dumpCameraProperties()),
+                imageGrabberPtr_,
+                SLOT(dumpCameraProperties())
+               );
+
+        connect(
                 imageGrabberPtr_,
                 SIGNAL(stopped()),
                 this,
@@ -198,6 +206,10 @@ void FlySorterWindow::startImageCapture()
         startPushButtonPtr_ -> setText("Stop");
         reloadPushButtonPtr_ -> setEnabled(false);
         trainingDataCheckBoxPtr_ -> setEnabled(false);
+        if (param_.imageGrabber.captureMode == QString("camera"))
+        {
+            actionDumpCameraPropsPtr_ -> setEnabled(true);
+        }
     }
 }
 
@@ -436,6 +448,16 @@ void FlySorterWindow::OnImageCaptureStopped()
         {
             trainingDataCheckBoxPtr_ -> setEnabled(true);
         }
+        actionDumpCameraPropsPtr_ -> setEnabled(false);
+}
+
+
+void FlySorterWindow::actionDumpCameraPropsTriggered()
+{
+    if (running_)
+    {
+        emit dumpCameraProperties();
+    }
 }
 
 
@@ -474,6 +496,12 @@ void FlySorterWindow::connectWidgets()
             SLOT(trainingDataCheckBoxChanged(int))
            );
 
+    connect(
+            actionDumpCameraPropsPtr_,
+            SIGNAL(triggered()),
+            this,
+            SLOT(actionDumpCameraPropsTriggered())
+           );
 }
 
 
@@ -770,6 +798,7 @@ void FlySorterWindow::updateWidgetsOnLoad()
         singleRadioButtonPtr_ -> setEnabled(false);
         batchRadioButtonPtr_ -> setEnabled(false);
     }
+    actionDumpCameraPropsPtr_ -> setEnabled(false);
 }
 
 

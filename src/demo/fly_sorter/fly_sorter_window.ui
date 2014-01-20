@@ -233,6 +233,8 @@
     </property>
     <addaction name="actionDebugImagesPtr_"/>
     <addaction name="actionDebugDataLogPtr_"/>
+    <addaction name="separator"/>
+    <addaction name="actionDumpCameraPropsPtr_"/>
    </widget>
    <addaction name="menuDebugPtr_"/>
   </widget>
@@ -277,6 +279,11 @@
    </property>
    <property name="text">
     <string>Data Log</string>
+   </property>
+  </action>
+  <action name="actionDumpCameraPropsPtr_">
+   <property name="text">
+    <string>Dump camera properties</string>
    </property>
   </action>
  </widget>

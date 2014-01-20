@@ -81,7 +81,7 @@ namespace bias
 
 
     // Debug files
-    const QString DEBUG_DUMP_CAMERA_PROPS_FILE_NAME = QString("bias_camera_props_dump.txt");
+    const QString DEBUG_DUMP_CAMERA_PROPS_FILE_NAME("bias_camera_props_dump.txt");
 
     // Public methods
     // ----------------------------------------------------------------------------------
