@@ -5,6 +5,7 @@
 
 namespace bias
 {
+    class CameraWindow;
 
     class ExtCtlHttpServer : public BasicHttpServer
     {

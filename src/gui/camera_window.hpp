@@ -35,7 +35,6 @@ namespace bias
     class LoggingSettingsDialog;
     class Format7SettingsDialog;
     class AlignmentSettingsDialog;
-    //class BasicHttpServer;
     class ExtCtlHttpServer;
     template <class T> class Lockable;
     template <class T> class LockableQueue;

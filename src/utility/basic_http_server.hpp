@@ -13,7 +13,6 @@ class QTcpSockect;
 namespace bias
 {
 
-    class CameraWindow;
 
     class BasicHttpServer : public QTcpServer
     {

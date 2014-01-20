@@ -313,7 +313,6 @@ void FlySorterWindow::newImage(ImageData imageData)
             }
         }
 
-
         // Write debug data log
         if (actionDebugDataLogPtr_ -> isChecked())
         {

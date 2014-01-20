@@ -31,7 +31,6 @@ class QNetworkReply;
 class QVarianMap;
 class QByteArray;
 
-
 enum TrainingDataMode 
 {
     TRAINING_DATA_MODE_SINGLE=0,
