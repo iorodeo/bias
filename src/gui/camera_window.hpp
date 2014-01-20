@@ -35,7 +35,8 @@ namespace bias
     class LoggingSettingsDialog;
     class Format7SettingsDialog;
     class AlignmentSettingsDialog;
-    class BasicHttpServer;
+    //class BasicHttpServer;
+    class ExtCtlHttpServer;
     template <class T> class Lockable;
     template <class T> class LockableQueue;
 
@@ -248,7 +249,7 @@ namespace bias
 
             VideoWriterParams videoWriterParams_;
 
-            QPointer<BasicHttpServer> httpServerPtr_;
+            QPointer<ExtCtlHttpServer> httpServerPtr_;
             unsigned int httpServerPort_;
 
             void connectWidgets();

@@ -1,236 +1,29 @@
-#include "basic_http_server.hpp"
-#include <QMap>
-#include <QTcpSocket>
-#include <QStringList>
-#include <QDateTime>
-#include <QVariantList>
-#include <iostream>
+#include "ext_ctl_http_server.hpp"
 #include "camera_window.hpp"
-#include "json.hpp"
 
 namespace bias
 {
-    // Constants
-    // ------------------------------------------------------------------------
-    static QMap<QString,QString> createEscapeToCharMap()
-    {
-        QMap<QString,QString> map;
-        map[QString("%20")] = QString(" ");
-        map[QString("%24")] = QString("$");
-        map[QString("%26")] = QString("&");
-        map[QString("%60")] = QString("`");
-        map[QString("%3A")] = QString(":");
-        map[QString("%3C")] = QString("<");
-        map[QString("%3E")] = QString(">");
-        map[QString("%5B")] = QString("[");
-        map[QString("%5D")] = QString("]");
-        map[QString("%7B")] = QString("{");
-        map[QString("%7D")] = QString("}");
-        map[QString("%22")] = QString("\"");
-        map[QString("%23")] = QString("#");
-        map[QString("%25")] = QString("%");
-        map[QString("%40")] = QString("@");
-        map[QString("%2F")] = QString("/");
-        map[QString("%3B")] = QString(";");
-        map[QString("%3D")] = QString("=");
-        map[QString("%3F")] = QString("?");
-        map[QString("%5C")] = QString("\\"); 
-        map[QString("%5E")] = QString("^");
-        map[QString("%7C")] = QString("|");
-        map[QString("%7E")] = QString("~"); 
-        map[QString("%27")] = QString("'");
-        map[QString("%5C")] = QString("\\"); 
-        map[QString("%2C")] = QString(",");
-        return map;
-    }
-    QMap<QString,QString> ESCAPE_TO_CHAR_MAP = createEscapeToCharMap();
-
-
-    // Methods - public
-    // -------------------------------------------------------------------------
-    BasicHttpServer::BasicHttpServer(CameraWindow *cameraWindow, QObject *parent)
-        : QTcpServer(parent)
+    ExtCtlHttpServer::ExtCtlHttpServer(CameraWindow *cameraWindow, QObject *parent)
+        : BasicHttpServer(parent)
     { 
-        cameraWindowPtr_ = QPointer<CameraWindow>(cameraWindow);
         closeFlag_ = false;
+        cameraWindowPtr_ = QPointer<CameraWindow>(cameraWindow);
     }
-
-
-    void BasicHttpServer::incomingConnection(int socket) 
-    { 
-        QTcpSocket* s = new QTcpSocket(this); 
-        connect(s, SIGNAL(readyRead()), this, SLOT(readClient()));
-        connect(s, SIGNAL(disconnected()), this, SLOT(discardClient()));
-        s->setSocketDescriptor(socket);
-    }
-
-
-    // Protected methods
-    // ------------------------------------------------------------------------
-    void BasicHttpServer::handleGetRequest(QTcpSocket *socketPtr, QStringList &tokens)
-    { 
-        QTextStream os(socketPtr);
-        os.setAutoDetectUnicode(true);
-
-        // Examine tokens
-        if (tokens.size() < 2)
-        {
-            sendBadRequestResp(os,"not enought tokens");
-            return;
-        }
-
-        // Parse tokens
-        QString paramsString = tokens[1];
-        paramsString = replaceEscapeChars(paramsString);
-
-        if (paramsString.length() == 1)
-        {
-            sendRunningResp(os);
-            return;
-        }
-        else if (paramsString.length() > 1)
-        {
-            // Check for request parameters character '?'
-            QChar secondChar = paramsString[1];
-            if (secondChar != QChar('?'))
-            {
-                sendBadRequestResp(os, "no ? character preceeding parameters");
-                return;
-            }
-
-            paramsString.remove(0,2);
-            QStringList paramsList = paramsString.split("&",QString::SkipEmptyParts);
-            if (!paramsList.isEmpty())
-            {
-                // We have some parameters - send appropriate response
-                handleParamsRequest(os, paramsList);
-                return;
-            }
-            else
-            {
-                // No parameters follow '?' character
-                sendBadRequestResp(os,"not parameters following ? char");
-                return;
-            }
-        }
-    }
-    
-
-    void BasicHttpServer::handleParamsRequest(QTextStream &os, QStringList &paramsList)
-    { 
-        os << "HTTP/1.0 200 Ok\r\n";
-        os << "Content-Type: application/json; charset=\"utf-8\"\r\n\r\n";
-
-        // Handle requests
-        QVariantList respList;
-        QVariantMap cmdMap;
-        for (unsigned int i=0; i<paramsList.size(); i++)
-        {
-            QString name;
-            QString value;
-
-            QStringList parts = paramsList[i].split("=",QString::SkipEmptyParts);
-            if (parts.size() == 0)
-            {
-                // Nothing here - just skip it
-                continue;
-            }
-            name = parts[0];
-
-            if (parts.size() == 1)
-            {
-                // Just command name 
-                cmdMap = paramsRequestSwitchYard(name, QString(""));
-            }
-            else if (parts.size() == 2)
-            {
-                // Command name + parameters
-                cmdMap = paramsRequestSwitchYard(name,parts[1]);
-            }
-            else
-            {
-                // Error unable to parse command
-                cmdMap = QVariantMap();
-                cmdMap.insert("success", false);
-                cmdMap.insert("message", "unable to parse command");
-            }
-            //respMap.insert(name,cmdMap);
-            respList.append(cmdMap);
-        }
-
-        // Send response
-        bool ok;
-        //QByteArray jsonResp = QtJson::serialize(respMap,ok);
-        QByteArray jsonResp = QtJson::serialize(respList,ok);
-        os << QString(jsonResp) << "\n";
-    }
-
-
-    void BasicHttpServer::sendBadRequestResp(QTextStream &os, QString msg)
-    { 
-        os << "HTTP/1.0 400 Bad Request\r\n";
-        os << "Content-Type: text/html; charset=\"utf-8\"\r\n\r\n";
-        os << "<html>\n";
-        os << "<body>\n";
-        os << "<h1>BIAS External Control Server</h1>\n";
-        os << "Bad request: " << msg << "\n";
-        os << "</body>\n";
-        os << "</html>\n";
-    }
-
-
-    void BasicHttpServer::sendRunningResp(QTextStream &os)
-    { 
-        os << "HTTP/1.0 200 Ok\r\n";
-        os << "Content-Type: text/html; charset=\"utf-8\"\r\n\r\n";
-        os << "<html>\n";
-        os << "<body>\n";
-        os << "<h1>BIAS Server Running</h1>\n";
-        os << QDateTime::currentDateTime().toString() << "\n";
-        os << "</body>\n";
-        os << "</html>\n";
-    }
-
 
     // Protected slots
-    // ------------------------------------------------------------------------
-    void BasicHttpServer::readClient()
+    // ------------------------------------------------------------------------------
+    void ExtCtlHttpServer::readClient()
     {
-        QTcpSocket* socketPtr = (QTcpSocket*) sender();
-        if (socketPtr->canReadLine()) 
-        {
-            QString requestString = QString(socketPtr->readLine());
-            QStringList tokens = splitRequestString(requestString);
-            if (!tokens.isEmpty()) 
-            {
-                if (tokens[0] == "GET") 
-                {
-                    handleGetRequest(socketPtr, tokens);
-                } 
-            }
-            socketPtr -> close();
-            if (socketPtr -> state() == QTcpSocket::UnconnectedState)
-            {
-                delete socketPtr;
-            }
-        } 
+        BasicHttpServer::readClient();
         if (closeFlag_)
         {
             cameraWindowPtr_ -> close();
         }
     }
 
-
-    void BasicHttpServer::discardClient()
-    {
-        QTcpSocket* socketPtr = (QTcpSocket*)sender(); 
-        socketPtr->deleteLater();
-    }
-
-
-    // Private methods
-    // ------------------------------------------------------------------------
-    QVariantMap BasicHttpServer::paramsRequestSwitchYard(QString name, QString value)
+    // Protected methods
+    // ------------------------------------------------------------------------------
+    QVariantMap ExtCtlHttpServer::paramsRequestSwitchYard(QString name, QString value)
     {
         QVariantMap cmdMap;
 
@@ -329,7 +122,9 @@ namespace bias
     }
 
 
-    QVariantMap BasicHttpServer::handleConnectRequest()
+    // Private Methods
+    // ------------------------------------------------------------------------
+    QVariantMap ExtCtlHttpServer::handleConnectRequest()
     { 
         QVariantMap cmdMap;
         RtnStatus status = cameraWindowPtr_ -> connectCamera(false);
@@ -340,7 +135,7 @@ namespace bias
     }
 
 
-    QVariantMap BasicHttpServer::handleDisconnectRequest()
+    QVariantMap ExtCtlHttpServer::handleDisconnectRequest()
     { 
         QVariantMap cmdMap;
         RtnStatus status = cameraWindowPtr_ -> disconnectCamera(false);
@@ -351,7 +146,7 @@ namespace bias
     }
 
 
-    QVariantMap BasicHttpServer::handleStartCaptureRequest()
+    QVariantMap ExtCtlHttpServer::handleStartCaptureRequest()
     {
         QVariantMap cmdMap;
         RtnStatus status = cameraWindowPtr_ -> startImageCapture(false);
@@ -362,7 +157,7 @@ namespace bias
     }
 
 
-    QVariantMap BasicHttpServer::handleStopCaptureRequest()
+    QVariantMap ExtCtlHttpServer::handleStopCaptureRequest()
     {
         QVariantMap cmdMap;
         RtnStatus status = cameraWindowPtr_ -> stopImageCapture(false);
@@ -373,7 +168,7 @@ namespace bias
     }
 
     
-    QVariantMap BasicHttpServer::handleGetConfiguration()
+    QVariantMap ExtCtlHttpServer::handleGetConfiguration()
     {
         QVariantMap cmdMap;
         RtnStatus status;
@@ -385,7 +180,7 @@ namespace bias
     }
 
 
-    QVariantMap BasicHttpServer::handleSetConfiguration(QString jsonConfig)
+    QVariantMap ExtCtlHttpServer::handleSetConfiguration(QString jsonConfig)
     {
         QVariantMap cmdMap;
         QByteArray jsonArray = jsonConfig.toLatin1();
@@ -397,7 +192,7 @@ namespace bias
     }
 
 
-    QVariantMap BasicHttpServer::handleLoggingEnable()
+    QVariantMap ExtCtlHttpServer::handleLoggingEnable()
     {
         QVariantMap cmdMap;
         RtnStatus status = cameraWindowPtr_ -> enableLogging(false);
@@ -408,7 +203,7 @@ namespace bias
     }
 
 
-    QVariantMap BasicHttpServer::handleLoggingDisable()
+    QVariantMap ExtCtlHttpServer::handleLoggingDisable()
     {
         QVariantMap cmdMap;
         RtnStatus status = cameraWindowPtr_ -> disableLogging(false);
@@ -419,7 +214,7 @@ namespace bias
     }
 
 
-    QVariantMap BasicHttpServer::handleSaveConfiguration(QString fileName)
+    QVariantMap ExtCtlHttpServer::handleSaveConfiguration(QString fileName)
     {
         QVariantMap cmdMap;
         RtnStatus status = cameraWindowPtr_ -> saveConfiguration(fileName,false);
@@ -430,7 +225,7 @@ namespace bias
     }
 
 
-    QVariantMap BasicHttpServer::handleLoadConfiguration(QString fileName)
+    QVariantMap ExtCtlHttpServer::handleLoadConfiguration(QString fileName)
     {
         QVariantMap cmdMap;
 
@@ -442,7 +237,7 @@ namespace bias
     }
 
     
-    QVariantMap BasicHttpServer::handleGetFrameCount()
+    QVariantMap ExtCtlHttpServer::handleGetFrameCount()
     {
         QVariantMap cmdMap;
         unsigned long frameCount = cameraWindowPtr_ -> getFrameCount();
@@ -452,7 +247,7 @@ namespace bias
         return cmdMap;
     }
 
-    QVariantMap BasicHttpServer::handleGetCameraGuid()
+    QVariantMap ExtCtlHttpServer::handleGetCameraGuid()
     {
         QVariantMap cmdMap;
         RtnStatus status; 
@@ -471,7 +266,7 @@ namespace bias
     }
 
 
-    QVariantMap BasicHttpServer::handleGetStatus()
+    QVariantMap ExtCtlHttpServer::handleGetStatus()
     {
         QVariantMap cmdMap;
         QVariantMap statusMap;
@@ -494,7 +289,7 @@ namespace bias
     }
 
 
-    QVariantMap BasicHttpServer::handleSetVideoFile(QString fileName)
+    QVariantMap ExtCtlHttpServer::handleSetVideoFile(QString fileName)
     {
         QVariantMap cmdMap;
         RtnStatus status = cameraWindowPtr_ -> setVideoFile(fileName);
@@ -505,7 +300,7 @@ namespace bias
     }
 
 
-    QVariantMap BasicHttpServer::handleGetVideoFile()
+    QVariantMap ExtCtlHttpServer::handleGetVideoFile()
     {
         QVariantMap cmdMap;
         QString fileName = cameraWindowPtr_ -> getVideoFileFullPath();
@@ -516,7 +311,7 @@ namespace bias
     }
 
 
-    QVariantMap BasicHttpServer::handleGetTimeStamp()
+    QVariantMap ExtCtlHttpServer::handleGetTimeStamp()
     {
         QVariantMap cmdMap;
         double timeStamp = cameraWindowPtr_ -> getTimeStamp();
@@ -527,7 +322,7 @@ namespace bias
     }
 
 
-    QVariantMap BasicHttpServer::handleGetFramesPerSec()
+    QVariantMap ExtCtlHttpServer::handleGetFramesPerSec()
     {
         QVariantMap cmdMap;
         double framesPerSec = cameraWindowPtr_ -> getFramesPerSec();
@@ -538,7 +333,7 @@ namespace bias
     }
 
 
-    QVariantMap BasicHttpServer::handleSetCameraName(QString cameraName)
+    QVariantMap ExtCtlHttpServer::handleSetCameraName(QString cameraName)
     {
         QVariantMap cmdMap;
         cameraWindowPtr_ -> setUserCameraName(cameraName);
@@ -549,7 +344,7 @@ namespace bias
     }
 
 
-    QVariantMap BasicHttpServer::handleSetWindowGeometry(QString jsonGeom)
+    QVariantMap ExtCtlHttpServer::handleSetWindowGeometry(QString jsonGeom)
     {
         QVariantMap cmdMap;
         QByteArray jsonGeomArray = jsonGeom.toLatin1();
@@ -561,7 +356,7 @@ namespace bias
     }
 
 
-    QVariantMap BasicHttpServer::handleGetWindowGeometry()
+    QVariantMap ExtCtlHttpServer::handleGetWindowGeometry()
     {
         QVariantMap cmdMap;
         QVariantMap windowGeomMap = cameraWindowPtr_ -> getWindowGeometryMap();
@@ -572,7 +367,7 @@ namespace bias
     }
 
 
-    QVariantMap BasicHttpServer::handleClose()
+    QVariantMap ExtCtlHttpServer::handleClose()
     {
         QVariantMap cmdMap;
         if (cameraWindowPtr_ -> isCapturing())
@@ -590,42 +385,4 @@ namespace bias
         }
         return cmdMap;
     }
-
-
-    // Utility functions
-    // ------------------------------------------------------------------------
-    QStringList splitRequestString(QString reqString)
-    {
-        QStringList reqList;
-        if (reqString.isEmpty())
-        {
-            return reqList;
-        }
-        int len = reqString.length();
-        int n0 = reqString.indexOf(' ');
-        int n1 = reqString.lastIndexOf(' ');
-        if ((n0 == -1) || (n1 == -1) || (n0==n1))
-        {
-            return reqList;
-        }
-        QString token0 = reqString.left(n0); 
-        QString token1 = reqString.mid(n0+1,n1-n0-1).trimmed();
-        QString token2 = reqString.right(len-n1-1);
-        reqList.append(token0);
-        reqList.append(token1);
-        reqList.append(token2);
-        return reqList;
-    }
-
-    QString replaceEscapeChars(QString input)
-    {
-        QString output(input);
-        QMap<QString,QString>::iterator it;
-        for (it=ESCAPE_TO_CHAR_MAP.begin(); it!=ESCAPE_TO_CHAR_MAP.end(); it++)
-        {
-            output.replace(it.key(), it.value());
-        }
-        return output;
-    }
-
-} // namespace bias
+}

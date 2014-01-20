@@ -37,7 +37,7 @@ set(
     timer_settings_dialog.hpp
     logging_settings_dialog.hpp
     format7_settings_dialog.hpp
-    basic_http_server.hpp
+    ext_ctl_http_server.hpp
     alignment_settings.hpp
     alignment_settings_dialog.hpp
     )
@@ -67,7 +67,7 @@ set(
     timer_settings_dialog.cpp
     logging_settings_dialog.cpp
     format7_settings_dialog.cpp
-    basic_http_server.cpp
+    ext_ctl_http_server.cpp
     alignment_settings.cpp
     alignment_settings_dialog.cpp
     )

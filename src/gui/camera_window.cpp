@@ -20,7 +20,7 @@
 #include "background_histogram_ufmf.hpp"
 #include "json.hpp"
 #include "json_utils.hpp"
-#include "basic_http_server.hpp"
+#include "ext_ctl_http_server.hpp"
 
 #include <cstdlib>
 #include <cmath>
@@ -2148,7 +2148,7 @@ namespace bias
 
         httpServerPort_  = HTTP_SERVER_PORT_BEGIN; 
         httpServerPort_ += HTTP_SERVER_PORT_STEP*(cameraNumber_ + 1);
-        httpServerPtr_ = new BasicHttpServer(this,this);
+        httpServerPtr_ = new ExtCtlHttpServer(this,this);
         setServerPortText();
         if (DEFAULT_HTTP_SERVER_ENABLED)
         {

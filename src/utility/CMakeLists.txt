@@ -12,6 +12,7 @@ set(
     json_utils.hpp
     rtn_status.hpp
     basic_image_proc.hpp
+    basic_http_server.hpp
     )
 
 set(
@@ -23,6 +24,7 @@ set(
     json.cpp
     json_utils.cpp
     basic_image_proc.cpp
+    basic_http_server.cpp
     )
 
 qt4_wrap_cpp(bias_utility_HEADERS_MOC ${bias_utility_HEADERS})
