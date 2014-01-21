@@ -3,6 +3,7 @@
 #include "json.hpp"
 #include "json_utils.hpp"
 #include "rtn_status.hpp"
+#include "ext_ctl_http_server.hpp"
 #include <QMessageBox>
 #include <QThreadPool>
 #include <QTimer>
@@ -30,6 +31,7 @@ const QString DEFAULT_PARAMETER_FILENAME = QString("fly_sorter_param.json");
 const QString TRAINING_DATA_BASE_STRING = QString("training_data");
 const QString TRAINING_VIDEO_BASE_STRING = QString("training_video");
 const QString DEBUG_IMAGES_BASE_STRING = QString("debug_images");
+const unsigned int DEFAULT_HTTP_SERVER_PORT = 5010; 
 
 
 // Public Methods
@@ -516,6 +518,7 @@ void FlySorterWindow::initialize()
     threadPoolPtr_ = new QThreadPool(this);
     threadPoolPtr_ -> setMaxThreadCount(MAX_THREAD_COUNT);
     batchVideoFileIndex_ = 0;
+    httpServerPort_ = DEFAULT_HTTP_SERVER_PORT;
 
     setupImageLabels();
     setupDisplayTimer();
@@ -523,12 +526,7 @@ void FlySorterWindow::initialize()
     loadParamFromFile();
     updateParamText();
     updateWidgetsOnLoad();
-
-    // Temporary
-    // ----------------------------------------------------------------------------
-    //distribution_ = std::uniform_int_distribution<unsigned int>(0,1);
-    //QString appDirPath = QCoreApplication::applicationDirPath();
-    //std::cout << "applicationDirPath = " << appDirPath.toStdString() << std::endl;
+    startHttpServer();
 }
 
 
@@ -633,6 +631,13 @@ void FlySorterWindow::sendDataViaHttpRequest()
     std::cout << "http request: " << reqUrl.toString().toStdString() << std::endl;
     QNetworkRequest req(reqUrl);
     QNetworkReply *reply = networkAccessManagerPtr_ -> get(req);
+}
+
+
+void FlySorterWindow::startHttpServer()
+{ 
+    httpServerPtr_ = new ExtCtlHttpServer(this,this);
+    httpServerPtr_ -> listen(QHostAddress::Any, httpServerPort_);
 }
 
 

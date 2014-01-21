@@ -30,12 +30,14 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class QVarianMap;
 class QByteArray;
+class ExtCtlHttpServer;
 
 enum TrainingDataMode 
 {
     TRAINING_DATA_MODE_SINGLE=0,
     TRAINING_DATA_MODE_BATCH
 };
+
 
 
 class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
@@ -104,6 +106,9 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         QList<QString> batchVideoFileList_;
         int batchVideoFileIndex_;
 
+        QPointer<ExtCtlHttpServer> httpServerPtr_;
+        unsigned int httpServerPort_;
+
         void connectWidgets();
         void initialize();
         void startImageCapture();
@@ -116,12 +121,12 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         void setupDisplayTimer();
         void setupNetworkAccessManager();
         void sendDataViaHttpRequest();
+        void startHttpServer();
         QVariantMap dataToMap();
         QByteArray dataToJson();
         void loadParamFromFile();
         void updateParamText();
         void updateWidgetsOnLoad();
-
         void setupTrainingDataWrite(QString videoFileName);
         void setupBatchDataWrite();
         void setupDebugImagesWrite();
@@ -130,6 +135,7 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         bool isTrainingDataModeBatch();
         bool updateBatchVideoFileList();
         bool createTrainingData();
+
 
         // Debug 
         std::ofstream debugDataLogStream_;

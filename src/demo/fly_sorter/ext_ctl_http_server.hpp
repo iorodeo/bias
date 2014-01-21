@@ -3,31 +3,28 @@
 #include<QVariantMap>
 #include "basic_http_server.hpp"
 
-namespace bias
+class FlySorterWindow;
+
+class ExtCtlHttpServer : public bias::BasicHttpServer
 {
-    class FlySorterWindow;
+    Q_OBJECT
 
-    class ExtCtlHttpServer : public BasicHttpServer
-    {
-        Q_OBJECT
+    public:
+        ExtCtlHttpServer(FlySorterWindow *flySorterWindow, QObject *parent=0);
 
-        public:
-            ExtCtlHttpServer(FlySorterWindow *flySorterWindow, QObject *parent=0);
+    protected:
+        virtual QVariantMap paramsRequestSwitchYard(QString name, QString value);
 
-        protected:
-            virtual QVariantMap paramsRequestSwitchYard(QString name, QString value);
+    protected slots:
+        virtual void readClient();
 
-        protected slots:
-            virtual void readClient();
+    private:
+        bool closeFlag_;
+        QPointer<FlySorterWindow> flySorterWindowPtr_;
+        QVariantMap handleStartReq();
+        QVariantMap handleStopReq();
+        QVariantMap handleGetStatusReq();
+        QVariantMap handleCloseReq();
+};
 
-        private:
-            bool closeFlag_;
-            QPointer<FlySorterWindow> flySorterWindowPtr_;
-            QVariantMap handleStart();
-            QVariantMap handleStop();
-            QVariantMap handleGetStatus();
-            QVariantMap handleClose();
-    };
-
-}
 #endif
