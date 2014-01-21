@@ -45,6 +45,85 @@ FlySorterWindow::FlySorterWindow(QWidget *parent) : QMainWindow(parent)
 }
 
 
+RtnStatus FlySorterWindow::startRunning()
+{
+    RtnStatus rtnStatus;
+
+    if (!running_)
+    {
+        // Setup sorting and tracking
+        blobFinder_ = BlobFinder(param_.blobFinder);
+        identityTracker_ = IdentityTracker(param_.identityTracker);
+        flySegmenter_ = FlySegmenter(param_.flySegmenter);
+        hogPositionFitter_ = HogPositionFitter(param_.hogPositionFitter);
+        genderSorter_ = GenderSorter(param_.genderSorter);
+
+        // Create training data
+        if (trainingDataCheckBoxPtr_ -> checkState() == Qt::Checked)
+        {
+            if (isTrainingDataModeSingle())
+            {
+                setupTrainingDataWrite(param_.imageGrabber.captureInputFile);
+            }
+            else
+            {
+                // Update vector of batch video files 
+                bool success = updateBatchVideoFileList();
+                if (!success)
+                {
+                    rtnStatus.success = false;
+                    rtnStatus.message = QString("unable to update batch video file list");
+                    return rtnStatus;
+                }
+                batchVideoFileIndex_ = 0;
+                setupBatchDataWrite();
+            }
+        }
+        else
+        {
+            hogPositionFitter_.trainingDataWriteDisable();
+        }
+
+        // Create debug image log
+        if ( (actionDebugBoundingImagesPtr_ -> isChecked()) || (actionDebugRawImagesPtr_ -> isChecked()))
+        {
+            setupDebugImagesWrite();
+        }
+
+        // Create debug data log
+        if (actionDebugDataLogPtr_ -> isChecked())
+        {
+            debugDataLogStream_.open("debug_data_log.txt");
+        }
+
+        stopRunningFlag_ = false;
+        startImageCapture();
+
+        rtnStatus.success = true;
+        rtnStatus.message = QString("");
+        return rtnStatus;
+    }
+    else
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("already running");
+        return rtnStatus;
+    }
+}
+
+
+RtnStatus FlySorterWindow::stopRunning()
+{ 
+    RtnStatus rtnStatus;
+    stopRunningFlag_ = true;
+    stopImageCapture();
+
+    rtnStatus.success = true;
+    rtnStatus.message = QString("");
+    return rtnStatus;
+}
+
+
 // Protected methods
 // ----------------------------------------------------------------------------
 
@@ -92,61 +171,20 @@ void FlySorterWindow::closeEvent(QCloseEvent *event)
 void FlySorterWindow::startPushButtonClicked()
 {
     if (!running_)
-    {
-
-        // Setup sorting and tracking
-        blobFinder_ = BlobFinder(param_.blobFinder);
-        identityTracker_ = IdentityTracker(param_.identityTracker);
-        flySegmenter_ = FlySegmenter(param_.flySegmenter);
-        hogPositionFitter_ = HogPositionFitter(param_.hogPositionFitter);
-        genderSorter_ = GenderSorter(param_.genderSorter);
-
-        // Create training data
-        if (trainingDataCheckBoxPtr_ -> checkState() == Qt::Checked)
+    { 
+        RtnStatus rtnStatus = startRunning();
+        if (!rtnStatus.success)
         {
-            if (isTrainingDataModeSingle())
-            {
-                setupTrainingDataWrite(param_.imageGrabber.captureInputFile);
-            }
-            else
-            {
-                // Update vector of batch video files 
-                bool success = updateBatchVideoFileList();
-                if (!success)
-                {
-                    return;
-                }
-                batchVideoFileIndex_ = 0;
-                setupBatchDataWrite();
-            }
+            QString errMsgTitle("Start Error");
+            QMessageBox::critical(this,errMsgTitle,rtnStatus.message);
         }
-        else
-        {
-            hogPositionFitter_.trainingDataWriteDisable();
-        }
-
-        // Create debug image log
-        if ( (actionDebugBoundingImagesPtr_ -> isChecked()) || (actionDebugRawImagesPtr_ -> isChecked()))
-        {
-            setupDebugImagesWrite();
-        }
-
-        // Create debug data log
-        if (actionDebugDataLogPtr_ -> isChecked())
-        {
-            debugDataLogStream_.open("debug_data_log.txt");
-        }
-
-        stopRunningFlag_ = false;
-        startImageCapture();
-
     }
     else
     {
-        stopRunningFlag_ = true;
-        stopImageCapture();
+        stopRunning();
     }
 }
+
 
 
 void FlySorterWindow::startImageCapture()

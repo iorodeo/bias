@@ -9,6 +9,7 @@
 #include "fly_segmenter.hpp"
 #include "hog_position_fitter.hpp"
 #include "gender_sorter.hpp"
+#include "rtn_status.hpp"
 #include <memory>
 #include <QCloseEvent>
 #include <QMainWindow>
@@ -47,6 +48,8 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
     public:
 
         FlySorterWindow(QWidget *parent=0);
+        RtnStatus startRunning();
+        RtnStatus stopRunning();
 
     signals:
 

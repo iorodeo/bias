@@ -59,10 +59,10 @@ QVariantMap ExtCtlHttpServer::paramsRequestSwitchYard(QString name, QString valu
 QVariantMap ExtCtlHttpServer::handleStartReq()
 { 
     QVariantMap cmdMap;
-    //RtnStatus status = flySorterWindowPtr_ -> startRunning();
-    //cmdMap.insert("success", status.success);
-    //cmdMap.insert("message", status.message);
-    //cmdMap.insert("value", "");
+    RtnStatus status = flySorterWindowPtr_ -> startRunning();
+    cmdMap.insert("success", status.success);
+    cmdMap.insert("message", status.message);
+    cmdMap.insert("value", "");
     return cmdMap;
 }
 
@@ -70,10 +70,10 @@ QVariantMap ExtCtlHttpServer::handleStartReq()
 QVariantMap ExtCtlHttpServer::handleStopReq()
 { 
     QVariantMap cmdMap;
-    //RtnStatus status = flySorterWindowPtr_ -> stopRunning();
-    //cmdMap.insert("success", status.success);
-    //cmdMap.insert("message", status.message);
-    //cmdMap.insert("value", "");
+    RtnStatus status = flySorterWindowPtr_ -> stopRunning();
+    cmdMap.insert("success", status.success);
+    cmdMap.insert("message", status.message);
+    cmdMap.insert("value", "");
     return cmdMap;
 }
 
