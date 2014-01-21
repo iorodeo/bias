@@ -81,10 +81,11 @@ QVariantMap ExtCtlHttpServer::handleStopReq()
 QVariantMap ExtCtlHttpServer::handleGetStatusReq()
 {
     QVariantMap cmdMap;
-    //RtnStatus status = flySorterWindowPtr_ -> getStatus();;
-    //cmdMap.insert("success", status.success);
-    //cmdMap.insert("message", status.message);
-    //cmdMap.insert("value", "");
+    QVariantMap statusMap;
+    RtnStatus status = flySorterWindowPtr_ -> getStatus(statusMap);;
+    cmdMap.insert("success", status.success);
+    cmdMap.insert("message", status.message);
+    cmdMap.insert("value", statusMap);
     return cmdMap;
 }
 
@@ -92,10 +93,19 @@ QVariantMap ExtCtlHttpServer::handleGetStatusReq()
 QVariantMap ExtCtlHttpServer::handleCloseReq()
 {
     QVariantMap cmdMap;
-    //RtnStatus status = flySorterWindowPtr_ -> close();
-    //cmdMap.insert("success", status.success);
-    //cmdMap.insert("message", status.message);
-    //cmdMap.insert("value", "");
+    if (flySorterWindowPtr_ -> isRunning())
+    {
+        cmdMap.insert("success", false);
+        cmdMap.insert("message", "unable to close window - running");
+        cmdMap.insert("value", "");
+    }
+    else
+    {
+        closeFlag_ = true;
+        cmdMap.insert("success", true);
+        cmdMap.insert("message","");
+        cmdMap.insert("value", "");
+    }
     return cmdMap;
 }
 

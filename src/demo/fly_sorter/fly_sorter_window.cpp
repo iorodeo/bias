@@ -45,6 +45,12 @@ FlySorterWindow::FlySorterWindow(QWidget *parent) : QMainWindow(parent)
 }
 
 
+bool FlySorterWindow::isRunning()
+{
+    return running_;
+}
+
+
 RtnStatus FlySorterWindow::startRunning()
 {
     RtnStatus rtnStatus;
@@ -120,6 +126,33 @@ RtnStatus FlySorterWindow::stopRunning()
 
     rtnStatus.success = true;
     rtnStatus.message = QString("");
+    return rtnStatus;
+}
+
+
+RtnStatus FlySorterWindow::getStatus(QVariantMap &statusMap)
+{
+    RtnStatus rtnStatus;
+    statusMap.insert("running", running_);
+    statusMap.insert("createTrainingData", createTrainingData());
+    if (isTrainingDataModeBatch())
+    {
+        statusMap.insert("trainingModeCheckbox", QString("batch"));
+    }
+    else
+    {
+        statusMap.insert("trainingModeCheckbox", QString("single"));
+    }
+    
+    if ((httpOutputCheckBoxPtr_ -> checkState()) == Qt::Checked)
+    {
+        statusMap.insert("httpOutputCheckbox", true);
+    }
+    else
+    {
+        statusMap.insert("httpOutputCheckbox", false);
+    }
+    statusMap.insert("configuration", paramMap_);
     return rtnStatus;
 }
 
@@ -812,6 +845,7 @@ void FlySorterWindow::loadParamFromFile()
         return;
     }
     param_ = paramNew;
+    paramMap_ = paramMap;
 }
 
 

@@ -17,6 +17,7 @@
 #include <QMap>
 #include <QList>
 #include <QDir>
+#include <QVariantMap>
 #include <opencv2/core/core.hpp>
 
 // Debug
@@ -48,8 +49,10 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
     public:
 
         FlySorterWindow(QWidget *parent=0);
+        bool isRunning();
         RtnStatus startRunning();
         RtnStatus stopRunning();
+        RtnStatus getStatus(QVariantMap &statusMap);
 
     signals:
 
@@ -82,6 +85,8 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         bool stopRunningFlag_;
 
         FlySorterParam param_;
+        QVariantMap paramMap_;
+
         float displayFreq_;
         QPointer<QThreadPool> threadPoolPtr_;
         QPointer<ImageGrabber> imageGrabberPtr_;
