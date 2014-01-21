@@ -93,6 +93,7 @@ void FlySorterWindow::startPushButtonClicked()
 {
     if (!running_)
     {
+
         // Setup sorting and tracking
         blobFinder_ = BlobFinder(param_.blobFinder);
         identityTracker_ = IdentityTracker(param_.identityTracker);
@@ -136,11 +137,13 @@ void FlySorterWindow::startPushButtonClicked()
             debugDataLogStream_.open("debug_data_log.txt");
         }
 
+        stopRunningFlag_ = false;
         startImageCapture();
 
     }
     else
     {
+        stopRunningFlag_ = true;
         stopImageCapture();
     }
 }
@@ -424,7 +427,7 @@ void FlySorterWindow::OnImageCaptureStopped()
         threadPoolPtr_ -> waitForDone();
         running_ = false;
 
-        if (createTrainingData() && isTrainingDataModeBatch())
+        if (createTrainingData() && isTrainingDataModeBatch() && !stopRunningFlag_)
         {
             batchVideoFileIndex_++;
             if (batchVideoFileIndex_ < batchVideoFileList_.size())
@@ -512,6 +515,7 @@ void FlySorterWindow::connectWidgets()
 void FlySorterWindow::initialize()
 {
     running_ = false;
+    stopRunningFlag_ = false;
     httpRequestErrorCount_ = 0;
     displayFreq_ = DEFAULT_DISPLAY_FREQ;
     parameterFileName_ = DEFAULT_PARAMETER_FILENAME;

@@ -76,6 +76,7 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
     private:
 
         bool running_;
+        bool stopRunningFlag_;
 
         FlySorterParam param_;
         float displayFreq_;
