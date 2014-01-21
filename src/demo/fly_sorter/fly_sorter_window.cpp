@@ -273,7 +273,8 @@ void FlySorterWindow::newImage(ImageData imageData)
         genderSorterData_ = genderSorter_.sort(hogPositionFitterData_);
 
         // Send position and gender data via http.
-        if ((httpOutputCheckBoxPtr_ -> checkState()) == Qt::Checked)
+        if (((httpOutputCheckBoxPtr_ -> checkState()) == Qt::Checked) &&
+	    (genderSorterData_.genderDataList.size() > 0))
         {
             sendDataViaHttpRequest();
         }
@@ -601,7 +602,7 @@ void FlySorterWindow::sendDataViaHttpRequest()
     jsonString.replace(" ", "");
     reqString += QString("/sendCmdGetRsp/sendData/") + jsonString;
     QUrl reqUrl = QUrl(reqString);
-    std::cout << "http request: " << reqUrl.toString().toStdString() << std::endl;
+    //std::cout << "http request: " << reqUrl.toString().toStdString() << std::endl;
     QNetworkRequest req(reqUrl);
     QNetworkReply *reply = networkAccessManagerPtr_ -> get(req);
 }
