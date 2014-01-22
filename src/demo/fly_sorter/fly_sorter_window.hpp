@@ -140,10 +140,13 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         void setupBatchDataWrite();
         void setupDebugImagesWrite();
         TrainingDataMode getTrainingDataMode();
+
         bool isTrainingDataModeSingle();
         bool isTrainingDataModeBatch();
         bool updateBatchVideoFileList();
         bool createTrainingData();
+        bool createDebugImages();
+        bool createDebugLog();
 
 
         // Debug 

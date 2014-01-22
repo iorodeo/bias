@@ -288,4 +288,36 @@ namespace bias
     }
 
 
+    int getNumBlobsExcludeXBorder(BlobDataList blobDataList)
+    {
+        int num = 0;
+        BlobDataList::iterator it;
+        for (it = blobDataList.begin(); it != blobDataList.end(); it++)
+        {
+            BlobData blobData = *it;
+            if (!blobData.onBorderX)
+            {
+                num++;
+            }
+        }
+        return num;
+    }
+
+
+    int getNumBlobsExcludeYBorder(BlobDataList blobDataList)
+    {
+        int num = 0;
+        BlobDataList::iterator it;
+        for (it = blobDataList.begin(); it != blobDataList.end(); it++)
+        {
+            BlobData blobData = *it;
+            if (!blobData.onBorderY)
+            {
+                num++;
+            }
+        }
+        return num;
+    }
+
+
 } // namespace bias

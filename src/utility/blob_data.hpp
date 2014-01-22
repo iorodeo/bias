@@ -80,6 +80,9 @@ namespace bias
     typedef std::list<BlobData> BlobDataList;
 
     std::string getIndentString(unsigned int indent, unsigned int indentStep=2);
+    int getNumBlobsExcludeXBorder(BlobDataList blobDataList);
+    int getNumBlobsExcludeYBorder(BlobDataList blobDataList);
+
 
 } // namespace bias
 

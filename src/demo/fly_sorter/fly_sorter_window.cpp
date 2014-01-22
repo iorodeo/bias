@@ -91,13 +91,13 @@ RtnStatus FlySorterWindow::startRunning()
         }
 
         // Create debug image log
-        if ( (actionDebugBoundingImagesPtr_ -> isChecked()) || (actionDebugRawImagesPtr_ -> isChecked()))
+        if (createDebugImages())
         {
             setupDebugImagesWrite();
         }
 
         // Create debug data log
-        if (actionDebugDataLogPtr_ -> isChecked())
+        if (createDebugLog())
         {
             debugDataLogStream_.open("debug_data_log.txt");
         }
@@ -361,8 +361,7 @@ void FlySorterWindow::newImage(ImageData imageData)
         genderSorterData_ = genderSorter_.sort(hogPositionFitterData_);
 
         // Send position and gender data via http.
-        if (((httpOutputCheckBoxPtr_ -> checkState()) == Qt::Checked) &&
-	    (genderSorterData_.genderDataList.size() > 0))
+        if ((httpOutputCheckBoxPtr_ -> checkState()) == Qt::Checked) 
         {
             sendDataViaHttpRequest();
         }
@@ -698,15 +697,19 @@ void FlySorterWindow::setupNetworkAccessManager()
 
 void FlySorterWindow::sendDataViaHttpRequest()
 { 
-    QString reqString = QString("http://%1").arg(param_.server.address);
-    reqString += QString(":%1").arg(param_.server.port); 
-    QString jsonString = QString(dataToJson());
-    jsonString.replace(" ", "");
-    reqString += QString("/sendCmdGetRsp/sendData/") + jsonString;
-    QUrl reqUrl = QUrl(reqString);
-    //std::cout << "http request: " << reqUrl.toString().toStdString() << std::endl;
-    QNetworkRequest req(reqUrl);
-    QNetworkReply *reply = networkAccessManagerPtr_ -> get(req);
+    // Only send data if we have data
+    if (genderSorterData_.genderDataList.size() > 0) 
+    {
+        QString reqString = QString("http://%1").arg(param_.server.address);
+        reqString += QString(":%1").arg(param_.server.port); 
+        QString jsonString = QString(dataToJson());
+        jsonString.replace(" ", "");
+        reqString += QString("/sendCmdGetRsp/sendData/") + jsonString;
+        QUrl reqUrl = QUrl(reqString);
+        //std::cout << "http request: " << reqUrl.toString().toStdString() << std::endl;
+        QNetworkRequest req(reqUrl);
+        QNetworkReply *reply = networkAccessManagerPtr_ -> get(req);
+    }
 }
 
 
@@ -720,14 +723,24 @@ void FlySorterWindow::startHttpServer()
 QVariantMap FlySorterWindow::dataToMap()
 {
     QVariantMap dataMap;
-
-    int numOkBlobs = getNumberOkItems(blobFinderData_.blobDataList);
-    dataMap.insert("ndetections", numOkBlobs);
-    
     MotionDirection direction = param_.identityTracker.motionDirection;
     GenderDataList genderDataList = genderSorterData_.genderDataList;
     GenderDataList::iterator it;
     QVariantList detectionList;
+
+    // Add number of detections - note certain detections on the border are
+    // ignored based motion direction.
+    int numBlobs = 0;
+    if (direction == MOTION_DIRECTION_Y)
+    {
+        numBlobs = getNumBlobsExcludeYBorder(blobFinderData_.blobDataList);
+    }
+    else
+    {
+        numBlobs = getNumBlobsExcludeXBorder(blobFinderData_.blobDataList);
+    } 
+    std::cout << "numBlobs: " << numBlobs << std::endl;
+    dataMap.insert("ndetections", numBlobs);
 
     for (it=genderDataList.begin(); it!=genderDataList.end(); it++)
     {
@@ -738,10 +751,21 @@ QVariantMap FlySorterWindow::dataToMap()
                 );
         QVariantMap detectionMap;
 
-        if (
-                (blobData.onBorderX && (direction == MOTION_DIRECTION_Y)) ||
-                (blobData.onBorderY && (direction == MOTION_DIRECTION_X))
-           )
+        // Skip certain on the border cases depending on motion direction
+        bool skipData = false;
+        skipData |= blobData.onBorderX && (direction == MOTION_DIRECTION_X);
+        skipData |= blobData.onBorderY && (direction == MOTION_DIRECTION_Y);
+        if (skipData)
+        {
+            continue;
+        }
+
+        // Check to see if fly is out of bounds - how this is determined depends 
+        // on motion direction
+        bool isOutOfBounds = false; 
+        isOutOfBounds |= blobData.onBorderX && (direction == MOTION_DIRECTION_Y);
+        isOutOfBounds |= blobData.onBorderY && (direction == MOTION_DIRECTION_X);
+        if (isOutOfBounds)
         { 
             detectionMap.insert("fly_type", "outofbounds"); 
             int x = blobData.boundingRect.x + blobData.boundingRect.width/2;
@@ -749,8 +773,9 @@ QVariantMap FlySorterWindow::dataToMap()
             detectionMap.insert("x", genderData.positionData.meanXAbs);
             detectionMap.insert("y", genderData.positionData.meanYAbs);
         } 
-        else 
+        else   
         {
+            // Normal detection - report classifiaction data
             if (blobData.old)
             {
                 detectionMap.insert("fly_type", "old"); 
@@ -1041,6 +1066,7 @@ bool FlySorterWindow::updateBatchVideoFileList()
 
 bool FlySorterWindow::createTrainingData()
 { 
+    // Returns true is trainging data should be created
     if (trainingDataCheckBoxPtr_ -> checkState() == Qt::Checked)
     {
         return true;
@@ -1049,4 +1075,20 @@ bool FlySorterWindow::createTrainingData()
     {
         return false;
     }
+}
+
+
+bool FlySorterWindow::createDebugImages()
+{
+    // Returns true is debug images should be created
+    bool value = actionDebugBoundingImagesPtr_ -> isChecked(); 
+    value |= actionDebugRawImagesPtr_ -> isChecked();
+    return value;
+}
+
+
+bool FlySorterWindow::createDebugLog()
+{
+    // Returns true is debug log should be created
+    return actionDebugDataLogPtr_ -> isChecked();
 }
