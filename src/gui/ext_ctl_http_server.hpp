@@ -1,41 +1,28 @@
-#ifndef BIAS_BASIC_HTTP_SERVER_HPP
-#define BIAS_BASIC_HTTP_SERVER_HPP
-
-#include <QTcpServer>
-#include <QPointer>
-#include <QString>
-#include <QStringList>
-#include <QTextStream>
-#include <QMap>
-#include <QVariantMap>
-
-class QTcpSockect;
+#ifndef EXT_CTL_HTTP_SERVER_HPP
+#define EXT_CTL_HTTP_SERVER_HPP
+#include<QVariantMap>
+#include "basic_http_server.hpp"
 
 namespace bias
 {
-
     class CameraWindow;
 
-    class BasicHttpServer : public QTcpServer
+    class ExtCtlHttpServer : public BasicHttpServer
     {
-
         Q_OBJECT
 
         public:
-            BasicHttpServer(CameraWindow *cameraWindow, QObject *parent=0);
-            void incomingConnection(int socket);
+            ExtCtlHttpServer(CameraWindow *cameraWindow, QObject *parent=0);
 
-        private slots:
-            void readClient();
-            void discardClient();
+        protected:
+            virtual QVariantMap paramsRequestSwitchYard(QString name, QString value);
+
+        protected slots:
+            virtual void readClient();
 
         private:
-            QPointer<CameraWindow> cameraWindowPtr_;
-            void handleGetRequest(QTcpSocket *socket, QStringList &tokens);
-            void handleParamsRequest(QTextStream &os, QStringList &paramsList);
-            QVariantMap paramsRequestSwitchYard(QString name, QString value);
             bool closeFlag_;
-
+            QPointer<CameraWindow> cameraWindowPtr_;
             QVariantMap handleConnectRequest();
             QVariantMap handleDisconnectRequest();
             QVariantMap handleStartCaptureRequest();
@@ -57,17 +44,7 @@ namespace bias
             QVariantMap handleSetWindowGeometry(QString jsonGeom);
             QVariantMap handleGetWindowGeometry();
             QVariantMap handleClose();
-
-            void sendBadRequestResp(QTextStream &os, QString msg);
-            void sendRunningResp(QTextStream &os);
-
     };
 
-    QStringList splitRequestString(QString reqString);
-    QString replaceEscapeChars(QString input);
-
-
-} // namespace bias
-
-
-#endif // #ifndef BIAS_BASIC_HTTP_SERVER_HPP
+}
+#endif

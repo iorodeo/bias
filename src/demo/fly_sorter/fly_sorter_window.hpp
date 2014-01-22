@@ -9,6 +9,7 @@
 #include "fly_segmenter.hpp"
 #include "hog_position_fitter.hpp"
 #include "gender_sorter.hpp"
+#include "rtn_status.hpp"
 #include <memory>
 #include <QCloseEvent>
 #include <QMainWindow>
@@ -16,6 +17,7 @@
 #include <QMap>
 #include <QList>
 #include <QDir>
+#include <QVariantMap>
 #include <opencv2/core/core.hpp>
 
 // Debug
@@ -30,13 +32,14 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class QVarianMap;
 class QByteArray;
-
+class ExtCtlHttpServer;
 
 enum TrainingDataMode 
 {
     TRAINING_DATA_MODE_SINGLE=0,
     TRAINING_DATA_MODE_BATCH
 };
+
 
 
 class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
@@ -46,10 +49,15 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
     public:
 
         FlySorterWindow(QWidget *parent=0);
+        bool isRunning();
+        RtnStatus startRunning();
+        RtnStatus stopRunning();
+        RtnStatus getStatus(QVariantMap &statusMap);
 
     signals:
 
         void stopCapture();
+        void dumpCameraProperties();
 
     protected:
 
@@ -69,12 +77,16 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         void cameraSetupError(QString errorMsg);
         void imageGrabberFileReadError(QString errorMsg);
         void OnImageCaptureStopped();
+        void actionDumpCameraPropsTriggered();
 
     private:
 
         bool running_;
+        bool stopRunningFlag_;
 
         FlySorterParam param_;
+        QVariantMap paramMap_;
+
         float displayFreq_;
         QPointer<QThreadPool> threadPoolPtr_;
         QPointer<ImageGrabber> imageGrabberPtr_;
@@ -103,6 +115,9 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         QList<QString> batchVideoFileList_;
         int batchVideoFileIndex_;
 
+        QPointer<ExtCtlHttpServer> httpServerPtr_;
+        unsigned int httpServerPort_;
+
         void connectWidgets();
         void initialize();
         void startImageCapture();
@@ -115,12 +130,12 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         void setupDisplayTimer();
         void setupNetworkAccessManager();
         void sendDataViaHttpRequest();
+        void startHttpServer();
         QVariantMap dataToMap();
         QByteArray dataToJson();
         void loadParamFromFile();
         void updateParamText();
         void updateWidgetsOnLoad();
-
         void setupTrainingDataWrite(QString videoFileName);
         void setupBatchDataWrite();
         void setupDebugImagesWrite();
@@ -129,6 +144,7 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         bool isTrainingDataModeBatch();
         bool updateBatchVideoFileList();
         bool createTrainingData();
+
 
         // Debug 
         std::ofstream debugDataLogStream_;

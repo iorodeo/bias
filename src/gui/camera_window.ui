@@ -357,6 +357,12 @@
     <addaction name="actionServerPortPtr_"/>
     <addaction name="actionServerCommandsPtr_"/>
    </widget>
+   <widget class="QMenu" name="menuDebugPtr_">
+    <property name="title">
+     <string>&amp;Debug</string>
+    </property>
+    <addaction name="actionDumpCameraPropsPtr_"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuCameraPtr_"/>
    <addaction name="menuLoggingPtr_"/>
@@ -365,6 +371,7 @@
    <addaction name="menuServerPtr_"/>
    <addaction name="menuPluginsPtr_"/>
    <addaction name="menuHelpPtr_"/>
+   <addaction name="menuDebugPtr_"/>
   </widget>
   <widget class="QStatusBar" name="statusbarPtr_"/>
   <action name="actionLogging">
@@ -659,6 +666,11 @@
   <action name="actionDisplayAlignToolsPtr_">
    <property name="text">
     <string>Alignment Tools...</string>
+   </property>
+  </action>
+  <action name="actionDumpCameraPropsPtr_">
+   <property name="text">
+    <string>Dump camera properties</string>
    </property>
   </action>
  </widget>

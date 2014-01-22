@@ -3,8 +3,10 @@
 #include "exception.hpp"
 #include <QPointer>
 #include <iostream>
+#include <fstream>
 #include <opencv2/highgui/highgui.hpp>
 
+const QString DEBUG_DUMP_CAMERA_PROPS_FILE_NAME("fly_sorter_camera_props_dump.txt");
 
 // CameraInfo
 // ----------------------------------------------------------------------------
@@ -40,6 +42,7 @@ ImageGrabber::ImageGrabber(ImageGrabberParam param, QObject *parent)
 { 
     param_ = param;
     stopped_ = false;
+    dumpCamPropsFlag_ = false;
 }
 
 
@@ -47,6 +50,12 @@ void ImageGrabber::stopCapture()
 {
     stopped_ = true;
 }
+
+
+void ImageGrabber::dumpCameraProperties()
+{
+    dumpCamPropsFlag_ = true;
+};
 
 
 void ImageGrabber::run()
@@ -111,6 +120,17 @@ void ImageGrabber::runCaptureFromCamera()
         QDateTime currentDateTime = QDateTime::currentDateTime();
         imageData.dateTime = double(currentDateTime.toMSecsSinceEpoch())*(1.0e-3);
         emit newImage(imageData);
+
+        // dump camera properties
+        if (dumpCamPropsFlag_)
+        {
+            dumpCamPropsFlag_ = false;
+            std::cout << "DEBUG: dumping camera properties" << std::endl;
+            std::ofstream camPropsStream;
+            camPropsStream.open(DEBUG_DUMP_CAMERA_PROPS_FILE_NAME.toStdString());
+            camPropsStream << (cameraPtr_  -> getAllPropertiesString());
+            camPropsStream.close();
+        }
     } 
 
     // Clean up

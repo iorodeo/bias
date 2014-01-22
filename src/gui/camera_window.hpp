@@ -35,7 +35,7 @@ namespace bias
     class LoggingSettingsDialog;
     class Format7SettingsDialog;
     class AlignmentSettingsDialog;
-    class BasicHttpServer;
+    class ExtCtlHttpServer;
     template <class T> class Lockable;
     template <class T> class LockableQueue;
 
@@ -163,6 +163,7 @@ namespace bias
             void actionServerPortTriggered();
             void actionServerCommandsTriggered();
             void actionHelpAboutTriggered();
+            void actionDumpCameraPropsTriggered();
 
             // Signal mappers for videomode, framerate and properties
             void actionVideoModeTriggered(int vidModeInt);
@@ -247,7 +248,7 @@ namespace bias
 
             VideoWriterParams videoWriterParams_;
 
-            QPointer<BasicHttpServer> httpServerPtr_;
+            QPointer<ExtCtlHttpServer> httpServerPtr_;
             unsigned int httpServerPort_;
 
             void connectWidgets();
@@ -273,6 +274,7 @@ namespace bias
             void updateLoggingMenu();
             void updateTimerMenu();
             void updateDisplayMenu();
+            void updateDebugMenu();
 
             void updateCameraVideoModeMenu();
             void updateCameraFrameRateMenu();

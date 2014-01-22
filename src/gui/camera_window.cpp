@@ -20,11 +20,12 @@
 #include "background_histogram_ufmf.hpp"
 #include "json.hpp"
 #include "json_utils.hpp"
-#include "basic_http_server.hpp"
+#include "ext_ctl_http_server.hpp"
 
 #include <cstdlib>
 #include <cmath>
 #include <iostream>
+#include <fstream>
 
 #include <QtGui>
 #include <QTimer>
@@ -78,6 +79,9 @@ namespace bias
     };
     const QMap<VideoFileFormat, QString> VIDEOFILE_EXTENSION_MAP = createExtensionMap();
 
+
+    // Debug files
+    const QString DEBUG_DUMP_CAMERA_PROPS_FILE_NAME("bias_camera_props_dump.txt");
 
     // Public methods
     // ----------------------------------------------------------------------------------
@@ -1491,6 +1495,14 @@ namespace bias
         (!connected_) ? connectCamera() : disconnectCamera();
         //std::cout << "connected: "; 
         //std::cout << std::boolalpha << connected_ << std::noboolalpha << std::endl;
+        
+        // DEBUG
+        //// ------------------------------------
+        //if (connected_)
+        //{
+        //    cameraPtr_ -> printAllProperties();
+        //}
+        // --------------------------------------
     }
 
 
@@ -2057,6 +2069,21 @@ namespace bias
         QMessageBox::information(this, msgTitle, msgText);
     }
 
+    
+    void CameraWindow::actionDumpCameraPropsTriggered()
+    {
+        std::cout << "DEBUG: Dumping camera properties" << std::endl;
+        std::ofstream camPropsStream;
+        camPropsStream.open(DEBUG_DUMP_CAMERA_PROPS_FILE_NAME.toStdString());
+        camPropsStream << (cameraPtr_  -> getAllPropertiesString());
+        camPropsStream.close();
+
+        QString msgTitle("Debug Info");
+        QString msgText("Camera properties dumped to file: ");
+        msgText += DEBUG_DUMP_CAMERA_PROPS_FILE_NAME;
+        QMessageBox::information(this, msgTitle, msgText);
+    }
+
 
     // Private methods
     // -----------------------------------------------------------------------------------
@@ -2121,7 +2148,7 @@ namespace bias
 
         httpServerPort_  = HTTP_SERVER_PORT_BEGIN; 
         httpServerPort_ += HTTP_SERVER_PORT_STEP*(cameraNumber_ + 1);
-        httpServerPtr_ = new BasicHttpServer(this,this);
+        httpServerPtr_ = new ExtCtlHttpServer(this,this);
         setServerPortText();
         if (DEFAULT_HTTP_SERVER_ENABLED)
         {
@@ -2391,6 +2418,13 @@ namespace bias
                 SIGNAL(triggered()),
                 this,
                 SLOT(actionHelpAboutTriggered())
+               );
+
+        connect(
+                actionDumpCameraPropsPtr_,
+                SIGNAL(triggered()),
+                this,
+                SLOT(actionDumpCameraPropsTriggered())
                );
 
         connect(
@@ -2904,6 +2938,7 @@ namespace bias
         updateLoggingMenu();
         updateTimerMenu();
         updateDisplayMenu();
+        updateDebugMenu();
     }
 
 
@@ -3307,6 +3342,18 @@ namespace bias
     {
         updateDisplayOrientMenu();
         updateDisplayRotMenu();
+    }
+
+    void CameraWindow::updateDebugMenu()
+    {
+        if (connected_)
+        {
+            actionDumpCameraPropsPtr_ -> setEnabled(true);
+        }
+        else
+        {
+            actionDumpCameraPropsPtr_ -> setEnabled(false);
+        }
     }
 
 

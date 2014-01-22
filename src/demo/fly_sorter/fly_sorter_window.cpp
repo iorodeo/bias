@@ -3,6 +3,7 @@
 #include "json.hpp"
 #include "json_utils.hpp"
 #include "rtn_status.hpp"
+#include "ext_ctl_http_server.hpp"
 #include <QMessageBox>
 #include <QThreadPool>
 #include <QTimer>
@@ -30,6 +31,7 @@ const QString DEFAULT_PARAMETER_FILENAME = QString("fly_sorter_param.json");
 const QString TRAINING_DATA_BASE_STRING = QString("training_data");
 const QString TRAINING_VIDEO_BASE_STRING = QString("training_video");
 const QString DEBUG_IMAGES_BASE_STRING = QString("debug_images");
+const unsigned int DEFAULT_HTTP_SERVER_PORT = 5010; 
 
 
 // Public Methods
@@ -40,6 +42,118 @@ FlySorterWindow::FlySorterWindow(QWidget *parent) : QMainWindow(parent)
     setupUi(this);
     connectWidgets();
     initialize();
+}
+
+
+bool FlySorterWindow::isRunning()
+{
+    return running_;
+}
+
+
+RtnStatus FlySorterWindow::startRunning()
+{
+    RtnStatus rtnStatus;
+
+    if (!running_)
+    {
+        // Setup sorting and tracking
+        blobFinder_ = BlobFinder(param_.blobFinder);
+        identityTracker_ = IdentityTracker(param_.identityTracker);
+        flySegmenter_ = FlySegmenter(param_.flySegmenter);
+        hogPositionFitter_ = HogPositionFitter(param_.hogPositionFitter);
+        genderSorter_ = GenderSorter(param_.genderSorter);
+
+        // Create training data
+        if (trainingDataCheckBoxPtr_ -> checkState() == Qt::Checked)
+        {
+            if (isTrainingDataModeSingle())
+            {
+                setupTrainingDataWrite(param_.imageGrabber.captureInputFile);
+            }
+            else
+            {
+                // Update vector of batch video files 
+                bool success = updateBatchVideoFileList();
+                if (!success)
+                {
+                    rtnStatus.success = false;
+                    rtnStatus.message = QString("unable to update batch video file list");
+                    return rtnStatus;
+                }
+                batchVideoFileIndex_ = 0;
+                setupBatchDataWrite();
+            }
+        }
+        else
+        {
+            hogPositionFitter_.trainingDataWriteDisable();
+        }
+
+        // Create debug image log
+        if ( (actionDebugBoundingImagesPtr_ -> isChecked()) || (actionDebugRawImagesPtr_ -> isChecked()))
+        {
+            setupDebugImagesWrite();
+        }
+
+        // Create debug data log
+        if (actionDebugDataLogPtr_ -> isChecked())
+        {
+            debugDataLogStream_.open("debug_data_log.txt");
+        }
+
+        stopRunningFlag_ = false;
+        startImageCapture();
+
+        rtnStatus.success = true;
+        rtnStatus.message = QString("");
+        return rtnStatus;
+    }
+    else
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("already running");
+        return rtnStatus;
+    }
+}
+
+
+RtnStatus FlySorterWindow::stopRunning()
+{ 
+    RtnStatus rtnStatus;
+    stopRunningFlag_ = true;
+    stopImageCapture();
+
+    rtnStatus.success = true;
+    rtnStatus.message = QString("");
+    return rtnStatus;
+}
+
+
+RtnStatus FlySorterWindow::getStatus(QVariantMap &statusMap)
+{
+    RtnStatus rtnStatus;
+    statusMap.insert("running", running_);
+    statusMap.insert("createTrainingData", createTrainingData());
+    if (isTrainingDataModeBatch())
+    {
+        statusMap.insert("trainingModeCheckbox", QString("batch"));
+    }
+    else
+    {
+        statusMap.insert("trainingModeCheckbox", QString("single"));
+    }
+    
+    if ((httpOutputCheckBoxPtr_ -> checkState()) == Qt::Checked)
+    {
+        statusMap.insert("httpOutputCheckbox", true);
+    }
+    else
+    {
+        statusMap.insert("httpOutputCheckbox", false);
+    }
+    statusMap.insert("configuration", paramMap_);
+    return rtnStatus;
 }
 
 
@@ -90,64 +204,27 @@ void FlySorterWindow::closeEvent(QCloseEvent *event)
 void FlySorterWindow::startPushButtonClicked()
 {
     if (!running_)
-    {
-        // Setup sorting and tracking
-        blobFinder_ = BlobFinder(param_.blobFinder);
-        identityTracker_ = IdentityTracker(param_.identityTracker);
-        flySegmenter_ = FlySegmenter(param_.flySegmenter);
-        hogPositionFitter_ = HogPositionFitter(param_.hogPositionFitter);
-        genderSorter_ = GenderSorter(param_.genderSorter);
-
-        // Create training data
-        if (trainingDataCheckBoxPtr_ -> checkState() == Qt::Checked)
+    { 
+        RtnStatus rtnStatus = startRunning();
+        if (!rtnStatus.success)
         {
-            if (isTrainingDataModeSingle())
-            {
-                setupTrainingDataWrite(param_.imageGrabber.captureInputFile);
-            }
-            else
-            {
-                // Update vector of batch video files 
-                bool success = updateBatchVideoFileList();
-                if (!success)
-                {
-                    return;
-                }
-                batchVideoFileIndex_ = 0;
-                setupBatchDataWrite();
-            }
+            QString errMsgTitle("Start Error");
+            QMessageBox::critical(this,errMsgTitle,rtnStatus.message);
         }
-        else
-        {
-            hogPositionFitter_.trainingDataWriteDisable();
-        }
-
-        // Create debug image log
-        if (actionDebugImagesPtr_ -> isChecked())
-        {
-            setupDebugImagesWrite();
-        }
-
-        // Create debug data log
-        if (actionDebugDataLogPtr_ -> isChecked())
-        {
-            debugDataLogStream_.open("debug_data_log.txt");
-        }
-
-        startImageCapture();
-
     }
     else
     {
-        stopImageCapture();
+        stopRunning();
     }
 }
+
 
 
 void FlySorterWindow::startImageCapture()
 {
     if (!running_)
     {
+
         ImageGrabberParam imageGrabberParam = param_.imageGrabber;
         if (createTrainingData() && isTrainingDataModeBatch())
         {
@@ -177,6 +254,13 @@ void FlySorterWindow::startImageCapture()
                 );
 
         connect(
+                this,
+                SIGNAL(dumpCameraProperties()),
+                imageGrabberPtr_,
+                SLOT(dumpCameraProperties())
+               );
+
+        connect(
                 imageGrabberPtr_,
                 SIGNAL(stopped()),
                 this,
@@ -198,6 +282,10 @@ void FlySorterWindow::startImageCapture()
         startPushButtonPtr_ -> setText("Stop");
         reloadPushButtonPtr_ -> setEnabled(false);
         trainingDataCheckBoxPtr_ -> setEnabled(false);
+        if (param_.imageGrabber.captureMode == QString("camera"))
+        {
+            actionDumpCameraPropsPtr_ -> setEnabled(true);
+        }
     }
 }
 
@@ -280,7 +368,13 @@ void FlySorterWindow::newImage(ImageData imageData)
         }
 
         // Write debug data images
-        if (actionDebugImagesPtr_ -> isChecked())
+        if (actionDebugRawImagesPtr_ -> isChecked())
+        {
+            QString fileName = QString("raw_frm_%1.bmp").arg(imageData.frameCount);
+            QString pathName = debugImagesDir_.absoluteFilePath(fileName);
+            cv::imwrite(pathName.toStdString(),imageData.mat);
+        }
+        if (actionDebugBoundingImagesPtr_ -> isChecked())
         {
             int cnt;
             GenderDataList::iterator it;
@@ -289,13 +383,12 @@ void FlySorterWindow::newImage(ImageData imageData)
             {
                 GenderData data = *it;
                 // Bounding image
-                QString fileName = QString("frm_%1_cnt_%2.bmp").arg(imageData.frameCount).arg(cnt);
+                QString fileName = QString("bnd_frm_%1_cnt_%2.bmp").arg(imageData.frameCount).arg(cnt);
                 QString pathName = debugImagesDir_.absoluteFilePath(fileName);
                 cv::Mat boundingImage = data.positionData.segmentData.blobData.boundingImage;
                 cv::imwrite(pathName.toStdString(),boundingImage);
             }
         }
-
 
         // Write debug data log
         if (actionDebugDataLogPtr_ -> isChecked())
@@ -406,7 +499,7 @@ void FlySorterWindow::OnImageCaptureStopped()
         threadPoolPtr_ -> waitForDone();
         running_ = false;
 
-        if (createTrainingData() && isTrainingDataModeBatch())
+        if (createTrainingData() && isTrainingDataModeBatch() && !stopRunningFlag_)
         {
             batchVideoFileIndex_++;
             if (batchVideoFileIndex_ < batchVideoFileList_.size())
@@ -422,10 +515,6 @@ void FlySorterWindow::OnImageCaptureStopped()
             }
         }
 
-        if (actionDebugImagesPtr_ -> isChecked())
-        {
-        }
-
         if (actionDebugDataLogPtr_ -> isChecked())
         {
             debugDataLogStream_.close();
@@ -437,6 +526,16 @@ void FlySorterWindow::OnImageCaptureStopped()
         {
             trainingDataCheckBoxPtr_ -> setEnabled(true);
         }
+        actionDumpCameraPropsPtr_ -> setEnabled(false);
+}
+
+
+void FlySorterWindow::actionDumpCameraPropsTriggered()
+{
+    if (running_)
+    {
+        emit dumpCameraProperties();
+    }
 }
 
 
@@ -475,6 +574,12 @@ void FlySorterWindow::connectWidgets()
             SLOT(trainingDataCheckBoxChanged(int))
            );
 
+    connect(
+            actionDumpCameraPropsPtr_,
+            SIGNAL(triggered()),
+            this,
+            SLOT(actionDumpCameraPropsTriggered())
+           );
 }
 
 
@@ -482,12 +587,14 @@ void FlySorterWindow::connectWidgets()
 void FlySorterWindow::initialize()
 {
     running_ = false;
+    stopRunningFlag_ = false;
     httpRequestErrorCount_ = 0;
     displayFreq_ = DEFAULT_DISPLAY_FREQ;
     parameterFileName_ = DEFAULT_PARAMETER_FILENAME;
     threadPoolPtr_ = new QThreadPool(this);
     threadPoolPtr_ -> setMaxThreadCount(MAX_THREAD_COUNT);
     batchVideoFileIndex_ = 0;
+    httpServerPort_ = DEFAULT_HTTP_SERVER_PORT;
 
     setupImageLabels();
     setupDisplayTimer();
@@ -495,12 +602,7 @@ void FlySorterWindow::initialize()
     loadParamFromFile();
     updateParamText();
     updateWidgetsOnLoad();
-
-    // Temporary
-    // ----------------------------------------------------------------------------
-    //distribution_ = std::uniform_int_distribution<unsigned int>(0,1);
-    //QString appDirPath = QCoreApplication::applicationDirPath();
-    //std::cout << "applicationDirPath = " << appDirPath.toStdString() << std::endl;
+    startHttpServer();
 }
 
 
@@ -605,6 +707,13 @@ void FlySorterWindow::sendDataViaHttpRequest()
     //std::cout << "http request: " << reqUrl.toString().toStdString() << std::endl;
     QNetworkRequest req(reqUrl);
     QNetworkReply *reply = networkAccessManagerPtr_ -> get(req);
+}
+
+
+void FlySorterWindow::startHttpServer()
+{ 
+    httpServerPtr_ = new ExtCtlHttpServer(this,this);
+    httpServerPtr_ -> listen(QHostAddress::Any, httpServerPort_);
 }
 
 
@@ -737,6 +846,7 @@ void FlySorterWindow::loadParamFromFile()
         return;
     }
     param_ = paramNew;
+    paramMap_ = paramMap;
 }
 
 
@@ -771,6 +881,7 @@ void FlySorterWindow::updateWidgetsOnLoad()
         singleRadioButtonPtr_ -> setEnabled(false);
         batchRadioButtonPtr_ -> setEnabled(false);
     }
+    actionDumpCameraPropsPtr_ -> setEnabled(false);
 }
 
 

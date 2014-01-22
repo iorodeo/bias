@@ -103,6 +103,7 @@ namespace bias {
 
             std::string getPropertyString(PropertyType propType);
             std::string getPropertyInfoString(PropertyType propType);
+            std::string getAllPropertiesString();
 
             // Get/set trigger
             void setTriggerInternal();

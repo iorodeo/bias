@@ -43,6 +43,8 @@ class ImageGrabber : public QObject, public QRunnable
     public slots:
 
         void stopCapture();
+        void dumpCameraProperties();
+
 
     signals:
 
@@ -54,9 +56,9 @@ class ImageGrabber : public QObject, public QRunnable
 
     private:
 
-        bool ready_;
         bool stopped_;
         bool capturing_;
+        bool dumpCamPropsFlag_;
         std::shared_ptr<Camera> cameraPtr_;
         ImageGrabberParam param_;
 

@@ -231,8 +231,11 @@
     <property name="title">
      <string>Debug</string>
     </property>
-    <addaction name="actionDebugImagesPtr_"/>
+    <addaction name="actionDebugRawImagesPtr_"/>
+    <addaction name="actionDebugBoundingImagesPtr_"/>
     <addaction name="actionDebugDataLogPtr_"/>
+    <addaction name="separator"/>
+    <addaction name="actionDumpCameraPropsPtr_"/>
    </widget>
    <addaction name="menuDebugPtr_"/>
   </widget>
@@ -263,12 +266,12 @@
     <string>Playback</string>
    </property>
   </action>
-  <action name="actionDebugImagesPtr_">
+  <action name="actionDebugBoundingImagesPtr_">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Images</string>
+    <string>Bounding Images</string>
    </property>
   </action>
   <action name="actionDebugDataLogPtr_">
@@ -277,6 +280,19 @@
    </property>
    <property name="text">
     <string>Data Log</string>
+   </property>
+  </action>
+  <action name="actionDumpCameraPropsPtr_">
+   <property name="text">
+    <string>Dump camera properties</string>
+   </property>
+  </action>
+  <action name="actionDebugRawImagesPtr_">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Raw Images</string>
    </property>
   </action>
  </widget>
