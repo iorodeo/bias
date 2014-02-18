@@ -1,6 +1,6 @@
 #include "image_grabber.hpp"
-#include "camera.hpp"
 #include "exception.hpp"
+#include "camera.hpp"
 #include "stamped_image.hpp"
 #include "affinity.hpp"
 #include <iostream>
@@ -10,7 +10,8 @@
 
 namespace bias {
 
-    unsigned int ImageGrabber::NUM_STARTUP_SKIP = 15;
+    unsigned int ImageGrabber::DEFAULT_NUM_STARTUP_SKIP = 2;
+    unsigned int ImageGrabber::MIN_STARTUP_SKIP = 2;
     unsigned int ImageGrabber::MAX_ERROR_COUNT = 500;
 
     ImageGrabber::ImageGrabber(QObject *parent) : QObject(parent) 
@@ -36,6 +37,7 @@ namespace bias {
         stopped_ = true;
         cameraPtr_ = cameraPtr;
         newImageQueuePtr_ = newImageQueuePtr;
+        numStartUpSkip_ = DEFAULT_NUM_STARTUP_SKIP;
         if ((cameraPtr_ != NULL) && (newImageQueuePtr_ != NULL))
         {
             ready_ = true;
@@ -65,8 +67,6 @@ namespace bias {
 
     void ImageGrabber::run()
     { 
-        //double tLast = 0.0;
-
         bool isFirst = true;
         bool done = false;
         bool error = false;
@@ -97,7 +97,6 @@ namespace bias {
         thisThread -> setPriority(QThread::TimeCriticalPriority);
         assignThreadAffinity(true,1,0);
 
-
         // Start image capture
         cameraPtr_ -> acquireLock();
         try
@@ -126,14 +125,6 @@ namespace bias {
         // Grab images from camera until the done signal is given
         while (!done)
         {
-            //// DEVEL
-            //// ---------------------------------------------------
-            //if (!isFirst) 
-            //{
-            //    TSleepThread::msleep(1);
-            //}
-            //// ---------------------------------------------------
-
             acquireLock();
             done = stopped_;
             releaseLock();
@@ -156,7 +147,6 @@ namespace bias {
             cameraPtr_ -> releaseLock();
 
 
-
             // Push image into new image queue
             if (!error) 
             {
@@ -164,36 +154,23 @@ namespace bias {
                 timeStampDblLast = timeStampDbl; // Save last timestamp
                 
                 // Set initial time stamp for fps estimate
-                if (startUpCount == 0)
+                if ((startUpCount == 0) && (numStartUpSkip_ > 0))
                 {
                     timeStampInit = timeStamp;
                 }
-
-                // Reset initial time stamp for image acquisition
-                if ((isFirst) && (startUpCount >= NUM_STARTUP_SKIP))
-                {
-                    timeStampInit = timeStamp;
-                    timeStampDblLast = 0.0;
-                    isFirst = false;
-                }
-
-                timeStampDbl  = double(timeStamp.seconds);
-                timeStampDbl -= double(timeStampInit.seconds);
-                timeStampDbl += (1.0e-6)*double(timeStamp.microSeconds);
-                timeStampDbl -= (1.0e-6)*double(timeStampInit.microSeconds);
-                //std::cout << timeStampDbl - timeStampDblLast << std::endl;
+                timeStampDbl = convertTimeStampToDouble(timeStamp, timeStampInit);
 
                 // Skip some number of frames on startup - recommened by Point Grey. 
                 // During this time compute running avg to get estimate of frame interval
-                if (startUpCount < NUM_STARTUP_SKIP)
+                if (startUpCount <= numStartUpSkip_)
                 {
                     double dt = timeStampDbl - timeStampDblLast;
-                    if (startUpCount == 1)
+                    if (startUpCount == MIN_STARTUP_SKIP)
                     {
                         dtEstimate = dt;
 
                     }
-                    else if (startUpCount > 1)
+                    else if (startUpCount > MIN_STARTUP_SKIP)
                     {
                         double c0 = double(startUpCount-1)/double(startUpCount);
                         double c1 = double(1.0)/double(startUpCount);
@@ -202,6 +179,18 @@ namespace bias {
                     startUpCount++;
                     continue;
                 }
+                
+                // Reset initial time stamp for image acquisition
+                if ((isFirst) && (startUpCount >= numStartUpSkip_))
+                {
+                    timeStampInit = timeStamp;
+                    timeStampDblLast = 0.0;
+                    isFirst = false;
+                    timeStampDbl = convertTimeStampToDouble(timeStamp, timeStampInit);
+                    emit startTimer();
+                }
+                //std::cout << frameCount << ", " << dtEstimate << ", " << timeStampDbl << std::endl;
+
 
                 // Set image data timestamp, framecount and frame interval estimate
                 stampImg.timeStamp = timeStampDbl;
@@ -254,6 +243,17 @@ namespace bias {
         { 
             emit stopCaptureError(errorId, errorMsg);
         }
+    }
+
+
+    double ImageGrabber::convertTimeStampToDouble(TimeStamp curr, TimeStamp init)
+    {
+        double timeStampDbl = 0;  
+        timeStampDbl  = double(curr.seconds);
+        timeStampDbl -= double(init.seconds);
+        timeStampDbl += (1.0e-6)*double(curr.microSeconds);
+        timeStampDbl -= (1.0e-6)*double(init.microSeconds);
+        return timeStampDbl;
     }
 
 } // namespace bias

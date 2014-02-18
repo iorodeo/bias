@@ -8,6 +8,7 @@
 #include <QMessageBox>
 #include <iostream>
 
+
 namespace bias 
 {
     enum ROI_ENABLE_STATE
@@ -15,8 +16,9 @@ namespace bias
         ROI_ENABLE_OFF=0,
         ROI_ENABLE_ON,
     };
-    const unsigned int sliderSingleStep = 1;
-    const unsigned int sliderPageStep = 10;
+    const unsigned int SLIDER_SINGLE_STEP = 1;
+    const unsigned int SLIDER_PAGE_STEP = 10;
+    const int CAMERA_LOCK_TRY_DT = 100;
 
     // Public methods
     // ----------------------------------------------------------------------------------
@@ -432,12 +434,19 @@ namespace bias
     void Format7SettingsDialog::getFormat7SettingsAndInfo()
     {
         // Reads format7 settings and infomartion from camera
-        cameraPtr_ -> acquireLock();
-        settings_ = cameraPtr_ -> getFormat7Settings();
-        info_ = cameraPtr_ -> getFormat7Info(settings_.mode);
-        modeList_ = cameraPtr_ -> getListOfSupportedImageModes();
-        formatList_ = cameraPtr_ -> getListOfSupportedPixelFormats(settings_.mode);
-        cameraPtr_ -> releaseLock();
+        if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
+        {
+            settings_ = cameraPtr_ -> getFormat7Settings();
+            info_ = cameraPtr_ -> getFormat7Info(settings_.mode);
+            modeList_ = cameraPtr_ -> getListOfSupportedImageModes();
+            formatList_ = cameraPtr_ -> getListOfSupportedPixelFormats(settings_.mode);
+            cameraPtr_ -> releaseLock();
+        }
+        else
+        {
+            QString msgText("unable to retrieve settings/info from camera");
+            cameraLockFailErrMsg(msgText);
+        }
     }
 
 
@@ -630,8 +639,8 @@ namespace bias
         validatorPtr -> setRange(bottom,top);
         roiXOffsetLineEditPtr_ -> setValidator(validatorPtr);
         roiXOffsetSliderPtr_ -> setRange(bottom/step, top/step);
-        roiXOffsetSliderPtr_ -> setSingleStep(sliderSingleStep);
-        roiXOffsetSliderPtr_ -> setPageStep(sliderPageStep);
+        roiXOffsetSliderPtr_ -> setSingleStep(SLIDER_SINGLE_STEP);
+        roiXOffsetSliderPtr_ -> setPageStep(SLIDER_PAGE_STEP);
 
         // Set fixup and slider range for y offset 
         bottom = 0;
@@ -641,8 +650,8 @@ namespace bias
         validatorPtr -> setRange(bottom,top);
         roiYOffsetLineEditPtr_ -> setValidator(validatorPtr);
         roiYOffsetSliderPtr_ -> setRange(bottom/step, top/step);
-        roiXOffsetSliderPtr_ -> setSingleStep(sliderSingleStep);
-        roiXOffsetSliderPtr_ -> setPageStep(sliderPageStep);
+        roiXOffsetSliderPtr_ -> setSingleStep(SLIDER_SINGLE_STEP);
+        roiXOffsetSliderPtr_ -> setPageStep(SLIDER_PAGE_STEP);
 
         // Set fixup and slider range for x width 
         bottom = info_.imageHStepSize;
@@ -652,8 +661,8 @@ namespace bias
         validatorPtr -> setRange(bottom, top);
         roiXWidthLineEditPtr_ -> setValidator(validatorPtr);
         roiXWidthSliderPtr_ -> setRange(bottom/step, top/step);
-        roiXWidthSliderPtr_ -> setSingleStep(sliderSingleStep);
-        roiXWidthSliderPtr_ -> setPageStep(sliderPageStep);
+        roiXWidthSliderPtr_ -> setSingleStep(SLIDER_SINGLE_STEP);
+        roiXWidthSliderPtr_ -> setPageStep(SLIDER_PAGE_STEP);
 
         // Set fixup and slider range for y height 
         bottom = info_.imageVStepSize;
@@ -663,8 +672,8 @@ namespace bias
         validatorPtr -> setRange(bottom,top);
         roiYHeightLineEditPtr_ -> setValidator(validatorPtr);
         roiYHeightSliderPtr_ -> setRange(bottom/step, top/step);
-        roiYHeightSliderPtr_ -> setSingleStep(sliderSingleStep);
-        roiYHeightSliderPtr_ -> setPageStep(sliderPageStep);
+        roiYHeightSliderPtr_ -> setSingleStep(SLIDER_SINGLE_STEP);
+        roiYHeightSliderPtr_ -> setPageStep(SLIDER_PAGE_STEP);
         
     }
 
@@ -692,18 +701,26 @@ namespace bias
             cameraWindowPtr -> stopImageCapture();
         }
 
-        cameraPtr_ -> acquireLock();
-        try
+        if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
         {
-            settingsAreValid = cameraPtr_ -> validateFormat7Settings(settings);
+            try
+            {
+                settingsAreValid = cameraPtr_ -> validateFormat7Settings(settings);
+            }
+            catch (RuntimeError &runtimeError)
+            {
+                error = true;
+                errorId = runtimeError.id();
+                errorMsg = QString::fromStdString(runtimeError.what());
+            }
+            cameraPtr_ -> releaseLock();
         }
-        catch (RuntimeError &runtimeError)
+        else
         {
-            error = true;
-            errorId = runtimeError.id();
-            errorMsg = QString::fromStdString(runtimeError.what());
+            QString msgText("unable to validate format7 settings");
+            cameraLockFailErrMsg(msgText);
+            return;
         }
-        cameraPtr_ -> releaseLock();
 
         if (error)
         {
@@ -718,18 +735,26 @@ namespace bias
 
         if (settingsAreValid)
         {
-            cameraPtr_ -> acquireLock();
-            try
+            if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
             {
-                cameraPtr_ -> setFormat7Configuration(settings, percentSpeed);
+                try
+                {
+                    cameraPtr_ -> setFormat7Configuration(settings, percentSpeed);
+                }
+                catch (RuntimeError &runtimeError)
+                {
+                    error = true;
+                    errorId = runtimeError.id();
+                    errorMsg = QString::fromStdString(runtimeError.what());
+                }
+                cameraPtr_ -> releaseLock();
             }
-            catch (RuntimeError &runtimeError)
+            else
             {
-                error = true;
-                errorId = runtimeError.id();
-                errorMsg = QString::fromStdString(runtimeError.what());
+                QString msgText("unable to set format7 configuration");
+                cameraLockFailErrMsg(msgText);
+
             }
-            cameraPtr_ -> releaseLock();
             
             if (error)
             {
@@ -852,6 +877,14 @@ namespace bias
     bool Format7SettingsDialog::isRoiMaxSize()
     {
         return ((settings_.width == info_.maxWidth) && (settings_.height == info_.maxHeight));
+    }
+
+
+    void Format7SettingsDialog::cameraLockFailErrMsg(QString msg)
+    {
+        QString msgTitle("Format7 Dialog Lock Error");
+        QString msgMod = msg + QString(" - failed to acquire camera lock");
+        QMessageBox::critical(this, msgTitle, msgMod);
     }
 
 } // namespace bias

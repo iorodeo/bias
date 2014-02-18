@@ -120,6 +120,9 @@ namespace bias
             void showEvent(QShowEvent *event);
 
         private slots:
+
+            // Start timer on first frame
+            void startCaptureDurationTimer();
            
             // Button callbacks
             void connectButtonClicked();
@@ -186,6 +189,7 @@ namespace bias
             bool flipHorz_;
             bool haveDefaultVideoFileDir_;
             bool haveDefaultConfigFileDir_;
+            bool showCameraLockFailMsg_;
             unsigned int cameraNumber_;
             unsigned int format7PercentSpeed_;
 
@@ -365,6 +369,9 @@ namespace bias
 
     QString propNameToCamelCase(QString propName);
 
+
 }
+
+
 
 #endif // #ifndef BIAS_GUI_CAMERA_WINDOW_HPP

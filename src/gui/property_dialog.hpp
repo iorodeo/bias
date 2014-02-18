@@ -61,11 +61,12 @@ namespace bias
             void initialize();
 
             void updateDisplay(Property property, PropertyInfo propertyInfo);
-            void getPropertyAndUpdateDisplay();
+            void getPropertyAndUpdateDisplay(bool showLockFailErrMsg);
 
             void setPropertyValue(unsigned int value); 
             void setPropertyAbsoluteValue(float absoluteValue);
             void setProperty(Property property);
+            void cameraLockFailErrMsg(QString msg);
 
             Property getProperty();
             PropertyInfo getPropertyInfo();

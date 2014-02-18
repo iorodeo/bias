@@ -28,6 +28,13 @@ namespace bias
             {
                 return mutex_.tryLock();
             }
+
+
+            bool tryLock(int timeout)
+            {
+                return mutex_.tryLock(timeout);
+            }
+
             void acquireLock()
             {
                 mutex_.lock();

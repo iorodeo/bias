@@ -85,6 +85,7 @@ namespace bias
             void adjustOnYOffsetChange();
             void adjustOnXWidthChange();
             void adjustOnYHeightChange();
+            void cameraLockFailErrMsg(QString msg);
             bool isRoiMaxSize();
 
 

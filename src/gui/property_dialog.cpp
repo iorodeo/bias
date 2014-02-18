@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <QString>
 #include <QTimer>
+#include <QMessageBox>
 
 namespace bias
 {
@@ -14,6 +15,7 @@ namespace bias
     const int REFRESH_TIMER_INTERVAL_MS = 1000;
     const float ABSOLUTE_VALUE_SCALE = 100.0;
     const unsigned int FLOAT_PRECISION = 2;
+    const int CAMERA_LOCK_TRY_DT = 100; 
 
     // PropertyDialog methods
     // ------------------------------------------------------------------------
@@ -125,7 +127,7 @@ namespace bias
 
     void PropertyDialog::onRefreshTimer()
     {
-        getPropertyAndUpdateDisplay();
+        getPropertyAndUpdateDisplay(false);
     }
 
 
@@ -240,7 +242,7 @@ namespace bias
                 QString::fromStdString(getPropertyTypeString(propertyType_))
                 );
 
-        getPropertyAndUpdateDisplay();
+        getPropertyAndUpdateDisplay(true);
 
         connectWidgets();
 
@@ -416,17 +418,27 @@ namespace bias
     }
 
 
-    void PropertyDialog::getPropertyAndUpdateDisplay()
+    void PropertyDialog::getPropertyAndUpdateDisplay(bool showLockFailErrMsg)
     {
         if (cameraPtr_ == NULL)
         {
             return;
         }
-        cameraPtr_ -> acquireLock();
-        Property property = cameraPtr_ -> getProperty(propertyType_);
-        PropertyInfo  propertyInfo = cameraPtr_ -> getPropertyInfo(propertyType_);
-        cameraPtr_ -> releaseLock();
-        updateDisplay(property, propertyInfo);
+        if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
+        {
+            Property property = cameraPtr_ -> getProperty(propertyType_);
+            PropertyInfo  propertyInfo = cameraPtr_ -> getPropertyInfo(propertyType_);
+            cameraPtr_ -> releaseLock();
+            updateDisplay(property, propertyInfo);
+        }
+        else
+        {
+            if (showLockFailErrMsg)
+            {
+                QString msgText("unable to get property for display update");
+                cameraLockFailErrMsg(msgText);
+            }
+        }
     }
 
 
@@ -471,40 +483,74 @@ namespace bias
             return;
         }
 
-        cameraPtr_ -> acquireLock();
-        cameraPtr_ -> setProperty(property);
-        Property propertyNew = cameraPtr_ -> getProperty(propertyType_);
-        PropertyInfo propertyInfo = cameraPtr_ -> getPropertyInfo(propertyType_);
-        cameraPtr_ -> releaseLock();
-        updateDisplay(propertyNew,propertyInfo);
+        if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
+        {
+            cameraPtr_ -> setProperty(property);
+            Property propertyNew = cameraPtr_ -> getProperty(propertyType_);
+            PropertyInfo propertyInfo = cameraPtr_ -> getPropertyInfo(propertyType_);
+            cameraPtr_ -> releaseLock();
+            updateDisplay(propertyNew,propertyInfo);
+        }
+        else
+        {
+            QString msgText("unable to set camera property");
+            cameraLockFailErrMsg(msgText);
+        }
     }
 
 
     Property PropertyDialog::getProperty()
     {
+        Property property;
+
         if (cameraPtr_ == NULL) 
         { 
             Property dummy;
             return dummy; 
         }
-        cameraPtr_ -> acquireLock();
-        Property property = cameraPtr_ -> getProperty(propertyType_);
-        cameraPtr_ -> releaseLock();
+        if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
+        {
+            property = cameraPtr_ -> getProperty(propertyType_);
+            cameraPtr_ -> releaseLock();
+        }
+        else
+        {
+            QString msgText("unable to get camera property");
+            cameraLockFailErrMsg(msgText);
+        }
         return property;
     }
 
 
     PropertyInfo PropertyDialog::getPropertyInfo()
     {
+        PropertyInfo propertyInfo;
+
         if (cameraPtr_ == NULL)
         { 
             PropertyInfo dummy;
             return dummy;
         }
-        cameraPtr_ -> acquireLock();
-        PropertyInfo propertyInfo = cameraPtr_ -> getPropertyInfo(propertyType_);
-        cameraPtr_ -> releaseLock();
+        if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
+        {
+            propertyInfo = cameraPtr_ -> getPropertyInfo(propertyType_);
+            cameraPtr_ -> releaseLock();
+        }
+        else
+        {
+            QString msgText("unable to get prooperty info from camera");
+            cameraLockFailErrMsg(msgText);
+        }
         return propertyInfo;
+    }
+
+
+    void PropertyDialog::cameraLockFailErrMsg(QString msg)
+    {
+        QString msgTitle("Property Dialog Lock Error");
+        QString msgMod = msg + QString(" - failed to acquire camera lock");
+        QMessageBox::critical(this, msgTitle, msgMod);
+
     }
 
 

@@ -6,6 +6,7 @@
 #include <QObject>
 #include <QRunnable>
 #include <QThread>
+#include "basic_types.hpp"
 #include "camera_fwd.hpp"
 #include "lockable.hpp"
 
@@ -36,10 +37,12 @@ namespace bias
             void enableErrorCount();
             void disableErrorCount();
 
-            static unsigned int NUM_STARTUP_SKIP;
+            static unsigned int DEFAULT_NUM_STARTUP_SKIP;
+            static unsigned int MIN_STARTUP_SKIP;
             static unsigned int MAX_ERROR_COUNT;
 
         signals:
+            void startTimer();
             void startCaptureError(unsigned int errorId, QString errorMsg);
             void stopCaptureError(unsigned int errorId, QString errorMsg);
             void captureError(unsigned int errorId, QString errorMsg);
@@ -49,11 +52,13 @@ namespace bias
             bool stopped_;
             bool capturing_;
             bool errorCountEnabled_;
+            unsigned int numStartUpSkip_;
 
             std::shared_ptr<Lockable<Camera>> cameraPtr_;
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr_;
 
             void run();
+            double convertTimeStampToDouble(TimeStamp curr, TimeStamp init);
     };
 
 

@@ -59,6 +59,8 @@ namespace bias
     const QString DEFAULT_CONFIG_FILE_NAME = QString("bias_config");
     const QString CONFIG_FILE_EXTENSION = QString("json");
     const float DEFAULT_FORMAT7_PERCENT_SPEED = 100.0;
+    const int CAMERA_LOCK_TRY_DT = 100;                  // mSec
+    const int IMAGE_DISPLAY_CAMERA_LOCK_TRY_DT = int(0.5*1000.0/MAX_IMAGE_DISPLAY_FREQ);
 
     const unsigned int HTTP_SERVER_PORT_BEGIN = 5000;
     const unsigned int HTTP_SERVER_PORT_END = 20000;
@@ -108,23 +110,31 @@ namespace bias
             return rtnStatus;
         }
 
-        cameraPtr_ -> acquireLock();
-        try
+        if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
         {
-            cameraPtr_ -> connect();
-            // TEMPORARY - set camera to known videomode and trigger type
-            // ------------------------------------------------------------
-            cameraPtr_ -> setVideoMode(VIDEOMODE_FORMAT7);
-            cameraPtr_ -> setTriggerInternal();
-            // ------------------------------------------------------------
+            try
+            {
+                cameraPtr_ -> connect();
+                // TEMPORARY - set camera to known videomode and trigger type
+                // ------------------------------------------------------------
+                cameraPtr_ -> setVideoMode(VIDEOMODE_FORMAT7);
+                cameraPtr_ -> setTriggerInternal();
+                // ------------------------------------------------------------
+            }
+            catch (RuntimeError &runtimeError)
+            {
+                error = true;
+                errorId = runtimeError.id();
+                errorMsg = QString::fromStdString(runtimeError.what());
+            }
+            cameraPtr_ -> releaseLock();
         }
-        catch (RuntimeError &runtimeError)
+        else
         {
-            error = true;
-            errorId = runtimeError.id();
-            errorMsg = QString::fromStdString(runtimeError.what());
+            rtnStatus.success = false;
+            rtnStatus.message = QString("unable to acquire camera lock");
+            return rtnStatus; 
         }
-        cameraPtr_ -> releaseLock();
 
         if (error)
         {
@@ -175,18 +185,26 @@ namespace bias
             return rtnStatus;
         }
 
-        cameraPtr_ -> acquireLock();
-        try
+        if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
         {
-            cameraPtr_ -> disconnect();
+            try
+            {
+                cameraPtr_ -> disconnect();
+            }
+            catch (RuntimeError &runtimeError)
+            {
+                error = true;
+                errorId = runtimeError.id();
+                errorMsg = QString::fromStdString(runtimeError.what());
+            }
+            cameraPtr_ -> releaseLock();
         }
-        catch (RuntimeError &runtimeError)
+        else
         {
-            error = true;
-            errorId = runtimeError.id();
-            errorMsg = QString::fromStdString(runtimeError.what());
+            rtnStatus.success = false;
+            rtnStatus.message = QString("unable to acquire camea lock");
+            return rtnStatus;
         }
-        cameraPtr_ -> releaseLock();
 
         if (error)
         {
@@ -221,7 +239,6 @@ namespace bias
     RtnStatus CameraWindow::startImageCapture(bool showErrorDlg) 
     {
         RtnStatus rtnStatus;
-
 
         if (!connected_)
         {
@@ -289,6 +306,16 @@ namespace bias
                 this,
                 SLOT(stopImageCaptureError(unsigned int, QString))
                );
+
+        if (actionTimerEnabledPtr_ -> isChecked())
+        {
+            connect(
+                    imageGrabberPtr_,
+                    SIGNAL(startTimer()),
+                    this,
+                    SLOT(startCaptureDurationTimer())
+                   );
+        }
 
         threadPoolPtr_ -> start(imageGrabberPtr_);
         threadPoolPtr_ -> start(imageDispatcherPtr_);
@@ -372,18 +399,23 @@ namespace bias
         captureStartDateTime_ = QDateTime::currentDateTime();
         captureStopDateTime_ = captureStartDateTime_.addSecs(captureDurationSec_);
 
-        // Start duration timer - if enabled
-        if (actionTimerEnabledPtr_ -> isChecked())
-        {
-            captureDurationTimerPtr_ -> start();
-        }
+        // OLD
+        // ----------------------------------------------
+        //// Start duration timer - if enabled
+        //if (actionTimerEnabledPtr_ -> isChecked())
+        //{
+        //    captureDurationTimerPtr_ -> start();
+        //}
+        //-----------------------------------------------
 
         // Update GUI widget for capturing state
         startButtonPtr_ -> setText(QString("Stop"));
         connectButtonPtr_ -> setEnabled(false);
         statusbarPtr_ -> showMessage(QString("Capturing"));
         capturing_ = true;
+        showCameraLockFailMsg_ = false;
         updateAllMenus();
+        showCameraLockFailMsg_ = true;
 
         emit imageCaptureStarted(logging_);
 
@@ -608,12 +640,15 @@ namespace bias
 
     QVariantMap CameraWindow::getConfigurationMap(RtnStatus &rtnStatus, bool showErrorDlg)
     {
+
         if (!connected_) { 
             QVariantMap emptyMap = QVariantMap();
             rtnStatus.success = false;
             rtnStatus.message = QString("Unable to get configuration: camera is not connected");
             return emptyMap; 
         }
+
+        QVariantMap configurationMap;
 
         // Get configuration values from camera
         QString vendorName;
@@ -628,25 +663,33 @@ namespace bias
         bool error = false;
         unsigned int errorId;
 
-        cameraPtr_ -> acquireLock();
-        try
-        { 
-            vendorName = QString::fromStdString(cameraPtr_ -> getVendorName());
-            modelName = QString::fromStdString(cameraPtr_ -> getModelName());
-            guidString = QString::fromStdString((cameraPtr_ -> getGuid()).toString());
-            propList = cameraPtr_ -> getListOfProperties();
-            videoMode = cameraPtr_ -> getVideoMode();
-            frameRate = cameraPtr_ -> getFrameRate();
-            trigType = cameraPtr_ -> getTriggerType();
-            format7Settings = cameraPtr_ -> getFormat7Settings();
-        }
-        catch (RuntimeError &runtimeError)
+        if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
         {
-            error = true;
-            errorId = runtimeError.id();
-            errorMsg = QString::fromStdString(runtimeError.what());
+            try
+            { 
+                vendorName = QString::fromStdString(cameraPtr_ -> getVendorName());
+                modelName = QString::fromStdString(cameraPtr_ -> getModelName());
+                guidString = QString::fromStdString((cameraPtr_ -> getGuid()).toString());
+                propList = cameraPtr_ -> getListOfProperties();
+                videoMode = cameraPtr_ -> getVideoMode();
+                frameRate = cameraPtr_ -> getFrameRate();
+                trigType = cameraPtr_ -> getTriggerType();
+                format7Settings = cameraPtr_ -> getFormat7Settings();
+            }
+            catch (RuntimeError &runtimeError)
+            {
+                error = true;
+                errorId = runtimeError.id();
+                errorMsg = QString::fromStdString(runtimeError.what());
+            }
+            cameraPtr_ -> releaseLock();
         }
-        cameraPtr_ -> releaseLock();
+        else
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("unable acquire camera lock");
+            return configurationMap;
+        }
 
         if (error)
         {
@@ -665,10 +708,7 @@ namespace bias
             return emptyMap;
         }
 
-        // Create configuration map 
-        QVariantMap configurationMap;
         QVariantMap cameraMap;
-
         cameraMap.insert("vendor", vendorName); 
         cameraMap.insert("model", modelName);
         cameraMap.insert("guid", guidString);
@@ -1490,6 +1530,16 @@ namespace bias
     // Private slots
     // ----------------------------------------------------------------------------------
 
+    void CameraWindow::startCaptureDurationTimer()
+    {
+        if (actionTimerEnabledPtr_ -> isChecked())
+        {
+            captureStartDateTime_ = QDateTime::currentDateTime();
+            captureStopDateTime_ = captureStartDateTime_.addSecs(captureDurationSec_);
+            captureDurationTimerPtr_ -> start();
+        }
+    }
+
     void CameraWindow::connectButtonClicked()
     {
         (!connected_) ? connectCamera() : disconnectCamera();
@@ -1522,17 +1572,29 @@ namespace bias
         {
             // Get information from image dispatcher
             // -------------------------------------------------------------------
-            imageDispatcherPtr_ -> acquireLock();
+            //imageDispatcherPtr_ -> acquireLock();
+            QImage img;
+            cv::Mat histMat;
+            cv::Size imgSize;
 
-            cv::Mat imgMat = imageDispatcherPtr_ -> getImage();
-            QImage img = matToQImage(imgMat);
-            framesPerSec_ = imageDispatcherPtr_ -> getFPS();
-            timeStamp_ = imageDispatcherPtr_ -> getTimeStamp();
-            frameCount_ = imageDispatcherPtr_ -> getFrameCount();
-            cv::Mat histMat = calcHistogram(imgMat);
-            cv::Size imgSize = imgMat.size();
-
-            imageDispatcherPtr_ -> releaseLock();
+            if (imageDispatcherPtr_ -> tryLock(IMAGE_DISPLAY_CAMERA_LOCK_TRY_DT))
+            {
+                cv::Mat imgMat = imageDispatcherPtr_ -> getImage();
+                //QImage img = matToQImage(imgMat);
+                img = matToQImage(imgMat);
+                framesPerSec_ = imageDispatcherPtr_ -> getFPS();
+                timeStamp_ = imageDispatcherPtr_ -> getTimeStamp();
+                frameCount_ = imageDispatcherPtr_ -> getFrameCount();
+                //cv::Mat histMat = calcHistogram(imgMat);
+                //cv::Size imgSize = imgMat.size();
+                histMat = calcHistogram(imgMat);
+                imgSize = imgMat.size();
+                imageDispatcherPtr_ -> releaseLock();
+            }
+            else
+            {
+                return;
+            }
             // -------------------------------------------------------------------
 
             // Set pixmaps and update image labels - note need to add pluginPixmap
@@ -1555,7 +1617,14 @@ namespace bias
             QDateTime currentDateTime = QDateTime::currentDateTime();
             qint64 captureDt = currentDateTime.toMSecsSinceEpoch();
             captureDt -= captureStartDateTime_.toMSecsSinceEpoch();
-            setCaptureTimeLabel(double(1.0e-3*captureDt));
+            if ( (actionTimerEnabledPtr_ -> isChecked() )  && !(captureDurationTimerPtr_ -> isActive()) )
+            {
+                setCaptureTimeLabel(0.0);
+            }
+            else
+            {
+                setCaptureTimeLabel(double(1.0e-3*captureDt));
+            }
 
             updateHistogramPixmap(histMat);
         }
@@ -1745,17 +1814,43 @@ namespace bias
     
     void CameraWindow::actionCameraTriggerExternalTriggered()
     {
-        cameraPtr_ -> acquireLock();
-        cameraPtr_ -> setTriggerExternal();
-        cameraPtr_ -> releaseLock();
+        if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
+        {
+            cameraPtr_ -> setTriggerExternal();
+            cameraPtr_ -> releaseLock();
+        }
+        else
+        {
+            actionCameraTriggerExternalPtr_ -> setChecked(false);
+            actionCameraTriggerInternalPtr_ -> setChecked(true);
+            if (showCameraLockFailMsg_)
+            {
+                QString msgTitle("Camera Access Error");
+                QString msgText("unable to acquire camera lock");
+                QMessageBox::critical(this, msgTitle, msgText);
+            }
+        }
     }
 
 
     void CameraWindow::actionCameraTriggerInternalTriggered()
     {
-        cameraPtr_ -> acquireLock();
-        cameraPtr_ -> setTriggerInternal();
-        cameraPtr_ -> releaseLock();
+        if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
+        {
+            cameraPtr_ -> setTriggerInternal();
+            cameraPtr_ -> releaseLock();
+        }
+        else
+        {
+            actionCameraTriggerExternalPtr_ -> setChecked(true);
+            actionCameraTriggerInternalPtr_ -> setChecked(false);
+            if (showCameraLockFailMsg_)
+            {
+                QString msgTitle("Camera Access Error");
+                QString msgText("unable to acquire camera lock");
+                QMessageBox::critical(this, msgTitle, msgText);
+            }
+        }
     }
 
 
@@ -2102,6 +2197,7 @@ namespace bias
         frameCount_ = 0;
         userCameraName_ = QString("");
         format7PercentSpeed_ = DEFAULT_FORMAT7_PERCENT_SPEED;
+        showCameraLockFailMsg_ = true;
 
         imageRotation_ = IMAGE_ROTATION_0;
         videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
@@ -2542,9 +2638,7 @@ namespace bias
         QString windowTitle;
         if (userCameraName_.isEmpty())
         {
-            cameraPtr_ -> acquireLock();
-            Guid guid = cameraPtr_ -> getGuid(); 
-            cameraPtr_ -> releaseLock();
+            Guid guid = cameraPtr_ -> getGuid();  // don't need lock for this
             QString guidString = QString::fromStdString(guid.toString());
             windowTitle = QString("BIAS Camera Window, Guid: %1").arg(guidString);
         }
@@ -2881,23 +2975,19 @@ namespace bias
 
     void CameraWindow::updateCameraInfoMessage()
     {
+        QString vendorName = QString("_____");
+        QString modelName  = QString("_____");
+
         if (connected_) 
         {
-            cameraPtr_ -> acquireLock();
-            QString vendorName = QString::fromStdString(
-                    cameraPtr_ -> getVendorName()
-                    );
-            QString modelName = QString::fromStdString( 
-                    cameraPtr_ -> getModelName()
-                    );
-            cameraPtr_ -> releaseLock();
-            setCameraInfoMessage(vendorName, modelName);
+            if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
+            {
+                vendorName = QString::fromStdString(cameraPtr_ -> getVendorName());
+                modelName  = QString::fromStdString(cameraPtr_ -> getModelName());
+                cameraPtr_ -> releaseLock();
+            }
         }
-        else
-        {
-            setCameraInfoMessage("_____", "_____");
-        }
-
+        setCameraInfoMessage(vendorName, modelName);
     }
 
     
@@ -2996,19 +3086,31 @@ namespace bias
         deleteMenuActions(menuCameraVideoModePtr_, videoModeActionGroupPtr_);
 
         // Get list of allowed videomodes from camera 
-        cameraPtr_ -> acquireLock();
-        try
+        if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
         {
-            currentVideoMode = cameraPtr_ -> getVideoMode();
-            videoModeList = cameraPtr_ -> getAllowedVideoModes(); 
+            try
+            {
+                currentVideoMode = cameraPtr_ -> getVideoMode();
+                videoModeList = cameraPtr_ -> getAllowedVideoModes(); 
+            }
+            catch (RuntimeError &runtimeError)
+            {
+                error = true;
+                errorId = runtimeError.id();
+                errorMsg = QString::fromStdString(runtimeError.what());
+            }
+            cameraPtr_ -> releaseLock();
         }
-        catch (RuntimeError &runtimeError)
+        else
         {
-            error = true;
-            errorId = runtimeError.id();
-            errorMsg = QString::fromStdString(runtimeError.what());
+            if (showCameraLockFailMsg_)
+            {
+                QString msgTitle("Camera Access Error");
+                QString msgText("unable to acquire camera lock");
+                QMessageBox::critical(this, msgTitle, msgText);
+            }
+            return;
         }
-        cameraPtr_ -> releaseLock();
 
         if (error) 
         {
@@ -3077,20 +3179,32 @@ namespace bias
         deleteMenuActions(menuCameraFrameRatePtr_, frameRateActionGroupPtr_);
 
         // Get list of allowed framerates from camera 
-        cameraPtr_ -> acquireLock();
-        try
+        if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
         {
-            currentFrameRate = cameraPtr_ -> getFrameRate();
-            currentVideoMode = cameraPtr_ -> getVideoMode();
-            allowedRateList = cameraPtr_ -> getAllowedFrameRates(currentVideoMode); 
+            try
+            {
+                currentFrameRate = cameraPtr_ -> getFrameRate();
+                currentVideoMode = cameraPtr_ -> getVideoMode();
+                allowedRateList = cameraPtr_ -> getAllowedFrameRates(currentVideoMode); 
+            }
+            catch (RuntimeError &runtimeError)
+            {
+                error = true;
+                errorId = runtimeError.id();
+                errorMsg = QString::fromStdString(runtimeError.what());
+            }
+            cameraPtr_ -> releaseLock();
         }
-        catch (RuntimeError &runtimeError)
+        else
         {
-            error = true;
-            errorId = runtimeError.id();
-            errorMsg = QString::fromStdString(runtimeError.what());
+            if (showCameraLockFailMsg_)
+            {
+                QString msgTitle("Camera Access Error");
+                QString msgText("unable to acquire camera lock");
+                QMessageBox::critical(this, msgTitle, msgText);
+            }
+            return;
         }
-        cameraPtr_ -> releaseLock();
 
         if (error) 
         {
@@ -3158,19 +3272,31 @@ namespace bias
         deleteMenuActions(menuCameraPropertiesPtr_);
 
         // Get list of properties from camera 
-        cameraPtr_ -> acquireLock();
-        try
+        if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
         {
-            propList = cameraPtr_ -> getListOfProperties();
-            propInfoMap = cameraPtr_ -> getMapOfPropertyInfos();
+            try
+            {
+                propList = cameraPtr_ -> getListOfProperties();
+                propInfoMap = cameraPtr_ -> getMapOfPropertyInfos();
+            }
+            catch (RuntimeError &runtimeError)
+            {
+                error = true;
+                errorId = runtimeError.id();
+                errorMsg = QString::fromStdString(runtimeError.what());
+            }
+            cameraPtr_ -> releaseLock();
         }
-        catch (RuntimeError &runtimeError)
+        else
         {
-            error = true;
-            errorId = runtimeError.id();
-            errorMsg = QString::fromStdString(runtimeError.what());
+            if (showCameraLockFailMsg_)
+            {
+                QString msgTitle("Camera Access Error");
+                QString msgText("unable to acquire camera lock");
+                QMessageBox::critical(this, msgTitle, msgText);
+            }
+            return;
         }
-        cameraPtr_ -> releaseLock();
 
         if (error) 
         {
@@ -3242,18 +3368,30 @@ namespace bias
             return;
         }
 
-        cameraPtr_ -> acquireLock();
-        try
+        if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
         {
-            trigType = cameraPtr_ -> getTriggerType();
+            try
+            {
+                trigType = cameraPtr_ -> getTriggerType();
+            }
+            catch (RuntimeError &runtimeError)
+            {
+                error = true;
+                errorId = runtimeError.id();
+                errorMsg = QString::fromStdString(runtimeError.what());
+            }
+            cameraPtr_ -> releaseLock();
         }
-        catch (RuntimeError &runtimeError)
+        else
         {
-            error = true;
-            errorId = runtimeError.id();
-            errorMsg = QString::fromStdString(runtimeError.what());
+            if (showCameraLockFailMsg_)
+            {
+                QString msgTitle("Camera Access Error");
+                QString msgText("unable to acquire camera lock");
+                QMessageBox::critical(this, msgTitle, msgText);
+            }
+            return;
         }
-        cameraPtr_ -> releaseLock();
 
         if (error)
         {
@@ -3431,9 +3569,7 @@ namespace bias
 
     QString CameraWindow::getVideoFileFullPathWithGuid()
     {
-        cameraPtr_ -> acquireLock();
-        Guid cameraGuid = cameraPtr_ -> getGuid();
-        cameraPtr_ -> releaseLock();
+        Guid cameraGuid = cameraPtr_ -> getGuid(); // don't need lock for this
         
         QString fileExtension;  
         if (videoFileFormat_ != VIDEOFILE_FORMAT_BMP)
@@ -3485,23 +3621,34 @@ namespace bias
         unsigned int errorId;
 
         // Get Values from the camera - for making sure that vendor and model match etc.
-        cameraPtr_ -> acquireLock();
-        try
+        if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
         {
-            currVendorName = QString::fromStdString(cameraPtr_ -> getVendorName());
-            currModelName = QString::fromStdString(cameraPtr_ -> getModelName());
-            currCameraPropList = cameraPtr_ -> getListOfProperties();
-            cameraPropInfoMap = cameraPtr_ -> getMapOfPropertyInfos();
-            format7Settings = cameraPtr_ -> getFormat7Settings();
-            format7Info = cameraPtr_ -> getFormat7Info(format7Settings.mode);
+            try
+            {
+                currVendorName = QString::fromStdString(cameraPtr_ -> getVendorName());
+                currModelName = QString::fromStdString(cameraPtr_ -> getModelName());
+                currCameraPropList = cameraPtr_ -> getListOfProperties();
+                cameraPropInfoMap = cameraPtr_ -> getMapOfPropertyInfos();
+                format7Settings = cameraPtr_ -> getFormat7Settings();
+                format7Info = cameraPtr_ -> getFormat7Info(format7Settings.mode);
+            }
+            catch (RuntimeError &runtimeError)
+            {
+                error = true;
+                errorId = runtimeError.id();
+                errorMsg = QString::fromStdString(runtimeError.what());
+            }
+            cameraPtr_ -> releaseLock();
         }
-        catch (RuntimeError &runtimeError)
+        else
         {
-            error = true;
-            errorId = runtimeError.id();
-            errorMsg = QString::fromStdString(runtimeError.what());
+            if (showCameraLockFailMsg_ && showErrorDlg)
+            {
+                QString msgTitle("Camera Access Error");
+                QString msgText("unable to acquire camera lock");
+                QMessageBox::critical(this, msgTitle, msgText);
+            }
         }
-        cameraPtr_ -> releaseLock();
 
         if (error)
         {
@@ -3712,17 +3859,33 @@ namespace bias
         switch (triggerType)
         {
             case TRIGGER_INTERNAL:
-                cameraPtr_ -> acquireLock();
-                cameraPtr_ -> setTriggerInternal();
-                cameraPtr_ -> releaseLock();
+                if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
+                {
+                    cameraPtr_ -> setTriggerInternal();
+                    cameraPtr_ -> releaseLock();
+                }
+                else
+                {
+                    rtnStatus.success = false;
+                    rtnStatus.message = QString("setTriggerInternal - unable to acquire camera lock");
+                    return rtnStatus;
+                }
                 actionCameraTriggerInternalPtr_ -> setChecked(true);
                 actionCameraTriggerExternalPtr_ -> setChecked(false);
                 break;
 
             case TRIGGER_EXTERNAL:
-                cameraPtr_ -> acquireLock();
-                cameraPtr_ -> setTriggerExternal();
-                cameraPtr_ -> releaseLock();
+                if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
+                {
+                    cameraPtr_ -> setTriggerExternal();
+                    cameraPtr_ -> releaseLock();
+                }
+                else
+                {
+                    rtnStatus.success = false;
+                    rtnStatus.message = QString("setTriggerInternal - unable to acquire camera lock");
+                    return rtnStatus;
+                }
                 actionCameraTriggerInternalPtr_ -> setChecked(false);
                 actionCameraTriggerExternalPtr_ -> setChecked(true);
                 break;
@@ -4822,18 +4985,29 @@ namespace bias
             unsigned int errorId;
             QString errorMsg;
 
-            cameraPtr_ -> acquireLock();
-            try
+            if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
             {
-                cameraPtr_ -> setProperty(newProp);
+                try
+                {
+                    cameraPtr_ -> setProperty(newProp);
+                }
+                catch (RuntimeError &runtimeError)
+                {
+                    error = true;
+                    errorId = runtimeError.id();
+                    errorMsg = QString::fromStdString(runtimeError.what());
+                }
+                cameraPtr_ -> releaseLock();
             }
-            catch (RuntimeError &runtimeError)
+            else
             {
-                error = true;
-                errorId = runtimeError.id();
-                errorMsg = QString::fromStdString(runtimeError.what());
+                if (showCameraLockFailMsg_ && showErrorDlg)
+                {
+                    QString msgTitle("Camera Access Error");
+                    QString msgText("unable to acquire camera lock");
+                    QMessageBox::critical(this, msgTitle, msgText);
+                }
             }
-            cameraPtr_ -> releaseLock();
 
             if (error)
             {
@@ -5046,18 +5220,25 @@ namespace bias
         unsigned int errorId;
         QString errorMsg;
 
-        cameraPtr_ -> acquireLock();
-        try
+        if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
         {
-            settingsAreValid = cameraPtr_ -> validateFormat7Settings(format7Settings);
+            try
+            {
+                settingsAreValid = cameraPtr_ -> validateFormat7Settings(format7Settings);
+            }
+            catch (RuntimeError &runtimeError)
+            {
+                error = true;
+                errorId = runtimeError.id();
+                errorMsg = QString::fromStdString(runtimeError.what());
+            }
+            cameraPtr_ -> releaseLock();
         }
-        catch (RuntimeError &runtimeError)
+        else
         {
-            error = true;
-            errorId = runtimeError.id();
-            errorMsg = QString::fromStdString(runtimeError.what());
+            QString errMsgText("unable to acquire camera lock - failed to validate format7 settings.");
+            return onError(errMsgText, errMsgTitle, showErrorDlg);
         }
-        cameraPtr_ -> releaseLock();
 
         if (error)
         {
@@ -5069,21 +5250,28 @@ namespace bias
 
         if (settingsAreValid)
         {
-            cameraPtr_ -> acquireLock();
-            try
+            if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
             {
-                cameraPtr_ -> setFormat7Configuration(
-                        format7Settings, 
-                        format7PercentSpeed_
-                        );
+                try
+                {
+                    cameraPtr_ -> setFormat7Configuration(
+                            format7Settings, 
+                            format7PercentSpeed_
+                            );
+                }
+                catch (RuntimeError &runtimeError)
+                {
+                    error = true;
+                    errorId = runtimeError.id();
+                    errorMsg = QString::fromStdString(runtimeError.what());
+                }
+                cameraPtr_ -> releaseLock();
             }
-            catch (RuntimeError &runtimeError)
+            else
             {
-                error = true;
-                errorId = runtimeError.id();
-                errorMsg = QString::fromStdString(runtimeError.what());
+                QString errMsgText("unable to acquire camera lock - failed to set format7 settings.");
+                return onError(errMsgText, errMsgTitle, showErrorDlg);
             }
-            cameraPtr_ -> releaseLock();
             
             if (error)
             {
