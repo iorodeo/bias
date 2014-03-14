@@ -159,6 +159,9 @@ class ImageGrabberParam
         QString captureInputFile;
         static const QString DEFAULT_CAPTURE_INPUT_FILE;
 
+        QString captureInputDir;
+        static const QString DEFAULT_CAPTURE_INPUT_DIR;
+
         // New 
         // -----------------------------------------------------------
         float gamma;

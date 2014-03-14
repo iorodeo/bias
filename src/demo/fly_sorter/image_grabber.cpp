@@ -2,6 +2,11 @@
 #include "camera_facade.hpp"
 #include "exception.hpp"
 #include <QPointer>
+#include <QDir>
+#include <QString>
+#include <QStringList>
+#include <QFileInfo>
+#include <QFileInfoList>
 #include <iostream>
 #include <fstream>
 #include <opencv2/highgui/highgui.hpp>
@@ -68,6 +73,10 @@ void ImageGrabber::run()
     else if (param_.captureMode == QString("file"))
     {
         runCaptureFromFile();
+    }
+    else if (param_.captureMode == QString("directory"))
+    {
+        runCaptureFromDir();
     }
     else
     {
@@ -174,14 +183,14 @@ void ImageGrabber::runCaptureFromFile()
         QString errorMsg = QString("Error opening captureInputFile, ");
         errorMsg += param_.captureInputFile + QString(", - ");
         errorMsg += QString::fromStdString(exception.what());
-        emit cameraSetupError(errorMsg);
+        emit fileReadError(errorMsg);
         return;
     }
     if (!fileCapture.isOpened())
     {
         QString errorMsg = QString("Unable to open captureInputFile, ");
         errorMsg += param_.captureInputFile; 
-        emit cameraSetupError(errorMsg);
+        emit fileReadError(errorMsg);
         return;
     }
 
@@ -198,7 +207,7 @@ void ImageGrabber::runCaptureFromFile()
         QString errorMsg = QString("Unable to get properties from captureInputFile, ");
         errorMsg += param_.captureInputFile + QString(", "); 
         errorMsg += QString::fromStdString(exception.what());
-        emit cameraSetupError(errorMsg);
+        emit fileReadError(errorMsg);
         return;
     }
     //std::cout << "fourcc: " << fourcc << std::endl;
@@ -210,7 +219,7 @@ void ImageGrabber::runCaptureFromFile()
         // fix this
         // --------------------------------------------------------------------
         QString errorMsg = QString("Fourcc code is equal to 0 - this is currently not supported");
-        emit cameraSetupError(errorMsg);
+        emit fileReadError(errorMsg);
         return;
     }
 
@@ -293,10 +302,94 @@ void ImageGrabber::runCaptureFromFile()
         QString errorMsg = QString("Error releasing captureInputFile, ");
         errorMsg += param_.captureInputFile + QString(", - ");
         errorMsg += QString::fromStdString(exception.what());
-        emit cameraSetupError(errorMsg);
+        emit fileReadError(errorMsg);
         return;
     }
     //std::cout << "end" << std::endl;
+    return;
+}
+
+
+void ImageGrabber::runCaptureFromDir()
+{
+    float sleepDt = 1.0*1.0e3/param_.frameRate;
+    unsigned long fileCount = 0;
+
+    // Check that capture directory exists
+    QDir captureInputDir = QDir(param_.captureInputDir);
+    std::cout << "captureInputDir: " << captureInputDir.absolutePath().toStdString() << std::endl;
+    if (!captureInputDir.exists())
+    {
+        QString dirStr = captureInputDir.absolutePath();
+        QString errorMsg = QString("Error captureInputDir %1 does not exist.").arg(dirStr);
+        emit fileReadError(errorMsg);
+        return;
+    }
+
+    // Get names of image files in capture directory
+    QStringList nameFilter("*.bmp");
+    captureInputDir.setSorting(QDir::Name);
+    QFileInfoList imageFileInfoList = captureInputDir.entryInfoList(nameFilter);
+
+    // Create map from frame number in filename to File info
+    QMap<int,QFileInfo> frameNumberToFileInfoMap;
+    for (int i=0; i<imageFileInfoList.size(); i++)
+    {
+        QFileInfo fileInfo = imageFileInfoList[i];
+        QString fileName = fileInfo.fileName();
+        int frmInd = fileName.indexOf(QString("frm"));
+        int frmScoreInd0 = fileName.indexOf(QString("_"),frmInd);
+        int frmScoreInd1 = fileName.indexOf(QString("_"),frmScoreInd0+1);
+        int frameNumber = fileName.mid(frmScoreInd0+1, frmScoreInd1-frmScoreInd0-1).toInt();
+        if (!frameNumberToFileInfoMap.contains(frameNumber))
+        { 
+            frameNumberToFileInfoMap.insert(frameNumber, fileInfo);
+        }
+    }
+
+    QList<int> frameNumberList = frameNumberToFileInfoMap.keys();
+    qSort(frameNumberList.begin(), frameNumberList.end());
+    QListIterator<int> frameNumberIt(frameNumberList);
+
+    while ((!stopped_)  && frameNumberIt.hasNext())
+    {
+        int frameNumber = frameNumberIt.next();
+        QFileInfo fileInfo = frameNumberToFileInfoMap[frameNumber];
+        QString fileName = fileInfo.absoluteFilePath();
+        ImageData imageData;
+
+        std::cout  << "count: " << fileCount << ", fileName " << fileName.toStdString(); 
+        if (!fileInfo.exists())
+        {
+            std::cout <<" - skipped (doesn't exist)" << std::endl;
+            continue;
+        }
+        std::cout << std::endl;
+
+        cv::Mat mat;
+        try
+        { 
+            mat = cv::imread(fileName.toStdString());
+        }
+        catch (cv::Exception &exception)
+        {
+            QString errorMsg = QString("Unable to read image %1: ").arg(fileName);
+            errorMsg += QString::fromStdString(exception.what());
+            emit fileReadError(errorMsg);
+            stopped_ = true;
+            continue;
+        }
+
+        imageData.mat = mat.clone(); // Get deep copy of image mat (required)
+        imageData.frameCount = frameNumber; 
+        QDateTime currentDateTime = QDateTime::currentDateTime();
+        imageData.dateTime = double(currentDateTime.toMSecsSinceEpoch())*(1.0e-3);
+        emit newImage(imageData);
+
+        ThreadHelper::msleep(sleepDt);
+        fileCount++;
+    }
+
     return;
 }
 

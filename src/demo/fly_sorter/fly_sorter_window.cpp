@@ -488,6 +488,7 @@ void FlySorterWindow::cameraSetupError(QString message)
 
 void FlySorterWindow::imageGrabberFileReadError(QString message)
 {
+    stopRunning();
     QString errMsgTitle("Image Grabber File Read Error");
     QMessageBox::critical(this, errMsgTitle, message);
 }

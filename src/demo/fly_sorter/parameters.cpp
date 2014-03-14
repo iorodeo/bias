@@ -691,12 +691,14 @@ const unsigned int ImageGrabberParam::MAXIMUM_WHITE_BALANCE = 1023;
 QStringList getAllowedCaptureModes()
 {
     QStringList modes;
-    modes << QString("camera"); // first is default value
-    modes << QString("file");
+    modes << QString("camera");    // first is default value
+    modes << QString("file");      // from video file
+    modes << QString("directory"); // from cropped images in directory
     return modes;
 }
 const QStringList ImageGrabberParam::ALLOWED_CAPTURE_MODES = getAllowedCaptureModes();
 const QString ImageGrabberParam::DEFAULT_CAPTURE_INPUT_FILE = QString("test.avi");
+const QString ImageGrabberParam::DEFAULT_CAPTURE_INPUT_DIR = QString("test_images");
 
 ImageGrabberParam::ImageGrabberParam()
 {
@@ -710,6 +712,7 @@ ImageGrabberParam::ImageGrabberParam()
     whiteBalanceBlue = DEFAULT_WHITE_BALANCE_BLUE;
     captureMode = ALLOWED_CAPTURE_MODES.front();
     captureInputFile = DEFAULT_CAPTURE_INPUT_FILE;
+    captureInputDir = DEFAULT_CAPTURE_INPUT_DIR;
 }
 
 QVariantMap ImageGrabberParam::toMap()
@@ -1010,6 +1013,23 @@ RtnStatus ImageGrabberParam::fromMap(QVariantMap paramMap)
         return rtnStatus;
     }
     captureInputFile = paramMap["captureInputFile"].toString();
+
+
+    // Get caputre input dir
+    // ---------------------
+    if (!paramMap.contains("captureInputDir"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'caputreInputDir' not found in image grabber parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["captureInputFile"].canConvert<QString>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert image grabber parameter 'captureInputDir' to string");
+        return rtnStatus;
+    }
+    captureInputDir = paramMap["captureInputDir"].toString();
 
 
     rtnStatus.success = true;

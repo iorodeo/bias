@@ -65,6 +65,7 @@ class ImageGrabber : public QObject, public QRunnable
         void run();
         void runCaptureFromCamera();
         void runCaptureFromFile();
+        void runCaptureFromDir();
         bool setupCamera();
 
 };
