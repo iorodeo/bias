@@ -7,6 +7,7 @@
 #include <QString>
 #include <QStringList>
 #include <QMap>
+#include <QMutex>
 
 namespace bias
 {
@@ -23,7 +24,7 @@ namespace bias
             virtual ~VideoWriter_avi();
             virtual void addFrame(StampedImage stampedImg);
 
-            // Static constants
+            // Static variables 
             static const int DEFAULT_FOURCC;
             static const double DEFAULT_FPS;
             static const double MIN_ALLOWED_DT_ESTIMATE;
@@ -45,6 +46,7 @@ namespace bias
             bool isFirst_;
             cv::VideoWriter videoWriter_;
             void setupOutput(StampedImage stampedImage);
+            QMutex videoWriterMutex_;
             
     };
 

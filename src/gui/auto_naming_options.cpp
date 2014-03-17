@@ -9,8 +9,12 @@ namespace bias
      QStringList AutoNamingOptions::createAllowedTimeAndDateFormats()
      {
          QStringList allowedFormats;
-         allowedFormats << QString("dd_MM_yyyy_hh:mm:ss");
-         allowedFormats << QString("ddd_MMMM_d_yyyy_h:m:s_ap");
+         allowedFormats << QString("'date'_yyyy_MM_dd_'time'_hh_mm_ss");
+         allowedFormats << QString("'date'_dd_MM_yyyy_'time'_hh_mm_ss");
+         allowedFormats << QString("yyyy_MM_dd_hh_mm_ss");
+         allowedFormats << QString("dd_MM_yyyy_hh_mm_ss");
+         allowedFormats << QString("ddd_MMMM_d_yyyy_'hr'h_'min'm_'sec's_ap");
+         allowedFormats << QString("ddd_MMMM_d_yyyy_h_m_s_ap");
          return allowedFormats;
      }
 

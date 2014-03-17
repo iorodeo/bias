@@ -220,6 +220,7 @@ namespace bias
             VideoFileFormat videoFileFormat_;
             unsigned long frameCount_;
             unsigned long captureDurationSec_;
+            AutoNamingOptions autoNamingOptions_;
 
             QPixmap previewPixmapOriginal_;
             QPixmap pluginPixmapOriginal_;
@@ -335,7 +336,7 @@ namespace bias
             void setCaptureTimeLabel(double timeStamp);
             void setServerPortText();
 
-            QString getVideoFileFullPathWithGuid();
+            QString getVideoFileFullPathWithAutoNaming();
             QString getConfigFileFullPath();
 
             RtnStatus setCameraFromMap(QVariantMap cameraMap, bool showErrorDlg);

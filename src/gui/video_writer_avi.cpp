@@ -7,12 +7,13 @@
 
 namespace bias
 { 
+    // Static constants
+    // -----------------------------------------------------------------
     const QString DUMMY_FILENAME("dummy.avi");
     const double VideoWriter_avi::DEFAULT_FPS = 30.0;
     const double VideoWriter_avi::MIN_ALLOWED_DT_ESTIMATE = 0.00001; 
     const unsigned int VideoWriter_avi::DEFAULT_FRAME_SKIP = 1;
     const int VideoWriter_avi::DEFAULT_FOURCC = CV_FOURCC('X','V','I','D');
-    //const int VideoWriter_avi::DEFAULT_FOURCC = CV_FOURCC('D','I','B',' ');
     const VideoWriterParams_avi VideoWriter_avi::DEFAULT_PARAMS = 
         VideoWriterParams_avi();
 
@@ -29,16 +30,23 @@ namespace bias
             ) 
         : VideoWriter(fileName,parent)
     {
-        //fourcc_ = qStringToFourcc(params.codec);
-        fourcc_ = stringToFourcc(params.codec);
-        setFrameSkip(params.frameSkip);
-
         isFirst_ = true;
         fps_ = DEFAULT_FPS;
+        fourcc_ = stringToFourcc(params.codec);
+        setFrameSkip(params.frameSkip);
     }
 
 
-    VideoWriter_avi::~VideoWriter_avi() {};
+    VideoWriter_avi::~VideoWriter_avi() 
+    {
+        videoWriterMutex_.lock();
+        bool isOpened = videoWriter_.isOpened();
+        if (isOpened)
+        {
+            videoWriter_.release();
+        }
+        videoWriterMutex_.unlock();
+    };
 
 
     void VideoWriter_avi::addFrame(StampedImage stampedImg)
@@ -82,6 +90,10 @@ namespace bias
         }
 
         bool openOK= true;
+        
+        
+
+        videoWriterMutex_.lock();
         try
         {
             openOK = videoWriter_.open(
@@ -94,12 +106,14 @@ namespace bias
         }
         catch (cv::Exception &e)
         {
+            videoWriterMutex_.unlock();
             isFirst_ = false;
             unsigned int errorId = ERROR_VIDEO_WRITER_INITIALIZE;
             std::string errorMsg("video writer unable to open file:\n\n"); 
             errorMsg += e.what();
             throw RuntimeError(errorId, errorMsg); 
         }
+        videoWriterMutex_.unlock();
 
         if (!openOK)
         {
@@ -110,7 +124,11 @@ namespace bias
             throw RuntimeError(errorId, errorMsg); 
         }
 
-        if (!videoWriter_.isOpened())
+        videoWriterMutex_.lock();
+        bool isOpened = videoWriter_.isOpened();
+        videoWriterMutex_.unlock();
+
+        if (!isOpened)
         {
             isFirst_ = false;
             unsigned int errorId = ERROR_VIDEO_WRITER_INITIALIZE;

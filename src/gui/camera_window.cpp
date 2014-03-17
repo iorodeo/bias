@@ -329,7 +329,7 @@ namespace bias
         {
             // Create video writer based on video file format type
             std::shared_ptr<VideoWriter> videoWriterPtr; 
-            QString videoFileFullPath = getVideoFileFullPathWithGuid();
+            QString videoFileFullPath = getVideoFileFullPathWithAutoNaming();
 
             // DEBUG
             // -------------------------------------------------------------------------------
@@ -1975,8 +1975,14 @@ namespace bias
     {
         if (autoNamingDialogPtr_.isNull()) 
         {
-            autoNamingDialogPtr_ = new AutoNamingDialog(this);
+            autoNamingDialogPtr_ = new AutoNamingDialog(
+                    autoNamingOptions_, 
+                    numberOfCameras_, 
+                    this
+                    );
+
             autoNamingDialogPtr_ -> show();
+
             connect(
                     autoNamingDialogPtr_,
                     SIGNAL(autoNamingOptionsChanged(AutoNamingOptions)),
@@ -1995,6 +2001,7 @@ namespace bias
     {
         std::cout << __PRETTY_FUNCTION__ << std::endl;
         std::cout << options.toStdString() << std::endl;
+        autoNamingOptions_ = options;
     }
 
 
@@ -3613,10 +3620,33 @@ namespace bias
     }
 
 
-    QString CameraWindow::getVideoFileFullPathWithGuid()
+    QString CameraWindow::getVideoFileFullPathWithAutoNaming()
     {
-        Guid cameraGuid = cameraPtr_ -> getGuid(); // don't need lock for this
-        
+        QString fileName = currentVideoFileName_;
+
+        // Add camera identifier - guid or camera number
+        if ((autoNamingOptions_.includeCameraIdentifier) || (numberOfCameras_  > 1))
+        {
+            if (autoNamingOptions_.cameraIdentifier == AutoNamingOptions::GUID_IDENTIFIER)
+            {
+                Guid cameraGuid = cameraPtr_ -> getGuid(); // don't need lock for this
+                fileName += QString("_guid_") + QString::fromStdString(cameraGuid.toString());
+            }
+            else
+            {
+                fileName += QString("_cam_%1").arg(numberOfCameras_);
+            }
+        }
+
+        // Add time and date
+        if (autoNamingOptions_.includeTimeAndDate)
+        {
+            QDateTime dateTime= QDateTime::currentDateTime();
+            QString dateTimeString = dateTime.toString(autoNamingOptions_.timeAndDateFormat);
+            fileName += QString("_") + dateTimeString;
+        }
+
+        // Add file extension
         QString fileExtension;  
         if (videoFileFormat_ != VIDEOFILE_FORMAT_BMP)
         {
@@ -3624,13 +3654,11 @@ namespace bias
         }
         else
         {
-            fileExtension = "";
+            fileExtension = QString("");
         }
-        QString fileName = currentVideoFileName_;
-        fileName += "_guid_" + QString::fromStdString(cameraGuid.toString());
         if (!fileExtension.isEmpty())
         {
-            fileName +=  "." + fileExtension;
+            fileName +=  QString(".") + fileExtension;
         }
         QFileInfo videoFileInfo(currentVideoFileDir_, fileName);
         QString videoFileFullPath = videoFileInfo.absoluteFilePath();
