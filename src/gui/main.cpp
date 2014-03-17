@@ -44,23 +44,24 @@ int main (int argc, char *argv[])
     }
 
     // Open camera window for each camera 
-    int cnt;
+    unsigned int camCnt;
+    unsigned int numCam = guidList.size();
     QRect baseGeom;
     QRect nextGeom;
     bias::GuidList::iterator guidIt;
-    for (guidIt=guidList.begin(), cnt=0; guidIt!=guidList.end(); guidIt++, cnt++)
+    for (guidIt=guidList.begin(), camCnt=0; guidIt!=guidList.end(); guidIt++, camCnt++)
     {
         bias::Guid guid = *guidIt;
-        QSharedPointer<bias::CameraWindow> windowPtr(new bias::CameraWindow(cnt, guid));
+        QSharedPointer<bias::CameraWindow> windowPtr(new bias::CameraWindow(guid, camCnt, numCam));
         windowPtr -> show();
-        if (cnt==0)
+        if (camCnt==0)
         {
             baseGeom = windowPtr -> geometry();
         }
         else
         {
-            nextGeom.setX(baseGeom.x() + 40*cnt);
-            nextGeom.setY(baseGeom.y() + 40*cnt);
+            nextGeom.setX(baseGeom.x() + 40*camCnt);
+            nextGeom.setY(baseGeom.y() + 40*camCnt);
             nextGeom.setWidth(baseGeom.width());
             nextGeom.setHeight(baseGeom.height());
             windowPtr -> setGeometry(nextGeom);

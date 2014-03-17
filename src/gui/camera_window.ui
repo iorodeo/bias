@@ -254,6 +254,7 @@
     <addaction name="menuLoggingFormatPtr_"/>
     <addaction name="actionLoggingVideoFilePtr_"/>
     <addaction name="actionLoggingSettingsPtr_"/>
+    <addaction name="actionLoggingAutoNamingPtr_"/>
    </widget>
    <widget class="QMenu" name="menuTimerPtr_">
     <property name="title">
@@ -671,6 +672,11 @@
   <action name="actionDumpCameraPropsPtr_">
    <property name="text">
     <string>Dump camera properties</string>
+   </property>
+  </action>
+  <action name="actionLoggingAutoNamingPtr_">
+   <property name="text">
+    <string>Auto Naming...</string>
    </property>
   </action>
  </widget>

@@ -10,6 +10,7 @@ set(
     logging_settings_dialog.ui
     format7_settings_dialog.ui
     alignment_settings_dialog.ui
+    auto_naming_dialog.ui
     )
 
 set(
@@ -40,6 +41,7 @@ set(
     ext_ctl_http_server.hpp
     alignment_settings.hpp
     alignment_settings_dialog.hpp
+    auto_naming_dialog.hpp
     )
 
 set(
@@ -70,6 +72,7 @@ set(
     ext_ctl_http_server.cpp
     alignment_settings.cpp
     alignment_settings_dialog.cpp
+    auto_naming_dialog.cpp
     )
 
 qt4_wrap_ui(bias_gui_FORMS_HEADERS ${bias_gui_FORMS}) 

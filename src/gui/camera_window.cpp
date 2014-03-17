@@ -15,6 +15,7 @@
 #include "property_dialog.hpp"
 #include "timer_settings_dialog.hpp"
 #include "logging_settings_dialog.hpp"
+#include "auto_naming_dialog.hpp"
 #include "format7_settings_dialog.hpp"
 #include "alignment_settings_dialog.hpp"
 #include "background_histogram_ufmf.hpp"
@@ -88,12 +89,16 @@ namespace bias
     // Public methods
     // ----------------------------------------------------------------------------------
 
-    CameraWindow::CameraWindow(unsigned int cameraNumber, Guid cameraGuid, QWidget *parent) 
-        : QMainWindow(parent)
+    CameraWindow::CameraWindow(
+            Guid cameraGuid, 
+            unsigned int cameraNumber, 
+            unsigned int numberOfCameras, 
+            QWidget *parent
+            ) : QMainWindow(parent)
     {
         setupUi(this);
         connectWidgets();
-        initialize(cameraNumber, cameraGuid);
+        initialize(cameraGuid, cameraNumber, numberOfCameras);
     }
 
 
@@ -1964,6 +1969,27 @@ namespace bias
         std::cout << VIDEOFILE_EXTENSION_MAP[videoFileFormat_].toStdString();
         std::cout << std::endl;
     }
+    
+
+    void CameraWindow::actionLoggingAutoNamingTriggered()
+    {
+        if (autoNamingDialogPtr_.isNull()) 
+        {
+            autoNamingDialogPtr_ = new AutoNamingDialog(this);
+            autoNamingDialogPtr_ -> show();
+
+            //connect(
+            //        autoNamingDialogPtr_,
+            //        SIGNAL(autoNamingChannged(unsigned long)),
+            //        this,
+            //        SLOT(autoNamingChanged(unsigned long))
+            //       );
+        }
+        else
+        {
+            autoNamingDialogPtr_ -> raise();
+        }
+    }
 
 
     void CameraWindow::actionTimerEnabledTriggered()
@@ -2183,7 +2209,11 @@ namespace bias
     // Private methods
     // -----------------------------------------------------------------------------------
 
-    void CameraWindow::initialize(unsigned int cameraNumber, Guid guid)
+    void CameraWindow::initialize(
+            Guid guid, 
+            unsigned int cameraNumber, 
+            unsigned int numberOfCameras
+            )
     {
         connected_ = false;
         capturing_ = false;
@@ -2205,6 +2235,7 @@ namespace bias
         imageDisplayFreq_ = DEFAULT_IMAGE_DISPLAY_FREQ;
 
         cameraNumber_ = cameraNumber;
+        numberOfCameras_ = numberOfCameras;
         cameraPtr_ = std::make_shared<Lockable<Camera>>(guid);
 
         threadPoolPtr_ = new QThreadPool(this);
@@ -2402,6 +2433,13 @@ namespace bias
                 SIGNAL(triggered()),
                 this,
                 SLOT(actionLoggingFormatTriggered())
+               );
+
+        connect(
+                actionLoggingAutoNamingPtr_,
+                SIGNAL(triggered()),
+                this,
+                SLOT(actionLoggingAutoNamingTriggered())
                );
 
         connect(
@@ -2640,10 +2678,11 @@ namespace bias
         {
             Guid guid = cameraPtr_ -> getGuid();  // don't need lock for this
             QString guidString = QString::fromStdString(guid.toString());
-            windowTitle = QString("BIAS Camera Window, Guid: %1").arg(guidString);
+            windowTitle = QString("BIAS Camera Window, Cam: %1, Guid: %2").arg(cameraNumber_).arg(guidString);
         }
         else
         {
+            // Not currently being used???
             windowTitle = QString("BIAS Camera Window, Name: %1").arg(userCameraName_);
         }
         setWindowTitle(windowTitle);

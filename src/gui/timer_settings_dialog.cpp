@@ -79,6 +79,7 @@ namespace bias
     {
 
         setAttribute(Qt::WA_DeleteOnClose);
+        setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
         // Set spinbox limits
         hourSpinBoxPtr -> setMaximum(99);

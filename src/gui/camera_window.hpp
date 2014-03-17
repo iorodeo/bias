@@ -33,6 +33,7 @@ namespace bias
     class ImageLogger; 
     class TimerSettingsDialog;
     class LoggingSettingsDialog;
+    class AutoNamingDialog;
     class Format7SettingsDialog;
     class AlignmentSettingsDialog;
     class ExtCtlHttpServer;
@@ -46,7 +47,12 @@ namespace bias
 
         public:
 
-            CameraWindow(unsigned int cameraNumber, Guid cameraGuid, QWidget *parent=0);
+            CameraWindow(
+                    Guid cameraGuid, 
+                    unsigned int cameraNumber, 
+                    unsigned int numberOfCameras, 
+                    QWidget *parent=0
+                    );
             RtnStatus connectCamera(bool showErrorDlg=true);
             RtnStatus disconnectCamera(bool showErrorDlg=true);
             RtnStatus startImageCapture(bool showErrorDlg=true);
@@ -153,6 +159,7 @@ namespace bias
             void actionLoggingVideoFileTriggered();
             void actionLoggingSettingsTriggered();
             void actionLoggingFormatTriggered();
+            void actionLoggingAutoNamingTriggered();
             void actionTimerEnabledTriggered();
             void actionTimerSettingsTriggered();
             void actionDisplayUpdateFreqTriggered();
@@ -191,6 +198,7 @@ namespace bias
             bool haveDefaultConfigFileDir_;
             bool showCameraLockFailMsg_;
             unsigned int cameraNumber_;
+            unsigned int numberOfCameras_;
             unsigned int format7PercentSpeed_;
 
             QDir defaultVideoFileDir_;
@@ -246,6 +254,7 @@ namespace bias
 
             QPointer<TimerSettingsDialog> timerSettingsDialogPtr_;
             QPointer<LoggingSettingsDialog> loggingSettingsDialogPtr_;
+            QPointer<AutoNamingDialog> autoNamingDialogPtr_;
             QPointer<Format7SettingsDialog> format7SettingsDialogPtr_;
             AlignmentSettings alignmentSettings_;
             QPointer<AlignmentSettingsDialog> alignmentSettingsDialogPtr_;
@@ -256,7 +265,11 @@ namespace bias
             unsigned int httpServerPort_;
 
             void connectWidgets();
-            void initialize(unsigned int cameraNumber, Guid guid);
+            void initialize(
+                    Guid guid, 
+                    unsigned int cameraNumber, 
+                    unsigned int numberOfCameras
+                    );
 
 
             void setDefaultFileDirs();
