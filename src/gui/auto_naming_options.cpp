@@ -6,8 +6,20 @@ namespace bias
      int AutoNamingOptions::DEFAULT_CAMERA_IDENTIFIER = 
          AutoNamingOptions::CAMERA_NUMBER_IDENTIFIER;
 
+     QStringList AutoNamingOptions::createAllowedTimeAndDateFormats()
+     {
+         QStringList allowedFormats;
+         allowedFormats << QString("dd_MM_yyyy_hh:mm:ss");
+         allowedFormats << QString("ddd_MMMM_d_yyyy_h:m:s_ap");
+         return allowedFormats;
+     }
+
+     QStringList AutoNamingOptions::ALLOWED_TIME_AND_DATE_FORMATS = 
+         AutoNamingOptions::createAllowedTimeAndDateFormats();
+
+
      QString AutoNamingOptions::DEFAULT_TIME_AND_DATE_FORMAT = 
-         QString("dd_MM_yyyy_hh:mm:ss");
+       AutoNamingOptions::ALLOWED_TIME_AND_DATE_FORMATS[0]; 
 
 
      AutoNamingOptions::AutoNamingOptions()

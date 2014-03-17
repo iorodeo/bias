@@ -114,7 +114,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="timeDateFormatComboBoxPtr_">
+          <widget class="QComboBox" name="timeAndDateFormatComboBoxPtr_">
            <property name="minimumSize">
             <size>
              <width>150</width>

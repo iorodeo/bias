@@ -54,10 +54,19 @@ namespace bias
             unsigned int numberOfCameras
             )
     {
-        setupUi(this);
-        connectWidgets();
         setAttribute(Qt::WA_DeleteOnClose);
         setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
+        setupUi(this);
+        connectWidgets();
+
+        QStringListIterator allowedFormatsIt(AutoNamingOptions::ALLOWED_TIME_AND_DATE_FORMATS);
+        while (allowedFormatsIt.hasNext())
+        {
+            timeAndDateFormatComboBoxPtr_ -> addItem(allowedFormatsIt.next());
+        }
+
+        
     }
 
 
