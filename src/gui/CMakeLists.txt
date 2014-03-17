@@ -42,6 +42,7 @@ set(
     alignment_settings.hpp
     alignment_settings_dialog.hpp
     auto_naming_dialog.hpp
+    auto_naming_options.hpp
     )
 
 set(
@@ -73,6 +74,7 @@ set(
     alignment_settings.cpp
     alignment_settings_dialog.cpp
     auto_naming_dialog.cpp
+    auto_naming_options.cpp
     )
 
 qt4_wrap_ui(bias_gui_FORMS_HEADERS ${bias_gui_FORMS}) 

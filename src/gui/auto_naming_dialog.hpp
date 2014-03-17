@@ -1,25 +1,11 @@
 #ifndef AUTO_NAMING_DIALOG_HPP
 #define AUTO_NAMING_DIALOG_HPP
 #include "ui_auto_naming_dialog.h"
+#include "auto_naming_options.hpp"
 #include <QString>
 
 namespace bias
 {
-    
-    class AutoNamingOptions
-    {
-        public:
-            AutoNamingOptions();
-
-            int cameraIdentifier;
-            static int DEFAULT_CAMERA_IDENTIFIER;
-            enum {GUID_IDENTIFIER, CAMERA_NUMBER_IDENTIFIER};
-
-            QString timeAndDateFormat;
-            static QString DEFAULT_TIME_AND_DATE_FORMAT;
-
-    };
-
 
     class AutoNamingDialog : public QDialog, public Ui::AutoNamingDialog
     {
@@ -27,10 +13,25 @@ namespace bias
 
         public:
             AutoNamingDialog(QWidget *parent=0);
-            AutoNamingDialog(AutoNamingOptions options, QWidget *parent=0);
+            AutoNamingDialog(
+                    AutoNamingOptions options, 
+                    unsigned int numberOfCameras, 
+                    QWidget *parent=0
+                    );
+        signals:
+            void autoNamingOptionsChanged(AutoNamingOptions options);
+
+        private slots:
+            void cameraIdGroupBoxToggled(bool checked);
+            void guidRadioButtonToggled(bool checked);
+            void timeAndDateGroupBoxToggled(bool checked);
 
         private:
-            void initialize(AutoNamingOptions options);
+            void connectWidgets();
+            void initialize(
+                    AutoNamingOptions options, 
+                    unsigned int numberOfCameras
+                    );
 
 
     };

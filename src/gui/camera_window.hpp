@@ -14,6 +14,7 @@
 #include "camera_facade_fwd.hpp"
 #include "video_writer_params.hpp"
 #include "alignment_settings.hpp"
+#include "auto_naming_options.hpp"
 #include "rtn_status.hpp"
 
 
@@ -185,6 +186,7 @@ namespace bias
             void loggingSettingsChanged(VideoWriterParams params);
             void format7RoiEnableStateChanged();
             void alignmentSettingsChanged(AlignmentSettings);
+            void autoNamingOptionsChanged(AutoNamingOptions options);
 
         private:
 

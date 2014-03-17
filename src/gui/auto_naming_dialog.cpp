@@ -1,47 +1,90 @@
 #include "auto_naming_dialog.hpp"
+#include <iostream>
 
 namespace bias
 {
-    // AutoNamingOptions
-    // ------------------------------------------------------------------------
-     int AutoNamingOptions::DEFAULT_CAMERA_IDENTIFIER = 
-         AutoNamingOptions::CAMERA_NUMBER_IDENTIFIER;
-
-     QString AutoNamingOptions::DEFAULT_TIME_AND_DATE_FORMAT = 
-         QString("dd.MM.yyyy_hh:mm:ss");
-
-     AutoNamingOptions::AutoNamingOptions()
-     {
-         cameraIdentifier = DEFAULT_CAMERA_IDENTIFIER;
-         timeAndDateFormat = DEFAULT_TIME_AND_DATE_FORMAT;
-
-     }
-
-
-    // AutoNaming Dialog
-    // ------------------------------------------------------------------------
 
     // Public methods
     // ------------------------------------------------------------------------
     AutoNamingDialog::AutoNamingDialog(QWidget *parent)
     {
         AutoNamingOptions options; // Options w/ default values
-        initialize(options);
+        initialize(options,1);
     }
 
-    AutoNamingDialog::AutoNamingDialog(AutoNamingOptions options, QWidget *parent)
+    AutoNamingDialog::AutoNamingDialog(
+            AutoNamingOptions options, 
+            unsigned int numberOfCameras,
+            QWidget *parent
+            )
     {
-        initialize(options);
+        initialize(options,numberOfCameras);
+    }
+
+    // Private slots
+    // ------------------------------------------------------------------------
+    void AutoNamingDialog::cameraIdGroupBoxToggled(bool checked)
+    {
+        std::cout << __PRETTY_FUNCTION__ << ", checked = " << checked << std::endl;
+        AutoNamingOptions options;
+        emit autoNamingOptionsChanged(options);
+    }
+
+
+    void AutoNamingDialog::guidRadioButtonToggled(bool checked)
+    {
+        std::cout << __PRETTY_FUNCTION__ << ", checked = " << checked << std::endl;
+        AutoNamingOptions options;
+        emit autoNamingOptionsChanged(options);
+    }
+
+
+    void AutoNamingDialog::timeAndDateGroupBoxToggled(bool checked)
+    {
+        std::cout << __PRETTY_FUNCTION__ << ", checked = " << checked << std::endl;
+        AutoNamingOptions options;
+        emit autoNamingOptionsChanged(options);
     }
 
 
     // Private methods
     // ------------------------------------------------------------------------
-    void AutoNamingDialog::initialize(AutoNamingOptions options)
+    void AutoNamingDialog::initialize(
+            AutoNamingOptions options, 
+            unsigned int numberOfCameras
+            )
     {
         setupUi(this);
+        connectWidgets();
         setAttribute(Qt::WA_DeleteOnClose);
         setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    }
+
+
+    void AutoNamingDialog::connectWidgets()
+    {
+
+        connect(
+                cameraIdGroupBoxPtr_,
+                SIGNAL(toggled(bool)),
+                this,
+                SLOT(cameraIdGroupBoxToggled(bool))
+               );
+
+        connect(
+                guidRadioButtonPtr_,
+                SIGNAL(toggled(bool)),
+                this,
+                SLOT(guidRadioButtonToggled(bool))
+               );
+
+        connect(
+                timeAndDateGroupBoxPtr_,
+                SIGNAL(toggled(bool)),
+                this,
+                SLOT(timeAndDateGroupBoxToggled(bool))
+               );
+
     }
 
 }

@@ -1977,18 +1977,24 @@ namespace bias
         {
             autoNamingDialogPtr_ = new AutoNamingDialog(this);
             autoNamingDialogPtr_ -> show();
-
-            //connect(
-            //        autoNamingDialogPtr_,
-            //        SIGNAL(autoNamingChannged(unsigned long)),
-            //        this,
-            //        SLOT(autoNamingChanged(unsigned long))
-            //       );
+            connect(
+                    autoNamingDialogPtr_,
+                    SIGNAL(autoNamingOptionsChanged(AutoNamingOptions)),
+                    this,
+                    SLOT(autoNamingOptionsChanged(AutoNamingOptions))
+                   );
         }
         else
         {
             autoNamingDialogPtr_ -> raise();
         }
+    }
+
+
+    void CameraWindow::autoNamingOptionsChanged(AutoNamingOptions options)
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        std::cout << options.toStdString() << std::endl;
     }
 
 
@@ -2089,6 +2095,7 @@ namespace bias
     {
         alignmentSettings_ = settings;
     }
+
 
 
     void CameraWindow::actionVideoModeTriggered(int vidModeInt)

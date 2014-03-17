@@ -83,7 +83,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox_2">
+    <widget class="QGroupBox" name="timeAndDateGroupBoxPtr_">
      <property name="font">
       <font>
        <weight>75</weight>
