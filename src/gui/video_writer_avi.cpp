@@ -17,6 +17,8 @@ namespace bias
     const VideoWriterParams_avi VideoWriter_avi::DEFAULT_PARAMS = 
         VideoWriterParams_avi();
 
+    QMutex *VideoWriter_avi::videoWriterMutexPtr_ = new QMutex();
+
 
     VideoWriter_avi::VideoWriter_avi(QObject *parent) 
         : VideoWriter_avi(DEFAULT_PARAMS,DUMMY_FILENAME,parent) 
@@ -39,13 +41,13 @@ namespace bias
 
     VideoWriter_avi::~VideoWriter_avi() 
     {
-        videoWriterMutex_.lock();
+        videoWriterMutexPtr_ -> lock();
         bool isOpened = videoWriter_.isOpened();
         if (isOpened)
         {
             videoWriter_.release();
         }
-        videoWriterMutex_.unlock();
+        videoWriterMutexPtr_ -> unlock();
     };
 
 
@@ -91,9 +93,7 @@ namespace bias
 
         bool openOK= true;
         
-        
-
-        videoWriterMutex_.lock();
+        videoWriterMutexPtr_ -> lock();
         try
         {
             openOK = videoWriter_.open(
@@ -106,14 +106,14 @@ namespace bias
         }
         catch (cv::Exception &e)
         {
-            videoWriterMutex_.unlock();
+            videoWriterMutexPtr_ -> unlock();
             isFirst_ = false;
             unsigned int errorId = ERROR_VIDEO_WRITER_INITIALIZE;
             std::string errorMsg("video writer unable to open file:\n\n"); 
             errorMsg += e.what();
             throw RuntimeError(errorId, errorMsg); 
         }
-        videoWriterMutex_.unlock();
+        videoWriterMutexPtr_ -> unlock();
 
         if (!openOK)
         {
@@ -124,9 +124,9 @@ namespace bias
             throw RuntimeError(errorId, errorMsg); 
         }
 
-        videoWriterMutex_.lock();
+        videoWriterMutexPtr_ -> lock();
         bool isOpened = videoWriter_.isOpened();
-        videoWriterMutex_.unlock();
+        videoWriterMutexPtr_ -> unlock();
 
         if (!isOpened)
         {
@@ -136,6 +136,7 @@ namespace bias
             errorMsg += "no exception thrown, but file not opened??";
             throw RuntimeError(errorId, errorMsg); 
         }
+
     }
 
 

@@ -3642,7 +3642,7 @@ namespace bias
             }
             else
             {
-                fileName += QString("_cam_%1").arg(numberOfCameras_);
+                fileName += QString("_cam_%1").arg(cameraNumber_);
             }
         }
 

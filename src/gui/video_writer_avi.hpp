@@ -7,6 +7,7 @@
 #include <QString>
 #include <QStringList>
 #include <QMap>
+#include <QPointer>
 #include <QMutex>
 
 namespace bias
@@ -46,7 +47,7 @@ namespace bias
             bool isFirst_;
             cv::VideoWriter videoWriter_;
             void setupOutput(StampedImage stampedImage);
-            QMutex videoWriterMutex_;
+            static QMutex *videoWriterMutexPtr_;
             
     };
 
