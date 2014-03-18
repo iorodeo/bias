@@ -538,6 +538,19 @@ namespace bias {
     }
 
 
+    void Camera::setTriggerType(TriggerType triggerType)
+    {
+        if (triggerType == TRIGGER_EXTERNAL)
+        {
+            cameraDevicePtr_ -> setTriggerExternal();
+        }
+        else
+        {
+            cameraDevicePtr_ -> setTriggerInternal();
+        };
+    }
+
+
     TriggerType Camera::getTriggerType()
     {
         return cameraDevicePtr_ -> getTriggerType();

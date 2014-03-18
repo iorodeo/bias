@@ -108,6 +108,7 @@ namespace bias {
             // Get/set trigger
             void setTriggerInternal();
             void setTriggerExternal();
+            void setTriggerType(TriggerType triggerType);
             TriggerType getTriggerType();
 
             // Format 7 settings

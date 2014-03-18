@@ -3920,6 +3920,26 @@ namespace bias
         // to new value.
         // --------------------------------------------------------------------
 
+
+        // Format7 settings
+        QVariantMap format7SettingsMap = cameraMap["format7Settings"].toMap();
+        if (cameraPropMap.isEmpty())
+        {
+            QString errMsgText("Camera: format7 settings are not present");
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        rtnStatus = setFormat7SettingsFromMap(format7SettingsMap, format7Info, showErrorDlg);
+        if (!rtnStatus.success)
+        {
+            return rtnStatus;
+        }
+
         // Trigger Type
         QString triggerTypeString = cameraMap["triggerType"].toString();
         if (triggerTypeString.isEmpty())
@@ -3985,25 +4005,6 @@ namespace bias
                 }
 
         } // swtich(triggerType)
-
-        // Format7 settings
-        QVariantMap format7SettingsMap = cameraMap["format7Settings"].toMap();
-        if (cameraPropMap.isEmpty())
-        {
-            QString errMsgText("Camera: format7 settings are not present");
-            if (showErrorDlg)
-            {
-                QMessageBox::critical(this,errMsgTitle,errMsgText);
-            }
-            rtnStatus.success = false;
-            rtnStatus.message = errMsgText;
-            return rtnStatus;
-        }
-        rtnStatus = setFormat7SettingsFromMap(format7SettingsMap, format7Info, showErrorDlg);
-        if (!rtnStatus.success)
-        {
-            return rtnStatus;
-        }
 
         rtnStatus.success = true;
         rtnStatus.message = QString("");

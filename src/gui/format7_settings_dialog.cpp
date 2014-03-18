@@ -9,6 +9,7 @@
 #include <iostream>
 
 
+
 namespace bias 
 {
     enum ROI_ENABLE_STATE
@@ -694,15 +695,22 @@ namespace bias
             return;
         }
 
+        // Get captureing state so it can be restored
         bool isCapturing = cameraWindowPtr -> isCapturing();
-
         if (isCapturing) 
         {
             cameraWindowPtr -> stopImageCapture();
         }
 
+        TriggerType triggerType;  
         if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
         {
+            // Get trigger type so that it can be restored and set to internal trigger
+            // NOTE: restoring trigger type isn't working at the moment for some reason.
+            triggerType = cameraPtr_ -> getTriggerType();
+            cameraPtr_ -> setTriggerInternal();
+
+            // Check that settings are valid
             try
             {
                 settingsAreValid = cameraPtr_ -> validateFormat7Settings(settings);
@@ -753,7 +761,6 @@ namespace bias
             {
                 QString msgText("unable to set format7 configuration");
                 cameraLockFailErrMsg(msgText);
-
             }
             
             if (error)
@@ -775,6 +782,19 @@ namespace bias
             return;
         }
 
+
+        //// Restore trigger type - this doesn't work...
+        //if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
+        //{
+        //    cameraPtr_ -> setTriggerType(triggerType);
+        //}
+        //else
+        //{
+        //    QString msgText("unable to restore trigger type");
+        //    cameraLockFailErrMsg(msgText);
+        //}
+
+        // Restore capturing state
         if (isCapturing)
         {
             cameraWindowPtr -> startImageCapture();

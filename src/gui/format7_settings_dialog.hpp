@@ -5,6 +5,7 @@
 #include "camera_facade.hpp"
 #include <QDialog>
 #include <memory>
+#include <QThread>
 
 namespace bias
 {
@@ -90,6 +91,22 @@ namespace bias
 
 
     }; // class Format7SettingsDialog
+
+
+    // Utility sleep function
+    class SleepThread : public QThread
+    {
+        public:
+            static void msleep(unsigned long msec)
+            {
+                QThread::msleep(msec);
+            };
+
+            static void sleep(unsigned long sec)
+            {
+                QThread::sleep(sec);
+            };
+    };
 
 } // namespace bias
 
