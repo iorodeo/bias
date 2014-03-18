@@ -355,6 +355,10 @@ namespace bias
                     QVariantMap formatMap, 
                     bool showErrorDlg
                     );
+            RtnStatus setAutoNamingOptionsFromMap(
+                    QVariantMap autoNamingOptionsMap,
+                    bool showErrorDlg
+                    );
             RtnStatus setTimerFromMap(QVariantMap timerMap, bool showErrorDlg);
             RtnStatus setDisplayFromMap(QVariantMap displayMap, bool showErrorDlg);
             RtnStatus setServerFromMap(QVariantMap serverMap, bool showErrorDlg);

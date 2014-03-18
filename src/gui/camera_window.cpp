@@ -813,6 +813,14 @@ namespace bias
         
         loggingSettingsMap.insert("ufmf", ufmfSettingsMap);
         loggingMap.insert("settings", loggingSettingsMap);
+
+        // Add logging auto-naming options
+        QVariantMap autoNamingOptionsMap;
+        autoNamingOptionsMap.insert("includeCameraIdentifier", autoNamingOptions_.includeCameraIdentifier);
+        autoNamingOptionsMap.insert("includeTimeAndDate", autoNamingOptions_.includeTimeAndDate);
+        autoNamingOptionsMap.insert("cameraIdentifier", autoNamingOptions_.getCameraIdentifierString());
+        autoNamingOptionsMap.insert("timeAndDateFormat", autoNamingOptions_.timeAndDateFormat);
+        loggingMap.insert("autoNamingOptions", autoNamingOptionsMap);
         configurationMap.insert("logging", loggingMap);
 
         // Add Timer configuration
@@ -876,8 +884,8 @@ namespace bias
 
         QVariantMap oldConfigMap = getConfigurationMap(rtnStatus);
 
-        //rtnStatus = setConfigurationFromMap(configMap,showErrorDlg);
-	rtnStatus = setConfigurationFromMap_Lenient(configMap,oldConfigMap,showErrorDlg);
+        //rtnStatus = setConfigurationFromMap(configMap,showErrorDlg); 
+        rtnStatus = setConfigurationFromMap_Lenient(configMap,oldConfigMap,showErrorDlg);
         if (!rtnStatus.success)
         {
             QString origErrMsg = rtnStatus.message;
@@ -1052,9 +1060,9 @@ namespace bias
 
     // same as setConfigurationFromMap, but uses the old configuration if 
     // fields are missing from the new one
-    RtnStatus CameraWindow::setConfigurationFromMap_Lenient(
+    RtnStatus CameraWindow::setConfigurationFromMap_Lenient( 
             QVariantMap configMap, 
-	    QVariantMap oldConfigMap,
+            QVariantMap oldConfigMap,
             bool showErrorDlg
             )
     {
@@ -1075,9 +1083,9 @@ namespace bias
         QVariantMap cameraMap = configMap["camera"].toMap();
         if (cameraMap.isEmpty())
         {
-	  cameraMap = oldConfigMap["camera"].toMap();
+            cameraMap = oldConfigMap["camera"].toMap();
         }
-	rtnStatus = setCameraFromMap(cameraMap,showErrorDlg);
+        rtnStatus = setCameraFromMap(cameraMap,showErrorDlg);
         if (!rtnStatus.success)
         {
             return rtnStatus;
@@ -1088,7 +1096,7 @@ namespace bias
         QVariantMap loggingMap = configMap["logging"].toMap();
         if (loggingMap.isEmpty())
         {
-	  loggingMap = oldConfigMap["logging"].toMap();
+            loggingMap = oldConfigMap["logging"].toMap();
         }
         rtnStatus = setLoggingFromMap(loggingMap,showErrorDlg);
         if (!rtnStatus.success)
@@ -1101,7 +1109,7 @@ namespace bias
         QVariantMap timerMap = configMap["timer"].toMap();
         if (timerMap.isEmpty())
         {
-	  timerMap = oldConfigMap["timer"].toMap();
+            timerMap = oldConfigMap["timer"].toMap();
         }
         rtnStatus = setTimerFromMap(timerMap,showErrorDlg);
         if (!rtnStatus.success)
@@ -1114,7 +1122,7 @@ namespace bias
         QVariantMap displayMap = configMap["display"].toMap();
         if (displayMap.isEmpty())
         {
-	  displayMap = oldConfigMap["display"].toMap();
+            displayMap = oldConfigMap["display"].toMap();
         }
         rtnStatus = setDisplayFromMap(displayMap,showErrorDlg);
         if (!rtnStatus.success)
@@ -1127,7 +1135,7 @@ namespace bias
         QVariantMap serverMap = configMap["server"].toMap();
         if (serverMap.isEmpty())
         {
-	  serverMap = oldConfigMap["server"].toMap();
+            serverMap = oldConfigMap["server"].toMap();
         }
         rtnStatus = setServerFromMap(serverMap,showErrorDlg);
         if (!rtnStatus.success)
@@ -1140,7 +1148,7 @@ namespace bias
         QVariantMap configFileMap = configMap["configuration"].toMap();
         if (configFileMap.isEmpty())
         {
-	  configFileMap = oldConfigMap["configuration"].toMap();
+            configFileMap = oldConfigMap["configuration"].toMap();
         }
         rtnStatus = setConfigFileFromMap(configFileMap,showErrorDlg);
         if (!rtnStatus.success)
@@ -1965,9 +1973,9 @@ namespace bias
         QPointer<QAction> actionPtr = qobject_cast<QAction *>(sender());
         videoFileFormat_ = actionToVideoFileFormatMap_[actionPtr]; 
 
-        std::cout << "video file format: "; 
-        std::cout << VIDEOFILE_EXTENSION_MAP[videoFileFormat_].toStdString();
-        std::cout << std::endl;
+        //std::cout << "video file format: "; 
+        //std::cout << VIDEOFILE_EXTENSION_MAP[videoFileFormat_].toStdString();
+        //std::cout << std::endl;
     }
     
 
@@ -4165,6 +4173,27 @@ namespace bias
             return rtnStatus;
         }
 
+
+        // Set the logging auto naming options 
+        // -----------------------------------
+        QVariantMap autoNamingOptionsMap = loggingMap["autoNamingOptions"].toMap();
+        if (autoNamingOptionsMap.isEmpty())
+        {
+            QString errMsgText("Logging configuration: autoNamingOptions not present");
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        rtnStatus = setAutoNamingOptionsFromMap(autoNamingOptionsMap,showErrorDlg);
+        if (!rtnStatus.success)
+        {
+            return rtnStatus;
+        }
+
         rtnStatus.success = true;
         rtnStatus.message = QString("");
         return rtnStatus;
@@ -4297,7 +4326,7 @@ namespace bias
             return rtnStatus;
         }
         flipVert_ = orientMap["flipVertical"].toBool();
-        std::cout << "flipVert_ " << flipVert_ << std::endl;
+        //std::cout << "flipVert_ " << flipVert_ << std::endl;
 
         // Set Orientation Flip Horizontal
         if (!orientMap.contains("flipHorizontal"))
@@ -4325,7 +4354,7 @@ namespace bias
             return rtnStatus;
         }
         flipHorz_ = orientMap["flipHorizontal"].toBool();
-        std::cout << "flipHorz_ " << flipHorz_ << std::endl;
+        //std::cout << "flipHorz_ " << flipHorz_ << std::endl;
 
         // Set Rotation
         if (!displayMap.contains("rotation"))
@@ -5280,7 +5309,7 @@ namespace bias
         format7Settings.offsetY = offsetY;
         format7Settings.width = width;
         format7Settings.height = height;
-        format7Settings.print();
+        //format7Settings.print();
 
         bool captureStopped = false;
         if (capturing_) 
@@ -5938,6 +5967,157 @@ namespace bias
         // TO DO ... add ufmf check of ufmf Dilate window size range
         // ----------------------------------------------------------------------
         videoWriterParams_.ufmf.dilateWindowSize = ufmfDilateWindowSize;
+
+        rtnStatus.success = true;
+        rtnStatus.message = QString("");
+        return rtnStatus;
+    }
+
+
+    RtnStatus CameraWindow::setAutoNamingOptionsFromMap( 
+            QVariantMap autoNamingOptionsMap, 
+            bool showErrorDlg
+            )
+    {
+        RtnStatus rtnStatus;
+        QString errMsgTitle("Load Configuration Error (Logging Auto Naming Options)");
+
+        // Get includeCameraIdentifier value
+        // ------------------------------------------------------------------------------
+        if (!autoNamingOptionsMap.contains("includeCameraIdentifier"))
+        {
+            QString errMsgText("Logging Auto Naming: includeCameraIdentifier not present");
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        if (!autoNamingOptionsMap["includeCameraIdentifier"].canConvert<bool>())
+        {
+            QString errMsgText("Logging Auto Naming: unable to convert"); 
+            errMsgText += "includeCameraIdentifier to bool ";
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        autoNamingOptions_.includeCameraIdentifier = autoNamingOptionsMap["includeCameraIdentifier"].toBool();
+
+        // Get includeTimeAndDate value
+        // ------------------------------------------------------------------------------
+        if (!autoNamingOptionsMap.contains("includeTimeAndDate"))
+        {
+            QString errMsgText("Logging Auto Naming: includeTimeAndDate not present");
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        if (!autoNamingOptionsMap["includeTimeAndDate"].canConvert<bool>())
+        {
+            QString errMsgText("Logging Auto Naming: unable to convert"); 
+            errMsgText += "includeTimeAndDate to bool ";
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        autoNamingOptions_.includeTimeAndDate = autoNamingOptionsMap["includeTimeAndDate"].toBool();
+
+        // Get cameraIdentifier value
+        // ------------------------------------------------------------------------------
+        if (!autoNamingOptionsMap.contains("cameraIdentifier"))
+        {
+            QString errMsgText("Logging Auto Naming: cameraIdentifier not present");
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        if (!autoNamingOptionsMap["cameraIdentifier"].canConvert<QString>())
+        {
+            QString errMsgText("Logging Auto Naming: unable to convert"); 
+            errMsgText += "caneraIdentifier to string ";
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        QString cameraIdentifierString = autoNamingOptionsMap["cameraIdentifier"].toString();
+        int cameraIdentifier = AutoNamingOptions::cameraIdentifierFromString(cameraIdentifierString);
+        if (cameraIdentifier == -1)
+        {
+            QString errMsgText = QString("Logging Auto Naming:"); 
+            errMsgText += QString(" unknown camera identifier type %1").arg(cameraIdentifierString); 
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        autoNamingOptions_.cameraIdentifier = cameraIdentifier;
+
+
+        // Get time and date format string
+        // ------------------------------------------------------------------------------
+        if (!autoNamingOptionsMap.contains("timeAndDateFormat"))
+        {
+            QString errMsgText("Logging Auto Naming: timeAndDateFormat not present");
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        if (!autoNamingOptionsMap["timeAndDateFormat"].canConvert<QString>())
+        {
+            QString errMsgText("Logging Auto Naming: unable to convert "); 
+            errMsgText += "timeAndDateFormat to string ";
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        QString timeAndDateFormat = autoNamingOptionsMap["timeAndDateFormat"].toString();
+        if (!AutoNamingOptions::isAllowedTimeAndDateFormat(timeAndDateFormat))
+        {
+            QString errMsgText("Logging Auto Naming: ");
+            errMsgText += QString("invalid timeAndDateFormat %1").arg(timeAndDateFormat); 
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        autoNamingOptions_.timeAndDateFormat = timeAndDateFormat;
+       
 
         rtnStatus.success = true;
         rtnStatus.message = QString("");
