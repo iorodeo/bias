@@ -15,25 +15,28 @@ namespace bias
 
     ImageLogger::ImageLogger(QObject *parent) : QObject(parent) 
     {
-        initialize(NULL,NULL);
+        initialize(0, NULL,NULL);
     }
 
     ImageLogger::ImageLogger (
+            unsigned int cameraNumber,
             std::shared_ptr<VideoWriter> videoWriterPtr,
             std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr, 
             QObject *parent
             ) : QObject(parent)
     {
-        initialize(videoWriterPtr, logImageQueuePtr);
+        initialize(cameraNumber, videoWriterPtr, logImageQueuePtr);
     }
 
     void ImageLogger::initialize( 
+            unsigned int cameraNumber,
             std::shared_ptr<VideoWriter> videoWriterPtr,
             std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr 
             ) 
     {
         frameCount_ = 0;
         stopped_ = true;
+        cameraNumber_ = cameraNumber;
         videoWriterPtr_ = videoWriterPtr;
         logImageQueuePtr_ = logImageQueuePtr;
         if ((logImageQueuePtr_ != NULL) && (videoWriterPtr_ != NULL))
@@ -49,6 +52,11 @@ namespace bias
     void ImageLogger::stop()
     {
         stopped_ = true;
+    }
+
+    unsigned int ImageLogger::getLogQueueSize()
+    {
+        return logQueueSize_;
     }
 
     void ImageLogger::run()
@@ -97,7 +105,8 @@ namespace bias
                     emit imageLoggingError(errorId, errorMsg);
                     errorFlag = true;
                 }
-                //std::cout << "log queue size: " << logQueueSize << std::endl;
+                //std::cout << "cam: " << cameraNumber_ << ", queue size: " << logQueueSize;
+                //std::cout << "/" << MAX_LOG_QUEUE_SIZE << std::endl;
 
                 // Add frame to video writer
                 try 
@@ -114,6 +123,7 @@ namespace bias
 
             acquireLock();
             done = stopped_;
+            logQueueSize_ = logQueueSize;
             releaseLock();
 
         } // while (!done)

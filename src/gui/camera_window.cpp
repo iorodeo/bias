@@ -377,6 +377,7 @@ namespace bias
             videoWriterPtr -> setFileName(videoFileFullPath);
 
             imageLoggerPtr_ = new ImageLogger(
+                    cameraNumber_,
                     videoWriterPtr, 
                     logImageQueuePtr_, 
                     this
@@ -1585,7 +1586,6 @@ namespace bias
         {
             // Get information from image dispatcher
             // -------------------------------------------------------------------
-            //imageDispatcherPtr_ -> acquireLock();
             QImage img;
             cv::Mat histMat;
             cv::Size imgSize;
@@ -1593,13 +1593,10 @@ namespace bias
             if (imageDispatcherPtr_ -> tryLock(IMAGE_DISPLAY_CAMERA_LOCK_TRY_DT))
             {
                 cv::Mat imgMat = imageDispatcherPtr_ -> getImage();
-                //QImage img = matToQImage(imgMat);
                 img = matToQImage(imgMat);
                 framesPerSec_ = imageDispatcherPtr_ -> getFPS();
                 timeStamp_ = imageDispatcherPtr_ -> getTimeStamp();
                 frameCount_ = imageDispatcherPtr_ -> getFrameCount();
-                //cv::Mat histMat = calcHistogram(imgMat);
-                //cv::Size imgSize = imgMat.size();
                 histMat = calcHistogram(imgMat);
                 imgSize = imgMat.size();
                 imageDispatcherPtr_ -> releaseLock();
@@ -1624,6 +1621,13 @@ namespace bias
             statusMsg += boolToOnOffQString(actionTimerEnabledPtr_ -> isChecked());
             statusMsg += QString().sprintf(",  %dx%d", imgSize.width, imgSize.height);
             statusMsg += QString().sprintf(",  %1.1f fps", framesPerSec_);
+            if ((logging_) && (!imageLoggerPtr_.isNull()))
+            {
+                imageLoggerPtr_ -> acquireLock();
+                unsigned int logQueueSize = imageLoggerPtr_ -> getLogQueueSize();
+                imageLoggerPtr_ -> releaseLock();
+                statusMsg += QString(",  log queue size = %1").arg(logQueueSize);
+            }
             statusbarPtr_ -> showMessage(statusMsg);
 
             // Set update capture time 
