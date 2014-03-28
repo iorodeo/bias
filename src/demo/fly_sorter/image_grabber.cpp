@@ -20,7 +20,6 @@ const QString DEBUG_DUMP_CAMERA_PROPS_FILE_NAME("fly_sorter_camera_props_dump.tx
 const int CAPTURE_FROM_DIR_FRAME_NUMBER_MUL = 1000;
 
 
-
 // Function prototypes
 // ----------------------------------------------------------------------------
 bool getFrameNumberToFileInfoMap(

@@ -73,16 +73,28 @@ RtnStatus FlySorterWindow::startRunning()
             }
             else
             {
-                // Update vector of batch video files 
-                bool success = updateBatchVideoFileList();
-                if (!success)
+
+                // Batch trainging mode
+
+                if (isCaptureModeFile())
                 {
-                    rtnStatus.success = false;
-                    rtnStatus.message = QString("unable to update batch video file list");
-                    return rtnStatus;
+                    // Update list of batch video files 
+                    bool success = updateBatchVideoFileList();
+                    if (!success)
+                    {
+                        rtnStatus.success = false;
+                        rtnStatus.message = QString("unable to update batch video file list");
+                        return rtnStatus;
+                    }
+                    batchVideoFileIndex_ = 0;
+                    setupBatchDataWrite();
                 }
-                batchVideoFileIndex_ = 0;
-                setupBatchDataWrite();
+                else 
+                {
+                    // Update list of batch video directories 
+                     
+                }
+
             }
         }
         else
@@ -593,8 +605,15 @@ void FlySorterWindow::initialize()
     parameterFileName_ = DEFAULT_PARAMETER_FILENAME;
     threadPoolPtr_ = new QThreadPool(this);
     threadPoolPtr_ -> setMaxThreadCount(MAX_THREAD_COUNT);
-    batchVideoFileIndex_ = 0;
     httpServerPort_ = DEFAULT_HTTP_SERVER_PORT;
+
+    // Set up lists for batch running in file input mode
+    batchVideoFileList_.clear();
+    batchVideoFileIndex_ = 0; 
+
+    // Set up list for batch running in directory input mode
+    batchVideoDirList_.clear();
+    batchVideoDirIndex_ = 0;
 
     setupImageLabels();
     setupDisplayTimer();
@@ -886,7 +905,7 @@ void FlySorterWindow::updateParamText()
 
 void FlySorterWindow::updateWidgetsOnLoad()
 {
-    if (param_.imageGrabber.captureMode == QString("file"))
+    if (isCaptureModeFile() || isCaptureModeDir())
     {
         trainingDataCheckBoxPtr_ -> setEnabled(true);
         if (trainingDataCheckBoxPtr_ -> checkState() == Qt::Checked)
@@ -1019,6 +1038,17 @@ bool FlySorterWindow::isTrainingDataModeBatch()
 }
 
 
+bool FlySorterWindow::isCaptureModeFile()
+{ 
+    return param_.imageGrabber.captureMode == QString("file");
+}
+
+bool FlySorterWindow::isCaptureModeDir()
+{
+    return param_.imageGrabber.captureMode == QString("directory");
+}
+
+
 bool FlySorterWindow::updateBatchVideoFileList()
 {
     // Get application directory
@@ -1062,6 +1092,29 @@ bool FlySorterWindow::updateBatchVideoFileList()
         QString absoluteFilePath = videoDir.absoluteFilePath(videoNameList[i]);
         batchVideoFileList_.push_back(absoluteFilePath);
     }
+    return true;
+}
+
+
+bool FlySorterWindow::updateBatchVideoDirList()
+{
+    // Get application directory
+    QString appPathString = QCoreApplication::applicationDirPath();
+    QDir appDir = QDir(appPathString);
+
+    // Check to see if video file base directory exists 
+    QString videoDirString = TRAINING_VIDEO_BASE_STRING;
+    QDir videoDir = QDir(appDir.absolutePath() + "/" + videoDirString);
+    if (!videoDir.exists())
+    {
+        QString errMsgTitle("Batch Training Data Error");
+        QString message = QString("%1 subdirectory does not exist").arg(videoDirString);
+        QMessageBox::critical(this, errMsgTitle, message);
+        return false;
+    }
+
+    // Get list of sub-directories
+    
     return true;
 }
 

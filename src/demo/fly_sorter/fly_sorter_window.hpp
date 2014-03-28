@@ -34,6 +34,7 @@ class QVarianMap;
 class QByteArray;
 class ExtCtlHttpServer;
 
+
 enum TrainingDataMode 
 {
     TRAINING_DATA_MODE_SINGLE=0,
@@ -112,8 +113,11 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         GenderSorter genderSorter_;
         GenderSorterData genderSorterData_;
 
-        QList<QString> batchVideoFileList_;
+        QStringList batchVideoFileList_;
         int batchVideoFileIndex_;
+
+        QStringList batchVideoDirList_;
+        int batchVideoDirIndex_;
 
         QPointer<ExtCtlHttpServer> httpServerPtr_;
         unsigned int httpServerPort_;
@@ -143,7 +147,10 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
 
         bool isTrainingDataModeSingle();
         bool isTrainingDataModeBatch();
+        bool isCaptureModeFile();
+        bool isCaptureModeDir();
         bool updateBatchVideoFileList();
+        bool updateBatchVideoDirList();
         bool createTrainingData();
         bool createDebugImages();
         bool createDebugLog();

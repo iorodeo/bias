@@ -83,10 +83,6 @@ class ThreadHelper: public QThread
         }
 };
 
-// Utility functions
-// ----------------------------------------------------------------------------
-
-
 
 
 #endif // #ifndef BIAS_IMAGE_GRABBER_HPP
