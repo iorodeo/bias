@@ -2,26 +2,48 @@
 #include "camera_facade.hpp"
 #include "exception.hpp"
 #include <QPointer>
+#include <QMap>
+#include <QFile>
+#include <QFileInfo>
 #include <QDir>
 #include <QString>
 #include <QStringList>
-#include <QFileInfo>
-#include <QFileInfoList>
+#include <QTextStream>
 #include <iostream>
 #include <fstream>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
+// Constants
+// ----------------------------------------------------------------------------
 const QString DEBUG_DUMP_CAMERA_PROPS_FILE_NAME("fly_sorter_camera_props_dump.txt");
+const int CAPTURE_FROM_DIR_FRAME_NUMBER_MUL = 1000;
+
+
+
+// Function prototypes
+// ----------------------------------------------------------------------------
+bool getFrameNumberToFileInfoMap(
+        QFileInfoList imageFileInfoList, 
+        QMap<int,QFileInfo> &frameNumberToFileInfoMap,
+        QString errorMsg
+        );
+
+bool getFrameNumberFilterMap(
+        QDir captureInputDir,
+        QMap<int,bool> &frameNumberFilterMap,
+        QString errorMsg
+        );
 
 // CameraInfo
 // ----------------------------------------------------------------------------
-
 CameraInfo::CameraInfo()
 {
     vendor = QString("");
     model = QString("");
     guid = QString("");
 }
+
 
 // ImageData
 // ----------------------------------------------------------------------------
@@ -312,7 +334,7 @@ void ImageGrabber::runCaptureFromFile()
 
 void ImageGrabber::runCaptureFromDir()
 {
-    float sleepDt = 1.0*1.0e3/param_.frameRate;
+    float sleepDt = 0.5*1.0e3/param_.frameRate;
     unsigned long fileCount = 0;
 
     // Check that capture directory exists
@@ -321,44 +343,66 @@ void ImageGrabber::runCaptureFromDir()
     if (!captureInputDir.exists())
     {
         QString dirStr = captureInputDir.absolutePath();
-        QString errorMsg = QString("Error captureInputDir %1 does not exist.").arg(dirStr);
+        QString errorMsg = QString("Error: captureInputDir %1 does not exist.").arg(dirStr);
         emit fileReadError(errorMsg);
         return;
     }
 
     // Get names of image files in capture directory
-    QStringList nameFilter("*.bmp");
+    QStringList bmpFilter("*.bmp");
     captureInputDir.setSorting(QDir::Name);
-    QFileInfoList imageFileInfoList = captureInputDir.entryInfoList(nameFilter);
+    QFileInfoList imageFileInfoList = captureInputDir.entryInfoList(bmpFilter);
 
-    // Create map from frame number in filename to File info
-    QMap<int,QFileInfo> frameNumberToFileInfoMap;
-    for (int i=0; i<imageFileInfoList.size(); i++)
+    // Create map from frame number in filename and sort images files by frame number
+    QMap<int, QFileInfo> frameNumberToFileInfoMap;
+    QString mapErrorMsg;
+    bool mapOk = getFrameNumberToFileInfoMap(imageFileInfoList,frameNumberToFileInfoMap,mapErrorMsg);
+    if (!mapOk)
     {
-        QFileInfo fileInfo = imageFileInfoList[i];
-        QString fileName = fileInfo.fileName();
-        int frmInd = fileName.indexOf(QString("frm"));
-        int frmScoreInd0 = fileName.indexOf(QString("_"),frmInd);
-        int frmScoreInd1 = fileName.indexOf(QString("_"),frmScoreInd0+1);
-        int frameNumber = fileName.mid(frmScoreInd0+1, frmScoreInd1-frmScoreInd0-1).toInt();
-        if (!frameNumberToFileInfoMap.contains(frameNumber))
-        { 
-            frameNumberToFileInfoMap.insert(frameNumber, fileInfo);
-        }
+        emit fileReadError(mapErrorMsg);
+        return;
     }
-
     QList<int> frameNumberList = frameNumberToFileInfoMap.keys();
     qSort(frameNumberList.begin(), frameNumberList.end());
     QListIterator<int> frameNumberIt(frameNumberList);
 
+    // Read debug data log and create filter map
+    QMap<int, bool> frameNumberFilterMap;  
+    mapOk = getFrameNumberFilterMap(captureInputDir,frameNumberFilterMap, mapErrorMsg);
+    if (!mapOk)
+    {
+        emit fileReadError(mapErrorMsg);
+        return;
+    }
+
+
+
     while ((!stopped_)  && frameNumberIt.hasNext())
     {
+        ImageData imageData;
+
         int frameNumber = frameNumberIt.next();
         QFileInfo fileInfo = frameNumberToFileInfoMap[frameNumber];
         QString fileName = fileInfo.absoluteFilePath();
-        ImageData imageData;
-
         std::cout  << "count: " << fileCount << ", fileName " << fileName.toStdString(); 
+
+        // Filter out undesired values
+        if (!frameNumberFilterMap.contains(frameNumber))
+        {
+            QString errorMsg = QString("frame number not found in filter map for dir %1").arg(
+                    captureInputDir.absolutePath()
+                    );
+            emit fileReadError(errorMsg);
+            return;
+        }
+        bool filterValue = frameNumberFilterMap[frameNumber];
+        if (!filterValue)
+        {
+            std::cout << " - skipped (filtered)" << std::endl;
+            continue;
+        }
+
+        // Make sure file exists
         if (!fileInfo.exists())
         {
             std::cout <<" - skipped (doesn't exist)" << std::endl;
@@ -366,10 +410,12 @@ void ImageGrabber::runCaptureFromDir()
         }
         std::cout << std::endl;
 
-        cv::Mat mat;
+
+        // Read image from file
+        cv::Mat subImageMat;
         try
         { 
-            mat = cv::imread(fileName.toStdString());
+            subImageMat = cv::imread(fileName.toStdString());
         }
         catch (cv::Exception &exception)
         {
@@ -380,7 +426,15 @@ void ImageGrabber::runCaptureFromDir()
             continue;
         }
 
-        imageData.mat = mat.clone(); // Get deep copy of image mat (required)
+        // Place mat in larger padded image
+        unsigned int pad = 500;
+        cv::Scalar padColor = cv::Scalar(255,255,255);
+        cv::Size subImageSize = subImageMat.size();
+        cv::Size fullImageSize = cv::Size(subImageSize.width+2*pad,subImageSize.height+2*pad);
+        cv::Mat fullImageMat = cv::Mat(fullImageSize, CV_8UC3, padColor);
+        cv::copyMakeBorder(subImageMat,fullImageMat, pad, pad, pad, pad, cv::BORDER_CONSTANT, padColor);
+
+        imageData.mat = fullImageMat.clone(); // Get deep copy of image mat (required)
         imageData.frameCount = frameNumber; 
         QDateTime currentDateTime = QDateTime::currentDateTime();
         imageData.dateTime = double(currentDateTime.toMSecsSinceEpoch())*(1.0e-3);
@@ -877,3 +931,178 @@ bool ImageGrabber::setupCamera()
     return true;
 }
 
+
+// Utility functions
+// ----------------------------------------------------------------------------
+
+bool getFrameNumberToFileInfoMap(
+        QFileInfoList imageFileInfoList, 
+        QMap<int,QFileInfo> &frameNumberToFileInfoMap,
+        QString errorMsg
+        )
+{
+    for (int i=0; i<imageFileInfoList.size(); i++)
+    {
+        bool intOk;
+
+        QFileInfo fileInfo = imageFileInfoList[i];
+        QString fileName = fileInfo.fileName();
+
+        int frmInd = fileName.indexOf(QString("frm"));
+        if (frmInd == -1)
+        {
+            errorMsg = QString("Error: unable to find frm in %1").arg(fileName);
+            return false;
+        }
+
+        int frmScoreInd0 = fileName.indexOf(QString("_"),frmInd);
+        if (frmScoreInd0 == -1)
+        {
+            errorMsg = QString("Error: unable to parse frame number in %1").arg(fileName);
+            return false;
+        }
+
+        int frmScoreInd1 = fileName.indexOf(QString("_"),frmScoreInd0+1);
+        if (frmScoreInd1 == -1)
+        {
+            errorMsg = QString("Error: unable to parse frame number in %1").arg(fileName);
+            return false;
+        }
+
+        intOk = true;
+        int frameNumber = fileName.mid(frmScoreInd0+1, frmScoreInd1-frmScoreInd0-1).toInt(&intOk);
+        if (!intOk)
+        {
+            errorMsg = QString("Error: unable to convert frameNumber to int in file %1").arg(fileName);
+            return false;
+        }
+        int cntInd = fileName.indexOf(QString("cnt"));
+        if (cntInd == -1)
+        {
+            errorMsg = QString("Error: unable to find cnt in %1").arg(fileName);
+            return false;
+        }
+
+        int cntScoreInd0 = fileName.indexOf(QString("_"), cntInd);
+        if (cntScoreInd0 == -1)
+        {
+            errorMsg = QString("Error: unable to parse object count in %1").arg(fileName);
+            return false;
+        }
+
+        int cntScoreInd1 = fileName.indexOf(QString("."), cntScoreInd0+1);
+        if (cntScoreInd1 == -1)
+        {
+            errorMsg = QString("Error: unable to parse object count in %1").arg(fileName);
+            return false;
+        }
+
+        intOk = true;
+        int objectCount =  fileName.mid(cntScoreInd0+1,cntScoreInd1-cntScoreInd0-1).toInt(&intOk);
+        if (!intOk)
+        {
+            errorMsg = QString("Error: unable to convert count to int in file %1").arg(fileName);
+            return false;
+        }
+        int frameNumberWithCount = frameNumber*CAPTURE_FROM_DIR_FRAME_NUMBER_MUL + objectCount;
+        if (!frameNumberToFileInfoMap.contains(frameNumberWithCount))
+        { 
+            frameNumberToFileInfoMap.insert(frameNumberWithCount, fileInfo);
+        }
+    }
+    return true;
+}
+
+
+bool getFrameNumberFilterMap(
+        QDir captureInputDir,
+        QMap<int,bool> &frameNumberFilterMap,
+        QString errorMsg
+        )
+{
+    // Check that file exists
+    QString logFileName("debug_data_log.txt");
+    if (!captureInputDir.exists(logFileName))
+    {
+        errorMsg = QString("Error: %1 not found in capture directory").arg(logFileName); 
+        return false;
+    }
+
+    // Open file
+    QFile logFile(captureInputDir.absoluteFilePath(logFileName));
+    if (!logFile.open(QIODevice::ReadOnly))
+    {
+        errorMsg = QString("Error: unable to open debug data log %1").arg(logFileName);
+        return false;
+    }
+
+    // Read contents and create map
+    QTextStream logStream(&logFile);
+    bool inFrameCount = false;
+    bool filterFlag = true;
+    int frameNumberWithCount = -1;
+    while (!logStream.atEnd())
+    {
+        QString line = logStream.readLine();
+        QStringList lineList = line.split(" ",QString::SkipEmptyParts);
+        lineList = lineList.replaceInStrings(QString(","),QString(""));
+        if (lineList.isEmpty())
+        {
+            // Skip empty lines
+            continue;
+        }
+
+        if (lineList.contains("Frame:") && lineList.contains("count:"))
+        {
+            inFrameCount = true;
+            bool intOk = true;
+
+            int frameNumber = lineList[1].toInt(&intOk);
+            if (frameNumber == -1)
+            {
+                errorMsg = QString("Error: unable to parse frame number in %1").arg(
+                        captureInputDir.absoluteFilePath(logFileName)
+                        );
+                return false;
+            }
+
+            int objectCount = lineList[3].toInt(&intOk);
+            if (objectCount == -1)
+            {
+                errorMsg = QString("Error: unable to parse object count in %1").arg(
+                        captureInputDir.absoluteFilePath(logFileName)
+                        );
+                return false;
+            }
+            
+            frameNumberWithCount = frameNumber*CAPTURE_FROM_DIR_FRAME_NUMBER_MUL + objectCount;
+        }
+        else if (lineList.contains("onBorderX:") || lineList.contains("onBorderY:"))
+        {
+            bool intOk = true;
+            int onBorderVal = lineList[1].toInt(&intOk);
+            if ( (!intOk) || (onBorderVal < 0) || (onBorderVal > 1))
+            {
+                errorMsg = QString("Error: unable to parse onBorder value in %1").arg(
+                        captureInputDir.absoluteFilePath(logFileName)
+                        );
+                return false;
+            }
+            if (onBorderVal == 1)
+            {
+                filterFlag = false;
+            }
+        }
+        else if (lineList.contains("contourVector:"))
+        {
+            if (inFrameCount)
+            {
+                frameNumberFilterMap.insert(frameNumberWithCount,filterFlag);
+            }
+            inFrameCount = false;
+            filterFlag = true;
+        }
+    }
+    logFile.close();
+    return true;
+}

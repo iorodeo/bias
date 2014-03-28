@@ -83,6 +83,8 @@ class ThreadHelper: public QThread
         }
 };
 
+// Utility functions
+// ----------------------------------------------------------------------------
 
 
 
