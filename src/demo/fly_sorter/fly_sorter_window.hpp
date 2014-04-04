@@ -140,7 +140,7 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
         void loadParamFromFile();
         void updateParamText();
         void updateWidgetsOnLoad();
-        void setupTrainingDataWrite(QString videoFileName);
+        void setupTrainingDataWrite(QString name);
         void setupBatchDataWrite();
         void setupDebugImagesWrite();
         TrainingDataMode getTrainingDataMode();

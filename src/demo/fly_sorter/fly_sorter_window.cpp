@@ -92,7 +92,22 @@ RtnStatus FlySorterWindow::startRunning()
                 else 
                 {
                     // Update list of batch video directories 
-                     
+                    bool success = updateBatchVideoDirList();
+                    if (!success)
+                    {
+                        rtnStatus.success = false;
+                        rtnStatus.message = QString("unable to update batch video directory list");
+                        return rtnStatus;
+                    }
+                    batchVideoDirIndex_ = 0;
+                    setupBatchDataWrite();  // Check that is is the correct thing to do
+                    
+                    // DEVEL
+                    //  -------------------------------------------
+                    rtnStatus.success = false;
+                    rtnStatus.message = QString("Devel stop");
+                    return rtnStatus;
+                    // --------------------------------------------
                 }
 
             }
@@ -930,7 +945,7 @@ void FlySorterWindow::updateWidgetsOnLoad()
 }
 
 
-void FlySorterWindow::setupTrainingDataWrite(QString videoFileName)
+void FlySorterWindow::setupTrainingDataWrite(QString name)
 {
     // Get application directory
     QString appPathString = QCoreApplication::applicationDirPath();
@@ -945,7 +960,16 @@ void FlySorterWindow::setupTrainingDataWrite(QString videoFileName)
     }
 
     // Create training data directory if it doesn't exist
-    QString videoPrefix = videoFileName.split(".", QString::SkipEmptyParts).at(0);
+    QString videoPrefix; 
+    if (isCaptureModeFile())
+    {
+        videoPrefix = name.split(".", QString::SkipEmptyParts).at(0);
+    }
+    else
+    {
+        videoPrefix = name;
+    }
+
     QDir dataDir = QDir(baseDir.absolutePath() + "/" + videoPrefix);
     if (!dataDir.exists())
     {
@@ -960,16 +984,29 @@ void FlySorterWindow::setupTrainingDataWrite(QString videoFileName)
 
 void FlySorterWindow::setupBatchDataWrite()
 {
-    QFileInfo videoFileInfo(batchVideoFileList_[batchVideoFileIndex_]);
-    setupTrainingDataWrite(videoFileInfo.fileName());
+    QString videoName;
     QStringList statusMsg; 
     statusMsg << QString("Batch "); 
-    statusMsg << QString::number(batchVideoFileIndex_+1);
-    statusMsg << QString("/");  
-    statusMsg << QString::number(batchVideoFileList_.size());
+
+    if (isCaptureModeFile())
+    {
+        QFileInfo videoFileInfo(batchVideoFileList_[batchVideoFileIndex_]);
+        videoName = videoFileInfo.fileName();
+        statusMsg << QString::number(batchVideoFileIndex_+1);
+        statusMsg << QString("/");  
+        statusMsg << QString::number(batchVideoFileList_.size());
+    }
+    else
+    {
+        videoName = batchVideoDirList_[batchVideoDirIndex_];
+        statusMsg << QString::number(batchVideoDirIndex_+1);
+        statusMsg << QString("/");  
+        statusMsg << QString::number(batchVideoDirList_.size());
+    }
     statusMsg << QString("  "); 
-    statusMsg << videoFileInfo.fileName();
+    statusMsg << videoName;
     statusbar -> showMessage(statusMsg.join(QString("")));
+    setupTrainingDataWrite(videoName);
 }
 
 
@@ -1068,7 +1105,7 @@ bool FlySorterWindow::updateBatchVideoFileList()
 
     // Get list of '.avi' files in video file directory
     videoDir.setNameFilters(QStringList()<<"*.avi");
-    QList<QString> videoNameList  = videoDir.entryList();
+    QStringList videoNameList  = videoDir.entryList();
     if (videoNameList.empty())
     {
         QString errMsgTitle("Batch Training Data Error");
@@ -1087,9 +1124,10 @@ bool FlySorterWindow::updateBatchVideoFileList()
 
     // Get absolute path of video files
     batchVideoFileList_.clear();
-    for (int i=0; i<videoNameList.size(); i++)
+    QStringListIterator nameIt(videoNameList);
+    while (nameIt.hasNext())
     {
-        QString absoluteFilePath = videoDir.absoluteFilePath(videoNameList[i]);
+        QString absoluteFilePath = videoDir.absoluteFilePath(nameIt.next());
         batchVideoFileList_.push_back(absoluteFilePath);
     }
     return true;
@@ -1114,7 +1152,25 @@ bool FlySorterWindow::updateBatchVideoDirList()
     }
 
     // Get list of sub-directories
-    
+    videoDir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+    QStringList  videoDirList = videoDir.entryList();
+
+    if (videoDirList.empty())
+    {
+        QString errMsgTitle("Batch Training Data Error");
+        QString message = QString("no cropped image directories found in %1 subdirectory").arg(videoDirString);
+        QMessageBox::critical(this, errMsgTitle, message);
+        return false;
+    }
+
+    // Get absolute path of cropped image "video" directories
+    batchVideoDirList_.clear();
+    QStringListIterator dirIt(videoDirList);
+    while(dirIt.hasNext())
+    {
+        QString absoluteDirPath = videoDir.absoluteFilePath(dirIt.next());
+        batchVideoDirList_.push_back(absoluteDirPath);
+    }
     return true;
 }
 
