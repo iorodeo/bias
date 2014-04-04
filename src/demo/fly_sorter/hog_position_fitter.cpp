@@ -299,6 +299,7 @@ HogPositionFitterData HogPositionFitter::fit(
             posData.success = true;
             fitterData.positionDataList.push_back(posData); 
 
+            std::cout << "write training data: " << writeTrainingData_ << std::endl;
             if (writeTrainingData_)
             {
                 createTrainingData(frameCount, posData, rotBoundingImageLUV);
@@ -864,6 +865,8 @@ void HogPositionFitter::createTrainingData(
         cv::Mat img
         )
 {
+    std::cout << "createTrainingData" << std::endl;
+
     // Create base file name
     std::stringstream baseNameStream;
     baseNameStream << trainingFileNamePrefix_;
@@ -872,6 +875,8 @@ void HogPositionFitter::createTrainingData(
     baseNameStream << "_posy_"  << int(posData.meanYAbs);
     baseNameStream << "_id_"    << posData.segmentData.blobData.id;
     std::string baseName = baseNameStream.str();
+
+    std::cout << "baseName: " << baseName << std::endl;
 
     // Write unflipped pixel feature vector
     std::stringstream fileNameStream;

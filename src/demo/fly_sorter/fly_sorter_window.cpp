@@ -73,7 +73,6 @@ RtnStatus FlySorterWindow::startRunning()
             }
             else
             {
-
                 // Batch trainging mode
 
                 if (isCaptureModeFile())
@@ -87,7 +86,6 @@ RtnStatus FlySorterWindow::startRunning()
                         return rtnStatus;
                     }
                     batchVideoFileIndex_ = 0;
-                    setupBatchDataWrite();
                 }
                 else 
                 {
@@ -100,16 +98,8 @@ RtnStatus FlySorterWindow::startRunning()
                         return rtnStatus;
                     }
                     batchVideoDirIndex_ = 0;
-                    setupBatchDataWrite();  // Check that is is the correct thing to do
-                    
-                    // DEVEL
-                    //  -------------------------------------------
-                    rtnStatus.success = false;
-                    rtnStatus.message = QString("Devel stop");
-                    return rtnStatus;
-                    // --------------------------------------------
                 }
-
+                setupBatchDataWrite();
             }
         }
         else
@@ -255,7 +245,14 @@ void FlySorterWindow::startImageCapture()
         ImageGrabberParam imageGrabberParam = param_.imageGrabber;
         if (createTrainingData() && isTrainingDataModeBatch())
         {
-            imageGrabberParam.captureInputFile = batchVideoFileList_[batchVideoFileIndex_];
+            if (isCaptureModeFile())
+            {
+                imageGrabberParam.captureInputFile = batchVideoFileList_[batchVideoFileIndex_];
+            }
+            else
+            {
+                imageGrabberParam.captureInputDir = batchVideoDirList_[batchVideoDirIndex_];
+            }
         }
         imageGrabberPtr_ = new ImageGrabber(imageGrabberParam); 
 
@@ -528,9 +525,27 @@ void FlySorterWindow::OnImageCaptureStopped()
 
         if (createTrainingData() && isTrainingDataModeBatch() && !stopRunningFlag_)
         {
-            batchVideoFileIndex_++;
-            if (batchVideoFileIndex_ < batchVideoFileList_.size())
+            bool batchComplete = false;
+
+            if (isCaptureModeFile())
             {
+                batchVideoFileIndex_++;
+                if (batchVideoFileIndex_ >= batchVideoFileList_.size())
+                {
+                    batchComplete = true;
+                }
+            }
+            else
+            {
+                batchVideoDirIndex_++;
+                if (batchVideoDirIndex_ >= batchVideoDirList_.size())
+                {
+                    batchComplete = true;
+                }
+            }
+
+            if (!batchComplete)
+            { 
                 setupBatchDataWrite();
                 running_ = false;
                 startImageCapture();
@@ -967,7 +982,7 @@ void FlySorterWindow::setupTrainingDataWrite(QString name)
     }
     else
     {
-        videoPrefix = name;
+        videoPrefix = QDir(name).dirName(); 
     }
 
     QDir dataDir = QDir(baseDir.absolutePath() + "/" + videoPrefix);

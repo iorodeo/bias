@@ -333,12 +333,12 @@ void ImageGrabber::runCaptureFromFile()
 
 void ImageGrabber::runCaptureFromDir()
 {
-    float sleepDt = 0.5*1.0e3/param_.frameRate;
+    float sleepDt = 1.0e3/param_.frameRate;
     unsigned long fileCount = 0;
 
     // Check that capture directory exists
     QDir captureInputDir = QDir(param_.captureInputDir);
-    std::cout << "captureInputDir: " << captureInputDir.absolutePath().toStdString() << std::endl;
+    //std::cout << "captureInputDir: " << captureInputDir.absolutePath().toStdString() << std::endl;
     if (!captureInputDir.exists())
     {
         QString dirStr = captureInputDir.absolutePath();
@@ -383,7 +383,7 @@ void ImageGrabber::runCaptureFromDir()
         int frameNumber = frameNumberIt.next();
         QFileInfo fileInfo = frameNumberToFileInfoMap[frameNumber];
         QString fileName = fileInfo.absoluteFilePath();
-        std::cout  << "count: " << fileCount << ", fileName " << fileName.toStdString(); 
+        //std::cout  << "count: " << fileCount << ", fileName " << fileName.toStdString(); 
 
         // Filter out undesired values
         if (!frameNumberFilterMap.contains(frameNumber))
@@ -397,17 +397,17 @@ void ImageGrabber::runCaptureFromDir()
         bool filterValue = frameNumberFilterMap[frameNumber];
         if (!filterValue)
         {
-            std::cout << " - skipped (filtered)" << std::endl;
+            //std::cout << " - skipped (filtered)" << std::endl;
             continue;
         }
 
         // Make sure file exists
         if (!fileInfo.exists())
         {
-            std::cout <<" - skipped (doesn't exist)" << std::endl;
+            //std::cout <<" - skipped (doesn't exist)" << std::endl;
             continue;
         }
-        std::cout << std::endl;
+        //std::cout << std::endl;
 
 
         // Read image from file
