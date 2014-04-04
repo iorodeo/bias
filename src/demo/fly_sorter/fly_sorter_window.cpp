@@ -69,7 +69,14 @@ RtnStatus FlySorterWindow::startRunning()
         {
             if (isTrainingDataModeSingle())
             {
-                setupTrainingDataWrite(param_.imageGrabber.captureInputFile);
+                if (isCaptureModeFile())
+                {
+                    setupTrainingDataWrite(param_.imageGrabber.captureInputFile);
+                }
+                else
+                {
+                    setupTrainingDataWrite(param_.imageGrabber.captureInputDir);
+                }
             }
             else
             {
