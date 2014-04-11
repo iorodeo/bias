@@ -28,6 +28,7 @@ class PositionData
         double ellipseMajorAxis;
         double ellipseMinorAxis;
         double ellipseAngle;
+        double orientationFit;
         cv::Mat covarianceMatrix;
         cv::Mat rotBoundingImageLUV;
         std::vector<double> pixelFeatureVector;

@@ -31,6 +31,7 @@ PositionData::PositionData()
     ellipseMajorAxis = 0.0;
     ellipseMinorAxis = 0.0;
     ellipseAngle = 0.0;
+    orientationFit = 0.0;
     covarianceMatrix = cv::Mat(2,2,CV_64FC1,cv::Scalar(0.0));
 }
 
@@ -54,6 +55,7 @@ std::string PositionData::toStdString(unsigned int indent)
     ss << indentStr1 << "ellipseMajorAxis: " << ellipseMajorAxis << std::endl;
     ss << indentStr1 << "ellipseMinorAxis: " << ellipseMinorAxis << std::endl;
     ss << indentStr1 << "ellipseAngle: " << ellipseAngle << std::endl;
+    ss << indentStr1 << "orientationFit: " << orientationFit << std::endl;
     ss << indentStr1 << "covarianceMatrix: " << std::endl;
     ss << indentStr1 << "frameCount: " << frameCount << std::endl;
     for (int i=0; i<2; i++)
@@ -279,6 +281,7 @@ HogPositionFitterData HogPositionFitter::fit(
 
             FastBinaryPredictor orientPred = FastBinaryPredictor(param_.orientClassifier);
             FastBinaryPredictorData<double> orientData = orientPred.predict(posData.pixelFeatureVector);
+            posData.orientationFit = orientData.fit;
 
             // Flip pixel feature vector and rotate LUV bounding image  - if required
             if (orientData.fit < 0.0)
