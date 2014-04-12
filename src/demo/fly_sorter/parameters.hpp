@@ -29,7 +29,10 @@ class ClassifierParam
     public:
         std::vector<StumpData> stumpVector;
         float offset;
+        QString fileName;
+
         ClassifierParam();
+        RtnStatus loadFromFile();
 };
 
 
@@ -38,8 +41,10 @@ class FlySegmenterParam
     public:
 
         ClassifierParam classifier;
+
         static const ClassifierParam DEFAULT_CLASSIFIER_PARAM;
         static ClassifierParam createDefaultClassifierParam();
+        static const QString DEFAULT_CLASSIFIER_FILENAME;
 
         FlySegmenterParam();
 };

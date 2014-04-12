@@ -31,6 +31,7 @@ const QString DEFAULT_PARAMETER_FILENAME = QString("fly_sorter_param.json");
 const QString TRAINING_DATA_BASE_STRING = QString("training_data");
 const QString TRAINING_VIDEO_BASE_STRING = QString("training_video");
 const QString DEBUG_IMAGES_BASE_STRING = QString("debug_images");
+const QString CLASSIFIER_DIRECTORY = QString("classifiers");
 const unsigned int DEFAULT_HTTP_SERVER_PORT = 5010; 
 
 
@@ -659,6 +660,8 @@ void FlySorterWindow::initialize()
     updateParamText();
     updateWidgetsOnLoad();
     startHttpServer();
+
+
 }
 
 
@@ -927,8 +930,30 @@ void FlySorterWindow::loadParamFromFile()
         param_ = FlySorterParam();
         return;
     }
+
+    // DEVELOP
+    // ------------------------------------------------------------------------
+
+
+    // Check if classifier data directory exists
+    QDir classifierDir(CLASSIFIER_DIRECTORY);
+    if (!classifierDir.exists())
+    {
+        QString errMsgText = QString("classifier data directory does not exist"); 
+        QMessageBox::critical(this, errMsgTitle, errMsgText);
+    }
+
+   
+    // Temporary
+    //param_.flySegmenterParam.classifierFileName = classifierDir.absoluteFilePath(param_.flySegmenterParam.classifier.fileName);
+
+    //param_.flySegmenterParam.classifier.load();
+
+    
+    // ------------------------------------------------------------------------
     param_ = paramNew;
     paramMap_ = paramMap;
+
 }
 
 
