@@ -27,6 +27,7 @@
 #include <cmath>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 
 #include <QtGui>
 #include <QTimer>
@@ -4915,58 +4916,63 @@ namespace bias
             newProp.valueA = propValueMap["valueRed"].toUInt();
             newProp.valueB = propValueMap["valueBlue"].toUInt();
 
-            if (newProp.valueA < propInfo.minValue)
-            { 
-                QString errMsgText = QString(
-                        "Camera: property %1 valueRed is out of range (too low)"
-                        ).arg(name);
-                if (showErrorDlg)
-                {
-                    QMessageBox::critical(this,errMsgTitle,errMsgText);
-                }
-                rtnStatus.success = false;
-                rtnStatus.message = errMsgText;
-                return rtnStatus;
-            }
-            else if (newProp.valueA > propInfo.maxValue)
-            {
-                QString errMsgText = QString(
-                        "Camera: property %1 valueRed is out of range (too high)"
-                        ).arg(name);
-                if (showErrorDlg)
-                {
-                    QMessageBox::critical(this,errMsgTitle,errMsgText);
-                }
-                rtnStatus.success = false;
-                rtnStatus.message = errMsgText;
-                return rtnStatus;
-            }
-            if (newProp.valueB < propInfo.minValue)
-            { 
-                QString errMsgText = QString(
-                        "Camera: property %1 valueBlue is out of range (too low)"
-                        ).arg(name);
-                if (showErrorDlg)
-                {
-                    QMessageBox::critical(this,errMsgTitle,errMsgText);
-                }
-                rtnStatus.success = false;
-                rtnStatus.message = errMsgText;
-                return rtnStatus;
-            }
-            else if (newProp.valueB > propInfo.maxValue)
-            {
-                QString errMsgText = QString(
-                        "Camera: property %1 valueBlue is out of range (too high)"
-                        ).arg(name);
-                if (showErrorDlg)
-                {
-                    QMessageBox::critical(this,errMsgTitle,errMsgText);
-                }
-                rtnStatus.success = false;
-                rtnStatus.message = errMsgText;
-                return rtnStatus;
-            }
+            newProp.valueA = std::max(newProp.valueA, propInfo.minValue);
+            newProp.valueA = std::min(newProp.valueA, propInfo.maxValue);
+            newProp.valueB = std::max(newProp.valueB, propInfo.minValue);
+            newProp.valueB = std::min(newProp.valueB, propInfo.maxValue);
+
+            //if (newProp.valueA < propInfo.minValue)
+            //{ 
+            //    QString errMsgText = QString(
+            //            "Camera: property %1 valueRed is out of range (too low)"
+            //            ).arg(name);
+            //    if (showErrorDlg)
+            //    {
+            //        QMessageBox::critical(this,errMsgTitle,errMsgText);
+            //    }
+            //    rtnStatus.success = false;
+            //    rtnStatus.message = errMsgText;
+            //    return rtnStatus;
+            //}
+            //else if (newProp.valueA > propInfo.maxValue)
+            //{
+            //    QString errMsgText = QString(
+            //            "Camera: property %1 valueRed is out of range (too high)"
+            //            ).arg(name);
+            //    if (showErrorDlg)
+            //    {
+            //        QMessageBox::critical(this,errMsgTitle,errMsgText);
+            //    }
+            //    rtnStatus.success = false;
+            //    rtnStatus.message = errMsgText;
+            //    return rtnStatus;
+            //}
+            //if (newProp.valueB < propInfo.minValue)
+            //{ 
+            //    QString errMsgText = QString(
+            //            "Camera: property %1 valueBlue is out of range (too low)"
+            //            ).arg(name);
+            //    if (showErrorDlg)
+            //    {
+            //        QMessageBox::critical(this,errMsgTitle,errMsgText);
+            //    }
+            //    rtnStatus.success = false;
+            //    rtnStatus.message = errMsgText;
+            //    return rtnStatus;
+            //}
+            //else if (newProp.valueB > propInfo.maxValue)
+            //{
+            //    QString errMsgText = QString(
+            //            "Camera: property %1 valueBlue is out of range (too high)"
+            //            ).arg(name);
+            //    if (showErrorDlg)
+            //    {
+            //        QMessageBox::critical(this,errMsgTitle,errMsgText);
+            //    }
+            //    rtnStatus.success = false;
+            //    rtnStatus.message = errMsgText;
+            //    return rtnStatus;
+            //}
         } 
         else
         {
@@ -4998,35 +5004,39 @@ namespace bias
                 return rtnStatus;
             }
             newProp.value = propValueMap["value"].toUInt();
-            if (!newProp.absoluteControl) 
-            {
-                if (newProp.value < propInfo.minValue)
-                {
-                    QString errMsgText = QString(
-                            "Camera: property %1 value is out of range (too low)"
-                            ).arg(name);
-                    if (showErrorDlg)
-                    {
-                        QMessageBox::critical(this,errMsgTitle,errMsgText);
-                    }
-                    rtnStatus.success = false;
-                    rtnStatus.message = errMsgText;
-                    return rtnStatus;
-                }
-                else if (newProp.value > propInfo.maxValue)
-                {
-                    QString errMsgText = QString(
-                            "Camera: property %1 value is out of range (too high)"
-                            ).arg(name);
-                    if (showErrorDlg)
-                    {
-                        QMessageBox::critical(this,errMsgTitle,errMsgText);
-                    }
-                    rtnStatus.success = false;
-                    rtnStatus.message = errMsgText;
-                    return rtnStatus;
-                }
-            }
+
+            newProp.value = std::max(newProp.value, propInfo.minValue);
+            newProp.value = std::min(newProp.value, propInfo.maxValue);
+
+            //if (!newProp.absoluteControl) 
+            //{
+            //    if (newProp.value < propInfo.minValue)
+            //    {
+            //        QString errMsgText = QString(
+            //                "Camera: property %1 value is out of range (too low)"
+            //                ).arg(name);
+            //        if (showErrorDlg)
+            //        {
+            //            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            //        }
+            //        rtnStatus.success = false;
+            //        rtnStatus.message = errMsgText;
+            //        return rtnStatus;
+            //    }
+            //    else if (newProp.value > propInfo.maxValue)
+            //    {
+            //        QString errMsgText = QString(
+            //                "Camera: property %1 value is out of range (too high)"
+            //                ).arg(name);
+            //        if (showErrorDlg)
+            //        {
+            //            QMessageBox::critical(this,errMsgTitle,errMsgText);
+            //        }
+            //        rtnStatus.success = false;
+            //        rtnStatus.message = errMsgText;
+            //        return rtnStatus;
+            //    }
+            //}
         }  
 
         // Get "Absolute Value"
@@ -5059,32 +5069,35 @@ namespace bias
         newProp.absoluteValue = propValueMap["absoluteValue"].toFloat();
         if (newProp.absoluteControl)
         {
-            if (newProp.absoluteValue < propInfo.minAbsoluteValue)
-            {
-                QString errMsgText = QString(
-                        "Camera: property %1 absoluteValue is out of range (too low)"
-                        ).arg(name);
-                if (showErrorDlg)
-                {
-                    QMessageBox::critical(this,errMsgTitle,errMsgText);
-                }
-                rtnStatus.success = false;
-                rtnStatus.message = errMsgText;
-                return rtnStatus;
-            }
-            else if (newProp.absoluteValue > propInfo.maxAbsoluteValue)
-            {
-                QString errMsgText = QString(
-                        "Camera: property %1 absoluteValue is out of range (too high)"
-                        ).arg(name);
-                if (showErrorDlg)
-                {
-                    QMessageBox::critical(this,errMsgTitle,errMsgText);
-                }
-                rtnStatus.success = false;
-                rtnStatus.message = errMsgText;
-                return rtnStatus;
-            }
+            newProp.absoluteValue = std::max(newProp.absoluteValue, propInfo.minAbsoluteValue);
+            newProp.absoluteValue = std::min(newProp.absoluteValue, propInfo.maxAbsoluteValue);
+
+            //if (newProp.absoluteValue < propInfo.minAbsoluteValue)
+            //{
+            //    QString errMsgText = QString(
+            //            "Camera: property %1 absoluteValue is out of range (too low)"
+            //            ).arg(name);
+            //    if (showErrorDlg)
+            //    {
+            //        QMessageBox::critical(this,errMsgTitle,errMsgText);
+            //    }
+            //    rtnStatus.success = false;
+            //    rtnStatus.message = errMsgText;
+            //    return rtnStatus;
+            //}
+            //else if (newProp.absoluteValue > propInfo.maxAbsoluteValue)
+            //{
+            //    QString errMsgText = QString(
+            //            "Camera: property %1 absoluteValue is out of range (too high)"
+            //            ).arg(name);
+            //    if (showErrorDlg)
+            //    {
+            //        QMessageBox::critical(this,errMsgTitle,errMsgText);
+            //    }
+            //    rtnStatus.success = false;
+            //    rtnStatus.message = errMsgText;
+            //    return rtnStatus;
+            //}
         }
 
         // Set value in camera
