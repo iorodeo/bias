@@ -32,7 +32,7 @@ class ClassifierParam
         QString fileName;
 
         ClassifierParam();
-        RtnStatus loadFromFile();
+        RtnStatus loadFromFile(QString dirName=QString(""));
 };
 
 

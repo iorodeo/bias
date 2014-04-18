@@ -3,6 +3,7 @@
 #include "json_utils.hpp"
 #include <iostream>
 #include <QFile>
+#include <QDir>
 #include <QTextStream>
 
 const double PixelScaleFactor = 255.0;
@@ -32,12 +33,22 @@ ClassifierParam::ClassifierParam()
 }
 
 
-RtnStatus ClassifierParam::loadFromFile()
+RtnStatus ClassifierParam::loadFromFile(QString dirName)
 {
     RtnStatus rtnStatus;
-    QFile file(fileName);
+
+    // Check that directory exists
+    QDir dir(dirName);
+    if (!dir.exists())
+    {
+        rtnStatus.message = QString("Classifier directory, %1, does not exist").arg(dirName);
+        rtnStatus.success = false;
+        return rtnStatus;
+    }
 
     // Check the file exisits
+    std::cout << dir.absoluteFilePath(fileName).toStdString() << std::endl;
+    QFile file(dir.absoluteFilePath(fileName));
     if (!file.exists())
     {
         rtnStatus.message = QString("Classifier file, %1, does not exist").arg(fileName);
@@ -46,7 +57,7 @@ RtnStatus ClassifierParam::loadFromFile()
     }
 
     // Try to open file
-    if (!file.open(QIODevice::ReadOnly))
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         rtnStatus.message = QString("Unable to open classifier file %1").arg(fileName);
         rtnStatus.success = false;
@@ -56,13 +67,123 @@ RtnStatus ClassifierParam::loadFromFile()
 
     // Read data from file
     QTextStream fileStream(&file);
+    QStringList lineList;
     while (!fileStream.atEnd())
     {
         QString line = fileStream.readLine();
+        lineList.push_back(line);
     }
-    
-
     file.close();
+
+    // Parse file data
+    float offsetTemp;
+    std::vector<StumpData> stumpVectorTemp; 
+    QString parseErrMsg = QString("Unalbe to parse classifier file %1").arg(fileName);
+
+    if (lineList.size() < 2)
+    {
+        rtnStatus.message = parseErrMsg;
+        rtnStatus.message += QString(" - missing data");
+        rtnStatus.success = false;
+        return rtnStatus;
+    }
+
+
+
+    for (int i=0; i<lineList.size(); i++)
+    {
+        QString line = lineList[i];
+        QStringList splitList = line.split(" ", QString::SkipEmptyParts);
+        int splitListSize = splitList.size();
+
+        if (i==0)
+        {
+            // Get classifier offset
+            if (!splitListSize == 1)
+            {
+                rtnStatus.message = parseErrMsg + QString(" - offset is missing");  
+                rtnStatus.success = false;
+                return rtnStatus;
+            }
+            else
+            {
+                bool ok = true;
+                offsetTemp = splitList[0].toFloat(&ok);
+                if (!ok)
+                {
+                    rtnStatus.message = parseErrMsg + QString(" - can't convert offset to float");
+                    rtnStatus.success = false;
+                    return rtnStatus;
+                }
+                continue;
+            }
+        }
+        else
+        {
+            // Emptpy line - just keep going
+            if (splitListSize == 0)
+            {
+                continue;
+            }
+
+            // Get classifier stumps
+            if (splitListSize != 3)
+            {
+                rtnStatus.message = parseErrMsg; 
+                rtnStatus.message += QString(" - more than 3 items in stump");
+                rtnStatus.success = false;
+                return rtnStatus;
+            }
+            else
+            {
+                bool ok;
+                StumpData stumpData;
+
+                stumpData.channel = splitList[0].toUInt(&ok); 
+                if (!ok)
+                {
+                    rtnStatus.message = parseErrMsg; 
+                    rtnStatus.message += QString(" - unable to convert channel to uint");
+                    rtnStatus.success = false;
+                    return rtnStatus;
+                }
+
+
+                stumpData.threshold = splitList[1].toFloat(&ok);
+                if (!ok)
+                {
+                    rtnStatus.message = parseErrMsg; 
+                    rtnStatus.message += QString(" - unable to convert threshold to float");
+                    rtnStatus.success = false;
+                    return rtnStatus;
+                }
+
+                stumpData.value = splitList[2].toFloat(&ok);
+                if (!ok)
+                {
+                    rtnStatus.message = parseErrMsg;
+                    rtnStatus.message += QString(" - unable to convert value to float");
+                    rtnStatus.success = false;
+                    return rtnStatus;
+                }
+
+                stumpVectorTemp.push_back(stumpData);
+            }
+        }
+
+        if (stumpVectorTemp.size() < 0)
+        {
+            rtnStatus.message = parseErrMsg;
+            rtnStatus.message += QString(" - stump data missige");
+            rtnStatus.success = false;
+            return rtnStatus;
+        }
+
+        offset = offsetTemp;
+        stumpVector = stumpVectorTemp;
+
+    }
+
     rtnStatus.message = QString("");
     rtnStatus.success = true;
 

@@ -1037,7 +1037,7 @@ bool getFrameNumberFilterMap(
 
     // Open file
     QFile logFile(captureInputDir.absoluteFilePath(logFileName));
-    if (!logFile.open(QIODevice::ReadOnly))
+    if (!logFile.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         errorMsg = QString("Error: unable to open debug data log %1").arg(logFileName);
         return false;

@@ -886,6 +886,7 @@ QByteArray FlySorterWindow::dataToJson()
 
 void FlySorterWindow::loadParamFromFile()
 { 
+    RtnStatus rtnStatus;
     QString errMsgTitle("Load Parameter Error");
 
     QFile parameterFile(parameterFileName_);
@@ -921,7 +922,7 @@ void FlySorterWindow::loadParamFromFile()
         return;
     }
     FlySorterParam paramNew;
-    RtnStatus rtnStatus = paramNew.fromMap(paramMap);
+    rtnStatus = paramNew.fromMap(paramMap);
     if (!rtnStatus.success)
     {
         QString errMsgText = QString("%1: ").arg(parameterFileName_);
@@ -933,19 +934,15 @@ void FlySorterWindow::loadParamFromFile()
 
     // DEVELOP
     // ------------------------------------------------------------------------
-
-
-    // Check if classifier data directory exists
-    QDir classifierDir(CLASSIFIER_DIRECTORY);
-    if (!classifierDir.exists())
+    rtnStatus = param_.flySegmenter.classifier.loadFromFile(CLASSIFIER_DIRECTORY);
+    if (!rtnStatus.success)
     {
-        QString errMsgText = QString("classifier data directory does not exist"); 
+        QString errMsgText = QString("%1: ").arg(parameterFileName_);
+        errMsgText += rtnStatus.message + QString(" - using default values");
         QMessageBox::critical(this, errMsgTitle, errMsgText);
+        param_ = FlySorterParam();
+        return;
     }
-
-   
-    // Temporary
-    param_.flySegmenter.classifier.loadFromFile();
 
     
     // ------------------------------------------------------------------------
