@@ -57,14 +57,15 @@ namespace bias
         connectWidgets();
 
         numberOfCameras_ = numberOfCameras;
-        if (numberOfCameras_ > 1)
-        {
-            cameraIdentifierGroupBoxPtr_ -> setCheckable(false);
-        }
-        else
-        {
-            cameraIdentifierGroupBoxPtr_ -> setCheckable(true);
-        }
+        //if (numberOfCameras_ > 1)
+        //{
+        //    cameraIdentifierGroupBoxPtr_ -> setCheckable(false);
+        //}
+        //else
+        //{
+        //    cameraIdentifierGroupBoxPtr_ -> setCheckable(true);
+        //}
+        cameraIdentifierGroupBoxPtr_ -> setCheckable(true);
 
         QStringListIterator allowedFormatsIt(AutoNamingOptions::ALLOWED_TIME_AND_DATE_FORMATS);
         while (allowedFormatsIt.hasNext())
@@ -187,14 +188,15 @@ namespace bias
     {
         AutoNamingOptions options;
 
-        if (numberOfCameras_ > 1)
-        {
-            options.includeCameraIdentifier = true;
-        }
-        else
-        {
-            options.includeCameraIdentifier = cameraIdentifierGroupBoxPtr_ -> isChecked();
-        }
+        //if (numberOfCameras_ > 1)
+        //{
+        //    options.includeCameraIdentifier = true;
+        //}
+        //else
+        //{
+        //    options.includeCameraIdentifier = cameraIdentifierGroupBoxPtr_ -> isChecked();
+        //}
+        options.includeCameraIdentifier = cameraIdentifierGroupBoxPtr_ -> isChecked();
 
         if (guidIdentifierRadioButtonPtr_ -> isChecked())
         {

@@ -3637,7 +3637,8 @@ namespace bias
         QString fileName = currentVideoFileName_;
 
         // Add camera identifier - guid or camera number
-        if ((autoNamingOptions_.includeCameraIdentifier) || (numberOfCameras_  > 1))
+        //if ((autoNamingOptions_.includeCameraIdentifier) || (numberOfCameras_  > 1))
+        if (autoNamingOptions_.includeCameraIdentifier)
         {
             if (autoNamingOptions_.cameraIdentifier == AutoNamingOptions::GUID_IDENTIFIER)
             {

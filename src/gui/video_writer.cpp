@@ -81,21 +81,24 @@ namespace bias
         QFileInfo fileInfo(fileName_);
         QString incrFileName = fileName_;
 
-        if (fileInfo.exists())
-        {
-            QDir filePath = QDir(fileInfo.absolutePath());
-            QString baseName = fileInfo.baseName();
-            QString ext = fileInfo.suffix();
+        QDir filePath = QDir(fileInfo.absolutePath());
+        QString baseName = fileInfo.baseName();
+        QString ext = fileInfo.suffix();
 
-            unsigned int cnt = 2;
-            while(fileInfo.exists())
+        bool done = false;
+        unsigned int cnt = 1;
+
+        while(!done)
+        {
+            QString ver = QString("_v%1").arg(cnt,3,10,QChar('0'));
+            fileInfo = QFileInfo(filePath, baseName + ver + "." + ext);
+            if (!fileInfo.exists())
             {
-                QString ver = "_v" + QString::number(cnt);
-                fileInfo = QFileInfo(filePath, baseName + ver + "." + ext);
-                incrFileName = fileInfo.absoluteFilePath();
-                cnt++;
+                done = true;
             }
+            cnt++;
         }
+        incrFileName = fileInfo.absoluteFilePath();
 
         return incrFileName;
     }
