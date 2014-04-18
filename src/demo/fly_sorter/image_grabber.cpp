@@ -338,7 +338,6 @@ void ImageGrabber::runCaptureFromDir()
 
     // Check that capture directory exists
     QDir captureInputDir = QDir(param_.captureInputDir);
-    //std::cout << "captureInputDir: " << captureInputDir.absolutePath().toStdString() << std::endl;
     if (!captureInputDir.exists())
     {
         QString dirStr = captureInputDir.absolutePath();
@@ -347,10 +346,20 @@ void ImageGrabber::runCaptureFromDir()
         return;
     }
 
+    // Check that debug images sub-directory exists
+    QDir debugImagesDir = QDir(captureInputDir.absolutePath() + "/debug_images");
+    if (!debugImagesDir.exists())
+    {
+        QString dirStr = debugImagesDir.absolutePath();
+        QString errorMsg = QString("Error: debug_images dir %1 does not exist.").arg(dirStr);
+        emit fileReadError(errorMsg);
+        return;
+    }
+
     // Get names of image files in capture directory
     QStringList bmpFilter("*.bmp");
-    captureInputDir.setSorting(QDir::Name);
-    QFileInfoList imageFileInfoList = captureInputDir.entryInfoList(bmpFilter);
+    debugImagesDir.setSorting(QDir::Name);
+    QFileInfoList imageFileInfoList = debugImagesDir.entryInfoList(bmpFilter);
 
     // Create map from frame number in filename and sort images files by frame number
     QMap<int, QFileInfo> frameNumberToFileInfoMap;
@@ -373,7 +382,6 @@ void ImageGrabber::runCaptureFromDir()
         emit fileReadError(mapErrorMsg);
         return;
     }
-
 
 
     while ((!stopped_)  && frameNumberIt.hasNext())

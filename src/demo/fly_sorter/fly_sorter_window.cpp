@@ -945,9 +945,7 @@ void FlySorterWindow::loadParamFromFile()
 
    
     // Temporary
-    //param_.flySegmenterParam.classifierFileName = classifierDir.absoluteFilePath(param_.flySegmenterParam.classifier.fileName);
-
-    //param_.flySegmenterParam.classifier.load();
+    param_.flySegmenter.classifier.loadFromFile();
 
     
     // ------------------------------------------------------------------------
@@ -1215,6 +1213,8 @@ bool FlySorterWindow::updateBatchVideoDirList()
     QStringListIterator dirIt(videoDirList);
     while(dirIt.hasNext())
     {
+        //QString absoluteImagesDirPath = videoDir.absoluteFilePath(dirIt.next() + "/debug_images");
+        //batchVideoDirList_.push_back(absoluteImagesDirPath);
         QString absoluteDirPath = videoDir.absoluteFilePath(dirIt.next());
         batchVideoDirList_.push_back(absoluteDirPath);
     }
