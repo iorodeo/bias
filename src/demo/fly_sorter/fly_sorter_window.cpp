@@ -56,7 +56,14 @@ RtnStatus FlySorterWindow::startRunning()
 {
     RtnStatus rtnStatus;
 
-    if (!running_)
+    if (!haveClassifiers_)
+    {
+        rtnStatus.message = QString("unable to start - no classifiers loaded");
+        rtnStatus.success = false;
+        return rtnStatus;
+    }
+
+    if (!running_ )
     {
         // Setup sorting and tracking
         blobFinder_ = BlobFinder(param_.blobFinder);
@@ -199,6 +206,8 @@ void FlySorterWindow::resizeEvent(QResizeEvent *event)
 
 void FlySorterWindow::closeEvent(QCloseEvent *event)
 {
+    std::cout << "closeEvent" << std::endl;
+
     if (running_)
     {
         QMessageBox msgBox;
@@ -638,6 +647,7 @@ void FlySorterWindow::initialize()
 {
     running_ = false;
     stopRunningFlag_ = false;
+    haveClassifiers_ = false;
     httpRequestErrorCount_ = 0;
     displayFreq_ = DEFAULT_DISPLAY_FREQ;
     parameterFileName_ = DEFAULT_PARAMETER_FILENAME;
@@ -925,8 +935,7 @@ void FlySorterWindow::loadParamFromFile()
     rtnStatus = paramNew.fromMap(paramMap);
     if (!rtnStatus.success)
     {
-        QString errMsgText = QString("%1: ").arg(parameterFileName_);
-        errMsgText += rtnStatus.message + QString(" - using default values");
+        QString errMsgText = rtnStatus.message + QString(" - using default values");
         QMessageBox::critical(this, errMsgTitle, errMsgText);
         param_ = FlySorterParam();
         return;
@@ -934,20 +943,34 @@ void FlySorterWindow::loadParamFromFile()
 
     // DEVELOP
     // ------------------------------------------------------------------------
-    rtnStatus = param_.flySegmenter.classifier.loadFromFile(CLASSIFIER_DIRECTORY);
+    rtnStatus = paramNew.flySegmenter.classifier.loadFromFile(CLASSIFIER_DIRECTORY);
     if (!rtnStatus.success)
     {
-        QString errMsgText = QString("%1: ").arg(parameterFileName_);
-        errMsgText += rtnStatus.message + QString(" - using default values");
+        QString errMsgText = rtnStatus.message; 
         QMessageBox::critical(this, errMsgTitle, errMsgText);
-        param_ = FlySorterParam();
         return;
     }
 
+    rtnStatus = paramNew.hogPositionFitter.orientClassifier.loadFromFile(CLASSIFIER_DIRECTORY);
+    if (!rtnStatus.success)
+    {
+        QString errMsgText = rtnStatus.message; 
+        QMessageBox::critical(this, errMsgTitle, errMsgText);
+        return;
+    }
+
+    rtnStatus = paramNew.genderSorter.genderClassifier.loadFromFile(CLASSIFIER_DIRECTORY);
+    if (!rtnStatus.success)
+    {
+        QString errMsgText = rtnStatus.message; 
+        QMessageBox::critical(this, errMsgTitle, errMsgText);
+        return;
+    }
     
     // ------------------------------------------------------------------------
     param_ = paramNew;
     paramMap_ = paramMap;
+    haveClassifiers_ = true;
 
 }
 

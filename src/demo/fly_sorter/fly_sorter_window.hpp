@@ -84,6 +84,7 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
 
         bool running_;
         bool stopRunningFlag_;
+        bool haveClassifiers_;
 
         FlySorterParam param_;
         QVariantMap paramMap_;
