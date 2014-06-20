@@ -218,6 +218,8 @@ enum MotionDirection
     MOTION_DIRECTION_X = 0,
     MOTION_DIRECTION_Y = 1
 };
+QString motionDirectionToString(MotionDirection motionDir);
+MotionDirection motionDirectionFromString(QString motionDirString);
 
 class IdentityTrackerParam
 {

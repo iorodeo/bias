@@ -830,17 +830,6 @@ const float IdentityTrackerParam::DEFAULT_STD_DY = 8.652053;
 const float IdentityTrackerParam::DEFAULT_STD_WIDTH = 5.768036;
 const float IdentityTrackerParam::DEFAULT_STD_HEIGHT = 10.094062;
 const float IdentityTrackerParam::DEFAULT_MAX_COST = 8.921086;
-/*
-const float IdentityTrackerParam::DEFAULT_MEAN_DX = -5.5;
-const float IdentityTrackerParam::DEFAULT_MEAN_DY = 574.0;
-const float IdentityTrackerParam::DEFAULT_MEAN_WIDTH = 2.0;
-const float IdentityTrackerParam::DEFAULT_MEAN_HEIGHT = 4.0;
-const float IdentityTrackerParam::DEFAULT_STD_DX = 3.6050;
-const float IdentityTrackerParam::DEFAULT_STD_DY = 14.4201;
-const float IdentityTrackerParam::DEFAULT_STD_WIDTH = 5.7680;
-const float IdentityTrackerParam::DEFAULT_STD_HEIGHT = 8.6521;
-const float IdentityTrackerParam::DEFAULT_MAX_COST = 32.7148;
-*/
 const MotionDirection IdentityTrackerParam::DEFAULT_MOTION_DIRECTION = MOTION_DIRECTION_Y;
 
 IdentityTrackerParam::IdentityTrackerParam()
@@ -860,8 +849,18 @@ IdentityTrackerParam::IdentityTrackerParam()
 
 QVariantMap IdentityTrackerParam::toMap()
 {
-    // TO DO ///////////////////////////////////////
     QVariantMap paramMap;
+    paramMap.insert("meanDx", meanDx);        
+    paramMap.insert("meanDy", meanDy);        
+    paramMap.insert("meanWidth", meanWidth);
+    paramMap.insert("meanHeight", meanHeight);
+    paramMap.insert("stdDx", stdDx);
+    paramMap.insert("stdDy", stdDy);
+    paramMap.insert("stdWidth", stdWidth);
+    paramMap.insert("stdHeight", stdHeight);
+    paramMap.insert("maxCost",  maxCost);
+    QString motionDirString = motionDirectionToString(motionDirection);
+    paramMap.insert("motionDirection", motionDirString);
     return paramMap;
 }
 
@@ -885,10 +884,12 @@ QVariantMap FlySorterParam::toMap()
     QVariantMap serverParamMap = server.toMap();
     QVariantMap imageGrabberParamMap = imageGrabber.toMap();
     QVariantMap blobFinderParamMap = blobFinder.toMap();
+    QVariantMap identityTrackerParamMap = identityTracker.toMap();
 
     paramMap.insert("server", serverParamMap);
     paramMap.insert("imageGrabber", imageGrabberParamMap);
     paramMap.insert("blobFinder", blobFinderParamMap);
+    paramMap.insert("identityTracker", identityTrackerParamMap);
 
     return paramMap;
 }
@@ -947,6 +948,38 @@ RtnStatus FlySorterParam::fromJson(QByteArray paramJson)
 {
     RtnStatus rtnStatus;
     return rtnStatus;
+}
+
+
+// Utility functions
+// ----------------------------------------------------------------------------
+QString motionDirectionToString(MotionDirection motionDir)
+{
+    QString motionDirString;
+    if (motionDir == MOTION_DIRECTION_Y)
+    {
+        motionDirString = QString("y");
+    }
+    else
+    {
+        motionDirString = QString("x");
+    }
+    return motionDirString;
+}
+
+
+MotionDirection motionDirectionFromString(QString motionDirString)
+{
+    MotionDirection motionDir;
+    if (QString::compare(motionDirString,QString("y")),Qt::CaseInsensitive)
+    {
+        motionDir = MOTION_DIRECTION_Y;
+    }
+    else
+    {
+        motionDir = MOTION_DIRECTION_X; 
+    } 
+    return motionDir;
 }
 
 
