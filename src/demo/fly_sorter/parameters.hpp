@@ -264,16 +264,6 @@ class IdentityTrackerParam
 };
 
 
-// Devel
-// ----------------------
-enum GenderMode {
-    GenderModeMaleOnly,
-    GenderModeEveryOther,
-    GenderModeRandom,
-    GenderModeNotFound
-};
-// -----------------------
-
 class FlySorterParam
 {
     public:
