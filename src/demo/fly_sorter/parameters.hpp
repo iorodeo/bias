@@ -10,9 +10,11 @@
 #include "rtn_status.hpp"
 #include <opencv2/core/core.hpp>
 
-extern const double PixelScaleFactor;
+extern const double PixelScaleFactor;   // Caps not consistent
+extern const QString CLASSIFIER_DIRECTORY; 
 
 using namespace bias;
+
 
 class StumpData 
 {
@@ -46,6 +48,8 @@ class FlySegmenterParam
         ClassifierParam classifier;
         static const QString DEFAULT_CLASSIFIER_FILENAME;
         FlySegmenterParam();
+        QVariantMap toMap();
+        RtnStatus fromMap(QVariantMap paramMap);
 };
 
 

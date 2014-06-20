@@ -7,6 +7,7 @@
 #include <QTextStream>
 
 const double PixelScaleFactor = 255.0;
+const QString CLASSIFIER_DIRECTORY = QString("classifiers");
 
 
 // StumpData
@@ -226,6 +227,59 @@ FlySegmenterParam::FlySegmenterParam()
 {
     classifier.fileName = DEFAULT_CLASSIFIER_FILENAME;
 };
+
+
+QVariantMap FlySegmenterParam::toMap()
+{
+    QVariantMap paramMap;
+    paramMap.insert("classifierFile", classifier.fileName);
+    return paramMap;
+}
+
+RtnStatus FlySegmenterParam::fromMap(QVariantMap paramMap)
+{
+    RtnStatus rtnStatus;
+
+    if (paramMap.isEmpty())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("FlySegmenter parameter map is empty");
+        return rtnStatus;
+    }
+
+    // Get classifier file name 
+    // ------------------------
+    if (!paramMap.contains("classifierFile"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'classifierFile' not found in FlySegmenter parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["classifierFile"].canConvert<QString>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert FlySegmenter parameter 'classifierFile' to QString");
+        return rtnStatus;
+    }
+     QString fileName = paramMap["classifierFile"].toString();
+
+    // Check that parameters can be loaded from file
+    ClassifierParam classifierTemp;
+    classifierTemp.fileName = fileName;
+    rtnStatus = classifierTemp.loadFromFile(CLASSIFIER_DIRECTORY);
+    if (!rtnStatus.success)
+    {
+        rtnStatus.message = QString("FlySegmenter: %1").arg(rtnStatus.message);
+        return rtnStatus;
+    }
+    classifier = classifierTemp;
+
+    rtnStatus.success = true;
+    rtnStatus.message = QString("");
+    return rtnStatus;
+}
+
+
 
 // BinParam
 // ----------------------------------------------------------------------------
@@ -961,11 +1015,13 @@ QVariantMap FlySorterParam::toMap()
     QVariantMap imageGrabberParamMap = imageGrabber.toMap();
     QVariantMap blobFinderParamMap = blobFinder.toMap();
     QVariantMap identityTrackerParamMap = identityTracker.toMap();
+    QVariantMap flySegmenterParamMap = flySegmenter.toMap();
 
     paramMap.insert("server", serverParamMap);
     paramMap.insert("imageGrabber", imageGrabberParamMap);
     paramMap.insert("blobFinder", blobFinderParamMap);
     paramMap.insert("identityTracker", identityTrackerParamMap);
+    paramMap.insert("flySegmenter", flySegmenterParamMap);
 
     return paramMap;
 }
