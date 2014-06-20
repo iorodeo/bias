@@ -876,33 +876,8 @@ RtnStatus IdentityTrackerParam::fromMap(QVariantMap paramMap)
 // FlySorterParam
 // ----------------------------------------------------------------------------
 
-FlySorterParam::FlySorterParam()
-{
-    //server = ServerParam();
-    //imageGrabber = ImageGrabberParam();
-    //blobFinder = BlobFinderParam();
-    //flySegmenter = FlySegmenterParam();
-    //hogPositionFitter = HogPositionFitterParam();
-    
-    // Devel
-    // -------------------------------
-    genderMode = GenderModeMaleOnly;
-    // -------------------------------
-}
+FlySorterParam::FlySorterParam() { }
 
-
-// Devel
-// ----------------------------------------------------------------------------
-static QMap<GenderMode, QString> createGenderModeToStringMap()
-{
-    QMap<GenderMode, QString> map;
-    map[GenderModeMaleOnly] = QString("maleOnly");
-    map[GenderModeEveryOther] = QString("everyOther");
-    map[GenderModeRandom] = QString("random");
-    return map;
-}
-static QMap<GenderMode, QString> genderModeToStringMap = createGenderModeToStringMap();
-// -----------------------------------------------------------------------------
 
 QVariantMap FlySorterParam::toMap()
 {
@@ -914,11 +889,6 @@ QVariantMap FlySorterParam::toMap()
     paramMap.insert("server", serverParamMap);
     paramMap.insert("imageGrabber", imageGrabberParamMap);
     paramMap.insert("blobFinder", blobFinderParamMap);
-
-    // Devel
-    // --------------------------------------------------------------
-    paramMap.insert("genderMode", genderModeToStringMap[genderMode]);
-    // --------------------------------------------------------------
 
     return paramMap;
 }
@@ -965,31 +935,6 @@ RtnStatus FlySorterParam::fromMap(QVariantMap paramMap)
     {
         return rtnStatus;
     }
-
-    // Devel
-    // --------------------------------------------------------------------------------------
-    if (!paramMap.contains("genderMode"))
-    {
-        rtnStatus.success = false;
-        rtnStatus.message = QString("'genderMode' field not found in parameters");
-        return rtnStatus;
-    }
-    if (!paramMap["genderMode"].canConvert<QString>())
-    {
-        rtnStatus.success = false;
-        rtnStatus.message = QString("Unable to convert 'genderMode' to string");
-        return rtnStatus;
-    }
-    QString genderModeString = paramMap["genderMode"].toString();
-    GenderMode genderModeTemp = genderModeToStringMap.key(genderModeString, GenderModeNotFound);
-    if (genderModeTemp == GenderModeNotFound)
-    {
-        rtnStatus.success = false;
-        rtnStatus.message = QString("unknown genderMode: ") + genderModeString;
-        return rtnStatus;
-    }
-    genderMode = genderModeTemp;
-    // -----------------------------------------------------------------------------------------
 
     rtnStatus.success = true;
     rtnStatus.message = QString("");

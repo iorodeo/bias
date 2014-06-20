@@ -286,10 +286,6 @@ class FlySorterParam
         HogPositionFitterParam hogPositionFitter;
         GenderSorterParam genderSorter;
 
-        // Devel
-        // -------------------
-        GenderMode genderMode;
-        // -------------------
 
         FlySorterParam();
         QVariantMap toMap();
