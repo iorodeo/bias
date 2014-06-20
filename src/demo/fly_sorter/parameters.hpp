@@ -43,13 +43,8 @@ class ClassifierParam
 class FlySegmenterParam 
 {
     public:
-
         ClassifierParam classifier;
-
-        //static const ClassifierParam DEFAULT_CLASSIFIER_PARAM;
-        //static ClassifierParam createDefaultClassifierParam();
         static const QString DEFAULT_CLASSIFIER_FILENAME;
-
         FlySegmenterParam();
 };
 

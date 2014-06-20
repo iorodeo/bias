@@ -17,6 +17,8 @@ namespace bias
     const double BlobFinderParam::THRESHOLD_MAXVAL_MAX      = 255.0;
     const double BlobFinderParam::MINIMUM_AREA_MIN          = 1.0;
     const double BlobFinderParam::MAXIMUM_AREA_MIN          = 1.0;
+    const unsigned int BlobFinderParam::NUM_PAD_MIN         = 1; 
+    const unsigned int BlobFinderParam::NUM_PAD_MAX         = 200;
     
     
     BlobFinderParam::BlobFinderParam()
@@ -38,6 +40,8 @@ namespace bias
         paramMap.insert("thresholdMaxVal", thresholdMaxVal);
         paramMap.insert("minimumArea", minimumArea);
         paramMap.insert("maximumArea", maximumArea);
+        paramMap.insert("numPad", numPad);
+
         return paramMap;
     }
 
@@ -196,6 +200,35 @@ namespace bias
         }
         minimumArea = minimumAreaTemp;
         maximumArea = maximumAreaTemp;
+
+        // Get numPad
+        // -------------
+        if (!paramMap.contains("numPad"))
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("'numPad' not found in blob finder parameters");
+            return rtnStatus;
+        }
+        if (!paramMap["numPad"].canConvert<unsigned int>())
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("Unable to convert blob finder parameter 'numPad' to unsigned int");
+            return rtnStatus;
+        }
+        unsigned int numPadTemp = paramMap["numPad"].toUInt();
+        if (numPadTemp < NUM_PAD_MIN) 
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("Blob finder parameter 'numPad' less than minimum allowed"); 
+            return rtnStatus;
+        }
+        if (numPadTemp > NUM_PAD_MAX)
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("Blob finder parameter 'numPad' greater than maximum allowed"); 
+            return rtnStatus;
+        }
+        numPad = numPadTemp;
 
         rtnStatus.success = true;
         rtnStatus.message = QString("");

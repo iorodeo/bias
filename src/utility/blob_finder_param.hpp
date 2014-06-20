@@ -24,6 +24,8 @@ namespace bias
             static const double THRESHOLD_MAX;
             static const double THRESHOLD_MAXVAL_MIN;
             static const double THRESHOLD_MAXVAL_MAX;
+            static const unsigned int NUM_PAD_MIN;
+            static const unsigned int NUM_PAD_MAX;
 
             double minimumArea;
             double maximumArea;
