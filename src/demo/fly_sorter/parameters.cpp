@@ -8,6 +8,7 @@
 
 const double PixelScaleFactor = 255.0;
 
+
 // StumpData
 // ---------------------------------------------------------------------------
 StumpData::StumpData()
@@ -867,8 +868,83 @@ QVariantMap IdentityTrackerParam::toMap()
 
 RtnStatus IdentityTrackerParam::fromMap(QVariantMap paramMap)
 {
-    // TO DO /////////////////////////////////////
     RtnStatus rtnStatus;
+
+    if (paramMap.isEmpty())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("IdentityTracker parameter map is empty");
+        return rtnStatus;
+    }
+
+    // Get meanDx
+    rtnStatus = getFloatFromQVariantMap("meanDx", "identityTracker", paramMap, meanDx);
+    if (!rtnStatus.success)
+    {
+        return rtnStatus;
+    }
+    //Get meanDy
+    rtnStatus = getFloatFromQVariantMap("meanDy", "identityTracker", paramMap, meanDx);
+    if (!rtnStatus.success)
+    {
+        return rtnStatus;
+    }
+    //Get meanWidth
+    rtnStatus = getFloatFromQVariantMap("meanWidth", "identityTracker", paramMap, meanDx);
+    if (!rtnStatus.success)
+    {
+        return rtnStatus;
+    }
+    //Get meanHeight
+    rtnStatus = getFloatFromQVariantMap("meanHeight", "identityTracker", paramMap, meanDx);
+    if (!rtnStatus.success)
+    {
+        return rtnStatus;
+    }
+    //Get stdDx
+    rtnStatus = getFloatFromQVariantMap("stdDx", "identityTracker", paramMap, meanDx);
+    if (!rtnStatus.success)
+    {
+        return rtnStatus;
+    }
+    //Get stdDy
+    rtnStatus = getFloatFromQVariantMap("stdDy", "identityTracker", paramMap, meanDx);
+    if (!rtnStatus.success)
+    {
+        return rtnStatus;
+    }
+    //Get stdWidth
+    rtnStatus = getFloatFromQVariantMap("stdWidth", "identityTracker", paramMap, meanDx);
+    if (!rtnStatus.success)
+    {
+        return rtnStatus;
+    }
+    //Get stdHeight
+    rtnStatus = getFloatFromQVariantMap("stdHeight", "identityTracker", paramMap, meanDx);
+    if (!rtnStatus.success)
+    {
+        return rtnStatus;
+    }
+    //Get maxCost
+    rtnStatus = getFloatFromQVariantMap("maxCost", "identityTracker", paramMap, meanDx);
+    if (!rtnStatus.success)
+    {
+        return rtnStatus;
+    }
+    rtnStatus = getMotionDirectionFromQVariantMap(
+            "motionDirection", 
+            "identityTracker", 
+            paramMap, 
+            motionDirection
+            );
+    if (!rtnStatus.success)
+    {
+        return rtnStatus;
+    }
+        
+
+    rtnStatus.success = true;
+    rtnStatus.message = QString("");
     return rtnStatus;
 }
 
@@ -937,10 +1013,16 @@ RtnStatus FlySorterParam::fromMap(QVariantMap paramMap)
         return rtnStatus;
     }
 
+    QVariantMap identityTrackerParamMap = paramMap["identityTracker"].toMap();
+    rtnStatus = identityTracker.fromMap(identityTrackerParamMap);
+    if (!rtnStatus.success)
+    {
+        return rtnStatus;
+    }
+
     rtnStatus.success = true;
     rtnStatus.message = QString("");
     return rtnStatus;
-
 }
 
 
@@ -983,3 +1065,73 @@ MotionDirection motionDirectionFromString(QString motionDirString)
 }
 
 
+RtnStatus getFloatFromQVariantMap(QString key, QString mapName, QVariantMap map, float &value)
+{
+    RtnStatus rtnStatus;
+    if (!map.contains(key))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'%1' field not found in %2 parameters").arg(key).arg(mapName);
+        return rtnStatus;
+    }
+    if (!map[key].canConvert<float>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert %1 parameter '%2' to float").arg(mapName).arg(key);
+        return rtnStatus;
+    }
+    value = map[key].toFloat();
+    rtnStatus.success = true;
+    rtnStatus.message = QString("");
+    return rtnStatus;
+}
+
+
+RtnStatus getStringFromQVariantMap(QString key, QString mapName, QVariantMap map, QString &value)
+{
+    RtnStatus rtnStatus;
+    if (!map.contains(key))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'%1' field not found in %2 parameters").arg(key).arg(mapName);
+        return rtnStatus;
+    }
+    if (!map[key].canConvert<QString>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert %1 parameter '%2' to QString").arg(mapName).arg(key);
+        return rtnStatus;
+    }
+    value = map[key].toString();
+    rtnStatus.success = true;
+    rtnStatus.message = QString("");
+    return rtnStatus;
+}
+
+RtnStatus getMotionDirectionFromQVariantMap(QString key, QString mapName, QVariantMap map, MotionDirection &value)
+{
+    RtnStatus rtnStatus;
+    QString motionDirString;
+    rtnStatus =  getStringFromQVariantMap(key,mapName,map,motionDirString);
+    if (!rtnStatus.success)
+    {
+        return rtnStatus;
+    }
+    if (motionDirString.compare(QString("x"),Qt::CaseInsensitive) == 0)
+    {
+        value = MOTION_DIRECTION_X;
+    }
+    else if (motionDirString.compare(QString("y"),Qt::CaseInsensitive)==0)
+    {
+        value = MOTION_DIRECTION_Y;
+    }
+    else
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unknown motionDirection in %1- must be 'x' ro 'y'").arg(mapName);
+        return rtnStatus;
+    }
+    rtnStatus.success = true;
+    rtnStatus.message = QString("");
+    return rtnStatus;
+}

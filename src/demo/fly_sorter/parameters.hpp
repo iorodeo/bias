@@ -282,4 +282,10 @@ class FlySorterParam
         RtnStatus fromMap(QVariantMap paramMap);
 };
 
+
+
+RtnStatus getFloatFromQVariantMap(QString key, QString mapName, QVariantMap map, float &value);
+RtnStatus getStringFromQVariantMap(QString key, QString mapName, QVariantMap map, QString &value);
+RtnStatus getMotionDirectionFromQVariantMap(QString key, QString mapName, QVariantMap map, MotionDirection &value);
+
 #endif // #ifndef PARAMETERS_HPP
