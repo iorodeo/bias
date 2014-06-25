@@ -92,6 +92,8 @@ class PixelFeatureVectorParam
         static std::vector<BinParam> createDefaultBinParam();
 
         PixelFeatureVectorParam();
+        QVariantMap toMap();
+        RtnStatus fromMap(QVariantMap paramMap);
 };
 
 
@@ -111,7 +113,6 @@ class HogPositionFitterParam
         double padBorder;
         static const double DEFAULT_PAD_BORDER;
 
-        // TO DO
         cv::Scalar fillValuesLUV;
         static const cv::Scalar DEFAULT_FILL_VALUES_LUV;
 

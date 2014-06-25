@@ -372,6 +372,52 @@ PixelFeatureVectorParam::PixelFeatureVectorParam()
     binParam = DEFAULT_BIN_PARAM;
 };
 
+QVariantMap PixelFeatureVectorParam::toMap()
+{
+    QVariantMap paramMap;
+    return paramMap;
+}
+
+RtnStatus PixelFeatureVectorParam::fromMap(QVariantMap paramMap)
+{
+    RtnStatus rtnStatus;
+    if (paramMap.isEmpty())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("pixel feature vector parameter map is empty");
+        return rtnStatus;
+    }
+    // Get gradNormRadius
+    // ----------------------------
+    // unsigned int gradNormRadius;
+
+    // Get gradNormConst
+    // ----------------------------
+    // double gradNormConst;
+
+    // Get fillBndryErodeRadius
+    // ----------------------------
+    // unsigned int fillBndryErodeRadius;
+
+    // Get colorEdgeVector
+    // ----------------------------
+    // std::vector<cv::Scalar> colorEdgeVector;
+
+    // Get gradMagEdgeVector
+    // ----------------------------
+    // std::vector<float> gradMagEdgeVector;     
+
+    // Get gradOriCentVectory
+    // ----------------------------
+    // std::vector<float> gradOriCentVector;
+
+    // Get binParam
+    // ----------------------------
+    // std::vector<BinParam> binParam;
+
+    return rtnStatus;
+}
+
 // HogPositionFitterParam
 // ----------------------------------------------------------------------------
 
