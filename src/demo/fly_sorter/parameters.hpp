@@ -115,8 +115,6 @@ class HogPositionFitterParam
         static const double DEFAULT_PAD_BORDER;
 
         ClassifierParam orientClassifier;
-        //static const ClassifierParam DEFAULT_ORIENT_CLASSIFIER_PARAM;
-        //static ClassifierParam createDefaultOrientClassifierParam();
         static const QString DEFAULT_ORIENT_CLASSIFIER_FILENAME;
 
         PixelFeatureVectorParam pixelFeatureVector;
@@ -129,15 +127,15 @@ class GenderSorterParam
 {
     public:
 
-        ClassifierParam genderClassifier;
-        //static const ClassifierParam DEFAULT_GENDER_CLASSIFIER_PARAM;
-        //static ClassifierParam createDefaultGenderClassifierParam();
+        ClassifierParam classifier;
         static const QString DEFAULT_GENDER_CLASSIFIER_FILENAME;
 
         double minConfidence;
         static const double DEFAULT_MIN_CONFIDENCE;
 
         GenderSorterParam();
+        RtnStatus fromMap(QVariantMap paramMap);
+        QVariantMap toMap();
 };
 
 

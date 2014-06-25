@@ -958,7 +958,7 @@ void FlySorterWindow::loadParamFromFile()
         return;
     }
 
-    rtnStatus = paramNew.genderSorter.genderClassifier.loadFromFile(CLASSIFIER_DIRECTORY);
+    rtnStatus = paramNew.genderSorter.classifier.loadFromFile(CLASSIFIER_DIRECTORY);
     if (!rtnStatus.success)
     {
         QString errMsgText = rtnStatus.message; 

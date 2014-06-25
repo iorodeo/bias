@@ -75,7 +75,7 @@ GenderSorterData GenderSorter::sort(HogPositionFitterData hogData)
 
         if (genderData.positionData.success)
         {
-            FastBinaryPredictor genderPred = FastBinaryPredictor(param_.genderClassifier);
+            FastBinaryPredictor genderPred = FastBinaryPredictor(param_.classifier);
             genderData.predictorData = genderPred.predict(genderData.positionData.pixelFeatureVector);
             genderData.havePredictorData = true;
             if (genderData.predictorData.fit >= param_.minConfidence)

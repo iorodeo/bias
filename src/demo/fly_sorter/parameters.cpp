@@ -400,10 +400,81 @@ const QString GenderSorterParam::DEFAULT_GENDER_CLASSIFIER_FILENAME =
 QString("gender_classifier.txt");
 const double GenderSorterParam::DEFAULT_MIN_CONFIDENCE = 2.318072;
 
+
 GenderSorterParam::GenderSorterParam()
 {
     minConfidence = DEFAULT_MIN_CONFIDENCE;
-    genderClassifier.fileName = DEFAULT_GENDER_CLASSIFIER_FILENAME;
+    classifier.fileName = DEFAULT_GENDER_CLASSIFIER_FILENAME;
+}
+
+
+RtnStatus GenderSorterParam::fromMap(QVariantMap paramMap)
+{
+    RtnStatus rtnStatus;
+    if (paramMap.isEmpty())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("genderSorter parameter map is empty");
+        return rtnStatus;
+    }
+
+    // Get minConfidence
+    // -----------------------
+    if (!paramMap.contains("minConfidence"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'minConfidence' not found in genderSorter parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["minConfidence"].canConvert<double>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert genderSorter parameter 'minConfidence' to double");
+        return rtnStatus;
+    }
+    minConfidence = paramMap["minConfidence"].toDouble();
+
+
+    // Get classifier file name 
+    // ------------------------
+    if (!paramMap.contains("classifierFile"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'classifierFile' not found in genderSorter parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["classifierFile"].canConvert<QString>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert genderSorter parameter 'classifierFile' to QString");
+        return rtnStatus;
+    }
+     QString fileName = paramMap["classifierFile"].toString();
+
+    // Check that parameters can be loaded from file
+    ClassifierParam classifierTemp;
+    classifierTemp.fileName = fileName;
+    rtnStatus = classifierTemp.loadFromFile(CLASSIFIER_DIRECTORY);
+    if (!rtnStatus.success)
+    {
+        rtnStatus.message = QString("genderSorter: %1").arg(rtnStatus.message);
+        return rtnStatus;
+    }
+    classifier = classifierTemp;
+
+    rtnStatus.success = true;
+    rtnStatus.message = QString("");
+    return rtnStatus;
+    return rtnStatus;
+}
+
+
+QVariantMap GenderSorterParam::toMap()
+{
+    QVariantMap paramMap;
+    paramMap.insert("minConfidence", minConfidence);
+    paramMap.insert("classifierFile", classifier.fileName);
+    return paramMap;
 }
 
 // ImageGrabberParam
@@ -1016,12 +1087,14 @@ QVariantMap FlySorterParam::toMap()
     QVariantMap blobFinderParamMap = blobFinder.toMap();
     QVariantMap identityTrackerParamMap = identityTracker.toMap();
     QVariantMap flySegmenterParamMap = flySegmenter.toMap();
+    QVariantMap genderSorterParamMap = genderSorter.toMap();
 
     paramMap.insert("server", serverParamMap);
     paramMap.insert("imageGrabber", imageGrabberParamMap);
     paramMap.insert("blobFinder", blobFinderParamMap);
     paramMap.insert("identityTracker", identityTrackerParamMap);
     paramMap.insert("flySegmenter", flySegmenterParamMap);
+    paramMap.insert("genderSorter", genderSorterParamMap);
 
     return paramMap;
 }
@@ -1071,6 +1144,20 @@ RtnStatus FlySorterParam::fromMap(QVariantMap paramMap)
 
     QVariantMap identityTrackerParamMap = paramMap["identityTracker"].toMap();
     rtnStatus = identityTracker.fromMap(identityTrackerParamMap);
+    if (!rtnStatus.success)
+    {
+        return rtnStatus;
+    }
+
+    QVariantMap flySegmenterParamMap = paramMap["flySegmenter"].toMap();
+    rtnStatus = flySegmenter.fromMap(flySegmenterParamMap);
+    if (!rtnStatus.success)
+    {
+        return rtnStatus;
+    }
+
+    QVariantMap genderSorterParamMap = paramMap["genderSorter"].toMap();
+    rtnStatus = genderSorter.fromMap(genderSorterParamMap);
     if (!rtnStatus.success)
     {
         return rtnStatus;
