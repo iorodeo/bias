@@ -108,18 +108,22 @@ class HogPositionFitterParam
         unsigned int maxBodyArea;
         static const unsigned int DEFAULT_MAX_BODY_AREA;
 
+        double padBorder;
+        static const double DEFAULT_PAD_BORDER;
+
+        // TO DO
         cv::Scalar fillValuesLUV;
         static const cv::Scalar DEFAULT_FILL_VALUES_LUV;
 
-        double padBorder;
-        static const double DEFAULT_PAD_BORDER;
+        // TO Do
+        PixelFeatureVectorParam pixelFeatureVector;
 
         ClassifierParam orientClassifier;
         static const QString DEFAULT_ORIENT_CLASSIFIER_FILENAME;
 
-        PixelFeatureVectorParam pixelFeatureVector;
-
         HogPositionFitterParam();
+        QVariantMap toMap();
+        RtnStatus fromMap(QVariantMap paramMap);
 };
 
 

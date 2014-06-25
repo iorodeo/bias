@@ -378,9 +378,9 @@ PixelFeatureVectorParam::PixelFeatureVectorParam()
 const unsigned int HogPositionFitterParam::DEFAULT_CLOSE_RADIUS = 15;
 const unsigned int HogPositionFitterParam::DEFAULT_OPEN_AREA = 3400;
 const unsigned int HogPositionFitterParam::DEFAULT_MAX_BODY_AREA = 22000;
+const double HogPositionFitterParam::DEFAULT_PAD_BORDER = 15.0;
 const cv::Scalar HogPositionFitterParam::DEFAULT_FILL_VALUES_LUV =
 cv::Scalar(0.3703704,0.3259259,0.4962940); 
-const double HogPositionFitterParam::DEFAULT_PAD_BORDER = 15.0;
 const QString HogPositionFitterParam::DEFAULT_ORIENT_CLASSIFIER_FILENAME = 
 QString("orientation_classifier.txt");
 
@@ -389,10 +389,170 @@ HogPositionFitterParam::HogPositionFitterParam()
     closeRadius = DEFAULT_CLOSE_RADIUS;
     openArea = DEFAULT_OPEN_AREA;
     maxBodyArea = DEFAULT_MAX_BODY_AREA;
-    fillValuesLUV = DEFAULT_FILL_VALUES_LUV;
     padBorder = DEFAULT_PAD_BORDER;
+    fillValuesLUV = DEFAULT_FILL_VALUES_LUV;
     orientClassifier.fileName = DEFAULT_ORIENT_CLASSIFIER_FILENAME;
 }
+
+
+QVariantMap HogPositionFitterParam::toMap()
+{
+    QVariantMap paramMap;
+    paramMap.insert("closeRadius", closeRadius);
+    paramMap.insert("openArea", openArea);
+    paramMap.insert("maxBodyArea", maxBodyArea);
+    paramMap.insert("padBorder", padBorder);
+    QList<QVariant> fillValuesList;
+    for (int i=0; i<3; i++)
+    {
+        fillValuesList.push_back(QVariant(fillValuesLUV[i]));
+    }
+    paramMap.insert("fillValuesLUV", fillValuesList);
+    paramMap.insert("orientClassifierFile", orientClassifier.fileName);
+    return paramMap;
+}
+
+
+RtnStatus HogPositionFitterParam::fromMap(QVariantMap paramMap)
+{
+    RtnStatus rtnStatus;
+    if (paramMap.isEmpty())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("hogPositionFitter parameter map is empty");
+        return rtnStatus;
+    }
+
+    // Get closeRadius
+    // ---------------------
+    if (!paramMap.contains("closeRadius"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'closeRadius' not found in hogPositionFitter parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["closeRadius"].canConvert<unsigned int>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert  hogPositionFitter parameter 'closeRadius' to unsigned int");
+        return rtnStatus;
+    }
+    closeRadius = paramMap["closeRadius"].toUInt();
+
+    // Get openArea
+    // ---------------------
+    if (!paramMap.contains("openArea"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'openArea' not found in hogPositionFitter parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["openArea"].canConvert<unsigned int>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert  hogPositionFitter parameter 'closeRadius' to unsigned int");
+        return rtnStatus;
+    }
+    openArea = paramMap["openArea"].toUInt();
+
+    // Get maxBodyArea
+    // ---------------------
+    if (!paramMap.contains("maxBodyArea"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'maxBodyArea' not found in hogPositionFitter parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["maxBodyArea"].canConvert<unsigned int>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert  hogPositionFitter parameter 'maxBodyArea' to unsigned int");
+        return rtnStatus;
+    }
+    maxBodyArea = paramMap["maxBodyArea"].toUInt();
+
+    // Get padBorder
+    // ----------------------
+    if (!paramMap.contains("padBorder"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'padBorder' not found in hogPositionFitter parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["padBorder"].canConvert<double>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert  hogPositionFitter parameter 'padBorder' to double");
+        return rtnStatus;
+    }
+    double padBorderTemp = paramMap["padBorder"].toDouble();
+    if (padBorderTemp < 0.0)
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("hogPositionFitter parameter 'padBorder' must be >= 0");
+        return rtnStatus;
+    }
+    padBorder = padBorderTemp;
+
+    // Get fillValuesLUV
+    // ------------------------
+    if (!paramMap.contains("fillValuesLUV"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'fillValuesLUV' not found in hogPositionFitter parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["fillValuesLUV"].canConvert<QList<QVariant>>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert  hogPositionFitter parameter 'fillValuesLUV' to list");
+        return rtnStatus;
+    }
+    QList<QVariant> fillValuesList = paramMap["fillValuesLUV"].toList();
+    for (int i=0; i<3; i++)
+    {
+        QVariant var = fillValuesList.at(i);
+        if (!var.canConvert<double>())
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("Unable to convert element of hogPositionFitter parameter 'fillValuesLUV to double");
+            return rtnStatus;
+        }
+        fillValuesLUV[i] = var.toDouble();
+    }
+
+
+    // Get classifier file name 
+    // ------------------------
+    if (!paramMap.contains("orientClassifierFile"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'orientClassifierFile' not found in hogPositionFitter parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["orientClassifierFile"].canConvert<QString>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert hogPositionFitter parameter 'orientClassifierFile' to QString");
+        return rtnStatus;
+    }
+     QString fileName = paramMap["orientClassifierFile"].toString();
+
+    // Check that parameters can be loaded from file
+    ClassifierParam classifierTemp;
+    classifierTemp.fileName = fileName;
+    rtnStatus = classifierTemp.loadFromFile(CLASSIFIER_DIRECTORY);
+    if (!rtnStatus.success)
+    {
+        rtnStatus.message = QString("hogPositionFitter: %1").arg(rtnStatus.message);
+        return rtnStatus;
+    }
+    orientClassifier = classifierTemp;
+
+    return rtnStatus;
+
+}
+
 
 // GenderSorterParam
 // ----------------------------------------------------------------------------
@@ -1087,6 +1247,7 @@ QVariantMap FlySorterParam::toMap()
     QVariantMap blobFinderParamMap = blobFinder.toMap();
     QVariantMap identityTrackerParamMap = identityTracker.toMap();
     QVariantMap flySegmenterParamMap = flySegmenter.toMap();
+    QVariantMap hogPositionFitterParamMap = hogPositionFitter.toMap();
     QVariantMap genderSorterParamMap = genderSorter.toMap();
 
     paramMap.insert("server", serverParamMap);
@@ -1094,6 +1255,7 @@ QVariantMap FlySorterParam::toMap()
     paramMap.insert("blobFinder", blobFinderParamMap);
     paramMap.insert("identityTracker", identityTrackerParamMap);
     paramMap.insert("flySegmenter", flySegmenterParamMap);
+    paramMap.insert("hogPositionFitter", hogPositionFitterParamMap);
     paramMap.insert("genderSorter", genderSorterParamMap);
 
     return paramMap;
@@ -1151,6 +1313,13 @@ RtnStatus FlySorterParam::fromMap(QVariantMap paramMap)
 
     QVariantMap flySegmenterParamMap = paramMap["flySegmenter"].toMap();
     rtnStatus = flySegmenter.fromMap(flySegmenterParamMap);
+    if (!rtnStatus.success)
+    {
+        return rtnStatus;
+    }
+
+    QVariantMap hogPositionFitterParamMap = paramMap["hogPositionFitter"].toMap();
+    rtnStatus = hogPositionFitter.fromMap(hogPositionFitterParamMap);
     if (!rtnStatus.success)
     {
         return rtnStatus;
