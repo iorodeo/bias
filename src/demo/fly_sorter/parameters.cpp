@@ -79,7 +79,7 @@ RtnStatus ClassifierParam::loadFromFile(QString dirName)
     // Parse file data
     float offsetTemp;
     std::vector<StumpData> stumpVectorTemp; 
-    QString parseErrMsg = QString("Unalbe to parse classifier file %1").arg(fileName);
+    QString parseErrMsg = QString("Unable to parse classifier file %1").arg(fileName);
 
     if (lineList.size() < 2)
     {
@@ -301,6 +301,10 @@ BinParam::BinParam(unsigned int numX_, unsigned int numY_)
 const unsigned int PixelFeatureVectorParam::DEFAULT_GRAD_NORM_RADIUS = 5;
 const double PixelFeatureVectorParam::DEFAULT_GRAD_NORM_CONST = 0.005;  
 const unsigned int PixelFeatureVectorParam::DEFAULT_FILL_BNDRY_ERODE_RADIUS = 2;
+const unsigned int PixelFeatureVectorParam::COLOR_EDGE_VECTOR_MIN_SIZE = 2;
+const unsigned int PixelFeatureVectorParam::GRAD_MAG_EDGE_VECTOR_MIN_SIZE = 2;
+const unsigned int PixelFeatureVectorParam::GRAD_ORI_CENT_VECTOR_MIN_SIZE = 2;
+const unsigned int PixelFeatureVectorParam::BIN_PARAM_MIN_SIZE = 2;
 
 // TEMPORARY  
 std::vector<cv::Scalar> PixelFeatureVectorParam::createDefaultColorEdgeVector()
@@ -349,7 +353,6 @@ std::vector<float> PixelFeatureVectorParam::createDefaultGradOriCentVector()
 const std::vector<float> PixelFeatureVectorParam::DEFAULT_GRAD_ORI_CENT_VECTOR = 
 createDefaultGradOriCentVector();
 
-// TEMPORARY 
 std::vector<BinParam> PixelFeatureVectorParam::createDefaultBinParam()
 {
     std::vector<BinParam> binParam;
@@ -375,6 +378,50 @@ PixelFeatureVectorParam::PixelFeatureVectorParam()
 QVariantMap PixelFeatureVectorParam::toMap()
 {
     QVariantMap paramMap;
+    paramMap.insert("gradNormRadius", gradNormRadius);
+    paramMap.insert("gradNormConst", gradNormConst);
+    paramMap.insert("fillBndryErodeRadius", fillBndryErodeRadius);
+
+    // Convert colorEdgeVector to list of QVariants
+    QList<QVariant> colorEdgeList;
+    for (int i=0; i<colorEdgeVector.size(); i++)
+    {
+        QList<QVariant> data;
+        for (int j=0; j<3; j++)
+        {
+            data.push_back(QVariant(colorEdgeVector[i][j]));
+        }
+        colorEdgeList.push_back(QVariant(data));
+    }
+    paramMap.insert("colorEdgeVector", colorEdgeList);
+
+    // Convert gradMagEdgeVector to list of QVariants
+    QList<QVariant> gradMagEdgeList;
+    for (int i=0; i<gradMagEdgeVector.size(); i++)
+    {
+        gradMagEdgeList.push_back(QVariant(gradMagEdgeVector[i]));
+    }
+    paramMap.insert("gradMagEdgeVector", gradMagEdgeList);
+
+    // Convert gradOriCentVector to list of QVariants
+    QList<QVariant> gradOriCentList;
+    for (int i=0; i<gradOriCentVector.size(); i++)
+    {
+        gradOriCentList.push_back(QVariant(gradOriCentVector[i]));
+    }
+    paramMap.insert("gradOriCentVector", gradOriCentList);
+
+    // Convert binParam to list of QVariaints
+    QList<QVariant> binParamList;
+    for (int i=0; i<binParam.size(); i++)
+    {
+        QList<QVariant> valueList;
+        valueList.push_back(QVariant(binParam[i].numX));
+        valueList.push_back(QVariant(binParam[i].numY));
+        binParamList.push_back(QVariant(valueList));
+    }
+    paramMap.insert("binParam",binParamList);
+
     return paramMap;
 }
 
@@ -384,36 +431,236 @@ RtnStatus PixelFeatureVectorParam::fromMap(QVariantMap paramMap)
     if (paramMap.isEmpty())
     {
         rtnStatus.success = false;
-        rtnStatus.message = QString("pixel feature vector parameter map is empty");
+        rtnStatus.message = QString("pixelFeatureVector parameter map is empty");
         return rtnStatus;
     }
+
     // Get gradNormRadius
     // ----------------------------
-    // unsigned int gradNormRadius;
+    if (!paramMap.contains("gradNormRadius"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'gradNormRadius' not found in pixelFeatureVector parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["gradNormRadius"].canConvert<unsigned int>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert pixelFeatureVector parameter 'gradNormRadius' to unsigned int");
+        return rtnStatus;
+    }
+    gradNormRadius = paramMap["gradNormRadius"].toUInt();
+
 
     // Get gradNormConst
     // ----------------------------
-    // double gradNormConst;
+    if (!paramMap.contains("gradNormConst"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'gradNormConst' not found in pixelFeatureVector parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["gradNormConst"].canConvert<double>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert pixelFeatureVector parameter 'gradNormConst' to double");
+        return rtnStatus;
+    }
+    gradNormConst = paramMap["gradNormConst"].toDouble();
 
     // Get fillBndryErodeRadius
     // ----------------------------
-    // unsigned int fillBndryErodeRadius;
+    if (!paramMap.contains("fillBndryErodeRadius"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'fillBndryErodeRadius' not found in pixelFeatureVector parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["fillBndryErodeRadius"].canConvert<unsigned int>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert pixelFeatureVector parameter 'fillBnderyErodeRadius' to double");
+        return rtnStatus;
+    }
+    fillBndryErodeRadius = paramMap["fillBndryErodeRadius"].toUInt();
 
     // Get colorEdgeVector
     // ----------------------------
-    // std::vector<cv::Scalar> colorEdgeVector;
+    if (!paramMap.contains("colorEdgeVector"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'colorEdgeVector' not found in pixelFeatureVector parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["colorEdgeVector"].canConvert<QList<QVariant>>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert pixelFeatureVector parameter colorEdgeVector to QList<QVariant>");
+        return rtnStatus;
+    }
+
+    QList<QVariant> colorEdgeList = paramMap["colorEdgeVector"].toList();
+    if (colorEdgeList.size() < COLOR_EDGE_VECTOR_MIN_SIZE)
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("pixelFeatureVector -> colorEdgeVector must have at least"); 
+        rtnStatus.message += QString("%1 rows").arg(COLOR_EDGE_VECTOR_MIN_SIZE);
+        return rtnStatus;
+    }
+    std::vector<cv::Scalar> colorEdgeVectorTemp(colorEdgeList.size());
+
+    for (int i=0; i<colorEdgeList.size(); i++)
+    {
+        if (!colorEdgeList[i].canConvert<QList<QVariant>>())
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("Unable to convert pixelFeatureVector -> colorEdgeVector row to QList<QVariant>");
+            return rtnStatus;
+        }
+        QList<QVariant> rowList = colorEdgeList[i].toList();
+        if (rowList.size() != 3)
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("each row of pixelFeatureVector -> colorEdgeVector must have 3 elements.");
+            return rtnStatus;
+        }
+        for (int j=0; j<rowList.size();j++)
+        {
+            if (!rowList[j].canConvert<double>())
+            {
+                rtnStatus.success = false;
+                rtnStatus.message = QString("unable to convert pixelFeatureVector -> colorEdgeVector element to double");
+                return rtnStatus;
+            }
+            colorEdgeVectorTemp[i][j] = rowList[j].toDouble();
+        }
+    }
+    colorEdgeVector = colorEdgeVectorTemp;
 
     // Get gradMagEdgeVector
     // ----------------------------
     // std::vector<float> gradMagEdgeVector;     
+    if (!paramMap.contains("gradMagEdgeVector"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'gradMagEdgeVector' not found in pixelFeatureVector parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["gradMagEdgeVector"].canConvert<QList<QVariant>>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert pixelFeatureVector parameter 'gradMagEdgeVector' to QList<QVariant>");
+        return rtnStatus;
+    }
+    QList<QVariant> gradMagEdgeList = paramMap["gradMagEdgeVector"].toList();
+    if (gradMagEdgeList.size() < GRAD_MAG_EDGE_VECTOR_MIN_SIZE)
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("pixelFeatureVector -> gradMagEdgeVector must have at least");
+        rtnStatus.message += QString("%1 elements").arg(GRAD_MAG_EDGE_VECTOR_MIN_SIZE);
+        return rtnStatus;
+    }
+    std::vector<float> gradMagEdgeVectorTemp(gradMagEdgeList.size());     
+    for (int i=0; i<gradMagEdgeList.size(); i++)
+    {
+        if (!gradMagEdgeList[i].canConvert<float>())
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("Unable to convert pixelFeatureVector -> gradMagEdgeVector element to float");
+            return rtnStatus;
+        }
+        gradMagEdgeVectorTemp[i] = gradMagEdgeList[i].toFloat();
+    }
+    gradMagEdgeVector = gradMagEdgeVectorTemp;
 
-    // Get gradOriCentVectory
+
+    // Get gradOriCentVector
     // ----------------------------
-    // std::vector<float> gradOriCentVector;
+    if (!paramMap.contains("gradOriCentVector"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'gradOriCentVector' not found in pixelFeatureVector parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["gradOriCentVector"].canConvert<QList<QVariant>>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert pixelFeatureVector parameter 'gradOriCentVector' to QList<QVariant>");
+        return rtnStatus;
+    }
+    QList<QVariant> gradOriCentList = paramMap["gradOriCentVector"].toList();
+    if (gradOriCentList.size() < GRAD_ORI_CENT_VECTOR_MIN_SIZE)
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("pixelFeatureVector -> gradOriCentVector must have at least");
+        rtnStatus.message += QString("%1 elements").arg(GRAD_ORI_CENT_VECTOR_MIN_SIZE);
+        return rtnStatus;
+    }
+    std::vector<float> gradOriCentVectorTemp(gradOriCentList.size());
+    for (int i=0; i<gradOriCentList.size(); i++)
+    {
+        if (!gradOriCentList[i].canConvert<float>())
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("unable to convert pixelFeatureVector -> gradOriCentVector element to float");
+            return rtnStatus;
+        }
+        gradOriCentVectorTemp[i] = gradOriCentList[i].toFloat();
+    }
+    gradOriCentVector = gradOriCentVectorTemp;
+
 
     // Get binParam
     // ----------------------------
-    // std::vector<BinParam> binParam;
+    if (!paramMap.contains("binParam"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'binParam' not found in pixelFeatureVector parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["binParam"].canConvert<QList<QVariant>>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert pixelFeatureVector parameter 'binParam' to QList<QVariant>");
+        return rtnStatus;
+    }
+    QList<QVariant> binParamList = paramMap["binParam"].toList();
+    if (binParamList.size() < BIN_PARAM_MIN_SIZE)
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("pixelFeatureVector -> binParam must have at least");
+        rtnStatus.message += QString("%1 rows").arg(BIN_PARAM_MIN_SIZE);
+        return rtnStatus;
+    }
+    std::vector<BinParam> binParamTemp(binParamList.size());
+    for (int i=0; i<binParamList.size(); i++)
+    {
+        if (!binParamList[i].canConvert<QList<QVariant>>())
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("pixelFeatureVector -> binParam unable to convert row to QList<QVariant>");
+            return rtnStatus;
+        }
+        QList<QVariant> rowList = binParamList[i].toList();
+        if (rowList.size() != 2)
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("pixelFeatureVector -> binParam rows must have 2 elements");
+            return rtnStatus;
+        }
+        for (int j=0; j<2; j++)
+        {
+            if (!rowList[j].canConvert<unsigned int>())
+            {
+                rtnStatus.success = false;
+                rtnStatus.message = QString("pixelFeatureVector -> binParam unable to convert element to unsigned int");
+                return rtnStatus;
+            }
+        }
+        binParamTemp[i].numX = rowList[0].toUInt();
+        binParamTemp[i].numY = rowList[1].toUInt();
+    }
+    binParam = binParamTemp;
 
     return rtnStatus;
 }
@@ -454,7 +701,8 @@ QVariantMap HogPositionFitterParam::toMap()
         fillValuesList.push_back(QVariant(fillValuesLUV[i]));
     }
     paramMap.insert("fillValuesLUV", fillValuesList);
-    paramMap.insert("orientClassifierFile", orientClassifier.fileName);
+    paramMap.insert("orientationClassifierFile", orientClassifier.fileName);
+    paramMap.insert("pixelFeatureVector", pixelFeatureVector.toMap());
     return paramMap;
 }
 
@@ -555,6 +803,12 @@ RtnStatus HogPositionFitterParam::fromMap(QVariantMap paramMap)
         return rtnStatus;
     }
     QList<QVariant> fillValuesList = paramMap["fillValuesLUV"].toList();
+    if (fillValuesList.size() != 3)
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("hogPositionFitter parameter 'fillValuesLUV' must have length=3");
+        return rtnStatus;
+    }
     for (int i=0; i<3; i++)
     {
         QVariant var = fillValuesList.at(i);
@@ -567,22 +821,21 @@ RtnStatus HogPositionFitterParam::fromMap(QVariantMap paramMap)
         fillValuesLUV[i] = var.toDouble();
     }
 
-
     // Get classifier file name 
     // ------------------------
-    if (!paramMap.contains("orientClassifierFile"))
+    if (!paramMap.contains("orientationClassifierFile"))
     {
         rtnStatus.success = false;
-        rtnStatus.message = QString("'orientClassifierFile' not found in hogPositionFitter parameters");
+        rtnStatus.message = QString("'orientationClassifierFile' not found in hogPositionFitter parameters");
         return rtnStatus;
     }
-    if (!paramMap["orientClassifierFile"].canConvert<QString>())
+    if (!paramMap["orientationClassifierFile"].canConvert<QString>())
     {
         rtnStatus.success = false;
-        rtnStatus.message = QString("Unable to convert hogPositionFitter parameter 'orientClassifierFile' to QString");
+        rtnStatus.message = QString("Unable to convert hogPositionFitter parameter 'orientationClassifierFile' to QString");
         return rtnStatus;
     }
-     QString fileName = paramMap["orientClassifierFile"].toString();
+     QString fileName = paramMap["orientationClassifierFile"].toString();
 
     // Check that parameters can be loaded from file
     ClassifierParam classifierTemp;
@@ -595,8 +848,29 @@ RtnStatus HogPositionFitterParam::fromMap(QVariantMap paramMap)
     }
     orientClassifier = classifierTemp;
 
-    return rtnStatus;
+    // Get Pixel feature vector
+    if (!paramMap.contains("pixelFeatureVector"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'pixelFeatureVector' not found in hogPositionFitter parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["pixelFeatureVector"].canConvert<QVariantMap>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert hogPosition Fitter paramseter 'pixelFeatureVector' to QVariantMap");
+        return rtnStatus;
+    }
+    QVariantMap pixelFeatureVectorParamMap = paramMap["pixelFeatureVector"].toMap();
+    rtnStatus = pixelFeatureVector.fromMap(pixelFeatureVectorParamMap);
+    if (!rtnStatus.success)
+    {
+        return rtnStatus;
+    }
 
+    rtnStatus.success = true;
+    rtnStatus.message = QString("");
+    return rtnStatus;
 }
 
 

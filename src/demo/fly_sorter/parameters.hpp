@@ -78,18 +78,22 @@ class PixelFeatureVectorParam
         std::vector<cv::Scalar> colorEdgeVector;
         static const std::vector<cv::Scalar> DEFAULT_COLOR_EDGE_VECTOR;
         static std::vector<cv::Scalar> createDefaultColorEdgeVector();
+        static const unsigned int COLOR_EDGE_VECTOR_MIN_SIZE;
 
         std::vector<float> gradMagEdgeVector;     
         static const std::vector<float> DEFAULT_GRAD_MAG_EDGE_VECTOR;
         static std::vector<float> createDefaultGradMagEdgeVector();
+        static const unsigned int GRAD_MAG_EDGE_VECTOR_MIN_SIZE;
 
         std::vector<float> gradOriCentVector;
         static const std::vector<float> DEFAULT_GRAD_ORI_CENT_VECTOR;
         static std::vector<float> createDefaultGradOriCentVector();
+        static const unsigned int GRAD_ORI_CENT_VECTOR_MIN_SIZE;
 
         std::vector<BinParam> binParam;
         static const std::vector<BinParam> DEFAULT_BIN_PARAM;
         static std::vector<BinParam> createDefaultBinParam();
+        static const unsigned int BIN_PARAM_MIN_SIZE;
 
         PixelFeatureVectorParam();
         QVariantMap toMap();
