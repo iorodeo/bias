@@ -61,16 +61,17 @@ namespace bias
     // Methods
     // ----------------------------------------------------------------------------------
     VideoWriter_ufmf::VideoWriter_ufmf(QObject *parent) 
-        : VideoWriter_ufmf(DEFAULT_PARAMS, DUMMY_FILENAME, parent) 
+        : VideoWriter_ufmf(DEFAULT_PARAMS, DUMMY_FILENAME, 0, parent) 
     {} 
 
 
     VideoWriter_ufmf::VideoWriter_ufmf( 
             VideoWriterParams_ufmf params, 
             QString fileName, 
+            unsigned int cameraNumber,
             QObject *parent
             ) 
-        : VideoWriter(fileName,parent) 
+        : VideoWriter(fileName,cameraNumber,parent) 
     {
         isFirst_ = true;
 
@@ -81,16 +82,16 @@ namespace bias
         setFrameSkip(params.frameSkip);
         numberOfCompressors_ = params.numberOfCompressors;
 
-        // ----------------------------------------------------------------------------
-        std::cout << std::endl;
-        std::cout << "Params: " << std::endl;
-        std::cout << " backgroundThreshold:     " << backgroundThreshold_ << std::endl;
-        std::cout << " numberOfCompressors:     " << numberOfCompressors_ << std::endl;
-        std::cout << " boxLength:               " << boxLength_ << std::endl;
-        std::cout << " frameSkip:               " << frameSkip_ << std:: endl;
-        std::cout << " medianUpdateCount:       " << medianUpdateCount_ << std::endl;
-        std::cout << " medianUpdateInterval:    " << medianUpdateInterval_ << std::endl;
-        // -----------------------------------------------------------------------------
+        //// ----------------------------------------------------------------------------
+        //std::cout << std::endl;
+        //std::cout << "Params: " << std::endl;
+        //std::cout << " backgroundThreshold:     " << backgroundThreshold_ << std::endl;
+        //std::cout << " numberOfCompressors:     " << numberOfCompressors_ << std::endl;
+        //std::cout << " boxLength:               " << boxLength_ << std::endl;
+        //std::cout << " frameSkip:               " << frameSkip_ << std:: endl;
+        //std::cout << " medianUpdateCount:       " << medianUpdateCount_ << std::endl;
+        //std::cout << " medianUpdateInterval:    " << medianUpdateInterval_ << std::endl;
+        //// -----------------------------------------------------------------------------
 
         // Create thread pool for background modelling
         threadPoolPtr_ = new QThreadPool(this);
@@ -687,7 +688,8 @@ namespace bias
         bgHistogramPtr_ = new BackgroundHistogram_ufmf(
                 bgImageQueuePtr_,
                 bgNewDataQueuePtr_,
-                bgOldDataQueuePtr_
+                bgOldDataQueuePtr_,
+                cameraNumber_
                 );
 
         bgHistogramPtr_ -> setMedianUpdateCount(medianUpdateCount_);
@@ -696,7 +698,8 @@ namespace bias
         bgMedianPtr_ = new BackgroundMedian_ufmf(
                 bgNewDataQueuePtr_,
                 bgOldDataQueuePtr_,
-                medianMatQueuePtr_
+                medianMatQueuePtr_,
+                cameraNumber_ 
                 );
 
         threadPoolPtr_ -> start(bgHistogramPtr_);
@@ -742,7 +745,8 @@ namespace bias
         {
             compressorPtrVec_[i] = new Compressor_ufmf(
                     framesToDoQueuePtr_,
-                    framesFinishedSetPtr_
+                    framesFinishedSetPtr_,
+                    cameraNumber_
                     );
             threadPoolPtr_ -> start(compressorPtrVec_[i]);
         }

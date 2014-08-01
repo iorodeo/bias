@@ -21,6 +21,7 @@ namespace bias
             Compressor_ufmf(
                     CompressedFrameQueuePtr_ufmf framesToDoQueuePtr,
                     CompressedFrameSetPtr_ufmf framesFinishedSetPtr,
+                    unsigned int cameraNumber,
                     QObject *parent=0
                     );
 
@@ -30,13 +31,15 @@ namespace bias
 
             bool ready_;
             bool stopped_;
+            unsigned int cameraNumber_;
 
             CompressedFrameQueuePtr_ufmf framesToDoQueuePtr_;
             CompressedFrameSetPtr_ufmf framesFinishedSetPtr_;
 
             void initialize(
                     CompressedFrameQueuePtr_ufmf framesToDoQueuePtr,
-                    CompressedFrameSetPtr_ufmf framesFinishedSetPtr
+                    CompressedFrameSetPtr_ufmf framesFinishedSetPtr,
+                    unsigned int cameraNumber
                     );
 
             void run();

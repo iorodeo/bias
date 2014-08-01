@@ -21,7 +21,7 @@ namespace bias
     BackgroundHistogram_ufmf::BackgroundHistogram_ufmf(QObject *parent) 
         : QObject(parent) 
     {
-        initialize(NULL,NULL,NULL);
+        initialize(NULL,NULL,NULL,0);
     }
 
 
@@ -29,18 +29,20 @@ namespace bias
             std::shared_ptr<LockableQueue<StampedImage>> bgImageQueuePtr, 
             std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgNewDataQueuePtr,
             std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr,
+            unsigned int cameraNumber,
             QObject *parent
             ) 
         : QObject(parent)
     {
-        initialize(bgImageQueuePtr, bgNewDataQueuePtr, bgOldDataQueuePtr);
+        initialize(bgImageQueuePtr, bgNewDataQueuePtr, bgOldDataQueuePtr,cameraNumber);
     }
 
 
     void BackgroundHistogram_ufmf::initialize( 
             std::shared_ptr<LockableQueue<StampedImage>> bgImageQueuePtr,
             std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgNewDataQueuePtr,
-            std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr
+            std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr,
+            unsigned int cameraNumber
             ) 
     {
         ready_ = false;
@@ -61,6 +63,7 @@ namespace bias
         {
             ready_ = true;
         }
+        cameraNumber_ = cameraNumber;
     }
 
 
@@ -102,7 +105,7 @@ namespace bias
         // Set thread priority to idle - only run when no other thread are running
         QThread *thisThread = QThread::currentThread();
         thisThread -> setPriority(QThread::NormalPriority);
-        assignThreadAffinity(false,1);
+        ThreadAffinityService::assignThreadAffinity(false,cameraNumber_);
 
         acquireLock();
         stopped_ = false;

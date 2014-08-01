@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include "camera_window.hpp"
 #include "camera_facade.hpp"
+#include "affinity.hpp"
 #include <iostream>
 
 
@@ -43,11 +44,14 @@ int main (int argc, char *argv[])
         return 0;
     }
 
-    // Open camera window for each camera 
-    unsigned int camCnt;
+    // Get number of cameras
     unsigned int numCam = guidList.size();
+    bias::ThreadAffinityService::setNumberOfCameras(numCam);
+
+    // Open camera window for each camera 
     QRect baseGeom;
     QRect nextGeom;
+    unsigned int camCnt;
     bias::GuidList::iterator guidIt;
     for (guidIt=guidList.begin(), camCnt=0; guidIt!=guidList.end(); guidIt++, camCnt++)
     {

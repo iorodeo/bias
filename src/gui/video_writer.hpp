@@ -14,7 +14,7 @@ namespace bias
         public:
 
             VideoWriter(QObject *parent=0); 
-            explicit VideoWriter(QString fileName, QObject *parent=0);
+            explicit VideoWriter(QString fileName, unsigned int cameraNumber, QObject *parent=0);
             virtual ~VideoWriter();
             virtual void setFileName(QString fileName);
             virtual void setSize(cv::Size size);
@@ -34,6 +34,7 @@ namespace bias
             QString fileName_;
             unsigned long frameCount_;
             unsigned int frameSkip_;
+            unsigned int cameraNumber_;
             QString getUniqueFileName();
     };
 

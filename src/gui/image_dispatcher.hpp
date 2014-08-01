@@ -23,6 +23,7 @@ namespace bias
 
             ImageDispatcher( 
                     bool logging,
+                    unsigned int cameraNumber,
                     std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr, 
                     std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr, 
                     QObject *parent = 0
@@ -30,6 +31,7 @@ namespace bias
 
             void initialize( 
                     bool logging,
+                    unsigned int cameraNumber,
                     std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr,
                     std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr 
                     );
@@ -46,6 +48,7 @@ namespace bias
         private:
             bool ready_;
             bool logging_;
+            unsigned int cameraNumber_;
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr_;
             std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr_;
 

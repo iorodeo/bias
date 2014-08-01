@@ -16,19 +16,21 @@ namespace bias {
 
     ImageGrabber::ImageGrabber(QObject *parent) : QObject(parent) 
     {
-        initialize(NULL,NULL);
+        initialize(0,NULL,NULL);
     }
 
     ImageGrabber::ImageGrabber (
+            unsigned int cameraNumber,
             std::shared_ptr<Lockable<Camera>> cameraPtr,
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr, 
             QObject *parent
             ) : QObject(parent)
     {
-        initialize(cameraPtr, newImageQueuePtr);
+        initialize(cameraNumber, cameraPtr, newImageQueuePtr);
     }
 
     void ImageGrabber::initialize( 
+            unsigned int cameraNumber,
             std::shared_ptr<Lockable<Camera>> cameraPtr,
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr 
             ) 
@@ -38,6 +40,7 @@ namespace bias {
         cameraPtr_ = cameraPtr;
         newImageQueuePtr_ = newImageQueuePtr;
         numStartUpSkip_ = DEFAULT_NUM_STARTUP_SKIP;
+        cameraNumber_ = cameraNumber;
         if ((cameraPtr_ != NULL) && (newImageQueuePtr_ != NULL))
         {
             ready_ = true;
@@ -95,7 +98,7 @@ namespace bias {
         // Set thread priority to "time critical" and assign cpu affinity
         QThread *thisThread = QThread::currentThread();
         thisThread -> setPriority(QThread::TimeCriticalPriority);
-        assignThreadAffinity(true,1,0);
+        ThreadAffinityService::assignThreadAffinity(true,cameraNumber_);
 
         // Start image capture
         cameraPtr_ -> acquireLock();

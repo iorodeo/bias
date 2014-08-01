@@ -20,6 +20,7 @@ namespace bias
             VideoWriter_avi(
                     VideoWriterParams_avi params,
                     QString fileName, 
+                    unsigned int cameraNumber,
                     QObject *parent=0
                     );
             virtual ~VideoWriter_avi();

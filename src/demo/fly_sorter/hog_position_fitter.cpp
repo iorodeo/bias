@@ -167,6 +167,7 @@ HogPositionFitterData HogPositionFitter::fit(
         bool onBorder = posData.segmentData.blobData.isOnBorder();
         if (onBorder || (posData.bodyArea < param_.openArea))
         {
+            //std::cout << "onBorder || posData.bodyArea < param_.openArea" << std::endl;
             // Note,  with the current implementation of bwAreaOpen you can
             // degenerate cases where bodyArea > 0 but less than openArea. For
             // example when the image is all 255. I'm not worrying about this
@@ -179,6 +180,7 @@ HogPositionFitterData HogPositionFitter::fit(
         }
         else
         {
+            //std::cout << "isFly = true" << std::endl;
             // This is big enough to be a fly - get the largest connected component
             posData.isFly = true;
             cv::Mat maxCompMat = findMaxConnectedComponent(isBodyMat);
@@ -198,8 +200,8 @@ HogPositionFitterData HogPositionFitter::fit(
             // Note, double check this w/ Kristin
             //posData.bodyArea = cv::countNonZero(maxCompMat);
 
-	    // KB 20140117: Changed this to use isBodyMat
-	    posData.bodyArea = cv::countNonZero(isBodyMat);
+            // KB 20140117: Changed this to use isBodyMat
+            posData.bodyArea = cv::countNonZero(isBodyMat);
 
             // Check if area is too big for one fly
             if (posData.bodyArea > param_.maxBodyArea)

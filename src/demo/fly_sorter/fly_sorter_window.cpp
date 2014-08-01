@@ -580,7 +580,8 @@ void FlySorterWindow::OnImageCaptureStopped()
 
         startPushButtonPtr_ -> setText("Start");
         reloadPushButtonPtr_ -> setEnabled(true);
-        if (param_.imageGrabber.captureMode == QString("file"))
+        if ( (param_.imageGrabber.captureMode == QString("file") ) || 
+                (param_.imageGrabber.captureMode == QString("directory")))
         {
             trainingDataCheckBoxPtr_ -> setEnabled(true);
         }

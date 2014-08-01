@@ -8,24 +8,26 @@ namespace bias
     Compressor_ufmf::Compressor_ufmf(QObject *parent)
         : QObject(parent)
     { 
-        initialize(NULL,NULL);
+        initialize(NULL,NULL,0);
         ready_ = false;
     }
 
     Compressor_ufmf::Compressor_ufmf( 
             CompressedFrameQueuePtr_ufmf framesToDoQueuePtr, 
             CompressedFrameSetPtr_ufmf framesFinishedSetPtr, 
+            unsigned int cameraNumber,
             QObject *parent
             )  
         : QObject(parent)
     {
-        initialize(framesToDoQueuePtr,framesFinishedSetPtr);
+        initialize(framesToDoQueuePtr,framesFinishedSetPtr,cameraNumber);
     }
 
     
     void Compressor_ufmf::initialize( 
             CompressedFrameQueuePtr_ufmf framesToDoQueuePtr, 
-            CompressedFrameSetPtr_ufmf framesFinishedSetPtr 
+            CompressedFrameSetPtr_ufmf framesFinishedSetPtr,
+            unsigned int cameraNumber
             )
     {
         ready_ = false;
@@ -36,6 +38,7 @@ namespace bias
         {
             ready_ = true;
         }
+        cameraNumber_ = cameraNumber;
     }
 
    
@@ -59,7 +62,7 @@ namespace bias
         // Set thread priority to idle - only run when no other thread are running
         QThread *thisThread = QThread::currentThread();
         thisThread -> setPriority(QThread::NormalPriority);
-        assignThreadAffinity(false,1);
+        ThreadAffinityService::assignThreadAffinity(false,cameraNumber_);
 
         acquireLock();
         stopped_ = false;

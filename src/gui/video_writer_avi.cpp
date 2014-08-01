@@ -21,16 +21,17 @@ namespace bias
 
 
     VideoWriter_avi::VideoWriter_avi(QObject *parent) 
-        : VideoWriter_avi(DEFAULT_PARAMS,DUMMY_FILENAME,parent) 
+        : VideoWriter_avi(DEFAULT_PARAMS,DUMMY_FILENAME,0,parent) 
     {}
 
 
     VideoWriter_avi::VideoWriter_avi(
             VideoWriterParams_avi params,
             QString fileName, 
+            unsigned int cameraNumber,
             QObject *parent
             ) 
-        : VideoWriter(fileName,parent)
+        : VideoWriter(fileName,cameraNumber,parent)
     {
         isFirst_ = true;
         fps_ = DEFAULT_FPS;

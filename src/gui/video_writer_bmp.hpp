@@ -16,6 +16,7 @@ namespace bias
             explicit VideoWriter_bmp(
                     VideoWriterParams_bmp params,
                     QString fileName, 
+                    unsigned int cameraNumber,
                     QObject *parent=0
                     );
             virtual ~VideoWriter_bmp();

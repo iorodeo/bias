@@ -21,12 +21,14 @@ namespace bias
                     std::shared_ptr<LockableQueue<StampedImage>> bgImageQueuePtr, 
                     std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgNewDataQueuePtr,
                     std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr,
+                    unsigned int cameraNumber,
                     QObject *parent=0
                     );
             void initialize(
                     std::shared_ptr<LockableQueue<StampedImage>> bgImageQueuePtr,
                     std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgNewDataQueuePtr,
-                    std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr
+                    std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr,
+                    unsigned int cameraNumber
                     );
             void stop();
             void setMedianUpdateCount(unsigned int medianUpdateCount);
@@ -43,6 +45,7 @@ namespace bias
 
             bool ready_;
             bool stopped_;
+            unsigned int cameraNumber_;
             unsigned int medianUpdateCount_;
             unsigned int medianUpdateInterval_;
 

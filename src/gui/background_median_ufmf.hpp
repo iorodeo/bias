@@ -23,18 +23,22 @@ namespace bias
                     std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgNewDataQueuePtr,
                     std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr,
                     std::shared_ptr<LockableQueue<cv::Mat>> medianMatQueuePtr,
+                    unsigned int cameraNumber,
                     QObject *parent=0
                     );
             void initialize(
                     std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgNewDataQueuePtr,
                     std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr,
-                    std::shared_ptr<LockableQueue<cv::Mat>> medianMatQueuePtr
+                    std::shared_ptr<LockableQueue<cv::Mat>> medianMatQueuePtr,
+                    unsigned int cameraNumber
                     );
             void stop();
 
         private:
             bool ready_;
             bool stopped_;
+            unsigned int cameraNumber_;
+
             // Queues of incoming and outgoing background data for median calculation
             std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgNewDataQueuePtr_;
             std::shared_ptr<LockableQueue<BackgroundData_ufmf>> bgOldDataQueuePtr_;

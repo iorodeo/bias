@@ -280,6 +280,7 @@ namespace bias
         logImageQueuePtr_ -> clear();
 
         imageGrabberPtr_ = new ImageGrabber(
+                cameraNumber_, 
                 cameraPtr_, 
                 newImageQueuePtr_, 
                 this
@@ -287,6 +288,7 @@ namespace bias
 
         imageDispatcherPtr_ = new ImageDispatcher(
                 logging_, 
+                cameraNumber_,
                 newImageQueuePtr_,
                 logImageQueuePtr_,
                 this
@@ -334,7 +336,7 @@ namespace bias
 
             // DEBUG
             // -------------------------------------------------------------------------------
-            std::cout << "videoFileFullPath: " << videoFileFullPath.toStdString() << std::endl;
+            //std::cout << "videoFileFullPath: " << videoFileFullPath.toStdString() << std::endl;
             // --------------------------------------------------------------------------------
 
             switch (videoFileFormat_)
@@ -342,34 +344,39 @@ namespace bias
                 case VIDEOFILE_FORMAT_BMP:
                     videoWriterPtr = std::make_shared<VideoWriter_bmp>(
                             videoWriterParams_.bmp,
-                            videoFileFullPath
+                            videoFileFullPath,
+                            cameraNumber_
                             );
                     break;
 
                 case VIDEOFILE_FORMAT_AVI:  
                     videoWriterPtr = std::make_shared<VideoWriter_avi>(
                             videoWriterParams_.avi,
-                            videoFileFullPath
+                            videoFileFullPath,
+                            cameraNumber_
                             );
                     break;
 
                 case VIDEOFILE_FORMAT_FMF:
                     videoWriterPtr = std::make_shared<VideoWriter_fmf>(
                             videoWriterParams_.fmf,
-                            videoFileFullPath
+                            videoFileFullPath,
+                            cameraNumber_
                             );
                     break;
 
                 case VIDEOFILE_FORMAT_UFMF:
                     videoWriterPtr = std::make_shared<VideoWriter_ufmf>(
                             videoWriterParams_.ufmf,
-                            videoFileFullPath
+                            videoFileFullPath,
+                            cameraNumber_
                             );
                     break;
 
                 default:
                     videoWriterPtr = std::make_shared<VideoWriter>(
-                            videoFileFullPath
+                            videoFileFullPath,
+                            cameraNumber_
                             );
                     break;
             }
@@ -2298,7 +2305,7 @@ namespace bias
         startButtonPtr_ -> setEnabled(false);
         connectButtonPtr_ -> setEnabled(true);
 
-        assignThreadAffinity(false,1);
+        ThreadAffinityService::assignThreadAffinity(false,cameraNumber_);
 
         httpServerPort_  = HTTP_SERVER_PORT_BEGIN; 
         httpServerPort_ += HTTP_SERVER_PORT_STEP*(cameraNumber_ + 1);

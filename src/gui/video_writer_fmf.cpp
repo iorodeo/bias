@@ -14,14 +14,15 @@ namespace bias
         VideoWriterParams_fmf();
 
     VideoWriter_fmf::VideoWriter_fmf(QObject *parent) 
-        : VideoWriter_fmf(DEFAULT_PARAMS, DUMMY_FILENAME, parent) 
+        : VideoWriter_fmf(DEFAULT_PARAMS, DUMMY_FILENAME, 0, parent) 
     {}
 
     VideoWriter_fmf::VideoWriter_fmf(
             VideoWriterParams_fmf params,
             QString fileName, 
+            unsigned int cameraNumber,
             QObject *parent
-            ) : VideoWriter(fileName, parent)
+            ) : VideoWriter(fileName, cameraNumber, parent)
     {
         numWritten_ = 0;
         isFirst_ = true;

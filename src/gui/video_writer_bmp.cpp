@@ -18,14 +18,15 @@ namespace bias
 
     // VideoWriter_bmp methods
     VideoWriter_bmp::VideoWriter_bmp(QObject *parent) 
-        : VideoWriter_bmp(DEFAULT_PARAMS,DUMMY_FILENAME,parent) 
+        : VideoWriter_bmp(DEFAULT_PARAMS,DUMMY_FILENAME,0,parent) 
     {}
 
     VideoWriter_bmp::VideoWriter_bmp(
             VideoWriterParams_bmp params,
             QString fileName, 
+            unsigned int cameraNumber,
             QObject *parent
-            ) : VideoWriter(fileName,parent) 
+            ) : VideoWriter(fileName,cameraNumber,parent) 
     {
         isFirst_ = true;
         setFrameSkip(params.frameSkip);

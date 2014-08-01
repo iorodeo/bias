@@ -14,6 +14,7 @@ namespace bias
             VideoWriter_fmf(
                     VideoWriterParams_fmf params,
                     QString fileName, 
+                    unsigned int cameraNumber,
                     QObject *paraent=0
                     );
             ~VideoWriter_fmf();

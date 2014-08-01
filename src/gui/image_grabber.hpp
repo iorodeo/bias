@@ -23,12 +23,14 @@ namespace bias
             ImageGrabber(QObject *parent=0);
 
             ImageGrabber(
+                    unsigned int cameraNumber,
                     std::shared_ptr<Lockable<Camera>> cameraPtr,
                     std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr, 
                     QObject *parent=0
                     );
 
             void initialize(
+                    unsigned int cameraNumber,
                     std::shared_ptr<Lockable<Camera>> cameraPtr,
                     std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr 
                     );
@@ -53,6 +55,7 @@ namespace bias
             bool capturing_;
             bool errorCountEnabled_;
             unsigned int numStartUpSkip_;
+            unsigned int cameraNumber_;
 
             std::shared_ptr<Lockable<Camera>> cameraPtr_;
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr_;

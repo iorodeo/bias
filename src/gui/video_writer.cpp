@@ -10,13 +10,14 @@ namespace bias
     const QString DUMMY_FILENAME("dummy_filename");
 
     VideoWriter::VideoWriter(QObject *parent) 
-        : VideoWriter(DUMMY_FILENAME,parent) 
+        : VideoWriter(DUMMY_FILENAME,0, parent) 
     {}
 
-    VideoWriter::VideoWriter(QString fileName, QObject *parent) 
+    VideoWriter::VideoWriter(QString fileName, unsigned int cameraNumber, QObject *parent) 
         : QObject(parent)
     {
         setFileName(fileName);
+        cameraNumber_ = cameraNumber;
         size_ = cv::Size(0,0);
         frameCount_ = 0;
         frameSkip_ = DEFAULT_FRAME_SKIP;

@@ -17,21 +17,23 @@ namespace bias
 
     ImageDispatcher::ImageDispatcher(QObject *parent) : QObject(parent)
     {
-        initialize(false,NULL,NULL);
+        initialize(false,0,NULL,NULL);
     }
 
     ImageDispatcher::ImageDispatcher( 
             bool logging,
+            unsigned int cameraNumber,
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr, 
             std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr, 
             QObject *parent
             ) : QObject(parent)
     {
-        initialize(logging,newImageQueuePtr,logImageQueuePtr);
+        initialize(logging,cameraNumber,newImageQueuePtr,logImageQueuePtr);
     }
 
     void ImageDispatcher::initialize(
             bool logging,
+            unsigned int cameraNumber,
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr,
             std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr 
             ) 
@@ -48,6 +50,7 @@ namespace bias
         }
         stopped_ = true;
         logging_ = logging;
+        cameraNumber_ = cameraNumber;
         frameCount_ = 0;
         currentTimeStamp_ = 0.0;
     }
@@ -91,8 +94,7 @@ namespace bias
         // Set thread priority to normal and assign cpu affinity
         QThread *thisThread = QThread::currentThread();
         thisThread -> setPriority(QThread::TimeCriticalPriority);
-        assignThreadAffinity(false,1);
-
+        ThreadAffinityService::assignThreadAffinity(false,cameraNumber_);
 
         // Initiaiize values
         acquireLock();
@@ -105,9 +107,9 @@ namespace bias
         // --------------------------------------------------------------------
         CameraWindow* cameraWindowPtr = qobject_cast<CameraWindow *>(parent());
         QDir videoFileDir = cameraWindowPtr -> getVideoFileDir();
-        QFileInfo stampFileInfo = QFileInfo(videoFileDir, "stamp_log.txt");
+        QString stampLogName = QString("stamp_log_cam%1.txt").arg(cameraNumber_);
+        QFileInfo stampFileInfo = QFileInfo(videoFileDir, stampLogName);
         std::string stampFileName = stampFileInfo.absoluteFilePath().toStdString();
-        //std::cout << stampFileName << std::endl;
         std::ofstream stampOutStream;
         stampOutStream.open(stampFileName);
 

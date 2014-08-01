@@ -71,7 +71,7 @@ namespace bias
         // Set thread priority to normal
         QThread *thisThread = QThread::currentThread();
         thisThread -> setPriority(QThread::NormalPriority);
-        assignThreadAffinity(false,1);
+        ThreadAffinityService::assignThreadAffinity(false,cameraNumber_);
 
         acquireLock();
         stopped_ = false;
