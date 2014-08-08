@@ -14,15 +14,8 @@ namespace bias
 
         private:
             static unsigned int numberOfCameras_;
-            static QMutex coutMutex_;
+            static QMutex coutDebugMutex_;
     };
-
-
-    bool assignThreadAffinity(
-            bool isImageGrabber, 
-            unsigned int numberOfCameras, 
-            unsigned int cameraNumber=0 
-            );
 
 } // namespace bias
 
