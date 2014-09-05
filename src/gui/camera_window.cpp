@@ -182,7 +182,15 @@ namespace bias
         }
         connected_ = true;
         connectButtonPtr_ -> setText(QString("Disconnect"));
-        statusbarPtr_ -> showMessage(QString("Connected, Stopped"));
+
+        //QString statusMsg("Connected, logging = ");
+        //statusMsg += boolToOnOffQString(logging_);
+        //statusMsg += QString(", timer = ");
+        //statusMsg += boolToOnOffQString(actionTimerEnabledPtr_ -> isChecked());
+        //statusMsg += QString(", Stopped");
+        //statusLabelPtr_ -> setText(statusMsg);
+        updateStatusLabel();
+
         startButtonPtr_ -> setEnabled(true);
         menuCameraPtr_ -> setEnabled(true);
 
@@ -252,7 +260,10 @@ namespace bias
         }
         connected_ = false;
         connectButtonPtr_ -> setText(QString("Connect"));
-        statusbarPtr_ -> showMessage(QString("Disconnected"));
+
+        //statusLabelPtr_ -> setText("Disconnected");
+        updateStatusLabel();
+
         startButtonPtr_ -> setEnabled(false);
         menuCameraPtr_ -> setEnabled(false);
         updateCameraInfoMessage();
@@ -436,19 +447,12 @@ namespace bias
         captureStartDateTime_ = QDateTime::currentDateTime();
         captureStopDateTime_ = captureStartDateTime_.addSecs(captureDurationSec_);
 
-        // OLD
-        // ----------------------------------------------
-        //// Start duration timer - if enabled
-        //if (actionTimerEnabledPtr_ -> isChecked())
-        //{
-        //    captureDurationTimerPtr_ -> start();
-        //}
-        //-----------------------------------------------
 
         // Update GUI widget for capturing state
         startButtonPtr_ -> setText(QString("Stop"));
         connectButtonPtr_ -> setEnabled(false);
-        statusbarPtr_ -> showMessage(QString("Capturing"));
+        //statusLabelPtr_ -> setText("Capturing");
+        updateStatusLabel();
         capturing_ = true;
         showCameraLockFailMsg_ = false;
         updateAllMenus();
@@ -535,7 +539,14 @@ namespace bias
         // Update data GUI information
         startButtonPtr_ -> setText(QString("Start"));
         connectButtonPtr_ -> setEnabled(true);
-        statusbarPtr_ -> showMessage(QString("Connected, Stopped"));
+
+        //QString statusMsg("Connected, logging = ");
+        //statusMsg += boolToOnOffQString(logging_);
+        //statusMsg += QString(", timer = ");
+        //statusMsg += boolToOnOffQString(actionTimerEnabledPtr_ -> isChecked());
+        //statusMsg += QString(", Stopped");
+        //statusLabelPtr_ -> setText(statusMsg);
+        updateStatusLabel();
 
         framesPerSec_ = 0.0;
         updateAllImageLabels();
@@ -948,6 +959,7 @@ namespace bias
             }
         }
         updateAllMenus();
+        updateStatusLabel();
         rtnStatus.success = true;
         rtnStatus.message = QString("");
         return rtnStatus;
@@ -1650,12 +1662,23 @@ namespace bias
                 haveImagePixmap_ = true;
             }
 
-            // Update statusbar message
-            QString statusMsg("Capturing,  logging = ");
-            statusMsg += boolToOnOffQString(logging_);
-            statusMsg += QString(", timer = ");
-            statusMsg += boolToOnOffQString(actionTimerEnabledPtr_ -> isChecked());
-            statusMsg += QString().sprintf(",  %dx%d", imgSize.width, imgSize.height);
+            // Update status message
+            //QString statusMsg("Capturing,  logging = ");
+            //statusMsg += boolToOnOffQString(logging_);
+            //statusMsg += QString(", timer = ");
+            //statusMsg += boolToOnOffQString(actionTimerEnabledPtr_ -> isChecked());
+            //statusMsg += QString().sprintf(",  %dx%d", imgSize.width, imgSize.height);
+            //statusMsg += QString().sprintf(",  %1.1f fps", framesPerSec_);
+            //if ((logging_) && (!imageLoggerPtr_.isNull()))
+            //{
+            //    imageLoggerPtr_ -> acquireLock();
+            //    unsigned int logQueueSize = imageLoggerPtr_ -> getLogQueueSize();
+            //    imageLoggerPtr_ -> releaseLock();
+            //    statusMsg += QString(",  log queue size = %1").arg(logQueueSize);
+            //}
+            //statusLabelPtr_ -> setText(statusMsg);
+
+            QString statusMsg = QString().sprintf("%dx%d", imgSize.width, imgSize.height);
             statusMsg += QString().sprintf(",  %1.1f fps", framesPerSec_);
             if ((logging_) && (!imageLoggerPtr_.isNull()))
             {
@@ -1664,7 +1687,7 @@ namespace bias
                 imageLoggerPtr_ -> releaseLock();
                 statusMsg += QString(",  log queue size = %1").arg(logQueueSize);
             }
-            statusbarPtr_ -> showMessage(statusMsg);
+            updateStatusLabel(statusMsg);
 
             // Set update capture time 
             QDateTime currentDateTime = QDateTime::currentDateTime();
@@ -1927,6 +1950,7 @@ namespace bias
         {
             logging_ = false;
         }
+        updateStatusLabel();
     }
 
 
@@ -2056,6 +2080,7 @@ namespace bias
     void CameraWindow::actionTimerEnabledTriggered()
     {
         setCaptureTimeLabel(0.0);
+        updateStatusLabel();
     }
 
 
@@ -2319,6 +2344,7 @@ namespace bias
         currentConfigFileDir_ = defaultConfigFileDir_;
         currentConfigFileName_ = DEFAULT_CONFIG_FILE_NAME;
 
+        setupStatusLabel();
         setupCameraMenu();
         setupLoggingMenu();
         setupDisplayMenu();
@@ -2335,10 +2361,11 @@ namespace bias
 
         connectButtonPtr_ -> setText(QString("Connect"));
         startButtonPtr_ -> setText(QString("Start"));
-        statusbarPtr_ -> showMessage(QString("Camera found, disconnected"));
-
         startButtonPtr_ -> setEnabled(false);
         connectButtonPtr_ -> setEnabled(true);
+
+        //statusLabelPtr_ -> setText("Camera found, disconnected");
+        updateStatusLabel();
 
         ThreadAffinityService::assignThreadAffinity(false,cameraNumber_);
 
@@ -2757,6 +2784,16 @@ namespace bias
         setWindowTitle(windowTitle);
     }
 
+    
+    void CameraWindow::setupStatusLabel()
+    {
+        setStyleSheet("QStatusBar::item {border: 0px solid black};");
+        statusbarPtr_ -> setStyleSheet("QLabel {padding-left: 8px};");
+        statusLabelPtr_ = new QLabel();
+        statusLabelPtr_ -> setAlignment(Qt::AlignLeft);
+        statusbarPtr_ -> addPermanentWidget(statusLabelPtr_,1);
+    }
+
 
     void CameraWindow::setupCameraMenu()
     {
@@ -3119,6 +3156,40 @@ namespace bias
         cameraInfoString += QString(",  ");
         cameraInfoString += modelName; 
         cameraInfoLabelPtr_ -> setText(cameraInfoString);
+    }
+
+
+    void CameraWindow::updateStatusLabel(QString msg)
+    {
+        QString statusMsg;
+        if (connected_)
+        {
+            if (!capturing_)
+            {
+                statusMsg = QString("Connected, logging = ");
+                statusMsg += boolToOnOffQString(logging_);
+                statusMsg += QString(", timer = ");
+                statusMsg += boolToOnOffQString(actionTimerEnabledPtr_ -> isChecked());
+                statusMsg += QString(", Stopped");
+            }
+            else
+            {
+                statusMsg = QString("Capturing, logging = ");
+                statusMsg += boolToOnOffQString(logging_);
+                statusMsg += QString(", timer = ");
+                statusMsg += boolToOnOffQString(actionTimerEnabledPtr_ -> isChecked());
+            }
+        }
+        else
+        {
+            statusMsg = QString("Disconnected");
+        }
+
+        if (!msg.isEmpty())
+        {
+            statusMsg += QString(", ") + msg;
+        }
+        statusLabelPtr_ -> setText(statusMsg);
     }
 
 

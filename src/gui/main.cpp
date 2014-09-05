@@ -15,6 +15,7 @@
 int main (int argc, char *argv[])
 {
     QApplication app(argc, argv);
+   
     bias::GuidList guidList;
     bias::CameraFinder cameraFinder;
     std::list<QSharedPointer<bias::CameraWindow>> windowPtrList;

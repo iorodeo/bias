@@ -225,6 +225,8 @@ namespace bias
             unsigned long captureDurationSec_;
             AutoNamingOptions autoNamingOptions_;
 
+            QPointer<QLabel> statusLabelPtr_;
+
             QPixmap previewPixmapOriginal_;
             QPixmap pluginPixmapOriginal_;
             QPixmap histogramPixmapOriginal_;
@@ -285,13 +287,14 @@ namespace bias
             void setupCaptureDurationTimer();
             void updateWindowTitle();
             
-            // Menu setup methods
+            // Menu and statusbar setup methods
             void setupCameraMenu();
             void setupLoggingMenu();
             void setupDisplayMenu();
             void setupDisplayOrientMenu();
             void setupDisplayRotMenu();
             void setupDisplayColorMapMenu();
+            void setupStatusLabel();
 
             // Menu update methods
             void updateAllMenus();
@@ -336,6 +339,8 @@ namespace bias
 
             void resizeAllImageLabels();
             void updateHistogramPixmap(cv::Mat hist);
+
+            void updateStatusLabel(QString msg="");
 
             void deleteMenuActions(QMenu *menuPtr, QActionGroup *actionGroupPtr=NULL);
             void setCameraInfoMessage(QString vendorName, QString modelName);
