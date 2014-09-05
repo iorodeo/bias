@@ -871,6 +871,7 @@ namespace bias
         displayMap.insert("orientation", orientationMap);
         displayMap.insert("rotation", (unsigned int)(imageRotation_));
         displayMap.insert("updateFrequency", imageDisplayFreq_);
+        displayMap.insert("colorMap",COLORMAP_INT_TO_STRING_MAP[colorMapNumber_]);
         configurationMap.insert("display", displayMap);
 
         // Add server configuration
@@ -916,6 +917,10 @@ namespace bias
 
         QVariantMap oldConfigMap = getConfigurationMap(rtnStatus);
 
+        // --------------------------------------------------------------------------
+        //TODO: need to clean this up ... two functions for setting configuration.
+        //---------------------------------------------------------------------------
+        
         //rtnStatus = setConfigurationFromMap(configMap,showErrorDlg); 
         rtnStatus = setConfigurationFromMap_Lenient(configMap,oldConfigMap,showErrorDlg);
         if (!rtnStatus.success)
@@ -4499,6 +4504,26 @@ namespace bias
             return rtnStatus;
         }
         imageRotation_ = ImageRotationType(rotationUInt);
+
+        // Set Colormap (only change if present).
+        if (displayMap.contains("colorMap"))
+        {
+            if (!displayMap["colorMap"].canConvert<QString>())
+            {
+                QString errMsgText("Display configuration: unable to convert");
+                errMsgText += " colorMap to QString";
+                if (showErrorDlg)
+                {
+                    QMessageBox::critical(this,errMsgTitle,errMsgText);
+                }
+                rtnStatus.success = false;
+                rtnStatus.message = errMsgText;
+                return rtnStatus;
+            }
+            QString colorMapString = displayMap["colorMap"].toString();
+            colorMapNumber_ = COLORMAP_INT_TO_STRING_MAP.key(colorMapString,COLORMAP_NONE);
+        }
+
 
         // Set Image Display frequency
         if (!displayMap.contains("updateFrequency"))
