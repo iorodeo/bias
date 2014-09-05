@@ -4215,7 +4215,7 @@ namespace bias
             rtnStatus.message = errMsgText;
             return rtnStatus;
         }
-        logging_ = loggingMap["enabled"].toBool();
+        bool loggingEnabledValue  = loggingMap["enabled"].toBool();
 
         // Get "Format" value
         // -------------------
@@ -4367,6 +4367,16 @@ namespace bias
         if (!rtnStatus.success)
         {
             return rtnStatus;
+        }
+
+        // After we have all logging information - try and enable logging
+        if (loggingEnabledValue)
+        {
+            enableLogging(showErrorDlg);
+        }
+        else
+        {
+            disableLogging(showErrorDlg);
         }
 
         rtnStatus.success = true;

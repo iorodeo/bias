@@ -98,8 +98,8 @@ namespace bias
         unsigned int maxThreadCount = numberOfCompressors_ + BASE_NUMBER_OF_THREADS;
         threadPoolPtr_ -> setMaxThreadCount(maxThreadCount);
 
-        std::cout << " writer max thread count: "  << maxThreadCount << std::endl;
-        std::cout << std::endl;
+        //std::cout << " writer max thread count: "  << maxThreadCount << std::endl;
+        //std::cout << std::endl;
 
         // Create queue for images sent to background modeler
         bgImageQueuePtr_ = std::make_shared<LockableQueue<StampedImage>>();
