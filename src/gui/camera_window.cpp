@@ -38,6 +38,7 @@
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/contrib/contrib.hpp>
 
 #include <QTcpServer>
 
@@ -82,6 +83,28 @@ namespace bias
         return map;
     };
     const QMap<VideoFileFormat, QString> VIDEOFILE_EXTENSION_MAP = createExtensionMap();
+
+    const int COLORMAP_NONE = -1;
+    QMap<int, QString>  createColorMapIntToStringMap()
+    {
+        QMap<int, QString> map;
+        map.insert(COLORMAP_NONE, QString("None"));
+        map.insert(cv::COLORMAP_AUTUMN, QString("Autumn"));
+        map.insert(cv::COLORMAP_BONE, QString("Bone"));
+        map.insert(cv::COLORMAP_JET, QString("Jet"));
+        map.insert(cv::COLORMAP_WINTER, QString("Winter"));
+        map.insert(cv::COLORMAP_RAINBOW, QString("Rainbow"));
+        map.insert(cv::COLORMAP_OCEAN, QString("Ocean"));
+        map.insert(cv::COLORMAP_SUMMER, QString("Summer"));
+        map.insert(cv::COLORMAP_SPRING, QString("Spring"));
+        map.insert(cv::COLORMAP_COOL, QString("Cool"));
+        map.insert(cv::COLORMAP_HSV, QString("Hsv"));
+        map.insert(cv::COLORMAP_PINK, QString("Pink"));
+        map.insert(cv::COLORMAP_HOT, QString("Hot"));
+        return map;
+    }
+    const QMap<int, QString> COLORMAP_INT_TO_STRING_MAP = createColorMapIntToStringMap();
+    const int DEFAULT_COLORMAP_NUMBER = COLORMAP_NONE;
 
 
     // Debug files
@@ -1330,8 +1353,8 @@ namespace bias
         currentVideoFileName_ = videoFileName;
         // DEBUG
         // ---------------------------------------------------------------------------------------------
-        std::cout << "currentVideoFileDir:  " << currentVideoFileDir_.path().toStdString() << std::endl;
-        std::cout << "currentVideoFileName: " << currentVideoFileName_.toStdString() << std::endl;
+        //std::cout << "currentVideoFileDir:  " << currentVideoFileDir_.path().toStdString() << std::endl;
+        //std::cout << "currentVideoFileName: " << currentVideoFileName_.toStdString() << std::endl;
         // ---------------------------------------------------------------------------------------------
         return rtnStatus;
     }
@@ -1565,9 +1588,6 @@ namespace bias
     void CameraWindow::connectButtonClicked()
     {
         (!connected_) ? connectCamera() : disconnectCamera();
-        //std::cout << "connected: "; 
-        //std::cout << std::boolalpha << connected_ << std::noboolalpha << std::endl;
-        
         // DEBUG
         //// ------------------------------------
         //if (connected_)
@@ -1581,8 +1601,6 @@ namespace bias
     void CameraWindow::startButtonClicked()
     { 
         (!capturing_) ? startImageCapture() : stopImageCapture();
-        //std::cout << "capturing: ";
-        //std::cout << std::boolalpha << capturing_ << std::noboolalpha << std::endl;
     }
    
 
@@ -1594,19 +1612,14 @@ namespace bias
         {
             // Get information from image dispatcher
             // -------------------------------------------------------------------
-            QImage img;
-            cv::Mat histMat;
-            cv::Size imgSize;
+            cv::Mat imgMat;
 
             if (imageDispatcherPtr_ -> tryLock(IMAGE_DISPLAY_CAMERA_LOCK_TRY_DT))
             {
-                cv::Mat imgMat = imageDispatcherPtr_ -> getImage();
-                img = matToQImage(imgMat);
+                imgMat = imageDispatcherPtr_ -> getImage();
                 framesPerSec_ = imageDispatcherPtr_ -> getFPS();
                 timeStamp_ = imageDispatcherPtr_ -> getTimeStamp();
                 frameCount_ = imageDispatcherPtr_ -> getFrameCount();
-                histMat = calcHistogram(imgMat);
-                imgSize = imgMat.size();
                 imageDispatcherPtr_ -> releaseLock();
             }
             else
@@ -1614,6 +1627,16 @@ namespace bias
                 return;
             }
             // -------------------------------------------------------------------
+
+
+            cv::Mat histMat = calcHistogram(imgMat);
+            cv::Size imgSize = imgMat.size();
+            if (colorMapNumber_ != COLORMAP_NONE)
+            {
+                cv::applyColorMap(imgMat,imgMat, colorMapNumber_);
+            }
+            QImage img = matToQImage(imgMat);
+
 
             // Set pixmaps and update image labels - note need to add pluginPixmap
             if (!img.isNull()) 
@@ -1780,8 +1803,8 @@ namespace bias
         configFileFullPath = getConfigFileFullPath();
         saveConfiguration(configFileFullPath);
 
-        std::cout << "dir:  " << currentConfigFileDir_.absolutePath().toStdString() << std::endl;
-        std::cout << "file: " << currentConfigFileName_.toStdString() << std::endl;
+        //std::cout << "dir:  " << currentConfigFileDir_.absolutePath().toStdString() << std::endl;
+        //std::cout << "file: " << currentConfigFileName_.toStdString() << std::endl;
 
     }
 
@@ -2019,8 +2042,8 @@ namespace bias
 
     void CameraWindow::autoNamingOptionsChanged(AutoNamingOptions options)
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-        std::cout << options.toStdString() << std::endl;
+        //std::cout << __PRETTY_FUNCTION__ << std::endl;
+        //std::cout << options.toStdString() << std::endl;
         autoNamingOptions_ = options;
     }
 
@@ -2174,6 +2197,12 @@ namespace bias
         QPointer<PropertyDialog> propDialogPtr = new PropertyDialog(cameraPtr_, propType, this);
         propDialogPtr -> show();
     }
+
+
+    void CameraWindow::actionColorMapTriggered(int colorMapInt)
+    {
+        colorMapNumber_ = colorMapInt;
+    }
     
 
     void CameraWindow::actionPluginsSettingsTriggered()
@@ -2264,6 +2293,7 @@ namespace bias
         showCameraLockFailMsg_ = true;
 
         imageRotation_ = IMAGE_ROTATION_0;
+        colorMapNumber_ = DEFAULT_COLORMAP_NUMBER;
         videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
         captureDurationSec_ = DEFAULT_CAPTURE_DURATION;
         imageDisplayFreq_ = DEFAULT_IMAGE_DISPLAY_FREQ;
@@ -2779,6 +2809,7 @@ namespace bias
     {
         setupDisplayRotMenu();
         setupDisplayOrientMenu();
+        setupDisplayColorMapMenu();
     }
 
 
@@ -2800,6 +2831,18 @@ namespace bias
         actionToRotationMap_[actionDisplayRot180Ptr_] = IMAGE_ROTATION_180;
         actionToRotationMap_[actionDisplayRot270Ptr_] = IMAGE_ROTATION_270; 
         updateDisplayRotMenu();
+    }
+
+
+    void CameraWindow::setupDisplayColorMapMenu()
+    {
+        colorMapSignalMapperPtr_ = new QSignalMapper(menuColorMapPtr_);
+        connect(
+                colorMapSignalMapperPtr_,
+                SIGNAL(mapped(int)),
+                this,
+                SLOT(actionColorMapTriggered(int))
+               );
     }
 
 
@@ -3553,6 +3596,7 @@ namespace bias
     {
         updateDisplayOrientMenu();
         updateDisplayRotMenu();
+        updateDisplayColorMapMenu();
     }
 
     void CameraWindow::updateDebugMenu()
@@ -3598,6 +3642,48 @@ namespace bias
     }
 
 
+    void CameraWindow::updateDisplayColorMapMenu()
+    {
+        deleteMenuActions(menuColorMapPtr_, colorMapActionGroupPtr_);
+        colorMapActionGroupPtr_ = new QActionGroup(menuColorMapPtr_);
+
+        if (!COLORMAP_INT_TO_STRING_MAP.contains(colorMapNumber_))
+        {
+            colorMapNumber_ = COLORMAP_NONE; // Set to None if not found 
+        }
+
+        QMap<int,QString>::const_iterator mapIt;
+        for (
+                mapIt = COLORMAP_INT_TO_STRING_MAP.begin(); 
+                mapIt != COLORMAP_INT_TO_STRING_MAP.end(); 
+                mapIt++
+            )
+        {
+            QPointer<QAction> colorMapActionPtr = menuColorMapPtr_ -> addAction(mapIt.value());
+            colorMapActionPtr -> setCheckable(true);
+            colorMapActionGroupPtr_ -> addAction(colorMapActionPtr);
+            if (colorMapNumber_ == mapIt.key())
+            {
+                colorMapActionPtr -> setChecked(true);
+            }
+            else
+            {
+                colorMapActionPtr -> setChecked(false);
+            }
+
+            connect( 
+                    colorMapActionPtr, 
+                    SIGNAL(triggered()), 
+                    colorMapSignalMapperPtr_, 
+                    SLOT(map())
+                    );
+
+            colorMapSignalMapperPtr_ -> setMapping(colorMapActionPtr, mapIt.key());
+        }
+    }
+
+
+
     void CameraWindow::deleteMenuActions(QMenu *menuPtr, QActionGroup *actionGroupPtr)
     {
         QList<QAction *> actionList = menuPtr -> actions();
@@ -3608,7 +3694,6 @@ namespace bias
             if (actionGroupPtr != NULL)
             {
                 actionGroupPtr -> removeAction(actionPtr);
-
             }
             menuPtr -> removeAction(actionPtr);
         }

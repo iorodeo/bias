@@ -327,8 +327,15 @@
      <addaction name="actionDisplayRot180Ptr_"/>
      <addaction name="actionDisplayRot270Ptr_"/>
     </widget>
+    <widget class="QMenu" name="menuColorMapPtr_">
+     <property name="title">
+      <string>ColorMap</string>
+     </property>
+     <addaction name="actionDummy_colormap"/>
+    </widget>
     <addaction name="menuDisplayOrientationPtr_"/>
     <addaction name="menuDisplayRotPtr_"/>
+    <addaction name="menuColorMapPtr_"/>
     <addaction name="actionDisplayAlignToolsPtr_"/>
     <addaction name="actionDisplayUpdateFreqPtr_"/>
    </widget>
@@ -677,6 +684,31 @@
   <action name="actionLoggingAutoNamingPtr_">
    <property name="text">
     <string>Auto Naming...</string>
+   </property>
+  </action>
+  <action name="actionJet">
+   <property name="text">
+    <string>None</string>
+   </property>
+  </action>
+  <action name="actionDummy_colormap">
+   <property name="text">
+    <string>dummy colormap</string>
+   </property>
+  </action>
+  <action name="actionAutumn">
+   <property name="text">
+    <string>Autumn</string>
+   </property>
+  </action>
+  <action name="actionBone">
+   <property name="text">
+    <string>Bone</string>
+   </property>
+  </action>
+  <action name="actionJet_2">
+   <property name="text">
+    <string>Jet</string>
    </property>
   </action>
  </widget>

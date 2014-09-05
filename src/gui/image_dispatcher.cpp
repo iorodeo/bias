@@ -57,7 +57,8 @@ namespace bias
 
     cv::Mat ImageDispatcher::getImage() const
     {
-        return currentImage_;
+        cv::Mat currentImageCopy_ = currentImage_.clone();
+        return currentImageCopy_;
     }
 
     double ImageDispatcher::getTimeStamp() const

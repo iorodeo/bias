@@ -176,10 +176,12 @@ namespace bias
             void actionHelpAboutTriggered();
             void actionDumpCameraPropsTriggered();
 
-            // Signal mappers for videomode, framerate and properties
+            // Signal mappers for menu items e.g. videomode, framerate, properties and colormaps
             void actionVideoModeTriggered(int vidModeInt);
             void actionFrameRateTriggered(int frmRateInt);
             void actionPropertyTriggered(int propTypeInt);
+            void actionColorMapTriggered(int colorMapInt);
+
 
             // Dialog slots
             void timerDurationChanged(unsigned long duration);
@@ -202,6 +204,7 @@ namespace bias
             unsigned int cameraNumber_;
             unsigned int numberOfCameras_;
             unsigned int format7PercentSpeed_;
+            int colorMapNumber_;
 
             QDir defaultVideoFileDir_;
             QDir currentVideoFileDir_;
@@ -232,10 +235,12 @@ namespace bias
             QPointer<QActionGroup> cameraTriggerActionGroupPtr_;
             QPointer<QActionGroup> loggingFormatActionGroupPtr_;
             QPointer<QActionGroup> rotationActionGroupPtr_;
+            QPointer<QActionGroup> colorMapActionGroupPtr_;
 
             QPointer<QSignalMapper> videoModeSignalMapperPtr_;
             QPointer<QSignalMapper> frameRateSignalMapperPtr_;
             QPointer<QSignalMapper> propertiesSignalMapperPtr_;
+            QPointer<QSignalMapper> colorMapSignalMapperPtr_;
 
             QMap<QAction*, ImageRotationType> actionToRotationMap_;
             QMap<QAction*, VideoFileFormat> actionToVideoFileFormatMap_;
@@ -286,6 +291,7 @@ namespace bias
             void setupDisplayMenu();
             void setupDisplayOrientMenu();
             void setupDisplayRotMenu();
+            void setupDisplayColorMapMenu();
 
             // Menu update methods
             void updateAllMenus();
@@ -303,6 +309,7 @@ namespace bias
 
             void updateDisplayOrientMenu();
             void updateDisplayRotMenu();
+            void updateDisplayColorMapMenu();
 
             void updatePreviewImageLabel();
             void updateCameraInfoMessage();
