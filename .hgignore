@@ -3,3 +3,4 @@ syntax: glob
 *.o
 *.swp
 build
+build_1394

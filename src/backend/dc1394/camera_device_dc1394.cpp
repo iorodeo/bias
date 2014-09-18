@@ -84,10 +84,17 @@ namespace bias {
 
         if (!capturing_) {
 
+            // ------------------------------------------------------------------
+            // WBD DEVEL
+            //
+            // Need to modify so that we pick a resonable initial video mode
+            // ------------------------------------------------------------------
+
             // Temporary - just pick a video mode which works.
             error = dc1394_video_set_mode(
                     camera_dc1394_, 
-                    DC1394_VIDEO_MODE_FORMAT7_0
+                    //DC1394_VIDEO_MODE_FORMAT7_0
+                    DC1394_VIDEO_MODE_640x480_MONO8
                     );
             if (error != DC1394_SUCCESS) 
             {
@@ -98,20 +105,20 @@ namespace bias {
                 throw RuntimeError(ERROR_DC1394_SET_VIDEO_MODE, ssError.str());
             }
         
-            // Temporary - set color coding to mono8
-            error = dc1394_format7_set_color_coding(
-                    camera_dc1394_,
-                    DC1394_VIDEO_MODE_FORMAT7_0,
-                    DC1394_COLOR_CODING_MONO8
-                    );
-            if (error != DC1394_SUCCESS)
-            { 
-                std::stringstream ssError;
-                ssError << __PRETTY_FUNCTION__;
-                ssError << ": unable to set dc1394 color_coding, error code ";
-                ssError << error  << std::endl;
-                throw RuntimeError(ERROR_DC1394_SET_VIDEO_MODE, ssError.str());
-            }
+            //// Temporary - set color coding to mono8
+            //error = dc1394_format7_set_color_coding(
+            //        camera_dc1394_,
+            //        DC1394_VIDEO_MODE_FORMAT7_0,
+            //        DC1394_COLOR_CODING_MONO8
+            //        );
+            //if (error != DC1394_SUCCESS)
+            //{ 
+            //    std::stringstream ssError;
+            //    ssError << __PRETTY_FUNCTION__;
+            //    ssError << ": unable to set dc1394 color_coding, error code ";
+            //    ssError << error  << std::endl;
+            //    throw RuntimeError(ERROR_DC1394_SET_VIDEO_MODE, ssError.str());
+            //}
 
             // Set number of DMA buffers and capture flags
             error = dc1394_capture_setup(
@@ -192,6 +199,7 @@ namespace bias {
 
         // Put frame back 
         error = dc1394_capture_enqueue(camera_dc1394_, frame_dc1394_);
+
     }
 
     cv::Mat CameraDevice_dc1394::grabImage()
