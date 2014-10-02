@@ -1659,7 +1659,6 @@ namespace bias
             }
             // -------------------------------------------------------------------
 
-
             cv::Mat histMat = calcHistogram(imgMat);
             cv::Size imgSize = imgMat.size();
             if (colorMapNumber_ != COLORMAP_NONE)
@@ -1677,21 +1676,6 @@ namespace bias
             }
 
             // Update status message
-            //QString statusMsg("Capturing,  logging = ");
-            //statusMsg += boolToOnOffQString(logging_);
-            //statusMsg += QString(", timer = ");
-            //statusMsg += boolToOnOffQString(actionTimerEnabledPtr_ -> isChecked());
-            //statusMsg += QString().sprintf(",  %dx%d", imgSize.width, imgSize.height);
-            //statusMsg += QString().sprintf(",  %1.1f fps", framesPerSec_);
-            //if ((logging_) && (!imageLoggerPtr_.isNull()))
-            //{
-            //    imageLoggerPtr_ -> acquireLock();
-            //    unsigned int logQueueSize = imageLoggerPtr_ -> getLogQueueSize();
-            //    imageLoggerPtr_ -> releaseLock();
-            //    statusMsg += QString(",  log queue size = %1").arg(logQueueSize);
-            //}
-            //statusLabelPtr_ -> setText(statusMsg);
-
             QString statusMsg = QString().sprintf("%dx%d", imgSize.width, imgSize.height);
             statusMsg += QString().sprintf(",  %1.1f fps", framesPerSec_);
             if ((logging_) && (!imageLoggerPtr_.isNull()))

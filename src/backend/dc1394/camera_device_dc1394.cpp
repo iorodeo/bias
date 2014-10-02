@@ -15,6 +15,11 @@ namespace bias {
         context_dc1394_ = NULL;
         camera_dc1394_ = NULL;
         numDMABuffer_ = DEFAULT_NUM_DMA_BUFFER; 
+
+        timeStamp_ = {0,0};
+        startTime_ = 0;
+        timerFreq_ = 1;
+        isFirst_ = true;
     }
 
     CameraDevice_dc1394::CameraDevice_dc1394(Guid guid) : CameraDevice(guid)
@@ -109,8 +114,8 @@ namespace bias {
             error = dc1394_video_set_mode(
                     camera_dc1394_, 
                     DC1394_VIDEO_MODE_FORMAT7_0
-                    //DC1394_VIDEO_MODE_640x480_MONO8
                     );
+
             if (error != DC1394_SUCCESS) 
             {
                 std::stringstream ssError;
@@ -120,20 +125,20 @@ namespace bias {
                 throw RuntimeError(ERROR_DC1394_SET_VIDEO_MODE, ssError.str());
             }
         
-            //// Temporary - set color coding to mono8
-            //error = dc1394_format7_set_color_coding(
-            //        camera_dc1394_,
-            //        DC1394_VIDEO_MODE_FORMAT7_0,
-            //        DC1394_COLOR_CODING_MONO8
-            //        );
-            //if (error != DC1394_SUCCESS)
-            //{ 
-            //    std::stringstream ssError;
-            //    ssError << __PRETTY_FUNCTION__;
-            //    ssError << ": unable to set dc1394 color_coding, error code ";
-            //    ssError << error  << std::endl;
-            //    throw RuntimeError(ERROR_DC1394_SET_VIDEO_MODE, ssError.str());
-            //}
+            // Temporary - set color coding to mono8
+            error = dc1394_format7_set_color_coding(
+                    camera_dc1394_,
+                    DC1394_VIDEO_MODE_FORMAT7_0,
+                    DC1394_COLOR_CODING_MONO8
+                    );
+            if (error != DC1394_SUCCESS)
+            { 
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to set dc1394 color_coding, error code ";
+                ssError << error  << std::endl;
+                throw RuntimeError(ERROR_DC1394_SET_VIDEO_MODE, ssError.str());
+            }
 
             // Set number of DMA buffers and capture flags
             error = dc1394_capture_setup(
@@ -160,6 +165,7 @@ namespace bias {
                 ssError << error << std::endl;
                 throw RuntimeError(ERROR_DC1394_SET_VIDEO_TRANSMISSION, ssError.str());
             }
+            isFirst_ = true;
             capturing_ = true;
         }
     }
@@ -200,7 +206,12 @@ namespace bias {
             throw RuntimeError(ERROR_DC1394_CAPTURE_DEQUEUE, ssError.str());
         }
 
-        // copy to cv image  (Temporary) - assume mono8 format
+        // update time stamp
+        updateTimeStamp();
+        isFirst_ = false;
+
+        // Copy to cv image  (Temporary) - assume mono8 format
+        // Need to modify to handle color images.
         // --------------------------------------------------------------------------
         if ((image.rows != frame_dc1394_ -> size[1]) || (image.cols != frame_dc1394_ -> size[0]))
         {
@@ -209,7 +220,7 @@ namespace bias {
 
         unsigned int frameSize = (frame_dc1394_ -> size[0])*(frame_dc1394_ -> size[1]);
         unsigned char *pData0 = frame_dc1394_ -> image;
-        unsigned char *pData1 = pData0 +  frameSize;
+        unsigned char *pData1 = pData0 +  frameSize - 1;
         std::copy(pData0, pData1, image.data);
 
 
@@ -246,24 +257,7 @@ namespace bias {
 
     TimeStamp CameraDevice_dc1394::getImageTimeStamp()
     {
-        TimeStamp timeStamp;
-        // ------------------------------------------------
-        // TO DO ... get image timestamp
-        // ------------------------------------------------
-        //uint64_t  frameStamp  = frame_dc1394_ -> timestamp;  // Doesn't work on windows.
-
-#ifdef WIN32
-        LARGE_INTEGER timerFreqTemp;
-        QueryPerformanceFrequency(&timerFreqTemp);
-        timerFreq_ = uint64_t(timerFreqTemp.QuadPart);
-        std::cout << "timer freq: " << timerFreq_ << std::endl;
-        
-
-#else
-        uint64_t  frameStamp  = frame_dc1394_ -> timestamp;  // Doesn't work on windows.
-
-#endif
-        return timeStamp;
+        return timeStamp_;
     }
 
     Format7Settings CameraDevice_dc1394::getFormat7Settings()
@@ -328,6 +322,43 @@ namespace bias {
     void CameraDevice_dc1394::printInfo()
     {
         std::cout << toString();
+    }
+
+    // Private methods
+    // ------------------------------------------------------------------------
+    
+
+    void CameraDevice_dc1394::updateTimeStamp()
+    {
+        double elapsedTime = 0.0;
+#ifdef WIN32
+        if (isFirst_) 
+        {
+            // Get Start time and timer frequency
+            LARGE_INTEGER startTimeLI;
+            QueryPerformanceCounter(&startTimeLI);
+            startTime_ = uint64_t(startTimeLI.QuadPart);
+
+            LARGE_INTEGER timerFreqLI;
+            QueryPerformanceFrequency(&timerFreqLI);
+            timerFreq_ = uint64_t(timerFreqLI.QuadPart);
+        }
+
+        LARGE_INTEGER currentTimeLI;
+        QueryPerformanceCounter(&currentTimeLI);
+        uint64_t currentTime = uint64_t(currentTimeLI.QuadPart);
+        elapsedTime = (currentTime - startTime_)/double(timerFreq_);
+
+#else
+        if (isFirst_)
+        {
+            startTime_ = frame_dc1394_.timestamp; 
+            timerFreq_ = 1;  // Not used
+        }
+        elapsedTime = double(frame_dc1394_.timestamp - startTime_);
+#endif
+        timeStamp_.seconds = (long long)(elapsedTime);
+        timeStamp_.microSeconds = (unsigned int)(1.0e6*(elapsedTime - double(timeStamp_.seconds)));
     }
 
 } // namespace bias

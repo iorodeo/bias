@@ -182,6 +182,8 @@ namespace bias {
                     startUpCount++;
                     continue;
                 }
+
+                //std::cout << "dt grabber: " << timeStampDbl - timeStampDblLast << std::endl;
                 
                 // Reset initial time stamp for image acquisition
                 if ((isFirst) && (startUpCount >= numStartUpSkip_))

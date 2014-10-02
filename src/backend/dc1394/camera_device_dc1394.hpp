@@ -79,6 +79,9 @@ namespace bias {
             TimeStamp timeStamp_;
             uint64_t startTime_;
             uint64_t timerFreq_;
+            bool isFirst_;
+
+            void updateTimeStamp();
 
 
     };
