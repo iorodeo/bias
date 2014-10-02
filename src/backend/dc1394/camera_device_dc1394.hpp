@@ -21,7 +21,7 @@ namespace bias {
             virtual ~CameraDevice_dc1394();
             virtual CameraLib getCameraLib();
 
-            virtual void connect();    
+            virtual void connect();     // Needs fixing ...
             virtual void disconnect(); 
 
             virtual void startCapture();  
@@ -75,6 +75,11 @@ namespace bias {
             dc1394_t *context_dc1394_;
             dc1394camera_t *camera_dc1394_;
             dc1394video_frame_t *frame_dc1394_;
+
+            TimeStamp timeStamp_;
+            uint64_t startTime_;
+            uint64_t timerFreq_;
+
 
     };
 

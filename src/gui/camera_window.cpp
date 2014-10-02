@@ -144,10 +144,11 @@ namespace bias
             try
             {
                 cameraPtr_ -> connect();
-                // TEMPORARY - set camera to known videomode and trigger type
+                // WBD DEVEL TEMP
                 // ------------------------------------------------------------
-                cameraPtr_ -> setVideoMode(VIDEOMODE_FORMAT7);
-                cameraPtr_ -> setTriggerInternal();
+                // TEMPORARY - set camera to known videomode and trigger type
+                //cameraPtr_ -> setVideoMode(VIDEOMODE_FORMAT7);
+                //cameraPtr_ -> setTriggerInternal();
                 // ------------------------------------------------------------
             }
             catch (RuntimeError &runtimeError)
@@ -195,7 +196,11 @@ namespace bias
         menuCameraPtr_ -> setEnabled(true);
 
         updateCameraInfoMessage();
-        updateAllMenus();
+
+        // WBD DEVEL TEMP
+        // -----------------------------------------
+        //updateAllMenus();
+        // -----------------------------------------
 
         rtnStatus.success = true;
         rtnStatus.message = QString("");
@@ -455,7 +460,12 @@ namespace bias
         updateStatusLabel();
         capturing_ = true;
         showCameraLockFailMsg_ = false;
-        updateAllMenus();
+
+        // WBD DEVEL TEMP
+        // ---------------------------------------------
+        //updateAllMenus();
+        // ---------------------------------------------
+
         showCameraLockFailMsg_ = true;
 
         emit imageCaptureStarted(logging_);
@@ -550,7 +560,11 @@ namespace bias
 
         framesPerSec_ = 0.0;
         updateAllImageLabels();
-        updateAllMenus();
+
+        // WBD DEVEL TEMP
+        // ------------------------------------------------
+        //updateAllMenus();
+        // ------------------------------------------------
 
         emit imageCaptureStopped();
 

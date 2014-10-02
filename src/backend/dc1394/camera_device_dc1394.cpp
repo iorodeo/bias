@@ -1,8 +1,12 @@
 #ifdef WITH_DC1394
 #include "camera_device_dc1394.hpp"
+#include "utils_dc1394.hpp"
 #include "exception.hpp"
 #include <sstream>
 #include <algorithm>
+#ifdef WIN32
+#include<Windows.h>
+#endif
 
 namespace bias {
 
@@ -46,10 +50,8 @@ namespace bias {
         if (!connected_) 
         {
             // Create new dc1394 camera object
-            camera_dc1394_ = dc1394_camera_new( 
-                    context_dc1394_, 
-                    guid_.getValue_dc1394()
-                    );
+            camera_dc1394_ = dc1394_camera_new(context_dc1394_, guid_.getValue_dc1394());
+
             if ( ! camera_dc1394_ ) 
             {
                 std::stringstream ssError;
@@ -58,6 +60,19 @@ namespace bias {
                 throw RuntimeError(ERROR_DC1394_NEW_CAMERA, ssError.str());
             }
             connected_ = true;
+
+
+            // DEVEL 
+            // -------------------------------------------------------------------
+            // Print supported video modes
+            dc1394video_modes_t supportedModes;
+            dc1394_video_get_supported_modes(camera_dc1394_, &supportedModes);
+            std::cout << std::endl << "supported video modes" << std::endl;
+            printVideoModes_dc1394(supportedModes);
+            std::cout << std::endl;
+            // --------------------------------------------------------------------
+
+
         }
     }
 
@@ -93,8 +108,8 @@ namespace bias {
             // Temporary - just pick a video mode which works.
             error = dc1394_video_set_mode(
                     camera_dc1394_, 
-                    //DC1394_VIDEO_MODE_FORMAT7_0
-                    DC1394_VIDEO_MODE_640x480_MONO8
+                    DC1394_VIDEO_MODE_FORMAT7_0
+                    //DC1394_VIDEO_MODE_640x480_MONO8
                     );
             if (error != DC1394_SUCCESS) 
             {
@@ -185,21 +200,26 @@ namespace bias {
             throw RuntimeError(ERROR_DC1394_CAPTURE_DEQUEUE, ssError.str());
         }
 
-        // copy to cv image
-        // Temporary - assume mono8 format
+        // copy to cv image  (Temporary) - assume mono8 format
         // --------------------------------------------------------------------------
-        if ((image.rows*image.cols) != (frame_dc1394_->total_bytes)) 
+        if ((image.rows != frame_dc1394_ -> size[1]) || (image.cols != frame_dc1394_ -> size[0]))
         {
-            image = cv::Mat( frame_dc1394_-> size[1], frame_dc1394_-> size[0], CV_8UC1); 
+            image = cv::Mat(frame_dc1394_-> size[1], frame_dc1394_-> size[0], CV_8UC1); 
         }
 
+        unsigned int frameSize = (frame_dc1394_ -> size[0])*(frame_dc1394_ -> size[1]);
         unsigned char *pData0 = frame_dc1394_ -> image;
-        unsigned char *pData1 = pData0 +  (frame_dc1394_ -> total_bytes);
+        unsigned char *pData1 = pData0 +  frameSize;
         std::copy(pData0, pData1, image.data);
+
 
         // Put frame back 
         error = dc1394_capture_enqueue(camera_dc1394_, frame_dc1394_);
 
+        //std::cout << "color coding: " << getColorCodingString_dc1394(frame_dc1394_ -> color_coding) << std::endl;
+        //std::cout << "size:         " << frame_dc1394_ -> size[0] << ", " << frame_dc1394_ -> size[1] << std::endl;
+        //std::cout << "total bytes:  " << frame_dc1394_ -> total_bytes << std::endl;
+        //std::cout << "frameSize:    " << frameSize << std::endl;
     }
 
     cv::Mat CameraDevice_dc1394::grabImage()
@@ -230,6 +250,19 @@ namespace bias {
         // ------------------------------------------------
         // TO DO ... get image timestamp
         // ------------------------------------------------
+        //uint64_t  frameStamp  = frame_dc1394_ -> timestamp;  // Doesn't work on windows.
+
+#ifdef WIN32
+        LARGE_INTEGER timerFreqTemp;
+        QueryPerformanceFrequency(&timerFreqTemp);
+        timerFreq_ = uint64_t(timerFreqTemp.QuadPart);
+        std::cout << "timer freq: " << timerFreq_ << std::endl;
+        
+
+#else
+        uint64_t  frameStamp  = frame_dc1394_ -> timestamp;  // Doesn't work on windows.
+
+#endif
         return timeStamp;
     }
 

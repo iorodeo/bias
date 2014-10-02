@@ -4,6 +4,7 @@ project(bias_backend_dc1394)
 
 set(
     bias_backend_dc1394_SOURCE 
+    utils_dc1394.cpp
     guid_device_dc1394.cpp 
     camera_device_dc1394.cpp
     )

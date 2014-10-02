@@ -8,7 +8,8 @@
 #include <string>
 #include "FlyCapture2_C.h"
 
-namespace bias {
+namespace bias 
+{
 
     // Image conversion - for mapping from FlyCapture2 to opencv 
     // -----------------------------------------------------------------------
@@ -102,7 +103,7 @@ namespace bias {
     std::string getPropertyTypeString_fc2(fc2PropertyType propType);
 
 
-}
+} // namespace BIAS
 
 #endif // #ifndef BIAS_UTILS_FC2_HPP
 #endif // #ifdef WITH_FC2

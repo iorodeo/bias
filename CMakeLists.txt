@@ -7,7 +7,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 # Options
 # -----------------------------------------------------------------------------
-option(with_qt_gui  "include image acquisition GUI"   OFF) 
+option(with_qt_gui  "include image acquisition GUI"   ON) 
 option(with_fc2     "include the FlyCapture2 backend" OFF)
 option(with_dc1394  "include the libdc1394 backend"   ON )
 option(with_demos   "include demos" OFF)

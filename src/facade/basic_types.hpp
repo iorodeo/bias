@@ -88,6 +88,8 @@ namespace bias {
         ERROR_DC1394_START_CAPTURE,
         ERROR_DC1394_GRAB_IMAGE,
 
+        ERROR_DC1394_CONVERT_FRAMERATE,
+
         // Video Writer Errors
         ERROR_VIDEO_WRITER_ADD_FRAME,
         ERROR_VIDEO_WRITER_INITIALIZE,

@@ -14,7 +14,7 @@ using namespace bias;
 
 int main(int argc, char *argv[]) 
 {
-    int numImage = 1000;
+    int numImage = 100;
     cv::Mat image;
     cv::Mat imageScaled;
     CameraFinder cameraFinder;

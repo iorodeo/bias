@@ -7,7 +7,8 @@
 #include <sstream>
 #include <bitset>
 
-namespace bias {
+namespace bias 
+{
 
     // Image conversion - for mapping from FlyCapture2 to opencv 
     // -----------------------------------------------------------------------
