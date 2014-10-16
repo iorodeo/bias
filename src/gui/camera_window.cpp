@@ -36,6 +36,13 @@
 #include <QFile>
 #include <QApplication>
 
+// Added for qt5 build
+// ---------------------------
+#include <QMessageBox>
+#include <QDesktopWidget>
+#include <QFileDialog>
+// ---------------------------
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/contrib/contrib.hpp>

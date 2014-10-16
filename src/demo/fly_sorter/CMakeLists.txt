@@ -38,11 +38,21 @@ set(
     ext_ctl_http_server.cpp
     )
 
-qt4_wrap_ui(fly_sorter_FORMS_HEADERS ${fly_sorter_FORMS}) 
-qt4_wrap_cpp(fly_sorter_HEADERS_MOC ${fly_sorter_HEADERS})
+#qt4_wrap_ui(fly_sorter_FORMS_HEADERS ${fly_sorter_FORMS}) 
+#qt4_wrap_cpp(fly_sorter_HEADERS_MOC ${fly_sorter_HEADERS})
+#include(${QT_USE_FILE})
+#add_definitions(${QT_DEFINITIONS})
 
-include(${QT_USE_FILE})
-add_definitions(${QT_DEFINITIONS})
+qt5_wrap_ui(bias_gui_FORMS_HEADERS ${bias_gui_FORMS}) 
+qt5_wrap_cpp(bias_gui_HEADERS_MOC ${bias_gui_HEADERS})
+include_directories(${Qt5Core_INCLUDES}) 
+include_directories(${Qt5Widgets_INCLUDES}) 
+include_directories(${Qt5Gui_INCLUDES}) 
+include_directories(${Qt5Network_INCLUDES}) 
+add_definitions(${Qt5Core_DEFINITIONS}) 
+add_definitions(${Qt5Widgets_DEFINITIONS}) 
+add_definitions(${Qt5Gui_DEFINITIONS}) 
+add_definitions(${Qt5Network_DEFINITIONS}) 
 
 add_executable(
     fly_sorter
