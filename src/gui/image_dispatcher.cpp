@@ -113,7 +113,6 @@ namespace bias
         std::string stampFileName = stampFileInfo.absoluteFilePath().toStdString();
         std::ofstream stampOutStream;
         stampOutStream.open(stampFileName);
-
         // --------------------------------------------------------------------
 
         while (!done) 

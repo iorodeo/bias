@@ -43,6 +43,11 @@
 #include <QFileDialog>
 // ---------------------------
 
+// Temp
+// ---------------------------
+#include <QThread>
+// ---------------------------
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/contrib/contrib.hpp>
@@ -331,6 +336,7 @@ namespace bias
                 newImageQueuePtr_, 
                 this
                 );
+        imageGrabberPtr_ -> setAutoDelete(false);
 
         imageDispatcherPtr_ = new ImageDispatcher(
                 logging_, 
@@ -339,6 +345,7 @@ namespace bias
                 logImageQueuePtr_,
                 this
                 );
+        imageDispatcherPtr_ -> setAutoDelete(false);
 
         connect(
                 imageGrabberPtr_, 
@@ -370,6 +377,7 @@ namespace bias
                     SLOT(startCaptureDurationTimer())
                    );
         }
+
 
         threadPoolPtr_ -> start(imageGrabberPtr_);
         threadPoolPtr_ -> start(imageDispatcherPtr_);
@@ -436,6 +444,7 @@ namespace bias
                     logImageQueuePtr_, 
                     this
                     );
+            imageLoggerPtr_ -> setAutoDelete(false);
 
             // Connect image logger error signals
             connect(
@@ -553,6 +562,7 @@ namespace bias
         logImageQueuePtr_ -> clear();
         logImageQueuePtr_ -> releaseLock();
 
+
         // Update data GUI information
         startButtonPtr_ -> setText(QString("Start"));
         connectButtonPtr_ -> setEnabled(true);
@@ -563,8 +573,8 @@ namespace bias
         //statusMsg += boolToOnOffQString(actionTimerEnabledPtr_ -> isChecked());
         //statusMsg += QString(", Stopped");
         //statusLabelPtr_ -> setText(statusMsg);
+        
         updateStatusLabel();
-
         framesPerSec_ = 0.0;
         updateAllImageLabels();
 
@@ -574,6 +584,12 @@ namespace bias
         // ------------------------------------------------
 
         emit imageCaptureStopped();
+
+        // Manually delete grabber, dispatcher and logger threads   
+        // required as autoDelete is set to false
+        delete imageGrabberPtr_;
+        delete imageDispatcherPtr_;
+        delete imageLoggerPtr_;
 
         rtnStatus.success = true;
         rtnStatus.message = QString("");
