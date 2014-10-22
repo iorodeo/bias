@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 project(fly_sorter)
+if (POLICY CMP0020)
+    cmake_policy(SET CMP0020 NEW)
+endif()
 
 set(
     fly_sorter_FORMS 

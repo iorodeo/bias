@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 if(with_qt_gui)
     project(bias_utility)
+    if (POLICY CMP0020)
+        cmake_policy(SET CMP0020 NEW)
+    endif()
     
     set(
         bias_utility_HEADERS

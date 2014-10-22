@@ -13,4 +13,7 @@ if(with_dc1394)
     target_link_libraries(test_dc1394 ${bias_ext_link_LIBS} bias_camera_facade)
 endif()
 
+project(bias_test_serial)
+add_EXECUTABLE(test_serial test_serial.cpp)
+
 
