@@ -17,7 +17,23 @@ project(bias_test_serial)
 if (POLICY CMP0020)
     cmake_policy(SET CMP0020 NEW)
 endif()
-add_EXECUTABLE(test_serial test_serial.cpp)
+set(
+    bias_test_serial_HEADERS 
+    nano_ssr_serial.hpp
+    )
+
+set(
+    bias_test_serial_SOURCES 
+    test_serial.cpp
+    nano_ssr_serial.cpp
+    )
+qt5_wrap_cpp(bias_test_serial_HEADERS_MOC ${bias_test_serial_HEADERS})
+
+add_EXECUTABLE(
+    test_serial 
+    ${bias_test_serial_HEADERS_MOC}
+    ${bias_test_serial_SOURCES} 
+    )
 qt5_use_modules(test_serial Core Gui Widgets SerialPort)
 
 

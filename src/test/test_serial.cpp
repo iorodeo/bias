@@ -5,6 +5,7 @@
 #include <QSerialPortInfo>
 #include <QSerialPort>
 #include <QCoreApplication>
+#include "nano_ssr_serial.hpp"
 
 
 int main(int argc, char *argv[])
@@ -43,48 +44,75 @@ int main(int argc, char *argv[])
         }
     }
 
-
-    // Connect to serial port
-    int portNum = 0;
-    qDebug() << "Connecting to port number: " << portNum;
-    QSerialPort serial; 
-
-    serial.setPort(serialInfoList.at(0));
-    serial.setBaudRate(QSerialPort::Baud115200);
-    serial.setDataBits(QSerialPort::Data8);
-    serial.setFlowControl(QSerialPort::NoFlowControl);
-    serial.setParity(QSerialPort::NoParity);
-    serial.setStopBits(QSerialPort::OneStop);
-
-    bool isOpen = serial.open(QIODevice::ReadWrite);
+    qDebug() << "opening nano SSR device";
+    QSerialPortInfo serialInfo = serialInfoList.at(0);
+    bias::NanoSSRSerial nanoSSR(serialInfo);
+    bool isOpen = nanoSSR.open();
     if (!isOpen)
     {
-        qDebug() << "  unable to open serial port";
+        qDebug() << "  unable to open device";
         return app.exec();
-
     }
-    qDebug() << "  serial port opened";
-    qDebug() << "  sleeping for rest";
-    QThread::sleep(3);
-    qDebug() << "  read/write data";
+    qDebug() << "  device opened";
+
+    nanoSSR.startAll();
 
     for (int i=0; i<100; i++)
     {
-        QByteArray msg;  
-        msg.append(QString("hello # %1").arg(i));
-        qDebug() << "  msg: " << msg;
-        msg.append('\n');
-        serial.write(msg);
-        serial.waitForBytesWritten(500);
-
-        QByteArray buffer(100,'0');
-        serial.waitForReadyRead(500);
-        qint64 numBytes = serial.readLine(buffer.data(),buffer.size());
-        qDebug() << "  rsp: " << buffer;
-        qDebug();
+        QThread::msleep(500);
+        qDebug() << nanoSSR.isRunning(0);
     }
 
-    serial.close();
+
+
+    nanoSSR.close();
+    qDebug() << "Ctl-C to exit";
+    return app.exec();
+
+
+
+
+    //// Connect to serial port
+    //int portNum = 0;
+    //qDebug() << "Connecting to port number: " << portNum;
+    //QSerialPort serial; 
+
+    //serial.setPort(serialInfoList.at(0));
+    //serial.setBaudRate(QSerialPort::Baud115200);
+    //serial.setDataBits(QSerialPort::Data8);
+    //serial.setFlowControl(QSerialPort::NoFlowControl);
+    //serial.setParity(QSerialPort::NoParity);
+    //serial.setStopBits(QSerialPort::OneStop);
+
+    //bool isOpen = serial.open(QIODevice::ReadWrite);
+    //if (!isOpen)
+    //{
+    //    qDebug() << "  unable to open serial port";
+    //    return app.exec();
+
+    //}
+    //qDebug() << "  serial port opened";
+    //qDebug() << "  sleeping for rest";
+    //QThread::sleep(3);
+    //qDebug() << "  read/write data";
+
+    //for (int i=0; i<100; i++)
+    //{
+    //    QByteArray msg;  
+    //    msg.append(QString("hello # %1").arg(i));
+    //    qDebug() << "  msg: " << msg;
+    //    msg.append('\n');
+    //    serial.write(msg);
+    //    serial.waitForBytesWritten(500);
+
+    //    QByteArray buffer(100,'0');
+    //    serial.waitForReadyRead(500);
+    //    qint64 numBytes = serial.readLine(buffer.data(),buffer.size());
+    //    qDebug() << "  rsp: " << buffer;
+    //    qDebug();
+    //}
+
+    //serial.close();
     return app.exec();
 
 }
