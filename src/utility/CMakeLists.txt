@@ -31,22 +31,14 @@ if(with_qt_gui)
         basic_http_server.cpp
         )
     
+    # Old qt 4.8 build
+    # -------------------------------------------------
     #bias_utility_HEADERS_MOC ${bias_utility_HEADERS})
     #include(${QT_USE_FILE})
     #add_definitions(${QT_DEFINITIONS})
+    # -------------------------------------------------
 
     qt5_wrap_cpp(bias_utility_HEADERS_MOC ${bias_utility_HEADERS})
-    include_directories(${Qt5Core_INCLUDES}) 
-    include_directories(${Qt5Widgets_INCLUDES}) 
-    include_directories(${Qt5Gui_INCLUDES}) 
-    include_directories(${Qt5Network_INCLUDES}) 
-
-    add_definitions(${Qt5Core_DEFINITIONS}) 
-    add_definitions(${Qt5Widgets_DEFINITIONS}) 
-    add_definitions(${Qt5Gui_DEFINITIONS}) 
-    add_definitions(${Qt5Network_DEFINITIONS}) 
-
-    
     
     add_library(
         bias_utility

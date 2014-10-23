@@ -49,7 +49,10 @@ endif()
 if(with_qt_gui)
     set(QT_BINARY_DIR "$ENV{QTDIR}/bin")
 
+    # Old qt 4.8 build
+    # ------------------------------------------------------------
     #find_package(Qt4 COMPONENTS QtCore QtGui QtNetwork REQUIRED)
+    # ------------------------------------------------------------
 
     find_package(Qt5Core REQUIRED) 
     find_package(Qt5Widgets REQUIRED)

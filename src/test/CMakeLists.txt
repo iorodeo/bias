@@ -14,6 +14,10 @@ if(with_dc1394)
 endif()
 
 project(bias_test_serial)
+if (POLICY CMP0020)
+    cmake_policy(SET CMP0020 NEW)
+endif()
 add_EXECUTABLE(test_serial test_serial.cpp)
+qt5_use_modules(test_serial Core Gui Widgets SerialPort)
 
 
