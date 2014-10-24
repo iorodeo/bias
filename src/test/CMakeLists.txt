@@ -19,13 +19,13 @@ if (POLICY CMP0020)
 endif()
 set(
     bias_test_serial_HEADERS 
-    nano_ssr_serial.hpp
+    nano_ssr_pulse.hpp
     )
 
 set(
     bias_test_serial_SOURCES 
     test_serial.cpp
-    nano_ssr_serial.cpp
+    nano_ssr_pulse.cpp
     )
 qt5_wrap_cpp(bias_test_serial_HEADERS_MOC ${bias_test_serial_HEADERS})
 

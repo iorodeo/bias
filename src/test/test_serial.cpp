@@ -5,7 +5,7 @@
 #include <QSerialPortInfo>
 #include <QSerialPort>
 #include <QCoreApplication>
-#include "nano_ssr_serial.hpp"
+#include "nano_ssr_pulse.hpp"
 
 
 int main(int argc, char *argv[])
@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 
     qDebug() << "opening nano SSR device";
     QSerialPortInfo serialInfo = serialInfoList.at(0);
-    bias::NanoSSRSerial nanoSSR(serialInfo);
+    bias::NanoSSRPulse nanoSSR(serialInfo);
     bool isOpen = nanoSSR.open();
     if (!isOpen)
     {
@@ -55,18 +55,32 @@ int main(int argc, char *argv[])
     }
     qDebug() << "  device opened";
 
-    nanoSSR.startAll();
+    // Period
+    int period = -1;
+    nanoSSR.getPeriod(0,period);
+    qDebug() << "period: " << period;
+    nanoSSR.setPeriod(0,100);
+    nanoSSR.getPeriod(0,period);
+    qDebug() << "period: " << period;
 
-    for (int i=0; i<100; i++)
+    // numPulse
+    int numPulse = -1;
+    nanoSSR.getNumPulse(0,numPulse);
+    qDebug() << "numPulse: " << numPulse;
+    nanoSSR.setNumPulse(0,20);
+    nanoSSR.getNumPulse(0,numPulse);
+    qDebug() << "numPulse: " << numPulse;
+
+
+    nanoSSR.start(0);
+    while (nanoSSR.isRunning(0))
     {
-        QThread::msleep(500);
-        qDebug() << nanoSSR.isRunning(0);
+        qDebug() << "running";
+        QThread::msleep(200);
     }
 
-
-
     nanoSSR.close();
-    qDebug() << "Ctl-C to exit";
+    qDebug() << "Press Ctl-C to exit";
     return app.exec();
 
 

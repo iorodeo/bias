@@ -1,11 +1,11 @@
-#ifndef NANO_SSR_SERIAL_HPP 
-#define NANO_SSR_SERIAL_HPP
+#ifndef NANO_SSR_PULSE_HPP 
+#define NANO_SSR_PULSE_HPP
 #include <QSerialPort>
 
 namespace bias
 {
 
-    class NanoSSRSerial : public QSerialPort
+    class NanoSSRPulse : public QSerialPort
     {
         enum SerialCmdId 
         {
@@ -30,31 +30,33 @@ namespace bias
             static const int DEFAULT_WAITFOR_TIMEOUT;
             static const int NUM_CHANNELS;
             static const int RSP_BUFFER_SIZE;
+            static const int MAX_WRITE_CNT;
 
-            NanoSSRSerial(QObject *parent=Q_NULLPTR);
-            NanoSSRSerial(const QSerialPortInfo &portInfo, QObject *parent=Q_NULLPTR);
+            NanoSSRPulse(QObject *parent=Q_NULLPTR);
+            NanoSSRPulse(const QSerialPortInfo &portInfo, QObject *parent=Q_NULLPTR);
 
             bool open(bool sleepForReset=true);
             bool isRunning(int chan);
+            bool isRunning();
 
-            void start(int chan);
-            void stop(int chan);
-            void startAll();
-            void stopAll();
+            bool start(int chan);
+            bool stop(int chan);
+            bool startAll();
+            bool stopAll();
 
-            void setPeriod(int chan, int period);
-            int getPeriod();
+            bool setPeriod(int chan, int period);
+            bool getPeriod(int chan, int &period);
             
-            void setNumPulse(int chan, int period);
-            int getNumPulse(int chan);
+            bool setNumPulse(int chan, int num);
+            bool getNumPulse(int chan, int &num);
 
         protected:
             int waitForTimeout_;
             unsigned long resetSleepDt_;
 
             void initialize();
-            void writeCmd(QByteArray cmd);
-            QByteArray writeCmdGetRsp(QByteArray rsp);
+            bool writeCmd(QByteArray cmd);
+            bool writeCmdGetRsp(QByteArray cmd, QByteArray &rsp);
             bool isChanInRange(int chan);
     };
 
