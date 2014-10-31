@@ -5,6 +5,7 @@
 #include <QSerialPortInfo>
 #include <QSerialPort>
 #include <QCoreApplication>
+#include "nano_ssr_pulse.hpp"
 
 
 int main(int argc, char *argv[])
@@ -43,47 +44,43 @@ int main(int argc, char *argv[])
         }
     }
 
-    // Connect to serial port
-    int portNum = 0;
-    qDebug() << "Connecting to port number: " << portNum;
-    QSerialPort serial; 
-
-    serial.setPort(serialInfoList.at(0));
-    serial.setBaudRate(QSerialPort::Baud115200);
-    serial.setDataBits(QSerialPort::Data8);
-    serial.setFlowControl(QSerialPort::NoFlowControl);
-    serial.setParity(QSerialPort::NoParity);
-    serial.setStopBits(QSerialPort::OneStop);
-
-    bool isOpen = serial.open(QIODevice::ReadWrite);
+    qDebug() << "opening nano SSR device";
+    QSerialPortInfo serialInfo = serialInfoList.at(0);
+    bias::NanoSSRPulse nanoSSR(serialInfo);
+    bool isOpen = nanoSSR.open();
     if (!isOpen)
     {
-        qDebug() << "  unable to open serial port";
+        qDebug() << "  unable to open device";
         return app.exec();
-
     }
-    qDebug() << "  serial port opened";
-    qDebug() << "  sleeping for rest";
-    QThread::sleep(3);
-    qDebug() << "  read/write data";
+    qDebug() << "  device opened";
 
-    for (int i=0; i<100; i++)
+    // Period
+    int period = -1;
+    nanoSSR.getPeriod(0,period);
+    qDebug() << "period: " << period;
+    nanoSSR.setPeriod(0,100);
+    nanoSSR.getPeriod(0,period);
+    qDebug() << "period: " << period;
+
+    // numPulse
+    int numPulse = -1;
+    nanoSSR.getNumPulse(0,numPulse);
+    qDebug() << "numPulse: " << numPulse;
+    nanoSSR.setNumPulse(0,20);
+    nanoSSR.getNumPulse(0,numPulse);
+    qDebug() << "numPulse: " << numPulse;
+
+
+    nanoSSR.start(0);
+    while (nanoSSR.isRunning(0))
     {
-        QByteArray msg;  
-        msg.append(QString("hello # %1").arg(i));
-        qDebug() << "  msg: " << msg;
-        msg.append('\n');
-        serial.write(msg);
-        serial.waitForBytesWritten(500);
-
-        QByteArray buffer(100,'0');
-        serial.waitForReadyRead(500);
-        qint64 numBytes = serial.readLine(buffer.data(),buffer.size());
-        qDebug() << "  rsp: " << buffer;
-        qDebug();
+        qDebug() << "running";
+        QThread::msleep(200);
     }
 
-    serial.close();
+    nanoSSR.close();
+    qDebug() << "Press Ctl-C to exit";
     return app.exec();
 
 }

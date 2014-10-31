@@ -7,7 +7,7 @@ namespace bias
 
     class NanoSSRPulse : public QSerialPort
     {
-        enum SerialCmdId 
+        enum SerialCmdID 
         {
             CMD_ID_STOP=0,           
             CMD_ID_START, 

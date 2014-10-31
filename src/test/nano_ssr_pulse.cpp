@@ -39,8 +39,8 @@ namespace bias
         if (isOpen && sleepForReset)
         {
             QThread::msleep(resetSleepDt_);
+            readAll();
         }
-        readAll();
         return isOpen;
     }
 
