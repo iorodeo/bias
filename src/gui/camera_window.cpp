@@ -22,6 +22,7 @@
 #include "json.hpp"
 #include "json_utils.hpp"
 #include "ext_ctl_http_server.hpp"
+#include "plugin_handler.hpp"
 
 #include <cstdlib>
 #include <cmath>
@@ -329,6 +330,7 @@ namespace bias
 
         newImageQueuePtr_ -> clear();
         logImageQueuePtr_ -> clear();
+        pluginImageQueuePtr_ -> clear();
 
         imageGrabberPtr_ = new ImageGrabber(
                 cameraNumber_, 
@@ -340,9 +342,11 @@ namespace bias
 
         imageDispatcherPtr_ = new ImageDispatcher(
                 logging_, 
+                pluginEnabled_,
                 cameraNumber_,
                 newImageQueuePtr_,
                 logImageQueuePtr_,
+                pluginImageQueuePtr_,
                 this
                 );
         imageDispatcherPtr_ -> setAutoDelete(false);
@@ -433,7 +437,8 @@ namespace bias
                             cameraNumber_
                             );
                     break;
-            }
+
+            } // switch (videoFileFormat) 
 
             // Set output file
             videoWriterPtr -> setFileName(videoFileFullPath);
@@ -462,18 +467,30 @@ namespace bias
                    );
 
             threadPoolPtr_ -> start(imageLoggerPtr_);
-        }
+
+        } // if (logging_)
+
+        if (pluginEnabled_)
+        {
+            pluginHandlerPtr_ = new PluginHandler(
+                    cameraNumber_, 
+                    pluginImageQueuePtr_, 
+                    this
+                    );
+            pluginHandlerPtr_ -> setAutoDelete(false);
+            threadPoolPtr_ -> start(pluginHandlerPtr_);
+
+        } // if (pluginEnabled_)
 
         // Set Capture start and stop time
         captureStartDateTime_ = QDateTime::currentDateTime();
         captureStopDateTime_ = captureStartDateTime_.addSecs(captureDurationSec_);
 
-
         // Update GUI widget for capturing state
         startButtonPtr_ -> setText(QString("Stop"));
         connectButtonPtr_ -> setEnabled(false);
-        //statusLabelPtr_ -> setText("Capturing");
         updateStatusLabel();
+
         capturing_ = true;
         showCameraLockFailMsg_ = false;
 
@@ -550,6 +567,17 @@ namespace bias
             logImageQueuePtr_ -> releaseLock();
         }
 
+        if (!pluginHandlerPtr_.isNull())
+        {
+            pluginHandlerPtr_ -> acquireLock();
+            pluginHandlerPtr_ -> stop();
+            pluginHandlerPtr_ -> releaseLock();
+
+            pluginImageQueuePtr_ -> acquireLock();
+            pluginImageQueuePtr_ -> signalNotEmpty();
+            pluginImageQueuePtr_ -> releaseLock();
+        }
+
         // Wait until threads are finished
         threadPoolPtr_ -> waitForDone();
 
@@ -561,6 +589,10 @@ namespace bias
         logImageQueuePtr_ -> acquireLock();
         logImageQueuePtr_ -> clear();
         logImageQueuePtr_ -> releaseLock();
+
+        pluginImageQueuePtr_ -> acquireLock();
+        pluginImageQueuePtr_ -> clear();
+        pluginImageQueuePtr_ -> releaseLock();
 
 
         // Update data GUI information
@@ -590,6 +622,7 @@ namespace bias
         delete imageGrabberPtr_;
         delete imageDispatcherPtr_;
         delete imageLoggerPtr_;
+        delete pluginHandlerPtr_;
 
         rtnStatus.success = true;
         rtnStatus.message = QString("");
@@ -2332,7 +2365,7 @@ namespace bias
         connected_ = false;
         capturing_ = false;
         haveImagePixmap_ = false;
-        logging_ = false;
+        logging_ = false; 
         flipVert_ = false;
         flipHorz_ = false;
         haveDefaultVideoFileDir_ = false;
@@ -2342,6 +2375,7 @@ namespace bias
         userCameraName_ = QString("");
         format7PercentSpeed_ = DEFAULT_FORMAT7_PERCENT_SPEED;
         showCameraLockFailMsg_ = true;
+        pluginEnabled_ = false;
 
         imageRotation_ = IMAGE_ROTATION_0;
         colorMapNumber_ = DEFAULT_COLORMAP_NUMBER;
@@ -2357,7 +2391,7 @@ namespace bias
         threadPoolPtr_ -> setMaxThreadCount(MAX_THREAD_COUNT);
         newImageQueuePtr_ = std::make_shared<LockableQueue<StampedImage>>();
         logImageQueuePtr_ = std::make_shared<LockableQueue<StampedImage>>();
-
+        pluginImageQueuePtr_ = std::make_shared<LockableQueue<StampedImage>>();
 
         setDefaultFileDirs();
         currentVideoFileDir_ = defaultVideoFileDir_;
@@ -2385,7 +2419,6 @@ namespace bias
         startButtonPtr_ -> setEnabled(false);
         connectButtonPtr_ -> setEnabled(true);
 
-        //statusLabelPtr_ -> setText("Camera found, disconnected");
         updateStatusLabel();
 
         ThreadAffinityService::assignThreadAffinity(false,cameraNumber_);
@@ -2864,6 +2897,20 @@ namespace bias
         actionToVideoFileFormatMap_[actionLoggingFormatAVIPtr_] = VIDEOFILE_FORMAT_AVI;
         actionToVideoFileFormatMap_[actionLoggingFormatFMFPtr_] = VIDEOFILE_FORMAT_FMF;
         actionToVideoFileFormatMap_[actionLoggingFormatUFMFPtr_] = VIDEOFILE_FORMAT_UFMF;
+
+        if (logging_)
+        {
+            RtnStatus rtnStatus = enableLogging();
+            if (!rtnStatus.success)
+            {
+                logging_ = false;
+            }
+            else
+            {
+                actionLoggingEnabledPtr_ -> setChecked(true);
+            }
+        }
+
         updateLoggingMenu();
     }
 

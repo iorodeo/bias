@@ -46,6 +46,7 @@ set(
     alignment_settings_dialog.hpp
     auto_naming_dialog.hpp
     auto_naming_options.hpp
+    plugin_handler.hpp
     )
 
 set(
@@ -78,6 +79,7 @@ set(
     alignment_settings_dialog.cpp
     auto_naming_dialog.cpp
     auto_naming_options.cpp
+    plugin_handler.cpp
     )
 
 # Old qt 4.8 build

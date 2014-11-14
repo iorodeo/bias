@@ -32,6 +32,7 @@ namespace bias
     class ImageGrabber;
     class ImageDispatcher;
     class ImageLogger; 
+    class PluginHandler;
     class TimerSettingsDialog;
     class LoggingSettingsDialog;
     class AutoNamingDialog;
@@ -201,6 +202,7 @@ namespace bias
             bool haveDefaultVideoFileDir_;
             bool haveDefaultConfigFileDir_;
             bool showCameraLockFailMsg_;
+            bool pluginEnabled_;
             unsigned int cameraNumber_;
             unsigned int numberOfCameras_;
             unsigned int format7PercentSpeed_;
@@ -250,12 +252,14 @@ namespace bias
             std::shared_ptr<Lockable<Camera>> cameraPtr_;
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr_;
             std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr_;
+            std::shared_ptr<LockableQueue<StampedImage>> pluginImageQueuePtr_;
 
             QPointer<QThreadPool> threadPoolPtr_;
 
             QPointer<ImageGrabber> imageGrabberPtr_;
             QPointer<ImageDispatcher> imageDispatcherPtr_;
             QPointer<ImageLogger> imageLoggerPtr_;
+            QPointer<PluginHandler> pluginHandlerPtr_;
 
             QPointer<QTimer> imageDisplayTimerPtr_;
             QPointer<QTimer> captureDurationTimerPtr_;

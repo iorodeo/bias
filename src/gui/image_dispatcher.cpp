@@ -17,30 +17,47 @@ namespace bias
 
     ImageDispatcher::ImageDispatcher(QObject *parent) : QObject(parent)
     {
-        initialize(false,0,NULL,NULL);
+        initialize(false,false,0,NULL,NULL,NULL);
     }
 
     ImageDispatcher::ImageDispatcher( 
             bool logging,
+            bool pluginEnabled,
             unsigned int cameraNumber,
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr, 
             std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr, 
+            std::shared_ptr<LockableQueue<StampedImage>> pluginImageQueuePtr,
             QObject *parent
             ) : QObject(parent)
     {
-        initialize(logging,cameraNumber,newImageQueuePtr,logImageQueuePtr);
+        initialize(
+                logging,
+                pluginEnabled,
+                cameraNumber,
+                newImageQueuePtr,
+                logImageQueuePtr,
+                pluginImageQueuePtr
+                );
     }
 
     void ImageDispatcher::initialize(
             bool logging,
+            bool pluginEnabled,
             unsigned int cameraNumber,
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr,
-            std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr 
+            std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr,
+            std::shared_ptr<LockableQueue<StampedImage>> pluginImageQueuePtr
             ) 
     {
         newImageQueuePtr_ = newImageQueuePtr;
         logImageQueuePtr_ = logImageQueuePtr;
-        if ((newImageQueuePtr_ != NULL) && (logImageQueuePtr_ !=NULL)) 
+        pluginImageQueuePtr_ = pluginImageQueuePtr;
+        if (
+                (newImageQueuePtr_     != NULL) && 
+                (logImageQueuePtr_     != NULL) &&
+                (pluginImageQueuePtr_  != NULL)
+           )
+
         {
             ready_ = true;
         }
@@ -48,9 +65,12 @@ namespace bias
         {
             ready_ = false;
         }
+
         stopped_ = true;
         logging_ = logging;
         cameraNumber_ = cameraNumber;
+        pluginEnabled_ = pluginEnabled;
+
         frameCount_ = 0;
         currentTimeStamp_ = 0.0;
     }
@@ -104,8 +124,8 @@ namespace bias
         fpsEstimator_.reset();
         releaseLock();
 
-        // DEVEL
-        // --------------------------------------------------------------------
+        // DEVEL - make this non development. Need to pass video file dir as argument
+        // ---------------------------------------------------------------------------
         CameraWindow* cameraWindowPtr = qobject_cast<CameraWindow *>(parent());
         QDir videoFileDir = cameraWindowPtr -> getVideoFileDir();
         QString stampLogName = QString("stamp_log_cam%1.txt").arg(cameraNumber_);
@@ -113,7 +133,7 @@ namespace bias
         std::string stampFileName = stampFileInfo.absoluteFilePath().toStdString();
         std::ofstream stampOutStream;
         stampOutStream.open(stampFileName);
-        // --------------------------------------------------------------------
+        // ---------------------------------------------------------------------------
 
         while (!done) 
         {
@@ -135,6 +155,13 @@ namespace bias
                 logImageQueuePtr_ -> push(newStampImage);
                 logImageQueuePtr_ -> signalNotEmpty();
                 logImageQueuePtr_ -> releaseLock();
+            }
+            if (pluginEnabled_)
+            {
+                pluginImageQueuePtr_ -> acquireLock();
+                pluginImageQueuePtr_ -> push(newStampImage);
+                pluginImageQueuePtr_ -> signalNotEmpty();
+                pluginImageQueuePtr_ -> releaseLock();
             }
 
             acquireLock();

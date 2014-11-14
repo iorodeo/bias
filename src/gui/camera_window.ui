@@ -61,15 +61,15 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="pluginPreviewTabPtr_">
+      <widget class="QWidget" name="histogramTabPtr_">
        <attribute name="title">
-        <string>Plugin Preview</string>
+        <string>Histogram</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
-         <widget class="QLabel" name="pluginImageLabelPtr_">
+         <widget class="QLabel" name="histogramImageLabelPtr_">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -96,15 +96,15 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="histogramTabPtr_">
+      <widget class="QWidget" name="pluginPreviewTabPtr_">
        <attribute name="title">
-        <string>Histogram</string>
+        <string>Plugin Preview</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
-         <widget class="QLabel" name="histogramImageLabelPtr_">
+         <widget class="QLabel" name="pluginImageLabelPtr_">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -234,7 +234,7 @@
      <x>0</x>
      <y>0</y>
      <width>581</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuLoggingPtr_">
@@ -353,6 +353,7 @@
     <property name="title">
      <string>&amp;Plugins</string>
     </property>
+    <addaction name="actionPluginsEnabledPtr_"/>
     <addaction name="actionPluginsSettingsPtr_"/>
     <addaction name="separator"/>
     <addaction name="actionNoPluginsFoundPtr_"/>
@@ -611,12 +612,15 @@
     <string>Hide Window...</string>
    </property>
   </action>
-  <action name="actionNoPluginsFoundPtr_">
+  <action name="actionPluginsEnabledPtr_">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
-    <string>no plugins found</string>
+    <string>Enabled</string>
    </property>
   </action>
   <action name="actionPluginsSettingsPtr_">
@@ -709,6 +713,14 @@
   <action name="actionJet_2">
    <property name="text">
     <string>Jet</string>
+   </property>
+  </action>
+  <action name="actionNoPluginsFoundPtr_">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>No plugins found</string>
    </property>
   </action>
  </widget>

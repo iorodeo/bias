@@ -66,7 +66,10 @@ namespace bias
         StampedImage newStampedImage;
         unsigned int logQueueSize;
 
-        if (!ready_) { return; }
+        if (!ready_) 
+        { 
+            return; 
+        }
 
         // Set thread priority to normal
         QThread *thisThread = QThread::currentThread();

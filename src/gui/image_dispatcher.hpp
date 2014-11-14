@@ -23,17 +23,21 @@ namespace bias
 
             ImageDispatcher( 
                     bool logging,
+                    bool pluginEnabled,
                     unsigned int cameraNumber,
                     std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr, 
                     std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr, 
+                    std::shared_ptr<LockableQueue<StampedImage>> pluginImageQueuePtr,
                     QObject *parent = 0
                     );
 
             void initialize( 
                     bool logging,
+                    bool pluginEnabled,
                     unsigned int cameraNumber,
                     std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr,
-                    std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr 
+                    std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr ,
+                    std::shared_ptr<LockableQueue<StampedImage>> pluginImageQueuePtr
                     );
 
             // Use lock when calling these methods
@@ -48,9 +52,11 @@ namespace bias
         private:
             bool ready_;
             bool logging_;
+            bool pluginEnabled_;
             unsigned int cameraNumber_;
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr_;
             std::shared_ptr<LockableQueue<StampedImage>> logImageQueuePtr_;
+            std::shared_ptr<LockableQueue<StampedImage>> pluginImageQueuePtr_;
 
             // use lock when setting these values
             // -----------------------------------
