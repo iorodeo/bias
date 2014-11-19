@@ -1,5 +1,5 @@
 #include "video_writer.hpp"
-#include "Stamped_image.hpp"
+#include "stamped_image.hpp"
 #include <iostream>
 #include <QFileInfo>
 #include <QDir>

@@ -352,10 +352,10 @@ namespace bias {
 #else
         if (isFirst_)
         {
-            startTime_ = frame_dc1394_.timestamp; 
+            startTime_ = frame_dc1394_  -> timestamp; 
             timerFreq_ = 1;  // Not used
         }
-        elapsedTime = double(frame_dc1394_.timestamp - startTime_);
+        elapsedTime = double(frame_dc1394_ -> timestamp - startTime_);
 #endif
         timeStamp_.seconds = (long long)(elapsedTime);
         timeStamp_.microSeconds = (unsigned int)(1.0e6*(elapsedTime - double(timeStamp_.seconds)));

@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
             qDebug() << "  name:          " << serialInfo.portName();
             qDebug() << "  description:   " << serialInfo.description();
             qDebug() << "  manufacturer:  " << serialInfo.manufacturer();
-            qDebug() << "  serial Number: " << serialInfo.serialNumber();
+            //qDebug() << "  serial Number: " << serialInfo.serialNumber();
             if (serialInfo.hasVendorIdentifier())
             {
                 qDebug() << "  vendorId:     " << serialInfo.vendorIdentifier();

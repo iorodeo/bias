@@ -106,8 +106,11 @@ if(with_fc2)
 endif()
 
 if(with_dc1394)
-    # set(bias_ext_link_LIBS ${bias_ext_link_LIBS} dc1394 1394camera)
-    set(bias_ext_link_LIBS ${bias_ext_link_LIBS} dc1394 1394camera setupapi)
+    if (WIN32)
+        set(bias_ext_link_LIBS ${bias_ext_link_LIBS} dc1394 1394camera setupapi)
+    else()
+        set(bias_ext_link_LIBS ${bias_ext_link_LIBS} dc1394)
+    endif()
 endif()
 set(bias_ext_link_LIBS ${bias_ext_link_LIBS})
 
