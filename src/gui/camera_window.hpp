@@ -46,7 +46,6 @@ namespace bias
     {
         Q_OBJECT
 
-
         public:
 
             CameraWindow(
@@ -385,7 +384,6 @@ namespace bias
 
     }; // class CameraWindow
 
-
     // Utilitiy functions
     QString boolToOnOffQString(bool value);
     QString timeStampToQString(double timeStamp);
@@ -405,8 +403,7 @@ namespace bias
 
     QString propNameToCamelCase(QString propName);
 
-
-}
+} // namespace bias
 
 
 

@@ -157,12 +157,15 @@ namespace bias
             try
             {
                 cameraPtr_ -> connect();
+
+#ifdef WITH_FC2
                 // WBD DEVEL TEMP
                 // ------------------------------------------------------------
-                // TEMPORARY - set camera to known videomode and trigger type
-                //cameraPtr_ -> setVideoMode(VIDEOMODE_FORMAT7);
-                //cameraPtr_ -> setTriggerInternal();
+                //  TEMPORARY - set camera to known videomode and trigger type
+                cameraPtr_ -> setVideoMode(VIDEOMODE_FORMAT7);
+                cameraPtr_ -> setTriggerInternal();
                 // ------------------------------------------------------------
+#endif
             }
             catch (RuntimeError &runtimeError)
             {
@@ -210,10 +213,12 @@ namespace bias
 
         updateCameraInfoMessage();
 
+#ifdef WITH_FC2
         // WBD DEVEL TEMP
         // -----------------------------------------
-        //updateAllMenus();
+        updateAllMenus();
         // -----------------------------------------
+#endif 
 
         rtnStatus.success = true;
         rtnStatus.message = QString("");
@@ -494,10 +499,12 @@ namespace bias
         capturing_ = true;
         showCameraLockFailMsg_ = false;
 
+#ifdef WITH_FC2
         // WBD DEVEL TEMP
         // ---------------------------------------------
-        //updateAllMenus();
+        updateAllMenus();
         // ---------------------------------------------
+#endif 
 
         showCameraLockFailMsg_ = true;
 
@@ -610,10 +617,12 @@ namespace bias
         framesPerSec_ = 0.0;
         updateAllImageLabels();
 
+#ifdef WITH_FC2
         // WBD DEVEL TEMP
         // ------------------------------------------------
-        //updateAllMenus();
+        updateAllMenus();
         // ------------------------------------------------
+#endif
 
         emit imageCaptureStopped();
 
@@ -3071,7 +3080,7 @@ namespace bias
         {
             QPainter painter(&pixmapScaled);
             QString msg;  
-            msg.sprintf("%d",frameCount_);
+            msg.sprintf("%lu",frameCount_);
             painter.setPen(QColor(0,220,0));
             painter.drawText(5,12, msg);
         }
