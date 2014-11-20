@@ -2,6 +2,7 @@
 #include "camera_device_dc1394.hpp"
 #include "utils_dc1394.hpp"
 #include "exception.hpp"
+#include "utils.hpp"
 #include <sstream>
 #include <algorithm>
 #ifdef WIN32
@@ -69,15 +70,29 @@ namespace bias {
             // DEVEL 
             // -------------------------------------------------------------------
             // Print supported video modes
-            dc1394video_modes_t supportedModes;
-            dc1394_video_get_supported_modes(camera_dc1394_, &supportedModes);
-            std::cout << std::endl << "supported video modes" << std::endl;
-            printVideoModes_dc1394(supportedModes);
-            std::cout << std::endl;
+            //dc1394video_modes_t supportedModes;
+            //dc1394_video_get_supported_modes(camera_dc1394_, &supportedModes);
+            //std::cout << std::endl << "supported video modes" << std::endl;
+            //printVideoModes_dc1394(supportedModes);
+            //std::cout << std::endl;
+            //std::cout << "isColor: " << isColor() << std::endl;
 
-            std::cout << "isColor: " << isColor() << std::endl;
+            VideoModeList videoModeList = getAllowedVideoModes();
+            VideoModeList::iterator modeIt;
+            for (modeIt = videoModeList.begin(); modeIt!=videoModeList.end(); modeIt++)
+            {
+                VideoMode videoMode = *modeIt;
+                std::cout << getVideoModeString(videoMode) << std::endl;
 
+                FrameRateList frameRateList = getAllowedFrameRates(videoMode);
+                FrameRateList::iterator rateIt;
+                for (rateIt = frameRateList.begin(); rateIt!=frameRateList.end(); rateIt++)
+                {
+                    FrameRate frameRate = *rateIt;
+                    std::cout << "  " << getFrameRateString(frameRate) << std::endl;
+                }
 
+            }
             // --------------------------------------------------------------------
             
         }
@@ -243,8 +258,11 @@ namespace bias {
     {
         bool isColor = false;
 
-        dc1394video_modes_t supportedModes;
-        dc1394error_t rsp = dc1394_video_get_supported_modes(camera_dc1394_, &supportedModes);
+        dc1394video_modes_t supportedModes_dc1394;
+        dc1394error_t rsp = dc1394_video_get_supported_modes(
+                camera_dc1394_, 
+                &supportedModes_dc1394
+                );
         if (rsp != DC1394_SUCCESS)
         {
             std::stringstream ssError;
@@ -253,10 +271,14 @@ namespace bias {
             throw RuntimeError(ERROR_DC1394_GET_SUPPORTED_VIDEOMODES, ssError.str());
         }
 
-        for (int i=0; i<supportedModes.num; i++)
+        for (int i=0; i<supportedModes_dc1394.num; i++)
         {
-            dc1394color_coding_t colorCoding;
-            rsp = dc1394_get_color_coding_from_video_mode(camera_dc1394_, supportedModes.modes[i], &colorCoding);
+            dc1394color_coding_t colorCoding_dc1934;
+            rsp = dc1394_get_color_coding_from_video_mode(
+                    camera_dc1394_, 
+                    supportedModes_dc1394.modes[i], 
+                    &colorCoding_dc1934
+                    );
             if (rsp != DC1394_SUCCESS)
             {
                 std::stringstream ssError;
@@ -264,8 +286,8 @@ namespace bias {
                 ssError << ": error unable to get color coding from video mode" << std::endl;
                 throw RuntimeError(ERROR_DC1394_GET_COLOR_CODING_FROM_VIDEOMODE, ssError.str());
             } 
-            dc1394bool_t isColor_dc1394Val;
-            rsp = dc1394_is_color(colorCoding, &isColor_dc1394Val);
+            dc1394bool_t isColor_dc1394;
+            rsp = dc1394_is_color(colorCoding_dc1934, &isColor_dc1394);
             if (rsp != DC1394_SUCCESS)
             {
                 std::stringstream ssError;
@@ -273,7 +295,7 @@ namespace bias {
                 ssError << ": error unable to determine if color coding is color or monochrome" << std::endl;
                 throw RuntimeError(ERROR_DC1394_IS_COLOR, ssError.str());
             }
-            if (isColor_dc1394Val == DC1394_TRUE)
+            if (isColor_dc1394 == DC1394_TRUE)
             {
                 isColor = true;
             }
@@ -284,12 +306,65 @@ namespace bias {
 
     VideoModeList CameraDevice_dc1394::getAllowedVideoModes()
     {
-        return VideoModeList();
+        VideoModeList videoModeList;
+        dc1394video_modes_t supportedModes_dc1394;
+        dc1394error_t rsp = dc1394_video_get_supported_modes(
+                camera_dc1394_, 
+                &supportedModes_dc1394
+                );
+        if (rsp != DC1394_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to get supported video modes" << std::endl;
+            throw RuntimeError(ERROR_DC1394_GET_SUPPORTED_VIDEOMODES, ssError.str());
+        }
+
+        bool hasFormat7 = false;
+        for (int i=0; i<supportedModes_dc1394.num; i++)
+        {
+            VideoMode videoMode = convertVideoMode_from_dc1394(supportedModes_dc1394.modes[i]);
+            if (videoMode == VIDEOMODE_FORMAT7)
+            {
+                if (hasFormat7)
+                {
+                    continue;
+                }
+                else
+                {
+                    hasFormat7 = true;
+                }
+            }
+            videoModeList.push_back(videoMode);
+        }
+        return videoModeList;
     }
 
     FrameRateList CameraDevice_dc1394::getAllowedFrameRates(VideoMode vidMode) 
     { 
-        return FrameRateList(); 
+        FrameRateList frameRateList;
+
+        if (vidMode == VIDEOMODE_FORMAT7)
+        {
+            frameRateList.push_back(FRAMERATE_FORMAT7);
+        }
+        else
+        {
+            // Note, ImageMode doesn't matter if VideoMode is not format7.
+            dc1394video_mode_t vidMode_dc1394 = convertVideoMode_to_dc1394(vidMode,IMAGEMODE_0);
+            dc1394framerates_t supportedRates_dc1394;
+            dc1394error_t rsp = dc1394_video_get_supported_framerates(
+                    camera_dc1394_, 
+                    vidMode_dc1394, 
+                    &supportedRates_dc1394
+                    );
+            for (int i=0; i<supportedRates_dc1394.num; i++)
+            {
+                FrameRate frameRate = convertFrameRate_from_dc1394(supportedRates_dc1394.framerates[i]);
+                frameRateList.push_back(frameRate);
+            }
+        }
+        return frameRateList; 
     } 
 
     ImageModeList CameraDevice_dc1394::getAllowedImageModes()
@@ -317,8 +392,7 @@ namespace bias {
     bool CameraDevice_dc1394::validateFormat7Settings(Format7Settings settings)
     {
         return false;
-    }
-
+    } 
    
     void CameraDevice_dc1394::setFormat7Configuration(Format7Settings settings, float percentSpeed)
     {

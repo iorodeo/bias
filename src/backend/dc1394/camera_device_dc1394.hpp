@@ -37,8 +37,8 @@ namespace bias {
             virtual FrameRate getFrameRate() {}; // TO DO //
             virtual ImageMode getImageMode() {}; // TO DO //
 
-            virtual VideoModeList getAllowedVideoModes();  // TO DO //
-            virtual FrameRateList getAllowedFrameRates(VideoMode vidMode);  // TO DO //
+            virtual VideoModeList getAllowedVideoModes();  
+            virtual FrameRateList getAllowedFrameRates(VideoMode vidMode);  
             virtual ImageModeList getAllowedImageModes();  // TO DO //
 
             virtual Property getProperty(PropertyType propType) {}; // TO DO //

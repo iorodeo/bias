@@ -15,19 +15,23 @@ namespace bias
     // Conversion from BIAS types to libdc1394 types
     // ------------------------------------------------------------------------
     dc1394video_mode_t convertVideoMode_to_dc1394(VideoMode vidMode, ImageMode imgMode);
+    dc1394framerate_t convertFrameRate_to_dc1394(FrameRate frmRate);
 
     // Conversion from libdc1394 types to BIAS types
     // ------------------------------------------------------------------------
     VideoMode convertVideoMode_from_dc1394(dc1394video_mode_t vidMode_dc1394);
+    FrameRate convertFrameRate_from_dc1394(dc1394framerate_t frmRate_dc1394);
     
     // Print functions for libdc1394 configurations, settings and info
     //-------------------------------------------------------------------------
     void printVideoModes_dc1394(dc1394video_modes_t modes);
 
+
     // libdc1394 enumeration to string converstions
     // ------------------------------------------------------------------------
-    std::string getVideoModeString_dc1394(dc1394video_mode_t vidMode);
-    std::string getColorCodingString_dc1394(dc1394color_coding_t colorCoding);
+    std::string getVideoModeString_dc1394(dc1394video_mode_t vidMode_dc1394);
+    std::string getColorCodingString_dc1394(dc1394color_coding_t colorCoding_dc1394);
+    std::string getFrameRateString_dc1394(dc1394framerate_t frmRate_dc1394);
 
 
     //// Image conversion - for mapping from FlyCapture2 to opencv 

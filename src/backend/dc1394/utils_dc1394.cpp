@@ -1,5 +1,6 @@
 #include "utils_dc1394.hpp"
 #include "exception.hpp"
+#include "utils.hpp"
 #include <opencv2/core/core.hpp>
 #include <map>
 #include <iostream>
@@ -46,53 +47,89 @@ namespace bias
     
     dc1394video_mode_t convertVideoMode_to_dc1394(VideoMode vidMode, ImageMode imgMode)
     {
-        if (videoModeMap_to_dc1394.count(vidMode) != 0)
-        {
-            return videoModeMap_to_dc1394[vidMode];
+        dc1394video_mode_t vidMode_dc1394;
+        if (videoModeMap_to_dc1394.count(vidMode) == 0)
+        { 
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to convert videomode to libdc1394 videomode";
+            throw RuntimeError(ERROR_DC1394_CONVERT_VIDEOMODE, ssError.str());
         }
-        else
+
+        if ((vidMode == VIDEOMODE_FORMAT7) && (imgMode < NUMBER_OF_IMAGEMODE))
         {
-            if ((vidMode == VIDEOMODE_FORMAT7) && (imgMode < NUMBER_OF_IMAGEMODE))
-            {
+            if (imgMode < NUMBER_OF_IMAGEMODE)
+            {   
                 switch (imgMode)
                 {
                     case IMAGEMODE_0:
-                        return DC1394_VIDEO_MODE_FORMAT7_0;
+                        vidMode_dc1394 = DC1394_VIDEO_MODE_FORMAT7_0;
 
                     case IMAGEMODE_1:
-                        return DC1394_VIDEO_MODE_FORMAT7_1;
+                        vidMode_dc1394 = DC1394_VIDEO_MODE_FORMAT7_1;
 
                     case IMAGEMODE_2:
-                        return DC1394_VIDEO_MODE_FORMAT7_2;
+                        vidMode_dc1394 = DC1394_VIDEO_MODE_FORMAT7_2;
 
                     case IMAGEMODE_3:
-                        return DC1394_VIDEO_MODE_FORMAT7_3;
+                        vidMode_dc1394 = DC1394_VIDEO_MODE_FORMAT7_3;
 
                     case IMAGEMODE_4:
-                        return DC1394_VIDEO_MODE_FORMAT7_4;
+                        vidMode_dc1394 = DC1394_VIDEO_MODE_FORMAT7_4;
 
                     case IMAGEMODE_5:
-                        return DC1394_VIDEO_MODE_FORMAT7_5;
+                        vidMode_dc1394 = DC1394_VIDEO_MODE_FORMAT7_5;
 
                     case IMAGEMODE_6:
-                        return DC1394_VIDEO_MODE_FORMAT7_6;
+                        vidMode_dc1394 = DC1394_VIDEO_MODE_FORMAT7_6;
 
                     case IMAGEMODE_7:
-                        return DC1394_VIDEO_MODE_FORMAT7_7;
-
+                        vidMode_dc1394 = DC1394_VIDEO_MODE_FORMAT7_7;
                 }
             }
             else
             {
                 std::stringstream ssError;
                 ssError << __PRETTY_FUNCTION__;
-                ssError << ": unable to convert framerate to libdc1394 frame rate";
-                throw RuntimeError(ERROR_DC1394_CONVERT_FRAMERATE, ssError.str());
+                ssError << ": unable to convert videomode to libdc1394 videomode";
+                throw RuntimeError(ERROR_DC1394_CONVERT_VIDEOMODE, ssError.str());
             }
         }
-
-        dc1394video_mode_t vidMode_dc1394;
+        else
+        {
+            vidMode_dc1394 = videoModeMap_to_dc1394[vidMode];
+        }
         return vidMode_dc1394;
+    }
+
+    static std::map<FrameRate, dc1394framerate_t> createFrameRateMap_to_dc1394()
+    {
+        std::map<FrameRate, dc1394framerate_t> map;
+        map[FRAMERATE_1_875]    = DC1394_FRAMERATE_1_875;
+        map[FRAMERATE_3_75]     = DC1394_FRAMERATE_3_75;
+        map[FRAMERATE_7_5]      = DC1394_FRAMERATE_7_5;
+        map[FRAMERATE_15]       = DC1394_FRAMERATE_15;
+        map[FRAMERATE_30]       = DC1394_FRAMERATE_30;
+        map[FRAMERATE_60]       = DC1394_FRAMERATE_60;
+        map[FRAMERATE_120]      = DC1394_FRAMERATE_120;
+        map[FRAMERATE_240]      = DC1394_FRAMERATE_240;
+        map[FRAMERATE_FORMAT7]  = dc1394framerate_t(DC1394_FRAMERATE_MAX + 1); 
+        // Note, Format7 does not exist at value in libdc1394 so wer are using max value + 1.
+        return map;
+    }
+    static std::map<FrameRate,dc1394framerate_t> frameRateMap_to_dc1394 = 
+        createFrameRateMap_to_dc1394();
+
+    dc1394framerate_t convertFrameRate_to_dc1394(FrameRate frmRate)
+    {
+        if (frameRateMap_to_dc1394.count(frmRate) == 0)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to convert framerate to dc1394 framerate";
+            throw RuntimeError(ERROR_DC1394_CONVERT_FRAMERATE, ssError.str());
+        }
+        return frameRateMap_to_dc1394[frmRate];
     }
 
     // Conversion from libdc1394 types to BIAS types
@@ -139,29 +176,55 @@ namespace bias
 
     VideoMode convertVideoMode_from_dc1394(dc1394video_mode_t vidMode_dc1394)
     {
-        if (videoModeMap_from_dc1394.count(vidMode_dc1394) != 0)
-        {
-            return videoModeMap_from_dc1394[vidMode_dc1394];
-        }
-        else
+        if (videoModeMap_from_dc1394.count(vidMode_dc1394) == 0)
         {
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
-            ssError << ": unable to convert libdc1394 framerate to framerate";
-            throw RuntimeError(ERROR_DC1394_CONVERT_FRAMERATE, ssError.str());
+            ssError << ": unable to convert libdc1394 videomode";
+            throw RuntimeError(ERROR_DC1394_CONVERT_VIDEOMODE, ssError.str());
         }
+        return videoModeMap_from_dc1394[vidMode_dc1394];
     }
 
+    static std::map<dc1394framerate_t, FrameRate> createFrameRateMap_from_dc1394()
+    {
+        std::map<dc1394framerate_t, FrameRate> map;
+        map[DC1394_FRAMERATE_1_875]    = FRAMERATE_1_875;
+        map[DC1394_FRAMERATE_3_75]     = FRAMERATE_3_75;
+        map[DC1394_FRAMERATE_7_5]      = FRAMERATE_7_5;
+        map[DC1394_FRAMERATE_15]       = FRAMERATE_15;
+        map[DC1394_FRAMERATE_30]       = FRAMERATE_30;
+        map[DC1394_FRAMERATE_60]       = FRAMERATE_60;
+        map[DC1394_FRAMERATE_120]      = FRAMERATE_120;
+        map[DC1394_FRAMERATE_240]      = FRAMERATE_240;
+        map[dc1394framerate_t(DC1394_FRAMERATE_MAX + 1)] = FRAMERATE_FORMAT7; 
+        return map;
+    }
+
+    static std::map<dc1394framerate_t, FrameRate> frameRateMap_from_dc1394 = 
+        createFrameRateMap_from_dc1394();
+
+    FrameRate convertFrameRate_from_dc1394(dc1394framerate_t frmRate_dc1394)
+    {
+        if (frameRateMap_from_dc1394.count(frmRate_dc1394) == 0)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to convert libdc1394 framerate";
+            throw RuntimeError(ERROR_DC1394_CONVERT_FRAMERATE, ssError.str());
+        }
+        return frameRateMap_from_dc1394[frmRate_dc1394];
+    }
 
     // Print functions for libdc1394 configurations, settings and info
     //-------------------------------------------------------------------------
     //
-    void printVideoModes_dc1394(dc1394video_modes_t modes)
+    void printVideoModes_dc1394(dc1394video_modes_t modes_dc1394)
     {  
-        for (int i=0; i<modes.num; i++)
+        for (int i=0; i<modes_dc1394.num; i++)
         {
             std::cout << "i: " << i << ", mode: "; 
-            std::cout << getVideoModeString_dc1394(modes.modes[i]) << std::endl;
+            std::cout << getVideoModeString_dc1394(modes_dc1394.modes[i]) << std::endl;
         }
     }
 
@@ -207,17 +270,48 @@ namespace bias
     static std::map<dc1394video_mode_t, std::string> videoModeToStringMap_dc1394 = 
         createVideoModeToStringMap_dc1394();
 
-    std::string getVideoModeString_dc1394(dc1394video_mode_t vidMode)
+    std::string getVideoModeString_dc1394(dc1394video_mode_t vidMode_dc1394)
     {
-        if (videoModeToStringMap_dc1394.count(vidMode) != 0)
+        if (videoModeToStringMap_dc1394.count(vidMode_dc1394) != 0)
         {
-            return videoModeToStringMap_dc1394[vidMode];
+            return videoModeToStringMap_dc1394[vidMode_dc1394];
         }
         else
         {
             return std::string("unknown dc1394 video mode");
         }
     }
+
+    static std::map<dc1394framerate_t, std::string> createFrameRateToStringMap_dc1394()
+    {
+        std::map<dc1394framerate_t, std::string> map;
+        map[DC1394_FRAMERATE_1_875]    = std::string("DC1394_FRAMERATE_1_875");
+        map[DC1394_FRAMERATE_3_75]     = std::string("DC1394_FRAMERATE_3_75");
+        map[DC1394_FRAMERATE_7_5]      = std::string("DC1394_FRAMERATE_7_5");
+        map[DC1394_FRAMERATE_15]       = std::string("DC1394_FRAMERATE_15");
+        map[DC1394_FRAMERATE_30]       = std::string("DC1394_FRAMERATE_30");
+        map[DC1394_FRAMERATE_60]       = std::string("DC1394_FRAMERATE_60");
+        map[DC1394_FRAMERATE_120]      = std::string("DC1394_FRAMERATE_120");
+        map[DC1394_FRAMERATE_240]      = std::string("DC1394_FRAMERATE_240");
+        map[dc1394framerate_t(DC1394_FRAMERATE_MAX + 1)] = std::string("DC1394_FRAMERATE_FORMAT7"); 
+        return map;
+    }
+    
+    static std::map<dc1394framerate_t, std::string> frameRateToStringMap_dc1394 = 
+        createFrameRateToStringMap_dc1394();
+
+    std::string getFrameRateString_dc1394(dc1394framerate_t frmRate_dc1394)
+    {
+        if (frameRateToStringMap_dc1394.count(frmRate_dc1394) != 0)
+        {
+            return frameRateToStringMap_dc1394[frmRate_dc1394];
+        }
+        else
+        {
+            return std::string("unknown dc1394 frame rate");
+        }
+    }
+
 
 
     static std::map<dc1394color_coding_t, std::string> createColorCodingToStringMap_dc1394()
@@ -240,18 +334,17 @@ namespace bias
     static std::map<dc1394color_coding_t, std::string> colorCodingToStringMap_dc1394 = 
         createColorCodingToStringMap_dc1394();
 
-    std::string getColorCodingString_dc1394(dc1394color_coding_t colorCoding)
+    std::string getColorCodingString_dc1394(dc1394color_coding_t colorCoding_dc1394)
     {
-        if (colorCodingToStringMap_dc1394.count(colorCoding) != 0)
+        if (colorCodingToStringMap_dc1394.count(colorCoding_dc1394) != 0)
         {
-            return colorCodingToStringMap_dc1394[colorCoding];
+            return colorCodingToStringMap_dc1394[colorCoding_dc1394];
         }
         else
         {
             return std::string("unknown dc1394 color coding");
         }
     }
-
     
 } // namespace bias
 
