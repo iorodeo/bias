@@ -29,7 +29,7 @@ namespace bias {
             virtual cv::Mat grabImage();  
             virtual void grabImage(cv::Mat &image);
 
-            virtual bool isColor() {return false;} // TO DO //
+            virtual bool isColor(); 
             virtual bool isSupported(ImageMode imgMode) { return false; }; // TO DO //
             virtual bool isSupported(VideoMode vidMode, FrameRate frmRate) { return false; }; // TO DO //
 

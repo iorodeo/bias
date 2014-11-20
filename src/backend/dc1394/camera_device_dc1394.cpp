@@ -66,7 +66,6 @@ namespace bias {
             }
             connected_ = true;
 
-
             // DEVEL 
             // -------------------------------------------------------------------
             // Print supported video modes
@@ -75,9 +74,12 @@ namespace bias {
             std::cout << std::endl << "supported video modes" << std::endl;
             printVideoModes_dc1394(supportedModes);
             std::cout << std::endl;
+
+            std::cout << "isColor: " << isColor() << std::endl;
+
+
             // --------------------------------------------------------------------
-
-
+            
         }
     }
 
@@ -111,10 +113,7 @@ namespace bias {
             // ------------------------------------------------------------------
 
             // Temporary - just pick a video mode which works.
-            error = dc1394_video_set_mode(
-                    camera_dc1394_, 
-                    DC1394_VIDEO_MODE_FORMAT7_0
-                    );
+            error = dc1394_video_set_mode(camera_dc1394_, DC1394_VIDEO_MODE_FORMAT7_0);
 
             if (error != DC1394_SUCCESS) 
             {
@@ -238,6 +237,49 @@ namespace bias {
         cv::Mat image;
         grabImage(image);
         return image;
+    }
+
+    bool CameraDevice_dc1394::isColor()
+    {
+        bool isColor = false;
+
+        dc1394video_modes_t supportedModes;
+        dc1394error_t rsp = dc1394_video_get_supported_modes(camera_dc1394_, &supportedModes);
+        if (rsp != DC1394_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to get supported video modes" << std::endl;
+            throw RuntimeError(ERROR_DC1394_GET_SUPPORTED_VIDEOMODES, ssError.str());
+        }
+
+        for (int i=0; i<supportedModes.num; i++)
+        {
+            dc1394color_coding_t colorCoding;
+            rsp = dc1394_get_color_coding_from_video_mode(camera_dc1394_, supportedModes.modes[i], &colorCoding);
+            if (rsp != DC1394_SUCCESS)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": error unable to get color coding from video mode" << std::endl;
+                throw RuntimeError(ERROR_DC1394_GET_COLOR_CODING_FROM_VIDEOMODE, ssError.str());
+            } 
+            dc1394bool_t isColor_dc1394Val;
+            rsp = dc1394_is_color(colorCoding, &isColor_dc1394Val);
+            if (rsp != DC1394_SUCCESS)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": error unable to determine if color coding is color or monochrome" << std::endl;
+                throw RuntimeError(ERROR_DC1394_IS_COLOR, ssError.str());
+            }
+            if (isColor_dc1394Val == DC1394_TRUE)
+            {
+                isColor = true;
+            }
+        } // for (int i= ...
+
+        return isColor;
     }
 
     VideoModeList CameraDevice_dc1394::getAllowedVideoModes()
