@@ -14,11 +14,13 @@ namespace bias
 
     // Conversion from BIAS types to libdc1394 types
     // ------------------------------------------------------------------------
+    dc1394feature_t convertPropertyType_to_dc1394(PropertyType propType);
     dc1394video_mode_t convertVideoMode_to_dc1394(VideoMode vidMode, ImageMode imgMode);
     dc1394framerate_t convertFrameRate_to_dc1394(FrameRate frmRate);
 
     // Conversion from libdc1394 types to BIAS types
     // ------------------------------------------------------------------------
+    PropertyType convertPropertyType_from_dc1394(dc1394feature_t feature_dc1394);
     VideoMode convertVideoMode_from_dc1394(dc1394video_mode_t vidMode_dc1394);
     FrameRate convertFrameRate_from_dc1394(dc1394framerate_t frmRate_dc1394);
     ImageMode convertImageMode_from_dc1394(dc1394video_mode_t vidMode_dc1394);
@@ -38,13 +40,11 @@ namespace bias
     //// -----------------------------------------------------------------------
     //fc2PixelFormat getSuitablePixelFormat(fc2PixelFormat pixFormat);
     //int getCompatibleOpencvFormat(fc2PixelFormat pixFormat);
+
     
     //** // Conversion from BIAS types to FlyCapture2  types
     //// ------------------------------------------------------------------------
     //
-    //fc2PropertyType convertPropertyType_to_fc2(PropertyType propType);
-    //fc2FrameRate convertFrameRate_to_fc2(FrameRate frmRate);
-    //fc2VideoMode convertVideoMode_to_fc2(VideoMode vidMode);
     //fc2Mode convertImageMode_to_fc2(ImageMode imgMode);
     //fc2Property convertProperty_to_fc2(Property prop);
     //fc2PixelFormat convertPixelFormat_to_fc2(PixelFormat pixFormat);
@@ -52,10 +52,6 @@ namespace bias
 
     //** // Conversion from FlyCapture2 types to BIAS types
     //// ------------------------------------------------------------------------
-    //PropertyType convertPropertyType_from_fc2(fc2PropertyType propType_fc2);
-    //VideoMode convertVideoMode_from_fc2(fc2VideoMode vidMode_fc2);
-    //FrameRate convertFrameRate_from_fc2(fc2FrameRate frmRate_fc2);
-    //ImageMode convertImageMode_from_fc2(fc2Mode mode_fc2);
     //Property convertProperty_from_fc2(fc2Property prop_fc2); 
     //PropertyInfo convertPropertyInfo_from_fc2(fc2PropertyInfo propInfo_fc2); 
     //PixelFormat convertPixelFormat_from_fc2(fc2PixelFormat pixFormat_fc2);

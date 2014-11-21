@@ -52,17 +52,17 @@ namespace bias {
             virtual Format7Settings getFormat7Settings(); // TO DO // 
             virtual Format7Info getFormat7Info(ImageMode imgMode); // TO DO //
 
-            virtual bool validateFormat7Settings(Format7Settings settings);
-            virtual void setFormat7Configuration(Format7Settings settings, float percentSpeed);
+            virtual bool validateFormat7Settings(Format7Settings settings); // TO DO //
+            virtual void setFormat7Configuration(Format7Settings settings, float percentSpeed); // TO DO //
 
-            virtual PixelFormatList getListOfSupportedPixelFormats(ImageMode imgMode);
+            virtual PixelFormatList getListOfSupportedPixelFormats(ImageMode imgMode); // TO DO //
 
             virtual void setTriggerInternal() {}; // TO DO //
             virtual void setTriggerExternal() {}; // TO DO //
             virtual TriggerType getTriggerType() {}; // TO DO //
 
-            virtual std::string getVendorName() { return std::string("not done"); }; // TO DO //
-            virtual std::string getModelName() { return std::string("not done"); }; // TO DO //
+            virtual std::string getVendorName(); 
+            virtual std::string getModelName(); 
 
             virtual TimeStamp getImageTimeStamp();
 

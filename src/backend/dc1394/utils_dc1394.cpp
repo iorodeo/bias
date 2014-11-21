@@ -12,6 +12,46 @@ namespace bias
 
     // Conversion from BIAS types to libdc1394 types
     // ------------------------------------------------------------------------
+    static std::map<PropertyType, dc1394feature_t> createPropertyTypeMap_to_dc1394()
+    {
+        std::map<PropertyType, dc1394feature_t> map;
+        map[PROPERTY_TYPE_BRIGHTNESS]     =  DC1394_FEATURE_BRIGHTNESS;
+        map[PROPERTY_TYPE_AUTO_EXPOSURE]  =  DC1394_FEATURE_EXPOSURE;
+        map[PROPERTY_TYPE_SHARPNESS]      =  DC1394_FEATURE_SHARPNESS;
+        map[PROPERTY_TYPE_WHITE_BALANCE]  =  DC1394_FEATURE_WHITE_BALANCE;
+        map[PROPERTY_TYPE_HUE]            =  DC1394_FEATURE_HUE;
+        map[PROPERTY_TYPE_SATURATION]     =  DC1394_FEATURE_SATURATION;
+        map[PROPERTY_TYPE_GAMMA]          =  DC1394_FEATURE_GAMMA;
+        map[PROPERTY_TYPE_IRIS]           =  DC1394_FEATURE_IRIS;
+        map[PROPERTY_TYPE_FOCUS]          =  DC1394_FEATURE_FOCUS;
+        map[PROPERTY_TYPE_ZOOM]           =  DC1394_FEATURE_ZOOM;
+        map[PROPERTY_TYPE_PAN]            =  DC1394_FEATURE_PAN;
+        map[PROPERTY_TYPE_TILT]           =  DC1394_FEATURE_TILT;
+        map[PROPERTY_TYPE_SHUTTER]        =  DC1394_FEATURE_SHUTTER;
+        map[PROPERTY_TYPE_GAIN]           =  DC1394_FEATURE_GAIN;
+        map[PROPERTY_TYPE_TRIGGER_MODE]   =  DC1394_FEATURE_TRIGGER;
+        map[PROPERTY_TYPE_TRIGGER_DELAY]  =  DC1394_FEATURE_TRIGGER_DELAY;
+        map[PROPERTY_TYPE_FRAME_RATE]     =  DC1394_FEATURE_FRAME_RATE;
+        map[PROPERTY_TYPE_TEMPERATURE]    =  DC1394_FEATURE_TEMPERATURE ;
+        return map;
+    }
+
+    static std::map<PropertyType, dc1394feature_t> propertyTypeMap_to_dc1394 = 
+        createPropertyTypeMap_to_dc1394();
+
+    dc1394feature_t convertPropertyType_to_dc1394(PropertyType propType)
+    {
+        dc1394feature_t feature;
+        if (propertyTypeMap_to_dc1394.count(propType) == 0)
+        { 
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to convert propertyType to libdc1394 feature";
+            throw RuntimeError(ERROR_DC1394_CONVERT_PROPERTY_TYPE, ssError.str());
+        }
+        return propertyTypeMap_to_dc1394[propType];
+    };
+
     static std::map<VideoMode, dc1394video_mode_t> createVideoModeMap_to_dc1394()
     {
         std::map<VideoMode, dc1394video_mode_t> map;
@@ -137,6 +177,48 @@ namespace bias
 
     // Conversion from libdc1394 types to BIAS types
     // ------------------------------------------------------------------------
+    //
+    static std::map<dc1394feature_t, PropertyType> createPropertyTypeMap_from_dc1394()
+    {
+        std::map<dc1394feature_t, PropertyType> map;
+        map[DC1394_FEATURE_BRIGHTNESS]     =  PROPERTY_TYPE_BRIGHTNESS;
+        map[DC1394_FEATURE_EXPOSURE]       =  PROPERTY_TYPE_AUTO_EXPOSURE;
+        map[DC1394_FEATURE_SHARPNESS]      =  PROPERTY_TYPE_SHARPNESS;
+        map[DC1394_FEATURE_WHITE_BALANCE]  =  PROPERTY_TYPE_WHITE_BALANCE;
+        map[DC1394_FEATURE_HUE]            =  PROPERTY_TYPE_HUE;
+        map[DC1394_FEATURE_SATURATION]     =  PROPERTY_TYPE_SATURATION;
+        map[DC1394_FEATURE_GAMMA]          =  PROPERTY_TYPE_GAMMA;
+        map[DC1394_FEATURE_IRIS]           =  PROPERTY_TYPE_IRIS;
+        map[DC1394_FEATURE_FOCUS]          =  PROPERTY_TYPE_FOCUS;
+        map[DC1394_FEATURE_ZOOM]           =  PROPERTY_TYPE_ZOOM;
+        map[DC1394_FEATURE_PAN]            =  PROPERTY_TYPE_PAN;
+        map[DC1394_FEATURE_TILT]           =  PROPERTY_TYPE_TILT;
+        map[DC1394_FEATURE_SHUTTER]        =  PROPERTY_TYPE_SHUTTER;
+        map[DC1394_FEATURE_GAIN]           =  PROPERTY_TYPE_GAIN;
+        map[DC1394_FEATURE_TRIGGER]        =  PROPERTY_TYPE_TRIGGER_MODE;
+        map[DC1394_FEATURE_TRIGGER_DELAY]  =  PROPERTY_TYPE_TRIGGER_DELAY;
+        map[DC1394_FEATURE_FRAME_RATE]     =  PROPERTY_TYPE_FRAME_RATE;
+        map[DC1394_FEATURE_TEMPERATURE]    =  PROPERTY_TYPE_TEMPERATURE;
+        return map;
+    }
+
+    static std::map<dc1394feature_t, PropertyType> propertyTypeMap_from_dc1394 = 
+        createPropertyTypeMap_from_dc1394();
+
+    PropertyType convertPropertyType_from_dc1394(dc1394feature_t feature)
+    {
+        PropertyType propertyType;
+        if (propertyTypeMap_from_dc1394.count(feature) == 0)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to convert libdc1394 feature to propertyType";
+            throw RuntimeError(ERROR_DC1394_CONVERT_PROPERTY_TYPE, ssError.str());
+        }
+        return propertyTypeMap_from_dc1394[feature];
+    };
+
+
     static std::map<dc1394video_mode_t, VideoMode> createVideoModeMap_from_dc1394()
     {
         std::map<dc1394video_mode_t, VideoMode> map;

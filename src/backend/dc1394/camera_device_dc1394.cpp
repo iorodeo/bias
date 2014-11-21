@@ -43,8 +43,14 @@ namespace bias {
 
     CameraDevice_dc1394::~CameraDevice_dc1394()
     {
-        if (capturing_) { stopCapture(); } 
-        if (connected_) { disconnect(); }
+        if (capturing_) 
+        { 
+            stopCapture(); 
+        } 
+        if (connected_) 
+        { 
+            disconnect(); 
+        }
         dc1394_free(context_dc1394_);
     }
 
@@ -109,17 +115,17 @@ namespace bias {
             //    std::cout << "  " << getImageModeString(imageMode) << std::endl;
             //}
 
-            VideoMode videoMode = getVideoMode();
-            std::cout << "videoMode: " << getVideoModeString(videoMode) << std::endl;
+            //VideoMode videoMode = getVideoMode();
+            //std::cout << "videoMode: " << getVideoModeString(videoMode) << std::endl;
 
-            FrameRate frameRate = getFrameRate();
-            std::cout << "frameRate: " << getFrameRateString(frameRate) << std::endl;
+            //FrameRate frameRate = getFrameRate();
+            //std::cout << "frameRate: " << getFrameRateString(frameRate) << std::endl;
 
-            ImageMode imageMode = getImageMode();
-            std::cout << "imageMode: " << getImageModeString(imageMode) << std::endl;
+            //ImageMode imageMode = getImageMode();
+            //std::cout << "imageMode: " << getImageModeString(imageMode) << std::endl;
 
-            std::cout << "isSupported: " << isSupported(imageMode) << std::endl;
-            std::cout << "isSupported: " << isSupported(videoMode, frameRate) << std::endl;
+            //std::cout << "isSupported: " << isSupported(imageMode) << std::endl;
+            //std::cout << "isSupported: " << isSupported(videoMode, frameRate) << std::endl;
 
             // --------------------------------------------------------------------
             
@@ -558,6 +564,34 @@ namespace bias {
         return PixelFormatList();
     }
 
+
+    std::string CameraDevice_dc1394::getVendorName() 
+    { 
+        std::string vendorName;
+        if (connected_)
+        {
+            vendorName = std::string(camera_dc1394_ -> vendor);
+        }
+        else
+        {
+            vendorName = std::string("None");
+        }
+        return vendorName;
+    } 
+
+    std::string CameraDevice_dc1394::getModelName() 
+    { 
+        std::string modelName;
+        if (connected_)
+        {
+            modelName = std::string(camera_dc1394_ -> model);
+        }
+        else
+        {
+            modelName = std::string("None");
+        }
+        return modelName;
+    } 
 
     std::string CameraDevice_dc1394::toString()
     {
