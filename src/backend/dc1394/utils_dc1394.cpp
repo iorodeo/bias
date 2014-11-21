@@ -48,15 +48,7 @@ namespace bias
     dc1394video_mode_t convertVideoMode_to_dc1394(VideoMode vidMode, ImageMode imgMode)
     {
         dc1394video_mode_t vidMode_dc1394;
-        if (videoModeMap_to_dc1394.count(vidMode) == 0)
-        { 
-            std::stringstream ssError;
-            ssError << __PRETTY_FUNCTION__;
-            ssError << ": unable to convert videomode to libdc1394 videomode";
-            throw RuntimeError(ERROR_DC1394_CONVERT_VIDEOMODE, ssError.str());
-        }
-
-        if ((vidMode == VIDEOMODE_FORMAT7) && (imgMode < NUMBER_OF_IMAGEMODE))
+        if (vidMode == VIDEOMODE_FORMAT7) 
         {
             if (imgMode < NUMBER_OF_IMAGEMODE)
             {   
@@ -94,10 +86,20 @@ namespace bias
                 ssError << ": unable to convert videomode to libdc1394 videomode";
                 throw RuntimeError(ERROR_DC1394_CONVERT_VIDEOMODE, ssError.str());
             }
-        }
+        } 
         else
         {
-            vidMode_dc1394 = videoModeMap_to_dc1394[vidMode];
+            if (videoModeMap_to_dc1394.count(vidMode) != 0)
+            { 
+                vidMode_dc1394 = videoModeMap_to_dc1394[vidMode];
+            }
+            else
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to convert videomode to libdc1394 videomode";
+                throw RuntimeError(ERROR_DC1394_CONVERT_VIDEOMODE, ssError.str());
+            }
         }
         return vidMode_dc1394;
     }
@@ -131,6 +133,7 @@ namespace bias
         }
         return frameRateMap_to_dc1394[frmRate];
     }
+
 
     // Conversion from libdc1394 types to BIAS types
     // ------------------------------------------------------------------------

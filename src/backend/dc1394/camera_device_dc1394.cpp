@@ -118,6 +118,9 @@ namespace bias {
             ImageMode imageMode = getImageMode();
             std::cout << "imageMode: " << getImageModeString(imageMode) << std::endl;
 
+            std::cout << "isSupported: " << isSupported(imageMode) << std::endl;
+            std::cout << "isSupported: " << isSupported(videoMode, frameRate) << std::endl;
+
             // --------------------------------------------------------------------
             
         }
@@ -333,6 +336,38 @@ namespace bias {
         } // for (int i= ...
 
         return isColor;
+    }
+
+
+    bool CameraDevice_dc1394::isSupported(ImageMode imgMode)
+    {
+        try 
+        {
+            convertVideoMode_to_dc1394(VIDEOMODE_FORMAT7, imgMode);
+        }
+        catch (RuntimeError &runtimeError)
+        {
+            return false;
+        }
+        return true;
+    }
+
+
+    bool CameraDevice_dc1394::isSupported(VideoMode vidMode, FrameRate frmRate)
+    {
+        bool value = false;
+        VideoModeList videoModeList = getAllowedVideoModes();
+        VideoModeList::iterator modeIt = std::find(videoModeList.begin(), videoModeList.end(), vidMode);
+        if (*modeIt == vidMode)
+        {
+            FrameRateList frameRateList = getAllowedFrameRates(vidMode);
+            FrameRateList::iterator rateIt = std::find(frameRateList.begin(), frameRateList.end(), frmRate);
+            if (*rateIt == frmRate)
+            {
+                value = true;
+            }
+        }
+        return value;
     }
 
 
