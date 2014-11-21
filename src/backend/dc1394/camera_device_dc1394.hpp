@@ -33,13 +33,13 @@ namespace bias {
             virtual bool isSupported(ImageMode imgMode) { return false; }; // TO DO //
             virtual bool isSupported(VideoMode vidMode, FrameRate frmRate) { return false; }; // TO DO //
 
-            virtual VideoMode getVideoMode() {}; // TO DO //
-            virtual FrameRate getFrameRate() {}; // TO DO //
-            virtual ImageMode getImageMode() {}; // TO DO //
+            virtual VideoMode getVideoMode(); 
+            virtual FrameRate getFrameRate();
+            virtual ImageMode getImageMode();
 
             virtual VideoModeList getAllowedVideoModes();  
             virtual FrameRateList getAllowedFrameRates(VideoMode vidMode);  
-            virtual ImageModeList getAllowedImageModes();  // TO DO //
+            virtual ImageModeList getAllowedImageModes();  
 
             virtual Property getProperty(PropertyType propType) {}; // TO DO //
             virtual PropertyInfo getPropertyInfo(PropertyType propType) {}; // TO DO //

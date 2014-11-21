@@ -216,6 +216,49 @@ namespace bias
         return frameRateMap_from_dc1394[frmRate_dc1394];
     }
 
+    ImageMode convertImageMode_from_dc1394(dc1394video_mode_t vidMode)
+    {
+        ImageMode imageMode = IMAGEMODE_UNSPECIFIED;
+
+        switch (vidMode)
+        { 
+            case DC1394_VIDEO_MODE_FORMAT7_0:
+                imageMode = IMAGEMODE_0;
+                break; 
+
+            case DC1394_VIDEO_MODE_FORMAT7_1:
+                imageMode = IMAGEMODE_1;
+                break; 
+
+            case DC1394_VIDEO_MODE_FORMAT7_2:
+                imageMode = IMAGEMODE_2;
+                break; 
+
+            case DC1394_VIDEO_MODE_FORMAT7_3:
+                imageMode = IMAGEMODE_3;
+                break; 
+
+            case DC1394_VIDEO_MODE_FORMAT7_4:
+                imageMode = IMAGEMODE_4;
+                break;
+
+            case DC1394_VIDEO_MODE_FORMAT7_5:
+                imageMode = IMAGEMODE_5;
+                break;
+
+            case DC1394_VIDEO_MODE_FORMAT7_6:
+                imageMode = IMAGEMODE_6;
+
+            case DC1394_VIDEO_MODE_FORMAT7_7:
+                imageMode = IMAGEMODE_7;
+                break;
+
+            default:
+                break;
+            }
+        return imageMode;
+    }
+
     // Print functions for libdc1394 configurations, settings and info
     //-------------------------------------------------------------------------
     //

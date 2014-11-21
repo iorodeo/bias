@@ -23,6 +23,7 @@ namespace bias {
         isFirst_ = true;
     }
 
+
     CameraDevice_dc1394::CameraDevice_dc1394(Guid guid) : CameraDevice(guid)
     {
         context_dc1394_ = NULL;
@@ -39,6 +40,7 @@ namespace bias {
         }
     }
 
+
     CameraDevice_dc1394::~CameraDevice_dc1394()
     {
         if (capturing_) { stopCapture(); } 
@@ -46,10 +48,12 @@ namespace bias {
         dc1394_free(context_dc1394_);
     }
 
+
     CameraLib CameraDevice_dc1394::getCameraLib()
     {
         return guid_.getCameraLib();
     }
+
 
     void CameraDevice_dc1394::connect() 
     {
@@ -77,26 +81,48 @@ namespace bias {
             //std::cout << std::endl;
             //std::cout << "isColor: " << isColor() << std::endl;
 
-            VideoModeList videoModeList = getAllowedVideoModes();
-            VideoModeList::iterator modeIt;
-            for (modeIt = videoModeList.begin(); modeIt!=videoModeList.end(); modeIt++)
-            {
-                VideoMode videoMode = *modeIt;
-                std::cout << getVideoModeString(videoMode) << std::endl;
+            //VideoModeList videoModeList = getAllowedVideoModes();
+            //VideoModeList::iterator modeIt;
+            //for (modeIt = videoModeList.begin(); modeIt!=videoModeList.end(); modeIt++)
+            //{
+            //    VideoMode videoMode = *modeIt;
+            //    std::cout << getVideoModeString(videoMode) << std::endl;
 
-                FrameRateList frameRateList = getAllowedFrameRates(videoMode);
-                FrameRateList::iterator rateIt;
-                for (rateIt = frameRateList.begin(); rateIt!=frameRateList.end(); rateIt++)
-                {
-                    FrameRate frameRate = *rateIt;
-                    std::cout << "  " << getFrameRateString(frameRate) << std::endl;
-                }
+            //    FrameRateList frameRateList = getAllowedFrameRates(videoMode);
+            //    FrameRateList::iterator rateIt;
+            //    for (rateIt = frameRateList.begin(); rateIt!=frameRateList.end(); rateIt++)
+            //    {
+            //        FrameRate frameRate = *rateIt;
+            //        std::cout << "  " << getFrameRateString(frameRate) << std::endl;
+            //    }
 
-            }
+
+            //}
+            //std::cout << std::endl;
+
+            //ImageModeList imageModeList = getAllowedImageModes();
+            //ImageModeList::iterator imgIt;
+            //std::cout << "  image modes" << std::endl;
+            //for (imgIt = imageModeList.begin(); imgIt!=imageModeList.end(); imgIt++)
+            //{
+            //    ImageMode imageMode = *imgIt;
+            //    std::cout << "  " << getImageModeString(imageMode) << std::endl;
+            //}
+
+            VideoMode videoMode = getVideoMode();
+            std::cout << "videoMode: " << getVideoModeString(videoMode) << std::endl;
+
+            FrameRate frameRate = getFrameRate();
+            std::cout << "frameRate: " << getFrameRateString(frameRate) << std::endl;
+
+            ImageMode imageMode = getImageMode();
+            std::cout << "imageMode: " << getImageModeString(imageMode) << std::endl;
+
             // --------------------------------------------------------------------
             
         }
     }
+
 
     void CameraDevice_dc1394::disconnect()
     {
@@ -107,6 +133,7 @@ namespace bias {
             connected_ = false;
         }
     }
+
 
     void CameraDevice_dc1394::startCapture()
     {
@@ -184,6 +211,7 @@ namespace bias {
         }
     }
 
+    
     void CameraDevice_dc1394::stopCapture()
     {
         if ( capturing_ ) {
@@ -192,6 +220,7 @@ namespace bias {
             capturing_ = false;
         }
     }
+
 
     void CameraDevice_dc1394::grabImage(cv::Mat &image)
     {
@@ -247,12 +276,14 @@ namespace bias {
         //std::cout << "frameSize:    " << frameSize << std::endl;
     }
 
+
     cv::Mat CameraDevice_dc1394::grabImage()
     {
         cv::Mat image;
         grabImage(image);
         return image;
     }
+
 
     bool CameraDevice_dc1394::isColor()
     {
@@ -304,6 +335,62 @@ namespace bias {
         return isColor;
     }
 
+
+    VideoMode CameraDevice_dc1394::getVideoMode()
+    {
+        dc1394video_mode_t videoMode_dc1394;
+        dc1394error_t rsp = dc1394_video_get_mode(camera_dc1394_, &videoMode_dc1394);
+        if (rsp != DC1394_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to get current video mode" << std::endl;
+            throw RuntimeError(ERROR_DC1394_GET_VIDEOMODE, ssError.str());
+        }
+        return convertVideoMode_from_dc1394(videoMode_dc1394);
+    }
+
+
+    FrameRate CameraDevice_dc1394::getFrameRate()
+    {
+        FrameRate frameRate;
+        VideoMode videoMode = getVideoMode();
+        if (videoMode ==VIDEOMODE_FORMAT7)
+        {
+            frameRate = FRAMERATE_FORMAT7;
+        }
+        else
+        {
+            dc1394framerate_t frameRate_dc1394;
+            dc1394error_t rsp = dc1394_video_get_framerate(camera_dc1394_, &frameRate_dc1394);
+            if (rsp != DC1394_SUCCESS)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": error unable to get current framerate" << std::endl;
+                throw RuntimeError(ERROR_DC1394_GET_FRAMERATE, ssError.str());
+            }
+            frameRate = convertFrameRate_from_dc1394(frameRate_dc1394);
+        }
+        return frameRate;
+    }
+
+
+    ImageMode CameraDevice_dc1394::getImageMode()
+    { 
+        dc1394video_mode_t videoMode_dc1394;
+        dc1394error_t  rsp = dc1394_video_get_mode(camera_dc1394_, &videoMode_dc1394);
+        if (rsp != DC1394_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to get current video mode" << std::endl;
+            throw RuntimeError(ERROR_DC1394_GET_VIDEOMODE, ssError.str());
+        }
+        return convertImageMode_from_dc1394(videoMode_dc1394);
+    }
+
+
     VideoModeList CameraDevice_dc1394::getAllowedVideoModes()
     {
         VideoModeList videoModeList;
@@ -340,6 +427,7 @@ namespace bias {
         return videoModeList;
     }
 
+
     FrameRateList CameraDevice_dc1394::getAllowedFrameRates(VideoMode vidMode) 
     { 
         FrameRateList frameRateList;
@@ -358,6 +446,14 @@ namespace bias {
                     vidMode_dc1394, 
                     &supportedRates_dc1394
                     );
+            if (rsp != DC1394_SUCCESS)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": error unable to get supported framerates" << std::endl;
+                throw RuntimeError(ERROR_DC1394_GET_SUPPORTED_FRAMERATES, ssError.str());
+            }
+
             for (int i=0; i<supportedRates_dc1394.num; i++)
             {
                 FrameRate frameRate = convertFrameRate_from_dc1394(supportedRates_dc1394.framerates[i]);
@@ -367,15 +463,38 @@ namespace bias {
         return frameRateList; 
     } 
 
+
     ImageModeList CameraDevice_dc1394::getAllowedImageModes()
     {
-        return ImageModeList();
+        ImageModeList imageModeList;
+
+        dc1394video_modes_t supportedModes_dc1394;
+        dc1394error_t rsp = dc1394_video_get_supported_modes(
+                camera_dc1394_, 
+                &supportedModes_dc1394
+                ); 
+        if (rsp != DC1394_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to get supported framerates" << std::endl;
+            throw RuntimeError(ERROR_DC1394_GET_SUPPORTED_FRAMERATES, ssError.str());
+        }
+
+        for (int i=0; i<supportedModes_dc1394.num; i++)
+        {
+            ImageMode imageMode = convertImageMode_from_dc1394(supportedModes_dc1394.modes[i]);
+            imageModeList.push_back(imageMode);
+        }
+        return imageModeList;
     }
+
 
     TimeStamp CameraDevice_dc1394::getImageTimeStamp()
     {
         return timeStamp_;
     }
+
 
     Format7Settings CameraDevice_dc1394::getFormat7Settings()
     {
@@ -430,10 +549,12 @@ namespace bias {
         return ss.str();
     }
 
+
     void CameraDevice_dc1394::printGuid()
     {
         guid_.printValue();
     }
+
 
     void CameraDevice_dc1394::printInfo()
     {

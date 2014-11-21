@@ -21,11 +21,11 @@ namespace bias
     // ------------------------------------------------------------------------
     VideoMode convertVideoMode_from_dc1394(dc1394video_mode_t vidMode_dc1394);
     FrameRate convertFrameRate_from_dc1394(dc1394framerate_t frmRate_dc1394);
+    ImageMode convertImageMode_from_dc1394(dc1394video_mode_t vidMode_dc1394);
     
     // Print functions for libdc1394 configurations, settings and info
     //-------------------------------------------------------------------------
     void printVideoModes_dc1394(dc1394video_modes_t modes);
-
 
     // libdc1394 enumeration to string converstions
     // ------------------------------------------------------------------------
