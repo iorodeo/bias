@@ -52,6 +52,29 @@ namespace bias
         return propertyTypeMap_to_dc1394[propType];
     };
 
+
+    void convertProperty_to_dc1394(Property prop, dc1394feature_info_t &featureInfo_dc1394)
+    {
+        featureInfo_dc1394.available = convertBool_to_dc1394(prop.present);
+        featureInfo_dc1394.abs_control = convertSwitch_to_dc1394(prop.absoluteControl);
+        if (prop.onePush)
+        {
+            featureInfo_dc1394.current_mode = DC1394_FEATURE_MODE_ONE_PUSH_AUTO;
+        }
+        featureInfo_dc1394.is_on = convertSwitch_to_dc1394(prop.on);
+        if (prop.autoActive)
+        {
+            featureInfo_dc1394.current_mode = DC1394_FEATURE_MODE_AUTO;
+        }
+        featureInfo_dc1394.value = uint32_t(prop.value);
+        featureInfo_dc1394.abs_value =  prop.absoluteValue;
+        if (prop.type == PROPERTY_TYPE_WHITE_BALANCE)
+        { 
+            featureInfo_dc1394.RV_value = uint32_t(prop.valueA);
+            featureInfo_dc1394.BU_value = uint32_t(prop.valueB);
+        }
+    }
+
     static std::map<VideoMode, dc1394video_mode_t> createVideoModeMap_to_dc1394()
     {
         std::map<VideoMode, dc1394video_mode_t> map;
@@ -175,6 +198,31 @@ namespace bias
     }
 
 
+    dc1394bool_t convertBool_to_dc1394(bool value)
+    {
+        if (value)
+        {
+            return DC1394_TRUE;
+        }
+        else
+        { 
+            return DC1394_FALSE;
+        }
+    }
+
+
+    dc1394switch_t convertSwitch_to_dc1394(bool value)
+    {
+        if (value)
+        {
+            return DC1394_ON;
+        }
+        else
+        {
+            return DC1394_OFF;
+        }
+    }
+
     // Conversion from libdc1394 types to BIAS types
     // ------------------------------------------------------------------------
     //
@@ -217,6 +265,44 @@ namespace bias
         }
         return propertyTypeMap_from_dc1394[feature];
     };
+
+
+
+    Property convertProperty_from_dc1394(const dc1394feature_info_t featureInfo_dc1394)
+    {
+        Property prop;
+        prop.type = convertPropertyType_from_dc1394(featureInfo_dc1394.id);
+        prop.present = convertBool_from_dc1394(featureInfo_dc1394.available);
+        prop.absoluteControl = convertSwitch_from_dc1394(featureInfo_dc1394.abs_control);
+        if (featureInfo_dc1394.current_mode == DC1394_FEATURE_MODE_ONE_PUSH_AUTO)
+        {
+            prop.onePush = true;
+        }
+        else
+        {
+            prop.onePush = false;
+        }
+        prop.on = convertSwitch_from_dc1394(featureInfo_dc1394.is_on);
+        if (featureInfo_dc1394.current_mode == DC1394_FEATURE_MODE_AUTO)
+        {
+            // DEVEL:  Should I return true for one push as well?? 
+            prop.autoActive = true; 
+        }
+        else
+        {
+            prop.autoActive = false;
+        }
+        prop.value = (unsigned int)(featureInfo_dc1394.value);
+        prop.absoluteValue = featureInfo_dc1394.abs_value;
+        if (featureInfo_dc1394.id == DC1394_FEATURE_WHITE_BALANCE)
+        {
+            // DEVEL: I think this is corrent
+            prop.valueA = (unsigned int)(featureInfo_dc1394.RV_value);
+            prop.valueB = (unsigned int)(featureInfo_dc1394.BU_value);
+        }
+        // DEVEL: what about the other values ... B, R,G, target ???
+        return prop;
+    }
 
 
     static std::map<dc1394video_mode_t, VideoMode> createVideoModeMap_from_dc1394()
@@ -344,10 +430,37 @@ namespace bias
         return imageMode;
     }
 
+
+    bool convertBool_from_dc1394(dc1394bool_t value)
+    {
+        if (value == DC1394_TRUE)
+        {
+            return true;
+        } 
+        else
+        {
+            return false;
+        }
+    }
+
+
+    bool convertSwitch_from_dc1394(dc1394switch_t value)
+    {
+        if (value == DC1394_ON)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+
     // Print functions for libdc1394 configurations, settings and info
     //-------------------------------------------------------------------------
     //
-    void printVideoModes_dc1394(dc1394video_modes_t modes_dc1394)
+    void printVideoModes_dc1394(const dc1394video_modes_t &modes_dc1394)
     {  
         for (int i=0; i<modes_dc1394.num; i++)
         {
@@ -355,6 +468,16 @@ namespace bias
             std::cout << getVideoModeString_dc1394(modes_dc1394.modes[i]) << std::endl;
         }
     }
+
+
+    void printFeatureInfo_dc1394(const dc1394feature_info_t &featureInfo_dc1394)
+    {
+        std::string featureInfoStr = getFeatureInfoString_dc1394(featureInfo_dc1394);
+        std::cout << std::endl;
+        std::cout << featureInfoStr;
+        std::cout << std::endl;
+    }
+
 
     // libdc1394 enumeration to string converstions
     // ------------------------------------------------------------------------
@@ -529,6 +652,27 @@ namespace bias
         ss << "is_on:              " << getSwitchString_dc1394(featureInfo_dc1394.is_on) << std::endl;
         ss << "feature_mode:       " << getFeatureModeString_dc1394(featureInfo_dc1394.current_mode) << std::endl;
         ss << "feature_modes:      " << getFeatureModesString_dc1394(featureInfo_dc1394.modes) << std::endl;
+        if (featureInfo_dc1394.id == DC1394_FEATURE_TRIGGER)
+        {
+            ss << "trigger_mode:       " << getTriggerModeString_dc1394(featureInfo_dc1394.trigger_mode) << std::endl;
+            ss << "trigger_modes:      " << getTriggerModesString_dc1394(featureInfo_dc1394.trigger_modes) << std::endl;
+            ss << "trigger_polarity:   " << getTriggerPolarityString_dc1394(featureInfo_dc1394.trigger_polarity) << std::endl;
+            ss << "trigger_source:     " << getTriggerSourceString_dc1394(featureInfo_dc1394.trigger_source) << std::endl;
+            ss << "trigger_sources:    " << getTriggerSourcesString_dc1394(featureInfo_dc1394.trigger_sources) << std::endl; 
+        }
+        ss << "min:                " << featureInfo_dc1394.min << std::endl; 
+        ss << "max:                " << featureInfo_dc1394.max << std::endl; 
+        ss << "value:              " << featureInfo_dc1394.value << std::endl;
+        ss << "BU_value            " << featureInfo_dc1394.BU_value << std::endl;
+        ss << "RV_value            " << featureInfo_dc1394.RV_value << std::endl;
+        ss << "B_value             " << featureInfo_dc1394.B_value << std::endl;
+        ss << "R_value             " << featureInfo_dc1394.R_value << std::endl;
+        ss << "G_value             " << featureInfo_dc1394.G_value << std::endl;
+        ss << "target_value        " << featureInfo_dc1394.target_value << std::endl;
+        ss << "abs_control         " << getSwitchString_dc1394(featureInfo_dc1394.abs_control) << std::endl;
+        ss << "abs_value           " << featureInfo_dc1394.abs_value << std::endl;
+        ss << "abs_max             " << featureInfo_dc1394.abs_max << std::endl;
+        ss << "abs_min             " << featureInfo_dc1394.abs_min << std::endl;
         return ss.str();
     }
 
@@ -575,7 +719,6 @@ namespace bias
     }
 
 
-
     std::string getFeatureModeString_dc1394(dc1394feature_mode_t value)
     {
         std::string valueStr;
@@ -597,14 +740,14 @@ namespace bias
     }
 
 
-    std::string getFeatureModesString_dc1394(dc1394feature_modes_t featureModes_dc1394)
+    std::string getFeatureModesString_dc1394(const dc1394feature_modes_t &featureModes_dc1394)
     {
         std::stringstream ss;
         ss << "[";
         for (int i=0; i<featureModes_dc1394.num; i++)
         {
             ss << getFeatureModeString_dc1394(featureModes_dc1394.modes[i]);
-            if (i < featureModes_dc1394.num - 1)
+            if (i < (featureModes_dc1394.num - 1))
             {
                 ss << ", ";
             }
@@ -613,6 +756,117 @@ namespace bias
         return ss.str();
     }
 
+
+    static std::map<dc1394trigger_mode_t, std::string> createTriggerModeToStringMap_dc1394()
+    {
+        std::map<dc1394trigger_mode_t, std::string> map;
+        map[DC1394_TRIGGER_MODE_0]   = std::string("DC1394_TRIGGER_MODE_0"); 
+        map[DC1394_TRIGGER_MODE_1]   = std::string("DC1394_TRIGGER_MODE_1"); 
+        map[DC1394_TRIGGER_MODE_2]   = std::string("DC1394_TRIGGER_MODE_2"); 
+        map[DC1394_TRIGGER_MODE_3]   = std::string("DC1394_TRIGGER_MODE_3"); 
+        map[DC1394_TRIGGER_MODE_4]   = std::string("DC1394_TRIGGER_MODE_4"); 
+        map[DC1394_TRIGGER_MODE_5]   = std::string("DC1394_TRIGGER_MODE_5"); 
+        map[DC1394_TRIGGER_MODE_14]  = std::string("DC1394_TRIGGER_MODE_1"); 
+        map[DC1394_TRIGGER_MODE_15]  = std::string("DC1394_TRIGGER_MODE_1");
+        return map;
+    }
+    static std::map<dc1394trigger_mode_t, std::string> triggerModeToStringMap_dc1394 = 
+        createTriggerModeToStringMap_dc1394();
+
+
+    std::string getTriggerModeString_dc1394(dc1394trigger_mode_t value)
+    {
+        if (triggerModeToStringMap_dc1394.count(value) != 0)
+        {
+            return triggerModeToStringMap_dc1394[value];
+        }
+        else
+        {
+            return std::string("unkown trigger mode");
+        };
+    }
+
+
+    std::string getTriggerModesString_dc1394(const dc1394trigger_modes_t &triggerModes_dc1394)
+    {
+        std::stringstream ss;
+        ss << "[";
+        for (int i=0; i<triggerModes_dc1394.num; i++)
+        {
+            ss << getTriggerModeString_dc1394(triggerModes_dc1394.modes[i]);
+            if (i < (triggerModes_dc1394.num - 1))
+            { 
+                ss << ", ";
+            }
+        }
+        ss << "]";
+        return ss.str();
+    }
+
+
+    std::string getTriggerPolarityString_dc1394(dc1394trigger_polarity_t value)
+    {
+        std::string valueStr;
+        switch (value)
+        {
+            case DC1394_TRIGGER_ACTIVE_LOW:
+                valueStr = std::string("active low");
+                break;
+
+            case DC1394_TRIGGER_ACTIVE_HIGH:
+                valueStr = std::string("active high");
+                break;
+
+            default:
+                valueStr = std::string("uknown");
+                break;
+        }
+        return valueStr;
+    }
+
+
+    static std::map<dc1394trigger_source_t, std::string> createTriggerSourceToStringMap_dc1394()
+    {
+        std::map<dc1394trigger_source_t, std::string> map;
+        map[DC1394_TRIGGER_SOURCE_0] = std::string("DC1394_TRIGGER_SOURCE_0");
+        map[DC1394_TRIGGER_SOURCE_1] = std::string("DC1394_TRIGGER_SOURCE_1");
+        map[DC1394_TRIGGER_SOURCE_2] = std::string("DC1394_TRIGGER_SOURCE_2");
+        map[DC1394_TRIGGER_SOURCE_3] = std::string("DC1394_TRIGGER_SOURCE_3");
+        map[DC1394_TRIGGER_SOURCE_SOFTWARE] = std::string("DC1394_TRIGGER_SOURCE_SOFTWARE");
+        return map;
+    }
+    static std::map<dc1394trigger_source_t, std::string> triggerSourceToStringMap_dc1394 = 
+        createTriggerSourceToStringMap_dc1394();
+
+
+    std::string getTriggerSourceString_dc1394(dc1394trigger_source_t value)
+    {
+        if (triggerSourceToStringMap_dc1394.count(value) != 0)
+        {
+            return triggerSourceToStringMap_dc1394[value];
+        }
+        else
+        {
+            return std::string("unknown trigger source");
+        }
+    }
+
+
+    std::string getTriggerSourcesString_dc1394(const dc1394trigger_sources_t &triggerSources_dc1394)
+    {
+        std::stringstream ss;
+        ss << "[";
+        for (int i=0; i<triggerSources_dc1394.num; i++)
+        {
+            ss << getTriggerSourceString_dc1394(triggerSources_dc1394.sources[i]);
+            if (i < (triggerSources_dc1394.num-1))
+            {
+                ss << ", ";
+            }
+        }
+        ss << "]";
+        return ss.str();
+    }
     
 } // namespace bias
 

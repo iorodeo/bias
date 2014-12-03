@@ -80,7 +80,12 @@ namespace bias {
             // DEVEL 
             // -------------------------------------------------------------------
             // Print supported video modes
-            getProperty(PROPERTY_TYPE_BRIGHTNESS);
+            Property prop;
+            prop = getProperty(PROPERTY_TYPE_BRIGHTNESS);
+            prop.print();
+            std::cout << std::endl;
+            prop = getProperty(PROPERTY_TYPE_TRIGGER_MODE);
+            prop.print();
             // --------------------------------------------------------------------
             
         }
@@ -488,10 +493,11 @@ namespace bias {
     Property CameraDevice_dc1394::getProperty(PropertyType propType) 
     {
         // Convert propertyType to featuer id and get feature into struct
-        Property prop;
         dc1394feature_t feature_dc1394 = convertPropertyType_to_dc1394(propType);
 
         dc1394feature_info_t featureInfo_dc1394;
+        featureInfo_dc1394.current_mode = DC1394_FEATURE_MODE_MANUAL;
+
         featureInfo_dc1394.id = feature_dc1394;
         dc1394error_t rsp = dc1394_feature_get(camera_dc1394_, &featureInfo_dc1394);
         if (rsp != DC1394_SUCCESS)
@@ -501,9 +507,7 @@ namespace bias {
             ssError << ": error unable to get dc1394 freature information" << std::endl;
             throw RuntimeError(ERROR_DC1394_GET_FEATURE_INFO, ssError.str());
         }
-
-        std::cout << getFeatureInfoString_dc1394(featureInfo_dc1394) << std::endl;
-
+        Property prop = convertProperty_from_dc1394(featureInfo_dc1394);
         return prop;
     }
 
