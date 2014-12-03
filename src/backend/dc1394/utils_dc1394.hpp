@@ -34,6 +34,15 @@ namespace bias
     std::string getVideoModeString_dc1394(dc1394video_mode_t vidMode_dc1394);
     std::string getColorCodingString_dc1394(dc1394color_coding_t colorCoding_dc1394);
     std::string getFrameRateString_dc1394(dc1394framerate_t frmRate_dc1394);
+    
+    std::string getFeatureString_dc1394(dc1394feature_t featue_dc1394);
+    std::string getFeatureInfoString_dc1394(const dc1394feature_info_t &featureInfo_dc1394);
+    std::string getBoolString_dc1394(dc1394bool_t value);
+    std::string getSwitchString_dc1394(dc1394switch_t value);
+    std::string getFeatureModeString_dc1394(dc1394feature_mode_t value);
+    std::string getFeatureModesString_dc1394(dc1394feature_modes_t featureModes_dc1394);
+
+    std::string getTriggerModeString_dc1394(dc1394trigger_mode_t value);
 
 
     //// Image conversion - for mapping from FlyCapture2 to opencv 

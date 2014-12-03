@@ -80,53 +80,7 @@ namespace bias {
             // DEVEL 
             // -------------------------------------------------------------------
             // Print supported video modes
-            //dc1394video_modes_t supportedModes;
-            //dc1394_video_get_supported_modes(camera_dc1394_, &supportedModes);
-            //std::cout << std::endl << "supported video modes" << std::endl;
-            //printVideoModes_dc1394(supportedModes);
-            //std::cout << std::endl;
-            //std::cout << "isColor: " << isColor() << std::endl;
-
-            //VideoModeList videoModeList = getAllowedVideoModes();
-            //VideoModeList::iterator modeIt;
-            //for (modeIt = videoModeList.begin(); modeIt!=videoModeList.end(); modeIt++)
-            //{
-            //    VideoMode videoMode = *modeIt;
-            //    std::cout << getVideoModeString(videoMode) << std::endl;
-
-            //    FrameRateList frameRateList = getAllowedFrameRates(videoMode);
-            //    FrameRateList::iterator rateIt;
-            //    for (rateIt = frameRateList.begin(); rateIt!=frameRateList.end(); rateIt++)
-            //    {
-            //        FrameRate frameRate = *rateIt;
-            //        std::cout << "  " << getFrameRateString(frameRate) << std::endl;
-            //    }
-
-
-            //}
-            //std::cout << std::endl;
-
-            //ImageModeList imageModeList = getAllowedImageModes();
-            //ImageModeList::iterator imgIt;
-            //std::cout << "  image modes" << std::endl;
-            //for (imgIt = imageModeList.begin(); imgIt!=imageModeList.end(); imgIt++)
-            //{
-            //    ImageMode imageMode = *imgIt;
-            //    std::cout << "  " << getImageModeString(imageMode) << std::endl;
-            //}
-
-            //VideoMode videoMode = getVideoMode();
-            //std::cout << "videoMode: " << getVideoModeString(videoMode) << std::endl;
-
-            //FrameRate frameRate = getFrameRate();
-            //std::cout << "frameRate: " << getFrameRateString(frameRate) << std::endl;
-
-            //ImageMode imageMode = getImageMode();
-            //std::cout << "imageMode: " << getImageModeString(imageMode) << std::endl;
-
-            //std::cout << "isSupported: " << isSupported(imageMode) << std::endl;
-            //std::cout << "isSupported: " << isSupported(videoMode, frameRate) << std::endl;
-
+            getProperty(PROPERTY_TYPE_BRIGHTNESS);
             // --------------------------------------------------------------------
             
         }
@@ -529,6 +483,30 @@ namespace bias {
         }
         return imageModeList;
     }
+
+
+    Property CameraDevice_dc1394::getProperty(PropertyType propType) 
+    {
+        // Convert propertyType to featuer id and get feature into struct
+        Property prop;
+        dc1394feature_t feature_dc1394 = convertPropertyType_to_dc1394(propType);
+
+        dc1394feature_info_t featureInfo_dc1394;
+        featureInfo_dc1394.id = feature_dc1394;
+        dc1394error_t rsp = dc1394_feature_get(camera_dc1394_, &featureInfo_dc1394);
+        if (rsp != DC1394_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to get dc1394 freature information" << std::endl;
+            throw RuntimeError(ERROR_DC1394_GET_FEATURE_INFO, ssError.str());
+        }
+
+        std::cout << getFeatureInfoString_dc1394(featureInfo_dc1394) << std::endl;
+
+        return prop;
+    }
+
 
 
     TimeStamp CameraDevice_dc1394::getImageTimeStamp()

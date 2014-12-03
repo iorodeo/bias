@@ -398,6 +398,7 @@ namespace bias
     static std::map<dc1394video_mode_t, std::string> videoModeToStringMap_dc1394 = 
         createVideoModeToStringMap_dc1394();
 
+
     std::string getVideoModeString_dc1394(dc1394video_mode_t vidMode_dc1394)
     {
         if (videoModeToStringMap_dc1394.count(vidMode_dc1394) != 0)
@@ -409,6 +410,7 @@ namespace bias
             return std::string("unknown dc1394 video mode");
         }
     }
+
 
     static std::map<dc1394framerate_t, std::string> createFrameRateToStringMap_dc1394()
     {
@@ -424,9 +426,9 @@ namespace bias
         map[dc1394framerate_t(DC1394_FRAMERATE_MAX + 1)] = std::string("DC1394_FRAMERATE_FORMAT7"); 
         return map;
     }
-    
     static std::map<dc1394framerate_t, std::string> frameRateToStringMap_dc1394 = 
         createFrameRateToStringMap_dc1394();
+
 
     std::string getFrameRateString_dc1394(dc1394framerate_t frmRate_dc1394)
     {
@@ -458,9 +460,9 @@ namespace bias
         map[DC1394_COLOR_CODING_RAW16]    = std::string("DC1394_COLOR_CODING_RAW16");
         return map;
     }
-
     static std::map<dc1394color_coding_t, std::string> colorCodingToStringMap_dc1394 = 
         createColorCodingToStringMap_dc1394();
+
 
     std::string getColorCodingString_dc1394(dc1394color_coding_t colorCoding_dc1394)
     {
@@ -473,6 +475,144 @@ namespace bias
             return std::string("unknown dc1394 color coding");
         }
     }
+
+
+    static std::map<dc1394feature_t, std::string> createFeatureToStringMap_dc1394()
+    {
+        std::map<dc1394feature_t, std::string> map;
+        map[DC1394_FEATURE_BRIGHTNESS]     =  std::string("DC1394_FEATURE_BRIGHTNESS");
+        map[DC1394_FEATURE_EXPOSURE]       =  std::string("DC1394_FEATURE_EXPOSURE");
+        map[DC1394_FEATURE_SHARPNESS]      =  std::string("DC1394_FEATURE_SHARPNESS");
+        map[DC1394_FEATURE_WHITE_BALANCE]  =  std::string("DC1394_FEATURE_WHITE_BALANCE");
+        map[DC1394_FEATURE_HUE]            =  std::string("DC1394_FEATURE_HUE");
+        map[DC1394_FEATURE_SATURATION]     =  std::string("DC1394_FEATURE_SATURATION");
+        map[DC1394_FEATURE_GAMMA]          =  std::string("DC1394_FEATURE_GAMMA");
+        map[DC1394_FEATURE_IRIS]           =  std::string("DC1394_FEATURE_IRIS");
+        map[DC1394_FEATURE_FOCUS]          =  std::string("DC1394_FEATURE_FOCUS");
+        map[DC1394_FEATURE_ZOOM]           =  std::string("DC1394_FEATURE_ZOOM");
+        map[DC1394_FEATURE_PAN]            =  std::string("DC1394_FEATURE_PAN");
+        map[DC1394_FEATURE_TILT]           =  std::string("DC1394_FEATURE_TILT");
+        map[DC1394_FEATURE_SHUTTER]        =  std::string("DC1394_FEATURE_SHUTTER");
+        map[DC1394_FEATURE_GAIN]           =  std::string("DC1394_FEATURE_GAIN");
+        map[DC1394_FEATURE_TRIGGER]        =  std::string("DC1394_FEATURE_TRIGGER");
+        map[DC1394_FEATURE_TRIGGER_DELAY]  =  std::string("DC1394_FEATURE_TRIGGER_DELAY");
+        map[DC1394_FEATURE_FRAME_RATE]     =  std::string("DC1394_FEATURE_FRAME_RATE");
+        map[DC1394_FEATURE_TEMPERATURE]    =  std::string("DC1394_FEATURE_TEMPERATURE");
+        return map;
+    }
+    static std::map<dc1394feature_t, std::string> featureToStringMap_dc1394 = 
+        createFeatureToStringMap_dc1394();
+
+
+    std::string getFeatureString_dc1394(dc1394feature_t feature_dc1394)
+    {
+        if (featureToStringMap_dc1394.count(feature_dc1394) != 0)
+        {
+            return featureToStringMap_dc1394[feature_dc1394];
+        }
+        else
+        {
+            return std::string("unknown dc1394 feature");
+        }
+    }
+
+
+    std::string getFeatureInfoString_dc1394(const dc1394feature_info_t &featureInfo_dc1394)
+    {
+        std::stringstream ss;
+        ss << "id:                 " << getFeatureString_dc1394(featureInfo_dc1394.id) << std::endl;
+        ss << "available:          " << getBoolString_dc1394(featureInfo_dc1394.available) << std::endl;
+        ss << "absolute_capable:   " << getBoolString_dc1394(featureInfo_dc1394.absolute_capable) << std::endl;
+        ss << "readout_capable:    " << getBoolString_dc1394(featureInfo_dc1394.readout_capable) << std::endl;
+        ss << "on_off_capable:     " << getBoolString_dc1394(featureInfo_dc1394.on_off_capable) << std::endl;
+        ss << "polarity_capable:   " << getBoolString_dc1394(featureInfo_dc1394.polarity_capable) << std::endl;
+        ss << "is_on:              " << getSwitchString_dc1394(featureInfo_dc1394.is_on) << std::endl;
+        ss << "feature_mode:       " << getFeatureModeString_dc1394(featureInfo_dc1394.current_mode) << std::endl;
+        ss << "feature_modes:      " << getFeatureModesString_dc1394(featureInfo_dc1394.modes) << std::endl;
+        return ss.str();
+    }
+
+
+    std::string getBoolString_dc1394(dc1394bool_t value)
+    {
+        std::string valueStr;
+        switch (value)
+        {
+            case DC1394_TRUE:
+                valueStr =  std::string("true");
+                break;
+
+            case DC1394_FALSE:
+                valueStr = std::string("false");
+                break;
+
+            default:
+                valueStr = std::string("unknown");
+                break;
+        }
+        return valueStr;
+    }
+
+
+    std::string getSwitchString_dc1394(dc1394switch_t value)
+    {
+        std::string valueStr;
+        switch (value)
+        {
+            case DC1394_ON: 
+                valueStr = std::string("on");
+                break;
+
+            case  DC1394_OFF:
+                valueStr = std::string("off");
+                break;
+
+            default:
+                valueStr = std::string("unknown");
+                break;
+        }
+        return valueStr;
+    }
+
+
+
+    std::string getFeatureModeString_dc1394(dc1394feature_mode_t value)
+    {
+        std::string valueStr;
+        switch(value)
+        {
+            case DC1394_FEATURE_MODE_MANUAL:
+                valueStr = std::string("manual");
+                break;
+
+            case DC1394_FEATURE_MODE_AUTO:
+                valueStr = std::string("auto");
+                break;
+
+            default:
+                valueStr = std::string("uknown");
+                break;
+        }
+        return valueStr;
+    }
+
+
+    std::string getFeatureModesString_dc1394(dc1394feature_modes_t featureModes_dc1394)
+    {
+        std::stringstream ss;
+        ss << "[";
+        for (int i=0; i<featureModes_dc1394.num; i++)
+        {
+            ss << getFeatureModeString_dc1394(featureModes_dc1394.modes[i]);
+            if (i < featureModes_dc1394.num - 1)
+            {
+                ss << ", ";
+            }
+        }
+        ss << "]";
+        return ss.str();
+    }
+
     
 } // namespace bias
 
