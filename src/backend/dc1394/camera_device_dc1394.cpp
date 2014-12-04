@@ -492,25 +492,104 @@ namespace bias {
 
     Property CameraDevice_dc1394::getProperty(PropertyType propType) 
     {
-        // Convert propertyType to featuer id and get feature into struct
-        dc1394feature_t feature_dc1394 = convertPropertyType_to_dc1394(propType);
-
         dc1394feature_info_t featureInfo_dc1394;
-        featureInfo_dc1394.current_mode = DC1394_FEATURE_MODE_MANUAL;
-
-        featureInfo_dc1394.id = feature_dc1394;
-        dc1394error_t rsp = dc1394_feature_get(camera_dc1394_, &featureInfo_dc1394);
-        if (rsp != DC1394_SUCCESS)
-        {
-            std::stringstream ssError;
-            ssError << __PRETTY_FUNCTION__;
-            ssError << ": error unable to get dc1394 freature information" << std::endl;
-            throw RuntimeError(ERROR_DC1394_GET_FEATURE_INFO, ssError.str());
-        }
+        getFeatureInfo_dc1394(propType, featureInfo_dc1394);
         Property prop = convertProperty_from_dc1394(featureInfo_dc1394);
         return prop;
     }
 
+
+    // TODO
+    // ------------------------------------------------------------------------------------------------------
+    PropertyInfo CameraDevice_dc1394::getPropertyInfo(PropertyType propType) 
+    {
+        PropertyInfo propInfo;
+
+
+        return propInfo;
+    }
+
+    // TODO
+    // ------------------------------------------------------------------------------------------------------
+    void CameraDevice_dc1394::setProperty(Property prop) 
+    {
+        Property propCurr = getProperty(prop.type);
+        dc1394feature_t featureId = convertPropertyType_to_dc1394(prop.type);
+
+        // Set auto
+        if (prop.autoActive && !propCurr.autoActive)
+        {
+            // DEVEL: need to that auto mode is allowed ....
+            dc1394error_t rsp = dc1394_feature_set_mode(camera_dc1394_,featureId,DC1394_FEATURE_MODE_AUTO);
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to set dc1394 freature mode to auto" << std::endl;
+            throw RuntimeError(ERROR_DC1394_SET_FEATURE, ssError.str());
+        }
+
+        if (prop.onePush)
+        {
+
+        }
+
+        //// Get current feature settings from camera
+        //dc1394feature_info_t featureInfo_dc1394;
+        //featureInfo_dc1394.id = convertPropertyType_to_dc1394(prop.type);
+        //dc1394error_t rsp = dc1394_feature_get(camera_dc1394_, &featureInfo_dc1394);
+        //if (rsp != DC1394_SUCCESS)
+        //{
+        //    std::stringstream ssError;
+        //    ssError << __PRETTY_FUNCTION__;
+        //    ssError << ": error unable to get dc1394 freature information" << std::endl;
+        //    throw RuntimeError(ERROR_DC1394_GET_FEATURE_INFO, ssError.str());
+        //}
+
+        //// Modifiy feature settigns with property values in prop
+        //convertProperty_to_dc1394(prop, featureInfo_dc1394);
+
+        //// Set current mode - if in list of available feature modes
+        //bool modeAvailable = false;
+        //for (int i=0; i<featureInfo_dc1394.modes.num; i++)
+        //{
+        //    if (featureInfo_dc1394.current_mode == featureInfo_dc1394
+        //}
+
+
+
+
+
+
+
+        //if (featureInfo_dc1394.abs_control && featureInfo_dc1394.absolute_capable)
+        //{
+        //    // Set via absolute value
+        //    if (
+        //            (featureInfo_dc1394.abs_value >= featureInfo_dc1394.abs_min) &&
+        //            (featureInfo_dc1394.abs_value <= featureInfo_dc1394.abs_max)
+        //       )
+        //    { 
+        //        dc1394error_t  rsp = dc1394_feature_set_absolute_value(
+        //                camera_dc1394_, 
+        //                featureInfo_dc1394.id, 
+        //                featureInfo_dc1394.abs_value
+        //                );
+        //        if (rsp != DC1394_SUCCESS)
+        //        {
+        //            std::stringstream ssError;
+        //            ssError << __PRETTY_FUNCTION__;
+        //            ssError << ": error unable to set dc1394 freature absolute value" << std::endl;
+        //            throw RuntimeError(ERROR_DC1394_SET_FEATURE, ssError.str());
+        //        }
+        //    }
+        //}
+        //else
+        //{
+
+
+
+
+        //}
+    }
 
 
     TimeStamp CameraDevice_dc1394::getImageTimeStamp()
@@ -648,6 +727,24 @@ namespace bias {
         timeStamp_.seconds = (long long)(elapsedTime);
         timeStamp_.microSeconds = (unsigned int)(1.0e6*(elapsedTime - double(timeStamp_.seconds)));
     }
+    
+
+    void CameraDevice_dc1394::getFeatureInfo_dc1394(
+            PropertyType propType, 
+            dc1394feature_info_t &featureInfo_dc1394
+            )
+    {
+        featureInfo_dc1394.id = convertPropertyType_to_dc1394(propType);
+        dc1394error_t rsp = dc1394_feature_get(camera_dc1394_, &featureInfo_dc1394);
+        if (rsp != DC1394_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to get dc1394 freature information" << std::endl;
+            throw RuntimeError(ERROR_DC1394_GET_FEATURE_INFO, ssError.str());
+        }
+    }
+
 
 } // namespace bias
 

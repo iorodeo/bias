@@ -41,11 +41,11 @@ namespace bias {
             virtual FrameRateList getAllowedFrameRates(VideoMode vidMode);  
             virtual ImageModeList getAllowedImageModes();  
 
-            virtual Property getProperty(PropertyType propType); // TO DO //
-            virtual PropertyInfo getPropertyInfo(PropertyType propType) {}; // TO DO //
+            virtual Property getProperty(PropertyType propType); 
+            virtual PropertyInfo getPropertyInfo(PropertyType propType);  // TO DO //
             virtual ImageInfo getImageInfo() { return ImageInfo(); };
 
-            virtual void setProperty(Property prop) {}; // TO DO //
+            virtual void setProperty(Property prop); // TO DO //
             virtual void setVideoModeAndFrameRate(VideoMode vidMode, FrameRate frameRate) {}; // TO DO //
             virtual void setFormat7ImageMode(ImageMode imgMode) {}; // TO DO //
 
@@ -82,6 +82,7 @@ namespace bias {
             bool isFirst_;
 
             void updateTimeStamp();
+            void getFeatureInfo_dc1394(PropertyType propType, dc1394feature_info_t &featureInfo_dc1394);
 
 
     };

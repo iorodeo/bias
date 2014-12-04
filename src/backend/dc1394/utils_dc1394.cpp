@@ -75,6 +75,13 @@ namespace bias
         }
     }
 
+
+    // DEVEL:  TODO  
+    void convertPropertyInfo_to_dc1394(Property prop, dc1394feature_info_t &featureInfo_dc1394)
+    {
+    }
+
+
     static std::map<VideoMode, dc1394video_mode_t> createVideoModeMap_to_dc1394()
     {
         std::map<VideoMode, dc1394video_mode_t> map;
@@ -300,8 +307,18 @@ namespace bias
             prop.valueA = (unsigned int)(featureInfo_dc1394.RV_value);
             prop.valueB = (unsigned int)(featureInfo_dc1394.BU_value);
         }
-        // DEVEL: what about the other values ... B, R,G, target ???
+        // DEVEL: what about the other values ... B, R,G, target ??? look in libdc1394 source I
+        // think this if for whiteshading .
         return prop;
+    }
+
+
+    //DEVEL: TODO
+    PropertyInfo convertPropertyInfo_from_dc1394(const dc1394feature_info_t featureInfo_dc1394)
+    {
+        PropertyInfo propInfo;
+
+        return propInfo;
     }
 
 

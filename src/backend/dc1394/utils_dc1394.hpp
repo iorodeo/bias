@@ -11,11 +11,11 @@
 namespace bias 
 {
 
-
     // Conversion from BIAS types to libdc1394 types
     // ------------------------------------------------------------------------
     dc1394feature_t convertPropertyType_to_dc1394(PropertyType propType);
     void convertProperty_to_dc1394(Property prop, dc1394feature_info_t &featureInfo_dc1394);
+    void convertPropertyInfo_to_dc1394(Property prop, dc1394feature_info_t &featureInfo_dc1394);
     dc1394video_mode_t convertVideoMode_to_dc1394(VideoMode vidMode, ImageMode imgMode);
     dc1394framerate_t convertFrameRate_to_dc1394(FrameRate frmRate);
     dc1394bool_t convertBool_to_dc1394(bool value);
@@ -25,6 +25,7 @@ namespace bias
     // ------------------------------------------------------------------------
     PropertyType convertPropertyType_from_dc1394(dc1394feature_t feature_dc1394);
     Property convertProperty_from_dc1394(const dc1394feature_info_t featureInfo_dc1394);
+    PropertyInfo convertPropertyInfo_from_dc1394(const dc1394feature_info_t featureInfo_dc1394);
     VideoMode convertVideoMode_from_dc1394(dc1394video_mode_t vidMode_dc1394);
     FrameRate convertFrameRate_from_dc1394(dc1394framerate_t frmRate_dc1394);
     ImageMode convertImageMode_from_dc1394(dc1394video_mode_t vidMode_dc1394);
@@ -53,9 +54,6 @@ namespace bias
     std::string getTriggerPolarityString_dc1394(dc1394trigger_polarity_t value);
     std::string getTriggerSourceString_dc1394(dc1394trigger_source_t value);
     std::string getTriggerSourcesString_dc1394(const dc1394trigger_sources_t &triggerSources_dc1394);
-
-
-
 
     //// Image conversion - for mapping from FlyCapture2 to opencv 
     //// -----------------------------------------------------------------------
