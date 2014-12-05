@@ -19,6 +19,7 @@ namespace bias
             virtual void setFileName(QString fileName);
             virtual void setSize(cv::Size size);
             virtual void setFrameSkip(unsigned int frameSkip);
+            virtual void setVersioning(bool value);
             virtual void addFrame(StampedImage stampedImg);
             virtual QString getFileName() const;
             virtual cv::Size getSize() const;
@@ -35,6 +36,7 @@ namespace bias
             unsigned long frameCount_;
             unsigned int frameSkip_;
             unsigned int cameraNumber_;
+            bool addVersionNumber_;
             QString getUniqueFileName();
     };
 

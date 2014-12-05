@@ -57,14 +57,6 @@ namespace bias
         connectWidgets();
 
         numberOfCameras_ = numberOfCameras;
-        //if (numberOfCameras_ > 1)
-        //{
-        //    cameraIdentifierGroupBoxPtr_ -> setCheckable(false);
-        //}
-        //else
-        //{
-        //    cameraIdentifierGroupBoxPtr_ -> setCheckable(true);
-        //}
         cameraIdentifierGroupBoxPtr_ -> setCheckable(true);
 
         QStringListIterator allowedFormatsIt(AutoNamingOptions::ALLOWED_TIME_AND_DATE_FORMATS);
@@ -74,7 +66,6 @@ namespace bias
         }
 
         setDialogFromOptions(options);
-        
     }
 
 
@@ -110,6 +101,13 @@ namespace bias
                );
 
         connect(
+                versionNumberCheckBoxPtr_,
+                SIGNAL(toggled(bool)),
+                this,
+                SLOT(dialogWidgetChanged())
+               );
+
+        connect(
                 timeAndDateFormatComboBoxPtr_,
                 SIGNAL(currentIndexChanged(int)),
                 this,
@@ -135,7 +133,6 @@ namespace bias
 
     void AutoNamingDialog::setDialogFromOptions(AutoNamingOptions options)
     {
-        // Set camera identifier radios button
         if (options.cameraIdentifier == AutoNamingOptions::CAMERA_NUMBER_IDENTIFIER)
         {
             guidIdentifierRadioButtonPtr_ -> setChecked(false);
@@ -148,7 +145,6 @@ namespace bias
             numberIdentifierRadioButtonPtr_ -> setChecked(false);
         }
 
-        // Set camera identifier checkbox
         if (options.includeCameraIdentifier) 
         {
             cameraIdentifierGroupBoxPtr_ -> setChecked(true);
@@ -159,7 +155,6 @@ namespace bias
             cameraIdentifierGroupBoxPtr_ -> setChecked(false);
         }
 
-        // Set time and date check box
         if (options.includeTimeAndDate)
         {
             timeAndDateGroupBoxPtr_ -> setChecked(true);
@@ -169,7 +164,15 @@ namespace bias
             timeAndDateGroupBoxPtr_ -> setChecked(false);
         }
 
-        // Set time and date format options
+        if (options.includeVersionNumber)
+        {
+            versionNumberCheckBoxPtr_ -> setChecked(true);
+        }
+        else
+        {
+            versionNumberCheckBoxPtr_ -> setChecked(false);
+        }
+
         int index = timeAndDateFormatComboBoxPtr_ -> findText(options.timeAndDateFormat);
         if (index != -1)
         {
@@ -188,14 +191,6 @@ namespace bias
     {
         AutoNamingOptions options;
 
-        //if (numberOfCameras_ > 1)
-        //{
-        //    options.includeCameraIdentifier = true;
-        //}
-        //else
-        //{
-        //    options.includeCameraIdentifier = cameraIdentifierGroupBoxPtr_ -> isChecked();
-        //}
         options.includeCameraIdentifier = cameraIdentifierGroupBoxPtr_ -> isChecked();
 
         if (guidIdentifierRadioButtonPtr_ -> isChecked())
@@ -209,6 +204,7 @@ namespace bias
 
         options.includeTimeAndDate = timeAndDateGroupBoxPtr_ -> isChecked();
         options.timeAndDateFormat = timeAndDateFormatComboBoxPtr_ -> currentText();
+        options.includeVersionNumber = versionNumberCheckBoxPtr_ -> isChecked();
 
         return options;
     }

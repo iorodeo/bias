@@ -447,6 +447,7 @@ namespace bias
 
             // Set output file
             videoWriterPtr -> setFileName(videoFileFullPath);
+            videoWriterPtr -> setVersioning(autoNamingOptions_.includeVersionNumber);
 
             imageLoggerPtr_ = new ImageLogger(
                     cameraNumber_,
@@ -940,6 +941,7 @@ namespace bias
         QVariantMap autoNamingOptionsMap;
         autoNamingOptionsMap.insert("includeCameraIdentifier", autoNamingOptions_.includeCameraIdentifier);
         autoNamingOptionsMap.insert("includeTimeAndDate", autoNamingOptions_.includeTimeAndDate);
+        autoNamingOptionsMap.insert("includeVersionNumber", autoNamingOptions_.includeVersionNumber);
         autoNamingOptionsMap.insert("cameraIdentifier", autoNamingOptions_.getCameraIdentifierString());
         autoNamingOptionsMap.insert("timeAndDateFormat", autoNamingOptions_.timeAndDateFormat);
         loggingMap.insert("autoNamingOptions", autoNamingOptionsMap);
@@ -6329,6 +6331,30 @@ namespace bias
             return rtnStatus;
         }
         autoNamingOptions_.includeTimeAndDate = autoNamingOptionsMap["includeTimeAndDate"].toBool();
+
+
+        if (!autoNamingOptionsMap.contains("includeVersionNumber"))
+        {
+            // This is a new option - if it doesn't exist set it to the default value.
+            AutoNamingOptions optionsDefault;
+            autoNamingOptions_.includeVersionNumber = optionsDefault.includeVersionNumber;
+        }
+        else
+        {
+            if (!autoNamingOptionsMap["includeVersionNumber"].canConvert<bool>())
+            {
+                QString errMsgText("Logging Auto Naming: unable to convert"); 
+                errMsgText += "includeVersionNumber to bool ";
+                if (showErrorDlg)
+                {
+                    QMessageBox::critical(this,errMsgTitle,errMsgText);
+                }
+                rtnStatus.success = false;
+                rtnStatus.message = errMsgText;
+                return rtnStatus;
+            }
+            autoNamingOptions_.includeVersionNumber = autoNamingOptionsMap["includeVersionNumber"].toBool();
+        }
 
         // Get cameraIdentifier value
         // ------------------------------------------------------------------------------

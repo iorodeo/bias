@@ -21,6 +21,7 @@ namespace bias
         size_ = cv::Size(0,0);
         frameCount_ = 0;
         frameSkip_ = DEFAULT_FRAME_SKIP;
+        addVersionNumber_ = true;
     }
 
     VideoWriter::~VideoWriter() 
@@ -42,6 +43,11 @@ namespace bias
     void VideoWriter::setFrameSkip(unsigned int frameSkip)
     {
         frameSkip_ = frameSkip;
+    }
+
+    void VideoWriter::setVersioning(bool value)
+    {
+        addVersionNumber_ = value;
     }
 
     void VideoWriter::addFrame(StampedImage stampedImg)
@@ -81,26 +87,27 @@ namespace bias
     {
         QFileInfo fileInfo(fileName_);
         QString incrFileName = fileName_;
-
-        QDir filePath = QDir(fileInfo.absolutePath());
-        QString baseName = fileInfo.baseName();
-        QString ext = fileInfo.suffix();
-
-        bool done = false;
-        unsigned int cnt = 1;
-
-        while(!done)
+        if (addVersionNumber_)
         {
-            QString ver = QString("_v%1").arg(cnt,3,10,QChar('0'));
-            fileInfo = QFileInfo(filePath, baseName + ver + "." + ext);
-            if (!fileInfo.exists())
+            QDir filePath = QDir(fileInfo.absolutePath());
+            QString baseName = fileInfo.baseName();
+            QString ext = fileInfo.suffix();
+
+            bool done = false;
+            unsigned int cnt = 1;
+
+            while(!done)
             {
-                done = true;
+                QString ver = QString("_v%1").arg(cnt,3,10,QChar('0'));
+                fileInfo = QFileInfo(filePath, baseName + ver + "." + ext);
+                if (!fileInfo.exists())
+                {
+                    done = true;
+                }
+                cnt++;
             }
-            cnt++;
         }
         incrFileName = fileInfo.absoluteFilePath();
-
         return incrFileName;
     }
 

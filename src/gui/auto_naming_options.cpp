@@ -30,6 +30,7 @@ namespace bias
     {
         includeCameraIdentifier = true;
         includeTimeAndDate = true;
+        includeVersionNumber = true;
         cameraIdentifier = DEFAULT_CAMERA_IDENTIFIER;
         timeAndDateFormat = DEFAULT_TIME_AND_DATE_FORMAT;
 
@@ -40,6 +41,7 @@ namespace bias
         QStringList optionsList;
         optionsList << QString("includeCameraIdentifier: %1").arg(includeCameraIdentifier);
         optionsList << QString("includeTimeAndDate:      %1").arg(includeTimeAndDate);
+        optionsList << QString("includeVersionNumber:    %1").arg(includeVersionNumber);
         optionsList << QString("cameraIdentifier:        %1").arg(getCameraIdentifierString());
         optionsList << QString("timeAndDateFormat:       %1").arg(timeAndDateFormat);
         return optionsList.join("\n");

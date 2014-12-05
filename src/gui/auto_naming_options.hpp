@@ -16,6 +16,7 @@ namespace bias
 
             bool includeCameraIdentifier;
             bool includeTimeAndDate;
+            bool includeVersionNumber;
             int cameraIdentifier;
             QString timeAndDateFormat;
 
