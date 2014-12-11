@@ -76,12 +76,6 @@ namespace bias
     }
 
 
-    // DEVEL:  TODO  
-    void convertPropertyInfo_to_dc1394(Property prop, dc1394feature_info_t &featureInfo_dc1394)
-    {
-    }
-
-
     static std::map<VideoMode, dc1394video_mode_t> createVideoModeMap_to_dc1394()
     {
         std::map<VideoMode, dc1394video_mode_t> map;
@@ -274,7 +268,6 @@ namespace bias
     };
 
 
-
     Property convertProperty_from_dc1394(const dc1394feature_info_t featureInfo_dc1394)
     {
         Property prop;
@@ -313,11 +306,40 @@ namespace bias
     }
 
 
-    //DEVEL: TODO
     PropertyInfo convertPropertyInfo_from_dc1394(const dc1394feature_info_t featureInfo_dc1394)
     {
         PropertyInfo propInfo;
 
+        propInfo.type = convertPropertyType_from_dc1394(featureInfo_dc1394.id);
+        propInfo.present = convertBool_from_dc1394(featureInfo_dc1394.available);
+        propInfo.autoCapable = false;
+        propInfo.manualCapable = false;
+        propInfo.onePushCapable = false;
+        for (int i=0; i<featureInfo_dc1394.modes.num; i++)
+        {
+            if (featureInfo_dc1394.modes.modes[i] == DC1394_FEATURE_MODE_AUTO)
+            {
+                propInfo.autoCapable = true;
+            }
+            if (featureInfo_dc1394.modes.modes[i] == DC1394_FEATURE_MODE_MANUAL)
+            {
+                propInfo.manualCapable = true;
+            }
+            if (featureInfo_dc1394.modes.modes[i] == DC1394_FEATURE_MODE_ONE_PUSH_AUTO)
+            {
+                propInfo.onePushCapable = true;
+            }
+        }
+        propInfo.absoluteCapable = convertBool_from_dc1394(featureInfo_dc1394.absolute_capable);
+        propInfo.onOffCapable = convertBool_from_dc1394(featureInfo_dc1394.on_off_capable);
+        propInfo.readOutCapable = convertBool_from_dc1394(featureInfo_dc1394.readout_capable);
+        propInfo.minValue = (unsigned int)(featureInfo_dc1394.min);
+        propInfo.maxValue = (unsigned int)(featureInfo_dc1394.max);
+        propInfo.minAbsoluteValue = featureInfo_dc1394.abs_min;
+        propInfo.maxAbsoluteValue = featureInfo_dc1394.abs_max;
+        propInfo.haveUnits = false;
+        propInfo.units = std::string("NA");
+        propInfo.unitsAbbr = std::string("NA");
         return propInfo;
     }
 

@@ -213,12 +213,7 @@ namespace bias
 
         updateCameraInfoMessage();
 
-#ifdef WITH_FC2
-        // WBD DEVEL TEMP
-        // -----------------------------------------
         updateAllMenus();
-        // -----------------------------------------
-#endif 
 
         rtnStatus.success = true;
         rtnStatus.message = QString("");
@@ -500,12 +495,7 @@ namespace bias
         capturing_ = true;
         showCameraLockFailMsg_ = false;
 
-#ifdef WITH_FC2
-        // WBD DEVEL TEMP
-        // ---------------------------------------------
         updateAllMenus();
-        // ---------------------------------------------
-#endif 
 
         showCameraLockFailMsg_ = true;
 
@@ -618,12 +608,7 @@ namespace bias
         framesPerSec_ = 0.0;
         updateAllImageLabels();
 
-#ifdef WITH_FC2
-        // WBD DEVEL TEMP
-        // ------------------------------------------------
         updateAllMenus();
-        // ------------------------------------------------
-#endif
 
         emit imageCaptureStopped();
 
@@ -3327,10 +3312,13 @@ namespace bias
 
     void CameraWindow::updateCameraMenu()
     {
-        updateCameraVideoModeMenu();
-        updateCameraFrameRateMenu();
+        // WBD: DEVEL
+        // ------------------------------------
+        //updateCameraVideoModeMenu();
+        //updateCameraFrameRateMenu();
         updateCameraPropertiesMenu();
-        updateCameraTriggerMenu();
+        //updateCameraTriggerMenu();
+        // ------------------------------------
 
         if (connected_) 
         { 
@@ -3539,8 +3527,12 @@ namespace bias
 
         if (!connected_) { return; }
 
+        std::cout << "1" << std::endl;
+
         // Remove any existing actions from menu
         deleteMenuActions(menuCameraPropertiesPtr_);
+
+        std::cout << "2" << std::endl;
 
         // Get list of properties from camera 
         if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
@@ -3568,6 +3560,8 @@ namespace bias
             }
             return;
         }
+
+        std::cout << "3" << std::endl;
 
         if (error) 
         {

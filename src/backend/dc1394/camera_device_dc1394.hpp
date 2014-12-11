@@ -42,10 +42,10 @@ namespace bias {
             virtual ImageModeList getAllowedImageModes();  
 
             virtual Property getProperty(PropertyType propType); 
-            virtual PropertyInfo getPropertyInfo(PropertyType propType);  // TO DO //
+            virtual PropertyInfo getPropertyInfo(PropertyType propType);  
             virtual ImageInfo getImageInfo() { return ImageInfo(); };
 
-            virtual void setProperty(Property prop); // TO DO //
+            virtual void setProperty(Property prop); 
             virtual void setVideoModeAndFrameRate(VideoMode vidMode, FrameRate frameRate) {}; // TO DO //
             virtual void setFormat7ImageMode(ImageMode imgMode) {}; // TO DO //
 
@@ -57,9 +57,9 @@ namespace bias {
 
             virtual PixelFormatList getListOfSupportedPixelFormats(ImageMode imgMode); // TO DO //
 
-            virtual void setTriggerInternal() {}; // TO DO //
-            virtual void setTriggerExternal() {}; // TO DO //
-            virtual TriggerType getTriggerType() {}; // TO DO //
+            virtual void setTriggerInternal() {};     // TO DO //
+            virtual void setTriggerExternal() {};     // TO DO //
+            virtual TriggerType getTriggerType() {};  // TO DO //
 
             virtual std::string getVendorName(); 
             virtual std::string getModelName(); 
@@ -83,6 +83,12 @@ namespace bias {
 
             void updateTimeStamp();
             void getFeatureInfo_dc1394(PropertyType propType, dc1394feature_info_t &featureInfo_dc1394);
+            void setFeatureModeAuto_dc1394(PropertyType propType);
+            void setFeatureModeOnePush_dc1394(PropertyType propType);
+            void setFeatureAbsoluteControl_dc1394(PropertyType propType);
+            void setFeatureAbsoluteValue_dc1394(PropertyType propType, float absValue, PropertyInfo propInfo);
+            void setFeatureValue_dc1394(PropertyType propType, unsigned int value, PropertyInfo propInfo);
+            void setFeatureWhiteBalance_dc1394(unsigned int valueA, unsigned int valueB);
 
 
     };
