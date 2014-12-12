@@ -3314,10 +3314,10 @@ namespace bias
     {
         // WBD: DEVEL
         // ------------------------------------
-        //updateCameraVideoModeMenu();
-        //updateCameraFrameRateMenu();
+        updateCameraVideoModeMenu();
+        updateCameraFrameRateMenu();
         updateCameraPropertiesMenu();
-        //updateCameraTriggerMenu();
+        updateCameraTriggerMenu();
         // ------------------------------------
 
         if (connected_) 
@@ -3525,14 +3525,12 @@ namespace bias
         PropertyList propList;
         PropertyInfoMap propInfoMap;
 
-        if (!connected_) { return; }
+        if (!connected_) 
+        { 
+            return; 
+        }
 
-        std::cout << "1" << std::endl;
-
-        // Remove any existing actions from menu
         deleteMenuActions(menuCameraPropertiesPtr_);
-
-        std::cout << "2" << std::endl;
 
         // Get list of properties from camera 
         if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
@@ -3560,8 +3558,6 @@ namespace bias
             }
             return;
         }
-
-        std::cout << "3" << std::endl;
 
         if (error) 
         {

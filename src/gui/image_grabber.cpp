@@ -149,6 +149,14 @@ namespace bias {
             }
             cameraPtr_ -> releaseLock();
 
+#ifdef WITH_DC1394
+            // libdc1394 uses non blocking poll policy - returned frame is empty if a new
+            // frame is not available.
+            if (stampImg.image.empty()) 
+            { 
+                continue; 
+            }
+#endif
 
             // Push image into new image queue
             if (!error) 

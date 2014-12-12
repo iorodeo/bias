@@ -86,19 +86,19 @@ namespace bias {
             // DEVEL 
             // -------------------------------------------------------------------
             // Print supported video modes
-            Property prop;
-            PropertyInfo propInfo;
+            //Property prop;
+            //PropertyInfo propInfo;
 
-            propInfo = getPropertyInfo(PROPERTY_TYPE_BRIGHTNESS);
-            propInfo.print();
+            //propInfo = getPropertyInfo(PROPERTY_TYPE_BRIGHTNESS);
+            //propInfo.print();
 
-            prop = getProperty(PROPERTY_TYPE_BRIGHTNESS);
-            prop.print();
+            //prop = getProperty(PROPERTY_TYPE_BRIGHTNESS);
+            //prop.print();
 
-            prop.value = 200;
-            setProperty(prop);
-            prop = getProperty(PROPERTY_TYPE_BRIGHTNESS);
-            prop.print();
+            //prop.value = 200;
+            //setProperty(prop);
+            //prop = getProperty(PROPERTY_TYPE_BRIGHTNESS);
+            //prop.print();
 
             //prop = getProperty(PROPERTY_TYPE_TRIGGER_MODE);
             //prop.print();
@@ -218,14 +218,18 @@ namespace bias {
             throw RuntimeError(ERROR_DC1394_GRAB_IMAGE, ssError.str());
         }
 
-        dc1394error_t error;
-        error = dc1394_capture_dequeue(
+        // Get frame  
+        //dc1394error_t error = dc1394_capture_dequeue(
+        //        camera_dc1394_, 
+        //        DC1394_CAPTURE_POLICY_WAIT, 
+        //        &frame_dc1394_
+        //        );
+        dc1394error_t error = dc1394_capture_dequeue(
                 camera_dc1394_, 
-                DC1394_CAPTURE_POLICY_WAIT, 
+                DC1394_CAPTURE_POLICY_POLL, 
                 &frame_dc1394_
                 );
 
-        // Get frame  
         if (error != DC1394_SUCCESS) 
         { 
             std::stringstream ssError;
@@ -234,32 +238,34 @@ namespace bias {
             ssError << error << std::endl;
             throw RuntimeError(ERROR_DC1394_CAPTURE_DEQUEUE, ssError.str());
         }
-
-        // update time stamp
-        updateTimeStamp();
-        isFirst_ = false;
-
-        // Copy to cv image  (Temporary) - assume mono8 format
-        // Need to modify to handle color images.
-        // --------------------------------------------------------------------------
-        if ((image.rows != frame_dc1394_ -> size[1]) || (image.cols != frame_dc1394_ -> size[0]))
+        if (frame_dc1394_ != NULL)
         {
-            image = cv::Mat(frame_dc1394_-> size[1], frame_dc1394_-> size[0], CV_8UC1); 
+            // update time stamp
+            updateTimeStamp();
+            isFirst_ = false;
+
+            // Copy to cv image  (Temporary) - assume mono8 format
+            // Need to modify to handle color images.
+            // --------------------------------------------------------------------------
+            if ((image.rows != frame_dc1394_ -> size[1]) || (image.cols != frame_dc1394_ -> size[0]))
+            {
+                image = cv::Mat(frame_dc1394_-> size[1], frame_dc1394_-> size[0], CV_8UC1); 
+            }
+
+            unsigned int frameSize = (frame_dc1394_ -> size[0])*(frame_dc1394_ -> size[1]);
+            unsigned char *pData0 = frame_dc1394_ -> image;
+            unsigned char *pData1 = pData0 +  frameSize - 1;
+            std::copy(pData0, pData1, image.data);
+
+
+            // Put frame back 
+            error = dc1394_capture_enqueue(camera_dc1394_, frame_dc1394_);
+
+            //std::cout << "color coding: " << getColorCodingString_dc1394(frame_dc1394_ -> color_coding) << std::endl;
+            //std::cout << "size:         " << frame_dc1394_ -> size[0] << ", " << frame_dc1394_ -> size[1] << std::endl;
+            //std::cout << "total bytes:  " << frame_dc1394_ -> total_bytes << std::endl;
+            //std::cout << "frameSize:    " << frameSize << std::endl;
         }
-
-        unsigned int frameSize = (frame_dc1394_ -> size[0])*(frame_dc1394_ -> size[1]);
-        unsigned char *pData0 = frame_dc1394_ -> image;
-        unsigned char *pData1 = pData0 +  frameSize - 1;
-        std::copy(pData0, pData1, image.data);
-
-
-        // Put frame back 
-        error = dc1394_capture_enqueue(camera_dc1394_, frame_dc1394_);
-
-        //std::cout << "color coding: " << getColorCodingString_dc1394(frame_dc1394_ -> color_coding) << std::endl;
-        //std::cout << "size:         " << frame_dc1394_ -> size[0] << ", " << frame_dc1394_ -> size[1] << std::endl;
-        //std::cout << "total bytes:  " << frame_dc1394_ -> total_bytes << std::endl;
-        //std::cout << "frameSize:    " << frameSize << std::endl;
     }
 
 
@@ -720,6 +726,15 @@ namespace bias {
             ssError << ": error unable to get dc1394 feature information" << std::endl;
             throw RuntimeError(ERROR_DC1394_GET_FEATURE_INFO, ssError.str());
         }
+        //if (rsp != DC1394_SUCCESS)
+        //{
+        //    std::stringstream ssError;
+        //    ssError << __PRETTY_FUNCTION__;
+        //    ssError << ": error unable to get dc1394 feature information" << std::endl;
+        //    throw RuntimeError(ERROR_DC1394_GET_FEATURE_INFO, ssError.str());
+        //}
+
+
     }
 
 

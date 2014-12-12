@@ -15,7 +15,8 @@ namespace bias
     const int REFRESH_TIMER_INTERVAL_MS = 1000;
     const float ABSOLUTE_VALUE_SCALE = 100.0;
     const unsigned int FLOAT_PRECISION = 2;
-    const int CAMERA_LOCK_TRY_DT = 100; 
+    //const int CAMERA_LOCK_TRY_DT = 100; 
+    const int CAMERA_LOCK_TRY_DT = 20; 
 
     // PropertyDialog methods
     // ------------------------------------------------------------------------

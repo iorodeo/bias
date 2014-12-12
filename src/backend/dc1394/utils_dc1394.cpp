@@ -268,7 +268,7 @@ namespace bias
     };
 
 
-    Property convertProperty_from_dc1394(const dc1394feature_info_t featureInfo_dc1394)
+    Property convertProperty_from_dc1394(const dc1394feature_info_t &featureInfo_dc1394)
     {
         Property prop;
         prop.type = convertPropertyType_from_dc1394(featureInfo_dc1394.id);
@@ -306,40 +306,43 @@ namespace bias
     }
 
 
-    PropertyInfo convertPropertyInfo_from_dc1394(const dc1394feature_info_t featureInfo_dc1394)
+    PropertyInfo convertPropertyInfo_from_dc1394(const dc1394feature_info_t &featureInfo_dc1394)
     {
         PropertyInfo propInfo;
 
         propInfo.type = convertPropertyType_from_dc1394(featureInfo_dc1394.id);
         propInfo.present = convertBool_from_dc1394(featureInfo_dc1394.available);
-        propInfo.autoCapable = false;
-        propInfo.manualCapable = false;
-        propInfo.onePushCapable = false;
-        for (int i=0; i<featureInfo_dc1394.modes.num; i++)
+        if (propInfo.present)
         {
-            if (featureInfo_dc1394.modes.modes[i] == DC1394_FEATURE_MODE_AUTO)
+            propInfo.autoCapable = false;
+            propInfo.manualCapable = false;
+            propInfo.onePushCapable = false;
+            for (int i=0; i<featureInfo_dc1394.modes.num; i++)
             {
-                propInfo.autoCapable = true;
+                if (featureInfo_dc1394.modes.modes[i] == DC1394_FEATURE_MODE_AUTO)
+                {
+                    propInfo.autoCapable = true;
+                }
+                if (featureInfo_dc1394.modes.modes[i] == DC1394_FEATURE_MODE_MANUAL)
+                {
+                    propInfo.manualCapable = true;
+                }
+                if (featureInfo_dc1394.modes.modes[i] == DC1394_FEATURE_MODE_ONE_PUSH_AUTO)
+                {
+                    propInfo.onePushCapable = true;
+                }
             }
-            if (featureInfo_dc1394.modes.modes[i] == DC1394_FEATURE_MODE_MANUAL)
-            {
-                propInfo.manualCapable = true;
-            }
-            if (featureInfo_dc1394.modes.modes[i] == DC1394_FEATURE_MODE_ONE_PUSH_AUTO)
-            {
-                propInfo.onePushCapable = true;
-            }
+            propInfo.absoluteCapable = convertBool_from_dc1394(featureInfo_dc1394.absolute_capable);
+            propInfo.onOffCapable = convertBool_from_dc1394(featureInfo_dc1394.on_off_capable);
+            propInfo.readOutCapable = convertBool_from_dc1394(featureInfo_dc1394.readout_capable);
+            propInfo.minValue = (unsigned int)(featureInfo_dc1394.min);
+            propInfo.maxValue = (unsigned int)(featureInfo_dc1394.max);
+            propInfo.minAbsoluteValue = featureInfo_dc1394.abs_min;
+            propInfo.maxAbsoluteValue = featureInfo_dc1394.abs_max;
+            propInfo.haveUnits = false;
+            propInfo.units = std::string("NA");
+            propInfo.unitsAbbr = std::string("NA");
         }
-        propInfo.absoluteCapable = convertBool_from_dc1394(featureInfo_dc1394.absolute_capable);
-        propInfo.onOffCapable = convertBool_from_dc1394(featureInfo_dc1394.on_off_capable);
-        propInfo.readOutCapable = convertBool_from_dc1394(featureInfo_dc1394.readout_capable);
-        propInfo.minValue = (unsigned int)(featureInfo_dc1394.min);
-        propInfo.maxValue = (unsigned int)(featureInfo_dc1394.max);
-        propInfo.minAbsoluteValue = featureInfo_dc1394.abs_min;
-        propInfo.maxAbsoluteValue = featureInfo_dc1394.abs_max;
-        propInfo.haveUnits = false;
-        propInfo.units = std::string("NA");
-        propInfo.unitsAbbr = std::string("NA");
         return propInfo;
     }
 
@@ -684,34 +687,37 @@ namespace bias
         std::stringstream ss;
         ss << "id:                 " << getFeatureString_dc1394(featureInfo_dc1394.id) << std::endl;
         ss << "available:          " << getBoolString_dc1394(featureInfo_dc1394.available) << std::endl;
-        ss << "absolute_capable:   " << getBoolString_dc1394(featureInfo_dc1394.absolute_capable) << std::endl;
-        ss << "readout_capable:    " << getBoolString_dc1394(featureInfo_dc1394.readout_capable) << std::endl;
-        ss << "on_off_capable:     " << getBoolString_dc1394(featureInfo_dc1394.on_off_capable) << std::endl;
-        ss << "polarity_capable:   " << getBoolString_dc1394(featureInfo_dc1394.polarity_capable) << std::endl;
-        ss << "is_on:              " << getSwitchString_dc1394(featureInfo_dc1394.is_on) << std::endl;
-        ss << "feature_mode:       " << getFeatureModeString_dc1394(featureInfo_dc1394.current_mode) << std::endl;
-        ss << "feature_modes:      " << getFeatureModesString_dc1394(featureInfo_dc1394.modes) << std::endl;
-        if (featureInfo_dc1394.id == DC1394_FEATURE_TRIGGER)
+        if (featureInfo_dc1394.available == DC1394_TRUE)
         {
-            ss << "trigger_mode:       " << getTriggerModeString_dc1394(featureInfo_dc1394.trigger_mode) << std::endl;
-            ss << "trigger_modes:      " << getTriggerModesString_dc1394(featureInfo_dc1394.trigger_modes) << std::endl;
-            ss << "trigger_polarity:   " << getTriggerPolarityString_dc1394(featureInfo_dc1394.trigger_polarity) << std::endl;
-            ss << "trigger_source:     " << getTriggerSourceString_dc1394(featureInfo_dc1394.trigger_source) << std::endl;
-            ss << "trigger_sources:    " << getTriggerSourcesString_dc1394(featureInfo_dc1394.trigger_sources) << std::endl; 
+            ss << "absolute_capable:   " << getBoolString_dc1394(featureInfo_dc1394.absolute_capable) << std::endl;
+            ss << "readout_capable:    " << getBoolString_dc1394(featureInfo_dc1394.readout_capable) << std::endl;
+            ss << "on_off_capable:     " << getBoolString_dc1394(featureInfo_dc1394.on_off_capable) << std::endl;
+            ss << "polarity_capable:   " << getBoolString_dc1394(featureInfo_dc1394.polarity_capable) << std::endl;
+            ss << "is_on:              " << getSwitchString_dc1394(featureInfo_dc1394.is_on) << std::endl;
+            ss << "feature_mode:       " << getFeatureModeString_dc1394(featureInfo_dc1394.current_mode) << std::endl;
+            ss << "feature_modes:      " << getFeatureModesString_dc1394(featureInfo_dc1394.modes) << std::endl;
+            if (featureInfo_dc1394.id == DC1394_FEATURE_TRIGGER)
+            {
+                ss << "trigger_mode:       " << getTriggerModeString_dc1394(featureInfo_dc1394.trigger_mode) << std::endl;
+                ss << "trigger_modes:      " << getTriggerModesString_dc1394(featureInfo_dc1394.trigger_modes) << std::endl;
+                ss << "trigger_polarity:   " << getTriggerPolarityString_dc1394(featureInfo_dc1394.trigger_polarity) << std::endl;
+                ss << "trigger_source:     " << getTriggerSourceString_dc1394(featureInfo_dc1394.trigger_source) << std::endl;
+                ss << "trigger_sources:    " << getTriggerSourcesString_dc1394(featureInfo_dc1394.trigger_sources) << std::endl; 
+            }
+            ss << "min:                " << featureInfo_dc1394.min << std::endl; 
+            ss << "max:                " << featureInfo_dc1394.max << std::endl; 
+            ss << "value:              " << featureInfo_dc1394.value << std::endl;
+            ss << "BU_value            " << featureInfo_dc1394.BU_value << std::endl;
+            ss << "RV_value            " << featureInfo_dc1394.RV_value << std::endl;
+            ss << "B_value             " << featureInfo_dc1394.B_value << std::endl;
+            ss << "R_value             " << featureInfo_dc1394.R_value << std::endl;
+            ss << "G_value             " << featureInfo_dc1394.G_value << std::endl;
+            ss << "target_value        " << featureInfo_dc1394.target_value << std::endl;
+            ss << "abs_control         " << getSwitchString_dc1394(featureInfo_dc1394.abs_control) << std::endl;
+            ss << "abs_value           " << featureInfo_dc1394.abs_value << std::endl;
+            ss << "abs_max             " << featureInfo_dc1394.abs_max << std::endl;
+            ss << "abs_min             " << featureInfo_dc1394.abs_min << std::endl;
         }
-        ss << "min:                " << featureInfo_dc1394.min << std::endl; 
-        ss << "max:                " << featureInfo_dc1394.max << std::endl; 
-        ss << "value:              " << featureInfo_dc1394.value << std::endl;
-        ss << "BU_value            " << featureInfo_dc1394.BU_value << std::endl;
-        ss << "RV_value            " << featureInfo_dc1394.RV_value << std::endl;
-        ss << "B_value             " << featureInfo_dc1394.B_value << std::endl;
-        ss << "R_value             " << featureInfo_dc1394.R_value << std::endl;
-        ss << "G_value             " << featureInfo_dc1394.G_value << std::endl;
-        ss << "target_value        " << featureInfo_dc1394.target_value << std::endl;
-        ss << "abs_control         " << getSwitchString_dc1394(featureInfo_dc1394.abs_control) << std::endl;
-        ss << "abs_value           " << featureInfo_dc1394.abs_value << std::endl;
-        ss << "abs_max             " << featureInfo_dc1394.abs_max << std::endl;
-        ss << "abs_min             " << featureInfo_dc1394.abs_min << std::endl;
         return ss.str();
     }
 

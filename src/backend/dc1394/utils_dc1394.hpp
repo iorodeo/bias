@@ -23,8 +23,8 @@ namespace bias
     // Conversion from libdc1394 types to BIAS types
     // ------------------------------------------------------------------------
     PropertyType convertPropertyType_from_dc1394(dc1394feature_t feature_dc1394);
-    Property convertProperty_from_dc1394(const dc1394feature_info_t featureInfo_dc1394);
-    PropertyInfo convertPropertyInfo_from_dc1394(const dc1394feature_info_t featureInfo_dc1394);
+    Property convertProperty_from_dc1394(const dc1394feature_info_t &featureInfo_dc1394);
+    PropertyInfo convertPropertyInfo_from_dc1394(const dc1394feature_info_t &featureInfo_dc1394);
     VideoMode convertVideoMode_from_dc1394(dc1394video_mode_t vidMode_dc1394);
     FrameRate convertFrameRate_from_dc1394(dc1394framerate_t frmRate_dc1394);
     ImageMode convertImageMode_from_dc1394(dc1394video_mode_t vidMode_dc1394);
