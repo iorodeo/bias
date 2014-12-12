@@ -2,5 +2,7 @@ syntax: glob
 *~
 *.o
 *.swp
-build
 build_1394
+build_fc2
+build*
+
