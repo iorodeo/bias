@@ -77,14 +77,22 @@ namespace bias {
             }
             connected_ = true;
 
+            // Devel. set to format 7 as default.
             dc1394error_t rsp = dc1394_video_set_mode(camera_dc1394_, DC1394_VIDEO_MODE_FORMAT7_0);
             if (rsp != DC1394_SUCCESS) 
             {
                 std::cout << "DEVEL: failed to set camera to format7 mode 0" << std::endl;
             }
 
+
+
             // DEVEL 
             // -------------------------------------------------------------------
+            Format7Settings f7Settings = getFormat7Settings();
+            f7Settings.print();
+
+            //dc1394_camera_print_info(camera_dc1394_,stdout);
+
             // Print supported video modes
             //Property prop;
             //PropertyInfo propInfo;
@@ -218,12 +226,6 @@ namespace bias {
             throw RuntimeError(ERROR_DC1394_GRAB_IMAGE, ssError.str());
         }
 
-        // Get frame  
-        //dc1394error_t error = dc1394_capture_dequeue(
-        //        camera_dc1394_, 
-        //        DC1394_CAPTURE_POLICY_WAIT, 
-        //        &frame_dc1394_
-        //        );
         dc1394error_t error = dc1394_capture_dequeue(
                 camera_dc1394_, 
                 DC1394_CAPTURE_POLICY_POLL, 
@@ -280,6 +282,13 @@ namespace bias {
     bool CameraDevice_dc1394::isColor()
     {
         bool isColor = false;
+        if (!connected_)
+        { 
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to get color coding - not connected" << std::endl;
+            throw RuntimeError(ERROR_DC1394_IS_COLOR, ssError.str());
+        }
 
         dc1394video_modes_t supportedModes_dc1394;
         dc1394error_t rsp = dc1394_video_get_supported_modes(
@@ -362,6 +371,14 @@ namespace bias {
 
     VideoMode CameraDevice_dc1394::getVideoMode()
     {
+        if (!connected_)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to get current video mode - not connected" << std::endl;
+            throw RuntimeError(ERROR_DC1394_GET_VIDEOMODE, ssError.str());
+        }
+
         dc1394video_mode_t videoMode_dc1394;
         dc1394error_t rsp = dc1394_video_get_mode(camera_dc1394_, &videoMode_dc1394);
         if (rsp != DC1394_SUCCESS)
@@ -377,6 +394,14 @@ namespace bias {
 
     FrameRate CameraDevice_dc1394::getFrameRate()
     {
+        if (!connected_)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to get current framerate - not connected" << std::endl;
+            throw RuntimeError(ERROR_DC1394_GET_FRAMERATE, ssError.str());
+        }
+
         FrameRate frameRate;
         VideoMode videoMode = getVideoMode();
         if (videoMode ==VIDEOMODE_FORMAT7)
@@ -402,6 +427,14 @@ namespace bias {
 
     ImageMode CameraDevice_dc1394::getImageMode()
     { 
+        if (!connected_)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to get image mode from video mode - not connected" << std::endl;
+            throw RuntimeError(ERROR_DC1394_GET_VIDEOMODE, ssError.str());
+        }
+
         dc1394video_mode_t videoMode_dc1394;
         dc1394error_t  rsp = dc1394_video_get_mode(camera_dc1394_, &videoMode_dc1394);
         if (rsp != DC1394_SUCCESS)
@@ -417,6 +450,14 @@ namespace bias {
 
     VideoModeList CameraDevice_dc1394::getAllowedVideoModes()
     {
+        if (!connected_)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to get supported video modes - not connected" << std::endl;
+            throw RuntimeError(ERROR_DC1394_GET_SUPPORTED_VIDEOMODES, ssError.str());
+        }
+
         VideoModeList videoModeList;
         dc1394video_modes_t supportedModes_dc1394;
         dc1394error_t rsp = dc1394_video_get_supported_modes(
@@ -454,6 +495,14 @@ namespace bias {
 
     FrameRateList CameraDevice_dc1394::getAllowedFrameRates(VideoMode vidMode) 
     { 
+        if (!connected_)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to get supported framerates - not connected" << std::endl;
+            throw RuntimeError(ERROR_DC1394_GET_SUPPORTED_FRAMERATES, ssError.str());
+        }
+
         FrameRateList frameRateList;
 
         if (vidMode == VIDEOMODE_FORMAT7)
@@ -490,8 +539,15 @@ namespace bias {
 
     ImageModeList CameraDevice_dc1394::getAllowedImageModes()
     {
-        ImageModeList imageModeList;
+        if (!connected_)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to get supported modes - not connected" << std::endl;
+            throw RuntimeError(ERROR_DC1394_GET_SUPPORTED_FRAMERATES, ssError.str());
+        }
 
+        ImageModeList imageModeList;
         dc1394video_modes_t supportedModes_dc1394;
         dc1394error_t rsp = dc1394_video_get_supported_modes(
                 camera_dc1394_, 
@@ -501,7 +557,7 @@ namespace bias {
         {
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
-            ssError << ": error unable to get supported framerates" << std::endl;
+            ssError << ": error unable to get supported modes" << std::endl;
             throw RuntimeError(ERROR_DC1394_GET_SUPPORTED_FRAMERATES, ssError.str());
         }
 
@@ -583,9 +639,73 @@ namespace bias {
 
     Format7Settings CameraDevice_dc1394::getFormat7Settings()
     {
-        return Format7Settings();
-    }
+        if (!connected_)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to get format7 settings - not connected" << std::endl;
+            throw RuntimeError(ERROR_DC1394_GET_FORMAT7_SETTINGS , ssError.str()); 
+        }
 
+        Format7Settings format7Settings;
+        dc1394error_t rsp; 
+
+        // Get current video mode
+        dc1394video_mode_t videoMode_dc1394;
+        rsp = dc1394_video_get_mode(camera_dc1394_, &videoMode_dc1394);
+        if (rsp != DC1394_SUCCESS) 
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to get video mode" << std::endl;
+            throw RuntimeError(ERROR_DC1394_GET_VIDEOMODE, ssError.str()); 
+        }
+
+        // Get position of ROI
+        uint32_t left;
+        uint32_t top;
+        rsp = dc1394_format7_get_image_position(camera_dc1394_, videoMode_dc1394, &left, &top);
+        if (rsp != DC1394_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to get image position" << std::endl;
+            throw RuntimeError(ERROR_DC1394_GET_IMAGE_POSITION , ssError.str()); 
+        }
+        format7Settings.offsetX = (unsigned int)(left);
+        format7Settings.offsetY = (unsigned int)(top);
+
+        // Get width of ROI
+        uint32_t width;
+        uint32_t height;
+        rsp = dc1394_format7_get_image_size(camera_dc1394_, videoMode_dc1394, &width, &height);
+        if (rsp != DC1394_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to get image position" << std::endl;
+            throw RuntimeError(ERROR_DC1394_GET_IMAGE_POSITION , ssError.str()); 
+        }
+        format7Settings.width = (unsigned int)(width);
+        format7Settings.height = (unsigned int)(height);
+
+        // Get pixel format
+        dc1394color_coding_t colorCoding_dc1394;
+        rsp = dc1394_format7_get_color_coding(camera_dc1394_, videoMode_dc1394, &colorCoding_dc1394);
+        if (rsp != DC1394_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to get format7 color coding" << std::endl;
+            throw RuntimeError(ERROR_DC1394_GET_COLOR_CODING , ssError.str()); 
+        }
+        format7Settings.pixelFormat = convertPixelFormat_from_dc1394(colorCoding_dc1394);
+
+        // Get image mode
+        format7Settings.mode = convertImageMode_from_dc1394(videoMode_dc1394);
+
+        return format7Settings;
+    }
 
     Format7Info CameraDevice_dc1394::getFormat7Info(ImageMode imgMode)
     {
@@ -717,6 +837,14 @@ namespace bias {
             dc1394feature_info_t &featureInfo_dc1394
             )
     {
+        if (!connected_)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to get dc1394 feature information - not connected" << std::endl;
+            throw RuntimeError(ERROR_DC1394_GET_FEATURE_INFO, ssError.str());
+        }
+
         featureInfo_dc1394.id = convertPropertyType_to_dc1394(propType);
         dc1394error_t rsp = dc1394_feature_get(camera_dc1394_, &featureInfo_dc1394);
         if (rsp != DC1394_SUCCESS)
@@ -726,20 +854,19 @@ namespace bias {
             ssError << ": error unable to get dc1394 feature information" << std::endl;
             throw RuntimeError(ERROR_DC1394_GET_FEATURE_INFO, ssError.str());
         }
-        //if (rsp != DC1394_SUCCESS)
-        //{
-        //    std::stringstream ssError;
-        //    ssError << __PRETTY_FUNCTION__;
-        //    ssError << ": error unable to get dc1394 feature information" << std::endl;
-        //    throw RuntimeError(ERROR_DC1394_GET_FEATURE_INFO, ssError.str());
-        //}
-
-
     }
 
 
     void CameraDevice_dc1394::setFeatureModeAuto_dc1394(PropertyType propType)
     {
+        if (!connected_)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to set dc1394 feature mode to auto - not connected" << std::endl;
+            throw RuntimeError(ERROR_DC1394_SET_FEATURE, ssError.str());
+        }
+
         dc1394feature_t featureId_dc1394 = convertPropertyType_to_dc1394(propType);
         dc1394error_t rsp = dc1394_feature_set_mode( camera_dc1394_,featureId_dc1394, DC1394_FEATURE_MODE_AUTO);
         if (rsp != DC1394_SUCCESS)
@@ -754,6 +881,14 @@ namespace bias {
 
     void CameraDevice_dc1394::setFeatureModeOnePush_dc1394(PropertyType propType)
     {
+        if (!connected_)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to set dc1394 feature mode to one push auto - not connected" << std::endl;
+            throw RuntimeError(ERROR_DC1394_SET_FEATURE, ssError.str());
+        }
+
         dc1394feature_t featureId_dc1394 = convertPropertyType_to_dc1394(propType);
         dc1394error_t rsp = dc1394_feature_set_mode( camera_dc1394_,featureId_dc1394, DC1394_FEATURE_MODE_ONE_PUSH_AUTO);
         if (rsp != DC1394_SUCCESS)
@@ -768,13 +903,21 @@ namespace bias {
 
     void CameraDevice_dc1394::setFeatureAbsoluteControl_dc1394(PropertyType propType)
     {
+        if (!connected_)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to set dc1394 feature mode absolute control - not connected" << std::endl;
+            throw RuntimeError(ERROR_DC1394_SET_FEATURE, ssError.str());
+        }
+
         dc1394feature_t featureId_dc1394 = convertPropertyType_to_dc1394(propType);
         dc1394error_t rsp = dc1394_feature_set_absolute_control( camera_dc1394_,featureId_dc1394, DC1394_ON);
         if (rsp != DC1394_SUCCESS)
         {
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
-            ssError << ": error unable to set dc1394 feature mode to one push auto" << std::endl;
+            ssError << ": error unable to set dc1394 feature mode absolute control" << std::endl;
             throw RuntimeError(ERROR_DC1394_SET_FEATURE, ssError.str());
         }
     }
@@ -782,6 +925,14 @@ namespace bias {
 
     void CameraDevice_dc1394::setFeatureAbsoluteValue_dc1394(PropertyType propType, float absValue, PropertyInfo propInfo)
     {
+        if (!connected_)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to set dc1394 feature absolute value - not connected" << std::endl;
+            throw RuntimeError(ERROR_DC1394_SET_FEATURE, ssError.str());
+        }
+
         if ((absValue >= propInfo.minAbsoluteValue) && (absValue <= propInfo.maxAbsoluteValue))
         {
             dc1394feature_t featureId_dc1394 = convertPropertyType_to_dc1394(propType);
@@ -799,6 +950,14 @@ namespace bias {
 
    void CameraDevice_dc1394::setFeatureValue_dc1394(PropertyType propType, unsigned int value, PropertyInfo propInfo)
    {
+       if (!connected_)
+       {
+           std::stringstream ssError;
+           ssError << __PRETTY_FUNCTION__;
+           ssError << ": error unable to set dc1394 feature value - not connected" << std::endl;
+           throw RuntimeError(ERROR_DC1394_SET_FEATURE, ssError.str());
+       }
+
        if ((value >= propInfo.minValue) && (value <= propInfo.maxValue))
        {
            dc1394feature_t featureId_dc1394 = convertPropertyType_to_dc1394(propType);
@@ -816,6 +975,14 @@ namespace bias {
 
    void CameraDevice_dc1394::setFeatureWhiteBalance_dc1394(unsigned int valueA, unsigned int valueB)
    {
+       if (!connected_)
+       {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to set dc1394 feature white balance - not connected" << std::endl;
+            throw RuntimeError(ERROR_DC1394_SET_FEATURE, ssError.str());
+       }
+
         dc1394error_t  rsp = dc1394_feature_whitebalance_set_value(camera_dc1394_,valueB,valueA);
         if (rsp != DC1394_SUCCESS)
         {

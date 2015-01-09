@@ -224,6 +224,39 @@ namespace bias
         }
     }
 
+    static std::map<PixelFormat, dc1394color_coding_t> createPixelFormatMap_to_dc1394()
+    {
+        std::map<PixelFormat, dc1394color_coding_t> map;
+        map[PIXEL_FORMAT_MONO8]    =  DC1394_COLOR_CODING_MONO8;
+        map[PIXEL_FORMAT_411YUV8]  =  DC1394_COLOR_CODING_YUV411;
+        map[PIXEL_FORMAT_422YUV8]  =  DC1394_COLOR_CODING_YUV422;
+        map[PIXEL_FORMAT_444YUV8]  =  DC1394_COLOR_CODING_YUV444;
+        map[PIXEL_FORMAT_RGB8]     =  DC1394_COLOR_CODING_RGB8;
+        map[PIXEL_FORMAT_MONO16]   =  DC1394_COLOR_CODING_MONO16;
+        map[PIXEL_FORMAT_RGB16]    =  DC1394_COLOR_CODING_RGB16;
+        map[PIXEL_FORMAT_S_MONO16] =  DC1394_COLOR_CODING_MONO16S;
+        map[PIXEL_FORMAT_S_RGB16]  =  DC1394_COLOR_CODING_RGB16S;
+        map[PIXEL_FORMAT_RAW8]     =  DC1394_COLOR_CODING_RAW8;
+        map[PIXEL_FORMAT_RAW16]    =  DC1394_COLOR_CODING_RAW16;
+        return map;
+    }
+    static std::map<PixelFormat, dc1394color_coding_t> pixelFormatMap_to_dc1394 = 
+        createPixelFormatMap_to_dc1394();
+
+
+    dc1394color_coding_t convertPixelFormat_to_dc1394(PixelFormat pixFormat)
+    {
+        if (pixelFormatMap_to_dc1394.count(pixFormat) == 0)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to convert pixelFormat to libdc1394 color coding";
+            throw RuntimeError(ERROR_DC1394_CONVERT_PIXEL_FORMAT, ssError.str());
+
+        }
+        return pixelFormatMap_to_dc1394[pixFormat];
+    }
+
     // Conversion from libdc1394 types to BIAS types
     // ------------------------------------------------------------------------
     //
@@ -496,6 +529,37 @@ namespace bias
         {
             return false;
         }
+    }
+
+    static std::map<dc1394color_coding_t, PixelFormat> createPixelFormatMap_from_dc1394()
+    {
+        std::map<dc1394color_coding_t, PixelFormat> map;
+        map[DC1394_COLOR_CODING_MONO8]     = PIXEL_FORMAT_MONO8;     
+        map[DC1394_COLOR_CODING_YUV411]    = PIXEL_FORMAT_411YUV8;    
+        map[DC1394_COLOR_CODING_YUV422]    = PIXEL_FORMAT_422YUV8;    
+        map[DC1394_COLOR_CODING_YUV444]    = PIXEL_FORMAT_444YUV8;    
+        map[DC1394_COLOR_CODING_RGB8]      = PIXEL_FORMAT_RGB8;     
+        map[DC1394_COLOR_CODING_MONO16]    = PIXEL_FORMAT_MONO16;     
+        map[DC1394_COLOR_CODING_RGB16]     = PIXEL_FORMAT_RGB16;     
+        map[DC1394_COLOR_CODING_MONO16S]   = PIXEL_FORMAT_S_MONO16;    
+        map[DC1394_COLOR_CODING_RGB16S]    = PIXEL_FORMAT_S_RGB16;    
+        map[DC1394_COLOR_CODING_RAW8]      = PIXEL_FORMAT_RAW8;     
+        map[DC1394_COLOR_CODING_RAW16]     = PIXEL_FORMAT_RAW16;     
+        return map;
+    }
+    static std::map<dc1394color_coding_t, PixelFormat> pixelFormatMap_from_dc1394 = 
+        createPixelFormatMap_from_dc1394();
+
+    PixelFormat convertPixelFormat_from_dc1394(dc1394color_coding_t colorCoding_dc1394)
+    {
+        if (pixelFormatMap_from_dc1394.count(colorCoding_dc1394) == 0)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to convert libdc1394 color coding to pixel format";
+            throw RuntimeError(ERROR_DC1394_CONVERT_PIXEL_FORMAT, ssError.str());
+        }
+        return pixelFormatMap_from_dc1394[colorCoding_dc1394];
     }
 
 

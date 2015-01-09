@@ -19,6 +19,7 @@ namespace bias
     dc1394framerate_t convertFrameRate_to_dc1394(FrameRate frmRate);
     dc1394bool_t convertBool_to_dc1394(bool value);
     dc1394switch_t convertSwitch_to_dc1394(bool value);
+    dc1394color_coding_t convertPixelFormat_to_dc1394(PixelFormat pixFormat);
 
     // Conversion from libdc1394 types to BIAS types
     // ------------------------------------------------------------------------
@@ -30,6 +31,7 @@ namespace bias
     ImageMode convertImageMode_from_dc1394(dc1394video_mode_t vidMode_dc1394);
     bool convertBool_from_dc1394(dc1394bool_t value);
     bool convertSwitch_from_dc1394(dc1394switch_t value);
+    PixelFormat convertPixelFormat_from_dc1394(dc1394color_coding_t colorCoding_dc1394);
 
     // Print functions for libdc1394 configurations, settings and info
     //-------------------------------------------------------------------------
