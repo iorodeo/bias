@@ -876,8 +876,7 @@ RtnStatus HogPositionFitterParam::fromMap(QVariantMap paramMap)
 
 // GenderSorterParam
 // ----------------------------------------------------------------------------
-const QString GenderSorterParam::DEFAULT_GENDER_CLASSIFIER_FILENAME = 
-QString("gender_classifier.txt");
+const QString GenderSorterParam::DEFAULT_GENDER_CLASSIFIER_FILENAME = QString("gender_classifier.txt");
 const double GenderSorterParam::DEFAULT_MIN_CONFIDENCE = 2.318072;
 
 
@@ -954,6 +953,41 @@ QVariantMap GenderSorterParam::toMap()
     QVariantMap paramMap;
     paramMap.insert("minConfidence", minConfidence);
     paramMap.insert("classifierFile", classifier.fileName);
+    return paramMap;
+}
+
+// HogSorterParam
+// ----------------------------------------------------------------------------
+const QString HogSorterParam::DEFAULT_HOG_CLASSIFIER_FILENAME = QString("hog_classifier.txt");
+const double HogSorterParam::DEFAULT_MIN_CONFIDENCE = 1.0;
+
+
+HogSorterParam::HogSorterParam()
+{
+    minConfidence = DEFAULT_MIN_CONFIDENCE;
+    classifier.fileName = DEFAULT_HOG_CLASSIFIER_FILENAME;
+    sorterName = std::string("hog sorter");
+    labelTrue = std::string("T");
+    labelFalse = std::string("F");
+    labelUnknown = std::string("U");
+}
+
+RtnStatus HogSorterParam::fromMap(QVariantMap paramMap)
+{
+    RtnStatus rtnStatus;
+    // TO DO
+    return rtnStatus;
+
+}
+
+QVariantMap HogSorterParam::toMap()
+{
+    QVariantMap paramMap;
+    paramMap.insert("minConfidence", minConfidence);
+    paramMap.insert("classifierFile", classifier.fileName);
+    paramMap.insert("labelTrue",  QString::fromStdString(labelTrue));
+    paramMap.insert("labelFalse", QString::fromStdString(labelFalse));
+    paramMap.insert("labelUnknown", QString::fromStdString(labelUnknown));
     return paramMap;
 }
 

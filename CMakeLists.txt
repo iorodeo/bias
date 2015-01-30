@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
-
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR) 
 project(bais)
 
 if (POLICY CMP0020) 
@@ -10,10 +9,10 @@ endif()
 # Options
 # -----------------------------------------------------------------------------
 option(with_qt_gui  "include image acquisition GUI"   ON) 
-option(with_fc2     "include the FlyCapture2 backend" OFF)
-option(with_dc1394  "include the libdc1394 backend"   ON )
-option(with_demos   "include demos" OFF)
-option(with_tests   "include tests" ON)
+option(with_fc2     "include the FlyCapture2 backend" ON)
+option(with_dc1394  "include the libdc1394 backend"   OFF )
+option(with_demos   "include demos" ON)
+option(with_tests   "include tests" OFF)
 
 message(STATUS "Option: with_fc2     = ${with_fc2}")
 message(STATUS "Option: with_dc1394  = ${with_dc1394}")
@@ -25,6 +24,7 @@ if( NOT( with_fc2 OR with_dc1394 ) )
     message(FATAL_ERROR "their must be at least one camera backend")
 endif()
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 
 # Opencv library
 # -----------------------------------------------------------------------------
@@ -40,7 +40,7 @@ endif()
 # FlyCapture2 library location - replace this this custom find_package
 # -----------------------------------------------------------------------------
 if(with_fc2)
-    find_package( FlyCapture2 REQUIRED )
+    find_package( FlyCapture2 MODULE REQUIRED )
 endif()
 
 # Qt library

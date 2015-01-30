@@ -148,6 +148,27 @@ class GenderSorterParam
 };
 
 
+class HogSorterParam
+{
+    public:
+
+        ClassifierParam classifier;
+        static const QString DEFAULT_HOG_CLASSIFIER_FILENAME;
+
+        double minConfidence;
+        static const double DEFAULT_MIN_CONFIDENCE;
+
+        std::string sorterName;
+        std::string labelTrue;
+        std::string labelFalse;
+        std::string labelUnknown;
+
+        HogSorterParam();
+        RtnStatus fromMap(QVariantMap paramMap);
+        QVariantMap toMap();
+};
+
+
 class ImageGrabberParam
 {
     public:

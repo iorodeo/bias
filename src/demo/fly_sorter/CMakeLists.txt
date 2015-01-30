@@ -23,6 +23,7 @@ set(
     gender_sorter.hpp
     hungarian.hpp
     ext_ctl_http_server.hpp
+    hog_sorter.hpp
     )
 
 set(
@@ -39,6 +40,7 @@ set(
     gender_sorter.cpp
     hungarian.cpp
     ext_ctl_http_server.cpp
+    hog_sorter.cpp
     )
 
 #qt4_wrap_ui(fly_sorter_FORMS_HEADERS ${fly_sorter_FORMS}) 
