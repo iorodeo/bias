@@ -8,7 +8,7 @@
 // ----------------------------------------------------------------------------
 GenderData::GenderData()
 {
-    gender = UNKNOWN;
+    gender = GenderData::UNKNOWN;
     havePredictorData = false;
 };
 
@@ -69,7 +69,7 @@ GenderSorterData GenderSorter::sort(HogPositionFitterData hogData)
     for (it=hogData.positionDataList.begin(); it!=hogData.positionDataList.end(); it++)
     {
         GenderData genderData;
-        genderData.gender = UNKNOWN;
+        genderData.gender = GenderData::UNKNOWN;
         genderData.havePredictorData = false;
         genderData.positionData = *it;
 
@@ -80,15 +80,16 @@ GenderSorterData GenderSorter::sort(HogPositionFitterData hogData)
             genderData.havePredictorData = true;
             if (genderData.predictorData.fit >= param_.minConfidence)
             {
-                genderData.gender = FEMALE;
+                genderData.gender = GenderData::FEMALE;
             }
             if (genderData.predictorData.fit <= -param_.minConfidence)
             {
-                genderData.gender = MALE;
+                genderData.gender = GenderData::MALE;
             }
 
             // DEBUG -- print gender info
             // ---------------------------------------------------------------------------
+            std::cout << "GenderSorter: ";
             std::cout << "frame: " << genderData.positionData.frameCount << ", "; 
             std::cout << "fit: " << genderData.predictorData.fit << ",  "; 
             std::cout << GenderSorter::GenderToString(genderData.gender);
@@ -116,17 +117,17 @@ GenderSorterData GenderSorter::sort(HogPositionFitterData hogData)
     return sorterData;
 }
 
-std::string GenderSorter::GenderToString(Gender gender)
+std::string GenderSorter::GenderToString(GenderData::Gender gender)
 {
     std::string genderString;
 
     switch (gender)
     {
-        case FEMALE:
+        case GenderData::FEMALE:
             genderString = std::string("female");
             break;
 
-        case MALE:
+        case GenderData::MALE:
             genderString = std::string("male");
             break;
 
@@ -139,16 +140,16 @@ std::string GenderSorter::GenderToString(Gender gender)
 }
 
 
-std::string GenderSorter::GenderToLetter(Gender gender)
+std::string GenderSorter::GenderToLetter(GenderData::Gender gender)
 {
     std::string letterString;
     switch (gender)
     {
-        case FEMALE:
+        case GenderData::FEMALE:
             letterString = std::string("F");
             break;
 
-        case MALE:
+        case GenderData::MALE:
             letterString = std::string("M");
             break;
 

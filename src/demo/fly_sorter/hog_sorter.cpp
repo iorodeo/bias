@@ -8,7 +8,7 @@
 // ----------------------------------------------------------------------------
 SorterData::SorterData()
 {
-    classification = UNKNOWN;
+    classification = SorterData::UNKNOWN;
     havePredictorData = false;
 };
 
@@ -65,12 +65,13 @@ void HogSorter::setParam(HogSorterParam param)
 HogSorterData HogSorter::sort(HogPositionFitterData hogData)
 {
     HogSorterData hogSorterData;
+    hogSorterData.name = param_.name;
     PositionDataList::iterator it;
     int cnt = 0;
     for (it=hogData.positionDataList.begin(); it!=hogData.positionDataList.end(); it++)
     {
         SorterData sorterData;
-        sorterData.classification = UNKNOWN;
+        sorterData.classification = SorterData::UNKNOWN;
         sorterData.havePredictorData = false;
         sorterData.positionData = *it;
 
@@ -81,12 +82,23 @@ HogSorterData HogSorter::sort(HogPositionFitterData hogData)
             sorterData.havePredictorData = true;
             if (sorterData.predictorData.fit >= param_.minConfidence)
             {
-                sorterData.classification = TRUE;
+                sorterData.classification = SorterData::TRUE;
             }
             if (sorterData.predictorData.fit <= -param_.minConfidence)
             {
-                sorterData.classification = FALSE;
+                sorterData.classification = SorterData::FALSE;
             }
+            // DEBUG -- print sorter info
+            // ---------------------------------------------------------------------------
+            std::cout << "HogSorter: ";
+            std::cout << "name: " << param_.name << ", ";
+            std::cout << "frame: " << sorterData.positionData.frameCount << ", "; 
+
+            std::cout << "fit: " << sorterData.predictorData.fit << ",  "; 
+            std::cout << HogSorter::ClassificationToString(sorterData.classification) << ", ";
+            std::cout << HogSorter::ClassificationToLabel(sorterData.classification);
+            std::cout << std::endl;
+            // ----------------------------------------------------------------------------
             cnt++;
         }
         hogSorterData.sorterDataList.push_back(sorterData);
@@ -94,17 +106,17 @@ HogSorterData HogSorter::sort(HogPositionFitterData hogData)
     return hogSorterData;
 }
 
-std::string HogSorter::ClassificationToString(Classification classification)
+std::string HogSorter::ClassificationToString(SorterData::Classification classification)
 {
     std::string classificationString;
 
     switch (classification)
     {
-        case TRUE:
+        case SorterData::TRUE:
             classificationString = std::string("true");
             break;
 
-        case FALSE:
+        case SorterData::FALSE:
             classificationString = std::string("false");
             break;
 
@@ -117,7 +129,7 @@ std::string HogSorter::ClassificationToString(Classification classification)
 }
 
 
-std::string HogSorter::ClassificationToLabel(Classification classification)
+std::string HogSorter::ClassificationToLabel(SorterData::Classification classification)
 {
     std::string labelString;
     switch (classification)

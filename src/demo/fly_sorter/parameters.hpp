@@ -5,6 +5,7 @@
 #include <QStringList>
 #include <QVariantMap>
 #include <QFile>
+#include <QList>
 #include <vector>
 #include "blob_finder_param.hpp"
 #include "rtn_status.hpp"
@@ -158,7 +159,7 @@ class HogSorterParam
         double minConfidence;
         static const double DEFAULT_MIN_CONFIDENCE;
 
-        std::string sorterName;
+        std::string name;
         std::string labelTrue;
         std::string labelFalse;
         std::string labelUnknown;
@@ -304,6 +305,7 @@ class FlySorterParam
         FlySegmenterParam flySegmenter;
         HogPositionFitterParam hogPositionFitter;
         GenderSorterParam genderSorter;
+        QList<HogSorterParam> optionalSorterList; 
 
 
         FlySorterParam();

@@ -2,10 +2,10 @@
 #define HOG_POSITION_FITTER
 #include "parameters.hpp"
 #include "fly_segmenter.hpp"
-#include <list>
 #include <vector>
 #include <string>
 #include <opencv2/core/core.hpp>
+#include <QList>
 
 //Debug 
 //--------------------------------------
@@ -42,7 +42,7 @@ class PositionData
         static const bool DEFAULT_IS_FLY;
         static const bool DEFAULT_IS_MULTIPLE_FLIES;
 };
-typedef std::list<PositionData> PositionDataList;
+typedef QList<PositionData> PositionDataList;
 
 
 class HogPositionFitterData

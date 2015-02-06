@@ -304,7 +304,8 @@ HogPositionFitterData HogPositionFitter::fit(
             posData.success = true;
             fitterData.positionDataList.push_back(posData); 
 
-            std::cout << "write training data: " << writeTrainingData_ << std::endl;
+            // std::cout << "write training data: " << writeTrainingData_ << std::endl;
+
             if (writeTrainingData_)
             {
                 createTrainingData(frameCount, posData, rotBoundingImageLUV);
@@ -325,6 +326,7 @@ HogPositionFitterData HogPositionFitter::fit(
             //    }
             //    pVecStream.close();
             //}
+            //--------------------------------------------------------------------------------------
             if (showDebugWindow_)
             {
                 if (cnt==0)

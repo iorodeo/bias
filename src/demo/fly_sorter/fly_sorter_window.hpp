@@ -9,6 +9,7 @@
 #include "fly_segmenter.hpp"
 #include "hog_position_fitter.hpp"
 #include "gender_sorter.hpp"
+#include "hog_sorter.hpp"
 #include "rtn_status.hpp"
 #include <memory>
 #include <QCloseEvent>
@@ -113,6 +114,9 @@ class FlySorterWindow : public QMainWindow, private Ui::FlySorterWindow
 
         GenderSorter genderSorter_;
         GenderSorterData genderSorterData_;
+
+        QList<HogSorter> optionalSorterList_;
+        QList<HogSorterData> optionalSorterDataList_; 
 
         QStringList batchVideoFileList_;
         int batchVideoFileIndex_;

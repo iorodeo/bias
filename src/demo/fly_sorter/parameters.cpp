@@ -944,7 +944,6 @@ RtnStatus GenderSorterParam::fromMap(QVariantMap paramMap)
     rtnStatus.success = true;
     rtnStatus.message = QString("");
     return rtnStatus;
-    return rtnStatus;
 }
 
 
@@ -966,7 +965,7 @@ HogSorterParam::HogSorterParam()
 {
     minConfidence = DEFAULT_MIN_CONFIDENCE;
     classifier.fileName = DEFAULT_HOG_CLASSIFIER_FILENAME;
-    sorterName = std::string("hog sorter");
+    name = std::string("noname");
     labelTrue = std::string("T");
     labelFalse = std::string("F");
     labelUnknown = std::string("U");
@@ -975,7 +974,104 @@ HogSorterParam::HogSorterParam()
 RtnStatus HogSorterParam::fromMap(QVariantMap paramMap)
 {
     RtnStatus rtnStatus;
-    // TO DO
+    if (paramMap.isEmpty())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("hogSorter parameter map is empty");
+        return rtnStatus;
+    }
+      
+    // Get labelTrue
+    if (!paramMap.contains("labelTrue"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'labelTrue' not found in hogSorter parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["labelTrue"].canConvert<QString>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert hogSorter parameter 'labelTrue' to QString");
+        return rtnStatus;
+    }
+    labelTrue = paramMap["labelTrue"].toString().toStdString();
+
+    // Get labelFalse
+    if (!paramMap.contains("labelFalse"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'labelFalse' not found in hogSorter parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["labelFalse"].canConvert<QString>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert hogSorter parameter 'labelFalse' to QString");
+        return rtnStatus;
+    }
+    labelFalse = paramMap["labelFalse"].toString().toStdString();
+
+    // Get labelUnknown
+    if (!paramMap.contains("labelUnknown"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'labelUnknown' not found in hogSorter parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["labelUnknown"].canConvert<QString>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert hogSorter parameter 'labelUnknown' to QString");
+        return rtnStatus;
+    }
+    labelUnknown = paramMap["labelUnknown"].toString().toStdString();
+
+    // Get minConfidence
+    // -----------------------
+    if (!paramMap.contains("minConfidence"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'minConfidence' not found in hogSorter parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["minConfidence"].canConvert<double>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert hogSorter parameter 'minConfidence' to double");
+        return rtnStatus;
+    }
+    minConfidence = paramMap["minConfidence"].toDouble();
+
+
+    // Get classifier file name 
+    // ------------------------
+    if (!paramMap.contains("classifierFile"))
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("'classifierFile' not found in hogSorter parameters");
+        return rtnStatus;
+    }
+    if (!paramMap["classifierFile"].canConvert<QString>())
+    {
+        rtnStatus.success = false;
+        rtnStatus.message = QString("Unable to convert hogSorter parameter 'classifierFile' to QString");
+        return rtnStatus;
+    }
+    QString fileName = paramMap["classifierFile"].toString();
+
+    // Check that parameters can be loaded from file
+    ClassifierParam classifierTemp;
+    classifierTemp.fileName = fileName;
+    rtnStatus = classifierTemp.loadFromFile(CLASSIFIER_DIRECTORY);
+    if (!rtnStatus.success)
+    {
+        rtnStatus.message = QString("hogSorter: %1").arg(rtnStatus.message);
+        return rtnStatus;
+    }
+    classifier = classifierTemp;
+
+    rtnStatus.success = true;
+    rtnStatus.message = QString("");
     return rtnStatus;
 
 }
@@ -983,11 +1079,11 @@ RtnStatus HogSorterParam::fromMap(QVariantMap paramMap)
 QVariantMap HogSorterParam::toMap()
 {
     QVariantMap paramMap;
-    paramMap.insert("minConfidence", minConfidence);
-    paramMap.insert("classifierFile", classifier.fileName);
     paramMap.insert("labelTrue",  QString::fromStdString(labelTrue));
     paramMap.insert("labelFalse", QString::fromStdString(labelFalse));
     paramMap.insert("labelUnknown", QString::fromStdString(labelUnknown));
+    paramMap.insert("minConfidence", minConfidence);
+    paramMap.insert("classifierFile", classifier.fileName);
     return paramMap;
 }
 
@@ -1612,6 +1708,13 @@ QVariantMap FlySorterParam::toMap()
     paramMap.insert("hogPositionFitter", hogPositionFitterParamMap);
     paramMap.insert("genderSorter", genderSorterParamMap);
 
+    QVariantMap optionalSorterMap;
+    for (int i=0; i<optionalSorterList.size(); i++)
+    {
+        HogSorterParam sorterParam = optionalSorterList[i];
+        optionalSorterMap.insert(QString::fromStdString(sorterParam.name), sorterParam.toMap());
+    }
+    paramMap.insert("optionalSorters", optionalSorterMap);
     return paramMap;
 }
 
@@ -1621,7 +1724,6 @@ QByteArray FlySorterParam::toJson()
     bool ok;
     QVariantMap paramMap = toMap();
     QByteArray json = QtJson::serialize(paramMap,ok);
-
     return json;
 }
 
@@ -1685,6 +1787,28 @@ RtnStatus FlySorterParam::fromMap(QVariantMap paramMap)
     {
         return rtnStatus;
     }
+
+    QList<HogSorterParam> optionalSorterListTmp; 
+    QVariantMap optionalSorterMap = paramMap["optionalSorters"].toMap();
+    QMapIterator<QString,QVariant> it(optionalSorterMap);
+    while(it.hasNext())
+    {
+        it.next();
+        HogSorterParam sorterParam;
+        QString sorterName = it.key();
+        sorterParam.name = sorterName.toStdString();
+        QVariantMap sorterParamMap = it.value().toMap();
+        rtnStatus = sorterParam.fromMap(sorterParamMap);
+        if (!rtnStatus.success)
+        {
+            // Fail silently for now... not the best thing
+            std::cout << "Error: problem loading optional sorter params for " << sorterParam.name << ", "; 
+            std::cout << rtnStatus.message.toStdString() << std::endl;
+            continue;
+        }
+        optionalSorterListTmp << sorterParam;
+    }
+    optionalSorterList = optionalSorterListTmp;
 
     rtnStatus.success = true;
     rtnStatus.message = QString("");

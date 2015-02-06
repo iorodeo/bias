@@ -3,20 +3,14 @@
 #include "parameters.hpp"
 #include "fast_binary_predictor.hpp"
 #include "hog_position_fitter.hpp"
-#include <list>
 #include <string>
+#include <QList>
 
-enum Gender 
-{
-    MALE = 0,
-    FEMALE,
-    UNKNOWN, 
-};
-    
 
 class GenderData
 {
     public:
+        enum Gender {MALE=0, FEMALE, UNKNOWN};
         Gender gender;
         PositionData positionData;
         bool havePredictorData;
@@ -25,7 +19,7 @@ class GenderData
         std::string toStdString(unsigned int indent=0);
         void print(unsigned int indent=0);
 };
-typedef std::list<GenderData> GenderDataList;
+typedef QList<GenderData> GenderDataList;
 
 
 class GenderSorterData
@@ -43,8 +37,8 @@ class GenderSorter
         GenderSorter(GenderSorterParam param);
         GenderSorterData sort(HogPositionFitterData hogData);
         void setParam(GenderSorterParam param);
-        static std::string GenderToString(Gender gender);
-        static std::string GenderToLetter(Gender gender);
+        static std::string GenderToString(GenderData::Gender gender);
+        static std::string GenderToLetter(GenderData::Gender gender);
 
     private:
         GenderSorterParam param_;

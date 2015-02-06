@@ -71,6 +71,17 @@ RtnStatus FlySorterWindow::startRunning()
         hogPositionFitter_ = HogPositionFitter(param_.hogPositionFitter);
         genderSorter_ = GenderSorter(param_.genderSorter);
 
+        // Setup optional sorters
+        optionalSorterList_.clear();
+        optionalSorterDataList_.clear();
+        QListIterator<HogSorterParam> optionalIt(param_.optionalSorterList);
+        while (optionalIt.hasNext())
+        {
+            HogSorterParam sorterParam = optionalIt.next();
+            optionalSorterList_ << HogSorter(sorterParam);
+            optionalSorterDataList_ << HogSorterData();
+        }
+
         // Create training data
         if (trainingDataCheckBoxPtr_ -> checkState() == Qt::Checked)
         {
@@ -400,6 +411,15 @@ void FlySorterWindow::newImage(ImageData imageData)
 
         genderSorterData_ = genderSorter_.sort(hogPositionFitterData_);
 
+        // Apply optional sorters - if any
+        optionalSorterDataList_.clear();
+        QListIterator<HogSorter> optionalSorterIt(optionalSorterList_);
+        while (optionalSorterIt.hasNext())
+        {
+            HogSorter optionalSorter = optionalSorterIt.next();
+            optionalSorterDataList_ << optionalSorter.sort(hogPositionFitterData_);
+        }
+
         // Send position and gender data via http.
         if ((httpOutputCheckBoxPtr_ -> checkState()) == Qt::Checked) 
         {
@@ -464,7 +484,7 @@ void FlySorterWindow::updateDisplayOnTimer()
     {
         GenderData genderData = *it;
 
-        if ((genderData.gender == MALE) || (genderData.gender == FEMALE))
+        if ((genderData.gender == GenderData::MALE) || (genderData.gender == GenderData::FEMALE))
         {
             int x = int(genderData.positionData.meanXAbs);
             int y = int(genderData.positionData.meanYAbs);
@@ -795,7 +815,6 @@ QVariantMap FlySorterWindow::dataToMap()
     QVariantMap dataMap;
     MotionDirection direction = param_.identityTracker.motionDirection;
     GenderDataList genderDataList = genderSorterData_.genderDataList;
-    GenderDataList::iterator it;
     QVariantList detectionList;
 
     // Add number of detections - note certain detections on the border are
@@ -812,9 +831,9 @@ QVariantMap FlySorterWindow::dataToMap()
     std::cout << "numBlobs: " << numBlobs << std::endl;
     dataMap.insert("ndetections", numBlobs);
 
-    for (it=genderDataList.begin(); it!=genderDataList.end(); it++)
+    for (int itemNum=0; itemNum<genderDataList.size(); itemNum++)
     {
-        GenderData genderData = *it;
+        GenderData genderData = genderDataList[itemNum];
         BlobData blobData = genderData.positionData.segmentData.blobData;
         QVariant id = QVariant::fromValue<long>(
                 genderData.positionData.segmentData.blobData.id
@@ -862,6 +881,18 @@ QVariantMap FlySorterWindow::dataToMap()
                             GenderSorter::GenderToString(genderData.gender)
                             );
                     detectionMap.insert("fly_type", genderString); 
+
+                    // Add data from optional sorters
+                    QListIterator<HogSorterData> optionalDataIt(optionalSorterDataList_);
+                    while (optionalDataIt.hasNext())
+                    {
+                        HogSorterData optionalData = optionalDataIt.next();
+                        SorterData itemData = optionalData.sorterDataList[itemNum];
+                        QString sorterName = QString::fromStdString(optionalData.name);
+                        std::string classStdStr = HogSorter::ClassificationToString(itemData.classification);
+                        QString classStr = QString::fromStdString(classStdStr);
+                        detectionMap.insert(sorterName,classStr);
+                    }
                 }
             }
             detectionMap.insert("x", genderData.positionData.meanXAbs);

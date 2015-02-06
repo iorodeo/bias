@@ -3,8 +3,8 @@
 #include "parameters.hpp"
 #include "blob_finder.hpp"
 #include "fast_binary_predictor.hpp"
-#include <list>
 #include <string>
+#include <QList>
 
 
 class SegmentData 
@@ -18,7 +18,7 @@ class SegmentData
         std::string toStdString(unsigned int indent=0);
         void print(unsigned int indent=0);
 };
-typedef std::list<SegmentData> SegmentDataList;
+typedef QList<SegmentData> SegmentDataList;
 
 
 class FlySegmenterData
