@@ -2285,6 +2285,19 @@ namespace bias
     }
     
 
+    void CameraWindow::actionPluginsEnabledTriggered()
+    {
+        // TODO - check that there is a plugin available to run
+        if (actionPluginsEnabledPtr_ -> isChecked())
+        {
+            pluginEnabled_ = true;
+        }
+        else
+        {
+            pluginEnabled_ = false;
+        }
+    }
+
     void CameraWindow::actionPluginsSettingsTriggered()
     {
         QString msgTitle("Development");
@@ -2656,6 +2669,13 @@ namespace bias
                 SIGNAL(triggered()),
                 this,
                 SLOT(actionDisplayAlignToolsTriggered())
+               );
+
+        connect(
+                actionPluginsEnabledPtr_,
+                SIGNAL(triggered()),
+                this,
+                SLOT(actionPluginsEnabledTriggered())
                );
 
         connect(

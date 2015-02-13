@@ -169,6 +169,7 @@ namespace bias
             void actionDisplayRotTriggered();
             void actionDisplayAlignToolsTriggered();
             void actionHelpUserManualTriggered();
+            void actionPluginsEnabledTriggered();
             void actionPluginsSettingsTriggered();
             void actionServerEnabledTriggered();
             void actionServerPortTriggered();
