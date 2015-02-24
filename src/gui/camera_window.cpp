@@ -55,6 +55,10 @@
 
 #include <QTcpServer>
 
+// Development
+#include "stampede_plugin.hpp"
+//
+
 
 namespace bias
 {
@@ -1693,68 +1697,96 @@ namespace bias
 
         if (capturing_) 
         {
+            bool haveNewImage = false;
+            cv::Mat cameraImageMat;
+
             // Get information from image dispatcher
             // -------------------------------------------------------------------
-            cv::Mat imgMat;
 
             if (imageDispatcherPtr_ -> tryLock(IMAGE_DISPLAY_CAMERA_LOCK_TRY_DT))
             {
-                imgMat = imageDispatcherPtr_ -> getImage();
+                cameraImageMat = imageDispatcherPtr_ -> getImage();
                 framesPerSec_ = imageDispatcherPtr_ -> getFPS();
                 timeStamp_ = imageDispatcherPtr_ -> getTimeStamp();
                 frameCount_ = imageDispatcherPtr_ -> getFrameCount();
                 imageDispatcherPtr_ -> releaseLock();
-            }
-            else
-            {
-                return;
+                haveNewImage = true;
             }
             // -------------------------------------------------------------------
 
-            cv::Mat histMat = calcHistogram(imgMat);
-            cv::Size imgSize = imgMat.size();
-            if (colorMapNumber_ != COLORMAP_NONE)
+            if (haveNewImage)
             {
-                cv::applyColorMap(imgMat,imgMat, colorMapNumber_);
-            }
-            QImage img = matToQImage(imgMat);
+                cv::Mat histMat = calcHistogram(cameraImageMat);
+                cv::Size imgSize = cameraImageMat.size();
+                if (colorMapNumber_ != COLORMAP_NONE)
+                {
+                    cv::applyColorMap(cameraImageMat,cameraImageMat, colorMapNumber_);
+                }
+                QImage img = matToQImage(cameraImageMat);
 
 
-            // Set pixmaps and update image labels - note need to add pluginPixmap
-            if (!img.isNull()) 
-            {
-                previewPixmapOriginal_ = QPixmap::fromImage(img);
-                haveImagePixmap_ = true;
+                // Set pixmaps and update image labels - note need to add pluginPixmap
+                if (!img.isNull()) 
+                {
+                    previewPixmapOriginal_ = QPixmap::fromImage(img);
+                    haveImagePixmap_ = true;
+                }
+
+                // Update status message
+                QString statusMsg = QString().sprintf("%dx%d", imgSize.width, imgSize.height);
+                statusMsg += QString().sprintf(",  %1.1f fps", framesPerSec_);
+                if ((logging_) && (!imageLoggerPtr_.isNull()))
+                {
+                    imageLoggerPtr_ -> acquireLock();
+                    unsigned int logQueueSize = imageLoggerPtr_ -> getLogQueueSize();
+                    imageLoggerPtr_ -> releaseLock();
+                    statusMsg += QString(",  log queue size = %1").arg(logQueueSize);
+                }
+                updateStatusLabel(statusMsg);
+
+                // Set update capture time 
+                QDateTime currentDateTime = QDateTime::currentDateTime();
+                qint64 captureDt = currentDateTime.toMSecsSinceEpoch();
+                captureDt -= captureStartDateTime_.toMSecsSinceEpoch();
+                if ( (actionTimerEnabledPtr_ -> isChecked() )  && !(captureDurationTimerPtr_ -> isActive()) )
+                {
+                    setCaptureTimeLabel(0.0);
+                }
+                else
+                {
+                    setCaptureTimeLabel(double(1.0e-3*captureDt));
+                }
+                updateHistogramPixmap(histMat);
             }
 
-            // Update status message
-            QString statusMsg = QString().sprintf("%dx%d", imgSize.width, imgSize.height);
-            statusMsg += QString().sprintf(",  %1.1f fps", framesPerSec_);
-            if ((logging_) && (!imageLoggerPtr_.isNull()))
-            {
-                imageLoggerPtr_ -> acquireLock();
-                unsigned int logQueueSize = imageLoggerPtr_ -> getLogQueueSize();
-                imageLoggerPtr_ -> releaseLock();
-                statusMsg += QString(",  log queue size = %1").arg(logQueueSize);
-            }
-            updateStatusLabel(statusMsg);
 
-            // Set update capture time 
-            QDateTime currentDateTime = QDateTime::currentDateTime();
-            qint64 captureDt = currentDateTime.toMSecsSinceEpoch();
-            captureDt -= captureStartDateTime_.toMSecsSinceEpoch();
-            if ( (actionTimerEnabledPtr_ -> isChecked() )  && !(captureDurationTimerPtr_ -> isActive()) )
+            // Update plugin preview
+            if (pluginEnabled_)
             {
-                setCaptureTimeLabel(0.0);
-            }
-            else
-            {
-                setCaptureTimeLabel(double(1.0e-3*captureDt));
-            }
+                bool haveNewImage = false;
+                cv::Mat pluginImageMat;
 
-            updateHistogramPixmap(histMat);
+                if (pluginHandlerPtr_ -> tryLock(IMAGE_DISPLAY_CAMERA_LOCK_TRY_DT))
+                {
+
+                    pluginImageMat = pluginHandlerPtr_ -> getImage();
+                    pluginHandlerPtr_ -> releaseLock();
+                    haveNewImage = true;
+                }
+
+                if (haveNewImage)
+                {
+                    cv::Size pluginImageSize = pluginImageMat.size();
+                    QImage pluginImage  = matToQImage(pluginImageMat);
+
+                    if (!pluginImage.isNull())
+                    {
+                        pluginPixmapOriginal_ = QPixmap::fromImage(pluginImage);
+                    }
+                }
+            }
+            
         }
-
         updateAllImageLabels();
     }
 
@@ -2295,14 +2327,19 @@ namespace bias
         else
         {
             pluginEnabled_ = false;
+            setupImageLabels(false,false,true);
         }
     }
 
     void CameraWindow::actionPluginsSettingsTriggered()
     {
-        QString msgTitle("Development");
-        QString msgText("Plugin settings not fully implemented");
-        QMessageBox::information(this, msgTitle, msgText);
+        //QString msgTitle("Development");
+        //QString msgText("Plugin settings not fully implemented");
+        //QMessageBox::information(this, msgTitle, msgText);
+
+        // DEVEL
+        QPointer<StampedePlugin> stampedePluginPtr = new StampedePlugin(this);
+        stampedePluginPtr -> show();
     }
 
 
@@ -2384,7 +2421,9 @@ namespace bias
         userCameraName_ = QString("");
         format7PercentSpeed_ = DEFAULT_FORMAT7_PERCENT_SPEED;
         showCameraLockFailMsg_ = true;
-        pluginEnabled_ = false;
+
+        pluginEnabled_ = true;
+        actionPluginsEnabledPtr_ -> setChecked(true);
 
         imageRotation_ = IMAGE_ROTATION_0;
         colorMapNumber_ = DEFAULT_COLORMAP_NUMBER;
@@ -2449,17 +2488,27 @@ namespace bias
     }
 
 
-    void CameraWindow::setupImageLabels()
+    void CameraWindow::setupImageLabels(bool cameraPreview, bool histogram, bool pluginPreview)
     {
         QImage dummyImage;
         dummyImage = QImage(PREVIEW_DUMMY_IMAGE_SIZE,QImage::Format_RGB888);
         dummyImage.fill(QColor(Qt::gray).rgb());
-        previewPixmapOriginal_ = QPixmap::fromImage(dummyImage);
-        pluginPixmapOriginal_ = QPixmap::fromImage(dummyImage);
 
-        dummyImage = QImage(DEFAULT_HISTOGRAM_IMAGE_SIZE,QImage::Format_RGB888);
-        dummyImage.fill(QColor(Qt::gray).rgb());
-        histogramPixmapOriginal_ = QPixmap::fromImage(dummyImage);
+        if (cameraPreview)
+        {
+            previewPixmapOriginal_ = QPixmap::fromImage(dummyImage);
+        }
+        if (pluginPreview)
+        {
+            pluginPixmapOriginal_ = QPixmap::fromImage(dummyImage);
+        }
+
+        if (histogram)
+        {
+            dummyImage = QImage(DEFAULT_HISTOGRAM_IMAGE_SIZE,QImage::Format_RGB888);
+            dummyImage.fill(QColor(Qt::gray).rgb());
+            histogramPixmapOriginal_ = QPixmap::fromImage(dummyImage);
+        }
 
         updateAllImageLabels();
     }

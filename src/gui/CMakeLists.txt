@@ -109,6 +109,8 @@ target_link_libraries(
     ${bias_ext_link_LIBS} 
     bias_camera_facade
     bias_utility
+    stampede_plugin
     )
 
 qt5_use_modules(test_gui Core Gui Widgets Network)
+

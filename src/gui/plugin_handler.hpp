@@ -4,6 +4,7 @@
 #include <QMutex>
 #include <QObject>
 #include <QRunnable>
+#include <opencv2/core/core.hpp>
 #include "lockable.hpp"
 
 namespace bias
@@ -32,6 +33,8 @@ namespace bias
 
             void stop();
 
+            cv::Mat getImage() const;
+
         signals:
             void pluginError(unsigned int errorId, QString errorMsg);
 
@@ -40,6 +43,7 @@ namespace bias
             bool stopped_;
             unsigned int cameraNumber_;
             std::shared_ptr<LockableQueue<StampedImage>> pluginImageQueuePtr_;
+            cv::Mat currentImage_;
 
             void run();
 

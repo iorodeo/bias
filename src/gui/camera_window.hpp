@@ -23,6 +23,7 @@ class QTimer;
 class QThreadPool;
 class QSignalMapper;
 
+
 namespace cv   { class Mat; }
 
 namespace bias 
@@ -321,7 +322,11 @@ namespace bias
             void updatePreviewImageLabel();
             void updateCameraInfoMessage();
 
-            void setupImageLabels();
+            void setupImageLabels(
+                    bool cameraPreview=true, 
+                    bool histogram=true, 
+                    bool pluginPreview=true
+                    );
             void updateImageLabel(
                     QLabel *imageLabelPtr, 
                     QPixmap &pixmapOriginal, 

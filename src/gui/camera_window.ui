@@ -234,7 +234,7 @@
      <x>0</x>
      <y>0</y>
      <width>581</width>
-     <height>21</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuLoggingPtr_">
@@ -356,7 +356,8 @@
     <addaction name="actionPluginsEnabledPtr_"/>
     <addaction name="actionPluginsSettingsPtr_"/>
     <addaction name="separator"/>
-    <addaction name="actionNoPluginsFoundPtr_"/>
+    <addaction name="actionStampede"/>
+    <addaction name="actionGrab_Detector"/>
    </widget>
    <widget class="QMenu" name="menuServerPtr_">
     <property name="title">
@@ -721,6 +722,22 @@
    </property>
    <property name="text">
     <string>No plugins found</string>
+   </property>
+  </action>
+  <action name="actionStampede">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Stampede</string>
+   </property>
+  </action>
+  <action name="actionGrab_Detector">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Mouse Grab Detector</string>
    </property>
   </action>
  </widget>

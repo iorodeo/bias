@@ -82,9 +82,12 @@ endif()
 
 # Include directories
 # -----------------------------------------------------------------------------
+
 include_directories("./src/backend/base")
 include_directories("./src/facade")
 include_directories("./src/utility")
+include_directories(${stampede_plugin_INCLUDE_DIRS})
+message(STATUS "stampede_plugin_INCLUDE_DIRS='${stampede_plugin_INCLUDE_DIRS}'")
 
 if(with_fc2)
     include_directories(${FlyCapture2_INCLUDE_DIRS})
@@ -135,6 +138,7 @@ endif()
 
 add_subdirectory("src/facade")
 add_subdirectory("src/utility")
+add_subdirectory("src/plugin/stampede")
 
 if(with_qt_gui)
     add_subdirectory("src/gui")

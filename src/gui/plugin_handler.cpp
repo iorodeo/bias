@@ -1,6 +1,8 @@
 #include <plugin_handler.hpp>
 #include <QThread>
 #include <iostream>
+#include <sstream>
+#include <cv.h>
 #include "affinity.hpp"
 #include "stamped_image.hpp"
 
@@ -52,6 +54,12 @@ namespace bias
     }
 
 
+    cv::Mat PluginHandler::getImage() const
+    {
+        cv::Mat currentImageCopy = currentImage_.clone();
+        return currentImageCopy;
+    }
+
     void PluginHandler::run()
     {
         bool done = false;
@@ -81,15 +89,41 @@ namespace bias
                 pluginImageQueuePtr_ -> releaseLock();
                 break;
             }
+
             newStampedImage = pluginImageQueuePtr_ -> front();
             pluginImageQueuePtr_ -> pop();
             imageQueueSize =  pluginImageQueuePtr_ -> size();
             pluginImageQueuePtr_ -> releaseLock();
 
             // Plugin process frame
-            std::cout << "plugin: process frame, frame count = ";
-            std::cout << newStampedImage.frameCount;
-            std::cout << ", imageQueueSize = " << imageQueueSize << std::endl;
+            cv::Rect boxRect(300,300,50,300);
+            cv::Scalar boxColor(0,0,255);
+            int boxLineWidth = 3;
+            int medianFilterSize = 15;
+            double threshold = 99.0;
+
+            //cv::Mat roiImage = newStampedImage.image(boxRect).clone();
+            cv::Mat roiImage = newStampedImage.image(boxRect);
+            cv::medianBlur(roiImage,roiImage,medianFilterSize);
+            double maxValue;
+            double minValue;
+            cv::minMaxLoc(roiImage,&minValue,&maxValue);
+
+            std::stringstream minMaxStream;
+            std::stringstream foundStream;
+            minMaxStream << "frame: " << newStampedImage.frameCount << ", min: " << minValue << ", max: " <<  maxValue; 
+            if (maxValue > threshold)
+            {
+                foundStream << "object found";
+            }
+            std::cout << minMaxStream.str()  << ", " << foundStream.str() << std::endl;
+
+            acquireLock(); // Make sure all drawing changes are applied before display
+            cv::cvtColor(newStampedImage.image, currentImage_, CV_GRAY2BGR);
+            cv::rectangle(currentImage_,boxRect,boxColor,boxLineWidth);
+            cv::putText(currentImage_, foundStream.str(), cv::Point(1050,30),CV_FONT_HERSHEY_SIMPLEX, 1.0, boxColor,2);
+            cv::putText(currentImage_, minMaxStream.str(), cv::Point(8,30),CV_FONT_HERSHEY_SIMPLEX, 1.0, boxColor,2);
+            releaseLock();
             
             acquireLock();
             done = stopped_;
