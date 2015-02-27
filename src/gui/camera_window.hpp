@@ -16,6 +16,7 @@
 #include "alignment_settings.hpp"
 #include "auto_naming_options.hpp"
 #include "rtn_status.hpp"
+#include "bias_plugin.hpp"
 
 
 // External lib forward declarations
@@ -234,13 +235,13 @@ namespace bias
             QPixmap pluginPixmapOriginal_;
             QPixmap histogramPixmapOriginal_;
 
-
             QPointer<QActionGroup> videoModeActionGroupPtr_; 
             QPointer<QActionGroup> frameRateActionGroupPtr_; 
             QPointer<QActionGroup> cameraTriggerActionGroupPtr_;
             QPointer<QActionGroup> loggingFormatActionGroupPtr_;
             QPointer<QActionGroup> rotationActionGroupPtr_;
             QPointer<QActionGroup> colorMapActionGroupPtr_;
+            QPointer<QActionGroup> pluginActionGroupPtr_;
 
             QPointer<QSignalMapper> videoModeSignalMapperPtr_;
             QPointer<QSignalMapper> frameRateSignalMapperPtr_;
@@ -249,6 +250,7 @@ namespace bias
 
             QMap<QAction*, ImageRotationType> actionToRotationMap_;
             QMap<QAction*, VideoFileFormat> actionToVideoFileFormatMap_;
+            QMap<QString, QPointer<BiasPlugin>> pluginMap_;
 
             std::shared_ptr<Lockable<Camera>> cameraPtr_;
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr_;
@@ -298,6 +300,7 @@ namespace bias
             void setupDisplayMenu();
             void setupDisplayOrientMenu();
             void setupDisplayRotMenu();
+            void setupPluginMenu();
             void setupDisplayColorMapMenu();
             void setupStatusLabel();
 

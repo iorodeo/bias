@@ -356,8 +356,6 @@
     <addaction name="actionPluginsEnabledPtr_"/>
     <addaction name="actionPluginsSettingsPtr_"/>
     <addaction name="separator"/>
-    <addaction name="actionStampede"/>
-    <addaction name="actionGrab_Detector"/>
    </widget>
    <widget class="QMenu" name="menuServerPtr_">
     <property name="title">
@@ -737,7 +735,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Mouse Grab Detector</string>
+    <string>Grab Detector</string>
    </property>
   </action>
  </widget>

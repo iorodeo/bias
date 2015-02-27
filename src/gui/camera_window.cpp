@@ -36,6 +36,7 @@
 #include <QSignalMapper>
 #include <QFile>
 #include <QApplication>
+#include <QtDebug>
 
 // Added for qt5 build
 // ---------------------------
@@ -44,21 +45,16 @@
 #include <QFileDialog>
 // ---------------------------
 
-// Temp
-// ---------------------------
-#include <QThread>
-// ---------------------------
-
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/contrib/contrib.hpp>
 
-#include <QTcpServer>
 
 // Development
+// ------------------------------------
 #include "stampede_plugin.hpp"
-//
-
+#include "grab_detector_plugin.hpp"
+// -------------------------------------
 
 namespace bias
 {
@@ -122,7 +118,6 @@ namespace bias
     }
     const QMap<int, QString> COLORMAP_INT_TO_STRING_MAP = createColorMapIntToStringMap();
     const int DEFAULT_COLORMAP_NUMBER = COLORMAP_NONE;
-
 
     // Debug files
     const QString DEBUG_DUMP_CAMERA_PROPS_FILE_NAME("bias_camera_props_dump.txt");
@@ -2333,13 +2328,20 @@ namespace bias
 
     void CameraWindow::actionPluginsSettingsTriggered()
     {
-        //QString msgTitle("Development");
-        //QString msgText("Plugin settings not fully implemented");
-        //QMessageBox::information(this, msgTitle, msgText);
+        QPointer<QAction> selectedActionPtr = pluginActionGroupPtr_ -> checkedAction();
+        QString selectedText = selectedActionPtr -> text();
 
-        // DEVEL
-        QPointer<StampedePlugin> stampedePluginPtr = new StampedePlugin(this);
-        stampedePluginPtr -> show();
+        if (QString::compare(selectedText,"None", Qt::CaseInsensitive) == 0)
+        {
+            QString msgTitle("Plugin Message");
+            QString msgText("No Plugin selected - no settings.");
+            QMessageBox::information(this, msgTitle, msgText);
+        }
+        else
+        {
+            QPointer<BiasPlugin> selectedPluginPtr = pluginMap_[selectedText];
+            selectedPluginPtr -> show();
+        }
     }
 
 
@@ -2485,6 +2487,12 @@ namespace bias
         {
             actionServerEnabledPtr_ -> setChecked(false);
         }
+
+        // Temporary
+        pluginMap_["Stampede"] = new StampedePlugin();
+        pluginMap_["Grab Detector"] = new GrabDetectorPlugin();
+        setupPluginMenu();
+
     }
 
 
@@ -3021,6 +3029,32 @@ namespace bias
     }
 
 
+    void CameraWindow::setupPluginMenu()
+    {
+
+        QMapIterator<QString,QPointer<BiasPlugin>> pluginIt(pluginMap_);
+        pluginActionGroupPtr_ = new QActionGroup(menuPluginsPtr_);
+
+        // Add empty acction
+        QPointer<QAction> noneActionPtr = menuPluginsPtr_ -> addAction("None");
+        pluginActionGroupPtr_ -> addAction(noneActionPtr);
+        noneActionPtr -> setCheckable(true);
+        noneActionPtr -> setChecked(true);
+
+        while (pluginIt.hasNext())
+        {
+            pluginIt.next();
+            QString pluginName = pluginIt.key();
+            QPointer<QAction> pluginActionPtr = menuPluginsPtr_ -> addAction(pluginName);
+            pluginActionGroupPtr_ -> addAction(pluginActionPtr);
+            pluginActionPtr -> setCheckable(true);
+            pluginActionPtr -> setChecked(false);
+
+        }
+
+    }
+
+
     void CameraWindow::updateImageLabel(
             QLabel *imageLabelPtr, 
             QPixmap &pixmapOriginal,
@@ -3457,8 +3491,7 @@ namespace bias
         {
             VideoMode mode = *modeIt;
             QString modeString = QString::fromStdString(getVideoModeString(mode));
-            QPointer<QAction> modeActionPtr = 
-                menuCameraVideoModePtr_ -> addAction(modeString);
+            QPointer<QAction> modeActionPtr = menuCameraVideoModePtr_ -> addAction(modeString);
             videoModeActionGroupPtr_ -> addAction(modeActionPtr);
             modeActionPtr -> setCheckable(true);
             

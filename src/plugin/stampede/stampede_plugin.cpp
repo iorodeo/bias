@@ -5,7 +5,7 @@ namespace bias
 
     // Public Methods
     // ------------------------------------------------------------------------
-    StampedePlugin::StampedePlugin(QWidget *parent) : QDialog(parent)
+    StampedePlugin::StampedePlugin(QWidget *parent) : BiasPlugin(parent)
     {
         setupUi(this);
     }

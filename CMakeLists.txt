@@ -86,8 +86,13 @@ endif()
 include_directories("./src/backend/base")
 include_directories("./src/facade")
 include_directories("./src/utility")
+include_directories(${bias_plugin_INCLUDE_DIRS})
 include_directories(${stampede_plugin_INCLUDE_DIRS})
+include_directories(${grab_detector_plugin_INCLUDE_DIRS})
+
+message(STATUS "bias_plugin_INCLUDE_DIRS='${bias_plugin_INCLUDE_DIRS}'")
 message(STATUS "stampede_plugin_INCLUDE_DIRS='${stampede_plugin_INCLUDE_DIRS}'")
+message(STATUS "grab_detector_plugin_INCLUDE_DIRS='${grab_detector_plugin_INCLUDE_DIRS}'")
 
 if(with_fc2)
     include_directories(${FlyCapture2_INCLUDE_DIRS})
@@ -138,7 +143,9 @@ endif()
 
 add_subdirectory("src/facade")
 add_subdirectory("src/utility")
+add_subdirectory("src/plugin/base")
 add_subdirectory("src/plugin/stampede")
+add_subdirectory("src/plugin/grab_detector")
 
 if(with_qt_gui)
     add_subdirectory("src/gui")
