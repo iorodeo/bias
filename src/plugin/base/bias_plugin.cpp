@@ -3,7 +3,27 @@
 
 namespace bias
 {
-    BiasPlugin::BiasPlugin(QWidget *parent) : QDialog(parent)
-    { }
+
+    // Pulbic
+    // ------------------------------------------------------------------------
+
+    BiasPlugin::BiasPlugin(QWidget *parent) : QDialog(parent) { }
+
+
+    // Protected
+    // ------------------------------------------------------------------------
+
+    bool BiasPlugin::pluginsEnabled_ = false;
+
+    bool BiasPlugin::pluginsEnabled()
+    {
+        return pluginsEnabled_;
+    }
+
+    void BiasPlugin::setPluginsEnabled(bool value)
+    {
+        pluginsEnabled_ = value;
+    }
+
 
 }

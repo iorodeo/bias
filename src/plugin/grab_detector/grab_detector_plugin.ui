@@ -198,7 +198,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QDoubleSpinBox" name="levelDoubleSpinBoxPtr">
+              <widget class="QDoubleSpinBox" name="levelDblSpinBoxPtr">
                <property name="maximum">
                 <double>5.000000000000000</double>
                </property>
@@ -255,7 +255,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QDoubleSpinBox" name="durationDoubleSpinBoxPtr">
+              <widget class="QDoubleSpinBox" name="durationDblSpinBoxPtr">
                <property name="singleStep">
                 <double>0.500000000000000</double>
                </property>
@@ -333,6 +333,12 @@
           </item>
           <item>
            <widget class="QSlider" name="xPosSliderPtr">
+            <property name="maximum">
+             <number>1280</number>
+            </property>
+            <property name="pageStep">
+             <number>100</number>
+            </property>
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -361,8 +367,11 @@
             <property name="maximum">
              <number>1280</number>
             </property>
+            <property name="singleStep">
+             <number>1</number>
+            </property>
             <property name="value">
-             <number>1280</number>
+             <number>0</number>
             </property>
            </widget>
           </item>
@@ -373,7 +382,7 @@
         <widget class="QWidget" name="yPosWidgetPtr" native="true">
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
-           <widget class="QLabel" name="xPosLabelPtr_2">
+           <widget class="QLabel" name="yPosLabelPtr">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
               <horstretch>0</horstretch>
@@ -399,6 +408,12 @@
           </item>
           <item>
            <widget class="QSlider" name="yPosSliderPtr">
+            <property name="maximum">
+             <number>1280</number>
+            </property>
+            <property name="pageStep">
+             <number>100</number>
+            </property>
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -427,8 +442,11 @@
             <property name="maximum">
              <number>1280</number>
             </property>
+            <property name="singleStep">
+             <number>1</number>
+            </property>
             <property name="value">
-             <number>1280</number>
+             <number>0</number>
             </property>
            </widget>
           </item>
@@ -465,6 +483,12 @@
           </item>
           <item>
            <widget class="QSlider" name="widthSliderPtr">
+            <property name="maximum">
+             <number>1280</number>
+            </property>
+            <property name="pageStep">
+             <number>100</number>
+            </property>
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -493,8 +517,11 @@
             <property name="maximum">
              <number>1280</number>
             </property>
+            <property name="singleStep">
+             <number>1</number>
+            </property>
             <property name="value">
-             <number>1280</number>
+             <number>0</number>
             </property>
            </widget>
           </item>
@@ -531,6 +558,12 @@
           </item>
           <item>
            <widget class="QSlider" name="heightSliderPtr">
+            <property name="maximum">
+             <number>1280</number>
+            </property>
+            <property name="pageStep">
+             <number>100</number>
+            </property>
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -559,8 +592,11 @@
             <property name="maximum">
              <number>1280</number>
             </property>
+            <property name="singleStep">
+             <number>1</number>
+            </property>
             <property name="value">
-             <number>1280</number>
+             <number>0</number>
             </property>
            </widget>
           </item>
@@ -969,5 +1005,134 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>xPosSliderPtr</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>xPosSpinBoxPtr</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>228</x>
+     <y>61</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>421</x>
+     <y>61</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>yPosSliderPtr</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>yPosSpinBoxPtr</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>228</x>
+     <y>105</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>421</x>
+     <y>105</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>widthSliderPtr</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>widthSpinBoxPtr</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>228</x>
+     <y>149</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>421</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>heightSliderPtr</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>heightSpinBoxPtr</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>228</x>
+     <y>193</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>421</x>
+     <y>193</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>xPosSpinBoxPtr</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>xPosSliderPtr</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>421</x>
+     <y>61</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>228</x>
+     <y>61</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>yPosSpinBoxPtr</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>yPosSliderPtr</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>421</x>
+     <y>105</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>228</x>
+     <y>105</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>widthSpinBoxPtr</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>widthSliderPtr</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>421</x>
+     <y>149</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>228</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>heightSpinBoxPtr</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>heightSliderPtr</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>421</x>
+     <y>193</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>228</x>
+     <y>193</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

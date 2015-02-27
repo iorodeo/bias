@@ -12,6 +12,12 @@ namespace bias
         public:
 
             BiasPlugin(QWidget *parent=0);
+            static bool pluginsEnabled();
+            static void setPluginsEnabled(bool value);
+
+        protected:
+
+            static bool pluginsEnabled_;
 
     };
 

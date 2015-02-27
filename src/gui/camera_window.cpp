@@ -341,7 +341,7 @@ namespace bias
 
         imageDispatcherPtr_ = new ImageDispatcher(
                 logging_, 
-                pluginEnabled_,
+                BiasPlugin::pluginsEnabled(),
                 cameraNumber_,
                 newImageQueuePtr_,
                 logImageQueuePtr_,
@@ -470,7 +470,7 @@ namespace bias
 
         } // if (logging_)
 
-        if (pluginEnabled_)
+        if (BiasPlugin::pluginsEnabled())
         {
             pluginHandlerPtr_ = new PluginHandler(
                     cameraNumber_, 
@@ -480,7 +480,7 @@ namespace bias
             pluginHandlerPtr_ -> setAutoDelete(false);
             threadPoolPtr_ -> start(pluginHandlerPtr_);
 
-        } // if (pluginEnabled_)
+        } 
 
         // Set Capture start and stop time
         captureStartDateTime_ = QDateTime::currentDateTime();
@@ -1756,7 +1756,7 @@ namespace bias
 
 
             // Update plugin preview
-            if (pluginEnabled_)
+            if (BiasPlugin::pluginsEnabled())
             {
                 bool haveNewImage = false;
                 cv::Mat pluginImageMat;
@@ -2317,11 +2317,11 @@ namespace bias
         // TODO - check that there is a plugin available to run
         if (actionPluginsEnabledPtr_ -> isChecked())
         {
-            pluginEnabled_ = true;
+            BiasPlugin::setPluginsEnabled(true);
         }
         else
         {
-            pluginEnabled_ = false;
+            BiasPlugin::setPluginsEnabled(false);
             setupImageLabels(false,false,true);
         }
     }
@@ -2331,16 +2331,16 @@ namespace bias
         QPointer<QAction> selectedActionPtr = pluginActionGroupPtr_ -> checkedAction();
         QString selectedText = selectedActionPtr -> text();
 
-        if (QString::compare(selectedText,"None", Qt::CaseInsensitive) == 0)
-        {
-            QString msgTitle("Plugin Message");
-            QString msgText("No Plugin selected - no settings.");
-            QMessageBox::information(this, msgTitle, msgText);
-        }
-        else
+        if (pluginMap_.size() > 0)
         {
             QPointer<BiasPlugin> selectedPluginPtr = pluginMap_[selectedText];
             selectedPluginPtr -> show();
+        }
+        else
+        {
+            QString msgTitle("Plugins Message");
+            QString msgText("No Plugins available");
+            QMessageBox::information(this, msgTitle, msgText);
         }
     }
 
@@ -2424,8 +2424,8 @@ namespace bias
         format7PercentSpeed_ = DEFAULT_FORMAT7_PERCENT_SPEED;
         showCameraLockFailMsg_ = true;
 
-        pluginEnabled_ = true;
-        actionPluginsEnabledPtr_ -> setChecked(true);
+        BiasPlugin::setPluginsEnabled(true);
+        actionPluginsEnabledPtr_ -> setChecked(BiasPlugin::pluginsEnabled());
 
         imageRotation_ = IMAGE_ROTATION_0;
         colorMapNumber_ = DEFAULT_COLORMAP_NUMBER;
@@ -2489,8 +2489,8 @@ namespace bias
         }
 
         // Temporary
-        pluginMap_["Stampede"] = new StampedePlugin();
-        pluginMap_["Grab Detector"] = new GrabDetectorPlugin();
+        pluginMap_["Stampede"] = new StampedePlugin(this);
+        pluginMap_["Grab Detector"] = new GrabDetectorPlugin(this);
         setupPluginMenu();
 
     }
@@ -3035,12 +3035,7 @@ namespace bias
         QMapIterator<QString,QPointer<BiasPlugin>> pluginIt(pluginMap_);
         pluginActionGroupPtr_ = new QActionGroup(menuPluginsPtr_);
 
-        // Add empty acction
-        QPointer<QAction> noneActionPtr = menuPluginsPtr_ -> addAction("None");
-        pluginActionGroupPtr_ -> addAction(noneActionPtr);
-        noneActionPtr -> setCheckable(true);
-        noneActionPtr -> setChecked(true);
-
+        bool isFirst = true;
         while (pluginIt.hasNext())
         {
             pluginIt.next();
@@ -3048,7 +3043,15 @@ namespace bias
             QPointer<QAction> pluginActionPtr = menuPluginsPtr_ -> addAction(pluginName);
             pluginActionGroupPtr_ -> addAction(pluginActionPtr);
             pluginActionPtr -> setCheckable(true);
-            pluginActionPtr -> setChecked(false);
+            if (isFirst)
+            {
+                pluginActionPtr -> setChecked(true);
+                isFirst = false;
+            }
+            else
+            {
+                pluginActionPtr -> setChecked(false);
+            }
 
         }
 
