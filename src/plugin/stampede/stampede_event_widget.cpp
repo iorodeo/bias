@@ -1,5 +1,7 @@
 #include "stampede_event_widget.hpp"
 
+#include "empty_event_label.hpp"
+
 namespace bias
 {
 
@@ -14,13 +16,14 @@ namespace bias
 
     void StampedeEventWidget::setNameText(QString name)
     {
-        nameLabelPtr -> setText(name);
+        groupBoxPtr -> setTitle(name);
     }
 
     QString StampedeEventWidget::getNameText()
     {
-        return nameLabelPtr -> text();
+        return groupBoxPtr -> title();
     }
+
 
     // Protected Methods
     // ------------------------------------------------------------------------
@@ -37,7 +40,7 @@ namespace bias
         int step = 255/num;
         for (int i =0; i<num; i++)
         {
-            QPointer<QLabel> testLabelPtr = new QLabel();
+            QPointer<QLabel> testLabelPtr = new EmptyEventLabel();
             testLabelPtr -> setFixedHeight(25);
             QPalette labelPalette;
             labelPalette.setColor(QPalette::Window, QColor(255-step*i,255, step*i));

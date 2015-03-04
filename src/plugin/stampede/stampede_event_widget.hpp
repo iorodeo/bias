@@ -5,7 +5,6 @@
 #include <QPointer>
 #include <QHBoxLayout>
 #include <QSplitter>
-#include <QList>
 
 namespace bias
 {
@@ -24,7 +23,6 @@ namespace bias
 
             QPointer<QHBoxLayout> timelineLayoutPtr_;
             QPointer<QSplitter> timelineSplitterPtr_;
-            QList<QLabel> eventLabelList_;
 
             void initialize();
 
