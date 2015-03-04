@@ -13,8 +13,8 @@ namespace bias
 
             StampedePlugin(QWidget *parent=0);
 
-        private:
-            int dummy;
+        protected:
+            void initialize();
 
     };
 

@@ -8,6 +8,17 @@ namespace bias
     StampedePlugin::StampedePlugin(QWidget *parent) : BiasPlugin(parent)
     {
         setupUi(this);
+        initialize();
+    }
+
+
+    // Protected Methods
+    // ------------------------------------------------------------------------
+    void StampedePlugin::initialize()
+    {
+        vibrationEventWidgetPtr -> setNameText(QString("Vibration"));
+        displayEventWidgetPtr -> setNameText(QString("Display"));
+
     }
 
 }

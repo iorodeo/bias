@@ -8,16 +8,19 @@ endif()
 set(
     stampede_plugin_FORMS 
     stampede_plugin.ui
+    stampede_event_widget.ui
     )
 
 set(
     stampede_plugin_HEADERS 
     stampede_plugin.hpp
+    stampede_event_widget.hpp
     )
 
 set(
     stampede_plugin_SOURCES 
     stampede_plugin.cpp
+    stampede_event_widget.cpp
     )
 
 

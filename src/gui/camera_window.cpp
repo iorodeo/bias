@@ -3043,16 +3043,25 @@ namespace bias
             QPointer<QAction> pluginActionPtr = menuPluginsPtr_ -> addAction(pluginName);
             pluginActionGroupPtr_ -> addAction(pluginActionPtr);
             pluginActionPtr -> setCheckable(true);
-            if (isFirst)
+
+            if (QString::compare(pluginIt.key(), QString("Stampede"))==0)
             {
                 pluginActionPtr -> setChecked(true);
-                isFirst = false;
             }
             else
             {
                 pluginActionPtr -> setChecked(false);
             }
 
+            //if (isFirst)
+            //{
+            //    pluginActionPtr -> setChecked(true);
+            //    isFirst = false;
+            //}
+            //else
+            //{
+            //    pluginActionPtr -> setChecked(false);
+            //}
         }
 
     }
