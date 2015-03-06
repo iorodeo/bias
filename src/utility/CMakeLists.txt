@@ -17,6 +17,7 @@ if(with_qt_gui)
         rtn_status.hpp
         basic_image_proc.hpp
         basic_http_server.hpp
+        image_label.hpp
         )
     
     set(
@@ -29,15 +30,9 @@ if(with_qt_gui)
         json_utils.cpp
         basic_image_proc.cpp
         basic_http_server.cpp
+        image_label.cpp
         )
     
-    # Old qt 4.8 build
-    # -------------------------------------------------
-    #bias_utility_HEADERS_MOC ${bias_utility_HEADERS})
-    #include(${QT_USE_FILE})
-    #add_definitions(${QT_DEFINITIONS})
-    # -------------------------------------------------
-
     qt5_wrap_cpp(bias_utility_HEADERS_MOC ${bias_utility_HEADERS})
     
     add_library(

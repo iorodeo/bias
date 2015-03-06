@@ -3,6 +3,7 @@
 #include "mat_to_qimage.hpp"
 #include "stamped_image.hpp"
 #include "lockable.hpp"
+#include "image_label.hpp"
 #include "image_grabber.hpp"
 #include "image_dispatcher.hpp"
 #include "image_logger.hpp"
@@ -2490,7 +2491,7 @@ namespace bias
 
         // Temporary
         pluginMap_["Stampede"] = new StampedePlugin(this);
-        pluginMap_["Grab Detector"] = new GrabDetectorPlugin(this);
+        pluginMap_["Grab Detector"] = new GrabDetectorPlugin(pluginImageLabelPtr_,this);
         setupPluginMenu();
 
     }
@@ -3044,7 +3045,8 @@ namespace bias
             pluginActionGroupPtr_ -> addAction(pluginActionPtr);
             pluginActionPtr -> setCheckable(true);
 
-            if (QString::compare(pluginIt.key(), QString("Stampede"))==0)
+            //if (QString::compare(pluginIt.key(), QString("Stampede"))==0)
+            if (QString::compare(pluginIt.key(), QString("Grab Detector"))==0)
             {
                 pluginActionPtr -> setChecked(true);
             }
@@ -3068,7 +3070,7 @@ namespace bias
 
 
     void CameraWindow::updateImageLabel(
-            QLabel *imageLabelPtr, 
+            ImageLabel *imageLabelPtr, 
             QPixmap &pixmapOriginal,
             bool flipAndRotate,
             bool addFrameCount,
@@ -3102,6 +3104,9 @@ namespace bias
                 Qt::KeepAspectRatio, 
                 Qt::SmoothTransformation
                 );
+
+        float scaleFactor = float(pixmapScaled.width())/float(pixmapCopy.width());
+        imageLabelPtr -> setScaleFactor(scaleFactor);
 
         // Add alignment objects
         if (haveImagePixmap_ && addAlignmentObjs)
@@ -3223,7 +3228,7 @@ namespace bias
 
 
     void CameraWindow::resizeImageLabel( 
-            QLabel *imageLabelPtr, 
+            ImageLabel *imageLabelPtr, 
             QPixmap &pixmapOriginal, 
             bool flipAndRotate,
             bool addFrameCount,

@@ -24,7 +24,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidgetPtr_">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="previewTabPtr_">
        <attribute name="title">
@@ -32,7 +32,7 @@
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="QLabel" name="previewImageLabelPtr_">
+         <widget class="bias::ImageLabel" name="previewImageLabelPtr_">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
             <horstretch>0</horstretch>
@@ -67,7 +67,7 @@
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
-         <widget class="QLabel" name="histogramImageLabelPtr_">
+         <widget class="bias::ImageLabel" name="histogramImageLabelPtr_">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -102,7 +102,7 @@
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
-         <widget class="QLabel" name="pluginImageLabelPtr_">
+         <widget class="bias::ImageLabel" name="pluginImageLabelPtr_">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Ignored" vsizetype="Ignored">
             <horstretch>0</horstretch>
@@ -739,6 +739,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>bias::ImageLabel</class>
+   <extends>QLabel</extends>
+   <header>image_label.hpp</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -3,9 +3,14 @@
 
 #include "ui_grab_detector_plugin.h"
 #include "bias_plugin.hpp"
+#include <QPointer>
 
 namespace bias
 {
+
+    class ImageLabel;
+
+
     class GrabDetectorPlugin : public BiasPlugin, public Ui::GrabDetectorPluginDialog
     {
         Q_OBJECT
@@ -20,13 +25,14 @@ namespace bias
             static int DEFAULT_TRIGGER_THRESHOLD;
             static int DEFAULT_TRIGGER_FILTER_SIZE;
 
-            GrabDetectorPlugin(QWidget *parent=0);
+            GrabDetectorPlugin(ImageLabel *imageLabelPtr, QWidget *parentPtr=0);
 
         protected:
 
             bool triggerArmed_;
             int triggerThreshold_;
             int triggerFilterSize_;
+            QPointer<ImageLabel> imageLabelPtr_;
 
             void connectWidgets();
             void initialize();
@@ -38,12 +44,9 @@ namespace bias
             void connectPushButtonClicked();
             void levelDblSpinBoxValueChanged(double value);
             void durationDblSpinBoxValueChanged(double value);
-            void xPosSliderValueChanged(int value);
-            void yPosSliderValueChanged(int value);
-            void widthSliderValueChanged(int value);
-            void heightSliderValueChanged(int value);
             void colorSelectPushButtonClicked();
             void trigResetPushButtonClicked();
+            void selectBoxChanged(QRect boxRect);
 
     };
 }

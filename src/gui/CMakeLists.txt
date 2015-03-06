@@ -82,14 +82,6 @@ set(
     plugin_handler.cpp
     )
 
-# Old qt 4.8 build
-# -------------------------------------------------------
-#qt4_wrap_ui(bias_gui_FORMS_HEADERS ${bias_gui_FORMS}) 
-#qt4_wrap_cpp(bias_gui_HEADERS_MOC ${bias_gui_HEADERS})
-#include(${QT_USE_FILE})
-#add_definitions(${QT_DEFINITIONS})
-# -------------------------------------------------------
-
 qt5_wrap_ui(bias_gui_FORMS_HEADERS ${bias_gui_FORMS}) 
 qt5_wrap_cpp(bias_gui_HEADERS_MOC ${bias_gui_HEADERS})
 

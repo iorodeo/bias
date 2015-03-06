@@ -1,5 +1,6 @@
 #include "grab_detector_plugin.hpp"
 #include <QtDebug>
+#include "image_label.hpp"
 
 namespace bias
 {
@@ -17,8 +18,9 @@ namespace bias
     // Public Methods
     // ------------------------------------------------------------------------
     
-    GrabDetectorPlugin::GrabDetectorPlugin(QWidget *parent) : BiasPlugin(parent)
+    GrabDetectorPlugin::GrabDetectorPlugin(ImageLabel *imageLabelPtr, QWidget *parentPtr) : BiasPlugin(parentPtr)
     {
+        imageLabelPtr_ = imageLabelPtr;
         setupUi(this);
         connectWidgets();
         initialize();
@@ -65,34 +67,6 @@ namespace bias
                );
 
         connect(
-                xPosSliderPtr,
-                SIGNAL(valueChanged(int)),
-                this,
-                SLOT(xPosSliderValueChanged(int))
-               );
-
-        connect(
-                yPosSliderPtr,
-                SIGNAL(valueChanged(int)),
-                this,
-                SLOT(yPosSliderValueChanged(int))
-               );
-
-        connect(
-                widthSliderPtr,
-                SIGNAL(valueChanged(int)),
-                this,
-                SLOT(widthSliderValueChanged(int))
-               );
-
-        connect(
-                heightSliderPtr,
-                SIGNAL(valueChanged(int)),
-                this,
-                SLOT(heightSliderValueChanged(int))
-               );
-
-        connect(
                 colorSelectPushButtonPtr,
                 SIGNAL(clicked()),
                 this,
@@ -104,6 +78,13 @@ namespace bias
                 SIGNAL(clicked()),
                 this,
                 SLOT(trigResetPushButtonClicked())
+               );
+
+        connect(
+                imageLabelPtr_,
+                SIGNAL(selectBoxChanged(QRect)),
+                this,
+                SLOT(selectBoxChanged(QRect))
                );
 
     }
@@ -120,11 +101,6 @@ namespace bias
             comPortComboBoxPtr -> addItem(comPortStr);
         }
 
-        // Set detection box to default values
-        xPosSliderPtr -> setValue(DEFAULT_XPOS);
-        yPosSliderPtr -> setValue(DEFAULT_YPOS);
-        widthSliderPtr -> setValue(DEFAULT_WIDTH);
-        heightSliderPtr -> setValue(DEFAULT_HEIGHT);
 
         // Set trigger threshold and filter size (TEMPORARY)
         trigThresholdSpinBoxPtr -> setValue(DEFAULT_TRIGGER_THRESHOLD);
@@ -167,30 +143,6 @@ namespace bias
     }
 
 
-    void GrabDetectorPlugin::xPosSliderValueChanged(int value)
-    {
-        qDebug() << "xPos value changed: " << value;
-    }
-
-
-    void GrabDetectorPlugin::yPosSliderValueChanged(int value)
-    {
-        qDebug() << "yPos value changed: " << value;
-    }
-
-
-    void GrabDetectorPlugin::widthSliderValueChanged(int value)
-    {
-        qDebug() << "width value changed: " << value;
-    }
-
-
-    void GrabDetectorPlugin::heightSliderValueChanged(int value)
-    {
-        qDebug() << "height value changed: " << value;
-    }
-
-
     void GrabDetectorPlugin::colorSelectPushButtonClicked()
     {
         qDebug() << "color select push buttton clicked";
@@ -200,6 +152,16 @@ namespace bias
     void GrabDetectorPlugin::trigResetPushButtonClicked()
     {
         qDebug() << "trigger reset push button clicked";
+    }
+
+
+    void GrabDetectorPlugin::selectBoxChanged(QRect box)
+    {
+        qDebug() << box;
+        xPosSpinBoxPtr -> setValue(box.x());
+        yPosSpinBoxPtr -> setValue(box.y());
+        widthSpinBoxPtr -> setValue(box.width());
+        heightSpinBoxPtr -> setValue(box.height());
     }
 
 }

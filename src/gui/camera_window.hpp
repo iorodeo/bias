@@ -31,6 +31,7 @@ namespace bias
 {
     // BIAS forward declarations
     struct StampedImage;
+    class ImageLabel;
     class ImageGrabber;
     class ImageDispatcher;
     class ImageLogger; 
@@ -331,7 +332,7 @@ namespace bias
                     bool pluginPreview=true
                     );
             void updateImageLabel(
-                    QLabel *imageLabelPtr, 
+                    ImageLabel *imageLabelPtr, 
                     QPixmap &pixmapOriginal, 
                     bool flipAndRotate=true,
                     bool addFrameCount=true,
@@ -341,7 +342,7 @@ namespace bias
             void updateAllImageLabels();
 
             void resizeImageLabel(
-                    QLabel *imageLabelPtr, 
+                    ImageLabel *imageLabelPtr, 
                     QPixmap &pixmapOriginal, 
                     bool flipAndRotate=true,
                     bool addFrameCount=true,
