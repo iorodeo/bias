@@ -179,6 +179,7 @@ namespace bias
             void actionServerCommandsTriggered();
             void actionHelpAboutTriggered();
             void actionDumpCameraPropsTriggered();
+            void pluginActionGroupTriggered(QAction *action);
 
             // Signal mappers for menu items e.g. videomode, framerate, properties and colormaps
             void actionVideoModeTriggered(int vidModeInt);
@@ -294,6 +295,8 @@ namespace bias
             void setupImageDisplayTimer();
             void setupCaptureDurationTimer();
             void updateWindowTitle();
+            
+            QPointer<BiasPlugin> getCurrentPlugin();
             
             // Menu and statusbar setup methods
             void setupCameraMenu();

@@ -2,7 +2,6 @@
 #include <QThread>
 #include <iostream>
 #include <sstream>
-#include <cv.h>
 #include "affinity.hpp"
 #include "stamped_image.hpp"
 
@@ -12,7 +11,8 @@ namespace bias
 
     PluginHandler::PluginHandler(QObject *parent) : QObject(parent)
     {
-        initialize(0,NULL);
+        QPointer<BiasPlugin> emptyPluginPtr;
+        initialize(0,NULL,emptyPluginPtr);
     }
 
 
@@ -22,26 +22,52 @@ namespace bias
             QObject *parent
             ) : QObject(parent)
     {
-        initialize(cameraNumber, pluginImageQueuePtr);
+        QPointer<BiasPlugin> emptyPluginPtr;
+        initialize(cameraNumber, pluginImageQueuePtr, emptyPluginPtr);
+    }
+
+
+    PluginHandler::PluginHandler(
+            unsigned int cameraNumber,
+            std::shared_ptr<LockableQueue<StampedImage>> pluginImageQueuePtr,
+            BiasPlugin *pluginPtr,
+            QObject *parent
+            ) : QObject(parent)
+    {
+        QPointer<BiasPlugin> emptyPluginPtr;
+        initialize(cameraNumber, pluginImageQueuePtr, emptyPluginPtr);
+    }
+
+    void PluginHandler::setCameraNumber(unsigned int cameraNumber)
+    {
+       cameraNumber_ = cameraNumber;
+    } 
+
+    void PluginHandler::setImageQueue(std::shared_ptr<LockableQueue<StampedImage>> pluginImageQueuePtr)
+    {
+        pluginImageQueuePtr_ = pluginImageQueuePtr;
+        setReadyState();
+    }
+
+
+    void PluginHandler::setPlugin(BiasPlugin *pluginPtr)
+    {
+        pluginPtr_ = pluginPtr;
+        setReadyState();
     }
 
 
     void PluginHandler::initialize(
             unsigned int cameraNumber,
-            std::shared_ptr<LockableQueue<StampedImage>> pluginImageQueuePtr
+            std::shared_ptr<LockableQueue<StampedImage>> pluginImageQueuePtr,
+            BiasPlugin *pluginPtr
             )
     {
+        ready_ = false;
         stopped_ = true;
-        cameraNumber_ = cameraNumber;
-        pluginImageQueuePtr_ = pluginImageQueuePtr;
-        if (pluginImageQueuePtr_ != NULL)
-        {
-            ready_ = true;
-        }
-        else
-        {
-            ready_ = false;
-        }
+        setCameraNumber(cameraNumber);
+        setImageQueue(pluginImageQueuePtr);
+        setPlugin(pluginPtr);
 
         // Plugin setup actions
         std::cout << "plugin: setup" << std::endl;
@@ -56,8 +82,24 @@ namespace bias
 
     cv::Mat PluginHandler::getImage() const
     {
-        cv::Mat currentImageCopy = currentImage_.clone();
-        return currentImageCopy;
+        cv::Mat currentImage;
+        if (!pluginPtr_.isNull())
+        {
+            currentImage = pluginPtr_ -> getCurrentImage();
+        }
+        return currentImage;
+    }
+
+    void PluginHandler::setReadyState()
+    {
+        if ((pluginImageQueuePtr_ != NULL) && (!pluginPtr_.isNull()))
+        {
+            ready_ = true;
+        }
+        else
+        {
+            ready_ = false;
+        }
     }
 
     void PluginHandler::run()
@@ -89,41 +131,16 @@ namespace bias
                 pluginImageQueuePtr_ -> releaseLock();
                 break;
             }
-
             newStampedImage = pluginImageQueuePtr_ -> front();
             pluginImageQueuePtr_ -> pop();
             imageQueueSize =  pluginImageQueuePtr_ -> size();
             pluginImageQueuePtr_ -> releaseLock();
 
-            // Plugin process frame
-            cv::Rect boxRect(300,300,50,300);
-            cv::Scalar boxColor(0,0,255);
-            int boxLineWidth = 3;
-            int medianFilterSize = 15;
-            double threshold = 99.0;
-
-            //cv::Mat roiImage = newStampedImage.image(boxRect).clone();
-            cv::Mat roiImage = newStampedImage.image(boxRect);
-            cv::medianBlur(roiImage,roiImage,medianFilterSize);
-            double maxValue;
-            double minValue;
-            cv::minMaxLoc(roiImage,&minValue,&maxValue);
-
-            std::stringstream minMaxStream;
-            std::stringstream foundStream;
-            minMaxStream << "frame: " << newStampedImage.frameCount << ", min: " << minValue << ", max: " <<  maxValue; 
-            if (maxValue > threshold)
+            // Process Frame with plugin
+            if (!pluginPtr_.isNull())
             {
-                foundStream << "object found";
+                pluginPtr_ -> processFrame(newStampedImage);
             }
-            std::cout << minMaxStream.str()  << ", " << foundStream.str() << std::endl;
-
-            acquireLock(); // Make sure all drawing changes are applied before display
-            cv::cvtColor(newStampedImage.image, currentImage_, CV_GRAY2BGR);
-            cv::rectangle(currentImage_,boxRect,boxColor,boxLineWidth);
-            cv::putText(currentImage_, foundStream.str(), cv::Point(1050,30),CV_FONT_HERSHEY_SIMPLEX, 1.0, boxColor,2);
-            cv::putText(currentImage_, minMaxStream.str(), cv::Point(8,30),CV_FONT_HERSHEY_SIMPLEX, 1.0, boxColor,2);
-            releaseLock();
             
             acquireLock();
             done = stopped_;

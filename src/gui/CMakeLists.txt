@@ -19,7 +19,6 @@ set(
 set(
     bias_gui_HEADERS 
     camera_window.hpp 
-    lockable.hpp
     validators.hpp
     image_grabber.hpp
     image_logger.hpp

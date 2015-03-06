@@ -200,12 +200,6 @@ namespace bias
         connected_ = true;
         connectButtonPtr_ -> setText(QString("Disconnect"));
 
-        //QString statusMsg("Connected, logging = ");
-        //statusMsg += boolToOnOffQString(logging_);
-        //statusMsg += QString(", timer = ");
-        //statusMsg += boolToOnOffQString(actionTimerEnabledPtr_ -> isChecked());
-        //statusMsg += QString(", Stopped");
-        //statusLabelPtr_ -> setText(statusMsg);
         updateStatusLabel();
 
         startButtonPtr_ -> setEnabled(true);
@@ -473,11 +467,9 @@ namespace bias
 
         if (BiasPlugin::pluginsEnabled())
         {
-            pluginHandlerPtr_ = new PluginHandler(
-                    cameraNumber_, 
-                    pluginImageQueuePtr_, 
-                    this
-                    );
+            pluginHandlerPtr_ -> setCameraNumber(cameraNumber_);
+            pluginHandlerPtr_ -> setImageQueue(pluginImageQueuePtr_);
+            pluginHandlerPtr_ -> setPlugin(getCurrentPlugin());
             pluginHandlerPtr_ -> setAutoDelete(false);
             threadPoolPtr_ -> start(pluginHandlerPtr_);
 
@@ -617,7 +609,6 @@ namespace bias
         delete imageGrabberPtr_;
         delete imageDispatcherPtr_;
         delete imageLoggerPtr_;
-        delete pluginHandlerPtr_;
 
         rtnStatus.success = true;
         rtnStatus.message = QString("");
@@ -1755,34 +1746,38 @@ namespace bias
                 updateHistogramPixmap(histMat);
             }
 
+        } // if (capturing_)
 
-            // Update plugin preview
-            if (BiasPlugin::pluginsEnabled())
+
+        // Update plugin preview
+        if (BiasPlugin::pluginsEnabled())
+        {
+            bool haveNewImage = false;
+            cv::Mat pluginImageMat;
+
+            if (!pluginHandlerPtr_.isNull())
             {
-                bool haveNewImage = false;
-                cv::Mat pluginImageMat;
-
                 if (pluginHandlerPtr_ -> tryLock(IMAGE_DISPLAY_CAMERA_LOCK_TRY_DT))
                 {
-
                     pluginImageMat = pluginHandlerPtr_ -> getImage();
                     pluginHandlerPtr_ -> releaseLock();
                     haveNewImage = true;
                 }
+            }
 
-                if (haveNewImage)
+            if (haveNewImage)
+            {
+
+                cv::Size pluginImageSize = pluginImageMat.size();
+                QImage pluginImage  = matToQImage(pluginImageMat);
+
+                if (!pluginImage.isNull())
                 {
-                    cv::Size pluginImageSize = pluginImageMat.size();
-                    QImage pluginImage  = matToQImage(pluginImageMat);
-
-                    if (!pluginImage.isNull())
-                    {
-                        pluginPixmapOriginal_ = QPixmap::fromImage(pluginImage);
-                    }
+                    pluginPixmapOriginal_ = QPixmap::fromImage(pluginImage);
                 }
             }
-            
         }
+       
         updateAllImageLabels();
     }
 
@@ -2329,12 +2324,10 @@ namespace bias
 
     void CameraWindow::actionPluginsSettingsTriggered()
     {
-        QPointer<QAction> selectedActionPtr = pluginActionGroupPtr_ -> checkedAction();
-        QString selectedText = selectedActionPtr -> text();
+        QPointer<BiasPlugin> selectedPluginPtr = getCurrentPlugin();
 
-        if (pluginMap_.size() > 0)
+        if (!selectedPluginPtr.isNull())
         {
-            QPointer<BiasPlugin> selectedPluginPtr = pluginMap_[selectedText];
             selectedPluginPtr -> show();
         }
         else
@@ -2343,6 +2336,21 @@ namespace bias
             QString msgText("No Plugins available");
             QMessageBox::information(this, msgTitle, msgText);
         }
+
+        //QPointer<QAction> selectedActionPtr = pluginActionGroupPtr_ -> checkedAction();
+        //QString selectedText = selectedActionPtr -> text();
+
+        //if (pluginMap_.size() > 0)
+        //{
+        //    QPointer<BiasPlugin> selectedPluginPtr = pluginMap_[selectedText];
+        //    selectedPluginPtr -> show();
+        //}
+        //else
+        //{
+        //    QString msgTitle("Plugins Message");
+        //    QString msgText("No Plugins available");
+        //    QMessageBox::information(this, msgTitle, msgText);
+        //}
     }
 
 
@@ -2399,6 +2407,22 @@ namespace bias
         QString msgText("Camera properties dumped to file: ");
         msgText += DEBUG_DUMP_CAMERA_PROPS_FILE_NAME;
         QMessageBox::information(this, msgTitle, msgText);
+    }
+
+
+    void CameraWindow::pluginActionGroupTriggered(QAction *action)
+    {
+        QMapIterator<QString,QPointer<BiasPlugin>> pluginIt(pluginMap_);
+        while (pluginIt.hasNext())
+        {
+            pluginIt.next();
+            QPointer<BiasPlugin> pluginPtr = pluginIt.value();
+            pluginPtr -> setActive(false);
+
+        }
+
+        QPointer<BiasPlugin> pluginPtr = getCurrentPlugin();
+        pluginPtr -> setActive(true);
     }
 
 
@@ -2490,6 +2514,7 @@ namespace bias
         }
 
         // Temporary
+        pluginHandlerPtr_  = new PluginHandler(this);
         pluginMap_["Stampede"] = new StampedePlugin(this);
         pluginMap_["Grab Detector"] = new GrabDetectorPlugin(pluginImageLabelPtr_,this);
         setupPluginMenu();
@@ -2912,6 +2937,20 @@ namespace bias
         setWindowTitle(windowTitle);
     }
 
+
+    QPointer<BiasPlugin> CameraWindow::getCurrentPlugin()
+    {
+        QPointer<BiasPlugin> selectedPluginPtr;
+        QPointer<QAction> selectedActionPtr = pluginActionGroupPtr_ -> checkedAction();
+        QString selectedText = selectedActionPtr -> text();
+
+        if (pluginMap_.size() > 0)
+        {
+            selectedPluginPtr = pluginMap_[selectedText];
+        }
+        return selectedPluginPtr;
+    }
+
     
     void CameraWindow::setupStatusLabel()
     {
@@ -3041,30 +3080,32 @@ namespace bias
         {
             pluginIt.next();
             QString pluginName = pluginIt.key();
+            QPointer<BiasPlugin> pluginPtr = pluginIt.value();
             QPointer<QAction> pluginActionPtr = menuPluginsPtr_ -> addAction(pluginName);
             pluginActionGroupPtr_ -> addAction(pluginActionPtr);
             pluginActionPtr -> setCheckable(true);
 
+            //if (isFirst)
             //if (QString::compare(pluginIt.key(), QString("Stampede"))==0)
             if (QString::compare(pluginIt.key(), QString("Grab Detector"))==0)
             {
+                //isFirst = false;
                 pluginActionPtr -> setChecked(true);
+                pluginPtr -> setActive(true);
             }
             else
             {
                 pluginActionPtr -> setChecked(false);
+                pluginPtr -> setActive(false);
             }
-
-            //if (isFirst)
-            //{
-            //    pluginActionPtr -> setChecked(true);
-            //    isFirst = false;
-            //}
-            //else
-            //{
-            //    pluginActionPtr -> setChecked(false);
-            //}
         }
+
+        connect(
+                pluginActionGroupPtr_,
+                SIGNAL(triggered(QAction*)),
+                this,
+                SLOT(pluginActionGroupTriggered(QAction*))
+               );
 
     }
 

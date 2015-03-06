@@ -4,8 +4,11 @@
 #include <QMutex>
 #include <QObject>
 #include <QRunnable>
-#include <opencv2/core/core.hpp>
+#include <QPointer>
 #include "lockable.hpp"
+#include <opencv2/core/core.hpp>
+#include "bias_plugin.hpp"
+
 
 namespace bias
 {
@@ -26,13 +29,24 @@ namespace bias
                     QObject *parent=0
                     );
 
+            PluginHandler(
+                    unsigned int cameraNumber,
+                    std::shared_ptr<LockableQueue<StampedImage>> pluginImageQueuePtr, 
+                    BiasPlugin *pluginPtr,
+                    QObject *parent=0
+                    );
+
             void initialize(
                     unsigned int cameraNumber,
-                    std::shared_ptr<LockableQueue<StampedImage>> pluginImageQueuePtr 
+                    std::shared_ptr<LockableQueue<StampedImage>> pluginImageQueuePtr,
+                    BiasPlugin *pluginPtr
                     );
 
             void stop();
 
+            void setCameraNumber(unsigned int cameraNumber);
+            void setImageQueue(std::shared_ptr<LockableQueue<StampedImage>> pluginImageQueuePtr);
+            void setPlugin(BiasPlugin *pluginPtr);
             cv::Mat getImage() const;
 
         signals:
@@ -42,10 +56,12 @@ namespace bias
             bool ready_;
             bool stopped_;
             unsigned int cameraNumber_;
+            QPointer<BiasPlugin> pluginPtr_;
             std::shared_ptr<LockableQueue<StampedImage>> pluginImageQueuePtr_;
-            cv::Mat currentImage_;
 
             void run();
+            void setReadyState();
+
 
     }; // class PluginHandler
 

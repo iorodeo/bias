@@ -5,6 +5,11 @@
 #include "bias_plugin.hpp"
 #include <QPointer>
 
+namespace cv
+{
+    class Mat;
+}
+
 namespace bias
 {
 
@@ -26,16 +31,29 @@ namespace bias
             static int DEFAULT_TRIGGER_FILTER_SIZE;
 
             GrabDetectorPlugin(ImageLabel *imageLabelPtr, QWidget *parentPtr=0);
+            virtual void processFrame(StampedImage frame);
+            virtual cv::Mat getCurrentImage();
 
         protected:
 
             bool triggerArmed_;
             int triggerThreshold_;
             int triggerFilterSize_;
+            double signalMax_;
+            double signalMin_;
+            unsigned long frameCount_;
+            bool found_;
             QPointer<ImageLabel> imageLabelPtr_;
+            
 
             void connectWidgets();
             void initialize();
+
+            cv::Rect getDetectionBoxCv();
+            QRect getDetectionBox();
+            void setDetectionBox(QRect box);
+            int getThreshold();
+            int getMedianFilter();
 
         private slots:
 
@@ -46,7 +64,7 @@ namespace bias
             void durationDblSpinBoxValueChanged(double value);
             void colorSelectPushButtonClicked();
             void trigResetPushButtonClicked();
-            void selectBoxChanged(QRect boxRect);
+            void detectionBoxChanged(QRect boxRect);
 
     };
 }

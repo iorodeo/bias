@@ -1,4 +1,5 @@
 #include "stampede_plugin.hpp"
+#include <opencv2/core/core.hpp>
 
 namespace bias
 {
@@ -11,6 +12,20 @@ namespace bias
         initialize();
     }
 
+    void StampedePlugin::processFrame(StampedImage frame)
+    {
+        acquireLock();
+        currentImage_ = frame.image;
+        releaseLock();
+    }
+
+    cv::Mat StampedePlugin::getCurrentImage()
+    {
+        acquireLock();
+        cv::Mat currentImageCopy = currentImage_.clone();
+        releaseLock();
+        return currentImageCopy;
+    }
 
     // Protected Methods
     // ------------------------------------------------------------------------

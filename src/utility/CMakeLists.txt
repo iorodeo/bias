@@ -18,6 +18,8 @@ if(with_qt_gui)
         basic_image_proc.hpp
         basic_http_server.hpp
         image_label.hpp
+        stamped_image.hpp
+        lockable.hpp
         )
     
     set(
