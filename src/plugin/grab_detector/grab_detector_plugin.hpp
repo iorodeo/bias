@@ -44,7 +44,6 @@ namespace bias
             unsigned long frameCount_;
             bool found_;
             QPointer<ImageLabel> imageLabelPtr_;
-            
 
             void connectWidgets();
             void initialize();

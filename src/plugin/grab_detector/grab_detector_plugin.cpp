@@ -215,6 +215,13 @@ namespace bias
         trigThresholdSpinBoxPtr -> setValue(DEFAULT_TRIGGER_THRESHOLD);
         trigMedianFilterSpinBoxPtr ->  setValue(DEFAULT_TRIGGER_FILTER_SIZE);
 
+        // Setup live plot
+        livePlotPtr -> addGraph();
+        livePlotPtr -> xAxis -> setRange(0, 5);
+        livePlotPtr -> yAxis -> setRange(0,255);
+        livePlotPtr -> xAxis -> setLabel("time (sec)");
+        livePlotPtr -> replot();
+
     }
 
 

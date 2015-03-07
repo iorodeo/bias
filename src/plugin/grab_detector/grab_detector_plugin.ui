@@ -1029,10 +1029,28 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="livePlotTabPtr">
+      <attribute name="title">
+       <string>Live Plot</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <widget class="QCustomPlot" name="livePlotPtr" native="true"/>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QCustomPlot</class>
+   <extends>QWidget</extends>
+   <header>qcustomplot.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

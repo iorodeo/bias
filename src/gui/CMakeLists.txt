@@ -104,5 +104,5 @@ target_link_libraries(
     grab_detector_plugin
     )
 
-qt5_use_modules(test_gui Core Gui Widgets Network)
+qt5_use_modules(test_gui Core Gui Widgets Network PrintSupport)
 

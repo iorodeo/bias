@@ -34,9 +34,9 @@ add_library(
 add_dependencies(grab_detector_plugin ${grab_detector_plugin_FORMS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(.)
-target_link_libraries(grab_detector_plugin ${QT_LIBRARIES} bias_plugin bias_utility)
+target_link_libraries(grab_detector_plugin ${QT_LIBRARIES} bias_plugin bias_utility qcustomplot)
 
-qt5_use_modules(grab_detector_plugin Core Widgets Gui)
+qt5_use_modules(grab_detector_plugin Core Widgets Gui PrintSupport)
 
 set(grab_detector_plugin_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} CACHE FILEPATH "grab detector  include directories")
 
