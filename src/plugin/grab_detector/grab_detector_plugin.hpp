@@ -4,6 +4,10 @@
 #include "ui_grab_detector_plugin.h"
 #include "bias_plugin.hpp"
 #include <QPointer>
+#include <QVector>
+
+
+class QTimer;
 
 namespace cv
 {
@@ -29,6 +33,9 @@ namespace bias
             static int DEFAULT_TRIGGER_ARMED;
             static int DEFAULT_TRIGGER_THRESHOLD;
             static int DEFAULT_TRIGGER_FILTER_SIZE;
+            static int DEFAULT_LIVEPLOT_UPDATE_DT;
+            static double DEFAULT_LIVEPLOT_TIME_WINDOW; 
+            static double DEFAULT_LIVEPLOT_SIGNAL_WINDOW;
 
             GrabDetectorPlugin(ImageLabel *imageLabelPtr, QWidget *parentPtr=0);
             virtual void processFrame(StampedImage frame);
@@ -36,13 +43,18 @@ namespace bias
 
         protected:
 
-            bool triggerArmed_;
-            int triggerThreshold_;
-            int triggerFilterSize_;
+            bool found_;
             double signalMax_;
             double signalMin_;
             unsigned long frameCount_;
-            bool found_;
+
+            int livePlotUpdateDt_;
+            double livePlotTimeWindow_; 
+            double livePlotSignalWindow_;
+            QVector<double> livePlotTimeVec_;
+            QVector<double> livePlotSignalVec_;
+            QPointer<QTimer> livePlotUpdateTimerPtr_;
+
             QPointer<ImageLabel> imageLabelPtr_;
 
             void connectWidgets();
@@ -64,6 +76,7 @@ namespace bias
             void colorSelectPushButtonClicked();
             void trigResetPushButtonClicked();
             void detectionBoxChanged(QRect boxRect);
+            void updateLivePlotOnTimer();
 
     };
 }

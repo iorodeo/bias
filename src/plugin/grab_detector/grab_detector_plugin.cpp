@@ -1,6 +1,7 @@
 #include "grab_detector_plugin.hpp"
 #include "image_label.hpp"
 #include <QtDebug>
+#include <QTimer>
 #include <cv.h>
 #include <opencv2/core/core.hpp>
 #include <sstream>
@@ -18,6 +19,10 @@ namespace bias
     int GrabDetectorPlugin::DEFAULT_TRIGGER_ARMED = false;
     int GrabDetectorPlugin::DEFAULT_TRIGGER_THRESHOLD = 100;
     int GrabDetectorPlugin::DEFAULT_TRIGGER_FILTER_SIZE = 7; // must be odd
+
+    int GrabDetectorPlugin::DEFAULT_LIVEPLOT_UPDATE_DT = 50;
+    double GrabDetectorPlugin::DEFAULT_LIVEPLOT_TIME_WINDOW = 10.0; 
+    double GrabDetectorPlugin::DEFAULT_LIVEPLOT_SIGNAL_WINDOW = 255.0;
 
     // Public Methods
     // ------------------------------------------------------------------------
@@ -51,16 +56,17 @@ namespace bias
         { 
             found = false;
         }
-
-        qDebug() << signalMax << threshold << found;
-
         acquireLock();
         currentImage_ = workingImage;
         signalMin_ = signalMin;
         signalMax_ = signalMax;
         found_ = found;
         frameCount_ = frame.frameCount;
+        livePlotTimeVec_.append(frame.timeStamp);
+        livePlotSignalVec_.append(signalMax);
         releaseLock();
+
+        //qDebug() << signalMax << threshold << found;
     }
 
     cv::Mat GrabDetectorPlugin::getCurrentImage()
@@ -77,21 +83,21 @@ namespace bias
         cv::Scalar boxColor(0,0,255);
         int boxLineWidth = 3;
 
-        std::stringstream minMaxStream;
         std::stringstream foundStream;
-        minMaxStream << "frame: " << frameCount << ", min: " << signalMin << ", max: " << signalMax;
         if (found)
         {
             foundStream << "object found";
         }
-        //std::cout << minMaxStream.str()  << ", " << foundStream.str() << std::endl;
-
         cv::Mat currentImageBGR;
         cv::cvtColor(currentImage, currentImageBGR, CV_GRAY2BGR);
         cv::rectangle(currentImageBGR, boxRect,boxColor, boxLineWidth);
-        cv::putText(currentImageBGR, foundStream.str(), cv::Point(1050,30),CV_FONT_HERSHEY_SIMPLEX, 1.0, boxColor,2);
-        cv::putText(currentImageBGR, minMaxStream.str(), cv::Point(8,30),CV_FONT_HERSHEY_SIMPLEX, 1.0, boxColor,2);
 
+        double fontScale = 1.0;
+        int thickness = 2;
+        int baseline = 0;
+        cv::Size textSize = cv::getTextSize(foundStream.str(), CV_FONT_HERSHEY_SIMPLEX, fontScale, thickness, &baseline);
+        cv::Point textPoint(currentImage.cols/2 - textSize.width/2, textSize.height+baseline);
+        cv::putText(currentImageBGR, foundStream.str(), textPoint, CV_FONT_HERSHEY_SIMPLEX, fontScale, boxColor,thickness);
         return currentImageBGR;
     }
 
@@ -201,7 +207,14 @@ namespace bias
 
     void GrabDetectorPlugin::initialize()
     {
-        triggerArmed_ = false;
+        found_ = false;
+        signalMax_ = 0.0;
+        signalMin_ = 0.0;
+        frameCount_ = 0;
+
+        livePlotUpdateDt_ = DEFAULT_LIVEPLOT_UPDATE_DT;
+        livePlotTimeWindow_ = DEFAULT_LIVEPLOT_TIME_WINDOW;
+        livePlotSignalWindow_ = DEFAULT_LIVEPLOT_SIGNAL_WINDOW;
 
         // Add Dummy com port items for testing
         for (int i=1; i<=5; i++)
@@ -217,10 +230,18 @@ namespace bias
 
         // Setup live plot
         livePlotPtr -> addGraph();
-        livePlotPtr -> xAxis -> setRange(0, 5);
-        livePlotPtr -> yAxis -> setRange(0,255);
+        livePlotPtr -> addGraph();
+        livePlotPtr -> graph(0) -> setPen(QPen(QColor(0,0,255,255),1.5));
+        livePlotPtr -> graph(1) -> setPen(QPen(QColor(100,100,100,255),2.0));
+        livePlotPtr -> xAxis -> setRange(-livePlotTimeWindow_,0);
+        livePlotPtr -> yAxis -> setRange(0,livePlotSignalWindow_);
         livePlotPtr -> xAxis -> setLabel("time (sec)");
         livePlotPtr -> replot();
+
+        // Setup plot update timer
+        livePlotUpdateTimerPtr_ = new QTimer(this);
+        connect(livePlotUpdateTimerPtr_, SIGNAL(timeout()), this, SLOT(updateLivePlotOnTimer()));
+        livePlotUpdateTimerPtr_ -> start(livePlotUpdateDt_);
 
     }
 
@@ -274,9 +295,54 @@ namespace bias
     {
         if (isActive() && pluginsEnabled())
         {
-            qDebug() << box;
             setDetectionBox(box);
         }
+    }
+
+    void GrabDetectorPlugin::updateLivePlotOnTimer()
+    {
+        if (livePlotTimeVec_.empty())
+        {
+            return;
+        }
+        double lastTime = livePlotTimeVec_.last();
+        double firstTime = livePlotTimeVec_.first();
+
+        if (lastTime < firstTime)
+        {
+            livePlotTimeVec_.clear();
+            livePlotSignalVec_.clear();
+            return;
+        }
+
+        while (lastTime - firstTime > livePlotTimeWindow_)
+        {
+            livePlotTimeVec_.pop_front();
+            livePlotSignalVec_.pop_front();
+            firstTime = livePlotTimeVec_.first();
+        }
+
+        double threshold = double(getThreshold());
+        QVector<double> threshSignalVec = {threshold, threshold};
+        QVector<double> threshTimeVec;
+        if (lastTime < livePlotTimeWindow_)
+        {
+            double windowStartTime= -livePlotTimeWindow_ + lastTime;
+            livePlotPtr -> xAxis -> setRange(windowStartTime,lastTime);
+            threshTimeVec = QVector<double>({windowStartTime, lastTime});
+
+        }
+        else
+        {
+            livePlotPtr -> xAxis -> setRange(firstTime, lastTime);
+            threshTimeVec = QVector<double>({firstTime, lastTime});
+        }
+
+        livePlotPtr -> graph(0) -> setData(livePlotTimeVec_,livePlotSignalVec_);
+
+        livePlotPtr -> graph(1) -> setData(threshTimeVec, threshSignalVec);
+        livePlotPtr -> replot();
+
     }
 
 }
