@@ -315,7 +315,10 @@
              </font>
             </property>
             <property name="text">
-             <string>locked</string>
+             <string>Enable left mouse click + drag to set detection box</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
