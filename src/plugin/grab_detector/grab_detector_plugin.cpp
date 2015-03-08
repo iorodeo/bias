@@ -20,7 +20,7 @@ namespace bias
     int GrabDetectorPlugin::DEFAULT_TRIGGER_THRESHOLD = 100;
     int GrabDetectorPlugin::DEFAULT_TRIGGER_FILTER_SIZE = 7; // must be odd
 
-    int GrabDetectorPlugin::DEFAULT_LIVEPLOT_UPDATE_DT = 50;
+    int GrabDetectorPlugin::DEFAULT_LIVEPLOT_UPDATE_DT = 75;
     double GrabDetectorPlugin::DEFAULT_LIVEPLOT_TIME_WINDOW = 10.0; 
     double GrabDetectorPlugin::DEFAULT_LIVEPLOT_SIGNAL_WINDOW = 255.0;
 
@@ -305,6 +305,8 @@ namespace bias
         {
             return;
         }
+
+        acquireLock();
         double lastTime = livePlotTimeVec_.last();
         double firstTime = livePlotTimeVec_.first();
 
@@ -342,6 +344,7 @@ namespace bias
 
         livePlotPtr -> graph(1) -> setData(threshTimeVec, threshSignalVec);
         livePlotPtr -> replot();
+        releaseLock();
 
     }
 
