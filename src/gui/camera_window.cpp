@@ -1750,7 +1750,7 @@ namespace bias
 
 
         // Update plugin preview
-        if (BiasPlugin::pluginsEnabled())
+        if ((BiasPlugin::pluginsEnabled()) && (tabWidgetPtr_ -> currentWidget() == pluginPreviewTabPtr_))
         {
             bool haveNewImage = false;
             cv::Mat pluginImageMat;
