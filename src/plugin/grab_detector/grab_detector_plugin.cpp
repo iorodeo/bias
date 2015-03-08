@@ -314,6 +314,7 @@ namespace bias
         {
             livePlotTimeVec_.clear();
             livePlotSignalVec_.clear();
+            releaseLock();
             return;
         }
 
