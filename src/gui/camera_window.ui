@@ -24,7 +24,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidgetPtr_">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="previewTabPtr_">
        <attribute name="title">
@@ -234,7 +234,7 @@
      <x>0</x>
      <y>0</y>
      <width>581</width>
-     <height>19</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuLoggingPtr_">

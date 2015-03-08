@@ -72,7 +72,7 @@ namespace bias
     cv::Mat GrabDetectorPlugin::getCurrentImage()
     {
         acquireLock();
-        cv::Mat currentImage = currentImage_.clone();
+        cv::Mat currentImage = currentImage_;
         int signalMin = signalMin_;
         int signalMax = signalMax_;
         bool found = found_;
