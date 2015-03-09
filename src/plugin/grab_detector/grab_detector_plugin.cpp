@@ -11,9 +11,9 @@ namespace bias
 {
     // Public static variables 
     // ------------------------------------------------------------------------
-    int GrabDetectorPlugin::DEFAULT_XPOS = 300;
-    int GrabDetectorPlugin::DEFAULT_YPOS = 200;
-    int GrabDetectorPlugin::DEFAULT_WIDTH = 50;
+    int GrabDetectorPlugin::DEFAULT_XPOS = 500;
+    int GrabDetectorPlugin::DEFAULT_YPOS = 500;
+    int GrabDetectorPlugin::DEFAULT_WIDTH = 100;
     int GrabDetectorPlugin::DEFAULT_HEIGHT = 200;
 
     int GrabDetectorPlugin::DEFAULT_TRIGGER_ARMED = false;
@@ -230,6 +230,10 @@ namespace bias
         // Set trigger threshold and filter size (TEMPORARY)
         trigThresholdSpinBoxPtr -> setValue(DEFAULT_TRIGGER_THRESHOLD);
         trigMedianFilterSpinBoxPtr ->  setValue(DEFAULT_TRIGGER_FILTER_SIZE);
+        xPosSpinBoxPtr -> setValue(DEFAULT_XPOS);
+        yPosSpinBoxPtr -> setValue(DEFAULT_YPOS);
+        widthSpinBoxPtr -> setValue(DEFAULT_WIDTH);
+        heightSpinBoxPtr -> setValue(DEFAULT_HEIGHT);
 
         // Setup live plot
         livePlotPtr -> addGraph();
