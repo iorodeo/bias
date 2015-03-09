@@ -105,8 +105,6 @@ namespace bias
     void PluginHandler::run()
     {
         bool done = false;
-        unsigned int imageQueueSize = 0;
-        StampedImage newStampedImage;
 
         if (!ready_) 
         { 
@@ -123,6 +121,8 @@ namespace bias
 
         while (!done)
         {
+            QList<StampedImage> frameList;
+
             // Grab frame from image queue
             pluginImageQueuePtr_ -> acquireLock();
             pluginImageQueuePtr_ -> waitIfEmpty();
@@ -131,15 +131,18 @@ namespace bias
                 pluginImageQueuePtr_ -> releaseLock();
                 break;
             }
-            newStampedImage = pluginImageQueuePtr_ -> front();
-            pluginImageQueuePtr_ -> pop();
-            imageQueueSize =  pluginImageQueuePtr_ -> size();
+            while ( !(pluginImageQueuePtr_ ->  empty()) )
+            {
+                StampedImage stampedImage = pluginImageQueuePtr_ -> front();
+                frameList.append(stampedImage);
+                pluginImageQueuePtr_ -> pop();
+            }
             pluginImageQueuePtr_ -> releaseLock();
 
             // Process Frame with plugin
             if (!pluginPtr_.isNull())
             {
-                pluginPtr_ -> processFrame(newStampedImage);
+                pluginPtr_ -> processFrames(frameList);
             }
             
             acquireLock();

@@ -12,10 +12,12 @@ namespace bias
         initialize();
     }
 
-    void StampedePlugin::processFrame(StampedImage frame)
+    void StampedePlugin::processFrames(QList<StampedImage> frameList)
     {
         acquireLock();
-        currentImage_ = frame.image;
+        StampedImage latestFrame = frameList.back();
+        frameList.clear();
+        currentImage_ = latestFrame.image;
         releaseLock();
     }
 

@@ -35,7 +35,7 @@ namespace bias
         initialize();
     }
 
-    void GrabDetectorPlugin::processFrame(StampedImage frame)
+    void GrabDetectorPlugin::processFrames(QList<StampedImage> frameList)
     {
         int medianFilterSize = getMedianFilter();
         int threshold = getThreshold();
@@ -43,7 +43,10 @@ namespace bias
         double signalMin; 
         double signalMax;
 
-        cv::Mat workingImage = frame.image.clone();
+        StampedImage latestFrame = frameList.back();
+        frameList.clear();
+
+        cv::Mat workingImage = latestFrame.image.clone();
         cv::Rect boxRect = getDetectionBoxCv();
         cv::Mat roiImage = workingImage(boxRect);
         cv::medianBlur(roiImage,roiImage,medianFilterSize);
@@ -61,8 +64,8 @@ namespace bias
         signalMin_ = signalMin;
         signalMax_ = signalMax;
         found_ = found;
-        frameCount_ = frame.frameCount;
-        livePlotTimeVec_.append(frame.timeStamp);
+        frameCount_ = latestFrame.frameCount;
+        livePlotTimeVec_.append(latestFrame.timeStamp);
         livePlotSignalVec_.append(signalMax);
         releaseLock();
 

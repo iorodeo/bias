@@ -17,7 +17,7 @@ namespace bias
         public:
 
             StampedePlugin(QWidget *parent=0);
-            virtual void processFrame(StampedImage frame);
+            virtual void processFrames(QList<StampedImage> frameList);
             virtual cv::Mat getCurrentImage();
 
         protected:

@@ -2,6 +2,7 @@
 #define BIAS_PLUGIN_HPP
 #include <QDialog>
 #include <QWidget>
+#include <QList>
 #include "lockable.hpp"
 #include "stamped_image.hpp"
 
@@ -25,7 +26,7 @@ namespace bias
             void setActive(bool value);
             bool isActive();
 
-            virtual void processFrame(StampedImage frame);
+            virtual void processFrames(QList<StampedImage> frameList);
             virtual cv::Mat getCurrentImage();
 
 

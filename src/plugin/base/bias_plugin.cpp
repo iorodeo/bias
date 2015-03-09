@@ -25,10 +25,12 @@ namespace bias
         return active_;
     }
 
-    void BiasPlugin::processFrame(StampedImage frame) 
+    void BiasPlugin::processFrames(QList<StampedImage> frameList) 
     { 
         acquireLock();
-        currentImage_ = frame.image;
+        StampedImage latestFrame = frameList.back();
+        frameList.clear();
+        currentImage_ = latestFrame.image;
         releaseLock();
     } 
 
