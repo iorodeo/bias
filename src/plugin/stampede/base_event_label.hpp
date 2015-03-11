@@ -14,12 +14,13 @@ namespace bias
 
         public:
 
-            BaseEventLabel(QWidget *parent=0);
+            BaseEventLabel(QWidget *parentPtr=0);
 
         protected:
 
             void initialize();
-            void mousePressEvent(QMouseEvent *event);
+            void mousePressEvent(QMouseEvent *eventPtr);
+            //void mouseMoveEvent(QMouseEvent *eventPtr);
 
     };
 

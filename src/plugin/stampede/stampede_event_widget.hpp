@@ -15,7 +15,7 @@ namespace bias
 
         public:
 
-            StampedeEventWidget(QWidget *parent=0);
+            StampedeEventWidget(QWidget *parentPtr=0);
             void setNameText(QString name);
             QString getNameText();
 
@@ -25,6 +25,9 @@ namespace bias
             QPointer<QSplitter> timelineSplitterPtr_;
 
             void initialize();
+
+        private slots:
+            void timelineSplitterMoved(int pos, int index);
 
 
     };

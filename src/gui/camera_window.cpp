@@ -3086,8 +3086,8 @@ namespace bias
             pluginActionPtr -> setCheckable(true);
 
             //if (isFirst)
-            //if (QString::compare(pluginIt.key(), QString("Stampede"))==0)
-            if (QString::compare(pluginIt.key(), QString("Grab Detector"))==0)
+            if (QString::compare(pluginIt.key(), QString("Stampede"))==0)
+            //if (QString::compare(pluginIt.key(), QString("Grab Detector"))==0)
             {
                 //isFirst = false;
                 pluginActionPtr -> setChecked(true);

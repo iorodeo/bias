@@ -23,6 +23,7 @@ namespace bias
         protected:
             void initialize();
 
+
     };
 
 }
