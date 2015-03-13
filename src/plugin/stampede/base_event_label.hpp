@@ -3,6 +3,8 @@
 
 #include <QLabel>
 #include <QWidget>
+#include <QPointer>
+#include <QAction>
 
 namespace bias
 {
@@ -18,9 +20,20 @@ namespace bias
 
         protected:
 
+            QPointer<QAction> editActionPtr_;
+            QPointer<QAction> insertActionPtr_;
+            QPointer<QAction> removeActionPtr_;
+
             void initialize();
+            void setupContextMenuActions();
             void mousePressEvent(QMouseEvent *eventPtr);
-            //void mouseMoveEvent(QMouseEvent *eventPtr);
+            void contextMenuEvent(QContextMenuEvent *eventPtr);
+
+        private slots:
+
+            void editActionTriggered();
+            void insertActionTriggered();
+            void removeActionTriggered();
 
     };
 

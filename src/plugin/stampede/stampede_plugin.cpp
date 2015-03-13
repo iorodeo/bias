@@ -1,5 +1,6 @@
 #include "stampede_plugin.hpp"
 #include <opencv2/core/core.hpp>
+#include <QtDebug>
 
 namespace bias
 {
@@ -37,5 +38,12 @@ namespace bias
         displayEventWidgetPtr -> setNameText(QString("Display"));
 
     }
+
+    // Private slots
+    // ------------------------------------------------------------------------
+
+
+
+
 
 }

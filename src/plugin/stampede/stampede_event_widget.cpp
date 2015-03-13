@@ -5,6 +5,7 @@
 
 namespace bias
 {
+    double StampedeEventWidget::DEFAULT_DURATION = 5.0;
 
     // Public Methods
     // ------------------------------------------------------------------------
@@ -26,10 +27,19 @@ namespace bias
     }
 
 
+    void StampedeEventWidget::setToolTipMsg(QString msg)
+    {
+        QPoint mousePosGlobal = QCursor::pos();
+        QToolTip::showText(mousePosGlobal, msg, this, rect());
+    }
+
+
     // Protected Methods
     // ------------------------------------------------------------------------
     void StampedeEventWidget::initialize()
     {
+        duration_ = DEFAULT_DURATION;
+
         timelineLayoutPtr_ = new QHBoxLayout(timelineWidgetPtr);
         timelineSplitterPtr_ = new QSplitter(timelineWidgetPtr);
         timelineSplitterPtr_ -> setHandleWidth(0);
@@ -68,7 +78,6 @@ namespace bias
         timelineSplitterPtr_ -> setChildrenCollapsible(false);
     }
 
-
     // Private slots
     // ------------------------------------------------------------------------
 
@@ -78,16 +87,12 @@ namespace bias
         int splitterWidth = splitterSize.width();
 
         double fracPos = double(pos)/double(splitterWidth);
+        double timePos = duration_*fracPos;
 
-        QPoint mousePosGlobal = QCursor::pos();
+        QString toolTipMsg = QString("t=") + QString::number(timePos,'g',3);
+        setToolTipMsg(toolTipMsg);
 
-        QString toolTipMsg = QString("t=") + QString::number(fracPos,'g',2);
-        QToolTip::showText(mousePosGlobal, toolTipMsg, this, rect());
-
-        qDebug() << "index:        " << index; 
-        qDebug() << "fracPos:      " << fracPos; 
-        qDebug() << "global (x,y): " << mousePosGlobal.x() << mousePosGlobal.y();
-        qDebug() << "--";
+        emit timelineMoved(timePos, index);
     }
 
 

@@ -15,14 +15,21 @@ namespace bias
 
         public:
 
+            static double DEFAULT_DURATION; 
+
             StampedeEventWidget(QWidget *parentPtr=0);
             void setNameText(QString name);
             QString getNameText();
+            void setToolTipMsg(QString msg);
+            
+         signals:
+            void timelineMoved(double timePos, int index);
 
         protected:
 
             QPointer<QHBoxLayout> timelineLayoutPtr_;
             QPointer<QSplitter> timelineSplitterPtr_;
+            double duration_;
 
             void initialize();
 
