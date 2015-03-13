@@ -472,8 +472,11 @@ namespace bias
             pluginHandlerPtr_ -> setPlugin(getCurrentPlugin());
             pluginHandlerPtr_ -> setAutoDelete(false);
             threadPoolPtr_ -> start(pluginHandlerPtr_);
-
         } 
+        else
+        {
+            actionPluginsEnabledPtr_ -> setEnabled(false);
+        }
 
         // Set Capture start and stop time
         captureStartDateTime_ = QDateTime::currentDateTime();
@@ -588,14 +591,8 @@ namespace bias
         // Update data GUI information
         startButtonPtr_ -> setText(QString("Start"));
         connectButtonPtr_ -> setEnabled(true);
+        actionPluginsEnabledPtr_ -> setEnabled(true);
 
-        //QString statusMsg("Connected, logging = ");
-        //statusMsg += boolToOnOffQString(logging_);
-        //statusMsg += QString(", timer = ");
-        //statusMsg += boolToOnOffQString(actionTimerEnabledPtr_ -> isChecked());
-        //statusMsg += QString(", Stopped");
-        //statusLabelPtr_ -> setText(statusMsg);
-        
         updateStatusLabel();
         framesPerSec_ = 0.0;
         updateAllImageLabels();
@@ -2200,6 +2197,7 @@ namespace bias
     void CameraWindow::actionDisplayFlipVertTriggered()
     {
         flipVert_ = actionDisplayFlipVertPtr_ -> isChecked();
+        emit imageOrientationChanged(flipVert_, flipHorz_, imageRotation_);
         updateAllImageLabels();
     }
 
@@ -2207,6 +2205,7 @@ namespace bias
     void CameraWindow::actionDisplayFlipHorzTriggered()
     {
         flipHorz_ = actionDisplayFlipHorzPtr_ -> isChecked();
+        emit imageOrientationChanged(flipVert_, flipHorz_, imageRotation_);
         updateAllImageLabels();
     }
 
@@ -2215,6 +2214,7 @@ namespace bias
     {
         QPointer<QAction> actionPtr = qobject_cast<QAction *>(sender());
         imageRotation_ = actionToRotationMap_[actionPtr];
+        emit imageOrientationChanged(flipVert_, flipHorz_, imageRotation_);
         updateAllImageLabels();
     }
 
@@ -2439,8 +2439,11 @@ namespace bias
         capturing_ = false;
         haveImagePixmap_ = false;
         logging_ = false; 
+
         flipVert_ = false;
         flipHorz_ = false;
+        imageRotation_ = IMAGE_ROTATION_0;
+
         haveDefaultVideoFileDir_ = false;
         timeStamp_ = 0.0;
         framesPerSec_ = 0.0;
@@ -2452,7 +2455,6 @@ namespace bias
         BiasPlugin::setPluginsEnabled(true);
         actionPluginsEnabledPtr_ -> setChecked(BiasPlugin::pluginsEnabled());
 
-        imageRotation_ = IMAGE_ROTATION_0;
         colorMapNumber_ = DEFAULT_COLORMAP_NUMBER;
         videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
         captureDurationSec_ = DEFAULT_CAPTURE_DURATION;
@@ -2513,11 +2515,24 @@ namespace bias
             actionServerEnabledPtr_ -> setChecked(false);
         }
 
-        // Temporary
+        // Temporary - plugin development
+        // -------------------------------------------------------------------------------
         pluginHandlerPtr_  = new PluginHandler(this);
         pluginMap_["Stampede"] = new StampedePlugin(this);
         pluginMap_["Grab Detector"] = new GrabDetectorPlugin(pluginImageLabelPtr_,this);
+
+        //// May want to pass these as parameters on creation.
+        //QMapIterator<QString,QPointer<BiasPlugin>> it(pluginMap_);
+        //while (it.hasNext())
+        //{
+        //    it.next();
+        //    it.value() -> setImageOrientation(flipVert_, flipHorz_, imageRotation_);
+        //}
+
         setupPluginMenu();
+
+
+        // -------------------------------------------------------------------------------
 
     }
 
@@ -3086,8 +3101,8 @@ namespace bias
             pluginActionPtr -> setCheckable(true);
 
             //if (isFirst)
-            if (QString::compare(pluginIt.key(), QString("Stampede"))==0)
-            //if (QString::compare(pluginIt.key(), QString("Grab Detector"))==0)
+            //if (QString::compare(pluginIt.key(), QString("Stampede"))==0)
+            if (QString::compare(pluginIt.key(), QString("Grab Detector"))==0)
             {
                 //isFirst = false;
                 pluginActionPtr -> setChecked(true);
@@ -4740,7 +4755,6 @@ namespace bias
             return rtnStatus;
         }
         flipVert_ = orientMap["flipVertical"].toBool();
-        //std::cout << "flipVert_ " << flipVert_ << std::endl;
 
         // Set Orientation Flip Horizontal
         if (!orientMap.contains("flipHorizontal"))
@@ -4768,7 +4782,6 @@ namespace bias
             return rtnStatus;
         }
         flipHorz_ = orientMap["flipHorizontal"].toBool();
-        //std::cout << "flipHorz_ " << flipHorz_ << std::endl;
 
         // Set Rotation
         if (!displayMap.contains("rotation"))

@@ -35,8 +35,11 @@ namespace bias
         initialize();
     }
 
+
     void GrabDetectorPlugin::processFrames(QList<StampedImage> frameList)
     {
+        qDebug() << frameList.size();
+
         int medianFilterSize = getMedianFilter();
         int threshold = getThreshold();
         bool found = false;
@@ -205,6 +208,13 @@ namespace bias
                 SLOT(detectionBoxChanged(QRect))
                );
 
+        connect(
+                parentWidget(),
+                SIGNAL(imageOrientationChanged(bool,bool,ImageRotationType)),
+                this,
+                SLOT(imageOrientationChanged(bool,bool,ImageRotationType))
+               );
+
     }
 
 
@@ -218,6 +228,7 @@ namespace bias
         livePlotUpdateDt_ = DEFAULT_LIVEPLOT_UPDATE_DT;
         livePlotTimeWindow_ = DEFAULT_LIVEPLOT_TIME_WINDOW;
         livePlotSignalWindow_ = DEFAULT_LIVEPLOT_SIGNAL_WINDOW;
+
 
         // Add Dummy com port items for testing
         for (int i=1; i<=5; i++)
@@ -355,5 +366,6 @@ namespace bias
         releaseLock();
 
     }
+
 
 }

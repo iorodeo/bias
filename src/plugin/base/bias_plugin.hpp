@@ -5,6 +5,7 @@
 #include <QList>
 #include "lockable.hpp"
 #include "stamped_image.hpp"
+//#include "camera_facade_fwd.hpp"
 
 namespace cv
 {
@@ -25,10 +26,10 @@ namespace bias
 
             void setActive(bool value);
             bool isActive();
+            //void setImageOrientation(bool flipVert, bool flipHorz, ImageRotationType imageRot);
 
             virtual void processFrames(QList<StampedImage> frameList);
             virtual cv::Mat getCurrentImage();
-
 
         protected:
 
@@ -36,6 +37,14 @@ namespace bias
             bool active_;
 
             cv::Mat currentImage_;
+            //bool flipVert_;
+            //bool flipHorz_;
+            //ImageRotationType imageRot_;
+
+
+        //private slots:
+
+        //    void imageOrientationChanged(bool flipVert, bool flipHorz, ImageRotationType iamgeRot);
             
     };
 

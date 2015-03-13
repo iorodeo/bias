@@ -1,4 +1,5 @@
 #include "bias_plugin.hpp"
+//#include "camera_facade.hpp"
 #include <QtDebug>
 #include <opencv2/core/core.hpp>
 
@@ -24,6 +25,13 @@ namespace bias
     {
         return active_;
     }
+
+    //void BiasPlugin::setImageOrientation(bool flipVert, bool flipHorz, ImageRotationType imageRot)
+    //{
+    //    flipVert_ = flipVert;
+    //    flipHorz_ = flipHorz;
+    //    imageRot_ = imageRot;
+    //}
 
     void BiasPlugin::processFrames(QList<StampedImage> frameList) 
     { 
@@ -60,5 +68,13 @@ namespace bias
         pluginsEnabled_ = value;
     }
 
+
+    // Private slots
+    // ------------------------------------------------------------------------
+
+    //void BiasPlugin::imageOrientationChanged(bool flipVert, bool flipHorz, ImageRotationType imageRot)
+    //{
+    //    setImageOrientation(flipVert,flipHorz,imageRot);
+    //}
 
 }

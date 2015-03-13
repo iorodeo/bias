@@ -38,6 +38,7 @@ namespace bias
             static double DEFAULT_LIVEPLOT_SIGNAL_WINDOW;
 
             GrabDetectorPlugin(ImageLabel *imageLabelPtr, QWidget *parentPtr=0);
+
             virtual void processFrames(QList<StampedImage> frameList);
             virtual cv::Mat getCurrentImage();
 

@@ -122,6 +122,7 @@ namespace bias
             void imageCaptureStarted(bool logging);
             void imageCaptureStopped();
             void format7SettingsChanged();
+            void imageOrientationChanged(bool flipVert, bool flipHorz, ImageRotationType imageRot);
 
         protected:
 

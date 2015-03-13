@@ -8,6 +8,12 @@
 #include <QThread>
 #include <opencv2/core/core.hpp>
 
+// TEMPOERARY
+// ----------------------------------------
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+// ----------------------------------------
+
 namespace bias {
 
     unsigned int ImageGrabber::DEFAULT_NUM_STARTUP_SKIP = 2;
@@ -125,6 +131,16 @@ namespace bias {
         stopped_ = false;
         releaseLock();
 
+        // TEMPORARY
+        // ------------------------------------------------------------------------------
+        //cv::VideoCapture fileCapture;
+        //fileCapture.open("movie_comb.avi");
+        //bool fileOpen = fileCapture.isOpened();
+        //unsigned int numFrames = (unsigned int)(fileCapture.get(CV_CAP_PROP_FRAME_COUNT));
+        //int fourcc = int(fileCapture.get(CV_CAP_PROP_FOURCC));
+        // -------------------------------------------------------------------------------
+        
+
         // Grab images from camera until the done signal is given
         while (!done)
         {
@@ -203,6 +219,28 @@ namespace bias {
                     emit startTimer();
                 }
                 //std::cout << frameCount << ", " << dtEstimate << ", " << timeStampDbl << std::endl;
+                
+                // TEMPORARY
+                // --------------------------------------------------------------------- 
+                //cv::Mat fileMat;
+                //StampedImage fileImg;
+                //if (fileOpen && frameCount < numFrames)
+                //{
+                //    fileCapture >> fileMat; 
+                //    cv::Mat  fileMatMono = cv::Mat(fileMat.size(), CV_8UC1);
+                //    cvtColor(fileMat, fileMatMono, CV_RGB2GRAY);
+                //    
+                //    cv::Mat camSizeImage = cv::Mat(stampImg.image.size(), CV_8UC1);
+                //    int padx = camSizeImage.rows - fileMatMono.rows;
+                //    int pady = camSizeImage.cols - fileMatMono.cols;
+
+                //    cv::Scalar padColor = cv::Scalar(0);
+                //    cv::copyMakeBorder(fileMatMono, camSizeImage, 0, pady, 0, padx, cv::BORDER_CONSTANT, cv::Scalar(0));
+                //    stampImg.image = camSizeImage;
+
+                //    std::cout << "frame number: " << frameCount << std::endl;
+                //}
+                // ---------------------------------------------------------------------
 
 
                 // Set image data timestamp, framecount and frame interval estimate

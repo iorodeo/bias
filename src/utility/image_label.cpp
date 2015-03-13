@@ -1,4 +1,5 @@
 #include "image_label.hpp"
+#include "camera_facade.hpp"
 #include <QtDebug>
 #include <QMouseEvent>
 #include <QPointer>
@@ -14,11 +15,12 @@ namespace bias
 
     ImageLabel::ImageLabel(QWidget *parent) : QLabel(parent)
     {
+        setOrientation(false,false,IMAGE_ROTATION_0);
         boxInProgress_ = false;
         boxBegin_ = QPoint(0,0);
         boxEnd_ = QPoint(0,0);
-    }
 
+    }
 
     void ImageLabel::setScaleFactor(float scaleFactor)
     {
@@ -49,6 +51,63 @@ namespace bias
             pixmapRect = alignedRect.intersected(labelRect);
         }
         return pixmapRect;
+    }
+
+
+    void ImageLabel::setFlipVert(bool flipVert)
+    {
+        flipVert_ = flipVert;
+    }
+
+
+    void ImageLabel::setFlipHorz(bool flipHorz)
+    {
+        flipHorz_ = flipHorz;
+    }
+
+
+    void ImageLabel::setImageRotation(ImageRotationType imageRot)
+    {
+        imageRot_ = imageRot;
+    }
+
+
+    bool ImageLabel::getFlipVert()
+    {
+        return flipVert_;
+    }
+
+
+    bool ImageLabel::getFlipHorz()
+    {
+        return flipHorz_;
+    }
+
+
+    ImageRotationType ImageLabel::getImageRotation()
+    {
+        return imageRot_;
+    }
+
+    void ImageLabel::setOrientation(bool flipVert, bool flipHorz, ImageRotationType imageRot)
+    {
+        flipVert_ = flipVert;
+        flipHorz_ = flipHorz;
+        imageRot_ = imageRot; 
+    }
+
+    // Publix slots
+    // ------------------------------------------------------------------------
+
+    void ImageLabel::setPixmap(const QPixmap &pixmap)
+    {
+        QLabel::setPixmap(pixmap);
+    }
+
+
+    void ImageLabel::setPixmapWithFrameCount(const QPixmap &pixmap, unsigned long frameCount)
+    {
+        QLabel::setPixmap(pixmap);
     }
 
 
