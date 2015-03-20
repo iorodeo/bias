@@ -5,7 +5,8 @@
 
 namespace bias
 {
-    double StampedeEventWidget::DEFAULT_DURATION = 5.0;
+    int StampedeEventWidget::tmp_count = 0;
+    const double StampedeEventWidget::DEFAULT_DURATION = 5.0;
 
     // Public Methods
     // ------------------------------------------------------------------------
@@ -68,7 +69,15 @@ namespace bias
             }
             else
             {
-                labelPalette.setColor(QPalette::Window, QColor(0,0,255));
+                if (tmp_count == 0)
+                {
+                    labelPalette.setColor(QPalette::Window, QColor(0,0,255));
+                }
+                else
+                {
+                    labelPalette.setColor(QPalette::Window, QColor(255,255,0));
+                }
+
             }
             labelPalette.setColor(QPalette::WindowText, QColor(0,0,0));
             testLabelPtr -> setAutoFillBackground(true);
@@ -76,6 +85,7 @@ namespace bias
             timelineSplitterPtr_  -> addWidget(testLabelPtr);
         }
         timelineSplitterPtr_ -> setChildrenCollapsible(false);
+        tmp_count++;
     }
 
     // Private slots

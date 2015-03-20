@@ -15,7 +15,8 @@ namespace bias
 
         public:
 
-            static double DEFAULT_DURATION; 
+            static const double DEFAULT_DURATION; 
+            static int tmp_count;
 
             StampedeEventWidget(QWidget *parentPtr=0);
             void setNameText(QString name);
@@ -30,6 +31,7 @@ namespace bias
             QPointer<QHBoxLayout> timelineLayoutPtr_;
             QPointer<QSplitter> timelineSplitterPtr_;
             double duration_;
+            QColor color_;
 
             void initialize();
 
