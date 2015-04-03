@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>456</width>
-    <height>271</height>
+    <width>649</width>
+    <height>365</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Grab Detector Plugin</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="font">
@@ -47,6 +47,24 @@
             <layout class="QHBoxLayout" name="horizontalLayout_10">
              <item>
               <widget class="QLabel" name="comPortLabelPtr">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>80</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>80</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="font">
                 <font>
                  <weight>50</weight>
@@ -54,7 +72,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>Port </string>
+                <string>Serial Port   </string>
                </property>
               </widget>
              </item>
@@ -70,6 +88,12 @@
                 <size>
                  <width>75</width>
                  <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>75</width>
+                 <height>16777215</height>
                 </size>
                </property>
                <property name="editable">
@@ -139,6 +163,29 @@
               </widget>
              </item>
              <item>
+              <spacer name="horizontalSpacer_8">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>25</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="refreshListPushButtonPtr">
+               <property name="text">
+                <string>Refresh List</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <spacer name="horizontalSpacer_10">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
@@ -170,63 +217,6 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
-           <widget class="QWidget" name="levelWidgetPtr" native="true">
-            <layout class="QHBoxLayout" name="horizontalLayout_12">
-             <item>
-              <widget class="QLabel" name="levelLabelPtr">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>80</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>80</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>Level (V)</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QDoubleSpinBox" name="levelDblSpinBoxPtr">
-               <property name="maximum">
-                <double>5.000000000000000</double>
-               </property>
-               <property name="singleStep">
-                <double>0.500000000000000</double>
-               </property>
-               <property name="value">
-                <double>4.500000000000000</double>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_8">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
            <widget class="QWidget" name="durationWidgetPtr" native="true">
             <layout class="QHBoxLayout" name="horizontalLayout_14">
              <item>
@@ -256,11 +246,46 @@
              </item>
              <item>
               <widget class="QDoubleSpinBox" name="durationDblSpinBoxPtr">
+               <property name="minimumSize">
+                <size>
+                 <width>75</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>75</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="singleStep">
                 <double>0.500000000000000</double>
                </property>
                <property name="value">
                 <double>1.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_15">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>15</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="outputTestPushButtonPtr">
+               <property name="text">
+                <string>Test</string>
                </property>
               </widget>
              </item>
@@ -390,7 +415,7 @@
              <number>9999</number>
             </property>
             <property name="singleStep">
-             <number>1</number>
+             <number>5</number>
             </property>
             <property name="value">
              <number>0</number>
@@ -462,7 +487,7 @@
              <number>9999</number>
             </property>
             <property name="singleStep">
-             <number>1</number>
+             <number>5</number>
             </property>
             <property name="value">
              <number>0</number>
@@ -537,7 +562,7 @@
              <number>9999</number>
             </property>
             <property name="singleStep">
-             <number>1</number>
+             <number>5</number>
             </property>
             <property name="value">
              <number>0</number>
@@ -609,7 +634,7 @@
              <number>9999</number>
             </property>
             <property name="singleStep">
-             <number>1</number>
+             <number>5</number>
             </property>
             <property name="value">
              <number>0</number>
@@ -762,7 +787,7 @@
       <attribute name="title">
        <string>Trigger</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <widget class="QWidget" name="trigEnabledWidgetPtr" native="true">
          <layout class="QHBoxLayout" name="horizontalLayout_8">
@@ -776,13 +801,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>80</width>
+              <width>62</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>80</width>
+              <width>62</width>
               <height>16777215</height>
              </size>
             </property>
@@ -798,24 +823,21 @@
            </widget>
           </item>
           <item>
-           <spacer name="horizontalSpacer_7">
+           <spacer name="horizontalSpacer_6">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>337</width>
+              <width>15</width>
               <height>20</height>
              </size>
             </property>
            </spacer>
           </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QWidget" name="trigThresholdWidgetPtr" native="true">
-         <layout class="QHBoxLayout" name="horizontalLayout_7">
           <item>
            <widget class="QLabel" name="trigThresholdLabelPtr">
             <property name="sizePolicy">
@@ -826,13 +848,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>80</width>
+              <width>62</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>80</width>
+              <width>62</width>
               <height>16777215</height>
              </size>
             </property>
@@ -858,6 +880,9 @@
             <property name="maximum">
              <number>255</number>
             </property>
+            <property name="singleStep">
+             <number>5</number>
+            </property>
             <property name="value">
              <number>99</number>
             </property>
@@ -868,20 +893,17 @@
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>80</width>
+              <width>15</width>
               <height>20</height>
              </size>
             </property>
            </spacer>
           </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QWidget" name="trigMedianFilterWidgetPtr" native="true">
-         <layout class="QHBoxLayout" name="horizontalLayout_6">
           <item>
            <widget class="QLabel" name="trigMedianFilterLabelPtr">
             <property name="sizePolicy">
@@ -892,13 +914,13 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>80</width>
+              <width>72</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>80</width>
+              <width>72</width>
               <height>16777215</height>
              </size>
             </property>
@@ -940,20 +962,17 @@
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>367</width>
+              <width>15</width>
               <height>20</height>
              </size>
             </property>
            </spacer>
           </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QWidget" name="trigStateWidgetPtr" native="true">
-         <layout class="QHBoxLayout" name="horizontalLayout_9">
           <item>
            <widget class="QLabel" name="trigStateLabelPtr">
             <property name="sizePolicy">
@@ -981,7 +1000,7 @@
              </font>
             </property>
             <property name="text">
-             <string>State:  Armed</string>
+             <string>State: Armed</string>
             </property>
            </widget>
           </item>
@@ -999,13 +1018,13 @@
            </widget>
           </item>
           <item>
-           <spacer name="horizontalSpacer_6">
+           <spacer name="horizontalSpacer_7">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>334</width>
+              <width>337</width>
               <height>20</height>
              </size>
             </property>
@@ -1015,27 +1034,14 @@
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
+        <widget class="QCustomPlot" name="livePlotPtr" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>45</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="livePlotTabPtr">
-      <attribute name="title">
-       <string>Live Plot</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_6">
-       <item>
-        <widget class="QCustomPlot" name="livePlotPtr" native="true"/>
+        </widget>
        </item>
       </layout>
      </widget>

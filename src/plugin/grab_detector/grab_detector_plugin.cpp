@@ -1,5 +1,6 @@
 #include "grab_detector_plugin.hpp"
 #include "image_label.hpp"
+#include "pulse_device.hpp"
 #include <QtDebug>
 #include <QTimer>
 #include <cv.h>
@@ -18,7 +19,7 @@ namespace bias
 
     int GrabDetectorPlugin::DEFAULT_TRIGGER_ARMED = false;
     int GrabDetectorPlugin::DEFAULT_TRIGGER_THRESHOLD = 100;
-    int GrabDetectorPlugin::DEFAULT_TRIGGER_FILTER_SIZE = 7; // must be odd
+    int GrabDetectorPlugin::DEFAULT_TRIGGER_FILTER_SIZE = 3; // must be odd
 
     int GrabDetectorPlugin::DEFAULT_LIVEPLOT_UPDATE_DT = 75;
     double GrabDetectorPlugin::DEFAULT_LIVEPLOT_TIME_WINDOW = 10.0; 
@@ -174,10 +175,10 @@ namespace bias
                );
 
         connect(
-                levelDblSpinBoxPtr,
-                SIGNAL(valueChanged(double)),
+                outputTestPushButtonPtr,
+                SIGNAL(clicked()),
                 this,
-                SLOT(levelDblSpinBoxValueChanged(double))
+                SLOT(outputTestPushButtonClicked())
                );
 
         connect(
@@ -229,15 +230,6 @@ namespace bias
         livePlotTimeWindow_ = DEFAULT_LIVEPLOT_TIME_WINDOW;
         livePlotSignalWindow_ = DEFAULT_LIVEPLOT_SIGNAL_WINDOW;
 
-
-        // Add Dummy com port items for testing
-        for (int i=1; i<=5; i++)
-        {
-            QString comPortStr = QString("COM%1").arg(i);
-            comPortComboBoxPtr -> addItem(comPortStr);
-        }
-
-
         // Set trigger threshold and filter size (TEMPORARY)
         trigThresholdSpinBoxPtr -> setValue(DEFAULT_TRIGGER_THRESHOLD);
         trigMedianFilterSpinBoxPtr ->  setValue(DEFAULT_TRIGGER_FILTER_SIZE);
@@ -261,6 +253,16 @@ namespace bias
         connect(livePlotUpdateTimerPtr_, SIGNAL(timeout()), this, SLOT(updateLivePlotOnTimer()));
         livePlotUpdateTimerPtr_ -> start(livePlotUpdateDt_);
 
+
+        // Get list of serial ports and populate comports 
+        serialInfoList_ = QSerialPortInfo::availablePorts();
+        qDebug() << "serialInfoList_.size() =  " << serialInfoList_.size();
+        for (int i=0; i<serialInfoList_.size(); i++)
+        {
+            QSerialPortInfo serialInfo = serialInfoList_.at(i);
+            comPortComboBoxPtr -> addItem(serialInfo.portName());
+        }
+        
     }
 
 
@@ -284,6 +286,10 @@ namespace bias
         qDebug() << "connect button clicked";
     }
 
+    void GrabDetectorPlugin::outputTestPushButtonClicked()
+    {
+        qDebug() << "output test button clicked";
+    }
 
     void GrabDetectorPlugin::levelDblSpinBoxValueChanged(double value)
     {

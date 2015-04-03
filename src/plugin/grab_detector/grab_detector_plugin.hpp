@@ -1,11 +1,12 @@
 #ifndef GRAB_DETECTOR_PLUGIN_HPP
 #define GRAB_DETECTOR_PLUGIN_HPP
-
 #include "ui_grab_detector_plugin.h"
 #include "bias_plugin.hpp"
 #include <QPointer>
 #include <QVector>
-
+#include <QList>
+#include <QSerialPort>
+#include <QSerialPortInfo>
 
 class QTimer;
 
@@ -55,8 +56,9 @@ namespace bias
             QVector<double> livePlotTimeVec_;
             QVector<double> livePlotSignalVec_;
             QPointer<QTimer> livePlotUpdateTimerPtr_;
-
             QPointer<ImageLabel> imageLabelPtr_;
+
+            QList<QSerialPortInfo> serialInfoList_;
 
             void connectWidgets();
             void initialize();
@@ -72,6 +74,7 @@ namespace bias
             void comPortComboBoxIndexChanged(QString text);
             void connectPushButtonPressed();
             void connectPushButtonClicked();
+            void outputTestPushButtonClicked();
             void levelDblSpinBoxValueChanged(double value);
             void durationDblSpinBoxValueChanged(double value);
             void colorSelectPushButtonClicked();

@@ -13,11 +13,13 @@ set(
 set(
     grab_detector_plugin_HEADERS 
     grab_detector_plugin.hpp
+    pulse_device.hpp
     )
 
 set(
     grab_detector_plugin_SOURCES 
     grab_detector_plugin.cpp
+    pulse_device.cpp
     )
 
 
@@ -36,7 +38,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(.)
 target_link_libraries(grab_detector_plugin ${QT_LIBRARIES} bias_plugin bias_utility bias_camera_facade qcustomplot)
 
-qt5_use_modules(grab_detector_plugin Core Widgets Gui PrintSupport)
+qt5_use_modules(grab_detector_plugin Core Widgets Gui PrintSupport SerialPort)
 
 set(grab_detector_plugin_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} CACHE FILEPATH "grab detector  include directories")
 
