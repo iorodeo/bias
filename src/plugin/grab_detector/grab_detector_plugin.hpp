@@ -2,6 +2,7 @@
 #define GRAB_DETECTOR_PLUGIN_HPP
 #include "ui_grab_detector_plugin.h"
 #include "bias_plugin.hpp"
+#include "pulse_device.hpp"
 #include <QPointer>
 #include <QVector>
 #include <QList>
@@ -43,9 +44,17 @@ namespace bias
             virtual void processFrames(QList<StampedImage> frameList);
             virtual cv::Mat getCurrentImage();
 
+            void setTriggerEnabled(bool value);
+
+        signals:
+
+            void triggerFired();
+
         protected:
 
             bool found_;
+            bool triggerArmed_;
+            bool triggerEnabled_;
             double signalMax_;
             double signalMin_;
             unsigned long frameCount_;
@@ -59,6 +68,7 @@ namespace bias
             QPointer<ImageLabel> imageLabelPtr_;
 
             QList<QSerialPortInfo> serialInfoList_;
+            PulseDevice pulseDevice_;
 
             void connectWidgets();
             void initialize();
@@ -69,18 +79,21 @@ namespace bias
             int getThreshold();
             int getMedianFilter();
 
+            void updateTrigStateInfo();
+
         private slots:
 
             void comPortComboBoxIndexChanged(QString text);
-            void connectPushButtonPressed();
             void connectPushButtonClicked();
             void outputTestPushButtonClicked();
             void levelDblSpinBoxValueChanged(double value);
             void durationDblSpinBoxValueChanged(double value);
             void colorSelectPushButtonClicked();
             void trigResetPushButtonClicked();
+            void trigEnabledCheckBoxStateChanged(int state);
             void detectionBoxChanged(QRect boxRect);
             void updateLivePlotOnTimer();
+            void onTriggerFired();
 
     };
 }

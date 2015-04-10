@@ -1,5 +1,6 @@
 #include "pulse_device.hpp"
 #include <QThread>
+#include <QDebug>
 
 namespace bias
 {
@@ -27,6 +28,11 @@ namespace bias
             QThread::msleep(resetSleepDt_);
             readAll();
         }
+        setBaudRate(DEFAULT_BAUDRATE); 
+        setDataBits(DEFAULT_DATABITS); 
+        setFlowControl(DEFAULT_FLOWCONTROL); 
+        setParity(DEFAULT_PARITY); 
+        setStopBits(DEFAULT_STOPBITS); 
         return isOpen;
     }
 
@@ -41,19 +47,43 @@ namespace bias
 
     bool PulseDevice::stopPulse()
     {
-        return true; // TEMPORARY
+        QByteArray cmd;
+        cmd.append(QString("[%1,]\n").arg(CMD_ID_STOP_PULSE));
+        return writeCmd(cmd);
     }
 
 
     bool PulseDevice::setPulseLength(unsigned long pulseLength)
     {
-        return true; // TEMPORARY
+        QByteArray cmd;
+        cmd.append(QString("[%1,%2]\n").arg(CMD_ID_SET_PULSE_LENGTH).arg(pulseLength));
+        return writeCmd(cmd);
     }
 
 
     bool PulseDevice::getPulseLength(unsigned long &pulseLength)
     {
-        return true; // TEMPORARY
+        QByteArray cmd;
+        cmd.append(QString("[%1,]\n").arg(CMD_ID_GET_PULSE_LENGTH));
+
+        QByteArray rsp;
+        bool rspOk = writeCmdGetRsp(cmd,rsp);
+
+        bool rtnVal = false;
+        if ( rspOk && (rsp.size() > 0) )
+        {
+            qDebug() << rsp;
+            rsp = rsp.trimmed();
+
+            bool convOk;
+            qDebug() << rsp;
+            pulseLength = rsp.toULong(&convOk);
+            if (convOk)
+            {
+                rtnVal = true;
+            }
+        }
+        return rtnVal;
     }
 
 
@@ -61,11 +91,6 @@ namespace bias
     // ------------------------------------------------------------------------
     void PulseDevice::initialize()
     {
-        setBaudRate(DEFAULT_BAUDRATE); 
-        setDataBits(DEFAULT_DATABITS); 
-        setFlowControl(DEFAULT_FLOWCONTROL); 
-        setParity(DEFAULT_PARITY); 
-        setStopBits(DEFAULT_STOPBITS); 
         waitForTimeout_ = DEFAULT_WAITFOR_TIMEOUT;
         resetSleepDt_ = DEFAULT_RESET_SLEEP_DT;
     }

@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     QSerialPort serial; 
 
     serial.setPort(serialInfoList.at(0));
-    serial.setBaudRate(QSerialPort::Baud115200);
+    serial.setBaudRate(QSerialPort::Baud9600);
     serial.setDataBits(QSerialPort::Data8);
     serial.setFlowControl(QSerialPort::NoFlowControl);
     serial.setParity(QSerialPort::NoParity);

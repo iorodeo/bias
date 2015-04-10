@@ -1,8 +1,8 @@
 #include "grab_detector_plugin.hpp"
 #include "image_label.hpp"
-#include "pulse_device.hpp"
 #include <QtDebug>
 #include <QTimer>
+#include <QMessageBox>
 #include <cv.h>
 #include <opencv2/core/core.hpp>
 #include <sstream>
@@ -39,6 +39,8 @@ namespace bias
 
     void GrabDetectorPlugin::processFrames(QList<StampedImage> frameList)
     {
+        // NOTE: called in separate thread.
+        
         qDebug() << frameList.size();
 
         int medianFilterSize = getMedianFilter();
@@ -71,6 +73,13 @@ namespace bias
         frameCount_ = latestFrame.frameCount;
         livePlotTimeVec_.append(latestFrame.timeStamp);
         livePlotSignalVec_.append(signalMax);
+        if (found && triggerArmed_)
+        {
+            if (triggerEnabled_)
+            {
+                emit triggerFired();
+            }
+        }
         releaseLock();
 
         //qDebug() << signalMax << threshold << found;
@@ -148,6 +157,13 @@ namespace bias
         return trigMedianFilterSpinBoxPtr -> value();
     }
 
+    void GrabDetectorPlugin::setTriggerEnabled(bool value)
+    {
+        triggerEnabled_ = value;
+        trigEnabledCheckBoxPtr -> setChecked(value);
+
+    }
+
     // Protected Methods
     // ------------------------------------------------------------------------
     
@@ -159,13 +175,6 @@ namespace bias
                 this,
                 SLOT(comPortComboBoxIndexChanged(QString))
                 );
-
-        connect(
-                connectPushButtonPtr,
-                SIGNAL(pressed()),
-                this,
-                SLOT(connectPushButtonPressed())
-               );
 
         connect(
                 connectPushButtonPtr,
@@ -203,6 +212,13 @@ namespace bias
                );
 
         connect(
+                trigEnabledCheckBoxPtr,
+                SIGNAL(stateChanged(int)),
+                this,
+                SLOT(trigEnabledCheckBoxStateChanged(int))
+               );
+
+        connect(
                 imageLabelPtr_,
                 SIGNAL(selectBoxChanged(QRect)),
                 this,
@@ -216,12 +232,21 @@ namespace bias
                 SLOT(imageOrientationChanged(bool,bool,ImageRotationType))
                );
 
+        connect(
+                this,
+                SIGNAL(triggerFired()),
+                this,
+                SLOT(onTriggerFired())
+               );
+               
+
     }
 
 
     void GrabDetectorPlugin::initialize()
     {
         found_ = false;
+        triggerArmed_ = false;
         signalMax_ = 0.0;
         signalMin_ = 0.0;
         frameCount_ = 0;
@@ -253,7 +278,6 @@ namespace bias
         connect(livePlotUpdateTimerPtr_, SIGNAL(timeout()), this, SLOT(updateLivePlotOnTimer()));
         livePlotUpdateTimerPtr_ -> start(livePlotUpdateDt_);
 
-
         // Get list of serial ports and populate comports 
         serialInfoList_ = QSerialPortInfo::availablePorts();
         qDebug() << "serialInfoList_.size() =  " << serialInfoList_.size();
@@ -262,7 +286,37 @@ namespace bias
             QSerialPortInfo serialInfo = serialInfoList_.at(i);
             comPortComboBoxPtr -> addItem(serialInfo.portName());
         }
-        
+
+        statusLabelPtr -> setText(QString("Status: not connected "));
+        devOutputGroupBoxPtr -> setEnabled(false);
+
+        setTriggerEnabled(true);
+        updateTrigStateInfo();
+
+
+    }
+
+    void GrabDetectorPlugin::updateTrigStateInfo()
+    {
+        if (triggerArmed_)
+        {
+            trigStateLabelPtr -> setText("State: Ready");
+        }
+        else
+        {
+            trigStateLabelPtr -> setText("State: Stopped");
+        }
+
+        if (trigEnabledCheckBoxPtr -> isChecked())
+        {
+            trigStateLabelPtr -> setEnabled(true);
+            trigResetPushButtonPtr -> setEnabled(true);
+        }
+        else
+        {
+            trigStateLabelPtr -> setEnabled(false);
+            trigResetPushButtonPtr -> setEnabled(false);
+        }
     }
 
 
@@ -275,20 +329,68 @@ namespace bias
     }
 
 
-    void GrabDetectorPlugin::connectPushButtonPressed()
-    {
-        qDebug() << "connect button pressed";
-    }
-
-
     void GrabDetectorPlugin::connectPushButtonClicked()
     {
-        qDebug() << "connect button clicked";
+        tabWidgetPtr -> setEnabled(false);
+        tabWidgetPtr -> repaint(); 
+
+        if (pulseDevice_.isOpen())
+        {
+            statusLabelPtr -> setText(QString("Status: disconnecting ... "));
+            statusLabelPtr -> repaint();
+            pulseDevice_.close();
+        }
+        else
+        {
+            statusLabelPtr -> setText(QString("Status: connecting ..."));
+            statusLabelPtr -> repaint();
+            if (serialInfoList_.size() > 0)
+            {
+                int index = comPortComboBoxPtr -> currentIndex();
+                QSerialPortInfo serialInfo = serialInfoList_.at(index);
+                pulseDevice_.setPort(serialInfo);
+                pulseDevice_.open();
+            }
+        }
+
+        // Check to see if device is opene or closed and set status string accordingly
+        if (pulseDevice_.isOpen())
+        {
+            statusLabelPtr -> setText(QString("Status: connected"));
+            connectPushButtonPtr -> setText("Disconnect");
+            refreshListPushButtonPtr -> setEnabled(false);
+            comPortComboBoxPtr -> setEnabled(false);
+            devOutputGroupBoxPtr -> setEnabled(true);
+
+            //unsigned long pulseLength;
+            //bool ok = pulseDevice_.getPulseLength(pulseLength);
+            //qDebug() << "pulseLength = " << pulseLength;
+
+        }
+        else
+        {
+            statusLabelPtr -> setText(QString("Status: not connected"));
+            connectPushButtonPtr -> setText("Connect");
+            refreshListPushButtonPtr -> setEnabled(true);
+            comPortComboBoxPtr -> setEnabled(true);
+            devOutputGroupBoxPtr -> setEnabled(false);
+        }
+        tabWidgetPtr -> setEnabled(true);
+
     }
 
     void GrabDetectorPlugin::outputTestPushButtonClicked()
     {
-        qDebug() << "output test button clicked";
+        if (pulseDevice_.isOpen())
+        {
+            bool ok = pulseDevice_.startPulse(); 
+            if (!ok)
+            {
+                QString msgTitle("PulseDevice Error");
+                QString msgText("Error sending command to device");
+                QMessageBox::warning(this,msgTitle,msgText);
+            }
+        }
     }
 
     void GrabDetectorPlugin::levelDblSpinBoxValueChanged(double value)
@@ -311,7 +413,22 @@ namespace bias
 
     void GrabDetectorPlugin::trigResetPushButtonClicked()
     {
-        qDebug() << "trigger reset push button clicked";
+        triggerArmed_ = true;
+        updateTrigStateInfo();
+    }
+
+
+    void GrabDetectorPlugin::trigEnabledCheckBoxStateChanged(int state)
+    {
+        if (state == Qt::Unchecked)
+        {
+            triggerEnabled_ = false;
+        }
+        else
+        {
+            triggerEnabled_= true;
+        }
+        updateTrigStateInfo();
     }
 
 
@@ -373,5 +490,16 @@ namespace bias
 
     }
 
-
+    void GrabDetectorPlugin::onTriggerFired()
+    {
+        if (triggerArmed_)
+        {
+            if (pulseDevice_.isOpen())
+            {
+                pulseDevice_.startPulse();
+            }
+            triggerArmed_ = false;
+            updateTrigStateInfo();
+        }
+    }
 }
