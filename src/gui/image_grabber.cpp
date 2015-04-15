@@ -6,6 +6,7 @@
 #include <iostream>
 #include <QTime>
 #include <QThread>
+#include <QFileInfo>
 #include <opencv2/core/core.hpp>
 
 // TEMPOERARY
@@ -131,13 +132,26 @@ namespace bias {
         stopped_ = false;
         releaseLock();
 
-        // TEMPORARY
+        // TEMPORARY - for mouse grab detector testing
         // ------------------------------------------------------------------------------
-        //cv::VideoCapture fileCapture;
-        //fileCapture.open("movie_comb.avi");
-        //bool fileOpen = fileCapture.isOpened();
-        //unsigned int numFrames = (unsigned int)(fileCapture.get(CV_CAP_PROP_FRAME_COUNT));
-        //int fourcc = int(fileCapture.get(CV_CAP_PROP_FOURCC));
+
+        // Check for existence of movie file
+        QString grabTestMovieFileName("bias_test.avi");
+        cv::VideoCapture fileCapture;
+        unsigned int numFrames = 0;
+        int fourcc = 0;
+        bool haveGrabTestMovie = false;
+
+        if (QFileInfo(grabTestMovieFileName).exists())
+        {
+            fileCapture.open(grabTestMovieFileName.toStdString());
+            if ( fileCapture.isOpened() )
+            {
+                numFrames = (unsigned int)(fileCapture.get(CV_CAP_PROP_FRAME_COUNT));
+                fourcc = int(fileCapture.get(CV_CAP_PROP_FOURCC));
+                haveGrabTestMovie = true;
+            }
+        }
         // -------------------------------------------------------------------------------
         
 
@@ -220,26 +234,30 @@ namespace bias {
                 }
                 //std::cout << frameCount << ", " << dtEstimate << ", " << timeStampDbl << std::endl;
                 
-                // TEMPORARY
+                // TEMPORARY - for mouse grab detector testing
                 // --------------------------------------------------------------------- 
-                //cv::Mat fileMat;
-                //StampedImage fileImg;
-                //if (fileOpen && frameCount < numFrames)
-                //{
-                //    fileCapture >> fileMat; 
-                //    cv::Mat  fileMatMono = cv::Mat(fileMat.size(), CV_8UC1);
-                //    cvtColor(fileMat, fileMatMono, CV_RGB2GRAY);
-                //    
-                //    cv::Mat camSizeImage = cv::Mat(stampImg.image.size(), CV_8UC1);
-                //    int padx = camSizeImage.rows - fileMatMono.rows;
-                //    int pady = camSizeImage.cols - fileMatMono.cols;
+                cv::Mat fileMat;
+                StampedImage fileImg;
+                if (haveGrabTestMovie)
+                {
+                    fileCapture >> fileMat; 
+                    if (fileMat.empty())
+                    {
+                        fileCapture.set(CV_CAP_PROP_POS_FRAMES,0);
+                        continue;
+                    }
 
-                //    cv::Scalar padColor = cv::Scalar(0);
-                //    cv::copyMakeBorder(fileMatMono, camSizeImage, 0, pady, 0, padx, cv::BORDER_CONSTANT, cv::Scalar(0));
-                //    stampImg.image = camSizeImage;
+                    cv::Mat  fileMatMono = cv::Mat(fileMat.size(), CV_8UC1);
+                    cvtColor(fileMat, fileMatMono, CV_RGB2GRAY);
+                    
+                    cv::Mat camSizeImage = cv::Mat(stampImg.image.size(), CV_8UC1);
+                    int padx = camSizeImage.rows - fileMatMono.rows;
+                    int pady = camSizeImage.cols - fileMatMono.cols;
 
-                //    std::cout << "frame number: " << frameCount << std::endl;
-                //}
+                    cv::Scalar padColor = cv::Scalar(0);
+                    cv::copyMakeBorder(fileMatMono, camSizeImage, 0, pady, 0, padx, cv::BORDER_CONSTANT, cv::Scalar(0));
+                    stampImg.image = camSizeImage;
+                }
                 // ---------------------------------------------------------------------
 
 

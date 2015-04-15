@@ -41,7 +41,7 @@ namespace bias
     {
         // NOTE: called in separate thread.
         
-        qDebug() << frameList.size();
+        qDebug() << "frameList.size() = " << frameList.size();
 
         int medianFilterSize = getMedianFilter();
         int threshold = getThreshold();
