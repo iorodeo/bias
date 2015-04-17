@@ -473,10 +473,7 @@ namespace bias
             pluginHandlerPtr_ -> setAutoDelete(false);
             threadPoolPtr_ -> start(pluginHandlerPtr_);
         } 
-        else
-        {
-            actionPluginsEnabledPtr_ -> setEnabled(false);
-        }
+        actionPluginsEnabledPtr_ -> setEnabled(false);
 
         // Set Capture start and stop time
         captureStartDateTime_ = QDateTime::currentDateTime();
@@ -485,6 +482,7 @@ namespace bias
         // Update GUI widget for capturing state
         startButtonPtr_ -> setText(QString("Stop"));
         connectButtonPtr_ -> setEnabled(false);
+        pluginActionGroupPtr_ -> setEnabled(false);
         updateStatusLabel();
 
         capturing_ = true;
@@ -592,6 +590,7 @@ namespace bias
         startButtonPtr_ -> setText(QString("Start"));
         connectButtonPtr_ -> setEnabled(true);
         actionPluginsEnabledPtr_ -> setEnabled(true);
+        pluginActionGroupPtr_ -> setEnabled(true);
 
         updateStatusLabel();
         framesPerSec_ = 0.0;
@@ -2336,21 +2335,6 @@ namespace bias
             QString msgText("No Plugins available");
             QMessageBox::information(this, msgTitle, msgText);
         }
-
-        //QPointer<QAction> selectedActionPtr = pluginActionGroupPtr_ -> checkedAction();
-        //QString selectedText = selectedActionPtr -> text();
-
-        //if (pluginMap_.size() > 0)
-        //{
-        //    QPointer<BiasPlugin> selectedPluginPtr = pluginMap_[selectedText];
-        //    selectedPluginPtr -> show();
-        //}
-        //else
-        //{
-        //    QString msgTitle("Plugins Message");
-        //    QString msgText("No Plugins available");
-        //    QMessageBox::information(this, msgTitle, msgText);
-        //}
     }
 
 
@@ -2418,6 +2402,7 @@ namespace bias
             pluginIt.next();
             QPointer<BiasPlugin> pluginPtr = pluginIt.value();
             pluginPtr -> setActive(false);
+            pluginPtr -> hide();
 
         }
 
