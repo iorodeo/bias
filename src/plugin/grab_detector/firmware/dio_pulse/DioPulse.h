@@ -14,6 +14,7 @@ class DioPulseDev
         void stopPulse();
         void setPulseLength(unsigned long pulseLength);
         unsigned long getPulseLength();
+        int getPulsePin();
 
     protected:
         int pulsePin_;

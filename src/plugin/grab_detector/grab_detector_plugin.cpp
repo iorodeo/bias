@@ -25,6 +25,8 @@ namespace bias
     double GrabDetectorPlugin::DEFAULT_LIVEPLOT_TIME_WINDOW = 10.0; 
     double GrabDetectorPlugin::DEFAULT_LIVEPLOT_SIGNAL_WINDOW = 255.0;
 
+    QColor GrabDetectorPlugin::DEFAULT_DETECTION_BOX_COLOR = QColor(255,0,0);
+
     // Public Methods
     // ------------------------------------------------------------------------
     
@@ -96,7 +98,10 @@ namespace bias
         releaseLock();
 
         cv::Rect boxRect = getDetectionBoxCv();
-        cv::Scalar boxColor(0,0,255);
+        int red = detectionBoxColor_.red();
+        int green = detectionBoxColor_.green();
+        int blue = detectionBoxColor_.blue();
+        cv::Scalar boxColor(blue,green,red);
         int boxLineWidth = 3;
 
         std::stringstream foundStream;
@@ -146,6 +151,12 @@ namespace bias
     }
 
 
+    bool GrabDetectorPlugin::isDetectionBoxLocked()
+    {
+        return !(boxLockedCheckboxPtr -> isChecked());
+    }
+
+
     int GrabDetectorPlugin::getThreshold()
     {
         return trigThresholdSpinBoxPtr -> value();
@@ -181,6 +192,13 @@ namespace bias
                 SIGNAL(clicked()),
                 this,
                 SLOT(connectPushButtonClicked())
+               );
+
+        connect(
+                refreshPortListPushButtonPtr,
+                SIGNAL(clicked()),
+                this,
+                SLOT(refreshPortListPushButtonClicked())
                );
 
         connect(
@@ -255,6 +273,8 @@ namespace bias
         livePlotTimeWindow_ = DEFAULT_LIVEPLOT_TIME_WINDOW;
         livePlotSignalWindow_ = DEFAULT_LIVEPLOT_SIGNAL_WINDOW;
 
+        detectionBoxColor_ = DEFAULT_DETECTION_BOX_COLOR;
+
         // Set trigger threshold and filter size (TEMPORARY)
         trigThresholdSpinBoxPtr -> setValue(DEFAULT_TRIGGER_THRESHOLD);
         trigMedianFilterSpinBoxPtr ->  setValue(DEFAULT_TRIGGER_FILTER_SIZE);
@@ -278,21 +298,17 @@ namespace bias
         connect(livePlotUpdateTimerPtr_, SIGNAL(timeout()), this, SLOT(updateLivePlotOnTimer()));
         livePlotUpdateTimerPtr_ -> start(livePlotUpdateDt_);
 
-        // Get list of serial ports and populate comports 
-        serialInfoList_ = QSerialPortInfo::availablePorts();
-        qDebug() << "serialInfoList_.size() =  " << serialInfoList_.size();
-        for (int i=0; i<serialInfoList_.size(); i++)
-        {
-            QSerialPortInfo serialInfo = serialInfoList_.at(i);
-            comPortComboBoxPtr -> addItem(serialInfo.portName());
-        }
-
-        statusLabelPtr -> setText(QString("Status: not connected "));
-        devOutputGroupBoxPtr -> setEnabled(false);
+        refreshPortList();
 
         setTriggerEnabled(true);
         updateTrigStateInfo();
+        
+        statusLabelPtr -> setText(QString("Status: not connected "));
+        devOutputGroupBoxPtr -> setEnabled(false);
 
+        outputPinLabelPtr -> setText("Output Pin: __");
+
+        updateColorExampleLabel();
 
     }
 
@@ -320,12 +336,45 @@ namespace bias
     }
 
 
+    void GrabDetectorPlugin::refreshPortList()
+    {
+        comPortComboBoxPtr -> clear();
+
+        // Get list of serial ports and populate comports 
+        QList<QSerialPortInfo> serialInfoListTmp = QSerialPortInfo::availablePorts();
+        for (QSerialPortInfo serialInfo: serialInfoListTmp)
+        {
+            if (serialInfo.portName().contains("ttyS"))
+            {
+                continue;
+            }
+            else
+            {
+                serialInfoList_.append(serialInfo);
+            }
+        }
+
+        for (QSerialPortInfo serialInfo : serialInfoList_)
+        {
+            comPortComboBoxPtr -> addItem(serialInfo.portName());
+        }
+    }
+
+
+    void GrabDetectorPlugin::updateColorExampleLabel()
+    { 
+        QPalette palette = colorExampleLabelPtr -> palette();
+        palette.setColor(colorExampleLabelPtr -> backgroundRole(), detectionBoxColor_);
+        colorExampleLabelPtr -> setPalette(palette);
+        colorExampleLabelPtr -> setAutoFillBackground(true);
+    }
+
+
     // Private Slots
     // ------------------------------------------------------------------------
     
     void GrabDetectorPlugin::comPortComboBoxIndexChanged(QString text)
     {
-        qDebug() << "com port changed: " << text;
     }
 
 
@@ -358,25 +407,47 @@ namespace bias
         {
             statusLabelPtr -> setText(QString("Status: connected"));
             connectPushButtonPtr -> setText("Disconnect");
-            refreshListPushButtonPtr -> setEnabled(false);
+            refreshPortListPushButtonPtr -> setEnabled(false);
             comPortComboBoxPtr -> setEnabled(false);
             devOutputGroupBoxPtr -> setEnabled(true);
 
-            //unsigned long pulseLength;
-            //bool ok = pulseDevice_.getPulseLength(pulseLength);
-            //qDebug() << "pulseLength = " << pulseLength;
+            // Get output pin from device and set text
+            bool ok = false;
+            int outputPin = pulseDevice_.getOutputPin(&ok);
+            if (ok)
+            {
+                outputPinLabelPtr -> setText(QString("Output Pin: %1").arg(outputPin));
+            }
+            else
+            {
+                outputPinLabelPtr -> setText(QString("Output Pin: ??").arg(outputPin));
+            }
 
+            // Get pulse length 
+            ok = false;
+            unsigned long pulseLength_us = pulseDevice_.getPulseLength(&ok);
+            if (ok)
+            {
+                double pulseLength_sec = (1.0e-6)*pulseLength_us;
+                durationDblSpinBoxPtr -> setValue(pulseLength_sec);
+            }
         }
         else
         {
             statusLabelPtr -> setText(QString("Status: not connected"));
             connectPushButtonPtr -> setText("Connect");
-            refreshListPushButtonPtr -> setEnabled(true);
+            refreshPortListPushButtonPtr -> setEnabled(true);
             comPortComboBoxPtr -> setEnabled(true);
             devOutputGroupBoxPtr -> setEnabled(false);
+            outputPinLabelPtr -> setText(QString("Output Pin: __"));
         }
         tabWidgetPtr -> setEnabled(true);
 
+    }
+
+    void GrabDetectorPlugin::refreshPortListPushButtonClicked()
+    {
+        refreshPortList();
     }
 
     void GrabDetectorPlugin::outputTestPushButtonClicked()
@@ -393,21 +464,25 @@ namespace bias
         }
     }
 
-    void GrabDetectorPlugin::levelDblSpinBoxValueChanged(double value)
-    {
-        qDebug() << "level value chagned: " << value;
-    }
-
-
     void GrabDetectorPlugin::durationDblSpinBoxValueChanged(double value)
     {
         qDebug() << "duration value changed: " << value;
+        if (pulseDevice_.isOpen())
+        {
+            unsigned long pulseLength_us = (unsigned long)(value*1.0e6);
+            bool ok = pulseDevice_.setPulseLength(pulseLength_us);
+        }
     }
 
 
     void GrabDetectorPlugin::colorSelectPushButtonClicked()
     {
-        qDebug() << "color select push buttton clicked";
+        QColor newColor = QColorDialog::getColor(detectionBoxColor_, this);
+        if (newColor.isValid())
+        {
+            detectionBoxColor_ = newColor;
+        }
+        updateColorExampleLabel();
     }
 
 
@@ -434,7 +509,7 @@ namespace bias
 
     void GrabDetectorPlugin::detectionBoxChanged(QRect box)
     {
-        if (isActive() && pluginsEnabled())
+        if (isActive() && pluginsEnabled() && !isDetectionBoxLocked())
         {
             setDetectionBox(box);
         }

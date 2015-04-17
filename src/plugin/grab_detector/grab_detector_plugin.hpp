@@ -38,6 +38,7 @@ namespace bias
             static int DEFAULT_LIVEPLOT_UPDATE_DT;
             static double DEFAULT_LIVEPLOT_TIME_WINDOW; 
             static double DEFAULT_LIVEPLOT_SIGNAL_WINDOW;
+            static QColor DEFAULT_DETECTION_BOX_COLOR;
 
             GrabDetectorPlugin(ImageLabel *imageLabelPtr, QWidget *parentPtr=0);
 
@@ -58,6 +59,7 @@ namespace bias
             double signalMax_;
             double signalMin_;
             unsigned long frameCount_;
+            QColor detectionBoxColor_;
 
             int livePlotUpdateDt_;
             double livePlotTimeWindow_; 
@@ -76,17 +78,23 @@ namespace bias
             cv::Rect getDetectionBoxCv();
             QRect getDetectionBox();
             void setDetectionBox(QRect box);
+            bool isDetectionBoxLocked();
+
             int getThreshold();
             int getMedianFilter();
 
             void updateTrigStateInfo();
+            void refreshPortList();
+
+            void updateColorExampleLabel();
+
 
         private slots:
 
             void comPortComboBoxIndexChanged(QString text);
             void connectPushButtonClicked();
+            void refreshPortListPushButtonClicked();
             void outputTestPushButtonClicked();
-            void levelDblSpinBoxValueChanged(double value);
             void durationDblSpinBoxValueChanged(double value);
             void colorSelectPushButtonClicked();
             void trigResetPushButtonClicked();

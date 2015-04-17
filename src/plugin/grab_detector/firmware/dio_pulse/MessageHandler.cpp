@@ -49,6 +49,13 @@ void MessageHandler::cmdSwitchYard()
                 break;
             }
 
+        case CMD_ID_GET_OUTPUT_PIN:
+            {
+                int pulsePin = DioPulse.getPulsePin();
+                Serial << _DEC(pulsePin) << endl;
+                break;
+            }
+
         default:
             break;
     }

@@ -24,6 +24,7 @@ namespace bias
             static const int CMD_ID_STOP_PULSE = 2;
             static const int CMD_ID_SET_PULSE_LENGTH = 3;
             static const int CMD_ID_GET_PULSE_LENGTH = 4;
+            static const int CMD_ID_GET_OUTPUT_PIN = 5;
 
             PulseDevice(QObject *parent=Q_NULLPTR);
             PulseDevice(const QSerialPortInfo &portInfo, QObject *parent=Q_NULLPTR);
@@ -32,7 +33,8 @@ namespace bias
             bool startPulse();
             bool stopPulse();
             bool setPulseLength(unsigned long pulseLength);
-            bool getPulseLength(unsigned long &pulseLength);
+            unsigned long getPulseLength(bool *ok);
+            int getOutputPin(bool *ok);
 
         protected:
 

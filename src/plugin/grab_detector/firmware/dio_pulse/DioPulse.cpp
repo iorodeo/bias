@@ -54,6 +54,11 @@ unsigned long DioPulseDev::getPulseLength()
     return pulseLength_;
 }
 
+int DioPulseDev::getPulsePin()
+{
+    return pulsePin_;
+}
+
 
 void DioPulseDev::timerCallback()
 {

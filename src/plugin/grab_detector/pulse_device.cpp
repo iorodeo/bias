@@ -61,31 +61,53 @@ namespace bias
     }
 
 
-    bool PulseDevice::getPulseLength(unsigned long &pulseLength)
+    unsigned long PulseDevice::getPulseLength(bool *ok)
     {
+        unsigned long pulseLength = 0;
         QByteArray cmd;
         cmd.append(QString("[%1,]\n").arg(CMD_ID_GET_PULSE_LENGTH));
 
         QByteArray rsp;
         bool rspOk = writeCmdGetRsp(cmd,rsp);
 
-        bool rtnVal = false;
+        *ok = false;
         if ( rspOk && (rsp.size() > 0) )
         {
-            qDebug() << rsp;
             rsp = rsp.trimmed();
 
             bool convOk;
-            qDebug() << rsp;
             pulseLength = rsp.toULong(&convOk);
             if (convOk)
             {
-                rtnVal = true;
+                *ok = true;
             }
         }
-        return rtnVal;
+        return pulseLength;
     }
 
+    int PulseDevice::getOutputPin(bool *ok)
+    {
+        int pin = 0;
+        QByteArray cmd;
+        cmd.append(QString("[%1,]\n").arg(CMD_ID_GET_OUTPUT_PIN));
+
+        QByteArray rsp;
+        bool rspOk = writeCmdGetRsp(cmd,rsp);
+
+        *ok = false;
+        if ( rspOk && (rsp.size() > 0))
+        {
+            rsp = rsp.trimmed();
+
+            bool convOk;
+            pin = rsp.toInt(&convOk);
+            if (convOk)
+            {
+                *ok = true;
+            }
+        }
+        return pin;
+    }
 
     // Prottected methods
     // ------------------------------------------------------------------------

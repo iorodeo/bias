@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>680</width>
+    <width>681</width>
     <height>337</height>
    </rect>
   </property>
@@ -106,10 +106,10 @@
                    </size>
                   </property>
                   <property name="editable">
-                   <bool>true</bool>
+                   <bool>false</bool>
                   </property>
                   <property name="currentText">
-                   <string>COM1</string>
+                   <string/>
                   </property>
                  </widget>
                 </item>
@@ -139,6 +139,9 @@
                   </property>
                   <property name="text">
                    <string>Connect</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
                   </property>
                  </widget>
                 </item>
@@ -188,9 +191,12 @@
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="refreshListPushButtonPtr">
+                 <widget class="QPushButton" name="refreshPortListPushButtonPtr">
                   <property name="text">
                    <string>Refresh List</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
                   </property>
                  </widget>
                 </item>
@@ -304,6 +310,50 @@
                  <widget class="QPushButton" name="outputTestPushButtonPtr">
                   <property name="text">
                    <string>Test</string>
+                  </property>
+                  <property name="autoDefault">
+                   <bool>false</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_16">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::Fixed</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QLabel" name="outputPinLabelPtr">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>80</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>80</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>Output Pin: </string>
                   </property>
                  </widget>
                 </item>
@@ -768,6 +818,9 @@
                <property name="text">
                 <string>Select</string>
                </property>
+               <property name="autoDefault">
+                <bool>false</bool>
+               </property>
               </widget>
              </item>
              <item>
@@ -985,6 +1038,9 @@
                </property>
                <property name="text">
                 <string>Reset</string>
+               </property>
+               <property name="autoDefault">
+                <bool>false</bool>
                </property>
               </widget>
              </item>
