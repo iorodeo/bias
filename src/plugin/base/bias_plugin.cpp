@@ -6,6 +6,9 @@
 namespace bias
 {
 
+    const QString BiasPlugin::PLUGIN_NAME = QString("basePlugin"); 
+    const QString BiasPlugin::PLUGIN_DISPLAY_NAME = QString("Base Plugin"); 
+
     // Pulbic
     // ------------------------------------------------------------------------
 
@@ -26,13 +29,6 @@ namespace bias
         return active_;
     }
 
-    //void BiasPlugin::setImageOrientation(bool flipVert, bool flipHorz, ImageRotationType imageRot)
-    //{
-    //    flipVert_ = flipVert;
-    //    flipHorz_ = flipHorz;
-    //    imageRot_ = imageRot;
-    //}
-
     void BiasPlugin::processFrames(QList<StampedImage> frameList) 
     { 
         acquireLock();
@@ -51,6 +47,23 @@ namespace bias
         return currentImageCopy;
     }
 
+    QString BiasPlugin::getName()
+    {
+        return PLUGIN_NAME;
+    }
+
+    QString BiasPlugin::getDisplayName()
+    {
+        return PLUGIN_DISPLAY_NAME;
+    }
+
+    RtnStatus BiasPlugin::runCmdFromMap(QVariantMap cmdMap, bool showErrorDlg)
+    {
+        qDebug() << __PRETTY_FUNCTION__;
+        RtnStatus rtnStatus;
+        return rtnStatus;
+    }
+
     // Protected
     // ------------------------------------------------------------------------
 
@@ -67,14 +80,5 @@ namespace bias
     {
         pluginsEnabled_ = value;
     }
-
-
-    // Private slots
-    // ------------------------------------------------------------------------
-
-    //void BiasPlugin::imageOrientationChanged(bool flipVert, bool flipHorz, ImageRotationType imageRot)
-    //{
-    //    setImageOrientation(flipVert,flipHorz,imageRot);
-    //}
 
 }

@@ -105,6 +105,11 @@ namespace bias
             QRect getWindowGeometry();
             QVariantMap getWindowGeometryMap();
 
+            RtnStatus runPluginCmd(
+                    QByteArray jsonPluginCmdArray, 
+                    bool showErrorDlg=true
+                    );
+
             QString getCameraGuidString(RtnStatus &rtnStatus);
             QString getVideoFileFullPath();
             QDir getVideoFileDir();

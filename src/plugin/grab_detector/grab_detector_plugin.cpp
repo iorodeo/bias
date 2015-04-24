@@ -12,6 +12,9 @@ namespace bias
 {
     // Public static variables 
     // ------------------------------------------------------------------------
+    const QString GrabDetectorPlugin::PLUGIN_NAME = QString("grabDetector");
+    const QString GrabDetectorPlugin::PLUGIN_DISPLAY_NAME = QString("Grab Detector");
+
     int GrabDetectorPlugin::DEFAULT_XPOS = 500;
     int GrabDetectorPlugin::DEFAULT_YPOS = 500;
     int GrabDetectorPlugin::DEFAULT_WIDTH = 100;
@@ -26,6 +29,7 @@ namespace bias
     double GrabDetectorPlugin::DEFAULT_LIVEPLOT_SIGNAL_WINDOW = 255.0;
 
     QColor GrabDetectorPlugin::DEFAULT_DETECTION_BOX_COLOR = QColor(255,0,0);
+
 
     // Public Methods
     // ------------------------------------------------------------------------
@@ -173,6 +177,65 @@ namespace bias
         triggerEnabled_ = value;
         trigEnabledCheckBoxPtr -> setChecked(value);
 
+    }
+
+    QString GrabDetectorPlugin::getName()
+    {
+        return PLUGIN_NAME;
+    }
+
+
+    QString GrabDetectorPlugin::getDisplayName()
+    {
+        return PLUGIN_DISPLAY_NAME;
+    }
+
+    RtnStatus GrabDetectorPlugin::runCmdFromMap(QVariantMap cmdMap, bool showErrorDlg)
+    {
+        qDebug() << __PRETTY_FUNCTION__;
+        RtnStatus rtnStatus;
+
+        QString errMsgTitle("Plugin runCmdFromMap Error");
+
+        if (!cmdMap.contains("cmd"))
+        {
+            QString errMsgText("cmd not found in map");
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        if (!cmdMap["cmd"].canConvert<QString>())
+        {
+            QString errMsgText("runPluginCmd: unable to convert plugin name to string");
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        QString cmd  = cmdMap["cmd"].toString();
+        qDebug() << "cmd = " << cmd;
+
+        // TODO -- NOT DONE
+        if (cmd == QString("reset"))
+        {
+            resetTrigger();
+        }
+
+        return rtnStatus;
+    }
+
+
+    void GrabDetectorPlugin::resetTrigger()
+    {
+        triggerArmed_ = true;
+        updateTrigStateInfo();
     }
 
     // Protected Methods
@@ -480,8 +543,7 @@ namespace bias
 
     void GrabDetectorPlugin::trigResetPushButtonClicked()
     {
-        triggerArmed_ = true;
-        updateTrigStateInfo();
+        resetTrigger();
     }
 
 

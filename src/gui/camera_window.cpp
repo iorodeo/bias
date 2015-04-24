@@ -1515,6 +1515,77 @@ namespace bias
     }
 
 
+    RtnStatus CameraWindow::runPluginCmd(QByteArray jsonPluginCmdArray, bool showErrorDlg)
+    {
+        qDebug() << __PRETTY_FUNCTION__;
+
+        RtnStatus rtnStatus;
+        rtnStatus.success = true;
+        rtnStatus.message = QString("");
+        QString errMsgTitle("Plugin Run Command Error");
+
+        // Convert json bytearray to QVariant map
+        bool ok;
+        QVariantMap pluginCmdMap = QtJson::parse(QString(jsonPluginCmdArray), ok).toMap();
+        if (!ok)
+        {
+            QString errMsgText("error parsing plugin command - "); 
+            errMsgText += "unable to parse json.";
+            if (showErrorDlg) 
+            {
+                QMessageBox::critical(this, errMsgTitle, errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+
+        // Get plugin name
+        if (!pluginCmdMap.contains("plugin"))
+        {
+            QString errMsgText("runPluginCmd: plugin name not present");
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        if (!pluginCmdMap["plugin"].canConvert<QString>())
+        {
+            QString errMsgText("runPluginCmd: unable to convert plugin name to string");
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        QString cmdPluginName  = pluginCmdMap["plugin"].toString();
+
+        // Try to find plugin with matching name
+        bool nameFound = false;
+        for (QString pluginName : pluginMap_.keys())
+        {
+            if (pluginName == cmdPluginName)
+            {
+                nameFound = true;
+                qDebug() << "found matching name: " << pluginName;
+                rtnStatus = pluginMap_[pluginName] -> runCmdFromMap(pluginCmdMap,showErrorDlg);
+            }
+        }
+        if (!nameFound)
+        {
+            qDebug() << "name not found";
+        }
+
+
+        return rtnStatus;
+    }
+
+
     QVariantMap CameraWindow::getWindowGeometryMap()
     {
         QVariantMap windowGeomMap;
@@ -2503,8 +2574,8 @@ namespace bias
         // Temporary - plugin development
         // -------------------------------------------------------------------------------
         pluginHandlerPtr_  = new PluginHandler(this);
-        pluginMap_["Stampede"] = new StampedePlugin(this);
-        pluginMap_["Grab Detector"] = new GrabDetectorPlugin(pluginImageLabelPtr_,this);
+        pluginMap_[StampedePlugin::PLUGIN_NAME] = new StampedePlugin(this);
+        pluginMap_[GrabDetectorPlugin::PLUGIN_NAME] = new GrabDetectorPlugin(pluginImageLabelPtr_,this);
 
         //// May want to pass these as parameters on creation.
         //QMapIterator<QString,QPointer<BiasPlugin>> it(pluginMap_);
@@ -2942,11 +3013,11 @@ namespace bias
     {
         QPointer<BiasPlugin> selectedPluginPtr;
         QPointer<QAction> selectedActionPtr = pluginActionGroupPtr_ -> checkedAction();
-        QString selectedText = selectedActionPtr -> text();
+        QString selectedPluginName = selectedActionPtr -> data().toString();
 
         if (pluginMap_.size() > 0)
         {
-            selectedPluginPtr = pluginMap_[selectedText];
+            selectedPluginPtr = pluginMap_[selectedPluginName];
         }
         return selectedPluginPtr;
     }
@@ -3075,21 +3146,20 @@ namespace bias
         QMapIterator<QString,QPointer<BiasPlugin>> pluginIt(pluginMap_);
         pluginActionGroupPtr_ = new QActionGroup(menuPluginsPtr_);
 
-        bool isFirst = true;
         while (pluginIt.hasNext())
         {
             pluginIt.next();
-            QString pluginName = pluginIt.key();
             QPointer<BiasPlugin> pluginPtr = pluginIt.value();
-            QPointer<QAction> pluginActionPtr = menuPluginsPtr_ -> addAction(pluginName);
+            QString pluginName = pluginPtr -> getName();
+            QString pluginDisplayName = pluginPtr -> getDisplayName();
+            QPointer<QAction> pluginActionPtr = menuPluginsPtr_ -> addAction(pluginDisplayName);
+            pluginActionPtr -> setData(QVariant(pluginName));
             pluginActionGroupPtr_ -> addAction(pluginActionPtr);
             pluginActionPtr -> setCheckable(true);
 
-            //if (isFirst)
-            //if (QString::compare(pluginIt.key(), QString("Stampede"))==0)
-            if (QString::compare(pluginIt.key(), QString("Grab Detector"))==0)
+            //if (pluginName == QString("stampede")) 
+            if (pluginName == QString("grabDetector")) 
             {
-                //isFirst = false;
                 pluginActionPtr -> setChecked(true);
                 pluginPtr -> setActive(true);
             }

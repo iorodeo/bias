@@ -5,6 +5,7 @@
 #include <QList>
 #include "lockable.hpp"
 #include "stamped_image.hpp"
+#include "rtn_status.hpp"
 //#include "camera_facade_fwd.hpp"
 
 namespace cv
@@ -20,31 +21,32 @@ namespace bias
 
         public:
 
+            static const QString PLUGIN_NAME;
+            static const QString PLUGIN_DISPLAY_NAME;
+
             BiasPlugin(QWidget *parent=0);
             static bool pluginsEnabled();
             static void setPluginsEnabled(bool value);
 
             void setActive(bool value);
             bool isActive();
-            //void setImageOrientation(bool flipVert, bool flipHorz, ImageRotationType imageRot);
 
             virtual void processFrames(QList<StampedImage> frameList);
             virtual cv::Mat getCurrentImage();
 
+            virtual QString getName();
+            virtual QString getDisplayName();
+
+            virtual RtnStatus runCmdFromMap(QVariantMap cmdMap, bool showErrorDlg=true);
+
+
         protected:
+
 
             static bool pluginsEnabled_;
             bool active_;
 
             cv::Mat currentImage_;
-            //bool flipVert_;
-            //bool flipHorz_;
-            //ImageRotationType imageRot_;
-
-
-        //private slots:
-
-        //    void imageOrientationChanged(bool flipVert, bool flipHorz, ImageRotationType iamgeRot);
             
     };
 

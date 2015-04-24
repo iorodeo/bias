@@ -1,6 +1,6 @@
 #include "ext_ctl_http_server.hpp"
 #include "camera_window.hpp"
-#include <QDebug>
+#include <QtDebug>
 
 namespace bias
 {
@@ -114,7 +114,7 @@ namespace bias
         }
         else if (name == QString("plugin-cmd"))
         {
-            cmdMap = handlePluginCmd();
+            cmdMap = handlePluginCmd(value);
         }
         else 
         {
@@ -189,7 +189,7 @@ namespace bias
     {
         QVariantMap cmdMap;
         QByteArray jsonArray = jsonConfig.toLatin1();
-        RtnStatus status = cameraWindowPtr_ -> setConfigurationFromJson(jsonArray);
+        RtnStatus status = cameraWindowPtr_ -> setConfigurationFromJson(jsonArray,false);
         cmdMap.insert("success", status.success);
         cmdMap.insert("message", status.message);
         cmdMap.insert("value", "");
@@ -372,12 +372,16 @@ namespace bias
     }
 
 
-    QVariantMap ExtCtlHttpServer::handlePluginCmd()
+    QVariantMap ExtCtlHttpServer::handlePluginCmd(QString jsonPluginCmd)
     {
+        qDebug() << __PRETTY_FUNCTION__ << jsonPluginCmd;
+
         QVariantMap cmdMap;
-        qDebug() << "received plugin cmd";
-        cmdMap.insert("success", true);
-        cmdMap.insert("message", "");
+        QByteArray jsonPluginCmdArray = jsonPluginCmd.toLatin1();
+        RtnStatus status = cameraWindowPtr_ -> runPluginCmd(jsonPluginCmdArray,false);
+
+        cmdMap.insert("success", status.success);
+        cmdMap.insert("message", status.message);
         cmdMap.insert("value", "");
         return cmdMap;
     }

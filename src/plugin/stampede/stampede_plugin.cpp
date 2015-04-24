@@ -5,6 +5,9 @@
 namespace bias
 {
 
+    const QString StampedePlugin::PLUGIN_NAME = QString("stampede");
+    const QString StampedePlugin::PLUGIN_DISPLAY_NAME = QString("Stampede");
+
     // Public Methods
     // ------------------------------------------------------------------------
     StampedePlugin::StampedePlugin(QWidget *parent) : BiasPlugin(parent)
@@ -29,6 +32,25 @@ namespace bias
         releaseLock();
         return currentImageCopy;
     }
+
+    QString StampedePlugin::getName()
+    {
+        return PLUGIN_NAME;
+    }
+
+
+    QString StampedePlugin::getDisplayName()
+    {
+        return PLUGIN_DISPLAY_NAME;
+    }
+
+    RtnStatus StampedePlugin::runCmdFromMap(QVariantMap cmdMap,bool showErrorDlg)
+    {
+        qDebug() << __PRETTY_FUNCTION__;
+        RtnStatus rtnStatus;
+        return rtnStatus;
+    }
+
 
     // Protected Methods
     // ------------------------------------------------------------------------

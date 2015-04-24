@@ -28,6 +28,8 @@ namespace bias
 
         public:
 
+            static const QString PLUGIN_NAME;
+            static const QString PLUGIN_DISPLAY_NAME;
             static int DEFAULT_XPOS;
             static int DEFAULT_YPOS;
             static int DEFAULT_WIDTH;
@@ -45,7 +47,13 @@ namespace bias
             virtual void processFrames(QList<StampedImage> frameList);
             virtual cv::Mat getCurrentImage();
 
+            virtual QString getName();
+            virtual QString getDisplayName();
+            
+            virtual RtnStatus runCmdFromMap(QVariantMap cmdMap, bool showErrorDlg=true);
+
             void setTriggerEnabled(bool value);
+            void resetTrigger();
 
         signals:
 
