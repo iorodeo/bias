@@ -1,5 +1,6 @@
 #include "ext_ctl_http_server.hpp"
 #include "camera_window.hpp"
+#include <QDebug>
 
 namespace bias
 {
@@ -110,6 +111,10 @@ namespace bias
         else if (name == QString("close"))
         {
             cmdMap = handleClose();
+        }
+        else if (name == QString("plugin-cmd"))
+        {
+            cmdMap = handlePluginCmd();
         }
         else 
         {
@@ -363,6 +368,17 @@ namespace bias
         cmdMap.insert("success", true);
         cmdMap.insert("message", "");
         cmdMap.insert("value", windowGeomMap);
+        return cmdMap;
+    }
+
+
+    QVariantMap ExtCtlHttpServer::handlePluginCmd()
+    {
+        QVariantMap cmdMap;
+        qDebug() << "received plugin cmd";
+        cmdMap.insert("success", true);
+        cmdMap.insert("message", "");
+        cmdMap.insert("value", "");
         return cmdMap;
     }
 

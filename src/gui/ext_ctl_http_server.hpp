@@ -43,6 +43,7 @@ namespace bias
             QVariantMap handleSetCameraName(QString cameaName);
             QVariantMap handleSetWindowGeometry(QString jsonGeom);
             QVariantMap handleGetWindowGeometry();
+            QVariantMap handlePluginCmd();
             QVariantMap handleClose();
     };
 

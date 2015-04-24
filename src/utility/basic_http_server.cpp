@@ -53,7 +53,7 @@ namespace bias
     { 
     }
 
-    void BasicHttpServer::incomingConnection(int socket) 
+    void BasicHttpServer::incomingConnection(qintptr socket) 
     { 
         QTcpSocket* s = new QTcpSocket(this); 
         connect(s, SIGNAL(readyRead()), this, SLOT(readClient()));

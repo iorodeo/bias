@@ -244,19 +244,11 @@ namespace bias
                );
 
         connect(
-                parentWidget(),
-                SIGNAL(imageOrientationChanged(bool,bool,ImageRotationType)),
-                this,
-                SLOT(imageOrientationChanged(bool,bool,ImageRotationType))
-               );
-
-        connect(
                 this,
                 SIGNAL(triggerFired()),
                 this,
                 SLOT(onTriggerFired())
                );
-               
 
     }
 

@@ -21,7 +21,7 @@ namespace bias
 
         public:
             BasicHttpServer(QObject *parent=0);
-            virtual void incomingConnection(int socket);
+            virtual void incomingConnection(qintptr socket);
 
         protected:
             virtual void handleGetRequest(QTcpSocket *socket, QStringList &tokens);
