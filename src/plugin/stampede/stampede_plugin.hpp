@@ -32,6 +32,8 @@ namespace bias
 
         private slots:
 
+            void onTimerDurationChanged(unsigned long duration);
+
     };
 
 }

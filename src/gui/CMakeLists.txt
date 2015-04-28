@@ -106,3 +106,4 @@ target_link_libraries(
 
 qt5_use_modules(test_gui Core Gui Widgets Network PrintSupport SerialPort)
 
+set(bias_gui_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} CACHE FILEPATH "bias_gui include directories")

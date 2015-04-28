@@ -1515,6 +1515,55 @@ namespace bias
     }
 
 
+    void CameraWindow::setCaptureDuration(unsigned long duration)
+    {
+        captureDurationSec_ = duration;
+        emit timerDurationChanged(duration);
+    }
+
+
+    RtnStatus CameraWindow::setCurrentPlugin(QString pluginName)
+    {
+        RtnStatus rtnStatus;
+        rtnStatus.success = true;
+        rtnStatus.message = QString("");
+
+        bool pluginNameFound = false;
+        for (auto itemPluginName : pluginMap_.keys())
+        {
+            if (itemPluginName == pluginName)
+            {
+                pluginNameFound = true;
+                pluginMap_[pluginName] -> setActive(true);; 
+                pluginActionMap_[pluginName] -> setChecked(true);
+                updateTimerMenu();
+            }
+        }
+        if (!pluginNameFound)
+        {
+            rtnStatus.success = false; 
+            rtnStatus.message = QString("unable to find plugin with name %1").arg(pluginName);
+        }
+        return rtnStatus;
+    } 
+
+
+    QString CameraWindow::getCurrentPluginName(RtnStatus &rtnStatus)
+    {
+        QString currentPluginName = QString("");
+        QPointer<QAction> currentActionPtr = pluginActionGroupPtr_ -> checkedAction();
+        if (!currentActionPtr.isNull())
+        {
+            currentPluginName = currentActionPtr -> data().toString();
+        }
+        else
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("no plugin is checked");
+        }
+        return currentPluginName;
+    }
+
     RtnStatus CameraWindow::runPluginCmd(QByteArray jsonPluginCmdArray, bool showErrorDlg)
     {
         qDebug() << __PRETTY_FUNCTION__;
@@ -1567,7 +1616,7 @@ namespace bias
 
         // Try to find plugin with matching name
         bool nameFound = false;
-        for (QString pluginName : pluginMap_.keys())
+        for (auto pluginName : pluginMap_.keys())
         {
             if (pluginName == cmdPluginName)
             {
@@ -1726,16 +1775,10 @@ namespace bias
         }
     }
 
+
     void CameraWindow::connectButtonClicked()
     {
         (!connected_) ? connectCamera() : disconnectCamera();
-        // DEBUG
-        //// ------------------------------------
-        //if (connected_)
-        //{
-        //    cameraPtr_ -> printAllProperties();
-        //}
-        // --------------------------------------
     }
 
 
@@ -1855,7 +1898,6 @@ namespace bias
         if (currentDateTime >= captureStopDateTime_)
         {
             stopImageCapture();
-            //std::cout << "image caputre stopped by timer" << std::endl;
         }
     }
 
@@ -2238,7 +2280,7 @@ namespace bias
                     timerSettingsDialogPtr_,
                     SIGNAL(durationChanged(unsigned long)),
                     this,
-                    SLOT(timerDurationChanged(unsigned long))
+                    SLOT(onTimerDurationChanged(unsigned long))
                    );
         }
         else
@@ -2248,11 +2290,12 @@ namespace bias
     }
 
 
-    void CameraWindow::timerDurationChanged(unsigned long duration)
+    void CameraWindow::onTimerDurationChanged(unsigned long duration)
     {
         captureDurationSec_ = duration;
         captureStopDateTime_ = captureStartDateTime_.addSecs(captureDurationSec_);
         setCaptureTimeLabel(0.0);
+        emit timerDurationChanged(captureDurationSec_);
     }
 
 
@@ -2467,6 +2510,8 @@ namespace bias
 
     void CameraWindow::pluginActionGroupTriggered(QAction *action)
     {
+        qDebug() << __PRETTY_FUNCTION__;
+
         QMapIterator<QString,QPointer<BiasPlugin>> pluginIt(pluginMap_);
         while (pluginIt.hasNext())
         {
@@ -2477,8 +2522,14 @@ namespace bias
 
         }
 
-        QPointer<BiasPlugin> pluginPtr = getCurrentPlugin();
-        pluginPtr -> setActive(true);
+        RtnStatus rtnStatus;
+        QString pluginName = getCurrentPluginName(rtnStatus);
+        qDebug() << pluginName << rtnStatus.success; 
+
+        if (rtnStatus.success)
+        {
+            setCurrentPlugin(pluginName);
+        }
     }
 
 
@@ -2510,11 +2561,17 @@ namespace bias
 
         BiasPlugin::setPluginsEnabled(true);
         actionPluginsEnabledPtr_ -> setChecked(BiasPlugin::pluginsEnabled());
+        // Temporary - plugin development
+        // -------------------------------------------------------------------------------
+        pluginHandlerPtr_  = new PluginHandler(this);
+        pluginMap_[StampedePlugin::PLUGIN_NAME] = new StampedePlugin(this);
+        pluginMap_[GrabDetectorPlugin::PLUGIN_NAME] = new GrabDetectorPlugin(pluginImageLabelPtr_,this);
+        // -------------------------------------------------------------------------------
 
         colorMapNumber_ = DEFAULT_COLORMAP_NUMBER;
         videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
-        captureDurationSec_ = DEFAULT_CAPTURE_DURATION;
         imageDisplayFreq_ = DEFAULT_IMAGE_DISPLAY_FREQ;
+        setCaptureDuration(DEFAULT_CAPTURE_DURATION);
 
         cameraNumber_ = cameraNumber;
         numberOfCameras_ = numberOfCameras;
@@ -2539,9 +2596,13 @@ namespace bias
         setupImageDisplayTimer();
         setupCaptureDurationTimer();
         setupImageLabels();
+        setupPluginMenu();
         updateAllMenus(); 
 
         tabWidgetPtr_ -> setCurrentWidget(previewTabPtr_);
+
+        //setCurrentPlugin(pluginMap_.firstKey());
+        setCurrentPlugin("stampede");
 
         updateWindowTitle();
         updateCameraInfoMessage();
@@ -2571,24 +2632,6 @@ namespace bias
             actionServerEnabledPtr_ -> setChecked(false);
         }
 
-        // Temporary - plugin development
-        // -------------------------------------------------------------------------------
-        pluginHandlerPtr_  = new PluginHandler(this);
-        pluginMap_[StampedePlugin::PLUGIN_NAME] = new StampedePlugin(this);
-        pluginMap_[GrabDetectorPlugin::PLUGIN_NAME] = new GrabDetectorPlugin(pluginImageLabelPtr_,this);
-
-        //// May want to pass these as parameters on creation.
-        //QMapIterator<QString,QPointer<BiasPlugin>> it(pluginMap_);
-        //while (it.hasNext())
-        //{
-        //    it.next();
-        //    it.value() -> setImageOrientation(flipVert_, flipHorz_, imageRotation_);
-        //}
-
-        setupPluginMenu();
-
-
-        // -------------------------------------------------------------------------------
 
     }
 
@@ -3011,15 +3054,18 @@ namespace bias
 
     QPointer<BiasPlugin> CameraWindow::getCurrentPlugin()
     {
-        QPointer<BiasPlugin> selectedPluginPtr;
-        QPointer<QAction> selectedActionPtr = pluginActionGroupPtr_ -> checkedAction();
-        QString selectedPluginName = selectedActionPtr -> data().toString();
-
-        if (pluginMap_.size() > 0)
+        QPointer<BiasPlugin> currentPluginPtr;
+        RtnStatus rtnStatus;
+        rtnStatus.success = true;
+        QString currentPluginName = getCurrentPluginName(rtnStatus);
+        if (rtnStatus.success)
         {
-            selectedPluginPtr = pluginMap_[selectedPluginName];
+            if (pluginMap_.size() > 0)
+            {
+                currentPluginPtr = pluginMap_[currentPluginName];
+            }
         }
-        return selectedPluginPtr;
+        return currentPluginPtr;
     }
 
     
@@ -3152,23 +3198,28 @@ namespace bias
             QPointer<BiasPlugin> pluginPtr = pluginIt.value();
             QString pluginName = pluginPtr -> getName();
             QString pluginDisplayName = pluginPtr -> getDisplayName();
+
             QPointer<QAction> pluginActionPtr = menuPluginsPtr_ -> addAction(pluginDisplayName);
+            pluginActionMap_.insert(pluginName, pluginActionPtr);
             pluginActionPtr -> setData(QVariant(pluginName));
             pluginActionGroupPtr_ -> addAction(pluginActionPtr);
             pluginActionPtr -> setCheckable(true);
 
+            pluginActionPtr -> setChecked(false);
+            pluginPtr -> setActive(false);
+
             //if (pluginName == QString("stampede")) 
-            if (pluginName == QString("grabDetector")) 
-            {
-                pluginActionPtr -> setChecked(true);
-                pluginPtr -> setActive(true);
-            }
-            else
-            {
-                pluginActionPtr -> setChecked(false);
-                pluginPtr -> setActive(false);
-            }
+            //{
+            //    pluginActionPtr -> setChecked(true);
+            //    pluginPtr -> setActive(true);
+            //}
+            //else
+            //{
+            //    pluginActionPtr -> setChecked(false);
+            //    pluginPtr -> setActive(false);
+            //}
         }
+
 
         connect(
                 pluginActionGroupPtr_,
@@ -3963,6 +4014,19 @@ namespace bias
         else
         {
             setMenuChildrenEnabled(menuTimerPtr_, true);
+
+            if (BiasPlugin::pluginsEnabled())
+            {
+                QPointer<BiasPlugin> pluginPtr = getCurrentPlugin();
+                if (!pluginPtr.isNull())
+                {
+                    if (pluginPtr -> requireTimer())
+                    {
+                        actionTimerEnabledPtr_ -> setChecked(true);
+                        actionTimerEnabledPtr_ -> setEnabled(false);
+                    }
+                }
+            }
         }
     }
 

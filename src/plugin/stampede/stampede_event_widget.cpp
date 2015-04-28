@@ -52,7 +52,6 @@ namespace bias
                 SLOT(timelineSplitterMoved(int, int))
                 );
 
-
         timelineLayoutPtr_ -> addWidget(timelineSplitterPtr_);
         timelineWidgetPtr -> setLayout(timelineLayoutPtr_);
 
@@ -97,12 +96,27 @@ namespace bias
         int splitterWidth = splitterSize.width();
 
         double fracPos = double(pos)/double(splitterWidth);
-        double timePos = duration_*fracPos;
+        double timePos = double(duration_)*fracPos;
+        if (duration_ >= 60)
+        {
+            timePos = round(timePos);
+        }
+        else
+        {
+            double timePosSec = floor(timePos);
+            double timePosFrac = 0.1*round(10*(timePos-timePosSec));
+            timePos = timePosSec + timePosFrac;
+        }
 
         QString toolTipMsg = QString("t=") + QString::number(timePos,'g',3);
         setToolTipMsg(toolTipMsg);
 
         emit timelineMoved(timePos, index);
+    }
+
+    void StampedeEventWidget::onTimerDurationChanged(unsigned long duration)
+    {
+        duration_ = duration;
     }
 
 

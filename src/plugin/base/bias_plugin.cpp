@@ -2,6 +2,7 @@
 //#include "camera_facade.hpp"
 #include <QtDebug>
 #include <opencv2/core/core.hpp>
+#include "camera_window.hpp"
 
 namespace bias
 {
@@ -29,6 +30,12 @@ namespace bias
         return active_;
     }
 
+
+    bool BiasPlugin::requireTimer()
+    {
+        return requireTimer_;
+    }
+
     void BiasPlugin::processFrames(QList<StampedImage> frameList) 
     { 
         acquireLock();
@@ -47,15 +54,26 @@ namespace bias
         return currentImageCopy;
     }
 
+
     QString BiasPlugin::getName()
     {
         return PLUGIN_NAME;
     }
 
+
     QString BiasPlugin::getDisplayName()
     {
         return PLUGIN_DISPLAY_NAME;
     }
+
+
+    QPointer<CameraWindow> BiasPlugin::getCameraWindow()
+    {
+
+        QPointer<CameraWindow> cameraWindow = (CameraWindow*)(parent());
+        return cameraWindow;
+    }
+
 
     RtnStatus BiasPlugin::runCmdFromMap(QVariantMap cmdMap, bool showErrorDlg)
     {
@@ -79,6 +97,12 @@ namespace bias
     void BiasPlugin::setPluginsEnabled(bool value)
     {
         pluginsEnabled_ = value;
+    }
+
+
+    void BiasPlugin::setRequireTimer(bool value)
+    {
+        requireTimer_ = true;
     }
 
 }

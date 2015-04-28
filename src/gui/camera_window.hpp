@@ -104,7 +104,10 @@ namespace bias
             RtnStatus setWindowGeometryFromJson(QByteArray jsonGeomArray);
             QRect getWindowGeometry();
             QVariantMap getWindowGeometryMap();
+            void setCaptureDuration(unsigned long duration);
 
+            RtnStatus setCurrentPlugin(QString pluginName);
+            QString getCurrentPluginName(RtnStatus &rtnStatus);
             RtnStatus runPluginCmd(
                     QByteArray jsonPluginCmdArray, 
                     bool showErrorDlg=true
@@ -128,6 +131,7 @@ namespace bias
             void imageCaptureStopped();
             void format7SettingsChanged();
             void imageOrientationChanged(bool flipVert, bool flipHorz, ImageRotationType imageRot);
+            void timerDurationChanged(unsigned long duration);
 
         protected:
 
@@ -193,9 +197,8 @@ namespace bias
             void actionPropertyTriggered(int propTypeInt);
             void actionColorMapTriggered(int colorMapInt);
 
-
             // Dialog slots
-            void timerDurationChanged(unsigned long duration);
+            void onTimerDurationChanged(unsigned long duration);
             void loggingSettingsChanged(VideoWriterParams params);
             void format7RoiEnableStateChanged();
             void alignmentSettingsChanged(AlignmentSettings);
@@ -259,6 +262,7 @@ namespace bias
             QMap<QAction*, ImageRotationType> actionToRotationMap_;
             QMap<QAction*, VideoFileFormat> actionToVideoFileFormatMap_;
             QMap<QString, QPointer<BiasPlugin>> pluginMap_;
+            QMap<QString, QPointer<QAction>> pluginActionMap_;
 
             std::shared_ptr<Lockable<Camera>> cameraPtr_;
             std::shared_ptr<LockableQueue<StampedImage>> newImageQueuePtr_;

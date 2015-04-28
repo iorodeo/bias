@@ -56,14 +56,42 @@ namespace bias
     // ------------------------------------------------------------------------
     void StampedePlugin::initialize()
     {
+        setRequireTimer(true);
         vibrationEventWidgetPtr -> setNameText(QString("Vibration"));
         displayEventWidgetPtr -> setNameText(QString("Display"));
+
+        connect(
+                parent(),
+                SIGNAL(timerDurationChanged(unsigned long)),
+                this,
+                SLOT(onTimerDurationChanged(unsigned long))
+               );
+
+        connect(
+                parent(),
+                SIGNAL(timerDurationChanged(unsigned long)),
+                vibrationEventWidgetPtr,
+                SLOT(onTimerDurationChanged(unsigned long))
+               );
+
+        connect(
+                parent(),
+                SIGNAL(timerDurationChanged(unsigned long)),
+                displayEventWidgetPtr,
+                SLOT(onTimerDurationChanged(unsigned long))
+               );
+
 
     }
 
     // Private slots
     // ------------------------------------------------------------------------
 
+    void StampedePlugin::onTimerDurationChanged(unsigned long duration)
+    {
+        QString stopTimeText = QString("Stop (t=%1 sec)").arg(duration);
+        stopTimeLabelPtr -> setText(stopTimeText);
+    }
 
 
 

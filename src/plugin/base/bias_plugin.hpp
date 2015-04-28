@@ -15,6 +15,9 @@ namespace cv
 
 namespace bias
 {
+
+    class CameraWindow;
+
     class BiasPlugin : public QDialog, public Lockable<Empty>
     {
         Q_OBJECT
@@ -30,6 +33,8 @@ namespace bias
 
             void setActive(bool value);
             bool isActive();
+            bool requireTimer();
+            QPointer<CameraWindow> getCameraWindow();
 
             virtual void processFrames(QList<StampedImage> frameList);
             virtual cv::Mat getCurrentImage();
@@ -45,9 +50,11 @@ namespace bias
 
             static bool pluginsEnabled_;
             bool active_;
-
+            bool requireTimer_;
             cv::Mat currentImage_;
-            
+
+            void setRequireTimer(bool value);
+
     };
 
 }

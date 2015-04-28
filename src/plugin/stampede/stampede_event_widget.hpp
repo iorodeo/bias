@@ -30,13 +30,14 @@ namespace bias
 
             QPointer<QHBoxLayout> timelineLayoutPtr_;
             QPointer<QSplitter> timelineSplitterPtr_;
-            double duration_;
+            unsigned long duration_;
             QColor color_;
 
             void initialize();
 
         private slots:
             void timelineSplitterMoved(int pos, int index);
+            void onTimerDurationChanged(unsigned long duration);
 
 
     };
