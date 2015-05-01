@@ -1,6 +1,7 @@
 #ifndef GRAB_DETECTOR_PLUGIN_HPP
 #define GRAB_DETECTOR_PLUGIN_HPP
 #include "ui_grab_detector_plugin.h"
+#include "grab_detector_config.hpp"
 #include "bias_plugin.hpp"
 #include "pulse_device.hpp"
 #include <QPointer>
@@ -30,17 +31,9 @@ namespace bias
 
             static const QString PLUGIN_NAME;
             static const QString PLUGIN_DISPLAY_NAME;
-            static int DEFAULT_XPOS;
-            static int DEFAULT_YPOS;
-            static int DEFAULT_WIDTH;
-            static int DEFAULT_HEIGHT;
-            static int DEFAULT_TRIGGER_ARMED;
-            static int DEFAULT_TRIGGER_THRESHOLD;
-            static int DEFAULT_TRIGGER_FILTER_SIZE;
             static int DEFAULT_LIVEPLOT_UPDATE_DT;
             static double DEFAULT_LIVEPLOT_TIME_WINDOW; 
             static double DEFAULT_LIVEPLOT_SIGNAL_WINDOW;
-            static QColor DEFAULT_DETECTION_BOX_COLOR;
 
             GrabDetectorPlugin(ImageLabel *imageLabelPtr, QWidget *parentPtr=0);
 
@@ -55,6 +48,10 @@ namespace bias
             void setTriggerEnabled(bool value);
             void resetTrigger();
 
+            RtnStatus connectTriggerDev();
+            RtnStatus disconnectTriggerDev();
+            RtnStatus setFromConfig(GrabDetectorConfig config);
+
         signals:
 
             void triggerFired();
@@ -62,12 +59,11 @@ namespace bias
         protected:
 
             bool found_;
-            bool triggerArmed_;
-            bool triggerEnabled_;
             double signalMax_;
             double signalMin_;
             unsigned long frameCount_;
-            QColor detectionBoxColor_;
+            
+            GrabDetectorConfig config_;
 
             int livePlotUpdateDt_;
             double livePlotTimeWindow_; 

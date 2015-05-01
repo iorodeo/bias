@@ -14,21 +14,9 @@ namespace bias
     // ------------------------------------------------------------------------
     const QString GrabDetectorPlugin::PLUGIN_NAME = QString("grabDetector");
     const QString GrabDetectorPlugin::PLUGIN_DISPLAY_NAME = QString("Grab Detector");
-
-    int GrabDetectorPlugin::DEFAULT_XPOS = 500;
-    int GrabDetectorPlugin::DEFAULT_YPOS = 500;
-    int GrabDetectorPlugin::DEFAULT_WIDTH = 100;
-    int GrabDetectorPlugin::DEFAULT_HEIGHT = 200;
-
-    int GrabDetectorPlugin::DEFAULT_TRIGGER_ARMED = false;
-    int GrabDetectorPlugin::DEFAULT_TRIGGER_THRESHOLD = 100;
-    int GrabDetectorPlugin::DEFAULT_TRIGGER_FILTER_SIZE = 3; // must be odd
-
     int GrabDetectorPlugin::DEFAULT_LIVEPLOT_UPDATE_DT = 75;
     double GrabDetectorPlugin::DEFAULT_LIVEPLOT_TIME_WINDOW = 10.0; 
     double GrabDetectorPlugin::DEFAULT_LIVEPLOT_SIGNAL_WINDOW = 255.0;
-
-    QColor GrabDetectorPlugin::DEFAULT_DETECTION_BOX_COLOR = QColor(255,0,0);
 
 
     // Public Methods
@@ -79,9 +67,9 @@ namespace bias
         frameCount_ = latestFrame.frameCount;
         livePlotTimeVec_.append(latestFrame.timeStamp);
         livePlotSignalVec_.append(signalMax);
-        if (found && triggerArmed_)
+        if (found && config_.triggerArmedState)
         {
-            if (triggerEnabled_)
+            if (config_.triggerEnabled)
             {
                 emit triggerFired();
             }
@@ -102,9 +90,9 @@ namespace bias
         releaseLock();
 
         cv::Rect boxRect = getDetectionBoxCv();
-        int red = detectionBoxColor_.red();
-        int green = detectionBoxColor_.green();
-        int blue = detectionBoxColor_.blue();
+        int red = config_.detectBoxColor.red();
+        int green = config_.detectBoxColor.green();
+        int blue = config_.detectBoxColor.blue();
         cv::Scalar boxColor(blue,green,red);
         int boxLineWidth = 3;
 
@@ -174,7 +162,7 @@ namespace bias
 
     void GrabDetectorPlugin::setTriggerEnabled(bool value)
     {
-        triggerEnabled_ = value;
+        config_.triggerEnabled = value;
         trigEnabledCheckBoxPtr -> setChecked(value);
 
     }
@@ -193,7 +181,11 @@ namespace bias
     RtnStatus GrabDetectorPlugin::runCmdFromMap(QVariantMap cmdMap, bool showErrorDlg)
     {
         qDebug() << __PRETTY_FUNCTION__;
+
         RtnStatus rtnStatus;
+        rtnStatus.success = true;
+        rtnStatus.message = QString("");
+
 
         QString errMsgTitle("Plugin runCmdFromMap Error");
 
@@ -222,10 +214,30 @@ namespace bias
         QString cmd  = cmdMap["cmd"].toString();
         qDebug() << "cmd = " << cmd;
 
-        // TODO -- NOT DONE
         if (cmd == QString("reset"))
         {
             resetTrigger();
+        }
+        else if (cmd == QString("connect"))
+        {
+            rtnStatus = connectTriggerDev();
+        }
+        else if (cmd == QString("disconnect"))
+        {
+            rtnStatus = disconnectTriggerDev();
+        }
+        else if (cmd == QString("set-config"))
+        {
+        }
+        else
+        {
+            QString errMsgText = QString("runPluginCmd: unknown cmd %1").arg(cmd);
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
         }
 
         return rtnStatus;
@@ -234,8 +246,186 @@ namespace bias
 
     void GrabDetectorPlugin::resetTrigger()
     {
-        triggerArmed_ = true;
+        config_.triggerArmedState = true;
         updateTrigStateInfo();
+    }
+
+
+    RtnStatus GrabDetectorPlugin::connectTriggerDev()
+    {
+        RtnStatus rtnStatus;
+
+        tabWidgetPtr -> setEnabled(false);
+        tabWidgetPtr -> repaint(); 
+
+        if (pulseDevice_.isOpen())
+        {
+            tabWidgetPtr -> setEnabled(true);
+            rtnStatus.success = true;
+            rtnStatus.message = QString("device already connected");
+            return rtnStatus;
+        }
+        
+        statusLabelPtr -> setText(QString("Status: connecting ..."));
+        statusLabelPtr -> repaint();
+        if (serialInfoList_.size() > 0)
+        {
+            int index = comPortComboBoxPtr -> currentIndex();
+            QSerialPortInfo serialInfo = serialInfoList_.at(index);
+            pulseDevice_.setPort(serialInfo);
+            pulseDevice_.open();
+        }
+
+        // Check to see if device is opene or closed and set status string accordingly
+        if (pulseDevice_.isOpen())
+        {
+            statusLabelPtr -> setText(QString("Status: connected"));
+            connectPushButtonPtr -> setText("Disconnect");
+            refreshPortListPushButtonPtr -> setEnabled(false);
+            comPortComboBoxPtr -> setEnabled(false);
+            devOutputGroupBoxPtr -> setEnabled(true);
+
+            // Get output pin from device and set text
+            bool ok = false;
+            int outputPin = pulseDevice_.getOutputPin(&ok);
+            if (ok)
+            {
+                outputPinLabelPtr -> setText(QString("Output Pin: %1").arg(outputPin));
+            }
+            else
+            {
+                outputPinLabelPtr -> setText(QString("Output Pin: ??").arg(outputPin));
+            }
+
+            // Get pulse length 
+            ok = false;
+            unsigned long pulseLength_us = pulseDevice_.getPulseLength(&ok);
+            if (ok)
+            {
+                double pulseLength_sec = (1.0e-6)*pulseLength_us;
+                durationDblSpinBoxPtr -> setValue(pulseLength_sec);
+            }
+        }
+        else
+        {
+            statusLabelPtr -> setText(QString("Status: not connected"));
+            connectPushButtonPtr -> setText("Connect");
+            refreshPortListPushButtonPtr -> setEnabled(true);
+            comPortComboBoxPtr -> setEnabled(true);
+            devOutputGroupBoxPtr -> setEnabled(false);
+            outputPinLabelPtr -> setText(QString("Output Pin: __"));
+
+            tabWidgetPtr -> setEnabled(true);
+            rtnStatus.success = false;
+            rtnStatus.message = QString("failed to open device");
+            return rtnStatus;
+        }
+
+        tabWidgetPtr -> setEnabled(true);
+        rtnStatus.success = true;
+        rtnStatus.message = QString("");
+        return rtnStatus;
+    }
+
+
+    RtnStatus GrabDetectorPlugin::disconnectTriggerDev()
+    {
+        RtnStatus rtnStatus;
+        tabWidgetPtr -> setEnabled(false);
+        tabWidgetPtr -> repaint(); 
+
+        if (pulseDevice_.isOpen())
+        {
+            statusLabelPtr -> setText(QString("Status: disconnecting ... "));
+            statusLabelPtr -> repaint();
+            pulseDevice_.close();
+        }
+        else
+        {
+            tabWidgetPtr -> setEnabled(true);
+            rtnStatus.success = true;
+            rtnStatus.message = QString("device already disconnecter");
+            return rtnStatus;
+        }
+
+        statusLabelPtr -> setText(QString("Status: not connected"));
+        connectPushButtonPtr -> setText("Connect");
+        refreshPortListPushButtonPtr -> setEnabled(true);
+        comPortComboBoxPtr -> setEnabled(true);
+        devOutputGroupBoxPtr -> setEnabled(false);
+        outputPinLabelPtr -> setText(QString("Output Pin: __"));
+
+        tabWidgetPtr -> setEnabled(true);
+        rtnStatus.success = true;
+        rtnStatus.message = QString("");
+        return rtnStatus;
+    }
+
+
+    RtnStatus GrabDetectorPlugin::setFromConfig(GrabDetectorConfig config)
+    {
+        RtnStatus rtnStatus;
+
+        config_= config;
+
+        durationDblSpinBoxPtr -> setValue(config_.devicePulseDuration);
+        autoConnectCheckBoxPtr -> setChecked(config_.deviceAutoConnect);
+
+        xPosSpinBoxPtr -> setValue(config_.detectBoxXPos);
+        yPosSpinBoxPtr -> setValue(config_.detectBoxYPos);
+        widthSpinBoxPtr -> setValue(config_.detectBoxWidth);
+        heightSpinBoxPtr -> setValue(config_.detectBoxHeight);
+
+        setTriggerEnabled(config_.triggerEnabled);
+        trigThresholdSpinBoxPtr -> setValue(config_.triggerThreshold);
+        trigMedianFilterSpinBoxPtr ->  setValue(config_.triggerMedianFilter);
+
+        updateColorExampleLabel();
+        updateTrigStateInfo();
+
+        if (config_.deviceAutoConnect)
+        {
+            bool portFound = false;
+            QSerialPortInfo portInfo;
+
+            for (QSerialPortInfo serialInfo : serialInfoList_)
+            {
+                if (config_.devicePortName == serialInfo.portName())
+                {
+                    portFound = true;
+                    portInfo = serialInfo;
+                    break;
+                }
+            }
+
+            qDebug() << portFound;
+            if (portFound)
+            {
+                int portIndex = comPortComboBoxPtr -> findText(config_.devicePortName); 
+                comPortComboBoxPtr -> setCurrentIndex(portIndex);
+                rtnStatus = connectTriggerDev();
+                if (rtnStatus.success)
+                {
+                }
+            }
+        }
+
+        if (pulseDevice_.isOpen())
+        {
+            double value = durationDblSpinBoxPtr -> value();
+            unsigned long pulseLength_us = (unsigned long)(value*1.0e6);
+            bool ok = pulseDevice_.setPulseLength(pulseLength_us);
+        }
+        else
+        {
+            statusLabelPtr -> setText(QString("Status: not connected "));
+            devOutputGroupBoxPtr -> setEnabled(false);
+            outputPinLabelPtr -> setText("Output Pin: __");
+        }
+
+
+
+        return rtnStatus;
     }
 
     // Protected Methods
@@ -318,25 +508,28 @@ namespace bias
 
     void GrabDetectorPlugin::initialize()
     {
+
+        //GrabDetectorConfig config;
+        //config.detectBoxXPos = 5;
+        //config.print();
+        //QVariantMap configMap = config.toMap();
+        //QByteArray jsonConfigArray = config.toJson();
+        //qDebug() << jsonConfigArray;
+
+        //GrabDetectorConfig config2;
+        //config2.print();
+        //config2.setFromJson(jsonConfigArray);
+        //config2.print();
+
         found_ = false;
-        triggerArmed_ = false;
         signalMax_ = 0.0;
         signalMin_ = 0.0;
         frameCount_ = 0;
 
+
         livePlotUpdateDt_ = DEFAULT_LIVEPLOT_UPDATE_DT;
         livePlotTimeWindow_ = DEFAULT_LIVEPLOT_TIME_WINDOW;
         livePlotSignalWindow_ = DEFAULT_LIVEPLOT_SIGNAL_WINDOW;
-
-        detectionBoxColor_ = DEFAULT_DETECTION_BOX_COLOR;
-
-        // Set trigger threshold and filter size (TEMPORARY)
-        trigThresholdSpinBoxPtr -> setValue(DEFAULT_TRIGGER_THRESHOLD);
-        trigMedianFilterSpinBoxPtr ->  setValue(DEFAULT_TRIGGER_FILTER_SIZE);
-        xPosSpinBoxPtr -> setValue(DEFAULT_XPOS);
-        yPosSpinBoxPtr -> setValue(DEFAULT_YPOS);
-        widthSpinBoxPtr -> setValue(DEFAULT_WIDTH);
-        heightSpinBoxPtr -> setValue(DEFAULT_HEIGHT);
 
         // Setup live plot
         livePlotPtr -> addGraph();
@@ -355,21 +548,15 @@ namespace bias
 
         refreshPortList();
 
-        setTriggerEnabled(true);
-        updateTrigStateInfo();
-        
-        statusLabelPtr -> setText(QString("Status: not connected "));
-        devOutputGroupBoxPtr -> setEnabled(false);
+        setFromConfig(config_);
 
-        outputPinLabelPtr -> setText("Output Pin: __");
 
-        updateColorExampleLabel();
 
     }
 
     void GrabDetectorPlugin::updateTrigStateInfo()
     {
-        if (triggerArmed_)
+        if (config_.triggerArmedState)
         {
             trigStateLabelPtr -> setText("State: Ready");
         }
@@ -419,7 +606,7 @@ namespace bias
     void GrabDetectorPlugin::updateColorExampleLabel()
     { 
         QPalette palette = colorExampleLabelPtr -> palette();
-        palette.setColor(colorExampleLabelPtr -> backgroundRole(), detectionBoxColor_);
+        palette.setColor(colorExampleLabelPtr -> backgroundRole(), config_.detectBoxColor);
         colorExampleLabelPtr -> setPalette(palette);
         colorExampleLabelPtr -> setAutoFillBackground(true);
     }
@@ -435,69 +622,14 @@ namespace bias
 
     void GrabDetectorPlugin::connectPushButtonClicked()
     {
-        tabWidgetPtr -> setEnabled(false);
-        tabWidgetPtr -> repaint(); 
-
         if (pulseDevice_.isOpen())
         {
-            statusLabelPtr -> setText(QString("Status: disconnecting ... "));
-            statusLabelPtr -> repaint();
-            pulseDevice_.close();
+            disconnectTriggerDev();
         }
         else
         {
-            statusLabelPtr -> setText(QString("Status: connecting ..."));
-            statusLabelPtr -> repaint();
-            if (serialInfoList_.size() > 0)
-            {
-                int index = comPortComboBoxPtr -> currentIndex();
-                QSerialPortInfo serialInfo = serialInfoList_.at(index);
-                pulseDevice_.setPort(serialInfo);
-                pulseDevice_.open();
-            }
+            connectTriggerDev();
         }
-
-        // Check to see if device is opene or closed and set status string accordingly
-        if (pulseDevice_.isOpen())
-        {
-            statusLabelPtr -> setText(QString("Status: connected"));
-            connectPushButtonPtr -> setText("Disconnect");
-            refreshPortListPushButtonPtr -> setEnabled(false);
-            comPortComboBoxPtr -> setEnabled(false);
-            devOutputGroupBoxPtr -> setEnabled(true);
-
-            // Get output pin from device and set text
-            bool ok = false;
-            int outputPin = pulseDevice_.getOutputPin(&ok);
-            if (ok)
-            {
-                outputPinLabelPtr -> setText(QString("Output Pin: %1").arg(outputPin));
-            }
-            else
-            {
-                outputPinLabelPtr -> setText(QString("Output Pin: ??").arg(outputPin));
-            }
-
-            // Get pulse length 
-            ok = false;
-            unsigned long pulseLength_us = pulseDevice_.getPulseLength(&ok);
-            if (ok)
-            {
-                double pulseLength_sec = (1.0e-6)*pulseLength_us;
-                durationDblSpinBoxPtr -> setValue(pulseLength_sec);
-            }
-        }
-        else
-        {
-            statusLabelPtr -> setText(QString("Status: not connected"));
-            connectPushButtonPtr -> setText("Connect");
-            refreshPortListPushButtonPtr -> setEnabled(true);
-            comPortComboBoxPtr -> setEnabled(true);
-            devOutputGroupBoxPtr -> setEnabled(false);
-            outputPinLabelPtr -> setText(QString("Output Pin: __"));
-        }
-        tabWidgetPtr -> setEnabled(true);
-
     }
 
     void GrabDetectorPlugin::refreshPortListPushButtonClicked()
@@ -532,10 +664,10 @@ namespace bias
 
     void GrabDetectorPlugin::colorSelectPushButtonClicked()
     {
-        QColor newColor = QColorDialog::getColor(detectionBoxColor_, this);
+        QColor newColor = QColorDialog::getColor(config_.detectBoxColor, this);
         if (newColor.isValid())
         {
-            detectionBoxColor_ = newColor;
+            config_.detectBoxColor = newColor;
         }
         updateColorExampleLabel();
     }
@@ -551,11 +683,11 @@ namespace bias
     {
         if (state == Qt::Unchecked)
         {
-            triggerEnabled_ = false;
+            config_.triggerEnabled = false;
         }
         else
         {
-            triggerEnabled_= true;
+            config_.triggerEnabled= true;
         }
         updateTrigStateInfo();
     }
@@ -621,13 +753,13 @@ namespace bias
 
     void GrabDetectorPlugin::onTriggerFired()
     {
-        if (triggerArmed_)
+        if (config_.triggerArmedState)
         {
             if (pulseDevice_.isOpen())
             {
                 pulseDevice_.startPulse();
             }
-            triggerArmed_ = false;
+            config_.triggerArmedState = false;
             updateTrigStateInfo();
         }
     }

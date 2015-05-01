@@ -12,12 +12,14 @@ set(
 
 set(
     grab_detector_plugin_HEADERS 
+    grab_detector_config.hpp
     grab_detector_plugin.hpp
     pulse_device.hpp
     )
 
 set(
     grab_detector_plugin_SOURCES 
+    grab_detector_config.cpp
     grab_detector_plugin.cpp
     pulse_device.cpp
     )

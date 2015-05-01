@@ -5,11 +5,26 @@
 namespace bias
 {
 
-    struct RtnStatus 
+    class RtnStatus 
     {
-        bool success;
-        QString message;
-        RtnStatus() { success=true; message=QString(""); }
+        public:
+
+            RtnStatus() { success=true; message=QString(""); }
+
+            void appendMessage(QString moreMessage) 
+            { 
+                if (message.isEmpty())
+                {
+                    message = moreMessage;
+                }
+                else
+                {
+                    message = QString("%1, %2").arg(message).arg(moreMessage);
+                }
+            }
+
+            bool success;
+            QString message;
     };
 
 } 

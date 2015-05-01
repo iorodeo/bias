@@ -162,7 +162,7 @@
                  </spacer>
                 </item>
                 <item>
-                 <widget class="QCheckBox" name="autoConnectCheckBox">
+                 <widget class="QCheckBox" name="autoConnectCheckBoxPtr">
                   <property name="font">
                    <font>
                     <weight>50</weight>
