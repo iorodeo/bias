@@ -1,7 +1,9 @@
 #ifndef STAMPEDE_PLUGIN_HPP
 #define STAMPEDE_PLUGIN_HPP
 #include "ui_stampede_plugin.h"
+#include "stampede_plugin_config.hpp"
 #include "bias_plugin.hpp"
+#include "rtn_status.hpp"
 
 namespace cv
 { 
@@ -10,6 +12,9 @@ namespace cv
 
 namespace bias
 {
+
+
+
     class StampedePlugin : public BiasPlugin, public Ui::StampedePluginDialog
     {
         Q_OBJECT
@@ -28,11 +33,14 @@ namespace bias
             virtual RtnStatus runCmdFromMap(QVariantMap cmdMap,bool showErrorDlg=true);
 
         protected:
+
+            StampedePluginConfig config_;
+
             void initialize();
 
         private slots:
-
             void onTimerDurationChanged(unsigned long duration);
+
 
     };
 

@@ -398,7 +398,6 @@ namespace bias
                 }
             }
 
-            qDebug() << portFound;
             if (portFound)
             {
                 int portIndex = comPortComboBoxPtr -> findText(config_.devicePortName); 

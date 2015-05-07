@@ -8,27 +8,22 @@ endif()
 set(
     stampede_plugin_FORMS 
     stampede_plugin.ui
-    stampede_event_widget.ui
     )
 
 set(
     stampede_plugin_HEADERS 
     stampede_plugin.hpp
-    stampede_event_widget.hpp
-    base_event_label.hpp
-    empty_event_label.hpp
-    display_event_label.hpp
-    vibration_event_label.hpp
+    stampede_plugin_config.hpp
+    vibration_event.hpp
+    display_event.hpp
     )
 
 set(
     stampede_plugin_SOURCES 
     stampede_plugin.cpp
-    stampede_event_widget.cpp
-    base_event_label.cpp
-    empty_event_label.cpp
-    display_event_label.cpp
-    vibration_event_label.cpp
+    stampede_plugin_config.cpp
+    vibration_event.cpp
+    display_event.cpp
     )
 
 qt5_wrap_ui(stampede_plugin_FORMS_HEADERS ${stampede_plugin_FORMS}) 

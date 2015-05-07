@@ -2602,7 +2602,8 @@ namespace bias
         tabWidgetPtr_ -> setCurrentWidget(previewTabPtr_);
 
         //setCurrentPlugin(pluginMap_.firstKey());
-        setCurrentPlugin("grabDetector");
+        //setCurrentPlugin("grabDetector");
+        setCurrentPlugin("stampede");
 
         updateWindowTitle();
         updateCameraInfoMessage();
@@ -3207,20 +3208,7 @@ namespace bias
 
             pluginActionPtr -> setChecked(false);
             pluginPtr -> setActive(false);
-
-            //if (pluginName == QString("stampede")) 
-            //{
-            //    pluginActionPtr -> setChecked(true);
-            //    pluginPtr -> setActive(true);
-            //}
-            //else
-            //{
-            //    pluginActionPtr -> setChecked(false);
-            //    pluginPtr -> setActive(false);
-            //}
         }
-
-
         connect(
                 pluginActionGroupPtr_,
                 SIGNAL(triggered(QAction*)),
