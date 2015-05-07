@@ -68,19 +68,19 @@ namespace bias
 
         // Develpement
         // ------------------------------------------------------------------
-        DisplayEvent dspEvt;
-        dspEvt.setStartTime(5.2);
-        qDebug() << dspEvt.toString();
-        QVariantMap dspEvtMap = dspEvt.toMap();
-        QByteArray dspEvtJson = dspEvt.toJson();
-        qDebug() << dspEvtJson;
+        StampedePluginConfig config;
+        config.setToDefaultConfig();
 
+        qDebug() << config.toString();
 
-        DisplayEvent dspEvt2;
-        dspEvt2.fromJson(dspEvtJson);
-        qDebug() << dspEvt2.toString();
-
+        QVariantMap configMap = config.toMap();
+        QByteArray configJson = config.toJson();
+        qDebug() << configJson;
         
+
+        StampedePluginConfig config2;
+        config2.fromJson(configJson);
+        qDebug() << config.toJson();
     }
 
     // Private slots

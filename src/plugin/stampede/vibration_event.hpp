@@ -29,6 +29,8 @@ namespace bias
             RtnStatus fromMap(QVariantMap map);
             RtnStatus fromJson(QByteArray jsonArray);
 
+            RtnStatus checkValues();
+
         protected:
 
             unsigned int number_ = 10;

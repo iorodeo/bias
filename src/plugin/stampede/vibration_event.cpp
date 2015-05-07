@@ -3,6 +3,8 @@
 
 namespace bias
 {
+
+
     // Public methods
     // ------------------------------------------------------------------------
     VibrationEvent::VibrationEvent()
@@ -77,12 +79,10 @@ namespace bias
     QString VibrationEvent::toString()
     {
         QString eventStr;
-        eventStr.append(QString("\n"));
         eventStr.append(QString("Vibration Event:\n"));
         eventStr.append(QString("  number:     %1\n").arg(number_));
         eventStr.append(QString("  startTime:  %1\n").arg(startTime_));
         eventStr.append(QString("  period:     %1\n").arg(period_));
-        eventStr.append(QString("\n"));
         return eventStr;
     }
 
@@ -140,7 +140,7 @@ namespace bias
         else
         {
             rtnStatus.success = false;
-            rtnStatus.appendMessage(QString("missing number (of pulses)"));
+            rtnStatus.appendMessage(QString("vibration event missing number (of pulses) field"));
         }
 
         // Get start time of pulses
@@ -166,7 +166,7 @@ namespace bias
         else
         {
             rtnStatus.success = false;
-            rtnStatus.appendMessage(QString("missing startTime"));
+            rtnStatus.appendMessage(QString("vibration event missing startTime field"));
         }
 
         // Get period of pulses 
@@ -192,7 +192,16 @@ namespace bias
         else
         {
             rtnStatus.success = false;
-            rtnStatus.appendMessage(QString(" missing period"));
+            rtnStatus.appendMessage(QString("vibration event missing period field"));
+        }
+
+        // Check values
+        // --------------------------------------------------------------------
+        RtnStatus rtnCheckValues = checkValues();
+        if (!rtnCheckValues.success)
+        {
+            rtnStatus.success = false;
+            rtnStatus.appendMessage(rtnCheckValues.message);
         }
         return rtnStatus;
     }
@@ -217,4 +226,13 @@ namespace bias
         }
         return rtnStatus;
     }
+
+    RtnStatus VibrationEvent::checkValues()
+    {
+        RtnStatus rtnStatus;
+        rtnStatus.success = true;
+        rtnStatus.message = QString("");
+        return rtnStatus;
+    }
+
 }

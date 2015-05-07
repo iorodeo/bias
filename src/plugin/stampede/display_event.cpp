@@ -93,7 +93,6 @@ namespace bias
     QString DisplayEvent::toString()
     {
         QString eventStr;
-        eventStr.append(QString("\n"));
         eventStr.append(QString("Display Event:\n"));
         eventStr.append(QString("  patternId:   %1\n").arg(patternId_));
         eventStr.append(QString("  startTime:   %1\n").arg(startTime_));
@@ -154,7 +153,7 @@ namespace bias
         else
         {
             rtnStatus.success = false;
-            rtnStatus.appendMessage(QString("missing patternId"));
+            rtnStatus.appendMessage(QString("display event missing patternId"));
         }
 
         // Get Start time
@@ -180,7 +179,7 @@ namespace bias
         else
         {
             rtnStatus.success = false;
-            rtnStatus.appendMessage(QString("missing startTime"));
+            rtnStatus.appendMessage(QString("display event missing startTime"));
         }
 
         // Get stopTime
@@ -206,7 +205,7 @@ namespace bias
         else
         {
             rtnStatus.success = false;
-            rtnStatus.appendMessage(QString("missing startTime"));
+            rtnStatus.appendMessage(QString("display event missing startTime"));
         }
 
         // Get controlBias
@@ -232,7 +231,7 @@ namespace bias
         else
         {
             rtnStatus.success = false;
-            rtnStatus.appendMessage(QString("missing controlBias"));
+            rtnStatus.appendMessage(QString("display event missing controlBias"));
         }
 
         // Check values for correctness
