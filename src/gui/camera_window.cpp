@@ -467,6 +467,8 @@ namespace bias
 
         if (BiasPlugin::pluginsEnabled())
         {
+            getCurrentPlugin() -> reset();
+
             pluginHandlerPtr_ -> setCameraNumber(cameraNumber_);
             pluginHandlerPtr_ -> setImageQueue(pluginImageQueuePtr_);
             pluginHandlerPtr_ -> setPlugin(getCurrentPlugin());
@@ -1421,14 +1423,17 @@ namespace bias
         }
         currentVideoFileDir_ = videoFileDir;
         currentVideoFileName_ = videoFileName;
+
+        emit videoFileChanged();
+
         // DEBUG
         // ---------------------------------------------------------------------------------------------
         //std::cout << "currentVideoFileDir:  " << currentVideoFileDir_.path().toStdString() << std::endl;
         //std::cout << "currentVideoFileName: " << currentVideoFileName_.toStdString() << std::endl;
         // ---------------------------------------------------------------------------------------------
+        
         return rtnStatus;
     }
-
 
     void CameraWindow::setUserCameraName(QString cameraName)
     {
@@ -1526,6 +1531,15 @@ namespace bias
         emit timerDurationChanged(duration);
     }
 
+    QDir CameraWindow::getCurrentConfigFileDir()
+    {
+        return currentConfigFileDir_;
+    }
+
+    QDir CameraWindow::getDefaultConfigFileDir()
+    {
+        return defaultConfigFileDir_;
+    }
 
     RtnStatus CameraWindow::setCurrentPlugin(QString pluginName)
     {
@@ -1676,10 +1690,14 @@ namespace bias
     }
 
     QDir CameraWindow::getVideoFileDir()
-    {
+    { 
         return currentVideoFileDir_;
     }
 
+    QString CameraWindow::getVideoFileName()
+    {
+        return currentVideoFileName_;
+    }
 
     double CameraWindow::getTimeStamp()
     {
@@ -2567,12 +2585,7 @@ namespace bias
 
         BiasPlugin::setPluginsEnabled(true);
         actionPluginsEnabledPtr_ -> setChecked(BiasPlugin::pluginsEnabled());
-        // Temporary - plugin development
-        // -------------------------------------------------------------------------------
-        pluginHandlerPtr_  = new PluginHandler(this);
-        pluginMap_[StampedePlugin::PLUGIN_NAME] = new StampedePlugin(this);
-        pluginMap_[GrabDetectorPlugin::PLUGIN_NAME] = new GrabDetectorPlugin(pluginImageLabelPtr_,this);
-        // -------------------------------------------------------------------------------
+
 
         colorMapNumber_ = DEFAULT_COLORMAP_NUMBER;
         videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
@@ -2594,6 +2607,13 @@ namespace bias
         currentVideoFileName_ = DEFAULT_VIDEO_FILE_NAME;
         currentConfigFileDir_ = defaultConfigFileDir_;
         currentConfigFileName_ = DEFAULT_CONFIG_FILE_NAME;
+
+        // Temporary - plugin development
+        // -------------------------------------------------------------------------------
+        pluginHandlerPtr_  = new PluginHandler(this);
+        pluginMap_[StampedePlugin::PLUGIN_NAME] = new StampedePlugin(this);
+        pluginMap_[GrabDetectorPlugin::PLUGIN_NAME] = new GrabDetectorPlugin(pluginImageLabelPtr_,this);
+        // -------------------------------------------------------------------------------
 
         setupStatusLabel();
         setupCameraMenu();

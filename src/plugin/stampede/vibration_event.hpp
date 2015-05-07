@@ -19,6 +19,8 @@ namespace bias
             double startTime();
             RtnStatus setStartTime(double startTime);
 
+            double stopTime();
+
             double period();
             RtnStatus setPeriod(double period);
 

@@ -17,6 +17,9 @@ namespace bias
         active_ = false;
     }
 
+    void BiasPlugin::reset()
+    { }
+
 
     void BiasPlugin::setActive(bool value)
     {
@@ -41,6 +44,8 @@ namespace bias
         StampedImage latestFrame = frameList.back();
         frameList.clear();
         currentImage_ = latestFrame.image;
+        timeStamp_ = latestFrame.timeStamp;
+        frameCount_ = latestFrame.frameCount;
         releaseLock();
     } 
 

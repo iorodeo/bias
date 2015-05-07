@@ -23,13 +23,15 @@ namespace bias
     // Public methods
     // ----------------------------------------------------------------------------------
     NanoSSRPulse::NanoSSRPulse(QObject *parent) : QSerialPort(parent) 
-    {
+    { 
         initialize();
     };
 
+
     NanoSSRPulse::NanoSSRPulse(const QSerialPortInfo &portInfo, QObject *parent) 
         : QSerialPort(portInfo,parent) 
-    {
+    { 
+
         initialize();
     };
 
@@ -38,6 +40,13 @@ namespace bias
         bool isOpen = QSerialPort::open(QIODevice::ReadWrite);
         if (isOpen && sleepForReset)
         {
+            setBaudRate(DEFAULT_BAUDRATE); 
+            setDataBits(DEFAULT_DATABITS); 
+            setFlowControl(DEFAULT_FLOWCONTROL); 
+            setParity(DEFAULT_PARITY); 
+            setStopBits(DEFAULT_STOPBITS); 
+            waitForTimeout_ = DEFAULT_WAITFOR_TIMEOUT;
+            resetSleepDt_ = DEFAULT_RESET_SLEEP_DT;
             QThread::msleep(resetSleepDt_);
             readAll();
         }
@@ -174,13 +183,6 @@ namespace bias
     // ----------------------------------------------------------------------------------
     void NanoSSRPulse::initialize()
     { 
-        setBaudRate(DEFAULT_BAUDRATE); 
-        setDataBits(DEFAULT_DATABITS); 
-        setFlowControl(DEFAULT_FLOWCONTROL); 
-        setParity(DEFAULT_PARITY); 
-        setStopBits(DEFAULT_STOPBITS); 
-        waitForTimeout_ = DEFAULT_WAITFOR_TIMEOUT;
-        resetSleepDt_ = DEFAULT_RESET_SLEEP_DT;
     }
 
     bool NanoSSRPulse::writeCmd(QByteArray cmd)

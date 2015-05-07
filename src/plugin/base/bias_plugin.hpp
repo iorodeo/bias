@@ -34,10 +34,10 @@ namespace bias
             bool isActive();
             QPointer<CameraWindow> getCameraWindow();
 
+            virtual void reset();
             virtual void setActive(bool value);
             virtual void processFrames(QList<StampedImage> frameList);
             virtual cv::Mat getCurrentImage();
-
             virtual QString getName();
             virtual QString getDisplayName();
 
@@ -55,6 +55,8 @@ namespace bias
             bool active_;
             bool requireTimer_;
             cv::Mat currentImage_;
+            double timeStamp_;
+            unsigned long frameCount_;
 
             void setRequireTimer(bool value);
 

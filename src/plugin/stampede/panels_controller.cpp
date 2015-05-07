@@ -30,13 +30,13 @@ namespace bias
     // Public methods
     // ----------------------------------------------------------------------------------
     PanelsController::PanelsController(QObject *parent) : QSerialPort(parent) 
-    {
+    { 
         initialize();
     };
 
     PanelsController::PanelsController(const QSerialPortInfo &portInfo, QObject *parent) 
         : QSerialPort(portInfo,parent) 
-    {
+    { 
         initialize();
     };
 
@@ -46,6 +46,12 @@ namespace bias
         bool isOpen = QSerialPort::open(QIODevice::ReadWrite);
         if (isOpen)
         {
+            setBaudRate(DEFAULT_BAUDRATE); 
+            setDataBits(DEFAULT_DATABITS); 
+            setFlowControl(DEFAULT_FLOWCONTROL); 
+            setParity(DEFAULT_PARITY); 
+            setStopBits(DEFAULT_STOPBITS); 
+            waitForTimeout_ = DEFAULT_WAITFOR_TIMEOUT;
             readAll();
         }
         return isOpen;
@@ -374,12 +380,6 @@ namespace bias
     // ----------------------------------------------------------------------------------
     void PanelsController::initialize()
     { 
-        setBaudRate(DEFAULT_BAUDRATE); 
-        setDataBits(DEFAULT_DATABITS); 
-        setFlowControl(DEFAULT_FLOWCONTROL); 
-        setParity(DEFAULT_PARITY); 
-        setStopBits(DEFAULT_STOPBITS); 
-        waitForTimeout_ = DEFAULT_WAITFOR_TIMEOUT;
     }
 
     bool PanelsController::writeCmd(QByteArray cmd)

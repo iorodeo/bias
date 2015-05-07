@@ -154,9 +154,9 @@ namespace bias
     QString StampedePluginConfig::toString() 
     {
         QString configStr;
-        configStr.append(QString("vibrationPort:    %1\n").arg(vibrationPortName_));
-        configStr.append(QString("displayPort:      %1\n").arg(displayPortName_));
         configStr.append(QString("duration:         %1\n").arg(duration_));
+        configStr.append(QString("vibration port:   %1\n").arg(vibrationPortName_));
+        configStr.append(QString("display   port:   %1\n").arg(displayPortName_));
         configStr.append(QString("\n"));
 
         for (auto i=0; i<vibrationEventList_.size(); i++)
@@ -165,6 +165,7 @@ namespace bias
             configStr.append(vibrationEventList_[i].toString());
             configStr.append(QString("\n"));
         }
+
         for (auto i=0; i<displayEventList_.size(); i++)
         {
             configStr.append(QString("display event     %1 \n").arg(i));
@@ -396,7 +397,7 @@ namespace bias
         {
             if (map["port"].canConvert<QString>())
             {
-                vibrationPortName_ = map["port"].toString();
+                displayPortName_ = map["port"].toString();
             }
             else
             {
@@ -512,6 +513,10 @@ namespace bias
     RtnStatus StampedePluginConfig::checkVibrationEvents() 
     {
         RtnStatus rtnStatus;
+        rtnStatus.success = true;
+        rtnStatus.message = QString("");
+
+        QList<double> timeList;
         for (auto event : vibrationEventList_)
         {
             RtnStatus rtnCheckValues = event.checkValues();
@@ -519,6 +524,20 @@ namespace bias
             {
                 rtnStatus.success = false;
                 rtnStatus.appendMessage(rtnCheckValues.message);
+            }
+
+            double startTime = event.startTime();
+            double stopTime = event.startTime() + event.number()*event.period();
+            timeList.append(startTime);
+            timeList.append(stopTime);
+        }
+
+        for (auto i=0; i<timeList.size()-1; i++)
+        {
+            if (timeList[i] > timeList[i+1])
+            {
+                rtnStatus.success = false;
+                rtnStatus.appendMessage(QString("overlapping vibration events"));
             }
         }
         return rtnStatus;
@@ -528,6 +547,10 @@ namespace bias
     RtnStatus StampedePluginConfig::checkDisplayEvents() 
     {
         RtnStatus rtnStatus;
+        rtnStatus.success = true;
+        rtnStatus.message = QString("");
+
+        QList<double> timeList;
         for (auto event : displayEventList_)
         {
             RtnStatus rtnCheckValues = event.checkValues();
@@ -536,6 +559,17 @@ namespace bias
                 rtnStatus.success = false;
                 rtnStatus.message = QString(rtnCheckValues.message);
             }
+            timeList.append(event.startTime());
+            timeList.append(event.stopTime());
+        }
+
+        for (auto i=0; i<timeList.size()-1; i++)
+        {
+            if (timeList[i] > timeList[i-1])
+            {
+                rtnStatus.success = false;
+                rtnStatus.appendMessage(QString("overlapping display events"));
+            }
         }
         return rtnStatus;
     }
@@ -543,18 +577,14 @@ namespace bias
     void StampedePluginConfig::setToDefaultConfig()
     {
         setDuration(90);
-        setVibrationPortName("COM1");
-        setDisplayPortName("COM2");
+        setVibrationPortName("ttyUSB0");
+        setDisplayPortName("ttyUSB1");
 
         // Add Vibration events
         clearVibrationEventList();
 
         VibrationEvent vibEvent;
         vibEvent.setStartTime(5.0);
-        vibEvent.setPeriod(1.0);
-        vibEvent.setNumber(10);
-        appendVibrationEvent(vibEvent);
-        vibEvent.setStartTime(35.0);
         vibEvent.setPeriod(1.0);
         vibEvent.setNumber(10);
         appendVibrationEvent(vibEvent);
@@ -567,11 +597,13 @@ namespace bias
         dspEvent.setStartTime(20.0);
         dspEvent.setStopTime(30.0);
         dspEvent.setControlBias(1.0);
+
         appendDisplayEvent(dspEvent);
         dspEvent.setPatternId(1);
         dspEvent.setStartTime(50.0);
         dspEvent.setStopTime(60.0);
         dspEvent.setControlBias(1.0);
+
         appendDisplayEvent(dspEvent);
 
     }

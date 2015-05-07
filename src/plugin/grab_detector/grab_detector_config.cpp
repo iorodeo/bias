@@ -8,7 +8,7 @@ namespace bias
 
     // Device parameters 
     const QString GrabDetectorConfig::DEFAULT_DEVICE_PORT_NAME("ttyUSB0");
-    const bool GrabDetectorConfig::DEFAULT_DEVICE_AUTO_CONNECT = true;
+    const bool GrabDetectorConfig::DEFAULT_DEVICE_AUTO_CONNECT = false;
     const double GrabDetectorConfig::DEFAULT_DEVICE_PULSE_DURATION = 0.2; 
 
     // Detection box parameters

@@ -16,6 +16,8 @@ set(
     stampede_plugin_config.hpp
     vibration_event.hpp
     display_event.hpp
+    nano_ssr_pulse.hpp
+    panels_controller.hpp
     )
 
 set(
@@ -24,6 +26,8 @@ set(
     stampede_plugin_config.cpp
     vibration_event.cpp
     display_event.cpp
+    nano_ssr_pulse.cpp
+    panels_controller.cpp
     )
 
 qt5_wrap_ui(stampede_plugin_FORMS_HEADERS ${stampede_plugin_FORMS}) 
@@ -41,7 +45,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(.)
 target_link_libraries(stampede_plugin ${QT_LIBRARIES} bias_plugin bias_utility)
 
-qt5_use_modules(stampede_plugin Core Widgets Gui)
+qt5_use_modules(stampede_plugin Core Widgets Gui SerialPort)
 
 set(stampede_plugin_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} CACHE FILEPATH "stampede include directories")
 

@@ -51,6 +51,10 @@ namespace bias
         return rtnStatus;
     }
 
+    double VibrationEvent::stopTime()
+    {
+        return startTime_ + period_*number_;
+    }
 
     double VibrationEvent::period()
     {
@@ -79,9 +83,9 @@ namespace bias
     QString VibrationEvent::toString()
     {
         QString eventStr;
-        eventStr.append(QString("number:           %1\n").arg(number_));
-        eventStr.append(QString("startTime:        %1\n").arg(startTime_));
-        eventStr.append(QString("period:           %1\n").arg(period_));
+        eventStr.append(QString("  number:         %1\n").arg(number_));
+        eventStr.append(QString("  startTime:      %1\n").arg(startTime_));
+        eventStr.append(QString("  period:         %1\n").arg(period_));
         return eventStr;
     }
 
@@ -233,5 +237,4 @@ namespace bias
         rtnStatus.message = QString("");
         return rtnStatus;
     }
-
 }

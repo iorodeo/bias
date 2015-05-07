@@ -100,12 +100,18 @@ namespace bias
 
             RtnStatus setVideoFile(QString videoFileString);
             void setUserCameraName(QString cameraName);
+
+
             RtnStatus setWindowGeometry(QRect windowGeom);
             RtnStatus setWindowGeometryFromJson(QByteArray jsonGeomArray);
             QRect getWindowGeometry();
             QVariantMap getWindowGeometryMap();
+
             unsigned long getCaptureDuration();
             void setCaptureDuration(unsigned long duration);
+
+            QDir getCurrentConfigFileDir();
+            QDir getDefaultConfigFileDir();
 
             RtnStatus setCurrentPlugin(QString pluginName);
             QString getCurrentPluginName(RtnStatus &rtnStatus);
@@ -116,6 +122,7 @@ namespace bias
 
             QString getCameraGuidString(RtnStatus &rtnStatus);
             QString getVideoFileFullPath();
+            QString getVideoFileName();
             QDir getVideoFileDir();
 
             bool isConnected();
@@ -133,6 +140,7 @@ namespace bias
             void format7SettingsChanged();
             void imageOrientationChanged(bool flipVert, bool flipHorz, ImageRotationType imageRot);
             void timerDurationChanged(unsigned long duration);
+            void videoFileChanged();
 
         protected:
 

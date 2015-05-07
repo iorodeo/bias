@@ -294,7 +294,7 @@ namespace bias
             }
             else
             {
-                outputPinLabelPtr -> setText(QString("Output Pin: ??").arg(outputPin));
+                outputPinLabelPtr -> setText(QString("Output Pin: ??"));
             }
 
             // Get pulse length 
