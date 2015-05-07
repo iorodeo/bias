@@ -31,8 +31,8 @@ namespace bias
             QString displayPortName();
             RtnStatus setDisplayPortName(QString name);
 
-            double duration();
-            RtnStatus setDuration(double duration);
+            unsigned long duration();
+            RtnStatus setDuration(unsigned long duration);
 
             QString toString();
             QVariantMap toMap();
@@ -44,7 +44,7 @@ namespace bias
             RtnStatus setVibrationFromMap(QVariantMap map);
             RtnStatus setDisplayFromMap(QVariantMap map);
 
-            RtnStatus checkValues();
+            RtnStatus checkEvents();
             RtnStatus checkVibrationEvents();
             RtnStatus checkDisplayEvents();
 
@@ -53,7 +53,7 @@ namespace bias
 
         protected:
 
-            double duration_ = 0.0; 
+            unsigned long duration_ = 0; 
             QString vibrationPortName_;
             QString displayPortName_;
             QList<VibrationEvent> vibrationEventList_;

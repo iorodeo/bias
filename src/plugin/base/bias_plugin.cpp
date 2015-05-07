@@ -1,5 +1,4 @@
 #include "bias_plugin.hpp"
-//#include "camera_facade.hpp"
 #include <QtDebug>
 #include <opencv2/core/core.hpp>
 #include "camera_window.hpp"
@@ -69,9 +68,8 @@ namespace bias
 
     QPointer<CameraWindow> BiasPlugin::getCameraWindow()
     {
-
-        QPointer<CameraWindow> cameraWindow = (CameraWindow*)(parent());
-        return cameraWindow;
+        QPointer<CameraWindow> cameraWindowPtr = (CameraWindow*)(parent());
+        return cameraWindowPtr;
     }
 
 

@@ -34,6 +34,11 @@ namespace bias
     {
         setEnabled(true);
     }
+
+    void TimerSettingsDialog::onTimerDurationChanged(unsigned long duration)
+    {
+        setSpinBoxValues(duration);
+    }
         
 
     void TimerSettingsDialog::connectWidgets()
@@ -72,6 +77,13 @@ namespace bias
                 this,
                 SLOT(imageCaptureStopped())
                );
+
+        connect(
+                parent(),
+                SIGNAL(timerDurationChanged(unsigned long)),
+                this, 
+                SLOT(onTimerDurationChanged(unsigned long))
+               );
     }
 
 
@@ -89,6 +101,12 @@ namespace bias
         secSpinBoxPtr -> setMaximum(59);
         secSpinBoxPtr -> setMinimum(0);
 
+        setSpinBoxValues(duration);
+
+    };
+
+    void TimerSettingsDialog::setSpinBoxValues(unsigned long duration)
+    {
         // Set spinbox initial values
         unsigned long hour = duration/3600;
         unsigned long rem = duration - hour*3600;
@@ -97,7 +115,7 @@ namespace bias
         hourSpinBoxPtr -> setValue(hour);
         minSpinBoxPtr  -> setValue(min);
         secSpinBoxPtr  -> setValue(sec);
-    };
+    }
 
 
 } // namespase bias

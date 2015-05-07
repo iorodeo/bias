@@ -24,11 +24,13 @@ namespace bias
             void spinBoxValueChanged();
             void imageCaptureStarted(bool logging);
             void imageCaptureStopped();
+            void onTimerDurationChanged(unsigned long duration);
 
         private:
 
             void connectWidgets();
             void initialize(unsigned long duration);
+            void setSpinBoxValues(unsigned long duration);
 
     };
 

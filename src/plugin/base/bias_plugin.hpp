@@ -6,7 +6,6 @@
 #include "lockable.hpp"
 #include "stamped_image.hpp"
 #include "rtn_status.hpp"
-//#include "camera_facade_fwd.hpp"
 
 namespace cv
 {
@@ -31,11 +30,11 @@ namespace bias
             static bool pluginsEnabled();
             static void setPluginsEnabled(bool value);
 
-            void setActive(bool value);
-            bool isActive();
             bool requireTimer();
+            bool isActive();
             QPointer<CameraWindow> getCameraWindow();
 
+            virtual void setActive(bool value);
             virtual void processFrames(QList<StampedImage> frameList);
             virtual cv::Mat getCurrentImage();
 
@@ -44,11 +43,15 @@ namespace bias
 
             virtual RtnStatus runCmdFromMap(QVariantMap cmdMap, bool showErrorDlg=true);
 
+        signals:
+
+            void setCaptureDurationRequest(unsigned long);
 
         protected:
 
 
             static bool pluginsEnabled_;
+
             bool active_;
             bool requireTimer_;
             cv::Mat currentImage_;

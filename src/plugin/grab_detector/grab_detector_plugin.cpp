@@ -652,7 +652,7 @@ namespace bias
 
     void GrabDetectorPlugin::durationDblSpinBoxValueChanged(double value)
     {
-        qDebug() << "duration value changed: " << value;
+        //qDebug() << "duration value changed: " << value;
         if (pulseDevice_.isOpen())
         {
             unsigned long pulseLength_us = (unsigned long)(value*1.0e6);

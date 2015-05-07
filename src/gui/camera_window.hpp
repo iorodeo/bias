@@ -104,6 +104,7 @@ namespace bias
             RtnStatus setWindowGeometryFromJson(QByteArray jsonGeomArray);
             QRect getWindowGeometry();
             QVariantMap getWindowGeometryMap();
+            unsigned long getCaptureDuration();
             void setCaptureDuration(unsigned long duration);
 
             RtnStatus setCurrentPlugin(QString pluginName);

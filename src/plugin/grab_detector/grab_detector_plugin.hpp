@@ -21,6 +21,7 @@ namespace bias
 {
 
     class ImageLabel;
+    class CameraWindow;
 
 
     class GrabDetectorPlugin : public BiasPlugin, public Ui::GrabDetectorPluginDialog

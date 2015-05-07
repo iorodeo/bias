@@ -136,26 +136,17 @@ namespace bias
     } 
 
 
-    double StampedePluginConfig::duration() 
+    unsigned long StampedePluginConfig::duration() 
     {
         return duration_;
     } 
 
-    RtnStatus StampedePluginConfig::setDuration(double duration) 
+    RtnStatus StampedePluginConfig::setDuration(unsigned long duration) 
     {
+        duration_ = duration;
         RtnStatus rtnStatus;
         rtnStatus.success = true;
         rtnStatus.message = QString("");
-
-        if (duration <= 0.0)
-        {
-            rtnStatus.success = false;
-            rtnStatus.message = QString("duration must be > 0");
-        }
-        else
-        {
-            duration_ = duration;
-        }
         return rtnStatus;
     } 
 
@@ -163,20 +154,23 @@ namespace bias
     QString StampedePluginConfig::toString() 
     {
         QString configStr;
+        configStr.append(QString("vibrationPort:    %1\n").arg(vibrationPortName_));
+        configStr.append(QString("displayPort:      %1\n").arg(displayPortName_));
+        configStr.append(QString("duration:         %1\n").arg(duration_));
         configStr.append(QString("\n"));
-        configStr.append(QString("StampedePluginConfig:\n"));
-        configStr.append(QString("duration: %1\n").arg(duration_));
-        configStr.append(QString("vibrationPort: %1\n").arg(vibrationPortName_));
-        configStr.append(QString("displayPort: %1\n").arg(displayPortName_));
-        for (auto event : vibrationEventList_)
+
+        for (auto i=0; i<vibrationEventList_.size(); i++)
         {
-            configStr.append(event.toString());
+            configStr.append(QString("vibration event   %1 \n").arg(i));
+            configStr.append(vibrationEventList_[i].toString());
+            configStr.append(QString("\n"));
         }
-        for (auto event : displayEventList_)
+        for (auto i=0; i<displayEventList_.size(); i++)
         {
-            configStr.append(event.toString());
+            configStr.append(QString("display event     %1 \n").arg(i));
+            configStr.append(displayEventList_[i].toString());
+            configStr.append(QString("\n"));
         }
-        configStr.append(QString("\n"));
         return configStr;
     }
 
@@ -204,7 +198,7 @@ namespace bias
         displayMap.insert("events", displayMapList);
 
         QVariantMap configMap;
-        configMap.insert("duration", duration_);
+        configMap.insert("duration", (long long)(duration_));
         configMap.insert("vibration", vibrationMap);
         configMap.insert("display", displayMap);
         return configMap;
@@ -234,9 +228,9 @@ namespace bias
         // --------------------------------------------------------------------
         if (configMap.contains("duration"))
         {
-            if (configMap["duration"].canConvert<double>())
+            if (configMap["duration"].canConvert<unsigned long long>())
             {
-                double durationTmp = configMap["duration"].toDouble();
+                unsigned long durationTmp = (unsigned long)(configMap["duration"].toULongLong());
                 RtnStatus rtnSetDuration = setDuration(durationTmp);
                 if (!rtnSetDuration.success)
                 {
@@ -247,7 +241,7 @@ namespace bias
             else
             {
                 rtnStatus.success = false;
-                rtnStatus.appendMessage(QString("unable to convert duration to double"));
+                rtnStatus.appendMessage(QString("unable to convert duration to unsigned long"));
             }
         }
         else
@@ -491,40 +485,95 @@ namespace bias
         return rtnStatus;
     }
 
-   void StampedePluginConfig::setToDefaultConfig()
-   {
-       duration_ = 90.0;
-       QString vibrationPortName_ = QString("COM1");
-       QString displayPortName_ = QString("COM2");
+    RtnStatus StampedePluginConfig::checkEvents() 
+    {
+        RtnStatus rtnStatus;
+        rtnStatus.success = true;
+        rtnStatus.message = QString("");
 
-       // Add Vibration events
-       clearVibrationEventList();
+        RtnStatus rtnCheckVibEvts = checkVibrationEvents();
+        if (!rtnCheckVibEvts.success)
+        {
+            rtnStatus.success = false;
+            rtnStatus.appendMessage(rtnCheckVibEvts.message);
+        }
 
-       VibrationEvent vibEvent;
-       vibEvent.setStartTime(5.0);
-       vibEvent.setPeriod(1.0);
-       vibEvent.setNumber(10);
-       appendVibrationEvent(vibEvent);
-       vibEvent.setStartTime(35.0);
-       vibEvent.setPeriod(1.0);
-       vibEvent.setNumber(10);
-       appendVibrationEvent(vibEvent);
+        RtnStatus rtnCheckDspEvts = checkDisplayEvents();
+        if (!rtnCheckDspEvts.success)
+        {
+            rtnStatus.success = false;
+            rtnStatus.appendMessage(rtnCheckDspEvts.message);
+        }
+
+        return rtnStatus;
+    }
 
 
-       // Add Display events
-       clearDisplayEventList();
-       DisplayEvent dspEvent;
-       dspEvent.setPatternId(1);
-       dspEvent.setStartTime(20.0);
-       dspEvent.setStopTime(30.0);
-       dspEvent.setControlBias(1.0);
-       appendDisplayEvent(dspEvent);
-       dspEvent.setPatternId(1);
-       dspEvent.setStartTime(50.0);
-       dspEvent.setStopTime(60.0);
-       dspEvent.setControlBias(1.0);
-       appendDisplayEvent(dspEvent);
+    RtnStatus StampedePluginConfig::checkVibrationEvents() 
+    {
+        RtnStatus rtnStatus;
+        for (auto event : vibrationEventList_)
+        {
+            RtnStatus rtnCheckValues = event.checkValues();
+            if (!rtnCheckValues.success)
+            {
+                rtnStatus.success = false;
+                rtnStatus.appendMessage(rtnCheckValues.message);
+            }
+        }
+        return rtnStatus;
+    }
 
-   }
+
+    RtnStatus StampedePluginConfig::checkDisplayEvents() 
+    {
+        RtnStatus rtnStatus;
+        for (auto event : displayEventList_)
+        {
+            RtnStatus rtnCheckValues = event.checkValues();
+            if (!rtnCheckValues.success)
+            {
+                rtnStatus.success = false;
+                rtnStatus.message = QString(rtnCheckValues.message);
+            }
+        }
+        return rtnStatus;
+    }
+
+    void StampedePluginConfig::setToDefaultConfig()
+    {
+        setDuration(90);
+        setVibrationPortName("COM1");
+        setDisplayPortName("COM2");
+
+        // Add Vibration events
+        clearVibrationEventList();
+
+        VibrationEvent vibEvent;
+        vibEvent.setStartTime(5.0);
+        vibEvent.setPeriod(1.0);
+        vibEvent.setNumber(10);
+        appendVibrationEvent(vibEvent);
+        vibEvent.setStartTime(35.0);
+        vibEvent.setPeriod(1.0);
+        vibEvent.setNumber(10);
+        appendVibrationEvent(vibEvent);
+
+
+        // Add Display events
+        clearDisplayEventList();
+        DisplayEvent dspEvent;
+        dspEvent.setPatternId(1);
+        dspEvent.setStartTime(20.0);
+        dspEvent.setStopTime(30.0);
+        dspEvent.setControlBias(1.0);
+        appendDisplayEvent(dspEvent);
+        dspEvent.setPatternId(1);
+        dspEvent.setStartTime(50.0);
+        dspEvent.setStopTime(60.0);
+        dspEvent.setControlBias(1.0);
+        appendDisplayEvent(dspEvent);
+
+    }
 
 }

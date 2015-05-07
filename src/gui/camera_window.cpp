@@ -1515,6 +1515,11 @@ namespace bias
     }
 
 
+    unsigned long CameraWindow::getCaptureDuration()
+    {
+        return captureDurationSec_;
+    }
+
     void CameraWindow::setCaptureDuration(unsigned long duration)
     {
         captureDurationSec_ = duration;
@@ -1563,6 +1568,7 @@ namespace bias
         }
         return currentPluginName;
     }
+
 
     RtnStatus CameraWindow::runPluginCmd(QByteArray jsonPluginCmdArray, bool showErrorDlg)
     {
@@ -2571,7 +2577,7 @@ namespace bias
         colorMapNumber_ = DEFAULT_COLORMAP_NUMBER;
         videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
         imageDisplayFreq_ = DEFAULT_IMAGE_DISPLAY_FREQ;
-        setCaptureDuration(DEFAULT_CAPTURE_DURATION);
+        captureDurationSec_ = DEFAULT_CAPTURE_DURATION;
 
         cameraNumber_ = cameraNumber;
         numberOfCameras_ = numberOfCameras;

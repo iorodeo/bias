@@ -1,6 +1,8 @@
 #include "stampede_plugin.hpp"
 #include <opencv2/core/core.hpp>
 #include <QtDebug>
+#include "camera_window.hpp"
+#include "json_utils.hpp"
 
 namespace bias
 {
@@ -14,6 +16,14 @@ namespace bias
     {
         setupUi(this);
         initialize();
+        connectWidgets();
+    }
+
+    void StampedePlugin::setActive(bool value)
+    {
+        BiasPlugin::setActive(value);
+        QPointer<CameraWindow> cameraWindowPtr = getCameraWindow();
+        cameraWindowPtr -> setCaptureDuration(config_.duration());
     }
 
     void StampedePlugin::processFrames(QList<StampedImage> frameList)
@@ -56,31 +66,30 @@ namespace bias
     // ------------------------------------------------------------------------
     void StampedePlugin::initialize()
     {
-        setRequireTimer(true);
+        QFont monoSpaceFont("Monospace");
+        monoSpaceFont.setStyleHint(QFont::TypeWriter);
+        configTextEditPtr -> setFont(monoSpaceFont);
 
+        setRequireTimer(true);
+        config_.setToDefaultConfig();
+        updateConfigEditText();
+    }
+
+    void StampedePlugin::connectWidgets()
+    {
         connect(
                 parent(),
                 SIGNAL(timerDurationChanged(unsigned long)),
                 this,
                 SLOT(onTimerDurationChanged(unsigned long))
                );
+    }
 
-
-        // Develpement
-        // ------------------------------------------------------------------
-        StampedePluginConfig config;
-        config.setToDefaultConfig();
-
-        qDebug() << config.toString();
-
-        QVariantMap configMap = config.toMap();
-        QByteArray configJson = config.toJson();
-        qDebug() << configJson;
-        
-
-        StampedePluginConfig config2;
-        config2.fromJson(configJson);
-        qDebug() << config.toJson();
+    void StampedePlugin::updateConfigEditText()
+    {
+        //QByteArray prettyJson = prettyIndentJson(config_.toJson());
+        //configTextEditPtr -> setText(prettyJson);
+        configTextEditPtr -> setText(config_.toString());
     }
 
     // Private slots

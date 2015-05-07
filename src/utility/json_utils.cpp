@@ -57,7 +57,7 @@ namespace bias
                         isInnerList = true;
                         break;
                     }
-                    if (jsonArray[tempPos] == '[')
+                    if ((jsonArray[tempPos] == '[') || (jsonArray[tempPos] == '{'))
                     {
                         isInnerList = false;
                         break;

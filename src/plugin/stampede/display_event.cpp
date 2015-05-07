@@ -93,11 +93,10 @@ namespace bias
     QString DisplayEvent::toString()
     {
         QString eventStr;
-        eventStr.append(QString("Display Event:\n"));
-        eventStr.append(QString("  patternId:   %1\n").arg(patternId_));
-        eventStr.append(QString("  startTime:   %1\n").arg(startTime_));
-        eventStr.append(QString("  stopTime:    %1\n").arg(stopTime_));
-        eventStr.append(QString("  controlBias: %1\n").arg(controlBias_));
+        eventStr.append(QString("patternId:        %1\n").arg(patternId_));
+        eventStr.append(QString("startTime:        %1\n").arg(startTime_));
+        eventStr.append(QString("stopTime:         %1\n").arg(stopTime_));
+        eventStr.append(QString("controlBias:      %1\n").arg(controlBias_));
         return eventStr;
     }
 
