@@ -44,7 +44,7 @@ namespace bias
     }
 
 
-    RtnStatus GrabDetectorConfig::setFromMap(QVariantMap configMap)
+    RtnStatus GrabDetectorConfig::fromMap(QVariantMap configMap)
     {
         QVariantMap oldConfigMap = toMap();
 
@@ -326,7 +326,7 @@ namespace bias
     }
 
 
-    RtnStatus GrabDetectorConfig::setFromJson(QByteArray jsonConfigArray)
+    RtnStatus GrabDetectorConfig::fromJson(QByteArray jsonConfigArray)
     {
         RtnStatus rtnStatus;
         rtnStatus.success = true;
@@ -341,7 +341,7 @@ namespace bias
             return rtnStatus;
 
         }
-        rtnStatus = setFromMap(configMap);
+        rtnStatus = fromMap(configMap);
         return rtnStatus;
     }
 

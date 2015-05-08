@@ -52,13 +52,13 @@ namespace bias
 
             GrabDetectorConfig();
 
-            RtnStatus setFromMap(QVariantMap configMap);
             RtnStatus setDeviceFromMap(QVariantMap configMap);
             RtnStatus setDetectBoxFromMap(QVariantMap configMap);
             RtnStatus setTriggerFromMap(QVariantMap configMap);
+            RtnStatus fromMap(QVariantMap configMap);
             QVariantMap toMap();
 
-            RtnStatus setFromJson(QByteArray jsonConfigArray);
+            RtnStatus fromJson(QByteArray jsonConfigArray);
             QByteArray toJson();
 
 

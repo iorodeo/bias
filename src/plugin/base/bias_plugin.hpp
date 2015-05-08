@@ -40,7 +40,8 @@ namespace bias
             virtual cv::Mat getCurrentImage();
             virtual QString getName();
             virtual QString getDisplayName();
-
+            virtual QVariantMap getConfigAsMap();  
+            virtual RtnStatus setConfigFromMap(QVariantMap configMap);
             virtual RtnStatus runCmdFromMap(QVariantMap cmdMap, bool showErrorDlg=true);
 
         signals:

@@ -952,6 +952,21 @@ namespace bias
         configFileMap.insert("fileName", currentConfigFileName_);
         configurationMap.insert("configuration", configFileMap);
 
+        // Add plugin configuration
+        if (BiasPlugin::pluginsEnabled())
+        {
+            QVariantMap pluginMap;
+            RtnStatus rtnStatus;
+            QString pluginName = getCurrentPluginName(rtnStatus);
+            if (rtnStatus.success)
+            {
+                pluginMap.insert("name", pluginName);
+                QVariantMap pluginConfigMap = getCurrentPlugin() -> getConfigAsMap();;
+                pluginMap.insert("config", pluginConfigMap);
+                configurationMap.insert("plugin", pluginMap);
+            }
+        } 
+
         rtnStatus.success = true;
         rtnStatus.message = QString("");
         return configurationMap;
@@ -981,14 +996,9 @@ namespace bias
             return rtnStatus;
         }
 
-        QVariantMap oldConfigMap = getConfigurationMap(rtnStatus);
-
-        // --------------------------------------------------------------------------
-        //TODO: need to clean this up ... two functions for setting configuration.
-        //---------------------------------------------------------------------------
         
-        //rtnStatus = setConfigurationFromMap(configMap,showErrorDlg); 
-        rtnStatus = setConfigurationFromMap_Lenient(configMap,oldConfigMap,showErrorDlg);
+        QVariantMap oldConfigMap = getConfigurationMap(rtnStatus);
+        rtnStatus = setConfigurationFromMap(configMap,showErrorDlg); 
         if (!rtnStatus.success)
         {
             QString origErrMsg = rtnStatus.message;
@@ -1021,13 +1031,15 @@ namespace bias
     }
 
 
-    RtnStatus CameraWindow::setConfigurationFromMap(
+    RtnStatus CameraWindow::setConfigurationFromMap( 
             QVariantMap configMap, 
             bool showErrorDlg
             )
     {
+
         RtnStatus rtnStatus;
         QString errMsgTitle("Load Configuration Error");
+        QVariantMap oldConfigMap = getConfigurationMap(rtnStatus);
 
         // Check if camera is capturing
         // ----------------------------
@@ -1039,161 +1051,16 @@ namespace bias
 
         // Set camera properties, videomode, etc.
         // --------------------------------------
-        QVariantMap cameraMap = configMap["camera"].toMap();
-        if (cameraMap.isEmpty())
-        {
-            QString errMsgText("Camera configuration is empty");
-            if (showErrorDlg)
-            {
-                QMessageBox::critical(this,errMsgTitle,errMsgText);
-            }
-            rtnStatus.success = false;
-            rtnStatus.message = errMsgText;
-            return rtnStatus;
-        }
-        rtnStatus = setCameraFromMap(cameraMap,showErrorDlg);
-        if (!rtnStatus.success)
-        {
-            return rtnStatus;
-        }
-
-        // Set logging configuration
-        // --------------------------
-        QVariantMap loggingMap = configMap["logging"].toMap();
-        if (loggingMap.isEmpty())
-        {
-            QString errMsgText("Logging configuration is empty");
-            if (showErrorDlg) 
-            {
-                QMessageBox::critical(this,errMsgTitle,errMsgText);
-            }
-            rtnStatus.success = false;
-            rtnStatus.message = errMsgText;
-            return rtnStatus;
-        }
-        rtnStatus = setLoggingFromMap(loggingMap,showErrorDlg);
-        if (!rtnStatus.success)
-        {
-            return rtnStatus;
-        }
-
-        // Set timer configuration
-        // ------------------------
-        QVariantMap timerMap = configMap["timer"].toMap();
-        if (timerMap.isEmpty())
-        {
-            QString errMsgText("Timer configuration is empty");
-            if (showErrorDlg)
-            {
-                QMessageBox::critical(this,errMsgTitle,errMsgText);
-            }
-            rtnStatus.success = false;
-            rtnStatus.message = errMsgText;
-            return rtnStatus;
-        }
-        rtnStatus = setTimerFromMap(timerMap,showErrorDlg);
-        if (!rtnStatus.success)
-        {
-            return rtnStatus;
-        }
-
-        // Set display configuration
-        // --------------------------
-        QVariantMap displayMap = configMap["display"].toMap();
-        if (displayMap.isEmpty())
-        {
-            QString errMsgText("Display configuration is empty");
-            if (showErrorDlg)
-            {
-                QMessageBox::critical(this,errMsgTitle,errMsgText);
-            }
-            rtnStatus.success = false;
-            rtnStatus.message = errMsgText;
-            return rtnStatus;
-        }
-        rtnStatus = setDisplayFromMap(displayMap,showErrorDlg);
-        if (!rtnStatus.success)
-        {
-            return rtnStatus;
-        }
-
-        // Set external control server configuration
-        // -----------------------------------------
-        QVariantMap serverMap = configMap["server"].toMap();
-        if (serverMap.isEmpty())
-        {
-            QString errMsgText("Server configuration is empty");
-            if (showErrorDlg)
-            {
-                QMessageBox::critical(this,errMsgTitle,errMsgText);
-            }
-            rtnStatus.success = false;
-            rtnStatus.message = errMsgText;
-            return rtnStatus;
-        }
-        rtnStatus = setServerFromMap(serverMap,showErrorDlg);
-        if (!rtnStatus.success)
-        {
-            return rtnStatus;
-        }
-
-        // Set configuration file configuraiton 
-        // -------------------------------------
-        QVariantMap configFileMap = configMap["configuration"].toMap();
-        if (configFileMap.isEmpty())
-        {
-            QString errMsgText("Configuration file information is empty");
-            if (showErrorDlg) 
-            {
-                QMessageBox::critical(this,errMsgTitle,errMsgText);
-            }
-            rtnStatus.success = false;
-            rtnStatus.message = errMsgText;
-            return rtnStatus;
-        }
-        rtnStatus = setConfigFileFromMap(configFileMap,showErrorDlg);
-        if (!rtnStatus.success)
-        {
-            return rtnStatus;
-        }
-
-        rtnStatus.success = true;
-        rtnStatus.message = QString("");
-        return rtnStatus;
-    }
-
-    // same as setConfigurationFromMap, but uses the old configuration if 
-    // fields are missing from the new one
-    RtnStatus CameraWindow::setConfigurationFromMap_Lenient( 
-            QVariantMap configMap, 
-            QVariantMap oldConfigMap,
-            bool showErrorDlg
-            )
-    {
-
-        RtnStatus rtnStatus;
-        QString errMsgTitle("Load Configuration Error");
-
-        // Check if camera is capturing
-        // ----------------------------
-        if (capturing_)
-        {
-            QString errMsgText("unable to set configuration - capturing");
-            return onError(errMsgText, errMsgTitle, showErrorDlg);
-        }
-
-        // Set camera properties, videomode, etc.
-        // --------------------------------------
-        QVariantMap cameraMap = configMap["camera"].toMap();
-        if (cameraMap.isEmpty())
-        {
-            cameraMap = oldConfigMap["camera"].toMap();
-        }
-        rtnStatus = setCameraFromMap(cameraMap,showErrorDlg);
-        if (!rtnStatus.success)
-        {
-            return rtnStatus;
-        }
+        //QVariantMap cameraMap = configMap["camera"].toMap();
+        //if (cameraMap.isEmpty())
+        //{
+        //    cameraMap = oldConfigMap["camera"].toMap();
+        //}
+        //rtnStatus = setCameraFromMap(cameraMap,showErrorDlg);
+        //if (!rtnStatus.success)
+        //{
+        //    return rtnStatus;
+        //}
 
         // Set logging configuration
         // --------------------------
@@ -1260,6 +1127,17 @@ namespace bias
             return rtnStatus;
         }
 
+        // Set plugin 
+        QVariantMap pluginMap = configMap["plugin"].toMap();
+        if (pluginMap.isEmpty())
+        {
+            setPluginsEnabled(false);
+        }
+        else
+        {
+            setPluginFromMap(pluginMap,showErrorDlg);
+        }
+
         rtnStatus.success = true;
         rtnStatus.message = QString("");
 
@@ -1322,13 +1200,8 @@ namespace bias
 
         if (!(actionLoggingEnabledPtr_ -> isChecked()))
         {
-            QString msgText("Logging already disabled");
-            if (showErrorDlg)
-            {
-                QMessageBox::critical(this, msgTitle, msgText);
-            }
             rtnStatus.success = true;
-            rtnStatus.message = msgText;
+            rtnStatus.message = QString("");
         }
         else
         {
@@ -1541,6 +1414,33 @@ namespace bias
         return defaultConfigFileDir_;
     }
 
+    RtnStatus CameraWindow::setPluginsEnabled(bool enabled)
+    {
+        RtnStatus rtnStatus;
+        rtnStatus.success = true;
+        rtnStatus.message = QString("");
+
+        if (enabled)
+        {
+            if (!pluginMap_.isEmpty())
+            {
+                BiasPlugin::setPluginsEnabled(true);
+            }
+            else
+            {
+                rtnStatus.success = false;
+                rtnStatus.message = QString("no plugins available");
+            }
+        }
+        else
+        {
+            BiasPlugin::setPluginsEnabled(false);
+            setupImageLabels(false,false,true);
+        }
+        actionPluginsEnabledPtr_ -> setChecked(BiasPlugin::pluginsEnabled());
+        return rtnStatus;
+    }
+
     RtnStatus CameraWindow::setCurrentPlugin(QString pluginName)
     {
         RtnStatus rtnStatus;
@@ -1586,8 +1486,6 @@ namespace bias
 
     RtnStatus CameraWindow::runPluginCmd(QByteArray jsonPluginCmdArray, bool showErrorDlg)
     {
-        qDebug() << __PRETTY_FUNCTION__;
-
         RtnStatus rtnStatus;
         rtnStatus.success = true;
         rtnStatus.message = QString("");
@@ -1641,16 +1539,19 @@ namespace bias
             if (pluginName == cmdPluginName)
             {
                 nameFound = true;
-                qDebug() << "found matching name: " << pluginName;
                 rtnStatus = pluginMap_[pluginName] -> runCmdFromMap(pluginCmdMap,showErrorDlg);
             }
         }
         if (!nameFound)
         {
-            qDebug() << "name not found";
+            QString errMsgText("runPluginCmd: plugin name not found");
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
         }
-
-
         return rtnStatus;
     }
 
@@ -2450,12 +2351,11 @@ namespace bias
         // TODO - check that there is a plugin available to run
         if (actionPluginsEnabledPtr_ -> isChecked())
         {
-            BiasPlugin::setPluginsEnabled(true);
+            setPluginsEnabled(true);
         }
         else
         {
-            BiasPlugin::setPluginsEnabled(false);
-            setupImageLabels(false,false,true);
+            setPluginsEnabled(false);
         }
     }
 
@@ -2583,8 +2483,6 @@ namespace bias
         format7PercentSpeed_ = DEFAULT_FORMAT7_PERCENT_SPEED;
         showCameraLockFailMsg_ = true;
 
-        BiasPlugin::setPluginsEnabled(true);
-        actionPluginsEnabledPtr_ -> setChecked(BiasPlugin::pluginsEnabled());
 
 
         colorMapNumber_ = DEFAULT_COLORMAP_NUMBER;
@@ -2614,6 +2512,7 @@ namespace bias
         pluginMap_[StampedePlugin::PLUGIN_NAME] = new StampedePlugin(this);
         pluginMap_[GrabDetectorPlugin::PLUGIN_NAME] = new GrabDetectorPlugin(pluginImageLabelPtr_,this);
         // -------------------------------------------------------------------------------
+        setPluginsEnabled(true);
 
         setupStatusLabel();
         setupCameraMenu();
@@ -2628,8 +2527,8 @@ namespace bias
         tabWidgetPtr_ -> setCurrentWidget(previewTabPtr_);
 
         //setCurrentPlugin(pluginMap_.firstKey());
-        //setCurrentPlugin("grabDetector");
-        setCurrentPlugin("stampede");
+        setCurrentPlugin("grabDetector");
+        //setCurrentPlugin("stampede");
 
         updateWindowTitle();
         updateCameraInfoMessage();
@@ -5224,6 +5123,107 @@ namespace bias
 
         rtnStatus.success = true;
         rtnStatus.message = QString("");
+        return rtnStatus;
+    }
+
+    RtnStatus CameraWindow::setPluginFromMap(QVariantMap pluginMap, bool showErrorDlg)
+    {
+        RtnStatus rtnStatus;
+        rtnStatus.success = true;
+        rtnStatus.message = QString("");
+        QString errMsgTitle("Load Configuration Error (Plugin)");
+
+        if (!pluginMap.contains("name"))
+        {
+            QString errMsgText("Plugin: name of plugin is not present");
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+
+        if (!pluginMap["name"].canConvert<QString>())
+        {
+            QString errMsgText("Plugin: unable to convert name to QString");
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+
+        QString configPluginName = pluginMap["name"].toString();
+
+        // Try to find plugin with same name
+        bool pluginFound = false;
+        for (auto pluginName : pluginMap_.keys())
+        {
+            if (pluginName == configPluginName)
+            {
+                pluginFound = true;
+            }
+        }
+        if (!pluginFound)
+        {
+            QString errMsgText("Plugin: plugin not found");
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+
+        // Plugin found set to current plugin
+        rtnStatus = setCurrentPlugin(configPluginName);
+        if (!rtnStatus.success)
+        {
+            QString errMsgText("Plugin: error setting plugin -  ");
+            errMsgText += rtnStatus.message;
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+
+        // Try to set plugin configuration
+        QVariantMap pluginConfigMap = pluginMap["config"].toMap();
+        if (pluginConfigMap.isEmpty())
+        {
+            QString errMsgText("Plugin: configuration is empty");
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+        rtnStatus = getCurrentPlugin() -> setConfigFromMap(pluginConfigMap);
+        if (!rtnStatus.success)
+        {
+            QString errMsgText("Plugin: error setting plugin configuration - ");
+            errMsgText += rtnStatus.message;
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this,errMsgTitle,errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+            return rtnStatus;
+        }
+
+        setPluginsEnabled(true);
+
         return rtnStatus;
     }
 

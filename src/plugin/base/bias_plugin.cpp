@@ -85,6 +85,20 @@ namespace bias
         return rtnStatus;
     }
 
+    QVariantMap BiasPlugin::getConfigAsMap()  
+    {
+        QVariantMap configMap;
+        return configMap;
+    }
+
+    RtnStatus BiasPlugin::setConfigFromMap(QVariantMap configMap)
+    {
+        RtnStatus rtnStatus;
+        rtnStatus.success = true;
+        rtnStatus.message = QString("");
+        return rtnStatus;
+    }
+
     // Protected
     // ------------------------------------------------------------------------
 

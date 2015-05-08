@@ -244,6 +244,23 @@ namespace bias
     }
 
 
+    QVariantMap GrabDetectorPlugin::getConfigAsMap()   
+    {
+        QVariantMap configMap = config_.toMap();
+        return configMap;
+    } 
+
+    RtnStatus GrabDetectorPlugin::setConfigFromMap(QVariantMap configMap)
+    {
+        GrabDetectorConfig config;
+        RtnStatus rtnStatus = config.fromMap(configMap);
+        if (rtnStatus.success)
+        {
+            rtnStatus = setFromConfig(config);
+        }
+        return rtnStatus;
+    } 
+
     void GrabDetectorPlugin::resetTrigger()
     {
         config_.triggerArmedState = true;
@@ -422,8 +439,6 @@ namespace bias
             outputPinLabelPtr -> setText("Output Pin: __");
         }
 
-
-
         return rtnStatus;
     }
 
@@ -507,19 +522,6 @@ namespace bias
 
     void GrabDetectorPlugin::initialize()
     {
-
-        //GrabDetectorConfig config;
-        //config.detectBoxXPos = 5;
-        //config.print();
-        //QVariantMap configMap = config.toMap();
-        //QByteArray jsonConfigArray = config.toJson();
-        //qDebug() << jsonConfigArray;
-
-        //GrabDetectorConfig config2;
-        //config2.print();
-        //config2.setFromJson(jsonConfigArray);
-        //config2.print();
-
         found_ = false;
         signalMax_ = 0.0;
         signalMin_ = 0.0;

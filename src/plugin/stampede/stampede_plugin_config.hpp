@@ -50,7 +50,6 @@ namespace bias
 
             void setToDefaultConfig();
 
-
         protected:
 
             unsigned long duration_ = 0; 

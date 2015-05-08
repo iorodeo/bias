@@ -70,12 +70,6 @@ namespace bias
                     QVariantMap configMap, 
                     bool showErrorDlg=true
                     );
-            RtnStatus setConfigurationFromMap_Lenient(
-                    QVariantMap configMap, 
-		    QVariantMap oldConfigMap, 
-                    bool showErrorDlg=true
-                    );
-
             QByteArray getConfigurationJson(
                     RtnStatus &rtnStatus, 
                     bool showErrorDlg=true
@@ -113,6 +107,7 @@ namespace bias
             QDir getCurrentConfigFileDir();
             QDir getDefaultConfigFileDir();
 
+            RtnStatus setPluginsEnabled(bool enabled);
             RtnStatus setCurrentPlugin(QString pluginName);
             QString getCurrentPluginName(RtnStatus &rtnStatus);
             RtnStatus runPluginCmd(
@@ -410,6 +405,7 @@ namespace bias
             RtnStatus setDisplayFromMap(QVariantMap displayMap, bool showErrorDlg);
             RtnStatus setServerFromMap(QVariantMap serverMap, bool showErrorDlg);
             RtnStatus setConfigFileFromMap(QVariantMap configFileMap, bool showErrorDlg);
+            RtnStatus setPluginFromMap(QVariantMap pluginMap, bool showErrorDlg);
 
             cv::Mat calcHistogram(cv::Mat mat);
             RtnStatus onError(QString message, QString title, bool showErrorDlg);

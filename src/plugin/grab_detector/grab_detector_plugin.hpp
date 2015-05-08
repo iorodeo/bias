@@ -45,6 +45,8 @@ namespace bias
             virtual QString getDisplayName();
             
             virtual RtnStatus runCmdFromMap(QVariantMap cmdMap, bool showErrorDlg=true);
+            virtual QVariantMap getConfigAsMap();  
+            virtual RtnStatus setConfigFromMap(QVariantMap configMap);
 
             void setTriggerEnabled(bool value);
             void resetTrigger();
