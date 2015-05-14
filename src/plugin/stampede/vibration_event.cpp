@@ -3,8 +3,6 @@
 
 namespace bias
 {
-
-
     // Public methods
     // ------------------------------------------------------------------------
     VibrationEvent::VibrationEvent()

@@ -32,9 +32,12 @@ namespace bias
             static const QString CONFIG_FILE_EXTENSION;
             static const QString LOG_FILE_EXTENSION;
             static const QString LOG_FILE_POSTFIX;
+            static const QList<int> DEFAULT_VIBRATION_PIN_LIST;
+
 
             StampedePlugin(QWidget *parent=0);
             virtual void reset();
+            virtual void stop();
             virtual void setActive(bool value);
             virtual void processFrames(QList<StampedImage> frameList);
             virtual cv::Mat getCurrentImage();
@@ -43,6 +46,8 @@ namespace bias
             virtual RtnStatus runCmdFromMap(QVariantMap cmdMap,bool showErrorDlg=true);
 
             void processEvents();
+            void processDisplayEvents();
+            void processVibrationEvents();
             RtnStatus loadConfigFromFile(QString fileName, bool showErrorDlg=true);
 
             RtnStatus connectVibrationDev();
@@ -52,6 +57,13 @@ namespace bias
             RtnStatus disconnectDisplayDev();
             RtnStatus connectAll();
             RtnStatus disconnectAll();
+
+        signals:
+
+            void startVibrationEvent(int index, VibrationEvent event);
+            void stopVibrationEvent(int index, VibrationEvent event);
+            void startDisplayEvent(int index, DisplayEvent event);
+            void stopDisplayEvent(int index, DisplayEvent event);
 
         protected:
 
@@ -70,6 +82,7 @@ namespace bias
 
             QList<EventState> vibrationEventStateList_;
             QList<EventState> displayEventStateList_;
+            QList<int> vibrationPinList_;
 
             void initialize();
             void connectWidgets();
@@ -85,6 +98,7 @@ namespace bias
             bool checkForSerialPort(QString port);
 
         private slots:
+
             void onVibrationDevConnectClicked();
             void onVibrationDevTestClicked();
             void onDisplayDevConnectClicked();
@@ -93,6 +107,11 @@ namespace bias
             void onLoadConfigClicked();
             void onTimerDurationChanged(unsigned long duration);
             void onVideoFileChanged();
+
+            void onStartVibrationEvent(int index, VibrationEvent event);
+            void onStopVibrationEvent(int index, VibrationEvent event);
+            void onStartDisplayEvent(int index, DisplayEvent event);
+            void onStopDisplayEvent(int index, DisplayEvent event);
 
     };
 

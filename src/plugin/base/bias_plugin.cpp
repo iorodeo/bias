@@ -20,6 +20,8 @@ namespace bias
     void BiasPlugin::reset()
     { }
 
+    void BiasPlugin::stop()
+    { }
 
     void BiasPlugin::setActive(bool value)
     {

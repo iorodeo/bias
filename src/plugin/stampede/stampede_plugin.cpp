@@ -16,6 +16,7 @@ namespace bias
     const QString StampedePlugin::CONFIG_FILE_EXTENSION = QString("json");
     const QString StampedePlugin::LOG_FILE_EXTENSION = QString("txt");
     const QString StampedePlugin::LOG_FILE_POSTFIX = QString("stampede_log");
+    const QList<int> StampedePlugin::DEFAULT_VIBRATION_PIN_LIST = QList<int>({0,1});
 
     // Public Methods
     // ------------------------------------------------------------------------
@@ -31,6 +32,17 @@ namespace bias
         resetEventStates();
     }
 
+    void StampedePlugin::stop()
+    {
+        if (vibrationDev_.isOpen())
+        {
+            vibrationDev_.stopAll();
+        }
+        if (displayDev_.isOpen())
+        {
+        }
+    }
+
     void StampedePlugin::setActive(bool value)
     {
         BiasPlugin::setActive(value);
@@ -40,25 +52,43 @@ namespace bias
 
     void StampedePlugin::processFrames(QList<StampedImage> frameList)
     {
-        acquireLock();
+        double timeStamp;
+        unsigned long frameCount;
 
+        // -----------------------------------------------
+        // Note: called by separate thread (from main gui)
+        // -----------------------------------------------
+
+        acquireLock();
         StampedImage latestFrame = frameList.back();
         frameList.clear();
-
         currentImage_ = latestFrame.image;
         timeStamp_ = latestFrame.timeStamp;
         frameCount_ = latestFrame.frameCount;
-
-        processEvents();
+        //qDebug() << timeStamp_;
         releaseLock();
 
-
+        processEvents();
     }
 
     void StampedePlugin::processEvents()
     {
-        qDebug() << timeStamp_;
+        // -----------------------------------------------
+        // Note: called by separate thread (from main gui)
+        // -----------------------------------------------
 
+        processVibrationEvents();
+        processDisplayEvents();
+    }
+
+
+    void StampedePlugin::processVibrationEvents()
+    {
+        // -----------------------------------------------
+        // Note: called by separate thread (from main gui)
+        // -----------------------------------------------
+
+        acquireLock();
         QList<VibrationEvent> vibrationEventList= config_.vibrationEventList();
         for (auto i=0; i<vibrationEventList.size(); i++) 
         {
@@ -71,15 +101,15 @@ namespace bias
                 switch (vibrationEventStateList_[i])
                 {
                     case WAITING:
-                        qDebug() << "starting vibration ";
                         vibrationEventStateList_[i] = RUNNING;
+                        emit startVibrationEvent(i,event);
                         break;
 
                     case RUNNING:
                         if (stopTime < timeStamp_)
                         {
-                            qDebug() << "stopping vibration ";
                             vibrationEventStateList_[i] = COMPLETE;
+                            emit stopVibrationEvent(i,event);
                         }
                         break;
 
@@ -87,11 +117,17 @@ namespace bias
                         break;
                 }
             }
-            else
-            {
-            }
-        }
+        } // for (auto i=0 ...
+        releaseLock();
+    }
 
+    void StampedePlugin::processDisplayEvents()
+    {
+        // -----------------------------------------------
+        // Note: called by separate thread (from main gui)
+        // -----------------------------------------------
+
+        acquireLock();
         QList<DisplayEvent> displayEventList = config_.displayEventList();
         for (auto i=0; i<displayEventList.size(); i++)
         {
@@ -104,15 +140,15 @@ namespace bias
                 switch (displayEventStateList_[i])
                 {
                     case WAITING:
-                        qDebug() << "starting  display ";
                         displayEventStateList_[i] = RUNNING;
+                        emit startDisplayEvent(i,event);
                         break;
 
                     case RUNNING:
                         if (stopTime < timeStamp_)
                         {
-                            qDebug() << "stopping display ";
                             displayEventStateList_[i] = COMPLETE;
+                            emit stopDisplayEvent(i,event);
                         }
                         break;
 
@@ -120,12 +156,12 @@ namespace bias
                         break;
                 }
             }
-            else
-            {
-
-            }
-        }
+        } // for (auto i=0 ...
+        releaseLock();
     }
+
+
+
 
     cv::Mat StampedePlugin::getCurrentImage()
     {
@@ -189,7 +225,10 @@ namespace bias
         QByteArray jsonConfig = configFile.readAll();
         configFile.close();
 
+        acquireLock();
         RtnStatus rtnFromJson = config_.fromJson(jsonConfig);
+        releaseLock();
+
         qDebug() << rtnFromJson.success << " " << rtnFromJson.message;
         if (!rtnFromJson.success)
         {
@@ -247,6 +286,14 @@ namespace bias
         {
             rtnStatus.success = false;
             rtnStatus.message = QString("unable to open device %1").arg(config_.vibrationPortName());
+
+        }
+        else
+        {
+            for (int i=0; i<vibrationDev_.NUM_CHANNELS; i++)
+            {
+                vibrationDev_.setNumPulse(i,0);
+            }
         }
         updateConnectionStatusLabels();
         updateWidgetsEnabled();
@@ -417,6 +464,8 @@ namespace bias
         monoSpaceFont.setStyleHint(QFont::TypeWriter);
         configTextEditPtr -> setFont(monoSpaceFont);
 
+        vibrationPinList_ = DEFAULT_VIBRATION_PIN_LIST;
+
         QPointer<CameraWindow> cameraWindowPtr = getCameraWindow();
         defaultConfigFileDir_ = cameraWindowPtr -> getDefaultConfigFileDir();
         configFileDir_ = defaultConfigFileDir_;
@@ -424,7 +473,9 @@ namespace bias
         configFileNameLabelPtr -> setText(QString("Default Configuration"));
 
         setRequireTimer(true);
+        acquireLock();
         config_.setToDefaultConfig();
+        releaseLock();
         updateConfigEditText();
         updateWidgetsEnabled();
         updateConnectionStatusLabels();
@@ -484,17 +535,49 @@ namespace bias
                );
 
         connect(
-                parent(),
-                SIGNAL(videoFileChanged()),
-                this,
+                parent(), 
+                SIGNAL(videoFileChanged()), 
+                this, 
                 SLOT(onVideoFileChanged())
-               );
+                );
+
+        qRegisterMetaType<VibrationEvent>("VibrationEvent");
+        qRegisterMetaType<DisplayEvent>("DisplayEvent");
+
+        connect(
+                this, 
+                SIGNAL(startVibrationEvent(int,VibrationEvent)), 
+                this, 
+                SLOT(onStartVibrationEvent(int,VibrationEvent))
+                );
+
+        connect(
+                this, 
+                SIGNAL(stopVibrationEvent(int,VibrationEvent)),  
+                this, SLOT(onStopVibrationEvent(int,VibrationEvent))
+                );
+
+        connect(
+                this, 
+                SIGNAL(startDisplayEvent(int,DisplayEvent)),   
+                this, 
+                SLOT(onStartDisplayEvent(int,DisplayEvent))
+                ); 
+
+        connect(
+                this, 
+                SIGNAL(stopDisplayEvent(int,DisplayEvent)),   
+                this, 
+                SLOT(onStopDisplayEvent(int,DisplayEvent))
+                );
     }
 
 
     void StampedePlugin::updateConfigEditText()
     {
+        acquireLock();
         configTextEditPtr -> setText(config_.toString());
+        releaseLock();
     }
 
     QString StampedePlugin::getConfigFileFullPath()
@@ -598,6 +681,7 @@ namespace bias
 
     void StampedePlugin::resetEventStates()
     {
+        acquireLock();
         vibrationEventStateList_.clear();
         for (auto event : config_.vibrationEventList())
         {
@@ -609,6 +693,7 @@ namespace bias
         {
             displayEventStateList_.append(WAITING);
         } 
+        releaseLock();
     }
 
     // Private slots
@@ -687,9 +772,94 @@ namespace bias
         qDebug() << "duration = " << duration;
     }
 
+
     void StampedePlugin::onVideoFileChanged()
     {
         updateLogFileName();
+    }
+
+
+    void StampedePlugin::onStartVibrationEvent(int index,VibrationEvent event) 
+    {
+        qDebug() << "start vibration";
+        qDebug() << "  index         " << index;
+        qDebug() << "  startTime     " << event.startTime();
+        qDebug() << "  period        " << event.period();
+        qDebug() << "  number        " << event.number();
+
+
+        if (vibrationDev_.isOpen())
+        {
+            for (auto pin : vibrationPinList_)
+            {
+                int periodMS = int(1000*event.period());
+                vibrationDev_.setPeriod(pin,periodMS);
+                vibrationDev_.setNumPulse(pin,event.number());
+                vibrationDev_.startAll();
+            }
+        }
+        else
+        {
+            qDebug() << "** device not connected";
+        }
+
+        qDebug();
+    }
+
+
+    void StampedePlugin::onStopVibrationEvent(int index,VibrationEvent event) 
+    {
+        qDebug() << "stop vibration";
+        qDebug() << "  index         " << index;
+
+        if (vibrationDev_.isOpen())
+        {
+            vibrationDev_.stopAll();
+        }
+        else
+        {
+            qDebug() << "** device not connected";
+        }
+        qDebug();
+    }
+
+
+    void StampedePlugin::onStartDisplayEvent(int index,DisplayEvent event) 
+    {
+        qDebug() << "start display";
+        qDebug() << "  index         " << index;
+        qDebug() << "  patternId     " << event.patternId();
+        qDebug() << "  startTime     " << event.startTime();
+        qDebug() << "  stopTime      " << event.stopTime();
+        qDebug() << "  controalBias  " << event.controlBias();
+
+        if (displayDev_.isOpen())
+        {
+
+
+        }
+        else
+        {
+            qDebug() << "** device not connected";
+        }
+        qDebug();
+    }
+
+
+    void StampedePlugin::onStopDisplayEvent(int index,DisplayEvent event) 
+    {
+        qDebug() << "stop display";
+        qDebug() << "  index         " << index;
+
+        if (displayDev_.isOpen())
+        {
+
+        }
+        else
+        {
+            qDebug() << "** device not connected";
+        }
+        qDebug();
     }
 
 }

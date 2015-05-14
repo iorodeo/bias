@@ -39,6 +39,16 @@ namespace bias
         return rtnStatus;
     }
 
+    VibrationEvent StampedePluginConfig::getVibrationEvent(int index)
+    {
+        VibrationEvent event;
+        if ((index >= 0) && index < vibrationEventList_.size())
+        {
+            event = vibrationEventList_[index];
+        }
+        return event;
+    }
+
 
     RtnStatus StampedePluginConfig::appendVibrationEvent(VibrationEvent vibrationEvent) 
     {
@@ -55,6 +65,16 @@ namespace bias
         return rtnStatus;
     }
 
+
+    DisplayEvent StampedePluginConfig::getDisplayEvent(int index)
+    {
+        DisplayEvent event;
+        if ((index >=0) && index < displayEventList_.size())
+        {
+            event = displayEventList_[index];
+        }
+        return event;
+    }
 
 
     void StampedePluginConfig::clearVibrationEventList() 

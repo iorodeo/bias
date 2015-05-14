@@ -17,11 +17,13 @@ namespace bias
 
             QList<VibrationEvent> vibrationEventList();
             RtnStatus setVibrationEventList(QList<VibrationEvent> vibrationEventList);
+            VibrationEvent getVibrationEvent(int index);
             RtnStatus appendVibrationEvent(VibrationEvent vibrationEvent);
             void clearVibrationEventList();
 
             QList<DisplayEvent> displayEventList();
             RtnStatus setDisplayEventList(QList<DisplayEvent> displayEventList);
+            DisplayEvent getDisplayEvent(int index);
             RtnStatus appendDisplayEvent(DisplayEvent displayEvent);
             void clearDisplayEventList();
 

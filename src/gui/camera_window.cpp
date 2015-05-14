@@ -467,11 +467,14 @@ namespace bias
 
         if (BiasPlugin::pluginsEnabled())
         {
-            getCurrentPlugin() -> reset();
-
+            QPointer<BiasPlugin> currentPluginPtr = getCurrentPlugin(); 
+            if (!currentPluginPtr.isNull())
+            {
+                currentPluginPtr -> reset();
+            }
             pluginHandlerPtr_ -> setCameraNumber(cameraNumber_);
             pluginHandlerPtr_ -> setImageQueue(pluginImageQueuePtr_);
-            pluginHandlerPtr_ -> setPlugin(getCurrentPlugin());
+            pluginHandlerPtr_ -> setPlugin(currentPluginPtr);
             pluginHandlerPtr_ -> setAutoDelete(false);
             threadPoolPtr_ -> start(pluginHandlerPtr_);
         } 
@@ -587,6 +590,15 @@ namespace bias
         pluginImageQueuePtr_ -> clear();
         pluginImageQueuePtr_ -> releaseLock();
 
+        
+        if (BiasPlugin::pluginsEnabled())
+        {
+            QPointer<BiasPlugin> currentPluginPtr = getCurrentPlugin(); 
+            if (!currentPluginPtr.isNull())
+            {
+                currentPluginPtr -> stop();
+            }
+        }
 
         // Update data GUI information
         startButtonPtr_ -> setText(QString("Start"));
@@ -2527,8 +2539,8 @@ namespace bias
         tabWidgetPtr_ -> setCurrentWidget(previewTabPtr_);
 
         //setCurrentPlugin(pluginMap_.firstKey());
-        setCurrentPlugin("grabDetector");
-        //setCurrentPlugin("stampede");
+        //setCurrentPlugin("grabDetector");
+        setCurrentPlugin("stampede");
 
         updateWindowTitle();
         updateCameraInfoMessage();
