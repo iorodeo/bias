@@ -94,7 +94,7 @@ namespace bias
         return ok;
     }
 
-    bool PanelsController::setPatternID(uint8_t id)
+    bool PanelsController::setPatternId(uint8_t id)
     {
         bool ok = false;
         if ((id >= MIN_PATTERN_ID) && (id <= MAX_PATTERN_ID))
@@ -108,7 +108,7 @@ namespace bias
         return ok; 
     }
 
-    bool PanelsController::setConfigID(uint8_t id)
+    bool PanelsController::setConfigId(uint8_t id)
     {
         bool ok = false;
         if ((id >= MIN_CONFIG_ID) && (id <= MAX_CONFIG_ID))

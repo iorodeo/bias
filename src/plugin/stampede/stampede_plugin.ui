@@ -27,7 +27,11 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QTextEdit" name="configTextEditPtr"/>
+       <widget class="QTextEdit" name="configTextEditPtr">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QWidget" name="configFileWidgetPtr" native="true">
@@ -68,6 +72,19 @@
            </property>
            <property name="text">
             <string>Load</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="reloadConfigPushButtonPtr">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Reload</string>
            </property>
           </widget>
          </item>

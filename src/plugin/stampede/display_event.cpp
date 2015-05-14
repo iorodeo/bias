@@ -74,13 +74,13 @@ namespace bias
     }
 
 
-    double DisplayEvent::controlBias()
+    int DisplayEvent::controlBias()
     {
         return controlBias_;
     }
 
 
-    RtnStatus DisplayEvent::setControlBias(double controlBias)
+    RtnStatus DisplayEvent::setControlBias(int controlBias)
     {
         controlBias_ = controlBias;
         RtnStatus rtnStatus;
@@ -211,9 +211,9 @@ namespace bias
         // --------------------------------------------------------------------
         if (map.contains("controlBias"))
         {
-            if (map["controlBias"].canConvert<double>())
+            if (map["controlBias"].canConvert<int>())
             {
-                double controlBiasTmp = map["controlBias"].toDouble();
+                int controlBiasTmp = map["controlBias"].toInt();
                 RtnStatus rtnSetControlBias = setControlBias(controlBiasTmp);
                 if (!rtnSetControlBias.success)
                 {

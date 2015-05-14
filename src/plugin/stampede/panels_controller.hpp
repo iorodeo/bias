@@ -45,8 +45,8 @@ namespace bias
             bool allOn();
             bool allOff();
             bool setToGrayLevel(uint8_t level);
-            bool setPatternID(uint8_t id);
-            bool setConfigID(uint8_t id);
+            bool setPatternId(uint8_t id);
+            bool setConfigId(uint8_t id);
             bool setLaserTrig(bool value);
             bool setIdentCompress(bool value);
             bool setQuietMode(bool value);

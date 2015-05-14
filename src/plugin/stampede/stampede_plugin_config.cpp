@@ -170,6 +170,21 @@ namespace bias
         return rtnStatus;
     } 
 
+    unsigned int StampedePluginConfig::arenaConfigId()
+    {
+        return arenaConfigId_;
+    }
+
+
+    RtnStatus StampedePluginConfig::setArenaConfigId(unsigned int id)
+    {
+        arenaConfigId_ = id;
+        RtnStatus rtnStatus;
+        rtnStatus.success = true;
+        rtnStatus.message = QString("");
+        return rtnStatus;
+    }
+
 
     QString StampedePluginConfig::toString() 
     {
@@ -177,6 +192,7 @@ namespace bias
         configStr.append(QString("duration:         %1\n").arg(duration_));
         configStr.append(QString("vibration port:   %1\n").arg(vibrationPortName_));
         configStr.append(QString("display   port:   %1\n").arg(displayPortName_));
+        configStr.append(QString("arena config id:  %1\n").arg(arenaConfigId_));
         configStr.append(QString("\n"));
 
         for (auto i=0; i<vibrationEventList_.size(); i++)
@@ -216,6 +232,7 @@ namespace bias
 
         QVariantMap displayMap;
         displayMap.insert("port", displayPortName_);
+        displayMap.insert("arenaConfigId", arenaConfigId_);
         displayMap.insert("events", displayMapList);
 
         QVariantMap configMap;
@@ -411,6 +428,32 @@ namespace bias
             return rtnStatus;
         }
 
+        // Get arenaConfigId
+        // --------------------------------------------------------------------
+        if (map.contains("arenaConfigId"))
+        {
+            if (map["arenaConfigId"].canConvert<unsigned int>())
+            {
+                unsigned int arenaConfigIdTmp = map["arenaConfigId"].toUInt();
+                RtnStatus rtnSetArenaConfigId = setArenaConfigId(arenaConfigIdTmp);
+                if (!rtnSetArenaConfigId.success)
+                {
+                    rtnStatus.success = false;
+                    rtnStatus.appendMessage(rtnSetArenaConfigId.message);
+                }
+            }
+            else
+            {
+                rtnStatus.success = false;
+                rtnStatus.appendMessage(QString("unable to convert arenaConfigId to unsigned int"));
+            }
+        }
+        else
+        {
+            rtnStatus.success = false;
+            rtnStatus.appendMessage(QString("display event missing arenaConfigId"));
+        }
+
         //  Get port name
         //  -------------------------------------------------------------------
         if (map.contains("port"))
@@ -596,35 +639,41 @@ namespace bias
 
     void StampedePluginConfig::setToDefaultConfig()
     {
-        setDuration(90);
+        setDuration(30);
         setVibrationPortName("ttyUSB0");
         setDisplayPortName("ttyUSB1");
+        setArenaConfigId(1);
 
         // Add Vibration events
         clearVibrationEventList();
 
         VibrationEvent vibEvent;
-        vibEvent.setStartTime(5.0);
-        vibEvent.setPeriod(1.0);
+        vibEvent.setStartTime(2.0);
+        vibEvent.setPeriod(0.25);
         vibEvent.setNumber(10);
         appendVibrationEvent(vibEvent);
 
+        vibEvent.setStartTime(12.0);
+        vibEvent.setPeriod(0.25);
+        vibEvent.setNumber(10);
+        appendVibrationEvent(vibEvent);
 
         // Add Display events
         clearDisplayEventList();
         DisplayEvent dspEvent;
         dspEvent.setPatternId(1);
-        dspEvent.setStartTime(20.0);
-        dspEvent.setStopTime(30.0);
-        dspEvent.setControlBias(1.0);
-
+        dspEvent.setStartTime(6.0);
+        dspEvent.setStopTime(10.0);
+        dspEvent.setControlBias(5);
         appendDisplayEvent(dspEvent);
+
+        // Add Display events
         dspEvent.setPatternId(1);
-        dspEvent.setStartTime(50.0);
-        dspEvent.setStopTime(60.0);
-        dspEvent.setControlBias(1.0);
-
+        dspEvent.setStartTime(20.0);
+        dspEvent.setStopTime(25.0);
+        dspEvent.setControlBias(-5.0);
         appendDisplayEvent(dspEvent);
+
 
     }
 

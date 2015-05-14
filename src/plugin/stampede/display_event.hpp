@@ -21,8 +21,8 @@ namespace bias
             double stopTime();
             RtnStatus setStopTime(double stopTime);
 
-            double controlBias();
-            RtnStatus setControlBias(double controlBias);
+            int controlBias();
+            RtnStatus setControlBias(int controlBias);
 
             QString toString();
             QVariantMap toMap();
@@ -37,7 +37,7 @@ namespace bias
             unsigned int patternId_ = 0;
             double startTime_ = 0.0;
             double stopTime_ = 1.0;
-            double controlBias_ = 1.0;
+            int controlBias_ = 0;
 
 
     };

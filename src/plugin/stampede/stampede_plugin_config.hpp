@@ -36,6 +36,9 @@ namespace bias
             unsigned long duration();
             RtnStatus setDuration(unsigned long duration);
 
+            unsigned int arenaConfigId();
+            RtnStatus setArenaConfigId(unsigned int id);
+
             QString toString();
             QVariantMap toMap();
             QByteArray toJson();
@@ -55,6 +58,7 @@ namespace bias
         protected:
 
             unsigned long duration_ = 0; 
+            unsigned int arenaConfigId_ = 1; 
             QString vibrationPortName_;
             QString displayPortName_;
             QList<VibrationEvent> vibrationEventList_;

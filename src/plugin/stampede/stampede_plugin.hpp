@@ -7,6 +7,7 @@
 #include "nano_ssr_pulse.hpp"
 #include "rtn_status.hpp"
 #include <QDir>
+#include <QTextStream>
 
 namespace cv
 { 
@@ -15,8 +16,6 @@ namespace cv
 
 namespace bias
 {
-
-
 
     class StampedePlugin : public BiasPlugin, public Ui::StampedePluginDialog
     {
@@ -33,6 +32,8 @@ namespace bias
             static const QString LOG_FILE_EXTENSION;
             static const QString LOG_FILE_POSTFIX;
             static const QList<int> DEFAULT_VIBRATION_PIN_LIST;
+            static const double VIBRATION_TEST_PERIOD;
+            static const unsigned int VIBRATION_TEST_NUMBER;
 
 
             StampedePlugin(QWidget *parent=0);
@@ -45,9 +46,7 @@ namespace bias
             virtual QString getDisplayName();
             virtual RtnStatus runCmdFromMap(QVariantMap cmdMap,bool showErrorDlg=true);
 
-            void processEvents();
-            void processDisplayEvents();
-            void processVibrationEvents();
+
             RtnStatus loadConfigFromFile(QString fileName, bool showErrorDlg=true);
 
             RtnStatus connectVibrationDev();
@@ -84,6 +83,10 @@ namespace bias
             QList<EventState> displayEventStateList_;
             QList<int> vibrationPinList_;
 
+            bool loggingEnabled_;
+            QFile logFile_;
+            QTextStream logStream_;
+
             void initialize();
             void connectWidgets();
             void updateWidgetsEnabled();
@@ -97,6 +100,11 @@ namespace bias
             
             bool checkForSerialPort(QString port);
 
+            void processEvents();
+            void processDisplayEvents();
+            void processVibrationEvents();
+            void writeLogData();
+
         private slots:
 
             void onVibrationDevConnectClicked();
@@ -105,6 +113,7 @@ namespace bias
             void onDisplayDevBlinkClicked();
             void onDevConnectAllClicked();
             void onLoadConfigClicked();
+            void onReloadConfigClicked();
             void onTimerDurationChanged(unsigned long duration);
             void onVideoFileChanged();
 
