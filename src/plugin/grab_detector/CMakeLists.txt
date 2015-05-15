@@ -8,6 +8,7 @@ endif()
 set(
     grab_detector_plugin_FORMS 
     grab_detector_plugin.ui
+    ../../gui/camera_window.ui
     )
 
 set(
@@ -23,7 +24,6 @@ set(
     grab_detector_plugin.cpp
     pulse_device.cpp
     )
-
 
 qt5_wrap_ui(grab_detector_plugin_FORMS_HEADERS ${grab_detector_plugin_FORMS}) 
 qt5_wrap_cpp(grab_detector_plugin_HEADERS_MOC ${grab_detector_plugin_HEADERS})
@@ -42,5 +42,4 @@ target_link_libraries(grab_detector_plugin ${QT_LIBRARIES} bias_plugin bias_util
 
 qt5_use_modules(grab_detector_plugin Core Widgets Gui PrintSupport SerialPort)
 
-set(grab_detector_plugin_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} CACHE FILEPATH "grab detector  include directories")
 

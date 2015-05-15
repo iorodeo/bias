@@ -8,6 +8,7 @@ endif()
 set(
     stampede_plugin_FORMS 
     stampede_plugin.ui
+    ../../gui/camera_window.ui
     )
 
 set(
@@ -47,5 +48,4 @@ target_link_libraries(stampede_plugin ${QT_LIBRARIES} bias_plugin bias_utility)
 
 qt5_use_modules(stampede_plugin Core Widgets Gui SerialPort)
 
-set(stampede_plugin_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} CACHE FILEPATH "stampede include directories")
 

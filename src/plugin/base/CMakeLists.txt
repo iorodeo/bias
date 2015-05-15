@@ -32,5 +32,4 @@ target_link_libraries(bias_plugin ${QT_LIBRARIES})
 
 qt5_use_modules(bias_plugin Core Widgets Gui)
 
-set(bias_plugin_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} CACHE FILEPATH "bias plugin include directories")
 
