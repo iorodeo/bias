@@ -85,33 +85,23 @@ namespace bias {
             }
 
 
-
             // DEVEL 
             // -------------------------------------------------------------------
-            Format7Settings f7Settings = getFormat7Settings();
-            f7Settings.print();
+            //Format7Settings f7Settings = getFormat7Settings();
+            //f7Settings.print();
 
             //dc1394_camera_print_info(camera_dc1394_,stdout);
 
             // Print supported video modes
-            //Property prop;
+            //PropertyType propType = PROPERTY_TYPE_SHUTTER;
             //PropertyInfo propInfo;
-
-            //propInfo = getPropertyInfo(PROPERTY_TYPE_BRIGHTNESS);
+            //Property prop;
+            //
+            //propInfo = getPropertyInfo(propType);
             //propInfo.print();
 
-            //prop = getProperty(PROPERTY_TYPE_BRIGHTNESS);
+            //prop = getProperty(propType);
             //prop.print();
-
-            //prop.value = 200;
-            //setProperty(prop);
-            //prop = getProperty(PROPERTY_TYPE_BRIGHTNESS);
-            //prop.print();
-
-            //prop = getProperty(PROPERTY_TYPE_TRIGGER_MODE);
-            //prop.print();
-            //propInfo = getPropertyInfo(PROPERTY_TYPE_TRIGGER_MODE);
-            //propInfo.print();
             // --------------------------------------------------------------------
             
         }
@@ -599,34 +589,47 @@ namespace bias {
         {
             return;
         }
+
+
+        if (prop.autoActive && propCurr.autoActive)
+        {
+            return;
+        }
+
         if (prop.autoActive && !propCurr.autoActive && propInfoCurr.autoCapable)
         {
             setFeatureModeAuto_dc1394(prop.type);
+            return;
         }
-        else if(prop.onePush && propInfoCurr.onePushCapable)
+
+        if(prop.onePush && propInfoCurr.onePushCapable)
         {
             setFeatureModeOnePush_dc1394(prop.type);
+            return;
+        }
+
+        if (!prop.autoActive && propCurr.autoActive && propInfoCurr.manualCapable)
+        {
+            setFeatureModeManual_dc1394(prop.type);
+        }
+
+        if (prop.absoluteControl)
+        {
+            if (!propCurr.absoluteControl)
+            {
+                setFeatureAbsoluteControl_dc1394(prop.type);
+            }
+            setFeatureAbsoluteValue_dc1394(prop.type, prop.absoluteValue, propInfoCurr);
         }
         else
         {
-            if (prop.absoluteControl)
+            if (prop.type == PROPERTY_TYPE_WHITE_BALANCE)
             {
-                if (!propCurr.absoluteControl)
-                {
-                    setFeatureAbsoluteControl_dc1394(prop.type);
-                }
-                setFeatureAbsoluteValue_dc1394(prop.type, prop.absoluteValue, propInfoCurr);
+                setFeatureWhiteBalance_dc1394(prop.valueA, prop.valueB);
             }
             else
             {
-                if (prop.type == PROPERTY_TYPE_WHITE_BALANCE)
-                {
-                    setFeatureWhiteBalance_dc1394(prop.valueA, prop.valueB);
-                }
-                else
-                {
-                    setFeatureValue_dc1394(prop.type,prop.value,propInfoCurr);
-                }
+                setFeatureValue_dc1394(prop.type,prop.value,propInfoCurr);
             }
         }
     }
@@ -874,6 +877,27 @@ namespace bias {
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
             ssError << ": error unable to set dc1394 feature mode to auto" << std::endl;
+            throw RuntimeError(ERROR_DC1394_SET_FEATURE, ssError.str());
+        }
+    }
+
+
+    void CameraDevice_dc1394::setFeatureModeManual_dc1394(PropertyType propType)
+    {
+        if (!connected_)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to set dc1394 feature mode to maunual - not connected" << std::endl;
+            throw RuntimeError(ERROR_DC1394_SET_FEATURE, ssError.str());
+        }
+        dc1394feature_t featureId_dc1394 = convertPropertyType_to_dc1394(propType);
+        dc1394error_t rsp = dc1394_feature_set_mode( camera_dc1394_,featureId_dc1394, DC1394_FEATURE_MODE_MANUAL);
+        if (rsp != DC1394_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to set dc1394 feature mode to manual" << std::endl;
             throw RuntimeError(ERROR_DC1394_SET_FEATURE, ssError.str());
         }
     }

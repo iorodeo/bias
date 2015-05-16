@@ -84,6 +84,7 @@ namespace bias {
             void updateTimeStamp();
             void getFeatureInfo_dc1394(PropertyType propType, dc1394feature_info_t &featureInfo_dc1394);
             void setFeatureModeAuto_dc1394(PropertyType propType);
+            void setFeatureModeManual_dc1394(PropertyType propType);
             void setFeatureModeOnePush_dc1394(PropertyType propType);
             void setFeatureAbsoluteControl_dc1394(PropertyType propType);
             void setFeatureAbsoluteValue_dc1394(PropertyType propType, float absValue, PropertyInfo propInfo);

@@ -486,11 +486,25 @@ namespace bias
 
         if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
         {
+            //Property propertyOrig = cameraPtr_ -> getProperty(propertyType_);
+
             cameraPtr_ -> setProperty(property);
             Property propertyNew = cameraPtr_ -> getProperty(propertyType_);
             PropertyInfo propertyInfo = cameraPtr_ -> getPropertyInfo(propertyType_);
             cameraPtr_ -> releaseLock();
             updateDisplay(propertyNew,propertyInfo);
+
+            //std::cout << std::endl;
+            //std::cout << "orig" << std::endl;
+            //propertyOrig.print();
+
+            //std::cout << std::endl;
+            //std::cout << "set" << std::endl;
+            //property.print();
+
+            //std::cout << std::endl;
+            //std::cout << "new" << std::endl;
+            //propertyNew.print();
         }
         else
         {
