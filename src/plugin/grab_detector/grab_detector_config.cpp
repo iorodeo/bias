@@ -12,10 +12,10 @@ namespace bias
     const double GrabDetectorConfig::DEFAULT_DEVICE_PULSE_DURATION = 0.2; 
 
     // Detection box parameters
-    const int GrabDetectorConfig::DEFAULT_DETECTION_BOX_XPOS = 500;
-    const int GrabDetectorConfig::DEFAULT_DETECTION_BOX_YPOS = 500;
+    const int GrabDetectorConfig::DEFAULT_DETECTION_BOX_XPOS = 0;
+    const int GrabDetectorConfig::DEFAULT_DETECTION_BOX_YPOS = 0;
     const int GrabDetectorConfig::DEFAULT_DETECTION_BOX_WIDTH = 100;
-    const int GrabDetectorConfig::DEFAULT_DETECTION_BOX_HEIGHT = 200;
+    const int GrabDetectorConfig::DEFAULT_DETECTION_BOX_HEIGHT = 100;
     const QColor GrabDetectorConfig::DEFAULT_DETECTION_BOX_COLOR = QColor(255,0,0);
 
     // Trigger parameters

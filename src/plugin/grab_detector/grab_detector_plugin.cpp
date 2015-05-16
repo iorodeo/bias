@@ -47,36 +47,41 @@ namespace bias
         frameList.clear();
 
         cv::Mat workingImage = latestFrame.image.clone();
-        cv::Rect boxRect = getDetectionBoxCv();
-        cv::Mat roiImage = workingImage(boxRect);
-        cv::medianBlur(roiImage,roiImage,medianFilterSize);
-        cv::minMaxLoc(roiImage,&signalMin,&signalMax);
-        if (signalMax > threshold)
+        if ((workingImage.rows != 0) && (workingImage.cols != 0))
         {
-            found = true;
-        }
-        else
-        { 
-            found = false;
-        }
-        acquireLock();
-        currentImage_ = workingImage;
-        signalMin_ = signalMin;
-        signalMax_ = signalMax;
-        found_ = found;
-        frameCount_ = latestFrame.frameCount;
-        livePlotTimeVec_.append(latestFrame.timeStamp);
-        livePlotSignalVec_.append(signalMax);
-        if (found && config_.triggerArmedState)
-        {
-            if (config_.triggerEnabled)
+            cv::Rect boxRect = getDetectionBoxCv();
+            qDebug() << boxRect.x << boxRect.y << boxRect.width << boxRect.height;
+            qDebug() << workingImage.rows << workingImage.cols;
+            cv::Mat roiImage = workingImage(boxRect);
+            cv::medianBlur(roiImage,roiImage,medianFilterSize);
+            cv::minMaxLoc(roiImage,&signalMin,&signalMax);
+            if (signalMax > threshold)
             {
-                emit triggerFired();
+                found = true;
             }
-        }
-        releaseLock();
+            else
+            { 
+                found = false;
+            }
+            acquireLock();
+            currentImage_ = workingImage;
+            signalMin_ = signalMin;
+            signalMax_ = signalMax;
+            found_ = found;
+            frameCount_ = latestFrame.frameCount;
+            livePlotTimeVec_.append(latestFrame.timeStamp);
+            livePlotSignalVec_.append(signalMax);
+            if (found && config_.triggerArmedState)
+            {
+                if (config_.triggerEnabled)
+                {
+                    emit triggerFired();
+                }
+            }
+            releaseLock();
 
-        //qDebug() << signalMax << threshold << found;
+            //qDebug() << signalMax << threshold << found;
+        }
     }
 
     cv::Mat GrabDetectorPlugin::getCurrentImage()
@@ -550,8 +555,6 @@ namespace bias
         refreshPortList();
 
         setFromConfig(config_);
-
-
 
     }
 
