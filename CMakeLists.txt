@@ -60,6 +60,7 @@ if(with_qt_gui)
 
 endif()
 
+
 # Compiler flags
 # -----------------------------------------------------------------------------
 #set(CMAKE_CXX_FLAGS "-std=gnu++0x -O2 -Wall")

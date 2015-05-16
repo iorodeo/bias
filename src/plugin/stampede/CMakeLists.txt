@@ -48,4 +48,3 @@ target_link_libraries(stampede_plugin ${QT_LIBRARIES} bias_plugin bias_utility)
 
 qt5_use_modules(stampede_plugin Core Widgets Gui SerialPort)
 
-

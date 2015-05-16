@@ -8,6 +8,7 @@ endif()
 set(
     bias_plugin_HEADERS 
     bias_plugin.hpp
+    ../../gui/camera_window.hpp
     )
 
 set(
@@ -31,5 +32,4 @@ include_directories(.)
 target_link_libraries(bias_plugin ${QT_LIBRARIES})
 
 qt5_use_modules(bias_plugin Core Widgets Gui)
-
 

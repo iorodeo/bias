@@ -42,4 +42,3 @@ target_link_libraries(grab_detector_plugin ${QT_LIBRARIES} bias_plugin bias_util
 
 qt5_use_modules(grab_detector_plugin Core Widgets Gui PrintSupport SerialPort)
 
-
