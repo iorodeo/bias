@@ -1450,6 +1450,7 @@ namespace bias
             setupImageLabels(false,false,true);
         }
         actionPluginsEnabledPtr_ -> setChecked(BiasPlugin::pluginsEnabled());
+        updateTimerMenu(); // if required/not required by plugin
         return rtnStatus;
     }
 
@@ -2369,6 +2370,7 @@ namespace bias
         {
             setPluginsEnabled(false);
         }
+
     }
 
     void CameraWindow::actionPluginsSettingsTriggered()
@@ -2446,8 +2448,6 @@ namespace bias
 
     void CameraWindow::pluginActionGroupTriggered(QAction *action)
     {
-        qDebug() << __PRETTY_FUNCTION__;
-
         QMapIterator<QString,QPointer<BiasPlugin>> pluginIt(pluginMap_);
         while (pluginIt.hasNext())
         {
@@ -2460,8 +2460,6 @@ namespace bias
 
         RtnStatus rtnStatus;
         QString pluginName = getCurrentPluginName(rtnStatus);
-        qDebug() << pluginName << rtnStatus.success; 
-
         if (rtnStatus.success)
         {
             setCurrentPlugin(pluginName);
@@ -2496,7 +2494,6 @@ namespace bias
         showCameraLockFailMsg_ = true;
 
 
-
         colorMapNumber_ = DEFAULT_COLORMAP_NUMBER;
         videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
         imageDisplayFreq_ = DEFAULT_IMAGE_DISPLAY_FREQ;
@@ -2524,7 +2521,6 @@ namespace bias
         pluginMap_[StampedePlugin::PLUGIN_NAME] = new StampedePlugin(this);
         pluginMap_[GrabDetectorPlugin::PLUGIN_NAME] = new GrabDetectorPlugin(pluginImageLabelPtr_,this);
         // -------------------------------------------------------------------------------
-        setPluginsEnabled(true);
 
         setupStatusLabel();
         setupCameraMenu();
@@ -2540,7 +2536,9 @@ namespace bias
 
         //setCurrentPlugin(pluginMap_.firstKey());
         //setCurrentPlugin("grabDetector");
+        
         setCurrentPlugin("stampede");
+        setPluginsEnabled(true);
 
         updateWindowTitle();
         updateCameraInfoMessage();

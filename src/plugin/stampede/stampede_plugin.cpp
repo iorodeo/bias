@@ -875,7 +875,8 @@ namespace bias
 
     void StampedePlugin::onTimerDurationChanged(unsigned long duration)
     {
-        qDebug() << "duration = " << duration;
+        config_.setDuration(duration);
+        updateConfigEditText();
     }
 
 
