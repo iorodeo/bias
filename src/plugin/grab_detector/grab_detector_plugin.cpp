@@ -50,8 +50,6 @@ namespace bias
         if ((workingImage.rows != 0) && (workingImage.cols != 0))
         {
             cv::Rect boxRect = getDetectionBoxCv();
-            qDebug() << boxRect.x << boxRect.y << boxRect.width << boxRect.height;
-            qDebug() << workingImage.rows << workingImage.cols;
             cv::Mat roiImage = workingImage(boxRect);
             cv::medianBlur(roiImage,roiImage,medianFilterSize);
             cv::minMaxLoc(roiImage,&signalMin,&signalMax);
@@ -99,7 +97,7 @@ namespace bias
         int green = config_.detectBoxColor.green();
         int blue = config_.detectBoxColor.blue();
         cv::Scalar boxColor(blue,green,red);
-        int boxLineWidth = 3;
+        int boxLineWidth = 2;
 
         std::stringstream foundStream;
         if (found)
@@ -113,6 +111,8 @@ namespace bias
         double fontScale = 1.0;
         int thickness = 2;
         int baseline = 0;
+
+
         cv::Size textSize = cv::getTextSize(foundStream.str(), CV_FONT_HERSHEY_SIMPLEX, fontScale, thickness, &baseline);
         cv::Point textPoint(currentImage.cols/2 - textSize.width/2, textSize.height+baseline);
         cv::putText(currentImageBGR, foundStream.str(), textPoint, CV_FONT_HERSHEY_SIMPLEX, fontScale, boxColor,thickness);
