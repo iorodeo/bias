@@ -266,6 +266,7 @@ namespace bias
         return rtnStatus;
     } 
 
+
     void GrabDetectorPlugin::resetTrigger()
     {
         config_.triggerArmedState = true;
@@ -585,9 +586,11 @@ namespace bias
     void GrabDetectorPlugin::refreshPortList()
     {
         comPortComboBoxPtr -> clear();
+        serialInfoList_.clear();
 
         // Get list of serial ports and populate comports 
         QList<QSerialPortInfo> serialInfoListTmp = QSerialPortInfo::availablePorts();
+
         for (QSerialPortInfo serialInfo: serialInfoListTmp)
         {
             if (serialInfo.portName().contains("ttyS"))

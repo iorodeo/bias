@@ -101,6 +101,14 @@ namespace bias
         return rtnStatus;
     }
 
+    RtnStatus BiasPlugin::setConfigFromJson(QByteArray jsonArray)
+    {
+        RtnStatus rtnStatus;
+        rtnStatus.success = true;
+        rtnStatus.message = QString("");
+        return rtnStatus;
+    }
+
     // Protected
     // ------------------------------------------------------------------------
 

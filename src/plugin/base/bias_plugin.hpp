@@ -43,6 +43,7 @@ namespace bias
             virtual QString getDisplayName();
             virtual QVariantMap getConfigAsMap();  
             virtual RtnStatus setConfigFromMap(QVariantMap configMap);
+            virtual RtnStatus setConfigFromJson(QByteArray jsonArray);
             virtual RtnStatus runCmdFromMap(QVariantMap cmdMap, bool showErrorDlg=true);
 
         signals:
