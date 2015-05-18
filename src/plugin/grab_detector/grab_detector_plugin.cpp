@@ -185,8 +185,6 @@ namespace bias
 
     RtnStatus GrabDetectorPlugin::runCmdFromMap(QVariantMap cmdMap, bool showErrorDlg)
     {
-        qDebug() << __PRETTY_FUNCTION__;
-
         RtnStatus rtnStatus;
         rtnStatus.success = true;
         rtnStatus.message = QString("");
@@ -217,7 +215,6 @@ namespace bias
             return rtnStatus;
         }
         QString cmd  = cmdMap["cmd"].toString();
-        qDebug() << "cmd = " << cmd;
 
         if (cmd == QString("reset"))
         {
@@ -233,6 +230,16 @@ namespace bias
         }
         else if (cmd == QString("set-config"))
         {
+            QVariantMap configMap = cmdMap["config"].toMap();
+            if (!configMap.isEmpty())
+            {
+                rtnStatus = setConfigFromMap(configMap);
+            }
+            else
+            {
+                rtnStatus.message = QString("configuration map is empty");
+                rtnStatus.success = false;
+            }
         }
         else
         {
@@ -265,6 +272,18 @@ namespace bias
         }
         return rtnStatus;
     } 
+
+
+    RtnStatus GrabDetectorPlugin::setConfigFromJson(QByteArray jsonArray)
+    {
+        GrabDetectorConfig config;
+        RtnStatus rtnStatus = config.fromJson(jsonArray); 
+        if (rtnStatus.success)
+        {
+            rtnStatus = setFromConfig(config);
+        }
+        return rtnStatus;
+    }
 
 
     void GrabDetectorPlugin::resetTrigger()
@@ -406,30 +425,38 @@ namespace bias
         updateColorExampleLabel();
         updateTrigStateInfo();
 
-        if (config_.deviceAutoConnect)
+        bool portFound = false;
+        QSerialPortInfo portInfo;
+        refreshPortList();
+
+        for (QSerialPortInfo serialInfo : serialInfoList_)
         {
-            bool portFound = false;
-            QSerialPortInfo portInfo;
-
-            for (QSerialPortInfo serialInfo : serialInfoList_)
+            if (config_.devicePortName == serialInfo.portName())
             {
-                if (config_.devicePortName == serialInfo.portName())
-                {
-                    portFound = true;
-                    portInfo = serialInfo;
-                    break;
-                }
+                portFound = true;
+                portInfo = serialInfo;
+                break;
             }
+        }
 
-            if (portFound)
+        if (portFound)
+        {
+            int portIndex = comPortComboBoxPtr -> findText(config_.devicePortName); 
+            comPortComboBoxPtr -> setCurrentIndex(portIndex);
+            if (config_.deviceAutoConnect)
             {
-                int portIndex = comPortComboBoxPtr -> findText(config_.devicePortName); 
-                comPortComboBoxPtr -> setCurrentIndex(portIndex);
                 rtnStatus = connectTriggerDev();
                 if (rtnStatus.success)
                 {
+                    rtnStatus.success = false;
+                    rtnStatus.appendMessage(QString("unable to connect to port %1").arg(config_.devicePortName));
                 }
             }
+        }
+        else
+        {
+            rtnStatus.success = false;
+            rtnStatus.appendMessage(QString("port %1 not found").arg(config_.devicePortName));
         }
 
         if (pulseDevice_.isOpen())
@@ -617,6 +644,7 @@ namespace bias
         colorExampleLabelPtr -> setPalette(palette);
         colorExampleLabelPtr -> setAutoFillBackground(true);
     }
+
 
 
     // Private Slots

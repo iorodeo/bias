@@ -47,6 +47,7 @@ namespace bias
             virtual RtnStatus runCmdFromMap(QVariantMap cmdMap, bool showErrorDlg=true);
             virtual QVariantMap getConfigAsMap();  
             virtual RtnStatus setConfigFromMap(QVariantMap configMap);
+            virtual RtnStatus setConfigFromJson(QByteArray jsonArray);
 
             void setTriggerEnabled(bool value);
             void resetTrigger();

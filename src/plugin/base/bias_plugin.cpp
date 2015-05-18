@@ -109,24 +109,20 @@ namespace bias
         return rtnStatus;
     }
 
-    // Protected
-    // ------------------------------------------------------------------------
-
-    bool BiasPlugin::pluginsEnabled_ = false;
-
-
     bool BiasPlugin::pluginsEnabled()
     {
-        return pluginsEnabled_;
+        return getCameraWindow() -> isPluginEnabled();
     }
 
 
     void BiasPlugin::setPluginsEnabled(bool value)
     {
-        pluginsEnabled_ = value;
+        getCameraWindow() -> setPluginEnabled(value);
     }
 
 
+    // Protected methods
+    // ------------------------------------------------------------------------
     void BiasPlugin::setRequireTimer(bool value)
     {
         requireTimer_ = true;

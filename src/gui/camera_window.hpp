@@ -107,7 +107,7 @@ namespace bias
             QDir getCurrentConfigFileDir();
             QDir getDefaultConfigFileDir();
 
-            RtnStatus setPluginsEnabled(bool enabled);
+            RtnStatus setPluginEnabled(bool enabled);
             RtnStatus setCurrentPlugin(QString pluginName);
             QString getCurrentPluginName(RtnStatus &rtnStatus);
             RtnStatus runPluginCmd(
@@ -123,6 +123,7 @@ namespace bias
             bool isConnected();
             bool isCapturing();
             bool isLoggingEnabled();
+            bool isPluginEnabled();
             double getTimeStamp();
             double getFramesPerSec();
             unsigned long getFrameCount();
@@ -219,7 +220,7 @@ namespace bias
             bool haveDefaultVideoFileDir_;
             bool haveDefaultConfigFileDir_;
             bool showCameraLockFailMsg_;
-            //bool pluginEnabled_;
+            bool pluginEnabled_;
             unsigned int cameraNumber_;
             unsigned int numberOfCameras_;
             unsigned int format7PercentSpeed_;

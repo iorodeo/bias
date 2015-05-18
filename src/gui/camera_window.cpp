@@ -336,7 +336,7 @@ namespace bias
 
         imageDispatcherPtr_ = new ImageDispatcher(
                 logging_, 
-                BiasPlugin::pluginsEnabled(),
+                isPluginEnabled(),
                 cameraNumber_,
                 newImageQueuePtr_,
                 logImageQueuePtr_,
@@ -465,7 +465,7 @@ namespace bias
 
         } // if (logging_)
 
-        if (BiasPlugin::pluginsEnabled())
+        if (isPluginEnabled())
         {
             QPointer<BiasPlugin> currentPluginPtr = getCurrentPlugin(); 
             if (!currentPluginPtr.isNull())
@@ -591,7 +591,7 @@ namespace bias
         pluginImageQueuePtr_ -> releaseLock();
 
         
-        if (BiasPlugin::pluginsEnabled())
+        if (isPluginEnabled())
         {
             QPointer<BiasPlugin> currentPluginPtr = getCurrentPlugin(); 
             if (!currentPluginPtr.isNull())
@@ -965,7 +965,7 @@ namespace bias
         configurationMap.insert("configuration", configFileMap);
 
         // Add plugin configuration
-        if (BiasPlugin::pluginsEnabled())
+        if (isPluginEnabled())
         {
             QVariantMap pluginMap;
             RtnStatus rtnStatus;
@@ -1143,7 +1143,7 @@ namespace bias
         QVariantMap pluginMap = configMap["plugin"].toMap();
         if (pluginMap.isEmpty())
         {
-            setPluginsEnabled(false);
+            setPluginEnabled(false);
         }
         else
         {
@@ -1426,7 +1426,7 @@ namespace bias
         return defaultConfigFileDir_;
     }
 
-    RtnStatus CameraWindow::setPluginsEnabled(bool enabled)
+    RtnStatus CameraWindow::setPluginEnabled(bool enabled)
     {
         RtnStatus rtnStatus;
         rtnStatus.success = true;
@@ -1436,7 +1436,7 @@ namespace bias
         {
             if (!pluginMap_.isEmpty())
             {
-                BiasPlugin::setPluginsEnabled(true);
+                pluginEnabled_ = true;
             }
             else
             {
@@ -1446,10 +1446,10 @@ namespace bias
         }
         else
         {
-            BiasPlugin::setPluginsEnabled(false);
+            pluginEnabled_ = false;
             setupImageLabels(false,false,true);
         }
-        actionPluginsEnabledPtr_ -> setChecked(BiasPlugin::pluginsEnabled());
+        actionPluginsEnabledPtr_ -> setChecked(isPluginEnabled());
         updateTimerMenu(); // if required/not required by plugin
         return rtnStatus;
     }
@@ -1654,6 +1654,11 @@ namespace bias
         return logging_;
     }
 
+    bool CameraWindow::isPluginEnabled()
+    {
+        return pluginEnabled_;
+    }
+
     // Protected methods
     // ----------------------------------------------------------------------------------
 
@@ -1798,7 +1803,7 @@ namespace bias
 
 
         // Update plugin preview
-        if ((BiasPlugin::pluginsEnabled()) && (tabWidgetPtr_ -> currentWidget() == pluginPreviewTabPtr_))
+        if ((isPluginEnabled()) && (tabWidgetPtr_ -> currentWidget() == pluginPreviewTabPtr_))
         {
             bool haveNewImage = false;
             cv::Mat pluginImageMat;
@@ -2364,11 +2369,11 @@ namespace bias
         // TODO - check that there is a plugin available to run
         if (actionPluginsEnabledPtr_ -> isChecked())
         {
-            setPluginsEnabled(true);
+            setPluginEnabled(true);
         }
         else
         {
-            setPluginsEnabled(false);
+            setPluginEnabled(false);
         }
 
     }
@@ -2537,7 +2542,7 @@ namespace bias
         //setCurrentPlugin(pluginMap_.firstKey());
         setCurrentPlugin("grabDetector");
         //setCurrentPlugin("stampede");
-        setPluginsEnabled(true);
+        setPluginEnabled(true);
 
         updateWindowTitle();
         updateCameraInfoMessage();
@@ -3937,7 +3942,7 @@ namespace bias
         {
             setMenuChildrenEnabled(menuTimerPtr_, true);
 
-            if (BiasPlugin::pluginsEnabled())
+            if (isPluginEnabled())
             {
                 QPointer<BiasPlugin> pluginPtr = getCurrentPlugin();
                 if (!pluginPtr.isNull())
@@ -5231,7 +5236,7 @@ namespace bias
             return rtnStatus;
         }
 
-        setPluginsEnabled(true);
+        setPluginEnabled(true);
 
         return rtnStatus;
     }

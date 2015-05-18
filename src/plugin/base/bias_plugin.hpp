@@ -27,8 +27,8 @@ namespace bias
             static const QString PLUGIN_DISPLAY_NAME;
 
             BiasPlugin(QWidget *parent=0);
-            static bool pluginsEnabled();
-            static void setPluginsEnabled(bool value);
+            bool pluginsEnabled();
+            void setPluginsEnabled(bool value);
 
             bool requireTimer();
             bool isActive();
@@ -51,9 +51,6 @@ namespace bias
             void setCaptureDurationRequest(unsigned long);
 
         protected:
-
-
-            static bool pluginsEnabled_;
 
             bool active_;
             bool requireTimer_;

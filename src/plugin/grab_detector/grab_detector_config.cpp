@@ -2,6 +2,7 @@
 #include "json.hpp"
 #include <iostream>
 #include <QMessageBox>
+#include <QtDebug>
 
 namespace bias
 {
@@ -202,8 +203,11 @@ namespace bias
         {
             if (configMap["color"].canConvert<QString>())
             {
+                QString colorStr = QString("#%1").arg(configMap["color"].toString());
+
                 QColor color;  
-                color.setNamedColor(configMap["color"].toString());
+                color.setNamedColor(colorStr);
+
                 if (color.isValid())
                 {
                     detectBoxColor = color;
@@ -307,7 +311,10 @@ namespace bias
         detectBoxMap.insert("yPos", detectBoxYPos);
         detectBoxMap.insert("width", detectBoxWidth);
         detectBoxMap.insert("height", detectBoxHeight);
-        detectBoxMap.insert("color", detectBoxColor.name());
+        QString colorStr = detectBoxColor.name();
+        colorStr = colorStr.replace("#", "");
+        detectBoxMap.insert("color", colorStr);
+        qDebug() << colorStr;
 
         // Create trigger map
         QVariantMap triggerMap;
