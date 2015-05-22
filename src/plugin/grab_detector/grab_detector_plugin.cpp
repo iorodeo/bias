@@ -560,7 +560,6 @@ namespace bias
         signalMin_ = 0.0;
         frameCount_ = 0;
 
-
         livePlotUpdateDt_ = DEFAULT_LIVEPLOT_UPDATE_DT;
         livePlotTimeWindow_ = DEFAULT_LIVEPLOT_TIME_WINDOW;
         livePlotSignalWindow_ = DEFAULT_LIVEPLOT_SIGNAL_WINDOW;
@@ -583,6 +582,7 @@ namespace bias
         refreshPortList();
 
         setFromConfig(config_);
+        setRequireTimer(false);
 
     }
 

@@ -70,7 +70,7 @@ namespace bias
         setPlugin(pluginPtr);
 
         // Plugin setup actions
-        std::cout << "plugin: setup" << std::endl;
+        //std::cout << "plugin: setup" << std::endl;
     }
 
 
@@ -152,7 +152,7 @@ namespace bias
         } // while (!done)
 
         // Plugin clean up actions
-        std::cout << "plugin: clean up" << std::endl;
+        //std::cout << "plugin: clean up" << std::endl;
 
     } // PlugingHandler::run()
 

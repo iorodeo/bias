@@ -84,6 +84,8 @@ namespace bias
 
     void printTriggerModeInfo_fc2(fc2TriggerModeInfo &trigModeInfo);
 
+    void printConfiguration_fc2(fc2Config &config);
+
 
     // FlyCapture2 enumeration to string converstions
     // ------------------------------------------------------------------------
@@ -101,6 +103,15 @@ namespace bias
     std::string getModeString_fc2(fc2Mode mode);
 
     std::string getPropertyTypeString_fc2(fc2PropertyType propType);
+
+    std::string getGrabTimeoutString_fc2(fc2GrabTimeout grabTimeout);
+
+    std::string getGrabModeString_fc2(fc2GrabMode grabMode);
+
+    std::string getBusSpeedString_fc2(fc2BusSpeed busSpeed);
+
+    std::string getBandwidthAllocationString_fc2(fc2BandwidthAllocation bandwidthAllocation);
+
 
 
 } // namespace BIAS

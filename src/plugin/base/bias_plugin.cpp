@@ -15,6 +15,7 @@ namespace bias
     BiasPlugin::BiasPlugin(QWidget *parent) : QDialog(parent) 
     { 
         active_ = false;
+        setRequireTimer(false);
     }
 
     void BiasPlugin::reset()
@@ -125,7 +126,7 @@ namespace bias
     // ------------------------------------------------------------------------
     void BiasPlugin::setRequireTimer(bool value)
     {
-        requireTimer_ = true;
+        requireTimer_ = value;
     }
 
 }

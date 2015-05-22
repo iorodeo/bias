@@ -845,10 +845,36 @@ namespace bias
         std::cout << " sourceMask:               " << std::bitset<32>(trigModeInfo.sourceMask) << std::endl;
         std::cout << " softwareTriggerSupported: " << bool(trigModeInfo.softwareTriggerSupported) << std::endl;
         std::cout << " modeMask:                 " << std::bitset<32>(trigModeInfo.modeMask) << std::endl;
-        std::cout << " reserved   " << std::endl;
+        std::cout << " reserved  " << std::endl;
         for (int i=0; i<8; i++)
         {
             std::cout << "   [" << i << "] = " << trigModeInfo.reserved[i] << std::endl; 
+        }
+        std::cout << std::noboolalpha << std::endl;
+    }
+
+
+    void printConfiguration_fc2(fc2Config &config)
+    {
+        std::cout << std::endl;
+        std::cout << "---------------------------" << std::endl;
+        std::cout << " FlyCapture2 Configuration " << std::endl;
+        std::cout << "---------------------------" << std::endl;
+        std::cout << std::endl << std::boolalpha;
+        std::cout << " numBuffers:               " << config.numBuffers << std::endl;
+        std::cout << " numImageNotifications:    " << config.numImageNotifications << std::endl;
+        std::cout << " minNumImageNotifications: " << config.minNumImageNotifications << std::endl;
+        std::cout << " grabTimeout:              " << config.grabTimeout << std::endl;
+        std::cout << " grabMode:                 " << getGrabModeString_fc2(config.grabMode) << std::endl;
+        std::cout << " isochBusSpeed:            " << getBusSpeedString_fc2(config.isochBusSpeed) << std::endl;
+        std::cout << " asyncBusSpeed:            " << getBusSpeedString_fc2(config.asyncBusSpeed) << std::endl;
+        std::cout << " bandwidthAllocation:      " << getBandwidthAllocationString_fc2(config.bandwidthAllocation) << std::endl;
+        std::cout << " registerTimeoutRetries:   " << config.registerTimeoutRetries << std::endl;
+        std::cout << " registerTimeout:          " << config.registerTimeout << std::endl;
+        std::cout << " reserved                  " << std::endl;
+        for (int i=0; i<8; i++)
+        {
+            std::cout << "   [" << i << "] = " << config.reserved[i] << std::endl; 
         }
         std::cout << std::noboolalpha << std::endl;
     }
@@ -1118,6 +1144,100 @@ namespace bias
             return std::string("unknown fc2 property type");
         }
     }
+
+
+    static std::map<fc2GrabTimeout, std::string> grabTimeoutToStringMap_fc2
+    {
+        {FC2_TIMEOUT_NONE,        std::string("FC2_TIMEOUT_NONE")},
+        {FC2_TIMEOUT_INFINITE,    std::string("FC2_TIMEOUT_INFINITE")},
+        {FC2_TIMEOUT_UNSPECIFIED, std::string("FC2_TIMEOUT_UNSPECIFIED")} 
+    };
+
+    std::string getGrabTimeoutString_fc2(fc2GrabTimeout grabTimeout)
+    {
+        if (grabTimeoutToStringMap_fc2.count(grabTimeout) != 0)
+        {
+            grabTimeoutToStringMap_fc2[grabTimeout];
+        }
+        else
+        {
+            return std::string("unknown fc2 grabTimeout");
+        }
+    }
+
+    static std::map<fc2GrabMode, std::string> grabModeToStringMap_fc2 
+    { 
+        {FC2_DROP_FRAMES,            std::string("FC2_DROP_FRAMES")}, 
+        {FC2_BUFFER_FRAMES,          std::string("FC2_BUFFER_FRAMES")}, 
+        {FC2_UNSPECIFIED_GRAB_MODE,  std::string("FC2_UNSPECIFIED_GRAB_MODE")}, 
+    };
+
+    std::string getGrabModeString_fc2(fc2GrabMode grabMode)
+    {
+        if (grabModeToStringMap_fc2.count(grabMode) != 0)
+        {
+            return grabModeToStringMap_fc2[grabMode];
+        }
+        else
+        {
+            return std::string("unknown fc2 grabMode");
+        }
+    }
+
+
+    static std::map<fc2BusSpeed, std::string> busSpeedToStringMap_fc2
+    {
+
+        {FC2_BUSSPEED_S100,           std::string("FC2_BUSSPEED_S100")}, 
+        {FC2_BUSSPEED_S200,           std::string("FC2_BUSSPEED_S200")}, 
+        {FC2_BUSSPEED_S400,           std::string("FC2_BUSSPEED_S400")}, 
+        {FC2_BUSSPEED_S480,           std::string("FC2_BUSSPEED_S480")}, 
+        {FC2_BUSSPEED_S800,           std::string("FC2_BUSSPEED_S800")}, 
+        {FC2_BUSSPEED_S1600,          std::string("FC2_BUSSPEED_S1600")}, 
+        {FC2_BUSSPEED_S3200,          std::string("FC2_BUSSPEED_S3200")}, 
+        {FC2_BUSSPEED_S5000,          std::string("FC2_BUSSPEED_S5000")}, 
+        {FC2_BUSSPEED_10BASE_T,       std::string("FC2_BUSSPEED_10BASE_T")}, 
+        {FC2_BUSSPEED_100BASE_T,      std::string("FC2_BUSSPEED_100BASE_T")}, 
+        {FC2_BUSSPEED_1000BASE_T,     std::string("FC2_BUSSPEED_1000BASE_T")}, 
+        {FC2_BUSSPEED_10000BASE_T,    std::string("FC2_BUSSPEED_10000BASE_T")}, 
+        {FC2_BUSSPEED_S_FASTEST,      std::string("FC2_BUSSPEED_S_FASTEST")}, 
+        {FC2_BUSSPEED_ANY,            std::string("FC2_BUSSPEED_ANY")}, 
+        {FC2_BUSSPEED_SPEED_UNKNOWN,  std::string("FC2_BUSSPEED_SPEED_UNKNOWN")} 
+    };
+
+    std::string getBusSpeedString_fc2(fc2BusSpeed busSpeed)
+    {
+        if (busSpeedToStringMap_fc2.count(busSpeed) !=0)
+        {
+            return busSpeedToStringMap_fc2[busSpeed];
+        }
+        else
+        {
+            return std::string("unknown fc2 busSpeed");
+        }
+    }
+
+
+    static std::map<fc2BandwidthAllocation, std::string> bandwidthAllocationToStringMap_fc2
+    {
+        {FC2_BANDWIDTH_ALLOCATION_OFF,         std::string("FC2_BANDWIDTH_ALLOCATION_OFF")}, 
+        {FC2_BANDWIDTH_ALLOCATION_ON,          std::string("FC2_BANDWIDTH_ALLOCATION_ON")}, 
+        {FC2_BANDWIDTH_ALLOCATION_UNSUPPORTED, std::string("FC2_BANDWIDTH_ALLOCATION_UNSUPPORTED")}, 
+        {FC2_BANDWIDTH_ALLOCATION_UNSPECIFIED, std::string("FC2_BANDWIDTH_ALLOCATION_UNSPECIFIED")}, 
+    };
+
+    std::string getBandwidthAllocationString_fc2(fc2BandwidthAllocation bandwidthAllocation) 
+    {
+        if (bandwidthAllocationToStringMap_fc2.count(bandwidthAllocation)!=0)
+        {
+            return bandwidthAllocationToStringMap_fc2[bandwidthAllocation];
+        }
+        else
+        {
+            return std::string("unknown fc2 bandwidth allocation");
+        }
+    }
+
 
 } // namespece bias
 

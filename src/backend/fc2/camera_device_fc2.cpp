@@ -101,6 +101,20 @@ namespace bias {
                 ssError << ": unabled to got FlyCapture2 camera info";
                 throw RuntimeError(ERROR_FC2_GET_CAMERA_INFO, ssError.str());
             }
+
+            // DEVEL
+            // -----------------------------------------------
+            fc2Config config = getConfiguration_fc2();
+            printConfiguration_fc2(config);
+
+            //config.grabTimeout = FC2_TIMEOUT_NONE;
+            //config.grabMode =  FC2_BUFFER_FRAMES;
+
+            //setConfiguration_fc2(config);
+            //config = getConfiguration_fc2();
+            //printConfiguration_fc2(config);
+            // -----------------------------------------------
+
         }
     }
 
@@ -1221,6 +1235,55 @@ namespace bias {
             throw RuntimeError(ERROR_FC2_SET_TRIGGER_MODE, ssError.str());
         }
     }
+
+
+    fc2Config CameraDevice_fc2::getConfiguration_fc2()
+    {
+        fc2Config config;
+        if (connected_)
+        {
+            fc2Error error = fc2GetConfiguration(context_,&config);
+            if (error != FC2_ERROR_OK)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to get FlyCapture2 config - error";
+                throw RuntimeError(ERROR_FC2_GET_CONFIG, ssError.str());
+            }
+        }
+        else
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get FlyCapture2 config - not connected";
+            throw RuntimeError(ERROR_FC2_GET_CONFIG, ssError.str());
+        }
+        return config;
+    }
+
+
+    void CameraDevice_fc2::setConfiguration_fc2(fc2Config &config)
+    {
+        if (connected_)
+        {
+            fc2Error error = fc2SetConfiguration(context_, &config);
+            if (error != FC2_ERROR_OK)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to set FlyCapture2 config - error";
+                throw RuntimeError(ERROR_FC2_GET_CONFIG, ssError.str());
+            }
+        }
+        else
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to set FlyCapture2 config - not connected";
+            throw RuntimeError(ERROR_FC2_SET_CONFIG, ssError.str());
+        }
+    }
+
 
 
     // Temporary methods

@@ -78,7 +78,7 @@ namespace bias {
 
         private:
 
-            fc2Context context_;
+            fc2Context context_ {nullptr};
             fc2CameraInfo cameraInfo_;
             fc2Image rawImage_;
             fc2Image convertedImage_;
@@ -114,20 +114,22 @@ namespace bias {
             fc2Format7Configuration getFormat7Configuration();
             fc2TriggerMode getTriggerMode_fc2();
             fc2TriggerModeInfo getTriggerModeInfo_fc2();
+            fc2Config getConfiguration_fc2();
 
             // fc2 set methods
             // ---------------
             void setProperty(fc2Property prop);
             void setTriggerMode(fc2TriggerMode trigMode);
+            void setConfiguration_fc2(fc2Config &config);
 
             // Temporary 
             // --------------------------------------------
             void setVideoModeToFormat7(ImageMode mode);
             void setVideoModeToFormat7(fc2Mode mode);
-
             void printFormat7Configuration();
 
     };
+
 
     typedef std::shared_ptr<CameraDevice_fc2> CameraDevicePtr_fc2;
 
