@@ -93,7 +93,7 @@ namespace bias
             void updateWidgetsEnabled();
             void updateConnectionStatusLabels();
             void updateConnectPushButtonText();
-            void updateLogFileName();
+            void updateLogFileNameDisplay();
             void resetEventStates();
 
             void updateConfigEditText();

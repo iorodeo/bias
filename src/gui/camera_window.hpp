@@ -116,7 +116,7 @@ namespace bias
                     );
 
             QString getCameraGuidString(RtnStatus &rtnStatus);
-            QString getVideoFileFullPath();
+            QString getVideoFileFullPath(QString autoNamingString="");
             QString getVideoFileName();
             QDir getVideoFileDir();
 
@@ -379,8 +379,8 @@ namespace bias
             void setCaptureTimeLabel(double timeStamp);
             void setServerPortText();
 
-            QString getVideoFileFullPathWithAutoNaming();
             QString getConfigFileFullPath();
+            QString getAutoNamingString();
 
             RtnStatus setCameraFromMap(QVariantMap cameraMap, bool showErrorDlg);
             RtnStatus setLoggingFromMap(QVariantMap loggingMap, bool showErrorDlg);

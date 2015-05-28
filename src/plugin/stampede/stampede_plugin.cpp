@@ -428,7 +428,7 @@ namespace bias
         updateWidgetsEnabled();
         updateConnectionStatusLabels();
         updateConnectPushButtonText();
-        updateLogFileName();
+        updateLogFileNameDisplay();
     }
 
     void StampedePlugin::connectWidgets()
@@ -606,7 +606,7 @@ namespace bias
     }
 
 
-    void StampedePlugin::updateLogFileName()
+    void StampedePlugin::updateLogFileNameDisplay()
     {
         QPointer<CameraWindow> cameraWindowPtr = getCameraWindow();
         logFileDir_ = cameraWindowPtr -> getVideoFileDir();
@@ -887,7 +887,7 @@ namespace bias
 
     void StampedePlugin::onVideoFileChanged()
     {
-        updateLogFileName();
+        updateLogFileNameDisplay();
     }
 
 

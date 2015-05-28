@@ -380,11 +380,13 @@ namespace bias
         threadPoolPtr_ -> start(imageGrabberPtr_);
         threadPoolPtr_ -> start(imageDispatcherPtr_);
 
+        QString autoNamingString = getAutoNamingString();
+
         if (logging_)
         {
             // Create video writer based on video file format type
             std::shared_ptr<VideoWriter> videoWriterPtr; 
-            QString videoFileFullPath = getVideoFileFullPathWithAutoNaming();
+            QString videoFileFullPath = getVideoFileFullPath(autoNamingString);
 
             // DEBUG
             // -------------------------------------------------------------------------------
@@ -1581,8 +1583,10 @@ namespace bias
     }
 
 
-    QString CameraWindow::getVideoFileFullPath()
+    QString CameraWindow::getVideoFileFullPath(QString autoNamingString)
     {
+        QString videoFileFullPath;
+
         QString fileExtension;
         if (videoFileFormat_ != VIDEOFILE_FORMAT_BMP)
         {
@@ -1594,12 +1598,14 @@ namespace bias
 
         }
         QString fileName = currentVideoFileName_;
+        fileName += autoNamingString;
+
         if (!fileExtension.isEmpty())
         {
             fileName +=  "." + fileExtension;
         }
         QFileInfo videoFileInfo(currentVideoFileDir_, fileName);
-        QString videoFileFullPath = videoFileInfo.absoluteFilePath();
+        videoFileFullPath = videoFileInfo.absoluteFilePath();
         return videoFileFullPath;
     }
 
@@ -4091,53 +4097,6 @@ namespace bias
     }
 
 
-    QString CameraWindow::getVideoFileFullPathWithAutoNaming()
-    {
-        QString fileName = currentVideoFileName_;
-
-        // Add camera identifier - guid or camera number
-        //if ((autoNamingOptions_.includeCameraIdentifier) || (numberOfCameras_  > 1))
-        if (autoNamingOptions_.includeCameraIdentifier)
-        {
-            if (autoNamingOptions_.cameraIdentifier == AutoNamingOptions::GUID_IDENTIFIER)
-            {
-                Guid cameraGuid = cameraPtr_ -> getGuid(); // don't need lock for this
-                fileName += QString("_guid_") + QString::fromStdString(cameraGuid.toString());
-            }
-            else
-            {
-                fileName += QString("_cam_%1").arg(cameraNumber_);
-            }
-        }
-
-        // Add time and date
-        if (autoNamingOptions_.includeTimeAndDate)
-        {
-            QDateTime dateTime= QDateTime::currentDateTime();
-            QString dateTimeString = dateTime.toString(autoNamingOptions_.timeAndDateFormat);
-            fileName += QString("_") + dateTimeString;
-        }
-
-        // Add file extension
-        QString fileExtension;  
-        if (videoFileFormat_ != VIDEOFILE_FORMAT_BMP)
-        {
-            fileExtension = VIDEOFILE_EXTENSION_MAP[videoFileFormat_];
-        }
-        else
-        {
-            fileExtension = QString("");
-        }
-        if (!fileExtension.isEmpty())
-        {
-            fileName +=  QString(".") + fileExtension;
-        }
-        QFileInfo videoFileInfo(currentVideoFileDir_, fileName);
-        QString videoFileFullPath = videoFileInfo.absoluteFilePath();
-        return videoFileFullPath;
-    }
-
-
     QString CameraWindow::getConfigFileFullPath()
     {
         QString fileName = currentConfigFileName_ + "." + CONFIG_FILE_EXTENSION;
@@ -4149,7 +4108,33 @@ namespace bias
         QString configFileFullPath = configFileInfo.absoluteFilePath();
         return configFileFullPath;
     }
-    
+
+    QString CameraWindow::getAutoNamingString()
+    {
+        QString autoNamingString = QString(""); 
+        // Add camera identifier - guid or camera number
+        if (autoNamingOptions_.includeCameraIdentifier)
+        {
+            if (autoNamingOptions_.cameraIdentifier == AutoNamingOptions::GUID_IDENTIFIER)
+            {
+                Guid cameraGuid = cameraPtr_ -> getGuid(); // don't need lock for this
+                autoNamingString += QString("_guid_") + QString::fromStdString(cameraGuid.toString());
+            }
+            else
+            {
+                autoNamingString += QString("_cam_%1").arg(cameraNumber_);
+            }
+        }
+
+        // Add time and date
+        if (autoNamingOptions_.includeTimeAndDate)
+        {
+            QDateTime dateTime= QDateTime::currentDateTime();
+            QString dateTimeString = dateTime.toString(autoNamingOptions_.timeAndDateFormat);
+            autoNamingString += QString("_") + dateTimeString;
+        }
+        return autoNamingString;
+    }
 
     RtnStatus CameraWindow::setCameraFromMap(QVariantMap cameraMap, bool showErrorDlg)
     {
