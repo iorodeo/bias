@@ -1,5 +1,6 @@
 #include "stampede_plugin_config.hpp"
 #include "json.hpp"
+#include <QtDebug>
 
 namespace bias
 {
@@ -256,11 +257,13 @@ namespace bias
     }
 
 
-    RtnStatus StampedePluginConfig::fromMap(QVariantMap configMap) 
+    RtnStatus StampedePluginConfig::fromMap(QVariantMap configMap, bool resetOnError) 
     {
         RtnStatus rtnStatus;
         rtnStatus.success = true;
         rtnStatus.message = QString("");
+
+        QVariantMap configMapOrig = toMap();
 
         // Get druation
         // --------------------------------------------------------------------
@@ -323,6 +326,19 @@ namespace bias
             rtnStatus.appendMessage("display field missing");
         }
 
+        // Check for overlapping events
+        RtnStatus rtnCheckEvents = checkEvents();
+        if (!rtnCheckEvents.success)
+        {
+            rtnStatus.success = false;
+            rtnStatus.appendMessage(rtnCheckEvents.message);
+        }
+
+        // Rest to original configuration on error
+        if (!rtnStatus.success)
+        {
+            fromMap(configMapOrig,false); // No reset on error
+        }
         return rtnStatus;
     }
 
@@ -511,6 +527,8 @@ namespace bias
                 // If conversions are success set new displayEventList
                 if (rtnStatus.success)
                 {
+
+                    QVariantMap configCurrent = toMap();
                     displayEventList_ = displayEventListTmp;
                 }
             }
@@ -601,6 +619,7 @@ namespace bias
             {
                 rtnStatus.success = false;
                 rtnStatus.appendMessage(QString("overlapping vibration events"));
+                break;
             }
         }
         return rtnStatus;
@@ -628,10 +647,11 @@ namespace bias
 
         for (auto i=0; i<timeList.size()-1; i++)
         {
-            if (timeList[i] > timeList[i-1])
+            if (timeList[i] > timeList[i+1])
             {
                 rtnStatus.success = false;
                 rtnStatus.appendMessage(QString("overlapping display events"));
+                break;
             }
         }
         return rtnStatus;

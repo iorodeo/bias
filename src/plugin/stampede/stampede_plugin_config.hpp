@@ -43,7 +43,7 @@ namespace bias
             QVariantMap toMap();
             QByteArray toJson();
 
-            RtnStatus fromMap(QVariantMap map);
+            RtnStatus fromMap(QVariantMap map, bool resetOnError=true);
             RtnStatus fromJson(QByteArray jsonArray);
 
             RtnStatus setVibrationFromMap(QVariantMap map);

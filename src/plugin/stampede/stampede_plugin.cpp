@@ -101,9 +101,6 @@ namespace bias
     }
 
 
-
-
-
     cv::Mat StampedePlugin::getCurrentImage()
     {
         acquireLock();
@@ -122,6 +119,12 @@ namespace bias
     {
         return PLUGIN_DISPLAY_NAME;
     }
+
+    QVariantMap StampedePlugin::getConfigAsMap()   
+    {
+        QVariantMap configMap = config_.toMap();
+        return configMap;
+    } 
 
     RtnStatus StampedePlugin::runCmdFromMap(QVariantMap cmdMap,bool showErrorDlg)
     {
@@ -171,7 +174,9 @@ namespace bias
 
         if (!rtnFromJson.success)
         {
-            QString errMsgText = QString("Unable to set configaration from file %1").arg(fileName);
+            QString errMsgText = QString("Unable to set configaration from file %1: ").arg(fileName);
+            errMsgText += rtnFromJson.message;
+
             if (showErrorDlg)
             {
                 QMessageBox::critical(this, errMsgTitle, errMsgText);
