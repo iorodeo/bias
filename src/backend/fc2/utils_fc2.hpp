@@ -105,6 +105,8 @@ namespace bias
     std::string getPropertyTypeString_fc2(fc2PropertyType propType);
 
     std::string getGrabTimeoutString_fc2(fc2GrabTimeout grabTimeout);
+    
+    std::string getGrabTimeoutString_fc2(int grabTimeout);
 
     std::string getGrabModeString_fc2(fc2GrabMode grabMode);
 

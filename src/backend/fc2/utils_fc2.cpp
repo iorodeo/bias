@@ -864,7 +864,7 @@ namespace bias
         std::cout << " numBuffers:               " << config.numBuffers << std::endl;
         std::cout << " numImageNotifications:    " << config.numImageNotifications << std::endl;
         std::cout << " minNumImageNotifications: " << config.minNumImageNotifications << std::endl;
-        std::cout << " grabTimeout:              " << config.grabTimeout << std::endl;
+        std::cout << " grabTimeout:              " << getGrabTimeoutString_fc2(config.grabTimeout) << std::endl;
         std::cout << " grabMode:                 " << getGrabModeString_fc2(config.grabMode) << std::endl;
         std::cout << " isochBusSpeed:            " << getBusSpeedString_fc2(config.isochBusSpeed) << std::endl;
         std::cout << " asyncBusSpeed:            " << getBusSpeedString_fc2(config.asyncBusSpeed) << std::endl;
@@ -1157,12 +1157,18 @@ namespace bias
     {
         if (grabTimeoutToStringMap_fc2.count(grabTimeout) != 0)
         {
-            grabTimeoutToStringMap_fc2[grabTimeout];
+            return grabTimeoutToStringMap_fc2[grabTimeout];
         }
         else
         {
             return std::string("unknown fc2 grabTimeout");
         }
+    }
+
+    std::string getGrabTimeoutString_fc2(int grabTimeout)
+    {
+
+        return getGrabTimeoutString_fc2(fc2GrabTimeout(grabTimeout));
     }
 
     static std::map<fc2GrabMode, std::string> grabModeToStringMap_fc2 

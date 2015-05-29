@@ -314,7 +314,6 @@ namespace bias
         QString colorStr = detectBoxColor.name();
         colorStr = colorStr.replace("#", "");
         detectBoxMap.insert("color", colorStr);
-        qDebug() << colorStr;
 
         // Create trigger map
         QVariantMap triggerMap;

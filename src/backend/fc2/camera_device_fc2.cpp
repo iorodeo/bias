@@ -102,17 +102,19 @@ namespace bias {
                 throw RuntimeError(ERROR_FC2_GET_CAMERA_INFO, ssError.str());
             }
 
+
             // DEVEL
             // -----------------------------------------------
+            //printInfo();
             fc2Config config = getConfiguration_fc2();
             printConfiguration_fc2(config);
 
-            //config.grabTimeout = FC2_TIMEOUT_NONE;
-            //config.grabMode =  FC2_BUFFER_FRAMES;
+            config.grabTimeout = FC2_TIMEOUT_NONE;
+            config.grabMode =  FC2_BUFFER_FRAMES;
 
-            //setConfiguration_fc2(config);
-            //config = getConfiguration_fc2();
-            //printConfiguration_fc2(config);
+            setConfiguration_fc2(config);
+            config = getConfiguration_fc2();
+            printConfiguration_fc2(config);
             // -----------------------------------------------
 
         }
@@ -202,11 +204,16 @@ namespace bias {
     {
         bool resize = false;
 
-        grabImageCommon();
+        std::string errMsg;
+        bool ok = grabImageCommon(errMsg);
+        if (!ok)
+        {
+            return;
+        }
 
         // Use either raw or converted image
         fc2Image *imagePtr_fc2;
-        if (useConverted)
+        if (useConverted_)
         {
             imagePtr_fc2 = &convertedImage_;
         }
@@ -468,20 +475,23 @@ namespace bias {
             setTriggerInternal();
         }
 
-        grabImageCommon();
-        imgInfo.rows = rawImage_.rows;
-        imgInfo.cols = rawImage_.cols;
-        imgInfo.stride = rawImage_.stride;
-        imgInfo.dataSize = rawImage_.dataSize;
-        pixFormat = convertPixelFormat_from_fc2(rawImage_.format);
-        imgInfo.pixelFormat = pixFormat; 
-
-        if (savedTrigType == TRIGGER_EXTERNAL) 
+        std::string errMsg;
+        bool ok = grabImageCommon(errMsg);
+        if (ok)
         {
-            // Return to external trigger
-            setTriggerExternal();
-        }
+            imgInfo.rows = rawImage_.rows;
+            imgInfo.cols = rawImage_.cols;
+            imgInfo.stride = rawImage_.stride;
+            imgInfo.dataSize = rawImage_.dataSize;
+            pixFormat = convertPixelFormat_from_fc2(rawImage_.format);
+            imgInfo.pixelFormat = pixFormat; 
 
+            if (savedTrigType == TRIGGER_EXTERNAL) 
+            {
+                // Return to external trigger
+                setTriggerExternal();
+            }
+        }
         return imgInfo;
     }
 
@@ -940,7 +950,7 @@ namespace bias {
     }
 
 
-    void CameraDevice_fc2::grabImageCommon()
+    bool CameraDevice_fc2::grabImageCommon(std::string &errMsg)
     {
         fc2Error error;
 
@@ -949,7 +959,9 @@ namespace bias {
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
             ssError << ": unable to grab Image - not capturing";
-            throw RuntimeError(ERROR_FC2_GRAB_IMAGE, ssError.str());
+            //throw RuntimeError(ERROR_FC2_GRAB_IMAGE, ssError.str());
+            errMsg = ssError.str();
+            return false;
         }
 
         // Retrieve image from buffer
@@ -959,7 +971,9 @@ namespace bias {
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
             ssError << ": unable to retrieve image from buffer";
-            throw RuntimeError(ERROR_FC2_RETRIEVE_BUFFER, ssError.str());
+            //throw RuntimeError(ERROR_FC2_RETRIEVE_BUFFER, ssError.str());
+            errMsg = ssError.str();
+            return false;
         }
 
         updateTimeStamp();
@@ -970,7 +984,7 @@ namespace bias {
 
         if (rawImage_.format != convertedFormat)
         {
-            useConverted = true;
+            useConverted_ = true;
             error = fc2ConvertImageTo(
                     convertedFormat,
                     &rawImage_, 
@@ -981,13 +995,16 @@ namespace bias {
                 std::stringstream ssError;
                 ssError << __PRETTY_FUNCTION__;
                 ssError << ": unable to convert image";
-                throw RuntimeError(ERROR_FC2_CONVERT_IMAGE, ssError.str());
+                //throw RuntimeError(ERROR_FC2_CONVERT_IMAGE, ssError.str());
+                errMsg = ssError.str();
+                return false;
             }
         }
         else
         {
-            useConverted = false;
+            useConverted_ = false;
         }
+        return true;
     }
 
 

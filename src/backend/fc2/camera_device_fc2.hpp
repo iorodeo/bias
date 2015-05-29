@@ -82,7 +82,7 @@ namespace bias {
             fc2CameraInfo cameraInfo_;
             fc2Image rawImage_;
             fc2Image convertedImage_;
-            bool useConverted;
+            bool useConverted_;
 
             TimeStamp timeStamp_;
             unsigned int cycleSecondsLast_;   // Used with embedded timestamp only
@@ -95,7 +95,8 @@ namespace bias {
             void initialize();
             void createRawImage();
             void destroyRawImage();
-            void grabImageCommon();
+            //void grabImageCommon();
+            bool grabImageCommon(std::string &errMsg);
 
             void createConvertedImage();
             void destroyConvertedImage();

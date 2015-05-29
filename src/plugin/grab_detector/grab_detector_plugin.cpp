@@ -35,13 +35,14 @@ namespace bias
     {
         // NOTE: called in separate thread.
         
-        qDebug() << "frameList.size() = " << frameList.size();
 
         int medianFilterSize = getMedianFilter();
         int threshold = getThreshold();
         bool found = false;
         double signalMin; 
         double signalMax;
+
+        int frameListSize = frameList.size();
 
         StampedImage latestFrame = frameList.back();
         frameList.clear();
@@ -78,7 +79,8 @@ namespace bias
             }
             releaseLock();
 
-            //qDebug() << signalMax << threshold << found;
+            //qDebug() << "cnt: " << frameCount_ << ", listSize: " << frameListSize;
+
         }
     }
 

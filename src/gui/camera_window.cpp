@@ -1013,6 +1013,7 @@ namespace bias
         
         QVariantMap oldConfigMap = getConfigurationMap(rtnStatus);
         rtnStatus = setConfigurationFromMap(configMap,showErrorDlg); 
+
         if (!rtnStatus.success)
         {
             QString origErrMsg = rtnStatus.message;
@@ -1065,16 +1066,16 @@ namespace bias
 
         // Set camera properties, videomode, etc.
         // --------------------------------------
-        //QVariantMap cameraMap = configMap["camera"].toMap();
-        //if (cameraMap.isEmpty())
-        //{
-        //    cameraMap = oldConfigMap["camera"].toMap();
-        //}
-        //rtnStatus = setCameraFromMap(cameraMap,showErrorDlg);
-        //if (!rtnStatus.success)
-        //{
-        //    return rtnStatus;
-        //}
+        QVariantMap cameraMap = configMap["camera"].toMap();
+        if (cameraMap.isEmpty())
+        {
+            cameraMap = oldConfigMap["camera"].toMap();
+        }
+        rtnStatus = setCameraFromMap(cameraMap,showErrorDlg);
+        if (!rtnStatus.success)
+        {
+            return rtnStatus;
+        }
 
         // Set logging configuration
         // --------------------------
@@ -2546,8 +2547,8 @@ namespace bias
         tabWidgetPtr_ -> setCurrentWidget(previewTabPtr_);
 
         //setCurrentPlugin(pluginMap_.firstKey());
-        //setCurrentPlugin("grabDetector");
-        setCurrentPlugin("stampede");
+        setCurrentPlugin("grabDetector");
+        //setCurrentPlugin("stampede");
         setPluginEnabled(true);
 
         updateWindowTitle();
