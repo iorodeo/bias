@@ -381,17 +381,14 @@ namespace bias
         threadPoolPtr_ -> start(imageDispatcherPtr_);
 
         QString autoNamingString = getAutoNamingString();
+        //qDebug() << "autoNameingSring: " << autoNamingString;
 
         if (logging_)
         {
             // Create video writer based on video file format type
-            std::shared_ptr<VideoWriter> videoWriterPtr; 
             QString videoFileFullPath = getVideoFileFullPath(autoNamingString);
-
-            // DEBUG
-            // -------------------------------------------------------------------------------
-            //std::cout << "videoFileFullPath: " << videoFileFullPath.toStdString() << std::endl;
-            // --------------------------------------------------------------------------------
+            //qDebug() << "videoFileFullPath: " << videoFileFullPath;
+            std::shared_ptr<VideoWriter> videoWriterPtr; 
 
             switch (videoFileFormat_)
             {
@@ -2547,8 +2544,8 @@ namespace bias
         tabWidgetPtr_ -> setCurrentWidget(previewTabPtr_);
 
         //setCurrentPlugin(pluginMap_.firstKey());
-        setCurrentPlugin("grabDetector");
-        //setCurrentPlugin("stampede");
+        //setCurrentPlugin("grabDetector");
+        setCurrentPlugin("stampede");
         setPluginEnabled(true);
 
         updateWindowTitle();
