@@ -38,6 +38,8 @@ namespace bias
             virtual void stop();
             virtual void setActive(bool value);
             virtual void processFrames(QList<StampedImage> frameList);
+            virtual void setFileAutoNamingString(QString autoNamingString);
+            virtual void setFileVersionNumber(unsigned verNum);
             virtual cv::Mat getCurrentImage();
             virtual QString getName();
             virtual QString getDisplayName();
@@ -58,6 +60,9 @@ namespace bias
 
             double timeStamp_;
             unsigned long frameCount_;
+
+            QString fileAutoNamingString_;
+            unsigned int fileVersionNumber_;
 
             void setRequireTimer(bool value);
 

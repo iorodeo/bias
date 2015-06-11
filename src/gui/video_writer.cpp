@@ -1,8 +1,8 @@
 #include "video_writer.hpp"
 #include "stamped_image.hpp"
 #include <iostream>
-#include <QFileInfo>
 #include <QDir>
+#include <QtDebug>
 
 namespace bias
 {
@@ -83,32 +83,50 @@ namespace bias
 
     void VideoWriter::finish() {};
 
-    QString VideoWriter::getUniqueFileName()
+    unsigned int VideoWriter::getNextVersionNumber()
     {
-        QFileInfo fileInfo(fileName_);
-        QString incrFileName = fileName_;
+        unsigned int nextVerNum = 0;
+
         if (addVersionNumber_)
         {
-            QDir filePath = QDir(fileInfo.absolutePath());
-            QString baseName = fileInfo.baseName();
-            QString ext = fileInfo.suffix();
-
             bool done = false;
-            unsigned int cnt = 1;
-
-            while(!done)
+            nextVerNum  = 1;
+            while (!done)
             {
-                QString ver = QString("_v%1").arg(cnt,3,10,QChar('0'));
-                fileInfo = QFileInfo(filePath, baseName + ver + "." + ext);
+                QFileInfo fileInfo = getFileInfo(nextVerNum);
                 if (!fileInfo.exists())
                 {
-                    done = true;
+                    done =  true;
                 }
-                cnt++;
+                else
+                {
+                    nextVerNum++;
+                }
             }
         }
-        incrFileName = fileInfo.absoluteFilePath();
-        return incrFileName;
+        return nextVerNum;
+    }
+
+    QString VideoWriter::getUniqueFileName()
+    {
+        unsigned int verNum = getNextVersionNumber();
+        QFileInfo fileInfo = getFileInfo(verNum);
+        return fileInfo.absoluteFilePath();
+    }
+
+    QFileInfo VideoWriter::getFileInfo(unsigned int verNum)
+    {
+        QFileInfo fileInfo(fileName_);
+        QDir filePath = QDir(fileInfo.absolutePath());
+        QString baseName = fileInfo.baseName();
+        QString ext = fileInfo.suffix();
+
+        if (addVersionNumber_ && (verNum > 0))
+        {
+            QString verStr = QString("_v%1").arg(verNum,3,10,QChar('0'));
+            fileInfo = QFileInfo(filePath, baseName + verStr + "." + ext);
+        }
+        return fileInfo;
     }
 
 

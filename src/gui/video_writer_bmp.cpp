@@ -5,6 +5,7 @@
 #include <QFileInfo>
 #include <stdexcept>
 #include <opencv2/highgui/highgui.hpp>
+#include <QtDebug>
 
 namespace bias
 {
@@ -33,6 +34,15 @@ namespace bias
     }
 
     VideoWriter_bmp::~VideoWriter_bmp() {}
+
+
+    void VideoWriter_bmp::setFileName(QString fileName)
+    {
+        fileName_ = fileName;
+        QFileInfo fileInfo(fileName_);
+        baseName_ = fileInfo.baseName();
+        baseDir_ = fileInfo.dir();
+    }
 
     void VideoWriter_bmp::addFrame(StampedImage stampedImg)
     {
@@ -65,12 +75,28 @@ namespace bias
         frameCount_++;
     }
 
+    unsigned int VideoWriter_bmp::getNextVersionNumber()
+    {
+        unsigned int nextVerNum = 0;
+        if (addVersionNumber_)
+        {
+            bool done = false;
+            QDir testLogDir;
+            while (!done)
+            {
+                nextVerNum++;
+                testLogDir = getLogDir(nextVerNum);
+                if (!testLogDir.exists())
+                {
+                    done = true;
+                }
+            }
+        }
+        return nextVerNum;
+    }
+
     void VideoWriter_bmp::setupOutput()
     {
-        QFileInfo fileInfo(fileName_);
-        baseName_ = fileInfo.baseName();
-        baseDir_ = fileInfo.dir();
-
         if (!baseDir_.exists())
         {
             unsigned int errorId = ERROR_VIDEO_WRITER_INITIALIZE;
@@ -80,25 +106,11 @@ namespace bias
             throw RuntimeError(errorId, errorMsg);
         }
 
-        logDir_ = QDir(baseDir_.absolutePath() + "/" + baseName_);
-        if (logDir_.exists()) 
-        {
-            // Log directory exists - increment baseName until we find
-            // one which doesn't a bit kludgey, but easy.
-            QString baseNameTemp;
+        unsigned int verNum = getNextVersionNumber();
+        QString logDirName = getLogDirName(verNum);
+        logDir_ = getLogDir(verNum);
 
-            unsigned int cnt = 2;
-            while (logDir_.exists())
-            {
-                baseNameTemp =  baseName_ + "_v" + QString::number(cnt);
-                logDir_ = QDir(baseDir_.absolutePath() + "/" + baseNameTemp);
-                cnt++;
-            }
-
-            baseName_ = baseNameTemp;
-        }
-
-        if (!baseDir_.mkdir(baseName_))
+        if (!baseDir_.mkdir(logDirName))
         {
             unsigned int errorId = ERROR_VIDEO_WRITER_INITIALIZE;
             std::string errorMsg("unable to create log directory, "); 
@@ -106,6 +118,35 @@ namespace bias
             throw RuntimeError(errorId, errorMsg);
         }
 
+    }
+
+    QString VideoWriter_bmp::getUniqueDirName()
+    {
+        unsigned int nextVerNum = getNextVersionNumber();
+        QString logDirName = getLogDirName(nextVerNum);
+        return logDirName;
+    }
+
+    QString VideoWriter_bmp::getLogDirName(unsigned int verNum)
+    {
+        QString logDirName;
+        if (verNum > 0)
+        { 
+            QString verStr = QString("_v%1").arg(verNum,3,10,QChar('0'));
+            logDirName =  baseName_ + verStr;
+        }
+        else
+        {
+            logDirName = baseName_;
+        }
+        return logDirName;
+    }
+
+    QDir VideoWriter_bmp::getLogDir(unsigned int verNum)
+    {
+        QString logDirName = getLogDirName(verNum);
+        QDir logDir = QDir(baseDir_.absolutePath() + "/" + logDirName);
+        return logDir;
     }
 
 } // namespace bias

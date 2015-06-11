@@ -3,6 +3,7 @@
 #include "stamped_image.hpp"
 #include <QString>
 #include <QObject>
+#include <QFileInfo>
 #include <opencv2/core/core.hpp>
 
 namespace bias
@@ -20,6 +21,7 @@ namespace bias
             virtual void setSize(cv::Size size);
             virtual void setFrameSkip(unsigned int frameSkip);
             virtual void setVersioning(bool value);
+            virtual unsigned int getNextVersionNumber();
             virtual void addFrame(StampedImage stampedImg);
             virtual QString getFileName() const;
             virtual cv::Size getSize() const;
@@ -37,7 +39,9 @@ namespace bias
             unsigned int frameSkip_;
             unsigned int cameraNumber_;
             bool addVersionNumber_;
+
             QString getUniqueFileName();
+            QFileInfo getFileInfo(unsigned int verNum);
     };
 
 } // namespace bias

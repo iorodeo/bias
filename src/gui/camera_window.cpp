@@ -326,6 +326,111 @@ namespace bias
         logImageQueuePtr_ -> clear();
         pluginImageQueuePtr_ -> clear();
 
+
+        QString autoNamingString = getAutoNamingString();
+        unsigned int versionNumber = 0;
+
+        if (logging_)
+        {
+            // Create video writer based on video file format type
+            QString videoFileFullPath = getVideoFileFullPath(autoNamingString);
+            std::shared_ptr<VideoWriter> videoWriterPtr; 
+
+            switch (videoFileFormat_)
+            {
+                case VIDEOFILE_FORMAT_BMP:
+                    videoWriterPtr = std::make_shared<VideoWriter_bmp>(
+                            videoWriterParams_.bmp,
+                            videoFileFullPath,
+                            cameraNumber_
+                            );
+                    break;
+
+                case VIDEOFILE_FORMAT_AVI:  
+                    videoWriterPtr = std::make_shared<VideoWriter_avi>(
+                            videoWriterParams_.avi,
+                            videoFileFullPath,
+                            cameraNumber_
+                            );
+                    break;
+
+                case VIDEOFILE_FORMAT_FMF:
+                    videoWriterPtr = std::make_shared<VideoWriter_fmf>(
+                            videoWriterParams_.fmf,
+                            videoFileFullPath,
+                            cameraNumber_
+                            );
+                    break;
+
+                case VIDEOFILE_FORMAT_UFMF:
+                    videoWriterPtr = std::make_shared<VideoWriter_ufmf>(
+                            videoWriterParams_.ufmf,
+                            videoFileFullPath,
+                            cameraNumber_
+                            );
+                    break;
+
+                default:
+                    videoWriterPtr = std::make_shared<VideoWriter>(
+                            videoFileFullPath,
+                            cameraNumber_
+                            );
+                    break;
+
+            } // switch (videoFileFormat) 
+
+            // Set output file
+            videoWriterPtr -> setFileName(videoFileFullPath);
+            videoWriterPtr -> setVersioning(autoNamingOptions_.includeVersionNumber);
+            versionNumber = videoWriterPtr -> getNextVersionNumber();
+
+            imageLoggerPtr_ = new ImageLogger(
+                    cameraNumber_,
+                    videoWriterPtr, 
+                    logImageQueuePtr_, 
+                    this
+                    );
+            imageLoggerPtr_ -> setAutoDelete(false);
+
+            // Connect image logger error signals
+            connect(
+                    imageLoggerPtr_,
+                    SIGNAL(imageLoggingError(unsigned int, QString)),
+                    this,
+                    SLOT(imageLoggingError(unsigned int, QString))
+                   );
+
+            connect(
+                    videoWriterPtr.get(),
+                    SIGNAL(imageLoggingError(unsigned int, QString)),
+                    this,
+                    SLOT(imageLoggingError(unsigned int, QString))
+                   );
+
+            threadPoolPtr_ -> start(imageLoggerPtr_);
+
+        } // if (logging_)
+
+        if (isPluginEnabled())
+        {
+            QPointer<BiasPlugin> currentPluginPtr = getCurrentPlugin(); 
+            if (!currentPluginPtr.isNull())
+            {
+                currentPluginPtr -> setFileAutoNamingString(autoNamingString);
+                currentPluginPtr -> setFileVersionNumber(versionNumber);
+                currentPluginPtr -> reset();
+            }
+            pluginHandlerPtr_ -> setCameraNumber(cameraNumber_);
+            pluginHandlerPtr_ -> setImageQueue(pluginImageQueuePtr_);
+            pluginHandlerPtr_ -> setPlugin(currentPluginPtr);
+            pluginHandlerPtr_ -> setAutoDelete(false);
+            threadPoolPtr_ -> start(pluginHandlerPtr_);
+        } 
+        actionPluginsEnabledPtr_ -> setEnabled(false);
+
+
+        // Set image Grabber and image dispatcher
+        // ------------------------------------------------------------------------------
         imageGrabberPtr_ = new ImageGrabber(
                 cameraNumber_, 
                 cameraPtr_, 
@@ -376,108 +481,9 @@ namespace bias
                    );
         }
 
-
         threadPoolPtr_ -> start(imageGrabberPtr_);
         threadPoolPtr_ -> start(imageDispatcherPtr_);
-
-        QString autoNamingString = getAutoNamingString();
-        //qDebug() << "autoNameingSring: " << autoNamingString;
-
-        if (logging_)
-        {
-            // Create video writer based on video file format type
-            QString videoFileFullPath = getVideoFileFullPath(autoNamingString);
-            //qDebug() << "videoFileFullPath: " << videoFileFullPath;
-            std::shared_ptr<VideoWriter> videoWriterPtr; 
-
-            switch (videoFileFormat_)
-            {
-                case VIDEOFILE_FORMAT_BMP:
-                    videoWriterPtr = std::make_shared<VideoWriter_bmp>(
-                            videoWriterParams_.bmp,
-                            videoFileFullPath,
-                            cameraNumber_
-                            );
-                    break;
-
-                case VIDEOFILE_FORMAT_AVI:  
-                    videoWriterPtr = std::make_shared<VideoWriter_avi>(
-                            videoWriterParams_.avi,
-                            videoFileFullPath,
-                            cameraNumber_
-                            );
-                    break;
-
-                case VIDEOFILE_FORMAT_FMF:
-                    videoWriterPtr = std::make_shared<VideoWriter_fmf>(
-                            videoWriterParams_.fmf,
-                            videoFileFullPath,
-                            cameraNumber_
-                            );
-                    break;
-
-                case VIDEOFILE_FORMAT_UFMF:
-                    videoWriterPtr = std::make_shared<VideoWriter_ufmf>(
-                            videoWriterParams_.ufmf,
-                            videoFileFullPath,
-                            cameraNumber_
-                            );
-                    break;
-
-                default:
-                    videoWriterPtr = std::make_shared<VideoWriter>(
-                            videoFileFullPath,
-                            cameraNumber_
-                            );
-                    break;
-
-            } // switch (videoFileFormat) 
-
-            // Set output file
-            videoWriterPtr -> setFileName(videoFileFullPath);
-            videoWriterPtr -> setVersioning(autoNamingOptions_.includeVersionNumber);
-
-            imageLoggerPtr_ = new ImageLogger(
-                    cameraNumber_,
-                    videoWriterPtr, 
-                    logImageQueuePtr_, 
-                    this
-                    );
-            imageLoggerPtr_ -> setAutoDelete(false);
-
-            // Connect image logger error signals
-            connect(
-                    imageLoggerPtr_,
-                    SIGNAL(imageLoggingError(unsigned int, QString)),
-                    this,
-                    SLOT(imageLoggingError(unsigned int, QString))
-                   );
-
-            connect(
-                    videoWriterPtr.get(),
-                    SIGNAL(imageLoggingError(unsigned int, QString)),
-                    this,
-                    SLOT(imageLoggingError(unsigned int, QString))
-                   );
-
-            threadPoolPtr_ -> start(imageLoggerPtr_);
-
-        } // if (logging_)
-
-        if (isPluginEnabled())
-        {
-            QPointer<BiasPlugin> currentPluginPtr = getCurrentPlugin(); 
-            if (!currentPluginPtr.isNull())
-            {
-                currentPluginPtr -> reset();
-            }
-            pluginHandlerPtr_ -> setCameraNumber(cameraNumber_);
-            pluginHandlerPtr_ -> setImageQueue(pluginImageQueuePtr_);
-            pluginHandlerPtr_ -> setPlugin(currentPluginPtr);
-            pluginHandlerPtr_ -> setAutoDelete(false);
-            threadPoolPtr_ -> start(pluginHandlerPtr_);
-        } 
-        actionPluginsEnabledPtr_ -> setEnabled(false);
+        // ------------------------------------------------------------------------------
 
         // Set Capture start and stop time
         captureStartDateTime_ = QDateTime::currentDateTime();

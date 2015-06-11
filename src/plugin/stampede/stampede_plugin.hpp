@@ -74,8 +74,6 @@ namespace bias
             QString configFileName_;
 
             QDir logFileDir_;
-            QString logFileName_;
-            QString logFileFullPath_;
 
             PanelsController displayDev_;
             NanoSSRPulse vibrationDev_;
@@ -105,6 +103,8 @@ namespace bias
             void processDisplayEvents();
             void processVibrationEvents();
             void writeLogData();
+            QString getLogFileName(bool includeAutoNaming);
+            QString getLogFileFullPath(bool includeAutoNaming);
 
         private slots:
 

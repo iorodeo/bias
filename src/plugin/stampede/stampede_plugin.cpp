@@ -45,7 +45,9 @@ namespace bias
         loggingEnabled_ = getCameraWindow() -> isLoggingEnabled();
         if (loggingEnabled_)
         {
-            logFile_.setFileName(logFileFullPath_);
+            QString logFileFullPath = getLogFileFullPath(true);
+            qDebug() << logFileFullPath;
+            logFile_.setFileName(logFileFullPath);
             bool isOpen = logFile_.open(QIODevice::WriteOnly);
             if (isOpen)
             {
@@ -608,15 +610,8 @@ namespace bias
 
     void StampedePlugin::updateLogFileNameDisplay()
     {
-        QPointer<CameraWindow> cameraWindowPtr = getCameraWindow();
-        logFileDir_ = cameraWindowPtr -> getVideoFileDir();
-
-        logFileName_ = cameraWindowPtr -> getVideoFileName() + QString("_") + LOG_FILE_POSTFIX;;
-        logFileName_ += QString(".") + LOG_FILE_EXTENSION;
-
-        logFileFullPath_ = logFileDir_.absoluteFilePath(logFileName_);
-        
-        logFileNameLabelPtr -> setText(logFileFullPath_);
+        QString logFileFullPath = getLogFileFullPath(false);
+        logFileNameLabelPtr -> setText(logFileFullPath);
     }
 
 
@@ -766,6 +761,36 @@ namespace bias
         }
         logStream_ << "\n";
         releaseLock();
+    }
+
+    QString StampedePlugin::getLogFileName(bool includeAutoNaming)
+    {
+        QPointer<CameraWindow> cameraWindowPtr = getCameraWindow();
+        QString logFileName = cameraWindowPtr -> getVideoFileName() + QString("_") + LOG_FILE_POSTFIX;
+        if (includeAutoNaming)
+        {
+            if (!fileAutoNamingString_.isEmpty())
+            {
+                logFileName += QString("_") + fileAutoNamingString_;
+            }
+            if (fileVersionNumber_ != 0)
+            {
+                QString verStr = QString("_v%1").arg(fileVersionNumber_,3,10,QChar('0'));
+                logFileName += verStr;
+            }
+        }
+        logFileName += QString(".") + LOG_FILE_EXTENSION;
+        return logFileName;
+    }
+
+
+    QString StampedePlugin::getLogFileFullPath(bool includeAutoNaming)
+    {
+        QString logFileName = getLogFileName(includeAutoNaming);
+        QPointer<CameraWindow> cameraWindowPtr = getCameraWindow();
+        logFileDir_ = cameraWindowPtr -> getVideoFileDir();
+        QString logFileFullPath = logFileDir_.absoluteFilePath(logFileName);
+        return logFileFullPath;
     }
 
     // Private slots

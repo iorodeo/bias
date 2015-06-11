@@ -21,6 +21,16 @@ namespace bias
     void BiasPlugin::reset()
     { }
 
+    void BiasPlugin::setFileAutoNamingString(QString autoNamingString)
+    {
+        fileAutoNamingString_ = autoNamingString;
+    }
+
+    void BiasPlugin::setFileVersionNumber(unsigned verNum)
+    {
+        fileVersionNumber_ = verNum;
+    }
+
     void BiasPlugin::stop()
     { }
 

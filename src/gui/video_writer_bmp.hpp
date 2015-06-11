@@ -20,7 +20,9 @@ namespace bias
                     QObject *parent=0
                     );
             virtual ~VideoWriter_bmp();
+            virtual void setFileName(QString fileName);
             virtual void addFrame(StampedImage stampedImg);
+            virtual unsigned int getNextVersionNumber();
 
             static const QString IMAGE_FILE_BASE;
             static const QString IMAGE_FILE_EXT;
@@ -34,6 +36,10 @@ namespace bias
             QDir logDir_;
             QString baseName_;
             void setupOutput();
+            QString getUniqueDirName();
+            QString getLogDirName(unsigned int verNum);
+            QDir getLogDir(unsigned int verNum);
+
     };
    
 }
