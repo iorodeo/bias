@@ -110,6 +110,26 @@ namespace bias
         QString logDirName = getLogDirName(verNum);
         logDir_ = getLogDir(verNum);
 
+        if (baseDir_.exists(logDirName) && !addVersionNumber_)
+        {
+            QString dirCopyName = logDirName + QString("_copy");
+            if (baseDir_.exists(dirCopyName))
+            {
+                bool done = false;
+                unsigned int cnt = 2;
+                while (!done)
+                {
+                    dirCopyName = logDirName + QString("_copy_%1").arg(cnt);
+                    if (!baseDir_.exists(dirCopyName))
+                    {
+                        done = true;
+                    }
+                    cnt++;
+                }
+            }
+            baseDir_.rename(logDirName,  dirCopyName);
+        }
+
         if (!baseDir_.mkdir(logDirName))
         {
             unsigned int errorId = ERROR_VIDEO_WRITER_INITIALIZE;
