@@ -585,6 +585,15 @@ namespace bias
     }
 
 
+    void printFormat7ModeInfo_dc1394(const dc1394format7mode_t &format7Mode_dc1394)
+    {
+        std::string format7ModeStr = getFormat7ModeInfoString_dc1394(format7Mode_dc1394);
+        std::cout << std::endl;
+        std::cout << format7ModeStr;
+        std::cout << std::endl;
+    }
+
+
     // libdc1394 enumeration to string converstions
     // ------------------------------------------------------------------------
     static std::map<dc1394video_mode_t, std::string> createVideoModeToStringMap_dc1394()
@@ -976,7 +985,30 @@ namespace bias
         ss << "]";
         return ss.str();
     }
+
+
+    std::string getFormat7ModeInfoString_dc1394(const dc1394format7mode_t &format7Mode_dc1394)
+    {
+        std::stringstream ss;
+        std::cout << std::boolalpha;
+        ss << "present:                 " << format7Mode_dc1394.present << std::endl;
+        std::cout << std::noboolalpha;
+        ss << "size_x:                  " << format7Mode_dc1394.size_x << std::endl;
+        ss << "size_y:                  " << format7Mode_dc1394.size_y << std::endl;
+        ss << "max_size_x:              " << format7Mode_dc1394.size_x << std::endl;
+        ss << "max_size_y:              " << format7Mode_dc1394.size_y << std::endl;
+        ss << "uint_t pos_x:            " << format7Mode_dc1394.pos_x << std::endl; 
+        ss << "uint_t pos_y:            " << format7Mode_dc1394.pos_y << std::endl; 
+        ss << "uint_t unit_size_x:      " << format7Mode_dc1394.unit_size_x << std::endl;
+        ss << "uint_t unit_size_y:      " << format7Mode_dc1394.unit_size_y << std::endl;
+        ss << "uint_t unit_pos_x:       " << format7Mode_dc1394.unit_pos_x << std::endl;
+        ss << "uint_t unit_pos_y:       " << format7Mode_dc1394.unit_pos_y << std::endl;
+
+        return ss.str();
+    }
+
+
     
 } // namespace bias
 
-  
+      

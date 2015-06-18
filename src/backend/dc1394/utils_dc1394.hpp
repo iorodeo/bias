@@ -37,6 +37,7 @@ namespace bias
     //-------------------------------------------------------------------------
     void printVideoModes_dc1394(const dc1394video_modes_t &modes_dc1394);
     void printFeatureInfo_dc1394(const dc1394feature_info_t &featureInfo_dc1394);
+    void printFormat7ModeInfo_dc1394(const dc1394format7mode_t &format7Mode_dc1394);
 
     // libdc1394 enumeration to string converstions
     // ------------------------------------------------------------------------
@@ -55,6 +56,7 @@ namespace bias
     std::string getTriggerPolarityString_dc1394(dc1394trigger_polarity_t value);
     std::string getTriggerSourceString_dc1394(dc1394trigger_source_t value);
     std::string getTriggerSourcesString_dc1394(const dc1394trigger_sources_t &triggerSources_dc1394);
+    std::string getFormat7ModeInfoString_dc1394(const dc1394format7mode_t &format7Mode_dc1394);
 
     //// Image conversion - for mapping from FlyCapture2 to opencv 
     //// -----------------------------------------------------------------------

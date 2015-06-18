@@ -84,6 +84,8 @@ namespace bias {
                 std::cout << "DEVEL: failed to set camera to format7 mode 0" << std::endl;
             }
 
+            //getFormat7Info(IMAGEMODE_0);
+
 
             // DEVEL 
             // -------------------------------------------------------------------
@@ -712,8 +714,46 @@ namespace bias {
 
     Format7Info CameraDevice_dc1394::getFormat7Info(ImageMode imgMode)
     {
-        return Format7Info(imgMode);
+        Format7Info  format7Info(imgMode);
+        dc1394error_t rsp; 
+
+        dc1394video_mode_t videoMode_dc1394 = convertVideoMode_to_dc1394(VIDEOMODE_FORMAT7, imgMode);
+
+        std::cout << getVideoModeString_dc1394(videoMode_dc1394);
+
+        // Get videomode info sturcture
+        dc1394format7modeset_t format7ModeSet_dc1394;
+        rsp =  dc1394_format7_get_modeset(camera_dc1394_,&format7ModeSet_dc1394);
+        dc1394format7mode_t *format7ModeInfo_dc1394;  
+        format7ModeInfo_dc1394 = &format7ModeSet_dc1394.mode[videoMode_dc1394];
+
+        rsp = dc1394_format7_get_mode_info(camera_dc1394_, videoMode_dc1394, format7ModeInfo_dc1394);
+        if (rsp != DC1394_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to get format7 mode info" << std::endl;
+            throw RuntimeError(ERROR_DC1394_GET_COLOR_CODING , ssError.str()); 
+        }
+        //printFormat7ModeInfo_dc1394(*format7ModeInfo_dc1394);
+
+        return format7Info;
     }
+
+        //ImageMode mode;
+        //bool supported;
+        //unsigned int maxWidth;
+        //unsigned int maxHeight;
+        //unsigned int offsetHStepSize;
+        //unsigned int offsetVStepSize;
+        //unsigned int imageHStepSize;
+        //unsigned int imageVStepSize;
+        //unsigned int pixelFormatBitField;
+        //unsigned int vendorPixelFormatBitField;
+        //unsigned int packetSize;
+        //unsigned int minPacketSize;
+        //unsigned int maxPacketSize;
+        //float percentage;
 
 
     bool CameraDevice_dc1394::validateFormat7Settings(Format7Settings settings)
