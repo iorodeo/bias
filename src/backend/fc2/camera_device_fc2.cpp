@@ -120,8 +120,9 @@ namespace bias {
             // -----------------------------------------------
 
             // Get Strobe info
+            unsigned int strobeSource = 2;
             fc2StrobeInfo strobeInfo_fc2;
-            strobeInfo_fc2.source = 2;
+            strobeInfo_fc2.source = strobeSource;
             error = fc2GetStrobeInfo(context_,&strobeInfo_fc2);
             if (error != FC2_ERROR_OK)
             {
@@ -131,20 +132,20 @@ namespace bias {
                 throw RuntimeError(ERROR_FC2_GET_STROBE_INFO, ssError.str());
             }
 
-            std::cout << std::endl;
-            std::cout << "strobInfo_fc2" << std::endl;
-            std::cout << "source            "   << strobeInfo_fc2.source << std::endl;
-            std::cout << "present           "   << strobeInfo_fc2.present << std::endl;
-            std::cout << "readOutSupported  "   << strobeInfo_fc2.readOutSupported << std::endl;
-            std::cout << "onOffSupported    "   << strobeInfo_fc2.onOffSupported << std::endl;
-            std::cout << "polaritySupported "   << strobeInfo_fc2.polaritySupported << std::endl;
-            std::cout << "minValue          "   << strobeInfo_fc2.minValue << std::endl;
-            std::cout << "maxValue          "   << strobeInfo_fc2.maxValue << std::endl;
-            std::cout << std::endl;
+            //std::cout << std::endl;
+            //std::cout << "strobInfo_fc2" << std::endl;
+            //std::cout << "source            "   << strobeInfo_fc2.source << std::endl;
+            //std::cout << "present           "   << strobeInfo_fc2.present << std::endl;
+            //std::cout << "readOutSupported  "   << strobeInfo_fc2.readOutSupported << std::endl;
+            //std::cout << "onOffSupported    "   << strobeInfo_fc2.onOffSupported << std::endl;
+            //std::cout << "polaritySupported "   << strobeInfo_fc2.polaritySupported << std::endl;
+            //std::cout << "minValue          "   << strobeInfo_fc2.minValue << std::endl;
+            //std::cout << "maxValue          "   << strobeInfo_fc2.maxValue << std::endl;
+            //std::cout << std::endl;
 
             // Set Strobe control
             fc2StrobeControl strobeControl_fc2;
-            strobeControl_fc2.source = 2;
+            strobeControl_fc2.source = strobeSource;
             strobeControl_fc2.onOff = TRUE;
             strobeControl_fc2.polarity = 1;
             strobeControl_fc2.delay = 0.0;
@@ -168,13 +169,13 @@ namespace bias {
                 throw RuntimeError(ERROR_FC2_GET_STROBE_CONTROL, ssError.str());
             }
 
-            std::cout << "strobeControl_fc2" << std::endl;
-            std::cout << "source:   " << strobeControl_fc2.source << std::endl; 
-            std::cout << "onOff:    " << strobeControl_fc2.onOff << std::endl; 
-            std::cout << "polarity: " << strobeControl_fc2.polarity << std::endl; 
-            std::cout << "delay:    " << strobeControl_fc2.delay << std::endl; 
-            std::cout << "duration: " << strobeControl_fc2.duration << std::endl; 
-            std::cout << std::endl;
+            //std::cout << "strobeControl_fc2" << std::endl;
+            //std::cout << "source:   " << strobeControl_fc2.source << std::endl; 
+            //std::cout << "onOff:    " << strobeControl_fc2.onOff << std::endl; 
+            //std::cout << "polarity: " << strobeControl_fc2.polarity << std::endl; 
+            //std::cout << "delay:    " << strobeControl_fc2.delay << std::endl; 
+            //std::cout << "duration: " << strobeControl_fc2.duration << std::endl; 
+            //std::cout << std::endl;
 
             // -----------------------------------------------
 
