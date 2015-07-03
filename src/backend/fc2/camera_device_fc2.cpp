@@ -98,24 +98,84 @@ namespace bias {
             {
                 std::stringstream ssError;
                 ssError << __PRETTY_FUNCTION__;
-                ssError << ": unabled to got FlyCapture2 camera info";
+                ssError << ": unabled to get FlyCapture2 camera info";
                 throw RuntimeError(ERROR_FC2_GET_CAMERA_INFO, ssError.str());
             }
 
 
-            // DEVEL
-            // -----------------------------------------------
             //printInfo();
             fc2Config config = getConfiguration_fc2();
-            printConfiguration_fc2(config);
+            //printConfiguration_fc2(config);
 
             config.grabTimeout = FC2_TIMEOUT_NONE;
             config.grabMode =  FC2_BUFFER_FRAMES;
             config.numBuffers = 20;
 
             setConfiguration_fc2(config);
-            config = getConfiguration_fc2();
-            printConfiguration_fc2(config);
+
+            //config = getConfiguration_fc2();
+            //printConfiguration_fc2(config);
+
+            // DEVEL
+            // -----------------------------------------------
+
+            // Get Strobe info
+            fc2StrobeInfo strobeInfo_fc2;
+            strobeInfo_fc2.source = 2;
+            error = fc2GetStrobeInfo(context_,&strobeInfo_fc2);
+            if (error != FC2_ERROR_OK)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unabled to get FlyCapture2 camera GPIO strobe info";
+                throw RuntimeError(ERROR_FC2_GET_STROBE_INFO, ssError.str());
+            }
+
+            std::cout << std::endl;
+            std::cout << "strobInfo_fc2" << std::endl;
+            std::cout << "source            "   << strobeInfo_fc2.source << std::endl;
+            std::cout << "present           "   << strobeInfo_fc2.present << std::endl;
+            std::cout << "readOutSupported  "   << strobeInfo_fc2.readOutSupported << std::endl;
+            std::cout << "onOffSupported    "   << strobeInfo_fc2.onOffSupported << std::endl;
+            std::cout << "polaritySupported "   << strobeInfo_fc2.polaritySupported << std::endl;
+            std::cout << "minValue          "   << strobeInfo_fc2.minValue << std::endl;
+            std::cout << "maxValue          "   << strobeInfo_fc2.maxValue << std::endl;
+            std::cout << std::endl;
+
+            // Set Strobe control
+            fc2StrobeControl strobeControl_fc2;
+            strobeControl_fc2.source = 2;
+            strobeControl_fc2.onOff = TRUE;
+            strobeControl_fc2.polarity = 1;
+            strobeControl_fc2.delay = 0.0;
+            strobeControl_fc2.duration = 0.0;
+
+            error = fc2SetStrobe(context_, &strobeControl_fc2);
+            if (error != FC2_ERROR_OK)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unabled to set FlyCapture2 camera GPIO strobe control";
+                throw RuntimeError(ERROR_FC2_SET_STROBE_CONTROL, ssError.str());
+            }
+
+            error = fc2GetStrobe(context_, &strobeControl_fc2);
+            if (error != FC2_ERROR_OK)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unabled to get FlyCapture2 camera GPIO strobe control";
+                throw RuntimeError(ERROR_FC2_GET_STROBE_CONTROL, ssError.str());
+            }
+
+            std::cout << "strobeControl_fc2" << std::endl;
+            std::cout << "source:   " << strobeControl_fc2.source << std::endl; 
+            std::cout << "onOff:    " << strobeControl_fc2.onOff << std::endl; 
+            std::cout << "polarity: " << strobeControl_fc2.polarity << std::endl; 
+            std::cout << "delay:    " << strobeControl_fc2.delay << std::endl; 
+            std::cout << "duration: " << strobeControl_fc2.duration << std::endl; 
+            std::cout << std::endl;
+
             // -----------------------------------------------
 
         }

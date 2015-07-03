@@ -2550,9 +2550,9 @@ namespace bias
         tabWidgetPtr_ -> setCurrentWidget(previewTabPtr_);
 
         //setCurrentPlugin(pluginMap_.firstKey());
-        //setCurrentPlugin("grabDetector");
-        setCurrentPlugin("stampede");
-        setPluginEnabled(true);
+        setCurrentPlugin("grabDetector");
+        //setCurrentPlugin("stampede");
+        setPluginEnabled(false);
 
         updateWindowTitle();
         updateCameraInfoMessage();
