@@ -50,7 +50,7 @@ namespace bias {
             virtual void setFormat7ImageMode(ImageMode imgMode) {}; // TO DO //
 
             virtual Format7Settings getFormat7Settings();  
-            virtual Format7Info getFormat7Info(ImageMode imgMode); // TO DO //
+            virtual Format7Info getFormat7Info(ImageMode imgMode);
 
             virtual bool validateFormat7Settings(Format7Settings settings); // TO DO //
             virtual void setFormat7Configuration(Format7Settings settings, float percentSpeed); // TO DO //
@@ -59,6 +59,7 @@ namespace bias {
 
             virtual void setTriggerInternal() {};     // TO DO //
             virtual void setTriggerExternal() {};     // TO DO //
+
             virtual TriggerType getTriggerType() {};  // TO DO //
 
             virtual std::string getVendorName(); 

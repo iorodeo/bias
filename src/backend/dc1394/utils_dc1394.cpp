@@ -120,27 +120,40 @@ namespace bias
                 {
                     case IMAGEMODE_0:
                         vidMode_dc1394 = DC1394_VIDEO_MODE_FORMAT7_0;
+                        break;
 
                     case IMAGEMODE_1:
                         vidMode_dc1394 = DC1394_VIDEO_MODE_FORMAT7_1;
+                        break;
 
                     case IMAGEMODE_2:
                         vidMode_dc1394 = DC1394_VIDEO_MODE_FORMAT7_2;
+                        break;
 
                     case IMAGEMODE_3:
                         vidMode_dc1394 = DC1394_VIDEO_MODE_FORMAT7_3;
+                        break;
 
                     case IMAGEMODE_4:
                         vidMode_dc1394 = DC1394_VIDEO_MODE_FORMAT7_4;
+                        break;
 
                     case IMAGEMODE_5:
                         vidMode_dc1394 = DC1394_VIDEO_MODE_FORMAT7_5;
+                        break;
 
                     case IMAGEMODE_6:
                         vidMode_dc1394 = DC1394_VIDEO_MODE_FORMAT7_6;
+                        break;
 
                     case IMAGEMODE_7:
                         vidMode_dc1394 = DC1394_VIDEO_MODE_FORMAT7_7;
+                        break;
+
+                    default:
+                        // Shouldn't get here ... but set some value (bad)
+                        vidMode_dc1394 = DC1394_VIDEO_MODE_FORMAT7_0;
+                        break;
                 }
             }
             else
@@ -562,6 +575,28 @@ namespace bias
         return pixelFormatMap_from_dc1394[colorCoding_dc1394];
     }
 
+
+    Format7Info convertFormat7Info_from_dc1394(ImageMode imgMode, const dc1394format7mode_t &format7Mode_dc1394)
+    {
+        Format7Info format7Info;
+        format7Info.mode = imgMode;
+        format7Info.supported = bool(format7Mode_dc1394.present);
+        format7Info.maxWidth = format7Mode_dc1394.max_size_x;
+        format7Info.maxHeight = format7Mode_dc1394.max_size_y;
+        format7Info.offsetHStepSize = format7Mode_dc1394.unit_pos_x;
+        format7Info.offsetVStepSize = format7Mode_dc1394.unit_pos_y;
+        format7Info.imageHStepSize = format7Mode_dc1394.unit_size_x;
+        format7Info.imageVStepSize = format7Mode_dc1394.unit_size_y;
+        format7Info.packetSize = format7Mode_dc1394.packet_size;
+        format7Info.minPacketSize = format7Mode_dc1394.unit_packet_size;
+        format7Info.maxPacketSize = format7Mode_dc1394.max_packet_size;
+        format7Info.percentage = 100*float(format7Mode_dc1394.packet_size)/float(format7Mode_dc1394.max_packet_size);
+
+        //format7Info.pixelFormatBitField =    ;
+        //format7Info.vendorPixelFormatBitField =   ;
+        
+        return format7Info;
+    }
 
     // Print functions for libdc1394 configurations, settings and info
     //-------------------------------------------------------------------------
@@ -1003,6 +1038,9 @@ namespace bias
         ss << "uint_t unit_size_y:      " << format7Mode_dc1394.unit_size_y << std::endl;
         ss << "uint_t unit_pos_x:       " << format7Mode_dc1394.unit_pos_x << std::endl;
         ss << "uint_t unit_pos_y:       " << format7Mode_dc1394.unit_pos_y << std::endl;
+        ss << "packet_size:             " << format7Mode_dc1394.packet_size << std::endl;
+        ss << "unit_packet_size:        " << format7Mode_dc1394.unit_packet_size << std::endl;
+        ss << "max_packet_size:         " << format7Mode_dc1394.max_packet_size << std::endl;
 
         return ss.str();
     }

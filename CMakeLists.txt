@@ -101,8 +101,8 @@ endif()
 if(with_dc1394)
     include_directories("./src/backend/dc1394")
     # Add custom libdc1394 
-    include_directories("/home/wbd/local/include")
-    link_directories("/home/wbd/local/lib")
+    #include_directories("/home/wbd/local/include")
+    #link_directories("/home/wbd/local/lib")
 endif()
 
 

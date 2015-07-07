@@ -32,6 +32,7 @@ namespace bias
     bool convertBool_from_dc1394(dc1394bool_t value);
     bool convertSwitch_from_dc1394(dc1394switch_t value);
     PixelFormat convertPixelFormat_from_dc1394(dc1394color_coding_t colorCoding_dc1394);
+    Format7Info convertFormat7Info_from_dc1394(ImageMode imgMode, const dc1394format7mode_t &format7Mode_dc1394);
 
     // Print functions for libdc1394 configurations, settings and info
     //-------------------------------------------------------------------------

@@ -77,15 +77,20 @@ namespace bias {
             }
             connected_ = true;
 
-            // Devel. set to format 7 as default.
-            dc1394error_t rsp = dc1394_video_set_mode(camera_dc1394_, DC1394_VIDEO_MODE_FORMAT7_0);
-            if (rsp != DC1394_SUCCESS) 
+
+            // Temporary - just pick a video mode which works.
+            dc1394error_t error = dc1394_video_set_mode(camera_dc1394_, DC1394_VIDEO_MODE_FORMAT7_0);
+            if (error != DC1394_SUCCESS) 
             {
-                std::cout << "DEVEL: failed to set camera to format7 mode 0" << std::endl;
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to set dc1394 video mode, error code ";
+                ssError << error  << std::endl;
+                throw RuntimeError(ERROR_DC1394_SET_VIDEO_MODE, ssError.str());
             }
 
-            //getFormat7Info(IMAGEMODE_0);
 
+            getFormat7Info(IMAGEMODE_0);
 
             // DEVEL 
             // -------------------------------------------------------------------
@@ -142,7 +147,6 @@ namespace bias {
 
             // Temporary - just pick a video mode which works.
             error = dc1394_video_set_mode(camera_dc1394_, DC1394_VIDEO_MODE_FORMAT7_0);
-
             if (error != DC1394_SUCCESS) 
             {
                 std::stringstream ssError;
@@ -714,19 +718,14 @@ namespace bias {
 
     Format7Info CameraDevice_dc1394::getFormat7Info(ImageMode imgMode)
     {
-        Format7Info  format7Info(imgMode);
         dc1394error_t rsp; 
 
         dc1394video_mode_t videoMode_dc1394 = convertVideoMode_to_dc1394(VIDEOMODE_FORMAT7, imgMode);
 
-        std::cout << getVideoModeString_dc1394(videoMode_dc1394);
-
         // Get videomode info sturcture
         dc1394format7modeset_t format7ModeSet_dc1394;
         rsp =  dc1394_format7_get_modeset(camera_dc1394_,&format7ModeSet_dc1394);
-        dc1394format7mode_t *format7ModeInfo_dc1394;  
-        format7ModeInfo_dc1394 = &format7ModeSet_dc1394.mode[videoMode_dc1394];
-
+        dc1394format7mode_t *format7ModeInfo_dc1394 = &format7ModeSet_dc1394.mode[imgMode];
         rsp = dc1394_format7_get_mode_info(camera_dc1394_, videoMode_dc1394, format7ModeInfo_dc1394);
         if (rsp != DC1394_SUCCESS)
         {
@@ -735,25 +734,15 @@ namespace bias {
             ssError << ": error unable to get format7 mode info" << std::endl;
             throw RuntimeError(ERROR_DC1394_GET_COLOR_CODING , ssError.str()); 
         }
+
         //printFormat7ModeInfo_dc1394(*format7ModeInfo_dc1394);
+
+        Format7Info format7Info = convertFormat7Info_from_dc1394(imgMode, *format7ModeInfo_dc1394);
+        format7Info.print();
 
         return format7Info;
     }
 
-        //ImageMode mode;
-        //bool supported;
-        //unsigned int maxWidth;
-        //unsigned int maxHeight;
-        //unsigned int offsetHStepSize;
-        //unsigned int offsetVStepSize;
-        //unsigned int imageHStepSize;
-        //unsigned int imageVStepSize;
-        //unsigned int pixelFormatBitField;
-        //unsigned int vendorPixelFormatBitField;
-        //unsigned int packetSize;
-        //unsigned int minPacketSize;
-        //unsigned int maxPacketSize;
-        //float percentage;
 
 
     bool CameraDevice_dc1394::validateFormat7Settings(Format7Settings settings)
