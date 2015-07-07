@@ -751,15 +751,34 @@ namespace bias
 
         acquireLock();
         logStream_ << frameCount_ << " " << timeStamp_; 
+
+        bool vibrationRunning = false;
         for (auto state : vibrationEventStateList_)
         {
-            logStream_ << " " << (state == RUNNING);
+            if (state == RUNNING)
+            {
+                vibrationRunning = true;
+                break;
+            }
         }
-        for (auto state : displayEventStateList_)
+        logStream_ << " " << vibrationRunning;
+
+
+        QList<DisplayEvent> displayEventList = config_.displayEventList();
+        bool displayRunning = false;
+        int displayControlBias = 0;
+        for (int i=0; i<displayEventList.size(); i++)
         {
-            logStream_ << " " << (state == RUNNING);
+            DisplayEvent event = displayEventList[i];
+            EventState displayState = displayEventStateList_[i];
+            if (displayState == RUNNING)
+            {
+                displayRunning = true;
+                displayControlBias = event.controlBias();
+                break;
+            }
         }
-        logStream_ << "\n";
+        logStream_ << " " << displayRunning << " " << displayControlBias << "\n";
         releaseLock();
     }
 
