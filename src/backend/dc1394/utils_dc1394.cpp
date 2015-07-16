@@ -270,6 +270,31 @@ namespace bias
         return pixelFormatMap_to_dc1394[pixFormat];
     }
 
+
+    static std::map<TriggerMode,dc1394trigger_mode_t> triggerModeMap_to_dc1394 
+    { 
+        {TRIGGER_MODE_0,   DC1394_TRIGGER_MODE_0}, 
+        {TRIGGER_MODE_1,   DC1394_TRIGGER_MODE_1}, 
+        {TRIGGER_MODE_2,   DC1394_TRIGGER_MODE_2}, 
+        {TRIGGER_MODE_3,   DC1394_TRIGGER_MODE_3}, 
+        {TRIGGER_MODE_4,   DC1394_TRIGGER_MODE_4}, 
+        {TRIGGER_MODE_5,   DC1394_TRIGGER_MODE_5}, 
+        {TRIGGER_MODE_14,  DC1394_TRIGGER_MODE_14}, 
+        {TRIGGER_MODE_15,  DC1394_TRIGGER_MODE_15}
+    };
+
+    dc1394trigger_mode_t convertTriggerMode_to_dc1394(TriggerMode trigMode)
+    {
+        if (triggerModeMap_to_dc1394.count(trigMode) == 0)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to convert TriggerMode to libdc1394 trigger mode";
+            throw RuntimeError(ERROR_DC1394_CONVERT_TRIGGER_MODE, ssError.str());
+        }
+        return triggerModeMap_to_dc1394[trigMode];
+    }
+
     // Conversion from libdc1394 types to BIAS types
     // ------------------------------------------------------------------------
     //
@@ -597,6 +622,34 @@ namespace bias
         
         return format7Info;
     }
+
+
+    static std::map<dc1394trigger_mode_t, TriggerMode> triggerModeMap_from_dc1394
+    { 
+        {DC1394_TRIGGER_MODE_0,  TRIGGER_MODE_0},   
+        {DC1394_TRIGGER_MODE_1,  TRIGGER_MODE_1},   
+        {DC1394_TRIGGER_MODE_2,  TRIGGER_MODE_2},   
+        {DC1394_TRIGGER_MODE_3,  TRIGGER_MODE_3},   
+        {DC1394_TRIGGER_MODE_4,  TRIGGER_MODE_4},   
+        {DC1394_TRIGGER_MODE_5,  TRIGGER_MODE_5},   
+        {DC1394_TRIGGER_MODE_14, TRIGGER_MODE_14},   
+        {DC1394_TRIGGER_MODE_15, TRIGGER_MODE_15}, 
+    };
+
+
+    TriggerMode convertTriggerMode_from_dc1394(dc1394trigger_mode_t trigMode_dc1394)
+    {
+        TriggerMode trigMode;
+        if (triggerModeMap_from_dc1394.count(trigMode_dc1394) == 0)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to convert libdc1394 trigger mode to TriggerMode";
+            throw RuntimeError(ERROR_DC1394_CONVERT_TRIGGER_MODE, ssError.str());
+        }
+        return triggerModeMap_from_dc1394[trigMode_dc1394];
+    }
+
 
     // Print functions for libdc1394 configurations, settings and info
     //-------------------------------------------------------------------------

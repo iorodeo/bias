@@ -20,6 +20,7 @@ namespace bias
     dc1394bool_t convertBool_to_dc1394(bool value);
     dc1394switch_t convertSwitch_to_dc1394(bool value);
     dc1394color_coding_t convertPixelFormat_to_dc1394(PixelFormat pixFormat);
+    dc1394trigger_mode_t convertTriggerMode_to_dc1394(TriggerMode trigMode);
 
     // Conversion from libdc1394 types to BIAS types
     // ------------------------------------------------------------------------
@@ -33,6 +34,7 @@ namespace bias
     bool convertSwitch_from_dc1394(dc1394switch_t value);
     PixelFormat convertPixelFormat_from_dc1394(dc1394color_coding_t colorCoding_dc1394);
     Format7Info convertFormat7Info_from_dc1394(ImageMode imgMode, const dc1394format7mode_t &format7Mode_dc1394);
+    TriggerMode convertTriggerMode_from_dc1394(dc1394trigger_mode_t trigMode_dc1394);
 
     // Print functions for libdc1394 configurations, settings and info
     //-------------------------------------------------------------------------

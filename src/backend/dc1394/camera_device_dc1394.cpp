@@ -90,25 +90,25 @@ namespace bias {
             }
 
 
+            setTriggerInternal();
+
             getFormat7Info(IMAGEMODE_0);
 
             // DEVEL 
             // -------------------------------------------------------------------
-            //Format7Settings f7Settings = getFormat7Settings();
-            //f7Settings.print();
+            Format7Settings f7Settings = getFormat7Settings();
+            f7Settings.print();
+            setFormat7Configuration(f7Settings,100.0);
 
-            //dc1394_camera_print_info(camera_dc1394_,stdout);
+            //PixelFormatList pixelFormatList = getListOfSupportedPixelFormats(IMAGEMODE_0);
+            //PixelFormatList::iterator it;
+            //for (it=pixelFormatList.begin(); it!=pixelFormatList.end(); it++)
+            //{
+            //    PixelFormat format = *it;
+            //    std::string formatStr = getPixelFormatString(format); 
+            //    std::cout <<  formatStr << std::endl;
+            //}
 
-            // Print supported video modes
-            //PropertyType propType = PROPERTY_TYPE_SHUTTER;
-            //PropertyInfo propInfo;
-            //Property prop;
-            //
-            //propInfo = getPropertyInfo(propType);
-            //propInfo.print();
-
-            //prop = getProperty(propType);
-            //prop.print();
             // --------------------------------------------------------------------
             
         }
@@ -656,24 +656,13 @@ namespace bias {
             throw RuntimeError(ERROR_DC1394_GET_FORMAT7_SETTINGS , ssError.str()); 
         }
 
-        Format7Settings format7Settings;
-        dc1394error_t rsp; 
-
         // Get current video mode
-        dc1394video_mode_t videoMode_dc1394;
-        rsp = dc1394_video_get_mode(camera_dc1394_, &videoMode_dc1394);
-        if (rsp != DC1394_SUCCESS) 
-        {
-            std::stringstream ssError;
-            ssError << __PRETTY_FUNCTION__;
-            ssError << ": error unable to get video mode" << std::endl;
-            throw RuntimeError(ERROR_DC1394_GET_VIDEOMODE, ssError.str()); 
-        }
+        dc1394video_mode_t videoMode_dc1394 = getVideoMode_dc1394();
 
         // Get position of ROI
         uint32_t left;
         uint32_t top;
-        rsp = dc1394_format7_get_image_position(camera_dc1394_, videoMode_dc1394, &left, &top);
+        dc1394error_t rsp = dc1394_format7_get_image_position(camera_dc1394_, videoMode_dc1394, &left, &top);
         if (rsp != DC1394_SUCCESS)
         {
             std::stringstream ssError;
@@ -681,6 +670,8 @@ namespace bias {
             ssError << ": error unable to get image position" << std::endl;
             throw RuntimeError(ERROR_DC1394_GET_IMAGE_POSITION , ssError.str()); 
         }
+
+        Format7Settings format7Settings;
         format7Settings.offsetX = (unsigned int)(left);
         format7Settings.offsetY = (unsigned int)(top);
 
@@ -718,13 +709,11 @@ namespace bias {
 
     Format7Info CameraDevice_dc1394::getFormat7Info(ImageMode imgMode)
     {
-        dc1394error_t rsp; 
-
         dc1394video_mode_t videoMode_dc1394 = convertVideoMode_to_dc1394(VIDEOMODE_FORMAT7, imgMode);
 
         // Get videomode info sturcture
         dc1394format7modeset_t format7ModeSet_dc1394;
-        rsp =  dc1394_format7_get_modeset(camera_dc1394_,&format7ModeSet_dc1394);
+        dc1394error_t rsp =  dc1394_format7_get_modeset(camera_dc1394_,&format7ModeSet_dc1394);
         dc1394format7mode_t *format7ModeInfo_dc1394 = &format7ModeSet_dc1394.mode[imgMode];
         rsp = dc1394_format7_get_mode_info(camera_dc1394_, videoMode_dc1394, format7ModeInfo_dc1394);
         if (rsp != DC1394_SUCCESS)
@@ -747,17 +736,129 @@ namespace bias {
 
     bool CameraDevice_dc1394::validateFormat7Settings(Format7Settings settings)
     {
-        return false;
+        return true;
     } 
    
     void CameraDevice_dc1394::setFormat7Configuration(Format7Settings settings, float percentSpeed)
     {
+
+        dc1394video_mode_t videoMode_dc1394 = getVideoMode_dc1394();
+
+        dc1394error_t rsp = dc1394_format7_set_image_size(camera_dc1394_, videoMode_dc1394, settings.width, settings.height);
+        if (rsp != DC1394_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to set format7 image size" << std::endl;
+            throw RuntimeError(ERROR_DC1394_SET_FORMAT7_IMAGE_SIZE , ssError.str()); 
+        }
+
+        rsp = dc1394_format7_set_image_position(camera_dc1394_, videoMode_dc1394, settings.offsetX, settings.offsetY);
+        if (rsp != DC1394_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to set format7 image position" << std::endl;
+            throw RuntimeError(ERROR_DC1394_SET_FORMAT7_IMAGE_POSITION , ssError.str()); 
+        }
+
+        dc1394color_coding_t colorCoding_dc1394 = convertPixelFormat_to_dc1394(settings.pixelFormat);
+        rsp = dc1394_format7_set_color_coding(camera_dc1394_, videoMode_dc1394, colorCoding_dc1394);
+        if (rsp != DC1394_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to set format7 pixel format (color coding)" << std::endl;
+            throw RuntimeError(ERROR_DC1394_SET_FORMAT7_COLOR_CODING , ssError.str()); 
+        }
     }
 
 
     PixelFormatList CameraDevice_dc1394::getListOfSupportedPixelFormats(ImageMode imgMode)
     {
-        return PixelFormatList();
+        dc1394video_mode_t videoMode_dc1394 = convertVideoMode_to_dc1394(VIDEOMODE_FORMAT7,imgMode);
+
+        dc1394color_codings_t colorCodings_dc1394;
+        dc1394error_t rsp = dc1394_format7_get_color_codings(camera_dc1394_, videoMode_dc1394, &colorCodings_dc1394);
+        if (rsp != DC1394_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to get dc1394 format7 color codings" << std::endl;
+            throw RuntimeError(ERROR_DC1394_GET_EXTERNAL_TRIGGER_POWER, ssError.str());
+        }
+
+        PixelFormatList pixelFormatList;
+        for (int i=0; i<colorCodings_dc1394.num; i++)
+        {
+            dc1394color_coding_t coding_dc1394 = colorCodings_dc1394.codings[i];
+            PixelFormat pixelFormat = convertPixelFormat_from_dc1394(coding_dc1394);
+            pixelFormatList.push_back(pixelFormat);
+        }
+        return pixelFormatList;
+    }
+
+
+    void CameraDevice_dc1394::setTriggerInternal() 
+    {
+        dc1394error_t rsp = dc1394_external_trigger_set_power(camera_dc1394_, DC1394_OFF);
+        if (rsp != DC1394_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to set dc1394 external trigger power setting to off" << std::endl;
+            throw RuntimeError(ERROR_DC1394_SET_EXTERNAL_TRIGGER_POWER, ssError.str());
+        }
+    }     
+
+
+    void CameraDevice_dc1394::setTriggerExternal() 
+    {
+
+        setExternalTriggerMode_dc1394(DC1394_TRIGGER_MODE_0); // class method
+
+        dc1394error_t rsp = dc1394_external_trigger_set_polarity(camera_dc1394_, DC1394_TRIGGER_ACTIVE_HIGH);
+        if (rsp != DC1394_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to set dc1394 external trigger polarity" << std::endl;
+            throw RuntimeError(ERROR_DC1394_SET_EXTERNAL_TRIGGER_POLARITY, ssError.str());
+        }
+
+        rsp = dc1394_external_trigger_set_power(camera_dc1394_, DC1394_ON);
+        if (rsp != DC1394_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to set dc1394 external trigger power setting to on" << std::endl;
+            throw RuntimeError(ERROR_DC1394_SET_EXTERNAL_TRIGGER_POWER, ssError.str());
+        }
+    }     
+
+
+    TriggerType CameraDevice_dc1394::getTriggerType() 
+    {
+        dc1394switch_t trigSwitch_dc1394 = DC1394_OFF;
+        dc1394error_t rsp = dc1394_external_trigger_get_power(camera_dc1394_, &trigSwitch_dc1394);
+        if (rsp != DC1394_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to get dc1394 external trigger power setting" << std::endl;
+            throw RuntimeError(ERROR_DC1394_GET_EXTERNAL_TRIGGER_POWER, ssError.str());
+        }
+
+        TriggerType trigType = TRIGGER_TYPE_UNSPECIFIED;
+        if (trigSwitch_dc1394 == DC1394_ON)
+        {
+            trigType = TRIGGER_EXTERNAL;
+        }
+        else
+        {
+            trigType = TRIGGER_INTERNAL;
+        }
+        return trigType;
     }
 
 
@@ -1044,6 +1145,46 @@ namespace bias {
             ssError << ": error unable to set dc1394 feature white balance" << std::endl;
             throw RuntimeError(ERROR_DC1394_SET_FEATURE, ssError.str());
         }
+   }
+
+   void CameraDevice_dc1394::setExternalTriggerMode_dc1394(dc1394trigger_mode_t triggerMode_dc1394)
+   {
+       dc1394error_t rsp = dc1394_external_trigger_set_mode(camera_dc1394_, triggerMode_dc1394);
+       if (rsp != DC1394_SUCCESS)
+       {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to set dc1394 external trigger mode" << std::endl;
+            throw RuntimeError(ERROR_DC1394_SET_EXTERNAL_TRIGGER_MODE, ssError.str());
+       }
+   }
+
+   dc1394trigger_mode_t CameraDevice_dc1394::getExternalTriggerMode_dc1394()
+   {
+       dc1394trigger_mode_t triggerMode_dc1394 = DC1394_TRIGGER_MODE_0;
+       dc1394error_t rsp = dc1394_external_trigger_get_mode(camera_dc1394_, &triggerMode_dc1394);
+       if (rsp != DC1394_SUCCESS)
+       {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to set dc1394 external trigger mode" << std::endl;
+            throw RuntimeError(ERROR_DC1394_GET_EXTERNAL_TRIGGER_MODE, ssError.str());
+       }
+       return triggerMode_dc1394;
+   }
+
+   dc1394video_mode_t CameraDevice_dc1394::getVideoMode_dc1394()
+   {
+        dc1394video_mode_t videoMode_dc1394;
+        dc1394error_t rsp = dc1394_video_get_mode(camera_dc1394_, &videoMode_dc1394);
+        if (rsp != DC1394_SUCCESS) 
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": error unable to get video mode" << std::endl;
+            throw RuntimeError(ERROR_DC1394_GET_VIDEOMODE, ssError.str()); 
+        }
+        return videoMode_dc1394;
    }
 
 } // namespace bias

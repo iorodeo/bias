@@ -47,20 +47,18 @@ namespace bias {
 
             virtual void setProperty(Property prop); 
             virtual void setVideoModeAndFrameRate(VideoMode vidMode, FrameRate frameRate) {}; // TO DO //
-            virtual void setFormat7ImageMode(ImageMode imgMode) {}; // TO DO //
+            virtual void setFormat7ImageMode(ImageMode imgMode) {}; // TO DO  //
 
             virtual Format7Settings getFormat7Settings();  
             virtual Format7Info getFormat7Info(ImageMode imgMode);
 
-            virtual bool validateFormat7Settings(Format7Settings settings); // TO DO //
-            virtual void setFormat7Configuration(Format7Settings settings, float percentSpeed); // TO DO //
+            virtual bool validateFormat7Settings(Format7Settings settings);                     // TO DO 1 //
+            virtual void setFormat7Configuration(Format7Settings settings, float percentSpeed); 
+            virtual PixelFormatList getListOfSupportedPixelFormats(ImageMode imgMode);         
 
-            virtual PixelFormatList getListOfSupportedPixelFormats(ImageMode imgMode); // TO DO //
-
-            virtual void setTriggerInternal() {};     // TO DO //
-            virtual void setTriggerExternal() {};     // TO DO //
-
-            virtual TriggerType getTriggerType() {};  // TO DO //
+            virtual void setTriggerInternal();     
+            virtual void setTriggerExternal();     
+            virtual TriggerType getTriggerType();  
 
             virtual std::string getVendorName(); 
             virtual std::string getModelName(); 
@@ -91,7 +89,9 @@ namespace bias {
             void setFeatureAbsoluteValue_dc1394(PropertyType propType, float absValue, PropertyInfo propInfo);
             void setFeatureValue_dc1394(PropertyType propType, unsigned int value, PropertyInfo propInfo);
             void setFeatureWhiteBalance_dc1394(unsigned int valueA, unsigned int valueB);
-
+            void setExternalTriggerMode_dc1394(dc1394trigger_mode_t triggerMode_dc1394);
+            dc1394trigger_mode_t getExternalTriggerMode_dc1394();
+            dc1394video_mode_t getVideoMode_dc1394();
 
     };
 
