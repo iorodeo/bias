@@ -2569,6 +2569,7 @@ namespace bias
         //setCurrentPlugin(pluginMap_.firstKey());
         setCurrentPlugin("grabDetector");
         //setCurrentPlugin("stampede");
+        //setPluginEnabled(true);
         setPluginEnabled(false);
 
         updateWindowTitle();
