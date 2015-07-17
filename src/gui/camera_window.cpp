@@ -65,6 +65,7 @@ namespace bias
     const unsigned int DURATION_TIMER_INTERVAL = 1000; // msec
     const QSize PREVIEW_DUMMY_IMAGE_SIZE = QSize(320,256);
     const unsigned int MAX_THREAD_COUNT=10;
+    const int THREADPOOL_WAIT_TIMEOUT = 50;
 
     // Default settings
     const unsigned long DEFAULT_CAPTURE_DURATION = 300; // sec
@@ -536,6 +537,7 @@ namespace bias
 
         // Note, image grabber and dispatcher are destroyed by the 
         // threadPool when their run methods exit.
+        //
 
         // Send stop singals to threads
         if (!imageGrabberPtr_.isNull())
@@ -552,9 +554,9 @@ namespace bias
             imageDispatcherPtr_ -> stop();
             imageDispatcherPtr_ -> releaseLock();
 
-            newImageQueuePtr_ -> acquireLock();
-            newImageQueuePtr_ -> signalNotEmpty();
-            newImageQueuePtr_ -> releaseLock();
+            //newImageQueuePtr_ -> acquireLock();
+            //newImageQueuePtr_ -> signalNotEmpty();
+            //newImageQueuePtr_ -> releaseLock();
         }
 
         if (!imageLoggerPtr_.isNull())
@@ -563,9 +565,9 @@ namespace bias
             imageLoggerPtr_ -> stop();
             imageLoggerPtr_ -> releaseLock();
 
-            logImageQueuePtr_ -> acquireLock();
-            logImageQueuePtr_ -> signalNotEmpty();
-            logImageQueuePtr_ -> releaseLock();
+            //logImageQueuePtr_ -> acquireLock();
+            //logImageQueuePtr_ -> signalNotEmpty();
+            //logImageQueuePtr_ -> releaseLock();
         }
 
         if (!pluginHandlerPtr_.isNull())
@@ -574,13 +576,29 @@ namespace bias
             pluginHandlerPtr_ -> stop();
             pluginHandlerPtr_ -> releaseLock();
 
+            //pluginImageQueuePtr_ -> acquireLock();
+            //pluginImageQueuePtr_ -> signalNotEmpty();
+            //pluginImageQueuePtr_ -> releaseLock();
+        }
+
+        // Wait until threads are finished
+        bool threadsDone = false;
+        while (!threadsDone)
+        {
+            threadsDone = threadPoolPtr_ -> waitForDone(THREADPOOL_WAIT_TIMEOUT);
+
+            newImageQueuePtr_ -> acquireLock();
+            newImageQueuePtr_ -> signalNotEmpty();
+            newImageQueuePtr_ -> releaseLock();
+
+            logImageQueuePtr_ -> acquireLock();
+            logImageQueuePtr_ -> signalNotEmpty();
+            logImageQueuePtr_ -> releaseLock();
+
             pluginImageQueuePtr_ -> acquireLock();
             pluginImageQueuePtr_ -> signalNotEmpty();
             pluginImageQueuePtr_ -> releaseLock();
         }
-
-        // Wait until threads are finished
-        threadPoolPtr_ -> waitForDone();
 
         // Clear any stale data out of existing queues
         newImageQueuePtr_ -> acquireLock();
@@ -595,7 +613,6 @@ namespace bias
         pluginImageQueuePtr_ -> clear();
         pluginImageQueuePtr_ -> releaseLock();
 
-        
         if (isPluginEnabled())
         {
             QPointer<BiasPlugin> currentPluginPtr = getCurrentPlugin(); 

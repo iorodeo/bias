@@ -179,20 +179,12 @@ namespace bias {
             }
             cameraPtr_ -> releaseLock();
 
-//#ifdef WITH_DC1394
-//            // libdc1394 uses non blocking poll policy - returned frame is empty if a new
-//            // frame is not available.
-//            if (stampImg.image.empty()) 
-//            { 
-//                continue; 
-//            }
-//#endif
             // grabImage is nonblocking - returned frame is empty is a new frame is not available.
             if (stampImg.image.empty()) 
             { 
                 continue; 
             }
-
+            
             // Push image into new image queue
             if (!error) 
             {
@@ -238,6 +230,7 @@ namespace bias {
                     emit startTimer();
                 }
                 //std::cout << frameCount << ", " << dtEstimate << ", " << timeStampDbl << std::endl;
+                //
                 
                 // TEMPORARY - for mouse grab detector testing
                 // --------------------------------------------------------------------- 
@@ -264,8 +257,7 @@ namespace bias {
                     stampImg.image = camSizeImage;
                 }
                 // ---------------------------------------------------------------------
-
-
+                
                 // Set image data timestamp, framecount and frame interval estimate
                 stampImg.timeStamp = timeStampDbl;
                 stampImg.frameCount = frameCount;
@@ -317,6 +309,7 @@ namespace bias {
         { 
             emit stopCaptureError(errorId, errorMsg);
         }
+
     }
 
 

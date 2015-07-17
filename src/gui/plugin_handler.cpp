@@ -4,6 +4,7 @@
 #include <sstream>
 #include "affinity.hpp"
 #include "stamped_image.hpp"
+#include <QtDebug>
 
 namespace bias
 { 

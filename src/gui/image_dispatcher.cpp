@@ -10,6 +10,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <fstream>
+#include <QtDebug>
 // ----------------------------------------------------------------------------
 
 namespace bias
@@ -156,6 +157,7 @@ namespace bias
                 logImageQueuePtr_ -> signalNotEmpty();
                 logImageQueuePtr_ -> releaseLock();
             }
+
             if (pluginEnabled_)
             {
                 pluginImageQueuePtr_ -> acquireLock();
