@@ -342,7 +342,7 @@
                   </property>
                   <property name="minimumSize">
                    <size>
-                    <width>80</width>
+                    <width>70</width>
                     <height>0</height>
                    </size>
                   </property>
@@ -353,9 +353,12 @@
                    </size>
                   </property>
                   <property name="text">
-                   <string>Output Pin: </string>
+                   <string>Output Pin:</string>
                   </property>
                  </widget>
+                </item>
+                <item>
+                 <widget class="QComboBox" name="outputPinComboBoxPtr"/>
                 </item>
                 <item>
                  <spacer name="horizontalSpacer_14">

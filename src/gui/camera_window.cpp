@@ -2552,7 +2552,8 @@ namespace bias
         //setCurrentPlugin(pluginMap_.firstKey());
         setCurrentPlugin("grabDetector");
         //setCurrentPlugin("stampede");
-        setPluginEnabled(false);
+        //setPluginEnabled(false);
+        setPluginEnabled(true);
 
         updateWindowTitle();
         updateCameraInfoMessage();

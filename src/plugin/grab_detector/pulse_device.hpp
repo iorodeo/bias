@@ -1,6 +1,7 @@
 #ifndef PULSE_DEVICE_HPP
 #define PULSE_DEIVE_HPP
 #include <QSerialPort>
+#include <QVector>
 
 namespace bias
 {
@@ -19,12 +20,15 @@ namespace bias
             static const int DEFAULT_WAITFOR_TIMEOUT = 500;
             static const int RSP_BUFFER_SIZE = 100;
             static const int MAX_WRITE_CNT = 10;
+            static const int MAX_READ_CNT = 50;
 
             static const int CMD_ID_START_PULSE = 1;
             static const int CMD_ID_STOP_PULSE = 2;
             static const int CMD_ID_SET_PULSE_LENGTH = 3;
             static const int CMD_ID_GET_PULSE_LENGTH = 4;
-            static const int CMD_ID_GET_OUTPUT_PIN = 5;
+            static const int CMD_ID_SET_OUTPUT_PIN = 5;
+            static const int CMD_ID_GET_OUTPUT_PIN = 6;
+            static const int CMD_ID_GET_ALLOWED_OUTPUT_PIN = 7;
 
             PulseDevice(QObject *parent=Q_NULLPTR);
             PulseDevice(const QSerialPortInfo &portInfo, QObject *parent=Q_NULLPTR);
@@ -35,6 +39,9 @@ namespace bias
             bool setPulseLength(unsigned long pulseLength);
             unsigned long getPulseLength(bool *ok);
             int getOutputPin(bool *ok);
+            bool setOutputPin(int outputPin);
+            QVector<int> getAllowedOutputPin(bool *ok);
+
 
         protected:
 

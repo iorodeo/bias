@@ -2,6 +2,8 @@
 #include "DioPulse.h"
 #include "TimerOne.h"
 
+const int DioPulseDev::ALLOWED_PULSE_PIN[NUM_PULSE_PIN] = {2,3,4,5,6,7,8,9,10};
+
 DioPulseDev::DioPulseDev() 
 {
     pulsePin_ = DEFAULT_PULSE_PIN;
@@ -12,8 +14,12 @@ DioPulseDev::DioPulseDev()
 
 void DioPulseDev::initialize()
 {
-    pinMode(pulsePin_,OUTPUT);
-    digitalWrite(pulsePin_, LOW);
+    for (int i=0; i<NUM_PULSE_PIN; i++)
+    {
+        int tmpPin = ALLOWED_PULSE_PIN[i];
+        pinMode(tmpPin,OUTPUT);
+        digitalWrite(tmpPin, LOW);
+    }
     Timer1.initialize(pulseLength_);
     Timer1.stop();
     Timer1.attachInterrupt(this->timerCallback);
@@ -57,6 +63,24 @@ unsigned long DioPulseDev::getPulseLength()
 int DioPulseDev::getPulsePin()
 {
     return pulsePin_;
+}
+
+
+void DioPulseDev::setPulsePin(int pulsePin)
+{
+    bool isValidPin = false;
+    for (int i=0;  i<NUM_PULSE_PIN; i++)
+    {
+        if (pulsePin == ALLOWED_PULSE_PIN[i])
+        {
+            isValidPin = true;
+            break;
+        }
+    }
+    if (isValidPin)
+    {
+        pulsePin_ = pulsePin;
+    } 
 }
 
 

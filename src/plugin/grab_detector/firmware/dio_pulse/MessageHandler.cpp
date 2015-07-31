@@ -49,6 +49,13 @@ void MessageHandler::cmdSwitchYard()
                 break;
             }
 
+        case CMD_ID_SET_OUTPUT_PIN:
+            {
+                int newPulsePin = readInt(1);
+                DioPulse.setPulsePin(newPulsePin); 
+                break;
+            }
+
         case CMD_ID_GET_OUTPUT_PIN:
             {
                 int pulsePin = DioPulse.getPulsePin();
@@ -56,10 +63,28 @@ void MessageHandler::cmdSwitchYard()
                 break;
             }
 
+        case CMD_ID_GET_ALLOWED_OUTPUT_PIN:
+            sendAllowedOutputPin();
+            break;
+
         default:
             break;
     }
 
+}
+
+void MessageHandler::sendAllowedOutputPin()
+{
+    for (int i=0; i<DioPulse.NUM_PULSE_PIN; i++)
+    {
+        int tmpPin = DioPulse.ALLOWED_PULSE_PIN[i];
+        Serial << _DEC(tmpPin);
+        if (i<DioPulse.NUM_PULSE_PIN-1)
+        {
+            Serial << ",";
+        }
+    }
+    Serial << endl;
 }
 
 // Create instance

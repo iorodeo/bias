@@ -4,9 +4,7 @@
 #include "MessageHandler.h"
 #include "DioPulse.h"
 
-
 const unsigned long BAUDRATE = 9600; 
-
 
 void setup()
 {

@@ -329,16 +329,49 @@ namespace bias
             comPortComboBoxPtr -> setEnabled(false);
             devOutputGroupBoxPtr -> setEnabled(true);
 
+            // Get list of allowed output pins
+            bool ok;
+            QVector<int> allowedOutputPin = pulseDevice_.getAllowedOutputPin(&ok);
+            if (ok)
+            {
+                allowedOutputPin_ = allowedOutputPin;
+                for (int i=0; i<allowedOutputPin_.size(); i++)
+                {
+                    int pin = allowedOutputPin_[i];
+                    outputPinComboBoxPtr -> addItem(QString::number(pin));
+                }
+            }
+
             // Get output pin from device and set text
-            bool ok = false;
             int outputPin = pulseDevice_.getOutputPin(&ok);
             if (ok)
             {
-                outputPinLabelPtr -> setText(QString("Output Pin: %1").arg(outputPin));
+                int index = -1;
+                for (int i=0; i<allowedOutputPin_.size(); i++)
+                {
+                    if (outputPin == allowedOutputPin_[i])
+                    {
+                        index = i;
+                        outputPin_ = allowedOutputPin_[i];
+                    }
+                }
+                if (index > 0)
+                {
+                    outputPinComboBoxPtr -> setCurrentIndex(index);
+                }
+                else
+                {
+                    ok = false;
+                }
+
             }
-            else
+
+            // If bad response or pulse pin not found
+            if (!ok)
             {
-                outputPinLabelPtr -> setText(QString("Output Pin: ??"));
+                allowedOutputPin_.clear();
+                outputPin_ = -1;
+                outputPinComboBoxPtr -> clear();
             }
 
             // Get pulse length 
@@ -357,7 +390,7 @@ namespace bias
             refreshPortListPushButtonPtr -> setEnabled(true);
             comPortComboBoxPtr -> setEnabled(true);
             devOutputGroupBoxPtr -> setEnabled(false);
-            outputPinLabelPtr -> setText(QString("Output Pin: __"));
+            //outputPinLabelPtr -> setText(QString("Output Pin: __"));
 
             tabWidgetPtr -> setEnabled(true);
             rtnStatus.success = false;
@@ -392,12 +425,15 @@ namespace bias
             return rtnStatus;
         }
 
+        allowedOutputPin_.clear();
+
         statusLabelPtr -> setText(QString("Status: not connected"));
         connectPushButtonPtr -> setText("Connect");
         refreshPortListPushButtonPtr -> setEnabled(true);
         comPortComboBoxPtr -> setEnabled(true);
         devOutputGroupBoxPtr -> setEnabled(false);
-        outputPinLabelPtr -> setText(QString("Output Pin: __"));
+        //outputPinLabelPtr -> setText(QString("Output Pin: __"));
+        outputPinComboBoxPtr -> clear();
 
         tabWidgetPtr -> setEnabled(true);
         rtnStatus.success = true;
@@ -471,7 +507,7 @@ namespace bias
         {
             statusLabelPtr -> setText(QString("Status: not connected "));
             devOutputGroupBoxPtr -> setEnabled(false);
-            outputPinLabelPtr -> setText("Output Pin: __");
+            //outputPinLabelPtr -> setText("Output Pin: __");
         }
 
         return rtnStatus;
@@ -508,6 +544,13 @@ namespace bias
                 SIGNAL(clicked()),
                 this,
                 SLOT(outputTestPushButtonClicked())
+               );
+
+        connect(
+                outputPinComboBoxPtr,
+                SIGNAL(currentIndexChanged(int)),
+                this,
+                SLOT(outputPinComboBoxIndexChanged(int))
                );
 
         connect(
@@ -582,6 +625,8 @@ namespace bias
         livePlotUpdateTimerPtr_ -> start(livePlotUpdateDt_);
 
         refreshPortList();
+        allowedOutputPin_.clear();
+        outputPin_ = -1;
 
         setFromConfig(config_);
         setRequireTimer(false);
@@ -669,10 +714,12 @@ namespace bias
         }
     }
 
+
     void GrabDetectorPlugin::refreshPortListPushButtonClicked()
     {
         refreshPortList();
     }
+
 
     void GrabDetectorPlugin::outputTestPushButtonClicked()
     {
@@ -687,6 +734,24 @@ namespace bias
             }
         }
     }
+
+
+    void GrabDetectorPlugin::outputPinComboBoxIndexChanged(int index)
+    {
+        if (pulseDevice_.isOpen() && (index >= 0) && (outputPin_ != -1) )
+        {
+            int newOutputPin = allowedOutputPin_[index];
+            if (outputPin_ != newOutputPin)
+            {
+                bool ok = pulseDevice_.setOutputPin(newOutputPin);
+                if (ok)
+                {
+                    outputPin_ = newOutputPin;
+                } 
+            }
+        }
+    }
+
 
     void GrabDetectorPlugin::durationDblSpinBoxValueChanged(double value)
     {

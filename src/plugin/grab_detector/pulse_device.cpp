@@ -109,6 +109,50 @@ namespace bias
         return pin;
     }
 
+
+    bool PulseDevice::setOutputPin(int outputPin)
+    {
+        QByteArray cmd;
+        cmd.append(QString("[%1,%2]\n").arg(CMD_ID_SET_OUTPUT_PIN).arg(outputPin));
+        return writeCmd(cmd);
+    }
+
+    QVector<int> PulseDevice::getAllowedOutputPin(bool *ok)
+    {
+        QByteArray cmd;
+        cmd.append(QString("[%1,]\n").arg(CMD_ID_GET_ALLOWED_OUTPUT_PIN));
+
+        QByteArray rsp;
+        bool rspOk = writeCmdGetRsp(cmd,rsp);
+
+        QVector<int> allowedOutputPin;
+        if ( rspOk && (rsp.size() > 0))
+        {
+            *ok = true;
+            rsp = rsp.trimmed();
+            QList<QByteArray> rspList = rsp.split(',');
+            for (int i=0; i<rspList.size(); i++)
+            {
+                bool convOk = false;
+                int pin = rspList[i].toInt(&convOk);
+                if (convOk)
+                {
+                    allowedOutputPin.append(pin);
+                }
+                else
+                {
+                    *ok = false;
+                }
+            }
+        }
+        else
+        {
+            *ok = false;
+        }
+        return allowedOutputPin;
+    }
+
+
     // Prottected methods
     // ------------------------------------------------------------------------
     void PulseDevice::initialize()
@@ -139,12 +183,24 @@ namespace bias
         {
             if (waitForReadyRead(waitForTimeout_))
             {
-                char buffer[RSP_BUFFER_SIZE];
-                qint64 numBytes = readLine(buffer,RSP_BUFFER_SIZE);
-                if (numBytes > 0)
+                int cnt = 0;
+                while (!ok)
                 {
-                    rsp.append(buffer);
-                    ok = true;
+                    rsp.append(readAll());
+                    if (rsp.endsWith('\n'))
+                    {
+                        ok = true;
+                    }
+                    else
+                    {
+                        waitForReadyRead(waitForTimeout_);
+                    }
+                    cnt++;
+                    if (cnt > MAX_READ_CNT)
+                    {
+                        break;
+                    }
+
                 }
             }
         }

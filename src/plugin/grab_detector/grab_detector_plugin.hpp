@@ -79,6 +79,8 @@ namespace bias
 
             QList<QSerialPortInfo> serialInfoList_;
             PulseDevice pulseDevice_;
+            QVector<int> allowedOutputPin_;
+            int outputPin_;
 
             void connectWidgets();
             void initialize();
@@ -103,6 +105,7 @@ namespace bias
             void connectPushButtonClicked();
             void refreshPortListPushButtonClicked();
             void outputTestPushButtonClicked();
+            void outputPinComboBoxIndexChanged(int index);
             void durationDblSpinBoxValueChanged(double value);
             void colorSelectPushButtonClicked();
             void trigResetPushButtonClicked();
