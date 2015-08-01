@@ -552,9 +552,9 @@ namespace bias
             imageDispatcherPtr_ -> stop();
             imageDispatcherPtr_ -> releaseLock();
 
-            newImageQueuePtr_ -> acquireLock();
-            newImageQueuePtr_ -> signalNotEmpty();
-            newImageQueuePtr_ -> releaseLock();
+            //newImageQueuePtr_ -> acquireLock();
+            //newImageQueuePtr_ -> signalNotEmpty();
+            //newImageQueuePtr_ -> releaseLock();
         }
 
         if (!imageLoggerPtr_.isNull())
@@ -563,9 +563,9 @@ namespace bias
             imageLoggerPtr_ -> stop();
             imageLoggerPtr_ -> releaseLock();
 
-            logImageQueuePtr_ -> acquireLock();
-            logImageQueuePtr_ -> signalNotEmpty();
-            logImageQueuePtr_ -> releaseLock();
+            //logImageQueuePtr_ -> acquireLock();
+            //logImageQueuePtr_ -> signalNotEmpty();
+            //logImageQueuePtr_ -> releaseLock();
         }
 
         if (!pluginHandlerPtr_.isNull())
@@ -574,13 +574,29 @@ namespace bias
             pluginHandlerPtr_ -> stop();
             pluginHandlerPtr_ -> releaseLock();
 
+            //pluginImageQueuePtr_ -> acquireLock();
+            //pluginImageQueuePtr_ -> signalNotEmpty();
+            //pluginImageQueuePtr_ -> releaseLock();
+        }
+
+        // Wait until threads are finished
+        bool threadsDone = false;
+        while (!threadsDone)
+        {
+            threadsDone = threadPoolPtr_ -> waitForDone(THREADPOOL_WAIT_TIMEOUT);
+
+            newImageQueuePtr_ -> acquireLock();
+            newImageQueuePtr_ -> signalNotEmpty();
+            newImageQueuePtr_ -> releaseLock();
+
+            logImageQueuePtr_ -> acquireLock();
+            logImageQueuePtr_ -> signalNotEmpty();
+            logImageQueuePtr_ -> releaseLock();
+
             pluginImageQueuePtr_ -> acquireLock();
             pluginImageQueuePtr_ -> signalNotEmpty();
             pluginImageQueuePtr_ -> releaseLock();
         }
-
-        // Wait until threads are finished
-        threadPoolPtr_ -> waitForDone();
 
         // Clear any stale data out of existing queues
         newImageQueuePtr_ -> acquireLock();
