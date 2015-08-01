@@ -65,6 +65,7 @@ namespace bias
     const unsigned int DURATION_TIMER_INTERVAL = 1000; // msec
     const QSize PREVIEW_DUMMY_IMAGE_SIZE = QSize(320,256);
     const unsigned int MAX_THREAD_COUNT=10;
+    const int THREADPOOL_WAIT_TIMEOUT = 50;
 
     // Default settings
     const unsigned long DEFAULT_CAPTURE_DURATION = 300; // sec
