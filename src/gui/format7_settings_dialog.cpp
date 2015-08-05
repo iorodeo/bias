@@ -7,7 +7,7 @@
 #include <QPointer>
 #include <QMessageBox>
 #include <iostream>
-
+#include <QtDebug>
 
 
 namespace bias 
@@ -339,7 +339,7 @@ namespace bias
         {
             return;
         }
-
+        
         // Get current settings from Camera
         getFormat7SettingsAndInfo();
 
@@ -441,6 +441,7 @@ namespace bias
             info_ = cameraPtr_ -> getFormat7Info(settings_.mode);
             modeList_ = cameraPtr_ -> getListOfSupportedImageModes();
             formatList_ = cameraPtr_ -> getListOfSupportedPixelFormats(settings_.mode);
+
             cameraPtr_ -> releaseLock();
         }
         else

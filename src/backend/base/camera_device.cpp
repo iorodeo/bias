@@ -59,6 +59,11 @@ namespace bias
         return false;
     }
 
+    unsigned int CameraDevice::getNumberOfImageMode()
+    {
+        return 0;
+    }
+
 
     VideoMode CameraDevice::getVideoMode() 
     { 

@@ -16,6 +16,8 @@ namespace bias
 
     ImageModeList getListOfImageModes();
 
+    ImageModeList getListOfImageModes(unsigned int number);
+
     PropertyTypeList getListOfPropertyTypes();
 
     PixelFormatList getListOfPixelFormats();

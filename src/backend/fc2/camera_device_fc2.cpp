@@ -15,6 +15,7 @@ namespace bias {
     const unsigned int MAX_CYCLE_OFFSET = 3072;
     const unsigned int USEC_PER_CYCLE_COUNT = (1000000/MAX_CYCLE_COUNT);
     const unsigned int CYCLE_OFFSET_MASK = 0b111111110000;
+    const unsigned int NUMBER_OF_FC2_IMAGEMODE = NUMBER_OF_IMAGEMODE;
 
     CameraDevice_fc2::CameraDevice_fc2() : CameraDevice()
     {
@@ -764,6 +765,11 @@ namespace bias {
             throw RuntimeError(ERROR_FC2_GET_FORMAT7_INFO, ssError.str());
         }
         return (supported==TRUE ? true : false);
+    }
+
+    unsigned int CameraDevice_fc2::getNumberOfImageMode()
+    {
+        return NUMBER_OF_FC2_IMAGEMODE;
     }
 
 

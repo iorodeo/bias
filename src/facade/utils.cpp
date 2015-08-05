@@ -39,6 +39,16 @@ namespace bias
         return list;
     }
 
+    ImageModeList getListOfImageModes(unsigned int number)
+    {
+        ImageModeList list;
+        for (int i=0; i < number; i++)
+        {
+            list.push_back(ImageMode(i));
+        }
+        return list;
+    }
+
     PropertyTypeList getListOfPropertyTypes()
     {
         PropertyTypeList list;

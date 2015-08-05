@@ -1071,7 +1071,6 @@ namespace bias
             bool showErrorDlg
             )
     {
-
         RtnStatus rtnStatus;
         QString errMsgTitle("Load Configuration Error");
         QVariantMap oldConfigMap = getConfigurationMap(rtnStatus);
@@ -2569,8 +2568,8 @@ namespace bias
         //setCurrentPlugin(pluginMap_.firstKey());
         setCurrentPlugin("grabDetector");
         //setCurrentPlugin("stampede");
-        //setPluginEnabled(false);
-        setPluginEnabled(true);
+        setPluginEnabled(false);
+        //setPluginEnabled(true);
 
         updateWindowTitle();
         updateCameraInfoMessage();

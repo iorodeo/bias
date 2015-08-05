@@ -11,6 +11,8 @@
 
 namespace bias {
 
+    const unsigned int NUMBER_OF_DC1394_IMAGEMODE = DC1394_VIDEO_MODE_FORMAT7_NUM; 
+
     CameraDevice_dc1394::CameraDevice_dc1394() : CameraDevice()
     {
         context_dc1394_ = NULL;
@@ -344,6 +346,11 @@ namespace bias {
             return false;
         }
         return true;
+    }
+
+    unsigned int CameraDevice_dc1394::getNumberOfImageMode()
+    {
+        return NUMBER_OF_DC1394_IMAGEMODE;
     }
 
 
@@ -723,15 +730,11 @@ namespace bias {
             ssError << ": error unable to get format7 mode info" << std::endl;
             throw RuntimeError(ERROR_DC1394_GET_COLOR_CODING , ssError.str()); 
         }
-
         //printFormat7ModeInfo_dc1394(*format7ModeInfo_dc1394);
-
         Format7Info format7Info = convertFormat7Info_from_dc1394(imgMode, *format7ModeInfo_dc1394);
         format7Info.print();
-
         return format7Info;
     }
-
 
 
     bool CameraDevice_dc1394::validateFormat7Settings(Format7Settings settings)
