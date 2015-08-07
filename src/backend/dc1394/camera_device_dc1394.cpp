@@ -94,13 +94,13 @@ namespace bias {
 
             setTriggerInternal();
 
-            getFormat7Info(IMAGEMODE_0);
+            //getFormat7Info(IMAGEMODE_0);
 
             // DEVEL 
             // -------------------------------------------------------------------
-            Format7Settings f7Settings = getFormat7Settings();
-            f7Settings.print();
-            setFormat7Configuration(f7Settings,100.0);
+            //Format7Settings f7Settings = getFormat7Settings();
+            //f7Settings.print();
+            //setFormat7Configuration(f7Settings,100.0);
 
             //PixelFormatList pixelFormatList = getListOfSupportedPixelFormats(IMAGEMODE_0);
             //PixelFormatList::iterator it;
@@ -732,7 +732,7 @@ namespace bias {
         }
         //printFormat7ModeInfo_dc1394(*format7ModeInfo_dc1394);
         Format7Info format7Info = convertFormat7Info_from_dc1394(imgMode, *format7ModeInfo_dc1394);
-        format7Info.print();
+        //format7Info.print();
         return format7Info;
     }
 
