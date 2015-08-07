@@ -10,7 +10,8 @@ namespace bias
     // Device parameters 
     const QString GrabDetectorConfig::DEFAULT_DEVICE_PORT_NAME("ttyUSB0");
     const bool GrabDetectorConfig::DEFAULT_DEVICE_AUTO_CONNECT = false;
-    const double GrabDetectorConfig::DEFAULT_DEVICE_PULSE_DURATION = 0.2; 
+    const double GrabDetectorConfig::DEFAULT_DEVICE_PULSE_DURATION = 0.02; 
+    const int GrabDetectorConfig::DEFAULT_OUTPUT_PIN = 4;
 
     // Detection box parameters
     const int GrabDetectorConfig::DEFAULT_DETECTION_BOX_XPOS = 0;
@@ -31,6 +32,7 @@ namespace bias
             devicePortName = DEFAULT_DEVICE_PORT_NAME;;
             deviceAutoConnect = DEFAULT_DEVICE_AUTO_CONNECT;
             devicePulseDuration = DEFAULT_DEVICE_PULSE_DURATION;
+            outputPin = DEFAULT_OUTPUT_PIN;
 
             detectBoxXPos = DEFAULT_DETECTION_BOX_XPOS;
             detectBoxYPos = DEFAULT_DETECTION_BOX_YPOS;
@@ -127,6 +129,20 @@ namespace bias
             {
                 rtnStatus.success = false;
                 rtnStatus.appendMessage("unable to convert pulse duration to double");
+            }
+        }
+
+        if (configMap.contains("outputPin"))
+        {
+            if (configMap["outputPin"].canConvert<int>())
+            {
+                outputPin = configMap["outputPin"].toInt();
+                qDebug() << "outputPin: " << outputPin;
+            }
+            else
+            {
+                rtnStatus.success = false;
+                rtnStatus.appendMessage("unable to convert output pin to int");
             }
         }
 
@@ -304,6 +320,7 @@ namespace bias
         deviceMap.insert("portName", devicePortName);
         deviceMap.insert("autoConnect", deviceAutoConnect);
         deviceMap.insert("pulseDuration", devicePulseDuration);
+        deviceMap.insert("outputPin", outputPin);
 
         // Create detectBox map
         QVariantMap detectBoxMap;
@@ -374,6 +391,7 @@ namespace bias
         configStr.append(QString("  portName:       %1\n").arg(devicePortName ));
         configStr.append(QString("  autoConnect:    %1\n").arg(deviceAutoConnect));
         configStr.append(QString("  pulseDuration:  %1\n").arg(devicePulseDuration));
+        configStr.append(QString("  outputPin:      %1\n").arg(outputPin));
 
         configStr.append(QString("\n"));
         configStr.append(QString("DetectBox: \n"));

@@ -3,6 +3,7 @@
 #include <QtDebug>
 #include <QTimer>
 #include <QMessageBox>
+#include <QThread>
 #include <cv.h>
 #include <opencv2/core/core.hpp>
 #include <sstream>
@@ -33,7 +34,9 @@ namespace bias
 
     void GrabDetectorPlugin::processFrames(QList<StampedImage> frameList)
     {
+        // --------------------------------------------------------------
         // NOTE: called in separate thread.
+        // --------------------------------------------------------------
         
 
         int medianFilterSize = getMedianFilter();
@@ -78,8 +81,6 @@ namespace bias
                 }
             }
             releaseLock();
-
-            //qDebug() << "cnt: " << frameCount_ << ", listSize: " << frameListSize;
 
         }
     }
@@ -340,47 +341,57 @@ namespace bias
                     int pin = allowedOutputPin_[i];
                     outputPinComboBoxPtr -> addItem(QString::number(pin));
                 }
+                outputPinComboBoxReady_ = true;
             }
 
-            // Get output pin from device and set text
-            int outputPin = pulseDevice_.getOutputPin(&ok);
-            if (ok)
+
+            // Set output pin
+            bool pinAllowed = false;
+            int pinIndex = -1;
+
+            qDebug() << "config_.outputPin: " << config_.outputPin;
+
+            for (int i=0; i<allowedOutputPin_.size(); i++)
             {
-                int index = -1;
-                for (int i=0; i<allowedOutputPin_.size(); i++)
+                if (config_.outputPin == allowedOutputPin_[i])
                 {
-                    if (outputPin == allowedOutputPin_[i])
-                    {
-                        index = i;
-                        outputPin_ = allowedOutputPin_[i];
-                    }
+                    pinAllowed = true;
+                    pinIndex = i;
+                    break;
                 }
-                if (index > 0)
-                {
-                    outputPinComboBoxPtr -> setCurrentIndex(index);
-                }
-                else
-                {
-                    ok = false;
-                }
-
             }
 
-            // If bad response or pulse pin not found
+            ok = false;
+            if (pinAllowed)
+            {
+                outputPinComboBoxPtr -> setCurrentIndex(pinIndex);
+                ok = pulseDevice_.setOutputPin(config_.outputPin);
+            }
+            else
+            {
+                if (!allowedOutputPin_.isEmpty())
+                {
+                    outputPinComboBoxPtr -> setCurrentIndex(0);
+                    config_.outputPin = allowedOutputPin_[0];
+                    ok = pulseDevice_.setOutputPin(config_.outputPin);
+                }
+            }
+
+
+            // If bad response or unable to set output pin 
             if (!ok)
             {
                 allowedOutputPin_.clear();
-                outputPin_ = -1;
+                config_.outputPin = -1;
                 outputPinComboBoxPtr -> clear();
+                outputPinComboBoxReady_ = false;
             }
 
-            // Get pulse length 
-            ok = false;
-            unsigned long pulseLength_us = pulseDevice_.getPulseLength(&ok);
+            // Set pulse length 
+            ok =  pulseDevice_.setPulseLength(1.0e6*config_.devicePulseDuration);
             if (ok)
             {
-                double pulseLength_sec = (1.0e-6)*pulseLength_us;
-                durationDblSpinBoxPtr -> setValue(pulseLength_sec);
+                durationDblSpinBoxPtr -> setValue(config_.devicePulseDuration);
             }
         }
         else
@@ -390,13 +401,13 @@ namespace bias
             refreshPortListPushButtonPtr -> setEnabled(true);
             comPortComboBoxPtr -> setEnabled(true);
             devOutputGroupBoxPtr -> setEnabled(false);
-            //outputPinLabelPtr -> setText(QString("Output Pin: __"));
 
             tabWidgetPtr -> setEnabled(true);
             rtnStatus.success = false;
             rtnStatus.message = QString("failed to open device");
             return rtnStatus;
         }
+
 
         tabWidgetPtr -> setEnabled(true);
         rtnStatus.success = true;
@@ -432,7 +443,6 @@ namespace bias
         refreshPortListPushButtonPtr -> setEnabled(true);
         comPortComboBoxPtr -> setEnabled(true);
         devOutputGroupBoxPtr -> setEnabled(false);
-        //outputPinLabelPtr -> setText(QString("Output Pin: __"));
         outputPinComboBoxPtr -> clear();
 
         tabWidgetPtr -> setEnabled(true);
@@ -446,7 +456,18 @@ namespace bias
     {
         RtnStatus rtnStatus;
 
+
+
+        GrabDetectorConfig oldConfig = config_;
         config_= config;
+        bool reconnect = false;
+        if (pulseDevice_.isOpen())
+        {
+            disconnectTriggerDev();
+            reconnect = true;
+        }
+
+
 
         durationDblSpinBoxPtr -> setValue(config_.devicePulseDuration);
         autoConnectCheckBoxPtr -> setChecked(config_.deviceAutoConnect);
@@ -481,10 +502,16 @@ namespace bias
         {
             int portIndex = comPortComboBoxPtr -> findText(config_.devicePortName); 
             comPortComboBoxPtr -> setCurrentIndex(portIndex);
-            if (config_.deviceAutoConnect)
+            if ( (config_.deviceAutoConnect) || reconnect)
             {
+                if (reconnect)
+                {
+                    QThread::msleep(1000);
+                }
+
                 rtnStatus = connectTriggerDev();
-                if (rtnStatus.success)
+
+                if (!rtnStatus.success)
                 {
                     rtnStatus.success = false;
                     rtnStatus.appendMessage(QString("unable to connect to port %1").arg(config_.devicePortName));
@@ -497,17 +524,10 @@ namespace bias
             rtnStatus.appendMessage(QString("port %1 not found").arg(config_.devicePortName));
         }
 
-        if (pulseDevice_.isOpen())
-        {
-            double value = durationDblSpinBoxPtr -> value();
-            unsigned long pulseLength_us = (unsigned long)(value*1.0e6);
-            bool ok = pulseDevice_.setPulseLength(pulseLength_us);
-        }
-        else
+        if (!pulseDevice_.isOpen())
         {
             statusLabelPtr -> setText(QString("Status: not connected "));
             devOutputGroupBoxPtr -> setEnabled(false);
-            //outputPinLabelPtr -> setText("Output Pin: __");
         }
 
         return rtnStatus;
@@ -626,7 +646,7 @@ namespace bias
 
         refreshPortList();
         allowedOutputPin_.clear();
-        outputPin_ = -1;
+        outputPinComboBoxReady_ = false;
 
         setFromConfig(config_);
         setRequireTimer(false);
@@ -699,6 +719,10 @@ namespace bias
     
     void GrabDetectorPlugin::comPortComboBoxIndexChanged(QString text)
     {
+        if (!text.isEmpty())
+        {
+            config_.devicePortName = text;
+        }
     }
 
 
@@ -738,15 +762,15 @@ namespace bias
 
     void GrabDetectorPlugin::outputPinComboBoxIndexChanged(int index)
     {
-        if (pulseDevice_.isOpen() && (index >= 0) && (outputPin_ != -1) )
+        if (pulseDevice_.isOpen() && (index >= 0) && outputPinComboBoxReady_ )
         {
             int newOutputPin = allowedOutputPin_[index];
-            if (outputPin_ != newOutputPin)
+            if (config_.outputPin != newOutputPin)
             {
                 bool ok = pulseDevice_.setOutputPin(newOutputPin);
                 if (ok)
                 {
-                    outputPin_ = newOutputPin;
+                    config_.outputPin = newOutputPin;
                 } 
             }
         }
@@ -755,7 +779,6 @@ namespace bias
 
     void GrabDetectorPlugin::durationDblSpinBoxValueChanged(double value)
     {
-        //qDebug() << "duration value changed: " << value;
         if (pulseDevice_.isOpen())
         {
             unsigned long pulseLength_us = (unsigned long)(value*1.0e6);

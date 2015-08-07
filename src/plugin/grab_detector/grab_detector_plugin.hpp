@@ -80,7 +80,7 @@ namespace bias
             QList<QSerialPortInfo> serialInfoList_;
             PulseDevice pulseDevice_;
             QVector<int> allowedOutputPin_;
-            int outputPin_;
+            bool outputPinComboBoxReady_ = false;
 
             void connectWidgets();
             void initialize();

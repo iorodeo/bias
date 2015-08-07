@@ -110,12 +110,13 @@ namespace bias {
 
             config.grabTimeout = FC2_TIMEOUT_NONE;
             config.grabMode =  FC2_BUFFER_FRAMES;
-            config.numBuffers = 20;
+            //config.numBuffers = 20;
+            config.numBuffers = 200;
 
             setConfiguration_fc2(config);
 
-            //config = getConfiguration_fc2();
-            //printConfiguration_fc2(config);
+            config = getConfiguration_fc2();
+            printConfiguration_fc2(config);
 
             // DEVEL
             // -----------------------------------------------

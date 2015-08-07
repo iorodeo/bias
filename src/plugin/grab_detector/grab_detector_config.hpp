@@ -18,6 +18,7 @@ namespace bias
             static const QString DEFAULT_DEVICE_PORT_NAME;
             static const bool DEFAULT_DEVICE_AUTO_CONNECT;
             static const double DEFAULT_DEVICE_PULSE_DURATION; 
+            static const int DEFAULT_OUTPUT_PIN;
 
             // Default detection box parameters
             static const int DEFAULT_DETECTION_BOX_XPOS;
@@ -36,6 +37,7 @@ namespace bias
             QString devicePortName;
             bool deviceAutoConnect;
             double devicePulseDuration;
+            int outputPin;
 
             // Dectection boc parameters
             int detectBoxXPos;
