@@ -992,7 +992,7 @@ namespace bias
         if (displayDev_.isOpen())
         {
             displayDev_.setPatternId(uint8_t(event.patternId()));
-            displayDev_.setGainAndBias(0,0,0,int8_t(event.controlBias()));
+            displayDev_.setGainAndBias(0,int8_t(event.controlBias()),0,0);
             displayDev_.start();
         }
         else

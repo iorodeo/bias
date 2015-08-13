@@ -344,12 +344,9 @@ namespace bias
                 outputPinComboBoxReady_ = true;
             }
 
-
             // Set output pin
             bool pinAllowed = false;
             int pinIndex = -1;
-
-            qDebug() << "config_.outputPin: " << config_.outputPin;
 
             for (int i=0; i<allowedOutputPin_.size(); i++)
             {
@@ -444,6 +441,7 @@ namespace bias
         comPortComboBoxPtr -> setEnabled(true);
         devOutputGroupBoxPtr -> setEnabled(false);
         outputPinComboBoxPtr -> clear();
+        outputPinComboBoxReady_ = false;
 
         tabWidgetPtr -> setEnabled(true);
         rtnStatus.success = true;
@@ -456,18 +454,15 @@ namespace bias
     {
         RtnStatus rtnStatus;
 
-
-
         GrabDetectorConfig oldConfig = config_;
         config_= config;
+
         bool reconnect = false;
         if (pulseDevice_.isOpen())
         {
             disconnectTriggerDev();
             reconnect = true;
         }
-
-
 
         durationDblSpinBoxPtr -> setValue(config_.devicePulseDuration);
         autoConnectCheckBoxPtr -> setChecked(config_.deviceAutoConnect);
@@ -508,7 +503,6 @@ namespace bias
                 {
                     QThread::msleep(1000);
                 }
-
                 rtnStatus = connectTriggerDev();
 
                 if (!rtnStatus.success)

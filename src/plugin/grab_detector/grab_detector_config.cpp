@@ -137,7 +137,6 @@ namespace bias
             if (configMap["outputPin"].canConvert<int>())
             {
                 outputPin = configMap["outputPin"].toInt();
-                qDebug() << "outputPin: " << outputPin;
             }
             else
             {
