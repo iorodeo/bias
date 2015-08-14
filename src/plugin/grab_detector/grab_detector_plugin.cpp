@@ -18,6 +18,8 @@ namespace bias
     int GrabDetectorPlugin::DEFAULT_LIVEPLOT_UPDATE_DT = 75;
     double GrabDetectorPlugin::DEFAULT_LIVEPLOT_TIME_WINDOW = 10.0; 
     double GrabDetectorPlugin::DEFAULT_LIVEPLOT_SIGNAL_WINDOW = 255.0;
+    const QString GrabDetectorPlugin::LOG_FILE_EXTENSION = QString("txt");
+    const QString GrabDetectorPlugin::LOG_FILE_POSTFIX = QString("grab_detector_log");
 
 
     // Public Methods
@@ -29,6 +31,17 @@ namespace bias
         setupUi(this);
         connectWidgets();
         initialize();
+    }
+
+    void GrabDetectorPlugin::reset()
+    {
+        openLogFile();
+    }
+
+
+    void GrabDetectorPlugin::stop()
+    {
+        closeLogFile();
     }
 
 
@@ -57,7 +70,7 @@ namespace bias
             cv::Mat roiImage = workingImage(boxRect);
             cv::medianBlur(roiImage,roiImage,medianFilterSize);
             cv::minMaxLoc(roiImage,&signalMin,&signalMax);
-            if (signalMax > threshold)
+            if (signalMax > double(threshold))
             {
                 found = true;
             }
@@ -77,7 +90,12 @@ namespace bias
             {
                 if (config_.triggerEnabled)
                 {
-                    emit triggerFired();
+                    TriggerData triggerData;
+                    triggerData.frameCount = latestFrame.frameCount;
+                    triggerData.timeStamp = latestFrame.timeStamp;
+                    triggerData.threshold = double(threshold);
+                    triggerData.signal = signalMax;
+                    emit triggerFired(triggerData);
                 }
             }
             releaseLock();
@@ -286,6 +304,17 @@ namespace bias
             rtnStatus = setFromConfig(config);
         }
         return rtnStatus;
+    }
+
+    QString GrabDetectorPlugin::getLogFileExtension()
+    {
+        return LOG_FILE_EXTENSION;
+    }
+
+
+    QString GrabDetectorPlugin::getLogFilePostfix()
+    {
+        return LOG_FILE_POSTFIX;
     }
 
 
@@ -527,6 +556,8 @@ namespace bias
         return rtnStatus;
     }
 
+
+
     // Protected Methods
     // ------------------------------------------------------------------------
     
@@ -602,11 +633,13 @@ namespace bias
                 SLOT(detectionBoxChanged(QRect))
                );
 
+        qRegisterMetaType<TriggerData>("TriggerData");
+
         connect(
                 this,
-                SIGNAL(triggerFired()),
+                SIGNAL(triggerFired(TriggerData)),
                 this,
-                SLOT(onTriggerFired())
+                SLOT(onTriggerFired(TriggerData))
                );
 
     }
@@ -706,6 +739,11 @@ namespace bias
         colorExampleLabelPtr -> setAutoFillBackground(true);
     }
 
+
+    void GrabDetectorPlugin::writeLogData(TriggerData data)
+    {
+        logStream_ << data.frameCount << " " << data.timeStamp << " " << data.threshold << " " << data.signal << '\n';
+    }
 
 
     // Private Slots
@@ -870,7 +908,7 @@ namespace bias
 
     }
 
-    void GrabDetectorPlugin::onTriggerFired()
+    void GrabDetectorPlugin::onTriggerFired(TriggerData data)
     {
         if (config_.triggerArmedState)
         {
@@ -879,6 +917,10 @@ namespace bias
                 pulseDevice_.startPulse();
             }
             config_.triggerArmedState = false;
+            if (loggingEnabled_)
+            {
+                writeLogData(data);
+            }
             updateTrigStateInfo();
         }
     }

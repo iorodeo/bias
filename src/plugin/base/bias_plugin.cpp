@@ -8,6 +8,8 @@ namespace bias
 
     const QString BiasPlugin::PLUGIN_NAME = QString("basePlugin"); 
     const QString BiasPlugin::PLUGIN_DISPLAY_NAME = QString("Base Plugin"); 
+    const QString BiasPlugin::LOG_FILE_EXTENSION = QString("txt");
+    const QString BiasPlugin::LOG_FILE_POSTFIX = QString("plugin_log");
 
     // Pulbic
     // ------------------------------------------------------------------------
@@ -132,11 +134,79 @@ namespace bias
     }
 
 
+    QString BiasPlugin::getLogFileExtension()
+    {
+        return LOG_FILE_EXTENSION;
+    }
+
+    QString BiasPlugin::getLogFilePostfix()
+    {
+        return LOG_FILE_POSTFIX;
+    }
+
+    QString BiasPlugin::getLogFileName(bool includeAutoNaming)
+    {
+        QPointer<CameraWindow> cameraWindowPtr = getCameraWindow();
+        QString logFileName = cameraWindowPtr -> getVideoFileName() + QString("_") + getLogFilePostfix();
+        if (includeAutoNaming)
+        {
+            if (!fileAutoNamingString_.isEmpty())
+            {
+                logFileName += QString("_") + fileAutoNamingString_;
+            }
+            if (fileVersionNumber_ != 0)
+            {
+                QString verStr = QString("_v%1").arg(fileVersionNumber_,3,10,QChar('0'));
+                logFileName += verStr;
+            }
+        }
+        logFileName += QString(".") + getLogFileExtension();
+        return logFileName;
+    }
+
+
+    QString BiasPlugin::getLogFileFullPath(bool includeAutoNaming)
+    {
+        QString logFileName = getLogFileName(includeAutoNaming);
+        QPointer<CameraWindow> cameraWindowPtr = getCameraWindow();
+        logFileDir_ = cameraWindowPtr -> getVideoFileDir();
+        QString logFileFullPath = logFileDir_.absoluteFilePath(logFileName);
+        return logFileFullPath;
+    }
+
     // Protected methods
     // ------------------------------------------------------------------------
+
     void BiasPlugin::setRequireTimer(bool value)
     {
         requireTimer_ = value;
+    }
+
+
+    void BiasPlugin::openLogFile()
+    {
+        loggingEnabled_ = getCameraWindow() -> isLoggingEnabled();
+        if (loggingEnabled_)
+        {
+            QString logFileFullPath = getLogFileFullPath(true);
+            qDebug() << logFileFullPath;
+            logFile_.setFileName(logFileFullPath);
+            bool isOpen = logFile_.open(QIODevice::WriteOnly);
+            if (isOpen)
+            {
+                logStream_.setDevice(&logFile_);
+            }
+        }
+    }
+
+
+    void BiasPlugin::closeLogFile()
+    {
+        if (loggingEnabled_ && logFile_.isOpen())
+        {
+            logStream_.flush();
+            logFile_.close();
+        }
     }
 
 }

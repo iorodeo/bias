@@ -6,8 +6,6 @@
 #include "panels_controller.hpp"
 #include "nano_ssr_pulse.hpp"
 #include "rtn_status.hpp"
-#include <QDir>
-#include <QTextStream>
 
 namespace cv
 { 
@@ -46,6 +44,8 @@ namespace bias
             virtual QString getDisplayName();
             virtual QVariantMap getConfigAsMap();  
             virtual RtnStatus runCmdFromMap(QVariantMap cmdMap,bool showErrorDlg=true);
+            virtual QString getLogFileExtension();
+            virtual QString getLogFilePostfix();
 
 
             RtnStatus loadConfigFromFile(QString fileName, bool showErrorDlg=true);
@@ -73,8 +73,6 @@ namespace bias
             QDir defaultConfigFileDir_;
             QString configFileName_;
 
-            QDir logFileDir_;
-
             PanelsController displayDev_;
             NanoSSRPulse vibrationDev_;
 
@@ -82,9 +80,10 @@ namespace bias
             QList<EventState> displayEventStateList_;
             QList<int> vibrationPinList_;
 
-            bool loggingEnabled_;
-            QFile logFile_;
-            QTextStream logStream_;
+            //QDir logFileDir_;
+            //bool loggingEnabled_;
+            //QFile logFile_;
+            //QTextStream logStream_;
 
             void initialize();
             void connectWidgets();
@@ -102,9 +101,11 @@ namespace bias
             void processEvents();
             void processDisplayEvents();
             void processVibrationEvents();
+
             void writeLogData();
-            QString getLogFileName(bool includeAutoNaming);
-            QString getLogFileFullPath(bool includeAutoNaming);
+
+            //QString getLogFileName(bool includeAutoNaming);
+            //QString getLogFileFullPath(bool includeAutoNaming);
 
         private slots:
 

@@ -42,18 +42,7 @@ namespace bias
             displayDev_.allOff();
         }
 
-        loggingEnabled_ = getCameraWindow() -> isLoggingEnabled();
-        if (loggingEnabled_)
-        {
-            QString logFileFullPath = getLogFileFullPath(true);
-            qDebug() << logFileFullPath;
-            logFile_.setFileName(logFileFullPath);
-            bool isOpen = logFile_.open(QIODevice::WriteOnly);
-            if (isOpen)
-            {
-                logStream_.setDevice(&logFile_);
-            }
-        }
+        openLogFile();
     }
 
     void StampedePlugin::stop()
@@ -68,11 +57,7 @@ namespace bias
             displayDev_.allOff();
         }
 
-        if (loggingEnabled_ && logFile_.isOpen())
-        {
-            logStream_.flush();
-            logFile_.close();
-        }
+        closeLogFile();
     }
 
     void StampedePlugin::setActive(bool value)
@@ -376,6 +361,7 @@ namespace bias
         return rtnStatus;
     }
 
+
     RtnStatus StampedePlugin::disconnectAll() 
     {
         RtnStatus rtnStatus;
@@ -402,6 +388,18 @@ namespace bias
             }
         }
         return rtnStatus;
+    }
+
+
+    QString StampedePlugin::getLogFileExtension()
+    {
+        return LOG_FILE_EXTENSION;
+    }
+
+
+    QString StampedePlugin::getLogFilePostfix()
+    {
+        return LOG_FILE_POSTFIX;
     }
 
 
@@ -778,38 +776,8 @@ namespace bias
                 break;
             }
         }
-        logStream_ << " " << displayRunning << " " << displayControlBias << "\n";
+        logStream_ << " " << displayRunning << " " << displayControlBias << '\n';
         releaseLock();
-    }
-
-    QString StampedePlugin::getLogFileName(bool includeAutoNaming)
-    {
-        QPointer<CameraWindow> cameraWindowPtr = getCameraWindow();
-        QString logFileName = cameraWindowPtr -> getVideoFileName() + QString("_") + LOG_FILE_POSTFIX;
-        if (includeAutoNaming)
-        {
-            if (!fileAutoNamingString_.isEmpty())
-            {
-                logFileName += QString("_") + fileAutoNamingString_;
-            }
-            if (fileVersionNumber_ != 0)
-            {
-                QString verStr = QString("_v%1").arg(fileVersionNumber_,3,10,QChar('0'));
-                logFileName += verStr;
-            }
-        }
-        logFileName += QString(".") + LOG_FILE_EXTENSION;
-        return logFileName;
-    }
-
-
-    QString StampedePlugin::getLogFileFullPath(bool includeAutoNaming)
-    {
-        QString logFileName = getLogFileName(includeAutoNaming);
-        QPointer<CameraWindow> cameraWindowPtr = getCameraWindow();
-        logFileDir_ = cameraWindowPtr -> getVideoFileDir();
-        QString logFileFullPath = logFileDir_.absoluteFilePath(logFileName);
-        return logFileFullPath;
     }
 
     // Private slots

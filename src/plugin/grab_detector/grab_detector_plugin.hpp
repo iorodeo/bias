@@ -17,11 +17,20 @@ namespace cv
     class Mat;
 }
 
+
 namespace bias
 {
 
     class ImageLabel;
     class CameraWindow;
+
+    struct TriggerData
+    {
+        unsigned long frameCount;
+        double timeStamp;
+        double threshold;
+        double signal;
+    };
 
 
     class GrabDetectorPlugin : public BiasPlugin, public Ui::GrabDetectorPluginDialog
@@ -35,8 +44,12 @@ namespace bias
             static int DEFAULT_LIVEPLOT_UPDATE_DT;
             static double DEFAULT_LIVEPLOT_TIME_WINDOW; 
             static double DEFAULT_LIVEPLOT_SIGNAL_WINDOW;
+            static const QString LOG_FILE_EXTENSION;
+            static const QString LOG_FILE_POSTFIX;
 
             GrabDetectorPlugin(ImageLabel *imageLabelPtr, QWidget *parentPtr=0);
+            virtual void reset();
+            virtual void stop();
 
             virtual void processFrames(QList<StampedImage> frameList);
             virtual cv::Mat getCurrentImage();
@@ -48,6 +61,8 @@ namespace bias
             virtual QVariantMap getConfigAsMap();  
             virtual RtnStatus setConfigFromMap(QVariantMap configMap);
             virtual RtnStatus setConfigFromJson(QByteArray jsonArray);
+            virtual QString getLogFileExtension();
+            virtual QString getLogFilePostfix();
 
             void setTriggerEnabled(bool value);
             void resetTrigger();
@@ -56,9 +71,10 @@ namespace bias
             RtnStatus disconnectTriggerDev();
             RtnStatus setFromConfig(GrabDetectorConfig config);
 
+
         signals:
 
-            void triggerFired();
+            void triggerFired(TriggerData data); 
 
         protected:
 
@@ -96,6 +112,8 @@ namespace bias
             void updateTrigStateInfo();
             void refreshPortList();
 
+            void writeLogData(TriggerData data);
+
             void updateColorExampleLabel();
 
 
@@ -112,7 +130,7 @@ namespace bias
             void trigEnabledCheckBoxStateChanged(int state);
             void detectionBoxChanged(QRect boxRect);
             void updateLivePlotOnTimer();
-            void onTriggerFired();
+            void onTriggerFired(TriggerData data);
 
     };
 }
