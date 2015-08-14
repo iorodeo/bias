@@ -191,7 +191,7 @@ namespace bias
             QString logFileFullPath = getLogFileFullPath(true);
             qDebug() << logFileFullPath;
             logFile_.setFileName(logFileFullPath);
-            bool isOpen = logFile_.open(QIODevice::WriteOnly);
+            bool isOpen = logFile_.open(QIODevice::WriteOnly | QIODevice::Text);
             if (isOpen)
             {
                 logStream_.setDevice(&logFile_);
