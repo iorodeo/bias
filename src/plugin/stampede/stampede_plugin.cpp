@@ -185,6 +185,39 @@ namespace bias
         return rtnStatus;
     }
 
+    RtnStatus StampedePlugin::saveConfigToFile(QString fileName, bool showErrorDlg)
+    {
+        acquireLock();
+        QByteArray configJson = config_.toJson();
+        releaseLock();
+        QByteArray prettyConfigJson =  prettyIndentJson(configJson);
+
+        RtnStatus rtnStatus;
+        QFile configFile(fileName);
+        bool isOpen = configFile.open(QIODevice::WriteOnly | QIODevice::Text);
+        if (isOpen)
+        {
+            configFile.write(prettyConfigJson);
+            QFileInfo configFileInfo(configFile.fileName());
+            configFileName_ = configFileInfo.baseName();
+            configFileDir_ = configFileInfo.dir();
+            rtnStatus.success = true;
+            rtnStatus.message = QString("");
+        }
+        else
+        {
+            QString errMsgTitle("Load Configuration Error");
+            QString errMsgText = QString("Unable to save configuration to file %1: ").arg(fileName);
+            if (showErrorDlg)
+            {
+                QMessageBox::critical(this, errMsgTitle, errMsgText);
+            }
+            rtnStatus.success = false;
+            rtnStatus.message = errMsgText;
+        }
+        return rtnStatus;
+    }
+
     RtnStatus StampedePlugin::connectVibrationDev() 
     {
         RtnStatus rtnStatus;
@@ -480,6 +513,13 @@ namespace bias
                 SIGNAL(clicked()),
                 this,
                 SLOT(onReloadConfigClicked())
+               );
+
+        connect(
+                saveConfigPushButtonPtr,
+                SIGNAL(clicked()),
+                this,
+                SLOT(onSaveConfigClicked())
                );
 
         connect(
@@ -889,6 +929,29 @@ namespace bias
             displayDev_.setConfigId(config_.arenaConfigId());
         }
     }
+
+    void StampedePlugin::onSaveConfigClicked()
+    {
+        QString configFileFullPath = getConfigFileFullPath();
+
+        QString configFileString = QFileDialog::getSaveFileName(
+                this, 
+                QString("Load Configuration File"),
+                configFileFullPath
+                );
+
+        if (!configFileString.isEmpty())
+        {
+            saveConfigToFile(configFileString);
+            if (displayDev_.isOpen())
+            {
+                displayDev_.setConfigId(config_.arenaConfigId());
+            }
+        }
+
+
+    }
+
 
     void StampedePlugin::onTimerDurationChanged(unsigned long duration)
     {

@@ -88,6 +88,19 @@
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="QPushButton" name="saveConfigPushButtonPtr">
+           <property name="font">
+            <font>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Save</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>

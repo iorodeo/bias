@@ -47,8 +47,8 @@ namespace bias
             virtual QString getLogFileExtension();
             virtual QString getLogFilePostfix();
 
-
             RtnStatus loadConfigFromFile(QString fileName, bool showErrorDlg=true);
+            RtnStatus saveConfigToFile(QString fileName, bool showErrorDlg=true);
 
             RtnStatus connectVibrationDev();
             RtnStatus disconnectVibrationDev();
@@ -116,6 +116,7 @@ namespace bias
             void onDevConnectAllClicked();
             void onLoadConfigClicked();
             void onReloadConfigClicked();
+            void onSaveConfigClicked();
             void onTimerDurationChanged(unsigned long duration);
             void onVideoFileChanged();
 
