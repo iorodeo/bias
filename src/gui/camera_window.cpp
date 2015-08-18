@@ -2526,8 +2526,8 @@ namespace bias
 
 
         colorMapNumber_ = DEFAULT_COLORMAP_NUMBER;
-        videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
-        //videoFileFormat_ = VIDEOFILE_FORMAT_AVI;
+        //videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
+        videoFileFormat_ = VIDEOFILE_FORMAT_AVI;
         imageDisplayFreq_ = DEFAULT_IMAGE_DISPLAY_FREQ;
         captureDurationSec_ = DEFAULT_CAPTURE_DURATION;
 
