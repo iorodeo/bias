@@ -40,6 +40,9 @@ namespace bias
             unsigned long getFrameCount() const;
             unsigned int getNumConnectedComp() const;
 
+            void dilateEnabled(bool value);
+            void setDilateWindowSize(unsigned int value);
+
             std::shared_ptr<std::vector<uint16_t>> getWriteRowBufPtr();
             std::shared_ptr<std::vector<uint16_t>> getWriteColBufPtr();
             std::shared_ptr<std::vector<uint16_t>> getWriteHgtBufPtr();
@@ -82,9 +85,12 @@ namespace bias
             unsigned int boxArea_;           // BoxLength*boxLength
             unsigned int boxLength_;         // Length of boxes or foreground pixels to store
             unsigned int numConnectedComp_;  // Number of connected components
-            double fgMaxFracCompress_;       // Maximum fraction of pixels that can be in foreground
-                                             // in order for us to compress
-                                             //
+            double fgMaxFracCompress_;       // Maximum fraction of pixels that can be in foreground in order for us to compress
+
+            bool dilateEnabled_;
+            unsigned int dilateWindowSize_;
+
+
             void allocateBuffers();          
             void resetBuffers(); 
             void createUncompressedFrame();

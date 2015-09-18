@@ -32,8 +32,8 @@ namespace bias
     const unsigned int VideoWriter_ufmf::MIN_NUMBER_OF_COMPRESSORS = 1;
     const unsigned int VideoWriter_ufmf::BASE_NUMBER_OF_THREADS = 4;
 
-    const bool VideoWriter_ufmf::DEFAULT_DILATE_STATE = false;
-    const unsigned int VideoWriter_ufmf::DEFAULT_DILATE_WINDOW_SIZE = 2;
+    const bool VideoWriter_ufmf::DEFAULT_DILATE_STATE = true;
+    const unsigned int VideoWriter_ufmf::DEFAULT_DILATE_WINDOW_SIZE = 1;
     const unsigned int VideoWriter_ufmf::MIN_DILATE_WINDOW_SIZE = 1;
     const unsigned int VideoWriter_ufmf::MAX_DILATE_WINDOW_SIZE = 20;
 
@@ -81,25 +81,17 @@ namespace bias
         boxLength_ = params.boxLength;
         setFrameSkip(params.frameSkip);
         numberOfCompressors_ = params.numberOfCompressors;
+        dilateState_ = params.dilateState;
+        dilateWindowSize_ = params.dilateWindowSize; 
 
-        //// ----------------------------------------------------------------------------
-        //std::cout << std::endl;
-        //std::cout << "Params: " << std::endl;
-        //std::cout << " backgroundThreshold:     " << backgroundThreshold_ << std::endl;
-        //std::cout << " numberOfCompressors:     " << numberOfCompressors_ << std::endl;
-        //std::cout << " boxLength:               " << boxLength_ << std::endl;
-        //std::cout << " frameSkip:               " << frameSkip_ << std:: endl;
-        //std::cout << " medianUpdateCount:       " << medianUpdateCount_ << std::endl;
-        //std::cout << " medianUpdateInterval:    " << medianUpdateInterval_ << std::endl;
-        //// -----------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------
+        std::cout << params.toString() << std::endl;
+        // -----------------------------------------------------------------------------
 
         // Create thread pool for background modelling
         threadPoolPtr_ = new QThreadPool(this);
         unsigned int maxThreadCount = numberOfCompressors_ + BASE_NUMBER_OF_THREADS;
         threadPoolPtr_ -> setMaxThreadCount(maxThreadCount);
-
-        //std::cout << " writer max thread count: "  << maxThreadCount << std::endl;
-        //std::cout << std::endl;
 
         // Create queue for images sent to background modeler
         bgImageQueuePtr_ = std::make_shared<LockableQueue<StampedImage>>();
@@ -204,6 +196,8 @@ namespace bias
 
             // Create compressed frame and set its data using the current frame 
             CompressedFrame_ufmf compressedFrame(boxLength_);
+            compressedFrame.dilateEnabled(dilateState_);
+            compressedFrame.setDilateWindowSize(dilateWindowSize_);
 
             if (!(framesWaitQueuePtr_ -> empty()))
             {

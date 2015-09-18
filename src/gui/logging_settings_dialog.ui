@@ -1453,6 +1453,9 @@
                <property name="text">
                 <string>Dilate</string>
                </property>
+               <property name="checked">
+                <bool>false</bool>
+               </property>
               </widget>
              </item>
              <item>

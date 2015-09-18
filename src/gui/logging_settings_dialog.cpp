@@ -141,8 +141,8 @@ namespace bias
         ufmfDilateRangeLabelPtr_ -> setText(tmpString);
 
 
-        ufmfDilateCheckBoxPtr_ -> setEnabled(false); // Temporary
-        ufmfDilateLineEditPtr_ -> setEnabled(false); // Temporary
+        ufmfDilateCheckBoxPtr_ -> setEnabled(true); 
+        ufmfDilateLineEditPtr_ -> setEnabled(true); 
 
     }
 
@@ -205,6 +205,12 @@ namespace bias
         // -------------------------------------------------------------------
         // TO DO - validatpor for ufmf dilate window size
         // --------------------------------------------------------------------
+        validatorPtr = new IntValidatorWithFixup(ufmfDilateLineEditPtr_);
+        validatorPtr -> setRange(
+                VideoWriter_ufmf::MIN_DILATE_WINDOW_SIZE,
+                VideoWriter_ufmf::MAX_DILATE_WINDOW_SIZE
+                );
+        ufmfDilateLineEditPtr_ -> setValidator(validatorPtr);
     }
 
 

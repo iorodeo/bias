@@ -81,9 +81,29 @@ namespace bias
         }
     }
 
+
     unsigned int CompressedFrame_ufmf::getNumConnectedComp() const
     {
         return numConnectedComp_;
+    }
+
+
+    void CompressedFrame_ufmf::dilateEnabled(bool value)
+    {
+        dilateEnabled_ = true;
+    }
+
+
+    void CompressedFrame_ufmf::setDilateWindowSize(unsigned int value)
+    {
+        if (value > 0)
+        {
+            dilateWindowSize_ = value;
+        }
+        else
+        {
+            dilateWindowSize_ = 1;
+        }
     }
 
 
@@ -136,7 +156,6 @@ namespace bias
 
     void CompressedFrame_ufmf::compress()
     {
-
         // ---------------------------------------------------------------------
         // NOTE, probably should raise an exception here
         // ---------------------------------------------------------------------
@@ -159,7 +178,13 @@ namespace bias
 
         // Get background/foreground membership, 255=background, 0=foreground
         cv::inRange(stampedImg_.image, bgLowerBound_, bgUpperBound_, membershipImage_);
-        cv::erode(membershipImage_, membershipImage_, cv::Mat(), cv::Point(-1,-1),1);
+        if (dilateEnabled_)
+        {
+            cv::Size structElemSize = cv::Size(2*dilateWindowSize_+1,2*dilateWindowSize_+1);
+            cv::Mat structElem = cv::getStructuringElement(cv::MORPH_RECT,structElemSize,cv::Point(-1,-1));
+            cv::erode(membershipImage_, membershipImage_, structElem, cv::Point(-1,-1),1);
+            //cv::erode(membershipImage_, membershipImage_, cv::Mat(), cv::Point(-1,-1),1);
+        }
 
         numForeground_ = numPix - cv::countNonZero(membershipImage_);
         numConnectedComp_ = 0;

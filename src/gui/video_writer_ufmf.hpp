@@ -94,6 +94,9 @@ namespace bias
             bool isFixedSize_;
             QString colorCoding_;
 
+            bool dilateState_;
+            unsigned int dilateWindowSize_;
+
             std::fstream file_;
             std::streampos indexLocation_;
             std::streampos indexLocationPtr_;

@@ -2179,6 +2179,7 @@ namespace bias
     void CameraWindow::loggingSettingsChanged(VideoWriterParams params)
     {
         videoWriterParams_ = params;
+        //std::cout << params.toString() << std::endl;
     }
 
 
@@ -2526,8 +2527,8 @@ namespace bias
 
 
         colorMapNumber_ = DEFAULT_COLORMAP_NUMBER;
-        //videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
-        videoFileFormat_ = VIDEOFILE_FORMAT_AVI;
+        videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
+        //videoFileFormat_ = VIDEOFILE_FORMAT_AVI;
         imageDisplayFreq_ = DEFAULT_IMAGE_DISPLAY_FREQ;
         captureDurationSec_ = DEFAULT_CAPTURE_DURATION;
 
@@ -2567,10 +2568,10 @@ namespace bias
         tabWidgetPtr_ -> setCurrentWidget(previewTabPtr_);
 
         //setCurrentPlugin(pluginMap_.firstKey());
-        //setCurrentPlugin("grabDetector");
-        setCurrentPlugin("stampede");
-        //setPluginEnabled(false);
-        setPluginEnabled(true);
+        setCurrentPlugin("grabDetector");
+        //setCurrentPlugin("stampede");
+        setPluginEnabled(false);
+        //setPluginEnabled(true);
 
         updateWindowTitle();
         updateCameraInfoMessage();
