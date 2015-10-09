@@ -108,6 +108,7 @@ namespace bias
 
             int getThreshold();
             int getMedianFilter();
+            bool getInverted();
 
             void updateTrigStateInfo();
             void refreshPortList();
@@ -128,6 +129,8 @@ namespace bias
             void colorSelectPushButtonClicked();
             void trigResetPushButtonClicked();
             void trigEnabledCheckBoxStateChanged(int state);
+            void trigThresholdSpinBoxChanged(int value);
+            void trigMedianFilterSpinBoxChanged(int value);
             void detectionBoxChanged(QRect boxRect);
             void updateLivePlotOnTimer();
             void onTriggerFired(TriggerData data);

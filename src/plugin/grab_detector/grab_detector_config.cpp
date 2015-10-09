@@ -23,6 +23,7 @@ namespace bias
     // Trigger parameters
     const bool GrabDetectorConfig::DEFAULT_TRIGGER_ENABLED = true;
     const bool GrabDetectorConfig::DEFAULT_TRIGGER_ARMED_STATE = false;
+    const bool GrabDetectorConfig::DEFAULT_TRIGGER_INVERTED = false; 
     const int GrabDetectorConfig::DEFAULT_TRIGGER_THRESHOLD = 100;
     const int GrabDetectorConfig::DEFAULT_TRIGGER_MEDIAN_FILTER = 3;
 
@@ -42,6 +43,7 @@ namespace bias
 
             triggerEnabled = DEFAULT_TRIGGER_ENABLED;
             triggerArmedState = DEFAULT_TRIGGER_ARMED_STATE;
+            triggerInverted = DEFAULT_TRIGGER_INVERTED;
             triggerThreshold = DEFAULT_TRIGGER_THRESHOLD;
             triggerMedianFilter = DEFAULT_TRIGGER_MEDIAN_FILTER;
     }
@@ -296,6 +298,19 @@ namespace bias
             }
         }
 
+        if (configMap.contains("inverted"))
+        {
+            if (configMap["inverted"].canConvert<bool>())
+            {
+                triggerInverted = configMap["inverted"].toBool();
+            }
+            else
+            {
+                rtnStatus.success = false;
+                rtnStatus.appendMessage(QString("unable to convert trigger inverted to bool"));
+            }
+        }
+
         if (configMap.contains("medianFilter"))
         {
             if (configMap["medianFilter"].canConvert<int>())
@@ -335,6 +350,7 @@ namespace bias
         QVariantMap triggerMap;
         triggerMap.insert("enabled", triggerEnabled);
         triggerMap.insert("armedState", triggerArmedState);
+        triggerMap.insert("inverted", triggerInverted);
         triggerMap.insert("threshold", triggerThreshold);
         triggerMap.insert("medianFilter", triggerMedianFilter);
 

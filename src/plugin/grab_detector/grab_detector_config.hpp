@@ -30,6 +30,7 @@ namespace bias
             // Default trigger parameters
             static const bool DEFAULT_TRIGGER_ENABLED; 
             static const bool DEFAULT_TRIGGER_ARMED_STATE;
+            static const bool DEFAULT_TRIGGER_INVERTED;
             static const int DEFAULT_TRIGGER_THRESHOLD;
             static const int DEFAULT_TRIGGER_MEDIAN_FILTER;
 
@@ -49,6 +50,7 @@ namespace bias
             // Trigger parameters
             bool triggerEnabled;
             bool triggerArmedState;
+            bool triggerInverted;
             int triggerThreshold;
             int triggerMedianFilter;
 

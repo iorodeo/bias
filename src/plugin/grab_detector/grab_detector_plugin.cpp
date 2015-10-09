@@ -54,6 +54,7 @@ namespace bias
 
         int medianFilterSize = getMedianFilter();
         int threshold = getThreshold();
+        bool inverted = getInverted();
         bool found = false;
         double signalMin; 
         double signalMax;
@@ -70,7 +71,18 @@ namespace bias
             cv::Mat roiImage = workingImage(boxRect);
             cv::medianBlur(roiImage,roiImage,medianFilterSize);
             cv::minMaxLoc(roiImage,&signalMin,&signalMax);
-            if (signalMax > double(threshold))
+
+            bool thresholdTest = false;
+            if (inverted)
+            {
+                thresholdTest = signalMax < double(threshold);
+            }
+            else
+            {
+                thresholdTest = signalMax > double(threshold);
+            }
+
+            if (thresholdTest)
             {
                 found = true;
             }
@@ -78,6 +90,7 @@ namespace bias
             { 
                 found = false;
             }
+
             acquireLock();
             currentImage_ = workingImage;
             signalMin_ = signalMin;
@@ -99,7 +112,6 @@ namespace bias
                 }
             }
             releaseLock();
-
         }
     }
 
@@ -184,6 +196,20 @@ namespace bias
     int GrabDetectorPlugin::getMedianFilter()
     {
         return trigMedianFilterSpinBoxPtr -> value();
+    }
+
+
+    bool GrabDetectorPlugin::getInverted()
+    {
+        Qt::CheckState checkState = trigInvertedCheckBoxPtr -> checkState();
+        if (checkState == Qt::Checked)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     void GrabDetectorPlugin::setTriggerEnabled(bool value)
@@ -504,6 +530,7 @@ namespace bias
         setTriggerEnabled(config_.triggerEnabled);
         trigThresholdSpinBoxPtr -> setValue(config_.triggerThreshold);
         trigMedianFilterSpinBoxPtr ->  setValue(config_.triggerMedianFilter);
+        trigInvertedCheckBoxPtr -> setChecked(config_.triggerInverted);
 
         updateColorExampleLabel();
         updateTrigStateInfo();
@@ -624,6 +651,20 @@ namespace bias
                 SIGNAL(stateChanged(int)),
                 this,
                 SLOT(trigEnabledCheckBoxStateChanged(int))
+               );
+
+        connect(
+                trigThresholdSpinBoxPtr,
+                SIGNAL(valueChanged(int)),
+                this,
+                SLOT(trigThresholdSpinBoxChanged(int))
+               );
+
+        connect(
+                trigMedianFilterSpinBoxPtr,
+                SIGNAL(valueChanged(int)),
+                this,
+                SLOT(trigMedianFilterSpinBoxChanged(int))
                );
 
         connect(
@@ -847,6 +888,17 @@ namespace bias
             config_.triggerEnabled= true;
         }
         updateTrigStateInfo();
+    }
+
+
+    void GrabDetectorPlugin::trigThresholdSpinBoxChanged(int value)
+    {
+        config_.triggerThreshold = value;
+    }
+
+    void GrabDetectorPlugin::trigMedianFilterSpinBoxChanged(int value)
+    {
+        config_.triggerMedianFilter = value;
     }
 
 
