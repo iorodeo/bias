@@ -8,40 +8,27 @@
 #
 # ------------------------------------------------------------------------------
 
-set(typical_fc2_dir "C:/Program Files/Point Grey Research/FlyCapture2")
-set(typical_fc2_lib_dir "${typical_fc2_dir}/lib64/C")
-set(typical_fc2_inc_dir "${typical_fc2_dir}/include/C")
-
-if(WIN32)
-    # -------------------------------------------------------------------------
-    # TO DO
-    # 
-    # I think this pretty fragile ... what if user puts flycapure in
-    # different location
-    # -------------------------------------------------------------------------
-    message(STATUS "finding include dir")
-    find_path(
-        FlyCapture2_INCLUDE_DIR 
-        "FlyCapture2_C.h"
-        HINTS ${typical_fc2_inc_dir}
-        )
-    message(STATUS "FlyCapture2_INCLUDE_DIR: " ${FlyCapture2_INCLUDE_DIR})
+if (WIN32)
+    set(typical_fc2_dir "C:/Program Files/Point Grey Research/FlyCapture2")
+    set(typical_fc2_lib_dir "${typical_fc2_dir}/lib64/C")
+    set(typical_fc2_inc_dir "${typical_fc2_dir}/include/C")
 else()
-    # -------------------------------------------------------------------------
-    # TO DO
-    # 
-    # linux, macos, etc not implemented yet
-    # -------------------------------------------------------------------------
-    message(FATAL_ERROR "FlyCapture2 currently only supported on WIN32")
+    set(typical_fc2_dir "/usr")
+    set(typical_fc2_lib_dir "${typical_fc2_dir}/lib")
+    set(typical_fc2_inc_dir "${typical_fc2_dir}/include/flycapture/C")
 endif()
 
+message(STATUS "${typical_fc2_inc_dir}")
+
+message(STATUS "finding include dir")
+find_path(
+    FlyCapture2_INCLUDE_DIR 
+    "FlyCapture2_C.h"
+    HINTS ${typical_fc2_inc_dir}
+    )
+message(STATUS "FlyCapture2_INCLUDE_DIR: " ${FlyCapture2_INCLUDE_DIR})
+
 if(WIN32)
-    # -------------------------------------------------------------------------
-    # TO DO
-    # 
-    # I think this pretty fragile ... what if user puts flycapure in
-    # different location
-    # -------------------------------------------------------------------------
     message(STATUS "finding library")
     find_library(
         FlyCapture2_LIBRARY 
@@ -49,12 +36,13 @@ if(WIN32)
         HINTS ${typical_fc2_lib_dir} 
         )
 else() 
-    # -------------------------------------------------------------------------
-    # TO DO
-    # 
-    # linux, macos, etc not implemented yet
-    # -------------------------------------------------------------------------
-    message(FATAL_ERROR "FlyCapture2 currently only supported on WIN32")
+    message(STATUS "finding library")
+    find_library(
+        FlyCapture2_LIBRARY 
+        NAMES "libflycapture-c.so"
+        HINTS ${typical_fc2_lib_dir} 
+        )
+
 endif()
 
 

@@ -1,7 +1,7 @@
 #if defined(WIN32) || defined(WIN64)
 #define _CRT_SECURE_NO_WARNINGS		
 #endif
-#include <windows.h>
+//#include <windows.h>
 #include <iostream>
 #include <memory>
 #include <sstream>
