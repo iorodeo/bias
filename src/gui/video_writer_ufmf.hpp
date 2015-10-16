@@ -39,6 +39,7 @@ namespace bias
 
             virtual ~VideoWriter_ufmf();
             virtual void addFrame(StampedImage stampedImg);
+            virtual void finish();
 
             // Static members
             static const unsigned int FRAMES_TODO_MAX_QUEUE_SIZE;
@@ -136,12 +137,14 @@ namespace bias
             CompressedFrameQueuePtr_ufmf framesWaitQueuePtr_;
             CompressedFrameSetPtr_ufmf framesFinishedSetPtr_;
 
+            unsigned int clearFinishedFrames();
             void checkImageFormat(StampedImage stampedImg);
             void setupOutputFile(StampedImage stampedImg);
             void writeHeader();
             void writeKeyFrame();
             void writeCompressedFrame(CompressedFrame_ufmf frame);
             void finishWriting();
+
 
             void startBackgroundModeling();
             void stopBackgroundModeling();

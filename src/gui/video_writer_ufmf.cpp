@@ -224,31 +224,7 @@ namespace bias
         } // if (frameCount_%frameSkip_==0) 
 
         // Remove frames from compressed frames "finished" set and write to disk 
-        framesFinishedSetPtr_ -> acquireLock();
-        if (!(framesFinishedSetPtr_ -> empty()))
-        {
-            bool writeDone = false;
-            while ( (!writeDone) && (!(framesFinishedSetPtr_ -> empty())) )
-            {
-                CompressedFrameSet_ufmf::iterator it = framesFinishedSetPtr_ -> begin();
-                CompressedFrame_ufmf compressedFrame = *it;
-
-                if (compressedFrame.getFrameCount() == nextFrameToWrite_)
-                {
-                    framesWaitQueuePtr_ -> push(compressedFrame);
-                    framesFinishedSetPtr_ -> erase(it);
-                    nextFrameToWrite_ += frameSkip_;
-                    writeCompressedFrame(compressedFrame);
-                }
-                else
-                {
-                    writeDone = true;
-                }
-            }
-
-        } // if (!(framesFinishedSetPtr_ 
-        framesFinishedSetSize = framesFinishedSetPtr_ -> size();
-        framesFinishedSetPtr_ -> releaseLock();
+        framesFinishedSetSize = clearFinishedFrames();
         frameCount_++;
 
         // Cull framesWaitQueue if it starts to grow too large
@@ -279,6 +255,44 @@ namespace bias
             QString errorMsg("logger framesFinishedSet has exceeded the maximum allowed size");
             emit imageLoggingError(errorId, errorMsg);
         }
+    }
+
+
+    void VideoWriter_ufmf::finish()
+    {
+        std::cout << "finish" << std::endl;
+        while (clearFinishedFrames() > 0);
+    }
+
+
+    unsigned int VideoWriter_ufmf::clearFinishedFrames()
+    {
+        framesFinishedSetPtr_ -> acquireLock();
+        if (!(framesFinishedSetPtr_ -> empty()))
+        {
+            bool writeDone = false;
+            while ( (!writeDone) && (!(framesFinishedSetPtr_ -> empty())) )
+            {
+                CompressedFrameSet_ufmf::iterator it = framesFinishedSetPtr_ -> begin();
+                CompressedFrame_ufmf compressedFrame = *it;
+
+                if (compressedFrame.getFrameCount() == nextFrameToWrite_)
+                {
+                    framesWaitQueuePtr_ -> push(compressedFrame);
+                    framesFinishedSetPtr_ -> erase(it);
+                    nextFrameToWrite_ += frameSkip_;
+                    writeCompressedFrame(compressedFrame);
+                }
+                else
+                {
+                    writeDone = true;
+                }
+            }
+
+        } // if (!(framesFinishedSetPtr_ 
+        unsigned int framesFinishedSetSize = framesFinishedSetPtr_ -> size();
+        framesFinishedSetPtr_ -> releaseLock();
+        return framesFinishedSetSize;
     }
 
 

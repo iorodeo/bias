@@ -39,6 +39,7 @@ namespace bias
         cameraNumber_ = cameraNumber;
         videoWriterPtr_ = videoWriterPtr;
         logImageQueuePtr_ = logImageQueuePtr;
+        logQueueSize_ = 0;
         if ((logImageQueuePtr_ != NULL) && (videoWriterPtr_ != NULL))
         {
             ready_ = true;
