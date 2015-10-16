@@ -246,6 +246,7 @@
       <string>Format</string>
      </property>
      <addaction name="actionLoggingFormatBMPPtr_"/>
+     <addaction name="actionLoggingFormatJPGPtr_"/>
      <addaction name="actionLoggingFormatAVIPtr_"/>
      <addaction name="actionLoggingFormatFMFPtr_"/>
      <addaction name="actionLoggingFormatUFMFPtr_"/>
@@ -736,6 +737,14 @@
    </property>
    <property name="text">
     <string>Grab Detector</string>
+   </property>
+  </action>
+  <action name="actionLoggingFormatJPGPtr_">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>jpg</string>
    </property>
   </action>
  </widget>

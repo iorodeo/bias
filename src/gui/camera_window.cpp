@@ -9,6 +9,7 @@
 #include "image_logger.hpp"
 #include "video_writer.hpp"
 #include "video_writer_bmp.hpp"
+#include "video_writer_jpg.hpp"
 #include "video_writer_avi.hpp"
 #include "video_writer_fmf.hpp"
 #include "video_writer_ufmf.hpp"
@@ -92,6 +93,7 @@ namespace bias
     {
         QMap<VideoFileFormat, QString> map;
         map.insert(VIDEOFILE_FORMAT_BMP,  QString("bmp"));
+        map.insert(VIDEOFILE_FORMAT_JPG,  QString("jpg"));
         map.insert(VIDEOFILE_FORMAT_AVI,  QString("avi"));
         map.insert(VIDEOFILE_FORMAT_FMF,  QString("fmf"));
         map.insert(VIDEOFILE_FORMAT_UFMF, QString("ufmf"));
@@ -342,6 +344,14 @@ namespace bias
                 case VIDEOFILE_FORMAT_BMP:
                     videoWriterPtr = std::make_shared<VideoWriter_bmp>(
                             videoWriterParams_.bmp,
+                            videoFileFullPath,
+                            cameraNumber_
+                            );
+                    break;
+
+                case VIDEOFILE_FORMAT_JPG:
+                    videoWriterPtr = std::make_shared<VideoWriter_jpg>(
+                            videoWriterParams_.jpg,
                             videoFileFullPath,
                             cameraNumber_
                             );
@@ -2179,7 +2189,7 @@ namespace bias
     void CameraWindow::loggingSettingsChanged(VideoWriterParams params)
     {
         videoWriterParams_ = params;
-        //std::cout << params.toString() << std::endl;
+        std::cout << params.toString() << std::endl;
     }
 
 
@@ -2733,6 +2743,13 @@ namespace bias
                );
 
         connect(
+                actionLoggingFormatJPGPtr_,
+                SIGNAL(triggered()),
+                this,
+                SLOT(actionLoggingFormatTriggered())
+               );
+
+        connect(
                 actionLoggingFormatAVIPtr_,
                 SIGNAL(triggered()),
                 this,
@@ -3088,11 +3105,13 @@ namespace bias
     {
         loggingFormatActionGroupPtr_ = new QActionGroup(menuLoggingFormatPtr_);
         loggingFormatActionGroupPtr_ -> addAction(actionLoggingFormatBMPPtr_);
+        loggingFormatActionGroupPtr_ -> addAction(actionLoggingFormatJPGPtr_);
         loggingFormatActionGroupPtr_ -> addAction(actionLoggingFormatAVIPtr_);
         loggingFormatActionGroupPtr_ -> addAction(actionLoggingFormatFMFPtr_);
         loggingFormatActionGroupPtr_ -> addAction(actionLoggingFormatUFMFPtr_);
         loggingFormatActionGroupPtr_ -> addAction(actionLoggingFormatIFMFPtr_);
         actionToVideoFileFormatMap_[actionLoggingFormatBMPPtr_] = VIDEOFILE_FORMAT_BMP;
+        actionToVideoFileFormatMap_[actionLoggingFormatJPGPtr_] = VIDEOFILE_FORMAT_JPG;
         actionToVideoFileFormatMap_[actionLoggingFormatAVIPtr_] = VIDEOFILE_FORMAT_AVI;
         actionToVideoFileFormatMap_[actionLoggingFormatFMFPtr_] = VIDEOFILE_FORMAT_FMF;
         actionToVideoFileFormatMap_[actionLoggingFormatUFMFPtr_] = VIDEOFILE_FORMAT_UFMF;

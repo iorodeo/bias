@@ -28,6 +28,7 @@ set(
     video_writer.hpp
     video_writer_params.hpp
     video_writer_bmp.hpp
+    video_writer_jpg.hpp
     video_writer_avi.hpp
     video_writer_fmf.hpp
     video_writer_ufmf.hpp
@@ -61,6 +62,7 @@ set(
     video_writer.cpp
     video_writer_params.cpp
     video_writer_bmp.cpp
+    video_writer_jpg.cpp
     video_writer_avi.cpp
     video_writer_fmf.cpp
     video_writer_ufmf.cpp

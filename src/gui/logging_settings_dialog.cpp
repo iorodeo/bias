@@ -1,4 +1,6 @@
 #include "logging_settings_dialog.hpp"
+#include "video_writer_bmp.hpp"
+#include "video_writer_jpg.hpp"
 #include "video_writer_ufmf.hpp"
 #include "video_writer_avi.hpp"
 #include "background_histogram_ufmf.hpp"
@@ -48,6 +50,21 @@ namespace bias
         tmpString = QString::number(params_.bmp.frameSkip);
         bmpFrameSkipLineEditPtr_ -> setText(tmpString);
         bmpFrameSkipRangeLabelPtr_ -> setText(QString(" >= 1 "));
+
+        // jpg tab - frame skip
+        tmpString = QString::number(params_.jpg.frameSkip);
+        jpgFrameSkipLineEditPtr_ -> setText(tmpString);
+        jpgFrameSkipRangeLabelPtr_ -> setText(QString(" >= 1"));
+
+        // jpg tab - quality
+        tmpString = QString::number(params_.jpg.quality);
+        jpgQualityLineEditPtr_ -> setText(tmpString);
+        tmpString = QString("(%1, %2)").arg(
+                QString::number(VideoWriter_jpg::MIN_QUALITY),  
+                QString::number(VideoWriter_jpg::MAX_QUALITY)
+                );
+        jpgQualityRangeLabelPtr_ -> setText(tmpString);
+
 
         // avi tab - frame skip
         tmpString = QString::number(params_.avi.frameSkip);
@@ -156,6 +173,19 @@ namespace bias
         validatorPtr -> setBottom(1);
         bmpFrameSkipLineEditPtr_ -> setValidator(validatorPtr);
 
+        // jpg tab - frame skip
+        validatorPtr = new IntValidatorWithFixup(jpgFrameSkipLineEditPtr_);
+        validatorPtr -> setBottom(1);
+        jpgFrameSkipLineEditPtr_ -> setValidator(validatorPtr);
+
+        // jpg tab - quality
+        validatorPtr = new IntValidatorWithFixup(jpgQualityLineEditPtr_);
+        validatorPtr -> setRange(
+                VideoWriter_jpg::MIN_QUALITY,
+                VideoWriter_jpg::MAX_QUALITY
+                );
+        jpgQualityLineEditPtr_ -> setValidator(validatorPtr);
+
         // avi tab - frame skip
         validatorPtr = new IntValidatorWithFixup(aviFrameSkipLineEditPtr_);
         validatorPtr -> setBottom(1);
@@ -221,6 +251,20 @@ namespace bias
                 SIGNAL(editingFinished()),
                 this,
                 SLOT(bmpFrameSkip_EditingFinished())
+               );
+
+        connect(
+                jpgFrameSkipLineEditPtr_,
+                SIGNAL(editingFinished()),
+                this,
+                SLOT(jpgFrameSkip_EditingFinished())
+               );
+
+        connect(
+                jpgQualityLineEditPtr_,
+                SIGNAL(editingFinished()),
+                this,
+                SLOT(jpgQuality_EditingFinished())
                );
 
         connect(
@@ -324,6 +368,24 @@ namespace bias
         emit parametersChanged(params_);
     }
 
+
+    void LoggingSettingsDialog::jpgFrameSkip_EditingFinished()
+    {
+        QString frameSkipString = jpgFrameSkipLineEditPtr_ -> text();
+        unsigned int frameSkip = frameSkipString.toUInt();
+        params_.jpg.frameSkip = frameSkip;
+        emit parametersChanged(params_);
+    }
+
+    void LoggingSettingsDialog::jpgQuality_EditingFinished()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+
+        QString qualityString = jpgQualityLineEditPtr_ -> text();
+        unsigned int quality = qualityString.toUInt();
+        params_.jpg.quality = quality;
+        emit parametersChanged(params_);
+    }
 
     void LoggingSettingsDialog::aviFrameSkip_EditingFinished()
     {

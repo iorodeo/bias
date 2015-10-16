@@ -15,6 +15,15 @@ namespace bias
     };
 
 
+    struct VideoWriterParams_jpg
+    {
+        unsigned int frameSkip;
+        unsigned int quality;
+        VideoWriterParams_jpg();
+        std::string toString();
+    };
+
+
     struct VideoWriterParams_avi
     {
         unsigned int frameSkip;
@@ -50,6 +59,7 @@ namespace bias
     struct VideoWriterParams
     {
         VideoWriterParams_bmp bmp;
+        VideoWriterParams_jpg jpg;
         VideoWriterParams_avi avi;
         VideoWriterParams_fmf fmf;
         VideoWriterParams_ufmf ufmf;

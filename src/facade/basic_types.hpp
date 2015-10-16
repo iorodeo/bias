@@ -317,6 +317,7 @@ namespace bias {
     enum VideoFileFormat
     {
         VIDEOFILE_FORMAT_BMP,
+        VIDEOFILE_FORMAT_JPG,
         VIDEOFILE_FORMAT_AVI,
         VIDEOFILE_FORMAT_FMF,
         VIDEOFILE_FORMAT_UFMF,

@@ -1,5 +1,6 @@
 #include "video_writer_params.hpp"
 #include "video_writer_bmp.hpp"
+#include "video_writer_jpg.hpp"
 #include "video_writer_avi.hpp"
 #include "video_writer_fmf.hpp"
 #include "video_writer_ufmf.hpp"
@@ -18,6 +19,22 @@ namespace bias
     {
         std::stringstream ss;
         ss << "frameSkip: " << frameSkip << std::endl;
+        return ss.str();
+    }
+
+
+    VideoWriterParams_jpg::VideoWriterParams_jpg()
+    {
+        frameSkip = VideoWriter_jpg::DEFAULT_FRAME_SKIP;
+        quality = VideoWriter_jpg::DEFAULT_QUALITY;
+    }
+
+    
+    std::string VideoWriterParams_jpg::toString()
+    {
+        std::stringstream ss;
+        ss << "frameSkip: " << frameSkip << std::endl;
+        ss << "quality: " << quality << std::endl;
         return ss.str();
     }
 
@@ -87,6 +104,10 @@ namespace bias
         ss << "bmp" << std::endl;
         ss << sepString << std::endl;
         ss << bmp.toString() << std::endl;
+
+        ss << "jpg" << std::endl;
+        ss << sepString << std::endl;
+        ss << jpg.toString() << std::endl;
 
         ss << "avi" << std::endl;
         ss << sepString << std::endl;
