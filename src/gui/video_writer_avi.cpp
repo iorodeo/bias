@@ -61,6 +61,7 @@ namespace bias
         }
         if (frameCount_%frameSkip_==0)
         {
+            //std::cout << "add frame: " << frameCount_ << std::endl;
             videoWriter_ << stampedImg.image;
         }
         frameCount_++;

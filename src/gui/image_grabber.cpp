@@ -200,7 +200,7 @@ namespace bias {
 
                 // Skip some number of frames on startup - recommened by Point Grey. 
                 // During this time compute running avg to get estimate of frame interval
-                if (startUpCount <= numStartUpSkip_)
+                if (startUpCount < numStartUpSkip_)
                 {
                     double dt = timeStampDbl - timeStampDblLast;
                     if (startUpCount == MIN_STARTUP_SKIP)
@@ -229,7 +229,6 @@ namespace bias {
                     timeStampDbl = convertTimeStampToDouble(timeStamp, timeStampInit);
                     emit startTimer();
                 }
-                //std::cout << frameCount << ", " << dtEstimate << ", " << timeStampDbl << std::endl;
                 //
                 
                 // TEMPORARY - for mouse grab detector testing
