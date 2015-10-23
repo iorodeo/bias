@@ -15,6 +15,7 @@ namespace bias
     const QString VideoWriter_jpg::IMAGE_FILE_BASE = QString("image_");
     const QString VideoWriter_jpg::IMAGE_FILE_EXT = QString(".jpg");
     const QString DUMMY_FILENAME("dummy.jpg");
+    const unsigned int VideoWriter_jpg::FRAMES_TODO_MAX_QUEUE_SIZE = 250;
     const unsigned int VideoWriter_jpg::DEFAULT_FRAME_SKIP = 1;
     const unsigned int VideoWriter_jpg::DEFAULT_QUALITY = 90;
     const unsigned int VideoWriter_jpg::MIN_QUALITY = 0;
@@ -84,6 +85,13 @@ namespace bias
             framesToDoQueueSize = framesToDoQueuePtr_ -> size();
             framesToDoQueuePtr_ -> releaseLock();
             std::cout << "size = " << framesToDoQueueSize << std::endl;
+        }
+        if (framesToDoQueueSize > FRAMES_TODO_MAX_QUEUE_SIZE) 
+        { 
+            std::cout << "error: framesToDoQueueSize = " << framesToDoQueueSize << std::endl;
+            unsigned int errorId = ERROR_FRAMES_TODO_MAX_QUEUE_SIZE;
+            QString errorMsg("logger framesToDoQueue has exceeded the maximum allowed size");
+            emit imageLoggingError(errorId, errorMsg);
         }
 
         frameCount_++;

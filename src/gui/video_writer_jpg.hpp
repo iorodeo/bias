@@ -34,6 +34,7 @@ namespace bias
 
             static const QString IMAGE_FILE_BASE;
             static const QString IMAGE_FILE_EXT;
+            static const unsigned int FRAMES_TODO_MAX_QUEUE_SIZE;
             static const unsigned int DEFAULT_FRAME_SKIP;
             static const unsigned int DEFAULT_QUALITY;
             static const unsigned int MIN_QUALITY;
