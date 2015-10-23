@@ -36,7 +36,9 @@ set(
     background_histogram_ufmf.hpp
     background_median_ufmf.hpp
     compressed_frame_ufmf.hpp
+    compressed_frame_jpg.hpp
     compressor_ufmf.hpp
+    compressor_jpg.hpp
     fps_estimator.hpp
     affinity.hpp
     property_dialog.hpp
@@ -70,7 +72,9 @@ set(
     background_histogram_ufmf.cpp
     background_median_ufmf.cpp
     compressed_frame_ufmf.cpp
+    compressed_frame_jpg.cpp
     compressor_ufmf.cpp
+    compressor_jpg.cpp
     fps_estimator.cpp
     affinity.cpp
     property_dialog.cpp

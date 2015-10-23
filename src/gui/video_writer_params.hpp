@@ -19,6 +19,7 @@ namespace bias
     {
         unsigned int frameSkip;
         unsigned int quality;
+        unsigned int numberOfCompressors;
         VideoWriterParams_jpg();
         std::string toString();
     };

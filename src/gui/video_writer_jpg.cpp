@@ -3,6 +3,7 @@
 #include "exception.hpp"
 #include <iostream>
 #include <QFileInfo>
+#include <QThreadPool>
 #include <stdexcept>
 #include <opencv2/highgui/highgui.hpp>
 #include <vector>
@@ -18,11 +19,11 @@ namespace bias
     const unsigned int VideoWriter_jpg::DEFAULT_QUALITY = 90;
     const unsigned int VideoWriter_jpg::MIN_QUALITY = 0;
     const unsigned int VideoWriter_jpg::MAX_QUALITY = 100;
+    const unsigned int VideoWriter_jpg::DEFAULT_NUMBER_OF_COMPRESSORS = 10;
     const VideoWriterParams_jpg VideoWriter_jpg::DEFAULT_PARAMS = VideoWriterParams_jpg();
 
     // VideoWriter_jpg methods
-    VideoWriter_jpg::VideoWriter_jpg(QObject *parent) 
-        : VideoWriter_jpg(DEFAULT_PARAMS,DUMMY_FILENAME,0,parent) 
+    VideoWriter_jpg::VideoWriter_jpg(QObject *parent) : VideoWriter_jpg(DEFAULT_PARAMS,DUMMY_FILENAME,0,parent) 
     {}
 
     VideoWriter_jpg::VideoWriter_jpg(
@@ -35,9 +36,17 @@ namespace bias
         isFirst_ = true;
         setFrameSkip(params.frameSkip);
         quality_ = params.quality;
+        numberOfCompressors_ = params.numberOfCompressors; 
+
+        threadPoolPtr_ = new QThreadPool(this);
+        threadPoolPtr_ -> setMaxThreadCount(numberOfCompressors_);
+        framesToDoQueuePtr_ = std::make_shared<CompressedFrameQueue_jpg>();
     }
 
-    VideoWriter_jpg::~VideoWriter_jpg() {}
+    VideoWriter_jpg::~VideoWriter_jpg() 
+    {
+        stopCompressors();
+    }
 
 
     void VideoWriter_jpg::setFileName(QString fileName)
@@ -53,6 +62,7 @@ namespace bias
         if (isFirst_)
         {
             setupOutput();
+            startCompressors();
             isFirst_= false;
         }
 
@@ -61,26 +71,37 @@ namespace bias
         imageFileName += IMAGE_FILE_EXT;
         QFileInfo imageFileInfo(logDir_,imageFileName);
         QString fullPathName = imageFileInfo.absoluteFilePath();
+
+        unsigned int framesToDoQueueSize = framesToDoQueuePtr_ -> size();
+
         if (frameCount_%frameSkip_==0) 
         {
-            std::vector<int> compressionParams;
-            compressionParams.push_back(CV_IMWRITE_JPEG_QUALITY);
-            compressionParams.push_back(int(quality_));
+            CompressedFrame_jpg compressedFrame(fullPathName,stampedImg,quality_);
 
-            try
-            {
-                cv::imwrite(fullPathName.toStdString(), stampedImg.image, compressionParams);
-            }
-            catch (cv::Exception &exc)
-            {
-                unsigned int errorId = ERROR_VIDEO_WRITER_ADD_FRAME;
-                std::string errorMsg("adding frame failed - "); 
-                errorMsg += exc.what();
-                throw RuntimeError(errorId, errorMsg);
-            }
+            framesToDoQueuePtr_ -> acquireLock();
+            framesToDoQueuePtr_ -> push(compressedFrame);
+            framesToDoQueuePtr_ -> wakeOne();
+            framesToDoQueueSize = framesToDoQueuePtr_ -> size();
+            framesToDoQueuePtr_ -> releaseLock();
+            std::cout << "size = " << framesToDoQueueSize << std::endl;
         }
 
         frameCount_++;
+    }
+
+
+    void VideoWriter_jpg::finish()
+    {
+        bool finished = false;
+        while (!finished)
+        {
+            framesToDoQueuePtr_ -> acquireLock();
+            if ( (framesToDoQueuePtr_ -> size()) == 0)
+            {
+                finished = true;
+            }
+            framesToDoQueuePtr_ -> releaseLock();
+        }
     }
 
     unsigned int VideoWriter_jpg::getNextVersionNumber()
@@ -175,6 +196,44 @@ namespace bias
         QString logDirName = getLogDirName(verNum);
         QDir logDir = QDir(baseDir_.absolutePath() + "/" + logDirName);
         return logDir;
+    }
+
+
+    void VideoWriter_jpg::startCompressors()
+    {
+        framesToDoQueuePtr_ -> clear();
+        compressorPtrVec_.resize(numberOfCompressors_);
+        for (unsigned int i=0; i<compressorPtrVec_.size(); i++)
+        {
+            compressorPtrVec_[i] = new Compressor_jpg(framesToDoQueuePtr_, cameraNumber_);
+            threadPoolPtr_ -> start(compressorPtrVec_[i]);
+        }
+    }
+
+
+    void VideoWriter_jpg::stopCompressors()
+    {
+        // Send all compressor threads a stop signal 
+        for (unsigned int i=0; i<compressorPtrVec_.size(); i++)
+        {
+            if (!(compressorPtrVec_[i].isNull()))
+            { 
+                compressorPtrVec_[i] -> acquireLock();
+                compressorPtrVec_[i] -> stop();
+                compressorPtrVec_[i] -> releaseLock();
+            }
+        }
+
+        // Wait until all compressor threads are null
+        for (unsigned int i=0; i<compressorPtrVec_.size(); i++)
+        {
+            while (!(compressorPtrVec_[i].isNull()))
+            {
+                framesToDoQueuePtr_ -> acquireLock();
+                framesToDoQueuePtr_ -> wakeOne();
+                framesToDoQueuePtr_ -> releaseLock();
+            }
+        }
     }
 
 } // namespace bias

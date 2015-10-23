@@ -27,6 +27,7 @@ namespace bias
     {
         frameSkip = VideoWriter_jpg::DEFAULT_FRAME_SKIP;
         quality = VideoWriter_jpg::DEFAULT_QUALITY;
+        numberOfCompressors = VideoWriter_jpg::DEFAULT_NUMBER_OF_COMPRESSORS;
     }
 
     
@@ -35,6 +36,7 @@ namespace bias
         std::stringstream ss;
         ss << "frameSkip: " << frameSkip << std::endl;
         ss << "quality: " << quality << std::endl;
+        ss << "numberOfCompressors: " << numberOfCompressors << std::endl;
         return ss.str();
     }
 

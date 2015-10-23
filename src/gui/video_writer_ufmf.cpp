@@ -260,7 +260,6 @@ namespace bias
 
     void VideoWriter_ufmf::finish()
     {
-        std::cout << "finish" << std::endl;
         while (clearFinishedFrames() > 0);
     }
 
