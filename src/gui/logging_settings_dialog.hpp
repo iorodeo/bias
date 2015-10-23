@@ -25,11 +25,9 @@ namespace bias
         private slots:
 
             void bmpFrameSkip_EditingFinished();
-
             void jpgFrameSkip_EditingFinished();
             void jpgQuality_EditingFinished();
-
-
+            void jpgCompressionThreads_EditingFinished();
             void aviFrameSkip_EditingFinished();
             void aviCodecComboBox_CurrentIndexChanged(QString text);
             void fmfFrameSkip_EditingFinished();

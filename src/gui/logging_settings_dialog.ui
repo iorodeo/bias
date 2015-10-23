@@ -44,13 +44,13 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="bmpTabPtr_">
       <attribute name="title">
        <string> bmp </string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_13">
+      <layout class="QVBoxLayout" name="verticalLayout_7">
        <item>
         <widget class="QWidget" name="bmpWidgetPtr_" native="true">
          <layout class="QVBoxLayout" name="verticalLayout_12">
@@ -212,6 +212,12 @@
        <item>
         <widget class="QWidget" name="jpgFrameSkipWidgetPtr_" native="true">
          <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
           <item>
            <widget class="QLabel" name="jpgFrameSkipLabelPtr_">
             <property name="sizePolicy">
@@ -316,6 +322,12 @@
        <item>
         <widget class="QWidget" name="jpgQualityWidgetPtr_" native="true">
          <layout class="QHBoxLayout" name="horizontalLayout_9">
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
           <item>
            <widget class="QLabel" name="jpgQualityLabelPtr_">
             <property name="sizePolicy">
@@ -412,6 +424,128 @@
        </item>
        <item>
         <widget class="Line" name="line_7">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="jpgComressionThreadsWidgetPtr_" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout_10">
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="jpgCompressionThreadsLabelPtr_">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>120</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>120</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Compression Threads</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_25">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>90</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="jpgCompressionThreadsLineEditPtr_">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>80</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>80</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="jpgCompressionThreadsRangeLabelPtr_">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>60</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>60</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>(min,max)</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="Line" name="line_8">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>

@@ -268,6 +268,13 @@ namespace bias
                );
 
         connect(
+                jpgCompressionThreadsLineEditPtr_,
+                SIGNAL(editingFinished()),
+                this,
+                SLOT(jpgCompressionThreads_EditingFinished())
+               );
+
+        connect(
                 aviFrameSkipLineEditPtr_,
                 SIGNAL(editingFinished()),
                 this,
@@ -379,12 +386,16 @@ namespace bias
 
     void LoggingSettingsDialog::jpgQuality_EditingFinished()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-
         QString qualityString = jpgQualityLineEditPtr_ -> text();
         unsigned int quality = qualityString.toUInt();
         params_.jpg.quality = quality;
         emit parametersChanged(params_);
+    }
+
+
+    void LoggingSettingsDialog::jpgCompressionThreads_EditingFinished()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
 
     void LoggingSettingsDialog::aviFrameSkip_EditingFinished()
