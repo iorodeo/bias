@@ -65,6 +65,10 @@ namespace bias
                 );
         jpgQualityRangeLabelPtr_ -> setText(tmpString);
 
+        // jpg compression threads
+        tmpString = QString::number(params_.jpg.numberOfCompressors);
+        jpgCompressionThreadsLineEditPtr_ -> setText(tmpString);
+        jpgCompressionThreadsRangeLabelPtr_ -> setText(QString(" >= 1"));
 
         // avi tab - frame skip
         tmpString = QString::number(params_.avi.frameSkip);
@@ -185,6 +189,10 @@ namespace bias
                 VideoWriter_jpg::MAX_QUALITY
                 );
         jpgQualityLineEditPtr_ -> setValidator(validatorPtr);
+
+        validatorPtr = new IntValidatorWithFixup(jpgCompressionThreadsLineEditPtr_);
+        validatorPtr -> setBottom(1);
+        jpgCompressionThreadsLineEditPtr_ -> setValidator(validatorPtr);
 
         // avi tab - frame skip
         validatorPtr = new IntValidatorWithFixup(aviFrameSkipLineEditPtr_);
