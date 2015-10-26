@@ -2167,6 +2167,10 @@ namespace bias
             case VIDEOFILE_FORMAT_BMP:
                 dialogTabWidgetPtr -> setCurrentWidget(loggingSettingsDialogPtr_ -> bmpTabPtr_);
                 break;
+
+           case VIDEOFILE_FORMAT_JPG:
+                dialogTabWidgetPtr -> setCurrentWidget(loggingSettingsDialogPtr_ -> jpgTabPtr_);
+                break;
                 
             case VIDEOFILE_FORMAT_AVI:
                 dialogTabWidgetPtr -> setCurrentWidget(loggingSettingsDialogPtr_ -> aviTabPtr_);
