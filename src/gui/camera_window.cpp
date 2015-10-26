@@ -930,6 +930,12 @@ namespace bias
         bmpSettingsMap.insert("frameSkip", videoWriterParams_.bmp.frameSkip);
         loggingSettingsMap.insert("bmp", bmpSettingsMap);
 
+        QVariantMap jpgSettingsMap;
+        jpgSettingsMap.insert("frameSkip", videoWriterParams_.jpg.frameSkip);
+        jpgSettingsMap.insert("quality", videoWriterParams_.jpg.quality);
+        jpgSettingsMap.insert("compressionThreads", videoWriterParams_.jpg.numberOfCompressors);
+        loggingSettingsMap.insert("jpg", jpgSettingsMap);
+
         QVariantMap aviSettingsMap;
         aviSettingsMap.insert("frameSkip", videoWriterParams_.avi.frameSkip);
         aviSettingsMap.insert("codec", videoWriterParams_.avi.codec);
@@ -6186,6 +6192,127 @@ namespace bias
             return rtnStatus;
         }
         videoWriterParams_.bmp.frameSkip = bmpFrameSkip;
+
+        // Get jpg values - ignore if not there
+        // --------------
+        QVariantMap jpgMap = formatMap["jpg"].toMap();
+        if (!jpgMap.isEmpty())
+        {
+            if (!jpgMap.contains("frameSkip"))
+            {
+                QString errMsgText("Logging Settings: jpg frameSkip not present");
+                if (showErrorDlg)
+                {
+                    QMessageBox::critical(this,errMsgTitle,errMsgText);
+                }
+                rtnStatus.success = false;
+                rtnStatus.message = errMsgText;
+                return rtnStatus;
+            }
+            if (!jpgMap["frameSkip"].canConvert<unsigned int>())
+            {
+                QString errMsgText("Logging Settings: jpg unable to convert");
+                errMsgText += " frameSkip to unsigned int";
+                if (showErrorDlg)
+                {
+                    QMessageBox::critical(this,errMsgTitle,errMsgText);
+                }
+                rtnStatus.success = false;
+                rtnStatus.message = errMsgText;
+                return rtnStatus;
+            }
+            unsigned int jpgFrameSkip = jpgMap["frameSkip"].toUInt();
+            if (jpgFrameSkip == 0)
+            {
+                QString errMsgText("Logging Settings: jpg frameSkip must");
+                errMsgText += " be greater than zero";
+                if (showErrorDlg)
+                {
+                    QMessageBox::critical(this,errMsgTitle,errMsgText);
+                }
+                rtnStatus.success = false;
+                rtnStatus.message = errMsgText;
+                return rtnStatus;
+            }
+            videoWriterParams_.jpg.frameSkip = jpgFrameSkip;
+
+
+            if (!jpgMap.contains("quality"))
+            {
+                QString errMsgText("Logging Settings: jpg quality not present");
+                if (showErrorDlg)
+                {
+                    QMessageBox::critical(this,errMsgTitle,errMsgText);
+                }
+                rtnStatus.success = false;
+                rtnStatus.message = errMsgText;
+                return rtnStatus;
+            }
+            if (!jpgMap["quality"].canConvert<unsigned int>())
+            {
+                QString errMsgText("Logging Settings: jpg unable to convert");
+                errMsgText += " qualtiy to unsigned int";
+                if (showErrorDlg)
+                {
+                    QMessageBox::critical(this,errMsgTitle,errMsgText);
+                }
+                rtnStatus.success = false;
+                rtnStatus.message = errMsgText;
+                return rtnStatus;
+            }
+            unsigned int jpgQuality = jpgMap["quality"].toUInt();
+            if ( (jpgQuality < 0) || (jpgQuality > 100))
+            {
+                QString errMsgText("Logging Settings: jpg frameSkip must");
+                errMsgText += " be between 0 and 100";
+                if (showErrorDlg)
+                {
+                    QMessageBox::critical(this,errMsgTitle,errMsgText);
+                }
+                rtnStatus.success = false;
+                rtnStatus.message = errMsgText;
+                return rtnStatus;
+            }
+            videoWriterParams_.jpg.quality = jpgQuality;
+
+            if (!jpgMap.contains("compressionThreads"))
+            {
+                QString errMsgText("Logging Settings: jpg compressionThreads not  present");
+                if (showErrorDlg)
+                {
+                    QMessageBox::critical(this,errMsgTitle,errMsgText);
+                }
+                rtnStatus.success = false;
+                rtnStatus.message = errMsgText;
+                return rtnStatus;
+            }
+            if (!jpgMap["compressionThreads"].canConvert<unsigned int>())
+            {
+                QString errMsgText("Logging Settings: jpg unable to convert");
+                errMsgText += " compressionThreads to unsigned int";
+                if (showErrorDlg)
+                {
+                    QMessageBox::critical(this,errMsgTitle,errMsgText);
+                }
+                rtnStatus.success = false;
+                rtnStatus.message = errMsgText;
+                return rtnStatus;
+            }
+            unsigned int jpgCompressionThreads = jpgMap["compressionThreads"].toUInt();
+            if (jpgCompressionThreads == 0)
+            {
+                QString errMsgText("Logging Settings: jpg compressionThreads must");
+                errMsgText += " be greater than zero";
+                if (showErrorDlg)
+                {
+                    QMessageBox::critical(this,errMsgTitle,errMsgText);
+                }
+                rtnStatus.success = false;
+                rtnStatus.message = errMsgText;
+                return rtnStatus;
+            }
+            videoWriterParams_.jpg.numberOfCompressors = jpgCompressionThreads;
+        }
 
         // Get fmf values
         // --------------

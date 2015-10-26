@@ -34,6 +34,9 @@ namespace bias
             QObject *parent
             ) : VideoWriter(fileName,cameraNumber,parent) 
     {
+
+        std::cout << params.toString() << std::endl;
+
         isFirst_ = true;
         setFrameSkip(params.frameSkip);
         quality_ = params.quality;

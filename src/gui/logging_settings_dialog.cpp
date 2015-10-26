@@ -390,6 +390,7 @@ namespace bias
         emit parametersChanged(params_);
     }
 
+
     void LoggingSettingsDialog::jpgQuality_EditingFinished()
     {
         QString qualityString = jpgQualityLineEditPtr_ -> text();
@@ -401,8 +402,12 @@ namespace bias
 
     void LoggingSettingsDialog::jpgCompressionThreads_EditingFinished()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        QString lineEditString = jpgCompressionThreadsLineEditPtr_ -> text();
+        unsigned int numberOfCompressors =  lineEditString.toUInt();
+        params_.jpg.numberOfCompressors = numberOfCompressors;
+        emit parametersChanged(params_);
     }
+
 
     void LoggingSettingsDialog::aviFrameSkip_EditingFinished()
     {
