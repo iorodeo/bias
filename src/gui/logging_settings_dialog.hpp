@@ -28,6 +28,7 @@ namespace bias
             void jpgFrameSkip_EditingFinished();
             void jpgQuality_EditingFinished();
             void jpgCompressionThreads_EditingFinished();
+            void jpgMjpgFlagCheckBox_StateChanged(int state);
             void aviFrameSkip_EditingFinished();
             void aviCodecComboBox_CurrentIndexChanged(QString text);
             void fmfFrameSkip_EditingFinished();

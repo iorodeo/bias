@@ -21,6 +21,7 @@ namespace bias
     const unsigned int VideoWriter_jpg::MIN_QUALITY = 0;
     const unsigned int VideoWriter_jpg::MAX_QUALITY = 100;
     const unsigned int VideoWriter_jpg::DEFAULT_NUMBER_OF_COMPRESSORS = 10;
+    const bool VideoWriter_jpg::DEFAULT_MJPG_FLAG = false;
     const VideoWriterParams_jpg VideoWriter_jpg::DEFAULT_PARAMS = VideoWriterParams_jpg();
 
     // VideoWriter_jpg methods
@@ -40,12 +41,15 @@ namespace bias
         isFirst_ = true;
         setFrameSkip(params.frameSkip);
         quality_ = params.quality;
+        mjpgFlag_ = params.mjpgFlag;
         numberOfCompressors_ = params.numberOfCompressors; 
 
         threadPoolPtr_ = new QThreadPool(this);
         threadPoolPtr_ -> setMaxThreadCount(numberOfCompressors_);
         framesToDoQueuePtr_ = std::make_shared<CompressedFrameQueue_jpg>();
+        framesFinishedSetPtr_ = std::make_shared<CompressedFrameSet_jpg>();
     }
+
 
     VideoWriter_jpg::~VideoWriter_jpg() 
     {
@@ -77,17 +81,28 @@ namespace bias
         QString fullPathName = imageFileInfo.absoluteFilePath();
 
         unsigned int framesToDoQueueSize = framesToDoQueuePtr_ -> size();
+        unsigned int framesFinishedSetSize = framesFinishedSetPtr_ -> size();
 
         if (frameCount_%frameSkip_==0) 
         {
-            CompressedFrame_jpg compressedFrame(fullPathName,stampedImg,quality_);
+            CompressedFrame_jpg compressedFrame(fullPathName, stampedImg, quality_, mjpgFlag_);
 
             framesToDoQueuePtr_ -> acquireLock();
             framesToDoQueuePtr_ -> push(compressedFrame);
             framesToDoQueuePtr_ -> wakeOne();
             framesToDoQueueSize = framesToDoQueuePtr_ -> size();
             framesToDoQueuePtr_ -> releaseLock();
-            std::cout << "size = " << framesToDoQueueSize << std::endl;
+            //std::cout << "size = " << framesToDoQueueSize << std::endl;
+           
+            
+            // Not growing ...? 
+            framesFinishedSetPtr_ -> acquireLock();
+            framesFinishedSetSize = framesFinishedSetPtr_ -> size();
+            framesFinishedSetPtr_ -> releaseLock();
+
+            std::cout << framesFinishedSetSize << std::endl;
+
+
         }
         if (framesToDoQueueSize > FRAMES_TODO_MAX_QUEUE_SIZE) 
         { 
@@ -216,7 +231,7 @@ namespace bias
         compressorPtrVec_.resize(numberOfCompressors_);
         for (unsigned int i=0; i<compressorPtrVec_.size(); i++)
         {
-            compressorPtrVec_[i] = new Compressor_jpg(framesToDoQueuePtr_, cameraNumber_);
+            compressorPtrVec_[i] = new Compressor_jpg(framesToDoQueuePtr_, framesFinishedSetPtr_, cameraNumber_);
             threadPoolPtr_ -> start(compressorPtrVec_[i]);
         }
     }

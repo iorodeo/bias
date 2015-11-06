@@ -8,6 +8,7 @@
 #include <iostream>
 #include <QPointer>
 #include <QStringList>
+#include <QtDebug>
 
 namespace bias
 {
@@ -69,6 +70,16 @@ namespace bias
         tmpString = QString::number(params_.jpg.numberOfCompressors);
         jpgCompressionThreadsLineEditPtr_ -> setText(tmpString);
         jpgCompressionThreadsRangeLabelPtr_ -> setText(QString(" >= 1"));
+
+        // jpg mjpgFlag 
+        if (params_.jpg.mjpgFlag)
+        {
+            jpgMjpgFlagCheckBoxPtr_ -> setCheckState(Qt::Checked);
+        }
+        else
+        {
+            jpgMjpgFlagCheckBoxPtr_ -> setCheckState(Qt::Unchecked);
+        }
 
         // avi tab - frame skip
         tmpString = QString::number(params_.avi.frameSkip);
@@ -281,6 +292,13 @@ namespace bias
                );
 
         connect(
+                jpgMjpgFlagCheckBoxPtr_,
+                SIGNAL(stateChanged(int)),
+                this,
+                SLOT(jpgMjpgFlagCheckBox_StateChanged(int))
+               );
+
+        connect(
                 aviFrameSkipLineEditPtr_,
                 SIGNAL(editingFinished()),
                 this,
@@ -408,6 +426,12 @@ namespace bias
         emit parametersChanged(params_);
     }
 
+    
+    void LoggingSettingsDialog::jpgMjpgFlagCheckBox_StateChanged(int state)
+    {
+        params_.jpg.mjpgFlag = bool(state);
+        emit parametersChanged(params_);
+    }
 
     void LoggingSettingsDialog::aviFrameSkip_EditingFinished()
     {
@@ -489,7 +513,7 @@ namespace bias
 
     void LoggingSettingsDialog::ufmfDilateCheckBox_StateChanged(int state)
     {
-        params_.ufmf.dilateState = state;
+        params_.ufmf.dilateState = bool(state);
         emit parametersChanged(params_);
     }
 

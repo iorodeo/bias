@@ -183,7 +183,6 @@ namespace bias
             cv::Size structElemSize = cv::Size(2*dilateWindowSize_+1,2*dilateWindowSize_+1);
             cv::Mat structElem = cv::getStructuringElement(cv::MORPH_RECT,structElemSize,cv::Point(-1,-1));
             cv::erode(membershipImage_, membershipImage_, structElem, cv::Point(-1,-1),1);
-            //cv::erode(membershipImage_, membershipImage_, cv::Mat(), cv::Point(-1,-1),1);
         }
 
         numForeground_ = numPix - cv::countNonZero(membershipImage_);

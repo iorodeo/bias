@@ -40,19 +40,24 @@ namespace bias
             static const unsigned int MIN_QUALITY;
             static const unsigned int MAX_QUALITY;
             static const unsigned int DEFAULT_NUMBER_OF_COMPRESSORS;
+            static const bool DEFAULT_MJPG_FLAG;
             static const VideoWriterParams_jpg DEFAULT_PARAMS;
 
         protected:
 
             bool isFirst_;
             unsigned int quality_;
+            bool mjpgFlag_;
             QDir baseDir_;
             QString baseName_;
             QDir logDir_;
             unsigned int numberOfCompressors_;
 
             std::vector<QPointer<Compressor_jpg>> compressorPtrVec_;
+
             CompressedFrameQueuePtr_jpg framesToDoQueuePtr_;
+            CompressedFrameSetPtr_jpg framesFinishedSetPtr_;
+
             QPointer<QThreadPool> threadPoolPtr_;
 
             void setupOutput();

@@ -241,14 +241,14 @@ namespace bias
         // Check frames todo and frames finish queue/set size and emit error if
         // they grow too large.
 
-        if (framesToDoQueueSize > FRAMES_TODO_MAX_QUEUE_SIZE) 
+        if (framesToDoQueueSize >= FRAMES_TODO_MAX_QUEUE_SIZE) 
         { 
             std::cout << "error: framesToDoQueueSize = " << framesToDoQueueSize << std::endl;
             unsigned int errorId = ERROR_FRAMES_TODO_MAX_QUEUE_SIZE;
             QString errorMsg("logger framesToDoQueue has exceeded the maximum allowed size");
             emit imageLoggingError(errorId, errorMsg);
         }
-        if (framesFinishedSetSize > FRAMES_FINISHED_MAX_SET_SIZE)
+        if (framesFinishedSetSize >= FRAMES_FINISHED_MAX_SET_SIZE)
         {
             std::cout << "error: framesFinishedSetSize = " << framesFinishedSetSize << std::endl;
             unsigned int errorId = ERROR_FRAMES_FINISHED_MAX_SET_SIZE;

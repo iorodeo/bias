@@ -1930,13 +1930,21 @@ namespace bias
 
     void CameraWindow::imageLoggingError(unsigned int errorId, QString errorMsg)
     {
-        stopImageCapture();
-        QString msgTitle("Image Logging Error");
-        QString msgText("image logging has failed\n\nError ID: ");
-        msgText += QString::number(errorId);
-        msgText += "\n\n";
-        msgText += errorMsg;
-        QMessageBox::critical(this, msgTitle, msgText);
+        //if ((errorId == ERROR_FRAMES_TODO_MAX_QUEUE_SIZE) || (errorId == ERROR_FRAMES_FINISHED_MAX_SET_SIZE))
+        if (false)
+        {
+
+        }
+        else
+        {
+            stopImageCapture();
+            QString msgTitle("Image Logging Error");
+            QString msgText("image logging has failed\n\nError ID: ");
+            msgText += QString::number(errorId);
+            msgText += "\n\n";
+            msgText += errorMsg;
+            QMessageBox::critical(this, msgTitle, msgText);
+        }
     }
 
 

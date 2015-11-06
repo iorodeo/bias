@@ -14,16 +14,15 @@ namespace bias
         std::string toString();
     };
 
-
     struct VideoWriterParams_jpg
     {
         unsigned int frameSkip;
         unsigned int quality;
         unsigned int numberOfCompressors;
+        bool mjpgFlag; 
         VideoWriterParams_jpg();
         std::string toString();
     };
-
 
     struct VideoWriterParams_avi
     {

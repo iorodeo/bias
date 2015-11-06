@@ -16,8 +16,12 @@ namespace bias
         public:
 
             Compressor_jpg(QObject *parent=0);
-
-            Compressor_jpg(CompressedFrameQueuePtr_jpg framesToDoQueuePtr, unsigned int cameraNumber, QObject *parent=0);
+            Compressor_jpg(
+                    CompressedFrameQueuePtr_jpg framesToDoQueuePtr, 
+                    CompressedFrameSetPtr_jpg framesFinishedSetPtr,
+                    unsigned int cameraNumber, 
+                    QObject *parent=0
+                    );
 
             void stop();
 
@@ -27,8 +31,13 @@ namespace bias
             bool stopped_;
             unsigned int cameraNumber_;
             CompressedFrameQueuePtr_jpg framesToDoQueuePtr_;
+            CompressedFrameSetPtr_jpg framesFinishedSetPtr_;
 
-            void initialize(CompressedFrameQueuePtr_jpg framesToDoQueuePtr, unsigned int cameraNumber);
+            void initialize(
+                    CompressedFrameQueuePtr_jpg framesToDoQueuePtr, 
+                    CompressedFrameSetPtr_jpg framesFinishedSetPtr, 
+                    unsigned int cameraNumber
+                    );
             void run();
     };
 

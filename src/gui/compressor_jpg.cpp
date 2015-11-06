@@ -8,22 +8,31 @@ namespace bias
 {
     Compressor_jpg::Compressor_jpg(QObject *parent) : QObject(parent)
     { 
-        initialize(NULL,0);
+        initialize(NULL,NULL,0);
         ready_ = false;
     }
 
-    Compressor_jpg::Compressor_jpg(CompressedFrameQueuePtr_jpg framesToDoQueuePtr, unsigned int cameraNumber, QObject *parent)  
-        : QObject(parent)
+    Compressor_jpg::Compressor_jpg(
+            CompressedFrameQueuePtr_jpg framesToDoQueuePtr, 
+            CompressedFrameSetPtr_jpg framesFinishedSetPtr, 
+            unsigned int cameraNumber, 
+            QObject *parent
+            )  : QObject(parent)
     {
-        initialize(framesToDoQueuePtr,cameraNumber);
+        initialize(framesToDoQueuePtr,framesFinishedSetPtr,cameraNumber);
     }
 
     
-    void Compressor_jpg::initialize( CompressedFrameQueuePtr_jpg framesToDoQueuePtr, unsigned int cameraNumber)
+    void Compressor_jpg::initialize(
+            CompressedFrameQueuePtr_jpg framesToDoQueuePtr, 
+            CompressedFrameSetPtr_jpg framesFinishedSetPtr, 
+            unsigned int cameraNumber
+            )
     {
         ready_ = false;
         stopped_ = true;
         framesToDoQueuePtr_ = framesToDoQueuePtr;
+        framesFinishedSetPtr_ = framesFinishedSetPtr;
         if (framesToDoQueuePtr_ != NULL) 
         {
             ready_ = true;
@@ -58,6 +67,8 @@ namespace bias
         stopped_ = false;
         releaseLock();
 
+        unsigned int framesFinishedSetSize = framesFinishedSetPtr_ -> size();
+
         while (!done)
         {
             bool haveNewFrame = false;
@@ -85,11 +96,21 @@ namespace bias
             if ((haveNewFrame) && (!done))
             {
                 // Compress the frame and write to file
-                compressedFrame.write();
+                bool mjpgFlag = compressedFrame.getMjpgFlag();
+                if (mjpgFlag)
+                {
+                    compressedFrame.encode();
+                    framesFinishedSetPtr_ -> acquireLock();
+                    framesFinishedSetPtr_ -> insert(compressedFrame);
+                    framesFinishedSetSize = framesFinishedSetPtr_ -> size();
+                    framesFinishedSetPtr_ -> releaseLock();
+                }
+                else
+                {
+                    compressedFrame.write();
+                }
 
             }
-
         }
     }
-
 } // namespace bias

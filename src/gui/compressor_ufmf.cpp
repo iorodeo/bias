@@ -68,6 +68,8 @@ namespace bias
         stopped_ = false;
         releaseLock();
 
+        unsigned int framesFinishedSetSize = framesFinishedSetPtr_ -> size();
+
         while (!done)
         {
             bool haveNewFrame = false;
@@ -100,9 +102,9 @@ namespace bias
                 // Put completed compressed frame into "done" set
                 framesFinishedSetPtr_ -> acquireLock();
                 framesFinishedSetPtr_ -> insert(compressedFrame);
+                framesFinishedSetSize = framesFinishedSetPtr_ -> size();
                 framesFinishedSetPtr_ -> releaseLock();
             }
-
 
         }
     }
