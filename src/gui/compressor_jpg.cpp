@@ -104,6 +104,7 @@ namespace bias
                     framesFinishedSetPtr_ -> insert(compressedFrame);
                     framesFinishedSetSize = framesFinishedSetPtr_ -> size();
                     framesFinishedSetPtr_ -> releaseLock();
+
                 }
                 else
                 {

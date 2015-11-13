@@ -21,7 +21,7 @@ namespace bias
             CompressedFrame_jpg(QString fileName);
             CompressedFrame_jpg(QString fileName, StampedImage stampedImg);
             CompressedFrame_jpg(QString fileName, StampedImage stampedImg, unsigned int quality);
-            CompressedFrame_jpg(QString fileName, StampedImage stampedImg, unsigned int qualite, bool mjpgFlag);
+            CompressedFrame_jpg(QString fileName, StampedImage stampedImg, unsigned int quality, bool mjpgFlag);
 
             bool haveFileName() const;
             bool haveStampedImage() const;
@@ -29,7 +29,7 @@ namespace bias
             void setStampedImage(StampedImage stampedImg);
             StampedImage getStampedImage() const;
             unsigned long getFrameCount() const;
-
+            double getTimeStamp() const;
 
             void setFileName(QString fileName);
             QString getFileName() const;
@@ -41,6 +41,7 @@ namespace bias
             bool getMjpgFlag() const;
 
             bool haveEncoding() const;
+            std::vector<uchar> &getEncodedJpgBuffer();
 
             void write();
             void encode();
@@ -80,6 +81,7 @@ namespace bias
 
     typedef LockableSet<CompressedFrame_jpg, CompressedFrameCmp_jpg> CompressedFrameSet_jpg;
     typedef std::shared_ptr<CompressedFrameSet_jpg> CompressedFrameSetPtr_jpg;
+
 }
 
 #endif

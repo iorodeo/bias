@@ -52,7 +52,6 @@ namespace bias
         setMjpgFlag(mjpgFlag);
     }
 
-
     bool CompressedFrame_jpg::haveFileName() const
     {
         return haveFileName_;
@@ -80,9 +79,10 @@ namespace bias
 
     unsigned long CompressedFrame_jpg::getFrameCount() const
     {
+
         if (haveStampedImg_)
         {
-            stampedImg_.frameCount;
+            return stampedImg_.frameCount;
         }
         else
         {
@@ -90,6 +90,17 @@ namespace bias
         }
     } 
 
+    double CompressedFrame_jpg::getTimeStamp() const
+    {
+        if (haveStampedImg_)
+        {
+            return stampedImg_.timeStamp;
+        }
+        else
+        {
+            return 0;
+        }
+    }
 
     void CompressedFrame_jpg::setFileName(QString fileName)
     {
@@ -138,6 +149,11 @@ namespace bias
         return haveEncoding_;
     }
 
+    std::vector<uchar> &CompressedFrame_jpg::getEncodedJpgBuffer()
+    {
+        return encodedJpgBuffer_;
+    }
+
     void CompressedFrame_jpg::write()
     {
         std::vector<int> compressionParams;
@@ -163,6 +179,7 @@ namespace bias
         compressionParams.push_back(CV_IMWRITE_JPEG_QUALITY);
         compressionParams.push_back(int(quality_));
         cv::imencode(".jpg", stampedImg_.image, encodedJpgBuffer_, compressionParams);
+        haveEncoding_ = true;
     }
 
     // Compressed frame comparison operator

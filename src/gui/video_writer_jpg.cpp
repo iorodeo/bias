@@ -2,6 +2,7 @@
 #include "basic_types.hpp"
 #include "exception.hpp"
 #include <iostream>
+#include <sstream>
 #include <QFileInfo>
 #include <QThreadPool>
 #include <stdexcept>
@@ -14,6 +15,11 @@ namespace bias
 
     const QString VideoWriter_jpg::IMAGE_FILE_BASE = QString("image_");
     const QString VideoWriter_jpg::IMAGE_FILE_EXT = QString(".jpg");
+    const QString VideoWriter_jpg::MJPG_FILE_EXT = QString(".mjpg");
+    const QString VideoWriter_jpg::MJPG_INDEX_EXT = QString(".txt");
+    const QString VideoWriter_jpg::MJPG_FILE_NAME = QString("movie");
+    const QString VideoWriter_jpg::MJPG_INDEX_NAME = QString("index");
+    const std::string VideoWriter_jpg::MJPG_BOUNDARY_MARKER = std::string("--boundary\r\n");
     const QString DUMMY_FILENAME("dummy.jpg");
     const unsigned int VideoWriter_jpg::FRAMES_TODO_MAX_QUEUE_SIZE = 250;
     const unsigned int VideoWriter_jpg::DEFAULT_FRAME_SKIP = 1;
@@ -21,7 +27,7 @@ namespace bias
     const unsigned int VideoWriter_jpg::MIN_QUALITY = 0;
     const unsigned int VideoWriter_jpg::MAX_QUALITY = 100;
     const unsigned int VideoWriter_jpg::DEFAULT_NUMBER_OF_COMPRESSORS = 10;
-    const bool VideoWriter_jpg::DEFAULT_MJPG_FLAG = false;
+    const bool VideoWriter_jpg::DEFAULT_MJPG_FLAG = true;
     const VideoWriterParams_jpg VideoWriter_jpg::DEFAULT_PARAMS = VideoWriterParams_jpg();
 
     // VideoWriter_jpg methods
@@ -39,6 +45,8 @@ namespace bias
         std::cout << params.toString() << std::endl;
 
         isFirst_ = true;
+        nextFrameToWrite_ = 0;
+
         setFrameSkip(params.frameSkip);
         quality_ = params.quality;
         mjpgFlag_ = params.mjpgFlag;
@@ -48,12 +56,15 @@ namespace bias
         threadPoolPtr_ -> setMaxThreadCount(numberOfCompressors_);
         framesToDoQueuePtr_ = std::make_shared<CompressedFrameQueue_jpg>();
         framesFinishedSetPtr_ = std::make_shared<CompressedFrameSet_jpg>();
+
     }
 
 
     VideoWriter_jpg::~VideoWriter_jpg() 
     {
         stopCompressors();
+        movieFile_.close();
+        indexFile_.close();
     }
 
 
@@ -67,6 +78,9 @@ namespace bias
 
     void VideoWriter_jpg::addFrame(StampedImage stampedImg)
     {
+        unsigned int framesToDoQueueSize;
+        unsigned int framesFinishedSetSize;  
+
         if (isFirst_)
         {
             setupOutput();
@@ -80,9 +94,6 @@ namespace bias
         QFileInfo imageFileInfo(logDir_,imageFileName);
         QString fullPathName = imageFileInfo.absoluteFilePath();
 
-        unsigned int framesToDoQueueSize = framesToDoQueuePtr_ -> size();
-        unsigned int framesFinishedSetSize = framesFinishedSetPtr_ -> size();
-
         if (frameCount_%frameSkip_==0) 
         {
             CompressedFrame_jpg compressedFrame(fullPathName, stampedImg, quality_, mjpgFlag_);
@@ -90,20 +101,20 @@ namespace bias
             framesToDoQueuePtr_ -> acquireLock();
             framesToDoQueuePtr_ -> push(compressedFrame);
             framesToDoQueuePtr_ -> wakeOne();
-            framesToDoQueueSize = framesToDoQueuePtr_ -> size();
             framesToDoQueuePtr_ -> releaseLock();
-            //std::cout << "size = " << framesToDoQueueSize << std::endl;
-           
-            
-            // Not growing ...? 
-            framesFinishedSetPtr_ -> acquireLock();
-            framesFinishedSetSize = framesFinishedSetPtr_ -> size();
-            framesFinishedSetPtr_ -> releaseLock();
-
-            std::cout << framesFinishedSetSize << std::endl;
-
-
         }
+
+        framesToDoQueuePtr_ -> acquireLock();
+        framesToDoQueueSize = framesToDoQueuePtr_ -> size();
+        framesToDoQueuePtr_ -> releaseLock();
+
+        framesFinishedSetPtr_ -> acquireLock();
+        framesFinishedSetSize = framesFinishedSetPtr_ -> size();
+        framesFinishedSetPtr_ -> releaseLock();
+
+        //std::cout << "To Do:    " << framesToDoQueueSize << std::endl;
+        //std::cout << "Finished: " << framesFinishedSetSize << std::endl;
+
         if (framesToDoQueueSize > FRAMES_TODO_MAX_QUEUE_SIZE) 
         { 
             std::cout << "error: framesToDoQueueSize = " << framesToDoQueueSize << std::endl;
@@ -112,6 +123,7 @@ namespace bias
             emit imageLoggingError(errorId, errorMsg);
         }
 
+        framesFinishedSetSize = clearFinishedFrames();
         frameCount_++;
     }
 
@@ -128,7 +140,9 @@ namespace bias
             }
             framesToDoQueuePtr_ -> releaseLock();
         }
+        while (clearFinishedFrames() > 0);
     }
+
 
     unsigned int VideoWriter_jpg::getNextVersionNumber()
     {
@@ -192,6 +206,13 @@ namespace bias
             errorMsg += baseDir_.absolutePath().toStdString();
             throw RuntimeError(errorId, errorMsg);
         }
+
+        
+        QString movieFileName = logDir_.absoluteFilePath(MJPG_FILE_NAME + MJPG_FILE_EXT);
+        QString indexFileName = logDir_.absoluteFilePath(MJPG_INDEX_NAME + MJPG_INDEX_EXT);
+
+        movieFile_.open(movieFileName.toStdString(), std::ios::out | std::ios::binary);
+        indexFile_.open(indexFileName.toStdString(), std::ios::out);
 
     }
 
@@ -259,6 +280,56 @@ namespace bias
                 framesToDoQueuePtr_ -> wakeOne();
                 framesToDoQueuePtr_ -> releaseLock();
             }
+        }
+    }
+
+    unsigned int VideoWriter_jpg::clearFinishedFrames()
+    {
+        framesFinishedSetPtr_ -> acquireLock();
+        if (!(framesFinishedSetPtr_ -> empty()))
+        {
+            bool writeDone = false;
+            while ( (!writeDone) && (!(framesFinishedSetPtr_ -> empty())) )
+            {
+                CompressedFrameSet_jpg::iterator it = framesFinishedSetPtr_ -> begin();
+                CompressedFrame_jpg compressedFrame = *it;
+
+                if (compressedFrame.getFrameCount() == nextFrameToWrite_)
+                {
+                    framesFinishedSetPtr_ -> erase(it);
+                    nextFrameToWrite_ += frameSkip_;
+                    writeCompressedMjpgFrame(compressedFrame);
+                }
+                else
+                {
+                    writeDone = true;
+                }
+            }
+
+        } // if (!(framesFinishedSetPtr_ 
+        unsigned int framesFinishedSetSize = framesFinishedSetPtr_ -> size();
+        framesFinishedSetPtr_ -> releaseLock();
+        return framesFinishedSetSize;
+    }
+
+    void VideoWriter_jpg::writeCompressedMjpgFrame(CompressedFrame_jpg frame)
+    {
+        if (frame.haveEncoding())
+        {
+            std::cout << "writing frame" << std::endl;
+            movieFile_.write(MJPG_BOUNDARY_MARKER.c_str(),MJPG_BOUNDARY_MARKER.size());
+            std::vector<uchar> jpgBuffer = frame.getEncodedJpgBuffer();
+            long frameBeginPos = movieFile_.tellp();
+            movieFile_.write((const char *) &jpgBuffer[0],jpgBuffer.size());
+            long frameEndPos = movieFile_.tellp();
+
+            std::stringstream ss;
+            ss << frame.getFrameCount()  << " "; 
+            ss << frame.getTimeStamp()   <<  " ";
+            ss << frameBeginPos          << " ";
+            ss << frameEndPos            << std::endl;;
+            std::string indexData = ss.str();
+            indexFile_.write(indexData.c_str(), indexData.size());
         }
     }
 

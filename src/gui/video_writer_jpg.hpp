@@ -7,8 +7,11 @@
 #include <QPointer>
 #include <QDir>
 #include <QString>
+#include <QPointer>
 #include <vector>
 #include <list>
+#include <string>
+#include <fstream>
 
 class QThreadPool;
 
@@ -34,6 +37,11 @@ namespace bias
 
             static const QString IMAGE_FILE_BASE;
             static const QString IMAGE_FILE_EXT;
+            static const QString MJPG_FILE_EXT; 
+            static const QString MJPG_INDEX_EXT; 
+            static const QString MJPG_FILE_NAME;
+            static const QString MJPG_INDEX_NAME;
+            static const std::string MJPG_BOUNDARY_MARKER;
             static const unsigned int FRAMES_TODO_MAX_QUEUE_SIZE;
             static const unsigned int DEFAULT_FRAME_SKIP;
             static const unsigned int DEFAULT_QUALITY;
@@ -52,6 +60,10 @@ namespace bias
             QString baseName_;
             QDir logDir_;
             unsigned int numberOfCompressors_;
+            unsigned long nextFrameToWrite_;
+
+            std::ofstream movieFile_;
+            std::ofstream indexFile_;
 
             std::vector<QPointer<Compressor_jpg>> compressorPtrVec_;
 
@@ -67,7 +79,8 @@ namespace bias
 
             void startCompressors();
             void stopCompressors();
-
+            unsigned int clearFinishedFrames();
+            void writeCompressedMjpgFrame(CompressedFrame_jpg frame);
 
     };
    
