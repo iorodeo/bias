@@ -16,12 +16,10 @@ namespace bias
         if (value < bottom())
         {
             input = QString::number(bottom());
-            std::cout << input.toStdString() << std::endl;
         }
         else if (value > top())
         {
             input = QString::number(top());
-            std::cout << input.toStdString() << std::endl;
         }
     }
 

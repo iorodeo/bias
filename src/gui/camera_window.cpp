@@ -934,6 +934,7 @@ namespace bias
         jpgSettingsMap.insert("frameSkip", videoWriterParams_.jpg.frameSkip);
         jpgSettingsMap.insert("quality", videoWriterParams_.jpg.quality);
         jpgSettingsMap.insert("compressionThreads", videoWriterParams_.jpg.numberOfCompressors);
+        jpgSettingsMap.insert("mjpg", videoWriterParams_.jpg.mjpgFlag);
         loggingSettingsMap.insert("jpg", jpgSettingsMap);
 
         QVariantMap aviSettingsMap;
@@ -1202,10 +1203,6 @@ namespace bias
         if (actionLoggingEnabledPtr_ -> isChecked())
         {
             QString msgText("Logging already enabled");
-            if (showErrorDlg) 
-            {
-                QMessageBox::critical(this, msgTitle, msgText);
-            }
             rtnStatus.success = true;
             rtnStatus.message = msgText;
         }
@@ -2207,7 +2204,7 @@ namespace bias
     void CameraWindow::loggingSettingsChanged(VideoWriterParams params)
     {
         videoWriterParams_ = params;
-        std::cout << params.toString() << std::endl;
+        //std::cout << params.toString() << std::endl;
     }
 
 
@@ -2216,7 +2213,6 @@ namespace bias
         // Get Format string
         QPointer<QAction> actionPtr = qobject_cast<QAction *>(sender());
         videoFileFormat_ = actionToVideoFileFormatMap_[actionPtr]; 
-
         //std::cout << "video file format: "; 
         //std::cout << VIDEOFILE_EXTENSION_MAP[videoFileFormat_].toStdString();
         //std::cout << std::endl;
@@ -2466,13 +2462,13 @@ namespace bias
 
     void CameraWindow::actionServerPortTriggered()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        //std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
 
 
     void CameraWindow::actionServerCommandsTriggered()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        //std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
 
     void CameraWindow::actionHelpUserManualTriggered()
@@ -2539,8 +2535,8 @@ namespace bias
         connected_ = false;
         capturing_ = false;
         haveImagePixmap_ = false;
-        //logging_ = false; 
-        logging_ = true; 
+        logging_ = false; 
+        //logging_ = true; 
 
         flipVert_ = false;
         flipHorz_ = false;
@@ -2556,9 +2552,9 @@ namespace bias
 
 
         colorMapNumber_ = DEFAULT_COLORMAP_NUMBER;
-        //videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
+        videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
         //videoFileFormat_ = VIDEOFILE_FORMAT_AVI;
-        videoFileFormat_ = VIDEOFILE_FORMAT_JPG;
+        //videoFileFormat_ = VIDEOFILE_FORMAT_JPG;
         imageDisplayFreq_ = DEFAULT_IMAGE_DISPLAY_FREQ;
         captureDurationSec_ = DEFAULT_CAPTURE_DURATION;
 
@@ -6322,6 +6318,31 @@ namespace bias
                 return rtnStatus;
             }
             videoWriterParams_.jpg.numberOfCompressors = jpgCompressionThreads;
+
+            if (!jpgMap.contains("mjpg"))
+            {
+                QString errMsgText("Logging Settings: jpg mjpg flag not present");
+                if (showErrorDlg)
+                {
+                    QMessageBox::critical(this,errMsgTitle,errMsgText);
+                }
+                rtnStatus.success = false;
+                rtnStatus.message = errMsgText;
+                return rtnStatus;
+            }
+            if (!jpgMap["mjpg"].canConvert<bool>())
+            {
+                QString errMsgText("Logging Settings: jpg unable to convert");
+                errMsgText += " mjpg flag to bool";
+                if (showErrorDlg)
+                {
+                    QMessageBox::critical(this,errMsgTitle,errMsgText);
+                }
+                rtnStatus.success = false;
+                rtnStatus.message = errMsgText;
+                return rtnStatus;
+            }
+            videoWriterParams_.jpg.mjpgFlag = jpgMap["mjpg"].toBool();
         }
 
         // Get fmf values

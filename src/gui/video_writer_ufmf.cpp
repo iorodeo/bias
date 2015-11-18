@@ -85,7 +85,7 @@ namespace bias
         dilateWindowSize_ = params.dilateWindowSize; 
 
         // ----------------------------------------------------------------------------
-        std::cout << params.toString() << std::endl;
+        //std::cout << params.toString() << std::endl;
         // -----------------------------------------------------------------------------
 
         // Create thread pool for background modelling

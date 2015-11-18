@@ -42,7 +42,7 @@ namespace bias
             ) : VideoWriter(fileName,cameraNumber,parent) 
     {
 
-        std::cout << params.toString() << std::endl;
+        //std::cout << params.toString() << std::endl;
 
         isFirst_ = true;
         nextFrameToWrite_ = 0;
@@ -316,7 +316,6 @@ namespace bias
     {
         if (frame.haveEncoding())
         {
-            std::cout << "writing frame" << std::endl;
             movieFile_.write(MJPG_BOUNDARY_MARKER.c_str(),MJPG_BOUNDARY_MARKER.size());
             std::vector<uchar> jpgBuffer = frame.getEncodedJpgBuffer();
             long frameBeginPos = movieFile_.tellp();
@@ -325,7 +324,7 @@ namespace bias
 
             std::stringstream ss;
             ss << frame.getFrameCount()  << " "; 
-            ss << frame.getTimeStamp()   <<  " ";
+            ss << frame.getTimeStamp()   << " ";
             ss << frameBeginPos          << " ";
             ss << frameEndPos            << std::endl;;
             std::string indexData = ss.str();
