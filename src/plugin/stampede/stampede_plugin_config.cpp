@@ -659,7 +659,7 @@ namespace bias
 
     void StampedePluginConfig::setToDefaultConfig()
     {
-        setDuration(30);
+        setDuration(40);
         setVibrationPortName("ttyUSB0");
         setDisplayPortName("ttyUSB1");
         setArenaConfigId(1);

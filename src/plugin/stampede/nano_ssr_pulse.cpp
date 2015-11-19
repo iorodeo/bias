@@ -128,7 +128,7 @@ namespace bias
         return writeCmd(cmd);
     } 
 
-    bool NanoSSRPulse::getPeriod(int chan, int &period)
+    bool NanoSSRPulse::getPeriod(int chan, int  &period)
     {
         bool ok = false;
         if (isChanInRange(chan))

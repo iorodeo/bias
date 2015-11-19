@@ -182,6 +182,10 @@ namespace bias
             configFileNameLabelPtr -> setText(labelString);
         }
         updateConfigEditText();
+
+        QPointer<CameraWindow> cameraWindowPtr = getCameraWindow();
+        cameraWindowPtr -> setCaptureDuration(config_.duration());
+
         return rtnStatus;
     }
 
@@ -973,7 +977,6 @@ namespace bias
         qDebug() << "  startTime     " << event.startTime();
         qDebug() << "  period        " << event.period();
         qDebug() << "  number        " << event.number();
-
 
         if (vibrationDev_.isOpen())
         {
