@@ -324,6 +324,7 @@ namespace bias
         frameCount_ = 0;
         timeStamp_ = 0.0;
         framesPerSec_ = 0.0;
+        skippedFramesWarning_ = false;
 
         newImageQueuePtr_ -> clear();
         logImageQueuePtr_ -> clear();
@@ -1927,10 +1928,9 @@ namespace bias
 
     void CameraWindow::imageLoggingError(unsigned int errorId, QString errorMsg)
     {
-        //if ((errorId == ERROR_FRAMES_TODO_MAX_QUEUE_SIZE) || (errorId == ERROR_FRAMES_FINISHED_MAX_SET_SIZE))
-        if (false)
+        if ((errorId == ERROR_FRAMES_TODO_MAX_QUEUE_SIZE) || (errorId == ERROR_FRAMES_FINISHED_MAX_SET_SIZE))
         {
-
+            skippedFramesWarning_ = true;
         }
         else
         {
@@ -2535,8 +2535,8 @@ namespace bias
         connected_ = false;
         capturing_ = false;
         haveImagePixmap_ = false;
-        logging_ = false; 
-        //logging_ = true; 
+        //logging_ = false; 
+        logging_ = true; 
 
         flipVert_ = false;
         flipHorz_ = false;
@@ -2549,12 +2549,13 @@ namespace bias
         userCameraName_ = QString("");
         format7PercentSpeed_ = DEFAULT_FORMAT7_PERCENT_SPEED;
         showCameraLockFailMsg_ = true;
+        skippedFramesWarning_ = false;
 
 
         colorMapNumber_ = DEFAULT_COLORMAP_NUMBER;
-        videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
+        //videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
         //videoFileFormat_ = VIDEOFILE_FORMAT_AVI;
-        //videoFileFormat_ = VIDEOFILE_FORMAT_JPG;
+        videoFileFormat_ = VIDEOFILE_FORMAT_JPG;
         imageDisplayFreq_ = DEFAULT_IMAGE_DISPLAY_FREQ;
         captureDurationSec_ = DEFAULT_CAPTURE_DURATION;
 
@@ -3345,6 +3346,14 @@ namespace bias
             painter.drawText(5,12, msg);
         }
 
+        // Display skipped frame warning
+        if (skippedFramesWarning_)
+        {
+            QPainter painter(&pixmapScaled);
+            QString msg("Warning: skipped frames");  
+            painter.setPen(QColor(255,0,0));
+            painter.drawText(5,pixmapScaled.size().height()- 12, msg);
+        }
         imageLabelPtr -> setPixmap(pixmapScaled);
     }
 

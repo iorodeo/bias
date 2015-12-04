@@ -248,6 +248,10 @@ namespace bias
             QString errorMsg("logger framesToDoQueue has exceeded the maximum allowed size");
             emit imageLoggingError(errorId, errorMsg);
         }
+
+        // ----------------------------------------------------------------------------------
+        // Change this .... check this in compressor threads and add skipped frames to queue.
+        // ----------------------------------------------------------------------------------
         if (framesFinishedSetSize >= FRAMES_FINISHED_MAX_SET_SIZE)
         {
             std::cout << "error: framesFinishedSetSize = " << framesFinishedSetSize << std::endl;

@@ -221,6 +221,7 @@ namespace bias
             bool haveDefaultConfigFileDir_;
             bool showCameraLockFailMsg_;
             bool pluginEnabled_;
+            bool skippedFramesWarning_;
             unsigned int cameraNumber_;
             unsigned int numberOfCameras_;
             unsigned int format7PercentSpeed_;

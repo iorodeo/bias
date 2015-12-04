@@ -69,6 +69,7 @@ namespace bias
 
             CompressedFrameQueuePtr_jpg framesToDoQueuePtr_;
             CompressedFrameSetPtr_jpg framesFinishedSetPtr_;
+            std::list<unsigned long> framesSkippedIndexList_;
 
             QPointer<QThreadPool> threadPoolPtr_;
 

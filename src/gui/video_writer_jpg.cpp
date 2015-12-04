@@ -56,7 +56,7 @@ namespace bias
         threadPoolPtr_ -> setMaxThreadCount(numberOfCompressors_);
         framesToDoQueuePtr_ = std::make_shared<CompressedFrameQueue_jpg>();
         framesFinishedSetPtr_ = std::make_shared<CompressedFrameSet_jpg>();
-
+        framesSkippedIndexList_.clear();
     }
 
 
@@ -96,12 +96,19 @@ namespace bias
 
         if (frameCount_%frameSkip_==0) 
         {
-            CompressedFrame_jpg compressedFrame(fullPathName, stampedImg, quality_, mjpgFlag_);
-
-            framesToDoQueuePtr_ -> acquireLock();
-            framesToDoQueuePtr_ -> push(compressedFrame);
-            framesToDoQueuePtr_ -> wakeOne();
-            framesToDoQueuePtr_ -> releaseLock();
+            //if ((framesToDoQueueSize < FRAMES_TODO_MAX_QUEUE_SIZE) && (stampedImg.frameCount%5 != 0) )
+            if (framesToDoQueueSize < FRAMES_TODO_MAX_QUEUE_SIZE)
+            {
+                CompressedFrame_jpg compressedFrame(fullPathName, stampedImg, quality_, mjpgFlag_);
+                framesToDoQueuePtr_ -> acquireLock();
+                framesToDoQueuePtr_ -> push(compressedFrame);
+                framesToDoQueuePtr_ -> wakeOne();
+                framesToDoQueuePtr_ -> releaseLock();
+            }
+            else
+            {
+                framesSkippedIndexList_.push_back(stampedImg.frameCount);
+            }
         }
 
         framesToDoQueuePtr_ -> acquireLock();
@@ -112,16 +119,21 @@ namespace bias
         framesFinishedSetSize = framesFinishedSetPtr_ -> size();
         framesFinishedSetPtr_ -> releaseLock();
 
-        //std::cout << "To Do:    " << framesToDoQueueSize << std::endl;
         //std::cout << "Finished: " << framesFinishedSetSize << std::endl;
+        //std::cout << "# todo:    " << framesToDoQueueSize << std::endl;
+        //std::cout << "# skipped: " << (framesSkippedIndexList_.size()) << std::endl;
+        //std::cout << std::endl;
 
-        if (framesToDoQueueSize > FRAMES_TODO_MAX_QUEUE_SIZE) 
+        //if ( (framesToDoQueueSize >= FRAMES_TODO_MAX_QUEUE_SIZE)  || (frameCount_ == 49))
+        if (framesToDoQueueSize >= FRAMES_TODO_MAX_QUEUE_SIZE) 
         { 
-            std::cout << "error: framesToDoQueueSize = " << framesToDoQueueSize << std::endl;
+            std::cout << "warning: framesToDoQueueSize = " << framesToDoQueueSize << std::endl;
             unsigned int errorId = ERROR_FRAMES_TODO_MAX_QUEUE_SIZE;
             QString errorMsg("logger framesToDoQueue has exceeded the maximum allowed size");
             emit imageLoggingError(errorId, errorMsg);
+            // Note this will not trigger stop of image acquisition ... just display a warning.
         }
+
 
         framesFinishedSetSize = clearFinishedFrames();
         frameCount_++;
@@ -291,12 +303,44 @@ namespace bias
             bool writeDone = false;
             while ( (!writeDone) && (!(framesFinishedSetPtr_ -> empty())) )
             {
-                CompressedFrameSet_jpg::iterator it = framesFinishedSetPtr_ -> begin();
-                CompressedFrame_jpg compressedFrame = *it;
+                // Handle skipped frames. 
+                if (framesSkippedIndexList_.size() > 0)
+                {
+                    std::list<unsigned long>::iterator skippedIndexIt = framesSkippedIndexList_.begin();
+                    bool done = false;
+
+                    while (!done)
+                    {
+                        if (*skippedIndexIt == nextFrameToWrite_)
+                        {
+                            nextFrameToWrite_ += frameSkip_;
+                        }
+                        else if (*skippedIndexIt < nextFrameToWrite_)
+                        {
+                            if (framesSkippedIndexList_.size() > 1)
+                            {
+                                skippedIndexIt++;
+                            }
+                            else
+                            {
+                                done = true;
+                            }
+                            framesSkippedIndexList_.pop_front();
+                        }
+                        else
+                        {
+                            done = true;
+                        }
+                    }
+                }
+
+                // Write next frame to file
+                CompressedFrameSet_jpg::iterator frameIt = framesFinishedSetPtr_ -> begin();
+                CompressedFrame_jpg compressedFrame = *frameIt;
 
                 if (compressedFrame.getFrameCount() == nextFrameToWrite_)
                 {
-                    framesFinishedSetPtr_ -> erase(it);
+                    framesFinishedSetPtr_ -> erase(frameIt);
                     nextFrameToWrite_ += frameSkip_;
                     writeCompressedMjpgFrame(compressedFrame);
                 }
