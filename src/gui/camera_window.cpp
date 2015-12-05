@@ -3350,7 +3350,7 @@ namespace bias
         if (skippedFramesWarning_)
         {
             QPainter painter(&pixmapScaled);
-            QString msg("Warning: skipped frames");  
+            QString msg("Logging queue overflow - skipped frames");  
             painter.setPen(QColor(255,0,0));
             painter.drawText(5,pixmapScaled.size().height()- 12, msg);
         }

@@ -1,5 +1,4 @@
 #include "compressor_jpg.hpp"
-
 #include "affinity.hpp"
 #include <iostream>
 #include <QThread>

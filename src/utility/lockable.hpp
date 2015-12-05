@@ -119,7 +119,6 @@ namespace bias
 
     };
 
-
 } // namespace bias
 
 #endif // #ifndef BIAS_LOCKABLE_HPP

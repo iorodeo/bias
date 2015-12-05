@@ -43,6 +43,7 @@ namespace bias
             static const QString MJPG_INDEX_NAME;
             static const std::string MJPG_BOUNDARY_MARKER;
             static const unsigned int FRAMES_TODO_MAX_QUEUE_SIZE;
+            static const unsigned int FRAMES_FINISHED_MAX_SET_SIZE;
             static const unsigned int DEFAULT_FRAME_SKIP;
             static const unsigned int DEFAULT_QUALITY;
             static const unsigned int MIN_QUALITY;

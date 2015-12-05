@@ -22,6 +22,7 @@ namespace bias
     const std::string VideoWriter_jpg::MJPG_BOUNDARY_MARKER = std::string("--boundary\r\n");
     const QString DUMMY_FILENAME("dummy.jpg");
     const unsigned int VideoWriter_jpg::FRAMES_TODO_MAX_QUEUE_SIZE = 250;
+    const unsigned int VideoWriter_jpg::FRAMES_FINISHED_MAX_SET_SIZE = 250;
     const unsigned int VideoWriter_jpg::DEFAULT_FRAME_SKIP = 1;
     const unsigned int VideoWriter_jpg::DEFAULT_QUALITY = 90;
     const unsigned int VideoWriter_jpg::MIN_QUALITY = 0;
@@ -133,7 +134,6 @@ namespace bias
             emit imageLoggingError(errorId, errorMsg);
             // Note this will not trigger stop of image acquisition ... just display a warning.
         }
-
 
         framesFinishedSetSize = clearFinishedFrames();
         frameCount_++;
