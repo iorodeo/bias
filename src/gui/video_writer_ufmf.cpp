@@ -74,6 +74,7 @@ namespace bias
         : VideoWriter(fileName,cameraNumber,parent) 
     {
         isFirst_ = true;
+        skipReported_ = false;
 
         backgroundThreshold_ = params.backgroundThreshold;
         medianUpdateCount_ = params.medianUpdateCount;
@@ -129,8 +130,7 @@ namespace bias
 
     void VideoWriter_ufmf::addFrame(StampedImage stampedImg) 
     {
-        unsigned int framesToDoQueueSize;
-        unsigned int framesFinishedSetSize;
+        bool skipFrame = false;
         bool haveNewMedianImage = false;
 
         currentImage_ = stampedImg;
@@ -213,18 +213,35 @@ namespace bias
                     bgUpdateCount_
                     );
 
-            // Insert new (uncalculated) compressed frame into "to do" queue.
             framesToDoQueuePtr_ -> acquireLock();
-            framesToDoQueuePtr_ -> push(compressedFrame);
-            framesToDoQueuePtr_ -> wakeOne();
-            framesToDoQueueSize = framesToDoQueuePtr_ -> size();
+            unsigned int framesToDoQueueSize = framesToDoQueuePtr_ -> size();
+            if (framesToDoQueueSize < FRAMES_TODO_MAX_QUEUE_SIZE)
+            {
+                // Insert new (uncalculated) compressed frame into "to do" queue.
+                framesToDoQueuePtr_ -> push(compressedFrame);
+                framesToDoQueuePtr_ -> wakeOne();
+            }
+            else
+            {
+                skipFrame = true;
+            }
             framesToDoQueuePtr_ -> releaseLock();
+
+            if (skipFrame)
+            {
+                // Queue is full - skip frame
+                framesSkippedIndexListPtr_ -> acquireLock();
+                framesSkippedIndexListPtr_ -> push_back(stampedImg.frameCount);
+                framesSkippedIndexListPtr_ -> releaseLock();
+                skipReported_ = true;
+            }
 
 
         } // if (frameCount_%frameSkip_==0) 
 
         // Remove frames from compressed frames "finished" set and write to disk 
-        framesFinishedSetSize = clearFinishedFrames();
+        //framesFinishedSetSize = clearFinishedFrames();
+        clearFinishedFrames();
         frameCount_++;
 
         // Cull framesWaitQueue if it starts to grow too large
@@ -238,26 +255,14 @@ namespace bias
             }
         }
 
-        // Check frames todo and frames finish queue/set size and emit error if
-        // they grow too large.
-
-        if (framesToDoQueueSize >= FRAMES_TODO_MAX_QUEUE_SIZE) 
+        // Report skipped frame
+        if ((skipFrame)  && (!skipReported_))
         { 
-            std::cout << "error: framesToDoQueueSize = " << framesToDoQueueSize << std::endl;
+            std::cout << "warning: logging overflow - skipped frame -" << std::endl;
             unsigned int errorId = ERROR_FRAMES_TODO_MAX_QUEUE_SIZE;
             QString errorMsg("logger framesToDoQueue has exceeded the maximum allowed size");
             emit imageLoggingError(errorId, errorMsg);
-        }
-
-        // ----------------------------------------------------------------------------------
-        // Change this .... check this in compressor threads and add skipped frames to queue.
-        // ----------------------------------------------------------------------------------
-        if (framesFinishedSetSize >= FRAMES_FINISHED_MAX_SET_SIZE)
-        {
-            std::cout << "error: framesFinishedSetSize = " << framesFinishedSetSize << std::endl;
-            unsigned int errorId = ERROR_FRAMES_FINISHED_MAX_SET_SIZE;
-            QString errorMsg("logger framesFinishedSet has exceeded the maximum allowed size");
-            emit imageLoggingError(errorId, errorMsg);
+            skipReported_ = true;
         }
     }
 
@@ -271,18 +276,59 @@ namespace bias
     unsigned int VideoWriter_ufmf::clearFinishedFrames()
     {
         framesFinishedSetPtr_ -> acquireLock();
-        if (!(framesFinishedSetPtr_ -> empty()))
+        bool framesFinishedSetEmpty = framesFinishedSetPtr_ -> empty();
+        framesFinishedSetPtr_ -> releaseLock();
+
+        if (!framesFinishedSetEmpty)
         {
             bool writeDone = false;
-            while ( (!writeDone) && (!(framesFinishedSetPtr_ -> empty())) )
+            while ( (!writeDone) && (!framesFinishedSetEmpty) ) 
             {
-                CompressedFrameSet_ufmf::iterator it = framesFinishedSetPtr_ -> begin();
-                CompressedFrame_ufmf compressedFrame = *it;
+                // Handle skipped frames. 
+                // --------------------------------------------------------------------------------
+                framesSkippedIndexListPtr_ -> acquireLock();
+                if (framesSkippedIndexListPtr_ -> size() > 0)
+
+                {
+                    std::list<unsigned long>::iterator skippedIndexIt = framesSkippedIndexListPtr_ -> begin();
+                    bool done = false;
+
+                    while (!done)
+                    {
+                        if (*skippedIndexIt == nextFrameToWrite_)
+                        {
+                            nextFrameToWrite_ += frameSkip_;
+                        }
+                        else if (*skippedIndexIt < nextFrameToWrite_)
+                        {
+                            if (framesSkippedIndexListPtr_ -> size() > 1)
+                            {
+                                skippedIndexIt++;
+                            }
+                            else
+                            {
+                                done = true;
+                            }
+                            framesSkippedIndexListPtr_ -> pop_front();
+                        }
+                        else
+                        {
+                            done = true;
+                        }
+                    }
+                }
+                framesSkippedIndexListPtr_ -> releaseLock();
+
+                // Write next frame to file
+                // --------------------------------------------------------------------------------
+                framesFinishedSetPtr_ -> acquireLock();
+                CompressedFrameSet_ufmf::iterator frameIt = framesFinishedSetPtr_ -> begin();
+                CompressedFrame_ufmf compressedFrame = *frameIt;
 
                 if (compressedFrame.getFrameCount() == nextFrameToWrite_)
                 {
                     framesWaitQueuePtr_ -> push(compressedFrame);
-                    framesFinishedSetPtr_ -> erase(it);
+                    framesFinishedSetPtr_ -> erase(frameIt);
                     nextFrameToWrite_ += frameSkip_;
                     writeCompressedFrame(compressedFrame);
                 }
@@ -290,9 +336,14 @@ namespace bias
                 {
                     writeDone = true;
                 }
-            }
+                framesFinishedSetEmpty = framesFinishedSetPtr_ -> empty();
+                framesFinishedSetPtr_ -> releaseLock();
+
+            } // while ( (!writeDone) && (!framesFinishedSetEmpty) ) 
 
         } // if (!(framesFinishedSetPtr_ 
+
+        framesFinishedSetPtr_ -> acquireLock();
         unsigned int framesFinishedSetSize = framesFinishedSetPtr_ -> size();
         framesFinishedSetPtr_ -> releaseLock();
         return framesFinishedSetSize;
@@ -757,6 +808,7 @@ namespace bias
             compressorPtrVec_[i] = new Compressor_ufmf(
                     framesToDoQueuePtr_,
                     framesFinishedSetPtr_,
+                    framesSkippedIndexListPtr_,
                     cameraNumber_
                     );
             threadPoolPtr_ -> start(compressorPtrVec_[i]);

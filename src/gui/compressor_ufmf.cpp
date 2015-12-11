@@ -1,4 +1,5 @@
 #include "compressor_ufmf.hpp"
+#include "video_writer_ufmf.hpp"
 #include "affinity.hpp"
 #include <iostream>
 #include <QThread>
@@ -8,25 +9,27 @@ namespace bias
     Compressor_ufmf::Compressor_ufmf(QObject *parent)
         : QObject(parent)
     { 
-        initialize(NULL,NULL,0);
+        initialize(nullptr,nullptr,nullptr,0);
         ready_ = false;
     }
 
     Compressor_ufmf::Compressor_ufmf( 
             CompressedFrameQueuePtr_ufmf framesToDoQueuePtr, 
             CompressedFrameSetPtr_ufmf framesFinishedSetPtr, 
+            std::shared_ptr<Lockable<std::list<unsigned long>>> framesSkippedIndexListPtr,
             unsigned int cameraNumber,
             QObject *parent
             )  
         : QObject(parent)
     {
-        initialize(framesToDoQueuePtr,framesFinishedSetPtr,cameraNumber);
+        initialize(framesToDoQueuePtr,framesFinishedSetPtr,framesSkippedIndexListPtr,cameraNumber);
     }
 
     
     void Compressor_ufmf::initialize( 
             CompressedFrameQueuePtr_ufmf framesToDoQueuePtr, 
             CompressedFrameSetPtr_ufmf framesFinishedSetPtr,
+            std::shared_ptr<Lockable<std::list<unsigned long>>> framesSkippedIndexListPtr,
             unsigned int cameraNumber
             )
     {
@@ -34,6 +37,7 @@ namespace bias
         stopped_ = true;
         framesToDoQueuePtr_ = framesToDoQueuePtr;
         framesFinishedSetPtr_ = framesFinishedSetPtr;
+        framesSkippedIndexListPtr_ = framesSkippedIndexListPtr;
         if ((framesToDoQueuePtr_ != NULL) && (framesFinishedSetPtr_ != NULL))
         {
             ready_ = true;
@@ -99,14 +103,26 @@ namespace bias
                 // Compress the frame
                 compressedFrame.compress();
 
-                // Put completed compressed frame into "done" set
-                framesFinishedSetPtr_ -> acquireLock();
-                framesFinishedSetPtr_ -> insert(compressedFrame);
-                framesFinishedSetSize = framesFinishedSetPtr_ -> size();
-                framesFinishedSetPtr_ -> releaseLock();
-            }
+                if (framesFinishedSetSize < VideoWriter_ufmf::FRAMES_FINISHED_MAX_SET_SIZE)
+                {
+                    // Put completed compressed frame into finished set
+                    framesFinishedSetPtr_ -> acquireLock();
+                    framesFinishedSetPtr_ -> insert(compressedFrame);
+                    framesFinishedSetSize = framesFinishedSetPtr_ -> size();
+                    framesFinishedSetPtr_ -> releaseLock();
+                }
+                else
+                {
+                    // Finished frames set is full - skip
+                    framesSkippedIndexListPtr_ -> acquireLock();
+                    framesSkippedIndexListPtr_ -> push_back(compressedFrame.getFrameCount());
+                    framesSkippedIndexListPtr_ -> releaseLock();
+                }
 
-        }
-    }
+            } // if (haveNewFrame) 
+
+        } // while (!done)  
+
+    } // void Compressor_ufmf::run()
 
 } // namespace bias

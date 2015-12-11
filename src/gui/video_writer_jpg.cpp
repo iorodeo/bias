@@ -45,6 +45,7 @@ namespace bias
         //std::cout << params.toString() << std::endl;
 
         isFirst_ = true;
+        skipReported_ = false;;
         nextFrameToWrite_ = 0;
 
         setFrameSkip(params.frameSkip);
@@ -78,8 +79,7 @@ namespace bias
 
     void VideoWriter_jpg::addFrame(StampedImage stampedImg)
     {
-        unsigned int framesToDoQueueSize;
-        unsigned int framesFinishedSetSize;  
+        bool skipFrame = false;
 
         if (isFirst_)
         {
@@ -94,18 +94,26 @@ namespace bias
         QFileInfo imageFileInfo(logDir_,imageFileName);
         QString fullPathName = imageFileInfo.absoluteFilePath();
 
+        framesToDoQueuePtr_  -> acquireLock();
+        framesToDoQueuePtr_  -> releaseLock();
+
         if (frameCount_%frameSkip_==0) 
         {
-            //if ((framesToDoQueueSize < FRAMES_TODO_MAX_QUEUE_SIZE) && (stampedImg.frameCount%5 != 0) )
+            framesToDoQueuePtr_ -> acquireLock();
+            unsigned int framesToDoQueueSize = framesToDoQueuePtr_ -> size();
             if (framesToDoQueueSize < FRAMES_TODO_MAX_QUEUE_SIZE)
             {
                 CompressedFrame_jpg compressedFrame(fullPathName, stampedImg, quality_, mjpgFlag_);
-                framesToDoQueuePtr_ -> acquireLock();
                 framesToDoQueuePtr_ -> push(compressedFrame);
                 framesToDoQueuePtr_ -> wakeOne();
-                framesToDoQueuePtr_ -> releaseLock();
             }
             else
+            { 
+                skipFrame = true;
+            }
+            framesToDoQueuePtr_ -> releaseLock();
+
+            if (skipFrame)
             {
                 framesSkippedIndexListPtr_ -> acquireLock();
                 framesSkippedIndexListPtr_ -> push_back(stampedImg.frameCount);
@@ -113,30 +121,21 @@ namespace bias
             }
         }
 
-        framesToDoQueuePtr_ -> acquireLock();
-        framesToDoQueueSize = framesToDoQueuePtr_ -> size();
-        framesToDoQueuePtr_ -> releaseLock();
+        framesSkippedIndexListPtr_ -> acquireLock();
+        unsigned int framesSkippedIndexListSize = framesSkippedIndexListPtr_ -> size();
+        framesSkippedIndexListPtr_ -> releaseLock();
 
-        framesFinishedSetPtr_ -> acquireLock();
-        framesFinishedSetSize = framesFinishedSetPtr_ -> size();
-        framesFinishedSetPtr_ -> releaseLock();
-
-        //std::cout << "Finished: " << framesFinishedSetSize << std::endl;
-        //std::cout << "# todo:    " << framesToDoQueueSize << std::endl;
-        //std::cout << "# skipped: " << (framesSkippedIndexListPtr_ -> size()) << std::endl;
-        //std::cout << std::endl;
-
-        //if ( (framesToDoQueueSize >= FRAMES_TODO_MAX_QUEUE_SIZE)  || (frameCount_ == 49))
-        if (framesToDoQueueSize >= FRAMES_TODO_MAX_QUEUE_SIZE) 
+        if ((skipFrame) && (!skipReported_))
         { 
-            std::cout << "warning: framesToDoQueueSize = " << framesToDoQueueSize << std::endl;
+            std::cout << "warning: logging overflow - skipped frame -" << std::endl;
             unsigned int errorId = ERROR_FRAMES_TODO_MAX_QUEUE_SIZE;
             QString errorMsg("logger framesToDoQueue has exceeded the maximum allowed size");
             emit imageLoggingError(errorId, errorMsg);
+            skipReported_ = true;
             // Note this will not trigger stop of image acquisition ... just display a warning.
         }
 
-        framesFinishedSetSize = clearFinishedFrames();
+        clearFinishedFrames();
         frameCount_++;
     }
 

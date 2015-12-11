@@ -21,6 +21,7 @@ namespace bias
             Compressor_ufmf(
                     CompressedFrameQueuePtr_ufmf framesToDoQueuePtr,
                     CompressedFrameSetPtr_ufmf framesFinishedSetPtr,
+                    std::shared_ptr<Lockable<std::list<unsigned long>>> framesSkippedIndexListPtr,
                     unsigned int cameraNumber,
                     QObject *parent=0
                     );
@@ -35,10 +36,12 @@ namespace bias
 
             CompressedFrameQueuePtr_ufmf framesToDoQueuePtr_;
             CompressedFrameSetPtr_ufmf framesFinishedSetPtr_;
+            std::shared_ptr<Lockable<std::list<unsigned long>>> framesSkippedIndexListPtr_;
 
             void initialize(
                     CompressedFrameQueuePtr_ufmf framesToDoQueuePtr,
                     CompressedFrameSetPtr_ufmf framesFinishedSetPtr,
+                    std::shared_ptr<Lockable<std::list<unsigned long>>> framesSkippedIndexListPtr,
                     unsigned int cameraNumber
                     );
 

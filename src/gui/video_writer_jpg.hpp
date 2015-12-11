@@ -56,6 +56,7 @@ namespace bias
         protected:
 
             bool isFirst_;
+            bool skipReported_;
             unsigned int quality_;
             bool mjpgFlag_;
             QDir baseDir_;

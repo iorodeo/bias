@@ -87,6 +87,7 @@ namespace bias
         protected:
 
             bool isFirst_;
+            bool skipReported_;
             unsigned int backgroundThreshold_;
             unsigned int medianUpdateCount_;
             unsigned int medianUpdateInterval_;
