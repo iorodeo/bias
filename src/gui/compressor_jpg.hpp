@@ -19,6 +19,7 @@ namespace bias
             Compressor_jpg(
                     CompressedFrameQueuePtr_jpg framesToDoQueuePtr, 
                     CompressedFrameSetPtr_jpg framesFinishedSetPtr,
+                    std::shared_ptr<Lockable<std::list<unsigned long>>> framesSkippedIndexListPtr,
                     unsigned int cameraNumber, 
                     QObject *parent=0
                     );
@@ -32,10 +33,12 @@ namespace bias
             unsigned int cameraNumber_;
             CompressedFrameQueuePtr_jpg framesToDoQueuePtr_;
             CompressedFrameSetPtr_jpg framesFinishedSetPtr_;
+            std::shared_ptr<Lockable<std::list<unsigned long>>> framesSkippedIndexListPtr_;
 
             void initialize(
                     CompressedFrameQueuePtr_jpg framesToDoQueuePtr, 
                     CompressedFrameSetPtr_jpg framesFinishedSetPtr, 
+                    std::shared_ptr<Lockable<std::list<unsigned long>>> framesSkippedIndexListPtr,
                     unsigned int cameraNumber
                     );
             void run();

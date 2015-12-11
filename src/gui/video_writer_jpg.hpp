@@ -17,6 +17,7 @@ class QThreadPool;
 
 namespace bias
 {
+
     class VideoWriter_jpg : public VideoWriter
     {
         public:
@@ -70,7 +71,7 @@ namespace bias
 
             CompressedFrameQueuePtr_jpg framesToDoQueuePtr_;
             CompressedFrameSetPtr_jpg framesFinishedSetPtr_;
-            std::list<unsigned long> framesSkippedIndexList_;
+            std::shared_ptr<Lockable<std::list<unsigned long>>> framesSkippedIndexListPtr_;
 
             QPointer<QThreadPool> threadPoolPtr_;
 

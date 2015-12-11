@@ -2,29 +2,32 @@
 #include "affinity.hpp"
 #include <iostream>
 #include <QThread>
+#include "video_writer_jpg.hpp"
 
 namespace bias
 {
     Compressor_jpg::Compressor_jpg(QObject *parent) : QObject(parent)
     { 
-        initialize(NULL,NULL,0);
+        initialize(nullptr,nullptr,nullptr,0);
         ready_ = false;
     }
 
     Compressor_jpg::Compressor_jpg(
             CompressedFrameQueuePtr_jpg framesToDoQueuePtr, 
             CompressedFrameSetPtr_jpg framesFinishedSetPtr, 
+            std::shared_ptr<Lockable<std::list<unsigned long>>> framesSkippedIndexListPtr,
             unsigned int cameraNumber, 
             QObject *parent
             )  : QObject(parent)
     {
-        initialize(framesToDoQueuePtr,framesFinishedSetPtr,cameraNumber);
+        initialize(framesToDoQueuePtr,framesFinishedSetPtr,framesSkippedIndexListPtr,cameraNumber);
     }
 
     
     void Compressor_jpg::initialize(
             CompressedFrameQueuePtr_jpg framesToDoQueuePtr, 
             CompressedFrameSetPtr_jpg framesFinishedSetPtr, 
+            std::shared_ptr<Lockable<std::list<unsigned long>>> framesSkippedIndexListPtr,
             unsigned int cameraNumber
             )
     {
@@ -32,7 +35,7 @@ namespace bias
         stopped_ = true;
         framesToDoQueuePtr_ = framesToDoQueuePtr;
         framesFinishedSetPtr_ = framesFinishedSetPtr;
-        if (framesToDoQueuePtr_ != NULL) 
+        if (framesToDoQueuePtr_ != nullptr) 
         {
             ready_ = true;
         }
@@ -98,12 +101,20 @@ namespace bias
                 bool mjpgFlag = compressedFrame.getMjpgFlag();
                 if (mjpgFlag)
                 {
-                    compressedFrame.encode();
-                    framesFinishedSetPtr_ -> acquireLock();
-                    framesFinishedSetPtr_ -> insert(compressedFrame);
-                    framesFinishedSetSize = framesFinishedSetPtr_ -> size();
-                    framesFinishedSetPtr_ -> releaseLock();
-
+                    if (framesFinishedSetSize < VideoWriter_jpg::FRAMES_FINISHED_MAX_SET_SIZE)
+                    {
+                        compressedFrame.encode();
+                        framesFinishedSetPtr_ -> acquireLock();
+                        framesFinishedSetPtr_ -> insert(compressedFrame);
+                        framesFinishedSetSize = framesFinishedSetPtr_ -> size();
+                        framesFinishedSetPtr_ -> releaseLock();
+                    }
+                    else
+                    {
+                        framesSkippedIndexListPtr_ -> acquireLock();
+                        framesSkippedIndexListPtr_ -> push_back(compressedFrame.getFrameCount());
+                        framesSkippedIndexListPtr_ -> releaseLock();
+                    }
                 }
                 else
                 {

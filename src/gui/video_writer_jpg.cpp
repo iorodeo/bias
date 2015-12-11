@@ -12,7 +12,6 @@
 
 namespace bias
 {
-
     const QString VideoWriter_jpg::IMAGE_FILE_BASE = QString("image_");
     const QString VideoWriter_jpg::IMAGE_FILE_EXT = QString(".jpg");
     const QString VideoWriter_jpg::MJPG_FILE_EXT = QString(".mjpg");
@@ -57,7 +56,7 @@ namespace bias
         threadPoolPtr_ -> setMaxThreadCount(numberOfCompressors_);
         framesToDoQueuePtr_ = std::make_shared<CompressedFrameQueue_jpg>();
         framesFinishedSetPtr_ = std::make_shared<CompressedFrameSet_jpg>();
-        framesSkippedIndexList_.clear();
+        framesSkippedIndexListPtr_ = std::make_shared<Lockable<std::list<unsigned long>>>();
     }
 
 
@@ -108,7 +107,9 @@ namespace bias
             }
             else
             {
-                framesSkippedIndexList_.push_back(stampedImg.frameCount);
+                framesSkippedIndexListPtr_ -> acquireLock();
+                framesSkippedIndexListPtr_ -> push_back(stampedImg.frameCount);
+                framesSkippedIndexListPtr_ -> releaseLock();
             }
         }
 
@@ -122,7 +123,7 @@ namespace bias
 
         //std::cout << "Finished: " << framesFinishedSetSize << std::endl;
         //std::cout << "# todo:    " << framesToDoQueueSize << std::endl;
-        //std::cout << "# skipped: " << (framesSkippedIndexList_.size()) << std::endl;
+        //std::cout << "# skipped: " << (framesSkippedIndexListPtr_ -> size()) << std::endl;
         //std::cout << std::endl;
 
         //if ( (framesToDoQueueSize >= FRAMES_TODO_MAX_QUEUE_SIZE)  || (frameCount_ == 49))
@@ -264,7 +265,12 @@ namespace bias
         compressorPtrVec_.resize(numberOfCompressors_);
         for (unsigned int i=0; i<compressorPtrVec_.size(); i++)
         {
-            compressorPtrVec_[i] = new Compressor_jpg(framesToDoQueuePtr_, framesFinishedSetPtr_, cameraNumber_);
+            compressorPtrVec_[i] = new Compressor_jpg(
+                    framesToDoQueuePtr_, 
+                    framesFinishedSetPtr_, 
+                    framesSkippedIndexListPtr_, 
+                    cameraNumber_
+                    );
             threadPoolPtr_ -> start(compressorPtrVec_[i]);
         }
     }
@@ -298,15 +304,21 @@ namespace bias
     unsigned int VideoWriter_jpg::clearFinishedFrames()
     {
         framesFinishedSetPtr_ -> acquireLock();
-        if (!(framesFinishedSetPtr_ -> empty()))
+        bool framesFinishedSetEmpty = framesFinishedSetPtr_ -> empty();
+        framesFinishedSetPtr_ -> releaseLock();
+
+        if (!framesFinishedSetEmpty)
         {
             bool writeDone = false;
-            while ( (!writeDone) && (!(framesFinishedSetPtr_ -> empty())) )
+            while ( (!writeDone) && (!framesFinishedSetEmpty) ) 
             {
                 // Handle skipped frames. 
-                if (framesSkippedIndexList_.size() > 0)
+                // --------------------------------------------------------------------------------
+                framesSkippedIndexListPtr_ -> acquireLock();
+                if (framesSkippedIndexListPtr_ -> size() > 0)
+
                 {
-                    std::list<unsigned long>::iterator skippedIndexIt = framesSkippedIndexList_.begin();
+                    std::list<unsigned long>::iterator skippedIndexIt = framesSkippedIndexListPtr_ -> begin();
                     bool done = false;
 
                     while (!done)
@@ -317,7 +329,7 @@ namespace bias
                         }
                         else if (*skippedIndexIt < nextFrameToWrite_)
                         {
-                            if (framesSkippedIndexList_.size() > 1)
+                            if (framesSkippedIndexListPtr_ -> size() > 1)
                             {
                                 skippedIndexIt++;
                             }
@@ -325,7 +337,7 @@ namespace bias
                             {
                                 done = true;
                             }
-                            framesSkippedIndexList_.pop_front();
+                            framesSkippedIndexListPtr_ -> pop_front();
                         }
                         else
                         {
@@ -333,8 +345,11 @@ namespace bias
                         }
                     }
                 }
+                framesSkippedIndexListPtr_ -> releaseLock();
 
                 // Write next frame to file
+                // --------------------------------------------------------------------------------
+                framesFinishedSetPtr_ -> acquireLock();
                 CompressedFrameSet_jpg::iterator frameIt = framesFinishedSetPtr_ -> begin();
                 CompressedFrame_jpg compressedFrame = *frameIt;
 
@@ -348,9 +363,14 @@ namespace bias
                 {
                     writeDone = true;
                 }
-            }
+                framesFinishedSetEmpty = framesFinishedSetPtr_ -> empty();
+                framesFinishedSetPtr_ -> releaseLock();
+
+            } // while ( (!writeDone) && (!framesFinishedSetEmpty) ) 
 
         } // if (!(framesFinishedSetPtr_ 
+
+        framesFinishedSetPtr_ -> acquireLock();
         unsigned int framesFinishedSetSize = framesFinishedSetPtr_ -> size();
         framesFinishedSetPtr_ -> releaseLock();
         return framesFinishedSetSize;
@@ -362,9 +382,9 @@ namespace bias
         {
             movieFile_.write(MJPG_BOUNDARY_MARKER.c_str(),MJPG_BOUNDARY_MARKER.size());
             std::vector<uchar> jpgBuffer = frame.getEncodedJpgBuffer();
-            long frameBeginPos = movieFile_.tellp();
+            std::ofstream::pos_type frameBeginPos = movieFile_.tellp();
             movieFile_.write((const char *) &jpgBuffer[0],jpgBuffer.size());
-            long frameEndPos = movieFile_.tellp();
+            std::ofstream::pos_type frameEndPos = movieFile_.tellp();
 
             std::stringstream ss;
             ss << frame.getFrameCount()  << " "; 

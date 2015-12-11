@@ -136,6 +136,7 @@ namespace bias
             CompressedFrameQueuePtr_ufmf framesToDoQueuePtr_;
             CompressedFrameQueuePtr_ufmf framesWaitQueuePtr_;
             CompressedFrameSetPtr_ufmf framesFinishedSetPtr_;
+            std::shared_ptr<Lockable<std::list<unsigned long>>> framesSkippedIndexListPtr_;
 
             unsigned int clearFinishedFrames();
             void checkImageFormat(StampedImage stampedImg);

@@ -103,6 +103,7 @@ namespace bias
         framesToDoQueuePtr_ = std::make_shared<CompressedFrameQueue_ufmf>();
         framesWaitQueuePtr_ = std::make_shared<CompressedFrameQueue_ufmf>();
         framesFinishedSetPtr_ = std::make_shared<CompressedFrameSet_ufmf>();
+        framesSkippedIndexListPtr_ = std::make_shared<Lockable<std::list<unsigned long>>>();
 
         isFixedSize_ = false;
         colorCoding_ = QString(DEFAULT_COLOR_CODING);
@@ -132,7 +133,6 @@ namespace bias
         unsigned int framesFinishedSetSize;
         bool haveNewMedianImage = false;
 
-        //currentImage_ = stampedImg.image;
         currentImage_ = stampedImg;
 
         // On first call - setup output file, background modeling, start compressors, ...
