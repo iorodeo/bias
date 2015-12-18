@@ -147,11 +147,14 @@ namespace bias
             void writeCompressedFrame(CompressedFrame_ufmf frame);
             void finishWriting();
 
-
             void startBackgroundModeling();
             void stopBackgroundModeling();
             void startCompressors();
             void stopCompressors();
+
+
+        private slots:
+            void onCompressorError(unsigned int errorId, QString errorMsg);
     };
 }
 

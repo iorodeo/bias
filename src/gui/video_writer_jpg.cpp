@@ -271,6 +271,12 @@ namespace bias
                     cameraNumber_
                     );
             threadPoolPtr_ -> start(compressorPtrVec_[i]);
+            connect(
+                    compressorPtrVec_[i],
+                    SIGNAL(imageLoggingError(unsigned int, QString)),
+                    this,
+                    SLOT(onCompressorError(unsigned int, QString))
+                   );
         }
     }
 
@@ -393,6 +399,13 @@ namespace bias
             std::string indexData = ss.str();
             indexFile_.write(indexData.c_str(), indexData.size());
         }
+    }
+
+    // Private slots
+    // ----------------------------------------------------------------------------------
+    void VideoWriter_jpg::onCompressorError(unsigned int errorId, QString errorMsg)
+    {
+        emit imageLoggingError(errorId, errorMsg);
     }
 
 } // namespace bias

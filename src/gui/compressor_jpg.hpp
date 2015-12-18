@@ -26,10 +26,14 @@ namespace bias
 
             void stop();
 
+        signals:
+            void imageLoggingError(unsigned int errorId, QString errorMsg);
+
         private:
 
             bool ready_;
             bool stopped_;
+            bool skipReported_;
             unsigned int cameraNumber_;
             CompressedFrameQueuePtr_jpg framesToDoQueuePtr_;
             CompressedFrameSetPtr_jpg framesFinishedSetPtr_;

@@ -79,7 +79,6 @@ namespace bias
 
     unsigned long CompressedFrame_jpg::getFrameCount() const
     {
-
         if (haveStampedImg_)
         {
             return stampedImg_.frameCount;

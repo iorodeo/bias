@@ -9,6 +9,8 @@ namespace bias
 {
     class VideoWriter_fmf : public VideoWriter
     {
+        Q_OBJECT
+
         public:
             VideoWriter_fmf(QObject *parent=0);
             VideoWriter_fmf(

@@ -14,6 +14,8 @@ namespace bias
 {
     class VideoWriter_avi : public VideoWriter
     {
+        Q_OBJECT 
+
         public:
 
             VideoWriter_avi(QObject *parent=0);

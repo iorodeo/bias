@@ -20,6 +20,8 @@ namespace bias
 
     class VideoWriter_jpg : public VideoWriter
     {
+        Q_OBJECT 
+
         public:
 
             VideoWriter_jpg(QObject *parent=0);
@@ -53,6 +55,7 @@ namespace bias
             static const bool DEFAULT_MJPG_FLAG;
             static const VideoWriterParams_jpg DEFAULT_PARAMS;
 
+
         protected:
 
             bool isFirst_;
@@ -85,6 +88,10 @@ namespace bias
             void stopCompressors();
             unsigned int clearFinishedFrames();
             void writeCompressedMjpgFrame(CompressedFrame_jpg frame);
+
+
+        private slots:
+            void onCompressorError(unsigned int errorId, QString errorMsg);
 
     };
    
