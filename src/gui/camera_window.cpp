@@ -2535,8 +2535,8 @@ namespace bias
         connected_ = false;
         capturing_ = false;
         haveImagePixmap_ = false;
-        //logging_ = false; 
-        logging_ = true; 
+        logging_ = false; 
+        //logging_ = true; 
 
         flipVert_ = false;
         flipHorz_ = false;
@@ -2550,7 +2550,6 @@ namespace bias
         format7PercentSpeed_ = DEFAULT_FORMAT7_PERCENT_SPEED;
         showCameraLockFailMsg_ = true;
         skippedFramesWarning_ = false;
-
 
         colorMapNumber_ = DEFAULT_COLORMAP_NUMBER;
         videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
@@ -4630,16 +4629,17 @@ namespace bias
         QDir directory = QDir(directoryString);
         if (!directory.exists())
         {
-            QString errMsgText("Logging configuration: directory does not exist");
+            QString errMsgText("Logging configuration: directory does not exist - setting to default value");
             if (showErrorDlg)
             {
-                QMessageBox::critical(this,errMsgTitle,errMsgText);
+                QMessageBox::warning(this,errMsgTitle,errMsgText);
             }
-            rtnStatus.success = false;
-            rtnStatus.message = errMsgText;
-            return rtnStatus;
+            currentVideoFileDir_ = defaultVideoFileDir_;
         }
-        currentVideoFileDir_ = directory;
+        else
+        {
+            currentVideoFileDir_ = directory;
+        }
 
 
         // Get "File Name" value
@@ -5147,17 +5147,18 @@ namespace bias
         QDir directory = QDir(directoryString);
         if (!directory.exists())
         {
-            QString errMsgText("Configuration file: directory");
-            errMsgText += " does not exist";
+            QString errMsgText("Configuration file: directory does not exist - setting to default value");
             if (showErrorDlg)
             {
-                QMessageBox::critical(this,errMsgTitle,errMsgText);
+                QMessageBox::warning(this,errMsgTitle,errMsgText);
             }
-            rtnStatus.success = false;
-            rtnStatus.message = errMsgText;
-            return rtnStatus;
+            // Don't exit on the is failure - set value to default
+            currentConfigFileDir_ = defaultConfigFileDir_; 
         }
-        currentConfigFileDir_ = directory;
+        else
+        {
+            currentConfigFileDir_ = directory;
+        }
 
         // Set File Name
         if (!configFileMap.contains("fileName"))
