@@ -29,6 +29,7 @@ namespace bias
             void jpgQuality_EditingFinished();
             void jpgCompressionThreads_EditingFinished();
             void jpgMjpgFlagCheckBox_StateChanged(int state);
+            void jpgMjpgMaxFramePerFile_EditingFinished();
             void aviFrameSkip_EditingFinished();
             void aviCodecComboBox_CurrentIndexChanged(QString text);
             void fmfFrameSkip_EditingFinished();
@@ -39,6 +40,7 @@ namespace bias
             void ufmfMedianUpdateInterval_EditingFinished();
             void ufmfCompressionThreads_EditingFinished();
             void ufmfDilateCheckBox_StateChanged(int state);
+            void jpgMjpgMaxFramePerFileFlagCheckBox_StateChanged(int state);
             void ufmfDilate_EditingFinished();
             void imageCaptureStarted(bool logging);
             void imageCaptureStopped();

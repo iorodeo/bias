@@ -53,6 +53,9 @@ namespace bias
             static const unsigned int MAX_QUALITY;
             static const unsigned int DEFAULT_NUMBER_OF_COMPRESSORS;
             static const bool DEFAULT_MJPG_FLAG;
+            static const bool DEFAULT_MJPG_MAX_FRAME_PER_FILE_FLAG;
+            static const unsigned long DEFAULT_MJPG_MAX_FRAME_PER_FILE;
+            static const unsigned long MJPG_MINVAL_MAX_FRAME_PER_FILE;
             static const VideoWriterParams_jpg DEFAULT_PARAMS;
 
 
@@ -62,6 +65,8 @@ namespace bias
             bool skipReported_;
             unsigned int quality_;
             bool mjpgFlag_;
+            bool mjpgMaxFramePerFileFlag_;
+            unsigned long mjpgMaxFramePerFile_;
             QDir baseDir_;
             QString baseName_;
             QDir logDir_;
@@ -70,6 +75,9 @@ namespace bias
 
             std::ofstream movieFile_;
             std::ofstream indexFile_;
+
+            unsigned int movieFileCount_;
+            unsigned long movieFileFrameCount_;
 
             std::vector<QPointer<Compressor_jpg>> compressorPtrVec_;
 
@@ -83,6 +91,8 @@ namespace bias
             QString getUniqueDirName();
             QString getLogDirName(unsigned int verNum);
             QDir getLogDir(unsigned int verNum);
+            QString getMovieFileName();
+            QString getIndexFileName();
 
             void startCompressors();
             void stopCompressors();

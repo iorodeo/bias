@@ -81,6 +81,22 @@ namespace bias
             jpgMjpgFlagCheckBoxPtr_ -> setCheckState(Qt::Unchecked);
         }
 
+        // jpg mjpgMaxFramePerFileFlag
+        if (params_.jpg.mjpgMaxFramePerFileFlag)
+        {
+            jpgMjpgMaxFramePerFileCheckBoxPtr_ -> setCheckState(Qt::Checked);
+        }
+        else
+        {
+            jpgMjpgMaxFramePerFileCheckBoxPtr_ -> setCheckState(Qt::Unchecked);
+        }
+
+        // jpg mjpg - maximum number of frames per file
+        tmpString = QString::number(params_.jpg.mjpgMaxFramePerFile);
+        jpgMjpgMaxFramePerFileLineEditPtr_ -> setText(tmpString);
+        tmpString = QString(" >= %1").arg(VideoWriter_jpg::MJPG_MINVAL_MAX_FRAME_PER_FILE);
+        jpgMjpgMaxFramePerFileRangeLabelPtr_ -> setText(tmpString);
+
         // avi tab - frame skip
         tmpString = QString::number(params_.avi.frameSkip);
         aviFrameSkipLineEditPtr_ -> setText(tmpString);
@@ -201,9 +217,15 @@ namespace bias
                 );
         jpgQualityLineEditPtr_ -> setValidator(validatorPtr);
 
+        // jpg tab - compression threads
         validatorPtr = new IntValidatorWithFixup(jpgCompressionThreadsLineEditPtr_);
         validatorPtr -> setBottom(1);
         jpgCompressionThreadsLineEditPtr_ -> setValidator(validatorPtr);
+
+        // jpg tab - mjpg max frame per file
+        validatorPtr = new IntValidatorWithFixup(jpgMjpgMaxFramePerFileLineEditPtr_);
+        validatorPtr -> setBottom(VideoWriter_jpg::MJPG_MINVAL_MAX_FRAME_PER_FILE);
+        jpgMjpgMaxFramePerFileLineEditPtr_ -> setValidator(validatorPtr);
 
         // avi tab - frame skip
         validatorPtr = new IntValidatorWithFixup(aviFrameSkipLineEditPtr_);
@@ -291,11 +313,26 @@ namespace bias
                 SLOT(jpgCompressionThreads_EditingFinished())
                );
 
+
         connect(
                 jpgMjpgFlagCheckBoxPtr_,
                 SIGNAL(stateChanged(int)),
                 this,
                 SLOT(jpgMjpgFlagCheckBox_StateChanged(int))
+               );
+
+        connect(
+                jpgMjpgMaxFramePerFileCheckBoxPtr_,
+                SIGNAL(stateChanged(int)),
+                this,
+                SLOT(jpgMjpgMaxFramePerFileFlagCheckBox_StateChanged(int))
+               );
+
+        connect(
+                jpgMjpgMaxFramePerFileLineEditPtr_,
+                SIGNAL(editingFinished()),
+                this,
+                SLOT(jpgMjpgMaxFramePerFile_EditingFinished())
                );
 
         connect(
@@ -433,6 +470,17 @@ namespace bias
         emit parametersChanged(params_);
     }
 
+    void LoggingSettingsDialog::jpgMjpgMaxFramePerFileFlagCheckBox_StateChanged(int state)
+    {
+        params_.jpg.mjpgMaxFramePerFileFlag = bool(state);
+        emit parametersChanged(params_);
+    }
+
+    void LoggingSettingsDialog::jpgMjpgMaxFramePerFile_EditingFinished()
+    {
+        qDebug() << __PRETTY_FUNCTION__;
+    }
+
     void LoggingSettingsDialog::aviFrameSkip_EditingFinished()
     {
         QString frameSkipString = aviFrameSkipLineEditPtr_ -> text();
@@ -440,7 +488,6 @@ namespace bias
         params_.avi.frameSkip = frameSkip;
         emit parametersChanged(params_);
     }
-
 
     void LoggingSettingsDialog::aviCodecComboBox_CurrentIndexChanged(QString text)
     {

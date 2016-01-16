@@ -2535,8 +2535,8 @@ namespace bias
         connected_ = false;
         capturing_ = false;
         haveImagePixmap_ = false;
-        logging_ = false; 
-        //logging_ = true; 
+        //logging_ = false; 
+        logging_ = true; 
 
         flipVert_ = false;
         flipHorz_ = false;
@@ -2552,9 +2552,9 @@ namespace bias
         skippedFramesWarning_ = false;
 
         colorMapNumber_ = DEFAULT_COLORMAP_NUMBER;
-        videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
+        //videoFileFormat_ = VIDEOFILE_FORMAT_UFMF;
         //videoFileFormat_ = VIDEOFILE_FORMAT_AVI;
-        //videoFileFormat_ = VIDEOFILE_FORMAT_JPG;
+        videoFileFormat_ = VIDEOFILE_FORMAT_JPG;
         imageDisplayFreq_ = DEFAULT_IMAGE_DISPLAY_FREQ;
         captureDurationSec_ = DEFAULT_CAPTURE_DURATION;
 

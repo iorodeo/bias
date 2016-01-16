@@ -28,6 +28,9 @@ namespace bias
     const unsigned int VideoWriter_jpg::MAX_QUALITY = 100;
     const unsigned int VideoWriter_jpg::DEFAULT_NUMBER_OF_COMPRESSORS = 10;
     const bool VideoWriter_jpg::DEFAULT_MJPG_FLAG = true;
+    const bool VideoWriter_jpg::DEFAULT_MJPG_MAX_FRAME_PER_FILE_FLAG = true;
+    const unsigned long VideoWriter_jpg::DEFAULT_MJPG_MAX_FRAME_PER_FILE = 100;
+    const unsigned long VideoWriter_jpg::MJPG_MINVAL_MAX_FRAME_PER_FILE = 10;
     const VideoWriterParams_jpg VideoWriter_jpg::DEFAULT_PARAMS = VideoWriterParams_jpg();
 
     // VideoWriter_jpg methods
@@ -48,9 +51,14 @@ namespace bias
         skipReported_ = false;;
         nextFrameToWrite_ = 0;
 
+        movieFileCount_ = 0;
+        movieFileFrameCount_ = 0;
+
         setFrameSkip(params.frameSkip);
         quality_ = params.quality;
         mjpgFlag_ = params.mjpgFlag;
+        mjpgMaxFramePerFileFlag_ = params.mjpgMaxFramePerFileFlag;
+        mjpgMaxFramePerFile_ = params.mjpgMaxFramePerFile;
         numberOfCompressors_ = params.numberOfCompressors; 
 
         threadPoolPtr_ = new QThreadPool(this);
@@ -64,8 +72,11 @@ namespace bias
     VideoWriter_jpg::~VideoWriter_jpg() 
     {
         stopCompressors();
-        movieFile_.close();
-        indexFile_.close();
+        if (mjpgFlag_)
+        {
+            movieFile_.close();
+            indexFile_.close();
+        }
     }
 
 
@@ -219,14 +230,47 @@ namespace bias
             throw RuntimeError(errorId, errorMsg);
         }
 
-        
-        QString movieFileName = logDir_.absoluteFilePath(MJPG_FILE_NAME + MJPG_FILE_EXT);
-        QString indexFileName = logDir_.absoluteFilePath(MJPG_INDEX_NAME + MJPG_INDEX_EXT);
-
-        movieFile_.open(movieFileName.toStdString(), std::ios::out | std::ios::binary);
-        indexFile_.open(indexFileName.toStdString(), std::ios::out);
-
+        if (mjpgFlag_)
+        {
+            QString movieFileName = getMovieFileName(); 
+            QString indexFileName = getIndexFileName();
+            movieFile_.open(movieFileName.toStdString(), std::ios::out | std::ios::binary);
+            indexFile_.open(indexFileName.toStdString(), std::ios::out);
+        }
     }
+
+
+    QString VideoWriter_jpg::getMovieFileName()
+    {
+        QString movieFileName;
+        if (mjpgMaxFramePerFileFlag_)
+        { 
+            QString incrFileName = QString("%1_%2%3").arg(MJPG_FILE_NAME).arg(movieFileCount_).arg(MJPG_FILE_EXT);
+            movieFileName = logDir_.absoluteFilePath(incrFileName);
+        }
+        else
+        {
+            movieFileName = logDir_.absoluteFilePath(MJPG_FILE_NAME + MJPG_FILE_EXT);
+        }
+        return movieFileName;
+    }
+
+
+    QString VideoWriter_jpg::getIndexFileName()
+    {
+        QString indexFileName;
+        if (mjpgMaxFramePerFileFlag_)
+        {
+            QString incrFileName = QString("%1_%2%3").arg(MJPG_INDEX_NAME).arg(movieFileCount_).arg(MJPG_INDEX_EXT);
+            indexFileName = logDir_.absoluteFilePath(incrFileName);
+        }
+        else
+        {
+            indexFileName = logDir_.absoluteFilePath(MJPG_INDEX_NAME + MJPG_INDEX_EXT);
+        }
+        return indexFileName;
+    }
+
 
     QString VideoWriter_jpg::getUniqueDirName()
     {
@@ -234,6 +278,7 @@ namespace bias
         QString logDirName = getLogDirName(nextVerNum);
         return logDirName;
     }
+
 
     QString VideoWriter_jpg::getLogDirName(unsigned int verNum)
     {
@@ -249,6 +294,7 @@ namespace bias
         }
         return logDirName;
     }
+
 
     QDir VideoWriter_jpg::getLogDir(unsigned int verNum)
     {
@@ -363,6 +409,18 @@ namespace bias
                     framesFinishedSetPtr_ -> erase(frameIt);
                     nextFrameToWrite_ += frameSkip_;
                     writeCompressedMjpgFrame(compressedFrame);
+
+                    movieFileFrameCount_ += 1;
+                    if ((mjpgMaxFramePerFileFlag_) && (movieFileFrameCount_ >= mjpgMaxFramePerFile_)) { 
+                        movieFile_.close();
+                        indexFile_.close();
+                        movieFileCount_ += 1;
+                        movieFileFrameCount_ = 0;
+                        QString movieFileName = getMovieFileName(); 
+                        QString indexFileName = getIndexFileName();
+                        movieFile_.open(movieFileName.toStdString(), std::ios::out | std::ios::binary);
+                        indexFile_.open(indexFileName.toStdString(), std::ios::out);
+                    }
                 }
                 else
                 {

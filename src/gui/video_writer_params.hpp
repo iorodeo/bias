@@ -20,6 +20,8 @@ namespace bias
         unsigned int quality;
         unsigned int numberOfCompressors;
         bool mjpgFlag; 
+        bool mjpgMaxFramePerFileFlag;
+        unsigned long mjpgMaxFramePerFile;
         VideoWriterParams_jpg();
         std::string toString();
     };

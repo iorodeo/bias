@@ -10,6 +10,8 @@
 namespace bias
 {
 
+    // BMP
+    // ------------------------------------------------------------------------
     VideoWriterParams_bmp::VideoWriterParams_bmp()
     {
         frameSkip = VideoWriter_bmp::DEFAULT_FRAME_SKIP;
@@ -23,12 +25,16 @@ namespace bias
     }
 
 
+    // jgp
+    // ------------------------------------------------------------------------
     VideoWriterParams_jpg::VideoWriterParams_jpg()
     {
         frameSkip = VideoWriter_jpg::DEFAULT_FRAME_SKIP;
         quality = VideoWriter_jpg::DEFAULT_QUALITY;
         numberOfCompressors = VideoWriter_jpg::DEFAULT_NUMBER_OF_COMPRESSORS;
         mjpgFlag = VideoWriter_jpg::DEFAULT_MJPG_FLAG;
+        mjpgMaxFramePerFileFlag = VideoWriter_jpg::DEFAULT_MJPG_MAX_FRAME_PER_FILE_FLAG;
+        mjpgMaxFramePerFile = VideoWriter_jpg::DEFAULT_MJPG_MAX_FRAME_PER_FILE;
     }
 
     
@@ -39,10 +45,14 @@ namespace bias
         ss << "quality: " << quality << std::endl;
         ss << "numberOfCompressors: " << numberOfCompressors << std::endl;
         ss << "mjpgFlag: " << std::boolalpha << mjpgFlag << std::noboolalpha << std::endl;
+        ss << "mjpgMaxFramePerFileFlag: " << std::boolalpha << mjpgMaxFramePerFileFlag << std::noboolalpha << std::endl;
+        ss << "mjpgMaxFramePerFile: " << mjpgMaxFramePerFile << std::endl;
         return ss.str();
     }
 
 
+    // avi
+    // ------------------------------------------------------------------------
     VideoWriterParams_avi::VideoWriterParams_avi()
     {
         frameSkip = VideoWriter_avi::DEFAULT_FRAME_SKIP;
@@ -60,6 +70,8 @@ namespace bias
     }
 
 
+    // fmf
+    // -------------------------------------------------------------------------
     VideoWriterParams_fmf::VideoWriterParams_fmf()
     {
         frameSkip = VideoWriter_fmf::DEFAULT_FRAME_SKIP;
@@ -74,6 +86,8 @@ namespace bias
     }
 
         
+    // ufmf
+    // ------------------------------------------------------------------------
     VideoWriterParams_ufmf::VideoWriterParams_ufmf()
     {
         frameSkip = VideoWriter_ufmf::DEFAULT_FRAME_SKIP;
@@ -101,6 +115,8 @@ namespace bias
     }
 
 
+    // VideoWriterParams
+    // ------------------------------------------------------------------------
     std::string VideoWriterParams::toString()
     {
         std::stringstream ss; 
