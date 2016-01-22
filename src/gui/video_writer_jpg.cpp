@@ -28,8 +28,8 @@ namespace bias
     const unsigned int VideoWriter_jpg::MAX_QUALITY = 100;
     const unsigned int VideoWriter_jpg::DEFAULT_NUMBER_OF_COMPRESSORS = 10;
     const bool VideoWriter_jpg::DEFAULT_MJPG_FLAG = true;
-    const bool VideoWriter_jpg::DEFAULT_MJPG_MAX_FRAME_PER_FILE_FLAG = true;
-    const unsigned long VideoWriter_jpg::DEFAULT_MJPG_MAX_FRAME_PER_FILE = 100;
+    const bool VideoWriter_jpg::DEFAULT_MJPG_MAX_FRAME_PER_FILE_FLAG = false;
+    const unsigned long VideoWriter_jpg::DEFAULT_MJPG_MAX_FRAME_PER_FILE = 5000000;
     const unsigned long VideoWriter_jpg::MJPG_MINVAL_MAX_FRAME_PER_FILE = 10;
     const VideoWriterParams_jpg VideoWriter_jpg::DEFAULT_PARAMS = VideoWriterParams_jpg();
 

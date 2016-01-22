@@ -936,6 +936,8 @@ namespace bias
         jpgSettingsMap.insert("quality", videoWriterParams_.jpg.quality);
         jpgSettingsMap.insert("compressionThreads", videoWriterParams_.jpg.numberOfCompressors);
         jpgSettingsMap.insert("mjpg", videoWriterParams_.jpg.mjpgFlag);
+        jpgSettingsMap.insert("mjpgMaxFramePerFileFlag", videoWriterParams_.jpg.mjpgMaxFramePerFileFlag);
+        jpgSettingsMap.insert("mjpgMaxFramePerFile", (unsigned long long)(videoWriterParams_.jpg.mjpgMaxFramePerFile));
         loggingSettingsMap.insert("jpg", jpgSettingsMap);
 
         QVariantMap aviSettingsMap;
@@ -2535,8 +2537,8 @@ namespace bias
         connected_ = false;
         capturing_ = false;
         haveImagePixmap_ = false;
-        //logging_ = false; 
-        logging_ = true; 
+        logging_ = false; 
+        //logging_ = true; 
 
         flipVert_ = false;
         flipHorz_ = false;
@@ -6342,8 +6344,7 @@ namespace bias
             }
             if (!jpgMap["mjpg"].canConvert<bool>())
             {
-                QString errMsgText("Logging Settings: jpg unable to convert");
-                errMsgText += " mjpg flag to bool";
+                QString errMsgText("Logging Settings: jpg unable to convert mjpg flag to bool");
                 if (showErrorDlg)
                 {
                     QMessageBox::critical(this,errMsgTitle,errMsgText);
@@ -6353,6 +6354,58 @@ namespace bias
                 return rtnStatus;
             }
             videoWriterParams_.jpg.mjpgFlag = jpgMap["mjpg"].toBool();
+
+            // new optional parameter
+            if (jpgMap.contains("mjpgMaxFramePerFileFlag"))
+            {
+                if (!jpgMap["mjpgMaxFramePerFileFlag"].canConvert<bool>())
+                {
+                    QString errMsgText("Logging Settings: jpg unable to convert mjpg maxFramePerFileFlag to bool");
+                    if (showErrorDlg)
+                    {
+                        QMessageBox::critical(this,errMsgTitle,errMsgText);
+                    }
+                    rtnStatus.success = false;
+                    rtnStatus.message = errMsgText;
+                    return rtnStatus;
+                }
+                videoWriterParams_.jpg.mjpgMaxFramePerFileFlag = jpgMap["maxFramePerFileFlag"].toBool();
+            }
+
+
+            // new optional parameter
+            if (jpgMap.contains("mjpgMaxFramePerFile"))
+            {
+                if (!jpgMap["mjpgMaxFramePerFile"].canConvert<unsigned long long>())
+                {
+                    QString errMsgText("Logging Settings: jpg unable to convert mjpg maxFramePerFile to unsigned long");
+                    if (showErrorDlg)
+                    {
+                        QMessageBox::critical(this,errMsgTitle,errMsgText);
+                    }
+                    rtnStatus.success = false;
+                    rtnStatus.message = errMsgText;
+                    return rtnStatus;
+                }
+                unsigned long maxFramePerFile = (unsigned long)(jpgMap["mjpgMaxFramePerFile"].toULongLong());
+                if (maxFramePerFile < VideoWriter_jpg::MJPG_MINVAL_MAX_FRAME_PER_FILE)
+                {
+                    QString errMsgText = QString("Logging Settings: jpg maxFramePerFile must be > %1").arg(
+                            VideoWriter_jpg::MJPG_MINVAL_MAX_FRAME_PER_FILE
+                            );
+                    if (showErrorDlg)
+                    {
+                        QMessageBox::critical(this,errMsgTitle,errMsgText);
+                    }
+                    rtnStatus.success = false;
+                    rtnStatus.message = errMsgText;
+                    return rtnStatus;
+                }
+                else
+                {
+                videoWriterParams_.jpg.mjpgMaxFramePerFile = maxFramePerFile;
+                }
+            }
         }
 
         // Get fmf values

@@ -478,7 +478,10 @@ namespace bias
 
     void LoggingSettingsDialog::jpgMjpgMaxFramePerFile_EditingFinished()
     {
-        qDebug() << __PRETTY_FUNCTION__;
+        QString lineEditString = jpgMjpgMaxFramePerFileLineEditPtr_ -> text();
+        unsigned long maxFramePerFile = lineEditString.toULong();
+        params_.jpg.mjpgMaxFramePerFile = maxFramePerFile;
+        emit parametersChanged(params_);
     }
 
     void LoggingSettingsDialog::aviFrameSkip_EditingFinished()
