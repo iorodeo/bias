@@ -1,8 +1,18 @@
+BIAS
+*****
 
 BIAS is a software application for recording video from IEEE 1394 and USB3
 Cameras.  BIAS was intially designed as image acquisition software for
 experiments in animial behavior. For example, recording the behavior of fruit
 flies in a walking arena. 
+
+
+.. figure:: /images/bias_charlie.png
+    :scale: 100 %
+    :alt: alternate text
+    :align: center
+
+
 
 Features
 ---------
@@ -22,8 +32,5 @@ BIAS provides the following features:
 * Image alignment tools
 * Cross platform - windows, linux
 
-
-.. figure:: ./images/bias_charlie.png
-   :align:  center
 
 
