@@ -6,6 +6,7 @@ Cameras.  BIAS was intially designed as image acquisition software for
 experiments in animial behavior. For example, recording the behavior of fruit
 flies in a walking arena. 
 
+|
 
 .. figure:: /images/bias_charlie.png
     :scale: 100 %
