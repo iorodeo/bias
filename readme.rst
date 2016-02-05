@@ -23,7 +23,7 @@ BIAS provides the following features:
 * Cross platform - windows, linux
 
 
-.. figure:: http://bitbucket.org/iorodeo/bias/images/bias_charlie.png
+.. figure:: https://bitbucket.org/iorodeo/bias/images/bias_charlie.png
    :align:  center
 
 
