@@ -33,4 +33,10 @@ BIAS provides the following features:
 * Cross platform - windows, linux
 
 
+Documentation
+-------------
+
+http://public.iorodeo.com/notes/bias/
+
+
 
