@@ -3,6 +3,8 @@
 #include "exception.hpp"
 #include <iostream>
 #include <sstream>
+#include <iomanip>
+#include <limits>
 #include <QFileInfo>
 #include <QThreadPool>
 #include <stdexcept>
@@ -451,6 +453,7 @@ namespace bias
 
             std::stringstream ss;
             ss << frame.getFrameCount()  << " "; 
+            ss << std::scientific << std::setprecision(std::numeric_limits<double>::max_digits10);
             ss << frame.getTimeStamp()   << " ";
             ss << frameBeginPos          << " ";
             ss << frameEndPos            << std::endl;;
