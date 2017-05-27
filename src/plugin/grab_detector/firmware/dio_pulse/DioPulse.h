@@ -1,5 +1,6 @@
 #ifndef DIO_PULSE_H
 #define DIO_PULSE_H
+#include <Arduino.h>
 
 class DioPulseDev
 {
@@ -23,6 +24,10 @@ class DioPulseDev
         int pulsePin_;
         int interruptCnt_;
         unsigned long pulseLength_;
+#if defined(__MK20DX256__)|| defined(__MK20DX128__) 
+        // Teensy 3.xx
+        IntervalTimer timer_;
+#endif
         static void timerCallback();
 
 };
