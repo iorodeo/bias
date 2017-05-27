@@ -132,27 +132,27 @@ namespace bias {
         stopped_ = false;
         releaseLock();
 
-        // TEMPORARY - for mouse grab detector testing
-        // ------------------------------------------------------------------------------
+        //// TEMPORARY - for mouse grab detector testing
+        //// ------------------------------------------------------------------------------
 
-        // Check for existence of movie file
-        QString grabTestMovieFileName("bias_test.avi");
-        cv::VideoCapture fileCapture;
-        unsigned int numFrames = 0;
-        int fourcc = 0;
-        bool haveGrabTestMovie = false;
+        //// Check for existence of movie file
+        //QString grabTestMovieFileName("bias_test.avi");
+        //cv::VideoCapture fileCapture;
+        //unsigned int numFrames = 0;
+        //int fourcc = 0;
+        //bool haveGrabTestMovie = false;
 
-        if (QFileInfo(grabTestMovieFileName).exists())
-        {
-            fileCapture.open(grabTestMovieFileName.toStdString());
-            if ( fileCapture.isOpened() )
-            {
-                numFrames = (unsigned int)(fileCapture.get(CV_CAP_PROP_FRAME_COUNT));
-                fourcc = int(fileCapture.get(CV_CAP_PROP_FOURCC));
-                haveGrabTestMovie = true;
-            }
-        }
-        // -------------------------------------------------------------------------------
+        //if (QFileInfo(grabTestMovieFileName).exists())
+        //{
+        //    fileCapture.open(grabTestMovieFileName.toStdString());
+        //    if ( fileCapture.isOpened() )
+        //    {
+        //        numFrames = (unsigned int)(fileCapture.get(CV_CAP_PROP_FRAME_COUNT));
+        //        fourcc = int(fileCapture.get(CV_CAP_PROP_FOURCC));
+        //        haveGrabTestMovie = true;
+        //    }
+        //}
+        //// -------------------------------------------------------------------------------
         
 
         // Grab images from camera until the done signal is given
@@ -182,6 +182,7 @@ namespace bias {
             // grabImage is nonblocking - returned frame is empty is a new frame is not available.
             if (stampImg.image.empty()) 
             { 
+                QThread::yieldCurrentThread();
                 continue; 
             }
             
@@ -231,31 +232,31 @@ namespace bias {
                 }
                 //
                 
-                // TEMPORARY - for mouse grab detector testing
-                // --------------------------------------------------------------------- 
-                cv::Mat fileMat;
-                StampedImage fileImg;
-                if (haveGrabTestMovie)
-                {
-                    fileCapture >> fileMat; 
-                    if (fileMat.empty())
-                    {
-                        fileCapture.set(CV_CAP_PROP_POS_FRAMES,0);
-                        continue;
-                    }
+                //// TEMPORARY - for mouse grab detector testing
+                //// --------------------------------------------------------------------- 
+                //cv::Mat fileMat;
+                //StampedImage fileImg;
+                //if (haveGrabTestMovie)
+                //{
+                //    fileCapture >> fileMat; 
+                //    if (fileMat.empty())
+                //    {
+                //        fileCapture.set(CV_CAP_PROP_POS_FRAMES,0);
+                //        continue;
+                //    }
 
-                    cv::Mat  fileMatMono = cv::Mat(fileMat.size(), CV_8UC1);
-                    cvtColor(fileMat, fileMatMono, CV_RGB2GRAY);
-                    
-                    cv::Mat camSizeImage = cv::Mat(stampImg.image.size(), CV_8UC1);
-                    int padx = camSizeImage.rows - fileMatMono.rows;
-                    int pady = camSizeImage.cols - fileMatMono.cols;
+                //    cv::Mat  fileMatMono = cv::Mat(fileMat.size(), CV_8UC1);
+                //    cvtColor(fileMat, fileMatMono, CV_RGB2GRAY);
+                //    
+                //    cv::Mat camSizeImage = cv::Mat(stampImg.image.size(), CV_8UC1);
+                //    int padx = camSizeImage.rows - fileMatMono.rows;
+                //    int pady = camSizeImage.cols - fileMatMono.cols;
 
-                    cv::Scalar padColor = cv::Scalar(0);
-                    cv::copyMakeBorder(fileMatMono, camSizeImage, 0, pady, 0, padx, cv::BORDER_CONSTANT, cv::Scalar(0));
-                    stampImg.image = camSizeImage;
-                }
-                // ---------------------------------------------------------------------
+                //    cv::Scalar padColor = cv::Scalar(0);
+                //    cv::copyMakeBorder(fileMatMono, camSizeImage, 0, pady, 0, padx, cv::BORDER_CONSTANT, cv::Scalar(0));
+                //    stampImg.image = camSizeImage;
+                //}
+                //// ---------------------------------------------------------------------
                 
                 // Set image data timestamp, framecount and frame interval estimate
                 stampImg.timeStamp = timeStampDbl;
