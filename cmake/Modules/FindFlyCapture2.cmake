@@ -2,9 +2,9 @@
 # 
 # Once done this will define
 #
-#  FlyCapture2_FOUND         - System has LibXml2
-#  FlyCapture2_INCLUDE_DIRS  - The LibXml2 include directories
-#  FlyCapture22_LIBRARIES    - The libraries needed to use LibXml2
+#  FlyCapture2_FOUND         - System has FlyCapture2
+#  FlyCapture2_INCLUDE_DIRS  - The FlyCapture2 include directories
+#  FlyCapture22_LIBRARIES    - The libraries needed to use FlyCapture2
 #
 # ------------------------------------------------------------------------------
 
@@ -50,7 +50,7 @@ set(FlyCapture2_LIBRARIES ${FlyCapture2_LIBRARY} )
 set(FlyCapture2_INCLUDE_DIRS ${FlyCapture2_INCLUDE_DIR} )
 
 include(FindPackageHandleStandardArgs)
-# handle the QUIETLY and REQUIRED arguments and set LIBXML2_FOUND to TRUE
+# handle the QUIETLY and REQUIRED arguments and set FlyCapture2_FOUND to TRUE
 # if all listed variables are TRUE
 find_package_handle_standard_args(
     FlyCapture2  DEFAULT_MSG

@@ -14,25 +14,51 @@ if(with_dc1394)
 endif()
 
 
-project(bias_test_serial)
-if (POLICY CMP0020)
-    cmake_policy(SET CMP0020 NEW)
+if (with_spinnaker)
+    project(bias_test_spinnaker)
+    if (POLICY CMP0020)
+        cmake_policy(SET CMP0020 NEW)
+    endif()
+    set(
+        bias_test_spinnaker_SOURCES
+        test_spinnaker.cpp
+        )
+    #qt5_wrap_cpp(bias_test_spinnaker_HEADERS_MOC ${bias_test_spinnaker_HEADERS})
+    
+    add_EXECUTABLE(
+        test_spinnaker 
+        ${bias_test_spinnaker_HEADERS_MOC}
+        ${bias_test_spinnaker_SOURCES} 
+        )
+    target_link_libraries(test_spinnaker ${bias_ext_link_LIBS})
+    #qt5_use_modules(test_spinnaker Core Gui Widgets)
+
 endif()
 
-set(
-    bias_test_serial_SOURCES 
-    test_serial.cpp
-    )
-qt5_wrap_cpp(bias_test_serial_HEADERS_MOC ${bias_test_serial_HEADERS})
 
-add_EXECUTABLE(
-    test_serial 
-    ${bias_test_serial_HEADERS_MOC}
-    ${bias_test_serial_SOURCES} 
-    )
-qt5_use_modules(test_serial Core Gui Widgets SerialPort)
+# Serial test
+# ---------------------------------------------------------------------------------------
+#project(bias_test_serial)
+#if (POLICY CMP0020)
+#    cmake_policy(SET CMP0020 NEW)
+#endif()
+#
+#set(
+#    bias_test_serial_SOURCES 
+#    test_serial.cpp
+#    )
+#qt5_wrap_cpp(bias_test_serial_HEADERS_MOC ${bias_test_serial_HEADERS})
+#
+#add_EXECUTABLE(
+#    test_serial 
+#    ${bias_test_serial_HEADERS_MOC}
+#    ${bias_test_serial_SOURCES} 
+#    )
+#qt5_use_modules(test_serial Core Gui Widgets SerialPort)
 
 
+# nano_ssr_pulse
+# ---------------------------------------------------------------------------------------
 #project(bias_test_nano_ssr_pulse)
 #if (POLICY CMP0020)
 #    cmake_policy(SET CMP0020 NEW)
@@ -59,6 +85,8 @@ qt5_use_modules(test_serial Core Gui Widgets SerialPort)
 
 
 
+# panels_controller
+# ---------------------------------------------------------------------------------------
 #project(bias_test_panels_controller)
 #if (POLICY CMP0020)
 #    cmake_policy(SET CMP0020 NEW)

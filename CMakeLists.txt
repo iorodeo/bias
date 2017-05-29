@@ -8,9 +8,10 @@ endif()
 
 # Options
 # -----------------------------------------------------------------------------
-option(with_qt_gui  "include image acquisition GUI"   ON) 
-option(with_fc2     "include the FlyCapture2 backend" OFF)
-option(with_dc1394  "include the libdc1394 backend"   ON )
+option(with_qt_gui    "include image acquisition GUI"   ON) 
+option(with_fc2       "include the FlyCapture2 backend" OFF)
+option(with_dc1394    "include the libdc1394 backend"   OFF)
+option(with_spinnaker "include the spinnaker backend"   ON)
 option(with_demos   "include demos" OFF)
 option(with_tests   "include tests" ON)
 
@@ -20,7 +21,7 @@ message(STATUS "Option: with_qt_gui  = ${with_qt_gui}")
 message(STATUS "Option: with_demos   = ${with_demos}")
 message(STATUS "Option: with_tests   = ${with_tests}") 
 
-if( NOT( with_fc2 OR with_dc1394 ) )
+if( NOT( with_fc2 OR with_dc1394 OR with_spinnaker) )
     message(FATAL_ERROR "their must be at least one camera backend")
 endif()
 
@@ -41,6 +42,10 @@ endif()
 # -----------------------------------------------------------------------------
 if(with_fc2)
     find_package( FlyCapture2 MODULE REQUIRED )
+endif()
+
+if(with_spinnaker)
+    find_package( Spinnaker MODULE REQUIRED )
 endif()
 
 # Qt library
@@ -76,6 +81,10 @@ if(with_fc2)
     add_definitions(-DWITH_FC2)
 endif()
 
+if(with_spinnaker)
+    add_definitions(-DWITH_SPIN)
+endif()
+
 if(with_dc1394)
     add_definitions(-DWITH_DC1394)
 endif()
@@ -97,6 +106,9 @@ if(with_fc2)
     include_directories(${FlyCapture2_INCLUDE_DIRS})
     include_directories("./src/backend/fc2")
 endif()
+if (with_spinnaker)
+    include_directories(${Spinnaker_INCLUDE_DIRS})
+endif()
 
 if(with_dc1394)
     include_directories("./src/backend/dc1394")
@@ -112,6 +124,10 @@ set(bias_ext_link_LIBS ${OpenCV_LIBS})
 
 if(with_fc2)
     set(bias_ext_link_LIBS ${bias_ext_link_LIBS} ${FlyCapture2_LIBRARIES})
+endif()
+
+if (with_spinnaker)
+    set(bias_ext_link_LIBS ${bias_ext_link_LIBS} ${Spinnaker_LIBRARIES})
 endif()
 
 if(with_dc1394)
