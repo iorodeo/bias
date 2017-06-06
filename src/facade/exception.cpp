@@ -27,8 +27,16 @@ namespace bias {
     {
         std::stringstream ssError;
         ssError << prettyFunctionStr;
+        ssError << ": libdc1394 libary not present";
+        throw RuntimeError(ERROR_NO_DC1394, ssError.str());
+    }
+
+    void throw_ERROR_NO_SPIN(std::string prettyFunctionStr)
+    {
+        std::stringstream ssError;
+        ssError << prettyFunctionStr;
         ssError << ": FlyCapure2 libary not present";
-        throw RuntimeError(ERROR_NO_FC2, ssError.str());
+        throw RuntimeError(ERROR_NO_SPIN, ssError.str());
     }
 
 }

@@ -12,6 +12,9 @@
 #ifdef WITH_DC1394
 #include <dc1394/dc1394.h> 
 #endif
+#ifdef WITH_SPIN
+#include "SpinnakerC.h"
+#endif
 
 namespace bias {
 

@@ -10,6 +10,7 @@ namespace bias {
     {
         CAMERA_LIB_FC2=0,
         CAMERA_LIB_DC1394,
+        CAMERA_LIB_SPIN,
         CAMERA_LIB_UNDEFINED,
         NUMBER_OF_CAMERA_LIB,
     };
@@ -120,6 +121,9 @@ namespace bias {
         ERROR_DC1394_GET_EXTERNAL_TRIGGER_MODE,
         ERROR_DC1394_GET_EXTERNAL_TRIGGER_POWER,
         ERROR_DC1394_GET_FORMAT7_COLOR_CODINGS,
+
+        // Spinnaker specific errors
+        ERROR_NO_SPIN,
 
         // Video Writer Errors
         ERROR_VIDEO_WRITER_ADD_FRAME,

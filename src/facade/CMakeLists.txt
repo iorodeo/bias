@@ -25,5 +25,9 @@ if(with_dc1394)
     set(bias_camera_facade_link_libs ${bias_camera_facade_link_libs} bias_backend_dc1394)
 endif()
 
+if (with_spin)
+    set(bias_camera_facade_link_libs ${bias_camera_facade_link_libs} bias_backend_spin)
+endif()
+
 target_link_libraries(bias_camera_facade ${bias_camera_facade_link_libs})
 

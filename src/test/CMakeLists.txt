@@ -14,24 +14,24 @@ if(with_dc1394)
 endif()
 
 
-if (with_spinnaker)
-    project(bias_test_spinnaker)
+if (with_spin)
+    project(bias_test_spin)
     if (POLICY CMP0020)
         cmake_policy(SET CMP0020 NEW)
     endif()
     set(
-        bias_test_spinnaker_SOURCES
+        bias_test_spin_SOURCES
         test_spinnaker.cpp
         )
-    #qt5_wrap_cpp(bias_test_spinnaker_HEADERS_MOC ${bias_test_spinnaker_HEADERS})
+    #qt5_wrap_cpp(bias_test_spin_HEADERS_MOC ${bias_test_spin_HEADERS})
     
     add_EXECUTABLE(
-        test_spinnaker 
-        ${bias_test_spinnaker_HEADERS_MOC}
-        ${bias_test_spinnaker_SOURCES} 
+        test_spin 
+        ${bias_test_spin_HEADERS_MOC}
+        ${bias_test_spin_SOURCES} 
         )
-    target_link_libraries(test_spinnaker ${bias_ext_link_LIBS})
-    #qt5_use_modules(test_spinnaker Core Gui Widgets)
+    target_link_libraries(test_spin ${bias_ext_link_LIBS})
+    #qt5_use_modules(test_spin Core Gui Widgets)
 
 endif()
 

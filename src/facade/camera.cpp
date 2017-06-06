@@ -12,6 +12,9 @@
 #ifdef WITH_DC1394
 #include "camera_device_dc1394.hpp"
 #endif
+#ifdef WITH_SPIN
+#include "camera_device_spin.hpp"
+#endif
 
 namespace bias {
 
@@ -32,6 +35,10 @@ namespace bias {
 
             case CAMERA_LIB_DC1394:
                 createCameraDevice_dc1394(guid);
+                break;
+
+            case CAMERA_LIB_SPIN:
+                createCameraDevice_spin(guid);
                 break;
 
             case CAMERA_LIB_UNDEFINED:
@@ -758,6 +765,26 @@ namespace bias {
     void Camera::createCameraDevice_dc1394(Guid guid)
     {
         throw_ERROR_NO_DC1394(std::string(__PRETTY_FUNCTION__));
+    }
+
+#endif
+
+    // Spinnaker specific methods
+    // -----------------------------------------------------------------------
+#ifdef WITH_SPIN
+
+    void Camera::createCameraDevice_spin(Guid guid)
+    {
+        cameraDevicePtr_ = std::make_shared<CameraDevice_spin>(guid);
+    }
+
+#else
+    // Dummy methods for when the library isn't included - allows the ifdefs 
+    // to  be limited to two locations.
+
+    void Camera::createCameraDevice_spin(Guid guid)
+    {
+        throw_ERROR_NO_SPIN(std::string(__PRETTY_FUNCTION__));
     }
 
 #endif

@@ -18,6 +18,10 @@
 #include "guid_device_dc1394.hpp"
 #endif
 
+#ifdef WITH_SPIN
+#include "guid_device_spin.hpp"
+#endif
+
 
 namespace bias {
     
@@ -58,6 +62,10 @@ namespace bias {
         public:
             explicit Guid(uint64_t guid);
             uint64_t getValue_dc1394();
+#endif
+#ifdef WITH_SPIN
+        //public:
+            // TO DO
 #endif
            
     };
