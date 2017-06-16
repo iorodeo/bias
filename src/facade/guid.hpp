@@ -64,8 +64,8 @@ namespace bias {
             uint64_t getValue_dc1394();
 #endif
 #ifdef WITH_SPIN
-        //public:
-            // TO DO
+        // Spinnaker specific features
+        public:
 #endif
            
     };

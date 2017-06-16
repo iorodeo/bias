@@ -319,7 +319,60 @@ namespace bias {
             ssError << ": unable to get number of Spinnaker cameras list, error=" << error;
             throw RuntimeError(ERROR_SPIN_CAMERA_LIST_SIZE, ssError.str());
         }
+
         std::cout << "numCameras: " << numCameras << std::endl;
+
+        for (int i=0; i<numCameras; i++) 
+        {
+            std::cout << "camera[" << i << "]" << std::endl; 
+
+            spinCamera hCam = nullptr;
+
+            // Get camera
+            error = spinCameraListGet(hCameraList, i, &hCam);
+            if (error != SPINNAKER_ERR_SUCCESS)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to get Spinnaker camera, error=" << error;
+                throw RuntimeError(ERROR_SPIN_GET_CAMERA, ssError.str());
+            }
+
+            // Temporary ...
+            // --------------------------------------------------------------------------
+            //error = printSpinCameraInfo(hCam);
+            //if (error != SPINNAKER_ERR_SUCCESS)
+            //{
+            //    std::cout << "unable to print camera info: " << error << std::cout;
+            //    return error;
+            //}
+            // ---------------------------------------------------------------------------
+
+            // Get GUID from camera
+            size_t bufSize = 64;
+            std::vector<char> bufVec(bufSize);
+            error = spinCameraGetUniqueID(hCam,&bufVec[0],&bufSize);
+            if (error != SPINNAKER_ERR_SUCCESS)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to get GUID for Spinnaker camera, error=" << error;
+                throw RuntimeError(ERROR_SPIN_GET_CAMERA_GUID, ssError.str());
+            }
+            std::string guidString = std::string(bufVec.begin(), bufVec.end());
+            std::cout << "guid: " << guidString << std::endl;
+
+            // Release Camera
+            error = spinCameraRelease(hCam);
+            if (error != SPINNAKER_ERR_SUCCESS)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to get Spinnaker camera, error=" << error;
+                throw RuntimeError(ERROR_SPIN_RELEASE_CAMERA, ssError.str());
+            }
+        } 
+
 
         // Clear Spinnaker camera list
         error = spinCameraListClear(hCameraList);
