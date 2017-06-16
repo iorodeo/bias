@@ -41,19 +41,30 @@ namespace bias {
             
             void createQueryContext_fc2();
             void destroyQueryContext_fc2();
+
             void createQueryContext_dc1394();
             void destroyQueryContext_dc1394();
+
+            void createQueryContext_spin();
+            void destroyQueryContext_spin();
+
             void update();
             void update_fc2();
             void update_dc1394();
+            void update_spin();
 
 #ifdef WITH_FC2
         private:
-            fc2Context queryContext_fc2_;
+            fc2Context queryContext_fc2_ = nullptr;
 #endif
 #ifdef WITH_DC1394
         private:
-            dc1394_t *queryContext_dc1394_;
+            dc1394_t *queryContext_dc1394_ = nullptr;
+#endif
+#ifdef WITH_SPIN
+        private:
+            spinSystem queryContext_spin_ = nullptr;
+
 #endif
     };
 

@@ -124,6 +124,13 @@ namespace bias {
 
         // Spinnaker specific errors
         ERROR_NO_SPIN,
+        ERROR_SPIN_CREATE_CONTEXT,
+        ERROR_SPIN_DESTROY_CONTEXT,
+        ERROR_SPIN_CREATE_CAMERA_LIST,
+        ERROR_SPIN_CLEAR_CAMERA_LIST,
+        ERROR_SPIN_DESTROY_CAMERA_LIST,
+        ERROR_SPIN_ENUMERATE_CAMERAS,
+        ERROR_SPIN_CAMERA_LIST_SIZE,
 
         // Video Writer Errors
         ERROR_VIDEO_WRITER_ADD_FRAME,

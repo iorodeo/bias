@@ -9,15 +9,19 @@ namespace bias {
 
     CameraFinder::CameraFinder() 
     {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
         createQueryContext_fc2();
         createQueryContext_dc1394();
+        createQueryContext_spin();
         update();
     };
 
     CameraFinder::~CameraFinder() 
     {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
         destroyQueryContext_fc2();
         destroyQueryContext_dc1394();
+        destroyQueryContext_spin();
     };
 
     void CameraFinder::update() 
@@ -25,6 +29,7 @@ namespace bias {
         guidSet_.clear();
         update_fc2();
         update_dc1394();
+        update_spin();
     }
 
     void CameraFinder::printGuid() 
@@ -174,9 +179,9 @@ namespace bias {
     // Dummy methods for when FlyCapture2 is not included
     // ------------------------------------------------------------------------
 
-    void CameraFinder::createQueryContext_fc2() {};
-    void CameraFinder::destroyQueryContext_fc2() {};
-    void CameraFinder::update_fc2() {};
+    void CameraFinder::createQueryContext_fc2() {}
+    void CameraFinder::destroyQueryContext_fc2() {}
+    void CameraFinder::update_fc2() {}
 
 #endif
 
@@ -237,12 +242,115 @@ namespace bias {
     }
 
 #else
+
     // Dummy methods for when libdc1394 is not included
     // ------------------------------------------------------------------------
 
-    void CameraFinder::createQueryContext_dc1394() {};
-    void CameraFinder::destroyQueryContext_dc1394() {};
-    void CameraFinder::update_dc1394() {};
+    void CameraFinder::createQueryContext_dc1394() {}
+    void CameraFinder::destroyQueryContext_dc1394() {}
+    void CameraFinder::update_dc1394() {}
+
+#endif
+
+#ifdef WITH_SPIN
+
+    // Spinnaker specific features
+    // ------------------------------------------------------------------------
+    
+    void CameraFinder::createQueryContext_spin()
+    {
+        spinError error = SPINNAKER_ERR_SUCCESS;
+	    error = spinSystemGetInstance(&queryContext_spin_);
+        if (error != SPINNAKER_ERR_SUCCESS) 
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to create Spinnaker query context";
+            throw RuntimeError(ERROR_SPIN_CREATE_CONTEXT, ssError.str());
+        }
+    }
+
+
+    void CameraFinder::destroyQueryContext_spin()
+    {
+        spinError error = SPINNAKER_ERR_SUCCESS;
+		error = spinSystemReleaseInstance(queryContext_spin_);
+        if (error != SPINNAKER_ERR_SUCCESS) 
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to create Spinnaker query context, error=" << error;
+            throw RuntimeError(ERROR_SPIN_DESTROY_CONTEXT, ssError.str());
+        }
+    }
+
+    void CameraFinder::update_spin() 
+    { 
+        // Get camera list and number of cameras
+        spinCameraList hCameraList = NULL;
+        size_t numCameras = 0;
+
+        // Create empty camera list
+        spinError error = spinCameraListCreateEmpty(&hCameraList);
+        if (error != SPINNAKER_ERR_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to create Spinnaker empty camera list, error=" << error;
+            throw RuntimeError(ERROR_SPIN_CREATE_CAMERA_LIST, ssError.str());
+        }
+
+        // Retrieve cameras from system
+        error = spinSystemGetCameras(queryContext_spin_, hCameraList);
+        if (error != SPINNAKER_ERR_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to enumerate Spinnaker cameras, error=" << error;
+            throw RuntimeError(ERROR_SPIN_ENUMERATE_CAMERAS, ssError.str());
+        }
+
+        // Retrieve number of cameras
+        error = spinCameraListGetSize(hCameraList, &numCameras);
+        if (error != SPINNAKER_ERR_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get number of Spinnaker cameras list, error=" << error;
+            throw RuntimeError(ERROR_SPIN_CAMERA_LIST_SIZE, ssError.str());
+        }
+        std::cout << "numCameras: " << numCameras << std::endl;
+
+        // Clear Spinnaker camera list
+        error = spinCameraListClear(hCameraList);
+        if (error != SPINNAKER_ERR_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to clear Spinnaker camera list, error=" << error;
+            throw RuntimeError(ERROR_SPIN_CLEAR_CAMERA_LIST, ssError.str());
+        }
+
+        // Destroy Spinnaker camera list
+        error = spinCameraListDestroy(hCameraList);
+        if (error != SPINNAKER_ERR_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to destroy Spinnaker camera list, error=" << error;
+            throw RuntimeError(ERROR_SPIN_DESTROY_CAMERA_LIST, ssError.str());
+        }
+
+    }
+
+#else
+
+    // Dummy methods for when Spinnaker is not included
+    // ------------------------------------------------------------------------
+
+    void CameraFinder::createQueryContext_spin() {}
+    void CameraFinder::destroyQueryContext_spin() {}
+    void CameraFinder::update_spin() {}
 
 #endif
 
