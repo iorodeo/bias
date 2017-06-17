@@ -1,13 +1,28 @@
 #include <iostream>
 #include <string>
 #include "camera_facade.hpp"
+#include "camera_device_spin.hpp"
 
 
 int main(int argc, char *argv[]) 
 {
     bias::CameraFinder camFinder;
 
-    camFinder.printGuid();
+    bias::GuidList guidList = camFinder.getGuidList();
+
+    for (auto guid : guidList) 
+    {
+        std::cout << "guid:   " << guid.toString() << std::endl;
+        bias::CameraDevice_spin camDev(guid);
+
+        bias::CameraLib camLib = camDev.getCameraLib();
+        std::cout << "camLib: "  << camLib << std::endl;
+
+        camDev.connect();
+        camDev.disconnect();
+
+    };
+
 
 
     return 0;

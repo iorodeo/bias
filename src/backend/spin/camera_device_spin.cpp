@@ -13,39 +13,44 @@ namespace bias {
 
     CameraDevice_spin::CameraDevice_spin() : CameraDevice()
     {
-        //initialize();
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        initialize();
     }
 
 
     CameraDevice_spin::CameraDevice_spin(Guid guid) : CameraDevice(guid)
     {
-        //initialize();
-        //spinError error= spinCreateContext(&context_);
-        //if (error != SPIN_ERROR_OK) 
-        //{
-        //    // TODO ... shouldn't throw exception in construction change this
-        //    std::stringstream ssError;
-        //    ssError << __PRETTY_FUNCTION__;
-        //    ssError << ": unable to create Spinnaker context"; 
-        //    throw RuntimeError(ERROR_SPIN_CREATE_CONTEXT, ssError.str());
-        //}
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        initialize();
+        spinError error = spinSystemGetInstance(&hSystem_);
+        if (error != SPINNAKER_ERR_SUCCESS) 
+        {
+            // TODO ... shouldn't throw exception in constructor change this
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to create Spinnaker context"; 
+            throw RuntimeError(ERROR_SPIN_CREATE_CONTEXT, ssError.str());
+        }
     }
 
 
-    //void CameraDevice_spin::initialize()
-    //{
-    //    isFirst_ = true;
-    //    rawImageCreated_ = false;
-    //    convertedImageCreated_ = false;
-    //    haveEmbeddedTimeStamp_ = false;
-    //    timeStamp_.seconds = 0;
-    //    timeStamp_.microSeconds = 0;
-    //    cycleSecondsLast_ = 0;
-    //}
+    void CameraDevice_spin::initialize()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        //isFirst_ = true;
+        //rawImageCreated_ = false;
+        //convertedImageCreated_ = false;
+        //haveEmbeddedTimeStamp_ = false;
+        //timeStamp_.seconds = 0;
+        //timeStamp_.microSeconds = 0;
+        //cycleSecondsLast_ = 0;
+    }
 
 
     CameraDevice_spin::~CameraDevice_spin() 
     {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+
         //if (capturing_) { stopCapture(); }
 
         //if (convertedImageCreated_) { destroyConvertedImage(); }
@@ -54,25 +59,27 @@ namespace bias {
 
         //if (connected_) { disconnect(); }
 
-        //spinError error = spinDestroyContext(context_);
-        //if ( error != SPIN_ERROR_OK ) 
-        //{
-        //    std::stringstream ssError;
-        //    ssError << __PRETTY_FUNCTION__;
-        //    ssError << ": unable to destroy Spinnaker context";
-        //    throw RuntimeError(ERROR_SPIN_DESTROY_CONTEXT, ssError.str());
-        //}
+        spinError error = spinSystemReleaseInstance(hSystem_);
+        if ( error != SPINNAKER_ERR_SUCCESS ) 
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to destroy Spinnaker context";
+            throw RuntimeError(ERROR_SPIN_DESTROY_CONTEXT, ssError.str());
+        }
     }
 
 
-    //CameraLib CameraDevice_spin::getCameraLib() 
-    //{ 
-    //    return guid_.getCameraLib(); 
-    //}
+    CameraLib CameraDevice_spin::getCameraLib() 
+    { 
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        return guid_.getCameraLib(); 
+    }
 
 
-    //void CameraDevice_spin::connect() 
-    //{
+    void CameraDevice_spin::connect() 
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
     //    if (!connected_) 
     //    { 
     //        // Connect to camera
@@ -176,11 +183,12 @@ namespace bias {
     //        // -----------------------------------------------
 
     //    }
-    //}
+    }
 
 
-    //void CameraDevice_spin::disconnect()
-    //{
+    void CameraDevice_spin::disconnect()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
     //    if (capturing_) { stopCapture(); }
     //    if (connected_) 
     //    {
@@ -194,7 +202,7 @@ namespace bias {
     //        }
     //        connected_ = false;
     //    }
-    //}
+    }
 
 
     //void CameraDevice_spin::startCapture()

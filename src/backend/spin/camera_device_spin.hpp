@@ -19,11 +19,12 @@ namespace bias {
             CameraDevice_spin(); 
             explicit CameraDevice_spin(Guid guid);
             virtual ~CameraDevice_spin();
-            //virtual CameraLib getCameraLib();
 
-            //virtual void connect();
-            //virtual void disconnect();
-            //
+            virtual CameraLib getCameraLib();
+
+            virtual void connect();
+            virtual void disconnect();
+            
             //virtual void startCapture();
             //virtual void stopCapture();
             //virtual cv::Mat grabImage();
@@ -73,7 +74,8 @@ namespace bias {
 
         private:
 
-            //spinContext context_ {nullptr};
+            spinSystem hSystem_ = nullptr;
+            
             //spinCameraInfo cameraInfo_;
             //spinImage rawImage_;
             //spinImage convertedImage_;
@@ -87,7 +89,7 @@ namespace bias {
             //bool convertedImageCreated_;
             //bool haveEmbeddedTimeStamp_;
 
-            //void initialize();
+            void initialize();
             //void createRawImage();
             //void destroyRawImage();
             ////void grabImageCommon();
