@@ -9,7 +9,6 @@ namespace bias {
 
     CameraFinder::CameraFinder() 
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
         createQueryContext_fc2();
         createQueryContext_dc1394();
         createQueryContext_spin();
@@ -18,7 +17,6 @@ namespace bias {
 
     CameraFinder::~CameraFinder() 
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
         destroyQueryContext_fc2();
         destroyQueryContext_dc1394();
         destroyQueryContext_spin();
@@ -320,15 +318,10 @@ namespace bias {
             throw RuntimeError(ERROR_SPIN_CAMERA_LIST_SIZE, ssError.str());
         }
 
-        std::cout << "numCameras: " << numCameras << std::endl;
-
         for (int i=0; i<numCameras; i++) 
         {
-            std::cout << "camera[" << i << "]" << std::endl; 
-
-            spinCamera hCam = nullptr;
-
             // Get camera
+            spinCamera hCam = nullptr;
             error = spinCameraListGet(hCameraList, i, &hCam);
             if (error != SPINNAKER_ERR_SUCCESS)
             {
@@ -337,16 +330,6 @@ namespace bias {
                 ssError << ": unable to get Spinnaker camera, error=" << error;
                 throw RuntimeError(ERROR_SPIN_GET_CAMERA, ssError.str());
             }
-
-            // Temporary ...
-            // --------------------------------------------------------------------------
-            //error = printSpinCameraInfo(hCam);
-            //if (error != SPINNAKER_ERR_SUCCESS)
-            //{
-            //    std::cout << "unable to print camera info: " << error << std::cout;
-            //    return error;
-            //}
-            // ---------------------------------------------------------------------------
 
             // Get GUID from camera
             size_t bufSize = 64;
@@ -360,7 +343,7 @@ namespace bias {
                 throw RuntimeError(ERROR_SPIN_GET_CAMERA_GUID, ssError.str());
             }
             std::string guidString = std::string(bufVec.begin(), bufVec.end());
-            std::cout << "guid: " << guidString << std::endl;
+            guidSet_.insert(Guid(guidString));
 
             // Release Camera
             error = spinCameraRelease(hCam);

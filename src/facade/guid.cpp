@@ -99,9 +99,9 @@ namespace bias {
     // Libdc1394 specific methods 
     // ------------------------------------------------------------------------
 
-    Guid::Guid(uint64_t guid)
+    Guid::Guid(uint64_t guidInt)
     {
-        guidDevicePtr_ = std::make_shared<GuidDevice_dc1394>(guid);
+        guidDevicePtr_ = std::make_shared<GuidDevice_dc1394>(guidInt);
     }
 
     uint64_t Guid::getValue_dc1394()
@@ -119,6 +119,23 @@ namespace bias {
         }
         return rval;
     }
+
+#endif
+
+#ifdef WITH_SPIN
+
+    // Spinnaker specific methods
+    // ------------------------------------------------------------------------
+    Guid::Guid(std::string guidStr)
+    {
+        guidDevicePtr_ = std::make_shared<GuidDevice_spin>(guidStr);
+    };
+
+    std::string Guid::getValue_spin()
+    {
+        std::string rval;
+        return rval;
+    };
 
 #endif
     

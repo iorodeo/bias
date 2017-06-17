@@ -13,22 +13,22 @@ namespace bias {
     class GuidDevice_spin : public GuidDevice 
     {
         // ---------------------------------------------------------------------
-        // Provides representation of Flycapture2 specific camera guids
+        // Provides representation of Spinnaker specific camera guids
         // ---------------------------------------------------------------------
         public:
             GuidDevice_spin();
-            //explicit GuidDevice_spin( spinPGRGuid guid_spin );
-            //virtual ~GuidDevice_spin() {};
-            //virtual CameraLib getCameraLib();
-            //virtual void printValue();
-            //virtual std::string toString();
-            //spinPGRGuid getValue();
+            explicit GuidDevice_spin(std::string guid_spin);
+            virtual ~GuidDevice_spin() {};
+            virtual CameraLib getCameraLib();
+            virtual void printValue();
+            virtual std::string toString();
+            std::string getValue();
 
         private:
-            //spinPGRGuid value_;
-            //virtual bool isEqual(GuidDevice &guid);
-            //virtual bool lessThan(GuidDevice &guid);
-            //virtual bool lessThanEqual(GuidDevice &guid);
+            std::string value_;
+            virtual bool isEqual(GuidDevice &guid);
+            virtual bool lessThan(GuidDevice &guid);
+            virtual bool lessThanEqual(GuidDevice &guid);
     };
 
     typedef std::shared_ptr<GuidDevice_spin> GuidDevicePtr_spin;

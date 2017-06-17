@@ -60,12 +60,14 @@ namespace bias {
 #ifdef WITH_DC1394
         // Libdc1394 specific features
         public:
-            explicit Guid(uint64_t guid);
+            explicit Guid(uint64_t guidInt);
             uint64_t getValue_dc1394();
 #endif
 #ifdef WITH_SPIN
         // Spinnaker specific features
         public:
+            explicit Guid(std::string guidStr);
+            std::string getValue_spin();
 #endif
            
     };

@@ -7,7 +7,8 @@ int main(int argc, char *argv[])
 {
     bias::CameraFinder camFinder;
 
-    std::cout << "hello" << std::endl;
+    camFinder.printGuid();
+
 
     return 0;
 }
