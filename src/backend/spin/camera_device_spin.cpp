@@ -28,7 +28,7 @@ namespace bias {
             // TODO ... shouldn't throw exception in constructor change this
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
-            ssError << ": unable to create Spinnaker context"; 
+            ssError << ": unable to create Spinnaker context, error = " << error; 
             throw RuntimeError(ERROR_SPIN_CREATE_CONTEXT, ssError.str());
         }
     }
@@ -64,7 +64,7 @@ namespace bias {
         {
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
-            ssError << ": unable to destroy Spinnaker context";
+            ssError << ": unable to destroy Spinnaker context, error = " << error;
             throw RuntimeError(ERROR_SPIN_DESTROY_CONTEXT, ssError.str());
         }
     }
@@ -80,115 +80,89 @@ namespace bias {
     void CameraDevice_spin::connect() 
     {
         std::cout << __PRETTY_FUNCTION__ << std::endl;
-    //    if (!connected_) 
-    //    { 
-    //        // Connect to camera
-    //        spinPGRGuid guid = getGuid_spin();
-    //        spinError error = spinConnect(context_, &guid);
-    //        if (error != SPIN_ERROR_OK) 
-    //        {
-    //            std::stringstream ssError;
-    //            ssError << __PRETTY_FUNCTION__;
-    //            ssError << ": unabled to connect to Spinnaker device";
-    //            throw RuntimeError(ERROR_SPIN_CONNECT, ssError.str());
-    //        }
-    //        connected_ = true;
 
-    //        // Get Camera information
-    //        error = spinGetCameraInfo( context_, &cameraInfo_ );
-    //        if (error != SPIN_ERROR_OK) 
-    //        {
-    //            std::stringstream ssError;
-    //            ssError << __PRETTY_FUNCTION__;
-    //            ssError << ": unabled to get Spinnaker camera info";
-    //            throw RuntimeError(ERROR_SPIN_GET_CAMERA_INFO, ssError.str());
-    //        }
+        if (!connected_) 
+        {
+            spinError error = SPINNAKER_ERR_SUCCESS;
+            spinCameraList hCameraList = nullptr;
+
+            // Create empty camera list
+            error = spinCameraListCreateEmpty(&hCameraList);
+            if (error != SPINNAKER_ERR_SUCCESS)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to create Spinnaker empty camera list, error=" << error;
+                throw RuntimeError(ERROR_SPIN_CREATE_CAMERA_LIST, ssError.str());
+            }
+
+            // Retrieve list of cameras from system
+            error = spinSystemGetCameras(hSystem_, hCameraList);
+            if (error != SPINNAKER_ERR_SUCCESS)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to enumerate Spinnaker cameras, error=" << error;
+                throw RuntimeError(ERROR_SPIN_ENUMERATE_CAMERAS, ssError.str());
+            }
+
+            error = spinCameraListGetBySerial(hCameraList, guid_.toString().c_str() , &hCam_);
+            if (error != SPINNAKER_ERR_SUCCESS)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to get Spinnaker camera from list, error = " << error;
+                throw RuntimeError(ERROR_SPIN_GET_CAMERA, ssError.str());
+            }
+            connected_ = true;
+
+            // Clear Spinnaker camera list
+            error = spinCameraListClear(hCameraList);
+            if (error != SPINNAKER_ERR_SUCCESS)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to clear Spinnaker camera list, error=" << error;
+                throw RuntimeError(ERROR_SPIN_CLEAR_CAMERA_LIST, ssError.str());
+            }
+
+            // Destroy Spinnaker camera list
+            error = spinCameraListDestroy(hCameraList);
+            if (error != SPINNAKER_ERR_SUCCESS)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to destroy Spinnaker camera list, error=" << error;
+                throw RuntimeError(ERROR_SPIN_DESTROY_CAMERA_LIST, ssError.str());
+            }
+
+            // Devel: print camera infor 
 
 
-    //        //printInfo();
-    //        spinConfig config = getConfiguration_spin();
-    //        //printConfiguration_spin(config);
-
-    //        config.grabTimeout = SPIN_TIMEOUT_NONE;
-    //        config.grabMode =  SPIN_BUFFER_FRAMES;
-    //        //config.numBuffers = 20;
-    //        config.numBuffers = 200;
-
-    //        setConfiguration_spin(config);
-
-    //        config = getConfiguration_spin();
-    //        printConfiguration_spin(config);
-
-    //        // DEVEL
-    //        // -----------------------------------------------
-
-    //        // Get Strobe info
-    //        unsigned int strobeSource = 2;
-    //        spinStrobeInfo strobeInfo_spin;
-    //        strobeInfo_spin.source = strobeSource;
-    //        error = spinGetStrobeInfo(context_,&strobeInfo_spin);
-    //        if (error != SPIN_ERROR_OK)
-    //        {
-    //            std::stringstream ssError;
-    //            ssError << __PRETTY_FUNCTION__;
-    //            ssError << ": unabled to get Spinnaker camera GPIO strobe info";
-    //            throw RuntimeError(ERROR_SPIN_GET_STROBE_INFO, ssError.str());
-    //        }
-
-    //        //std::cout << std::endl;
-    //        //std::cout << "strobInfo_spin" << std::endl;
-    //        //std::cout << "source            "   << strobeInfo_spin.source << std::endl;
-    //        //std::cout << "present           "   << strobeInfo_spin.present << std::endl;
-    //        //std::cout << "readOutSupported  "   << strobeInfo_spin.readOutSupported << std::endl;
-    //        //std::cout << "onOffSupported    "   << strobeInfo_spin.onOffSupported << std::endl;
-    //        //std::cout << "polaritySupported "   << strobeInfo_spin.polaritySupported << std::endl;
-    //        //std::cout << "minValue          "   << strobeInfo_spin.minValue << std::endl;
-    //        //std::cout << "maxValue          "   << strobeInfo_spin.maxValue << std::endl;
-    //        //std::cout << std::endl;
-
-    //        // Set Strobe control
-    //        spinStrobeControl strobeControl_spin;
-    //        strobeControl_spin.source = strobeSource;
-    //        strobeControl_spin.onOff = TRUE;
-    //        strobeControl_spin.polarity = 1;
-    //        strobeControl_spin.delay = 0.0;
-    //        strobeControl_spin.duration = 0.0;
-
-    //        error = spinSetStrobe(context_, &strobeControl_spin);
-    //        if (error != SPIN_ERROR_OK)
-    //        {
-    //            std::stringstream ssError;
-    //            ssError << __PRETTY_FUNCTION__;
-    //            ssError << ": unabled to set Spinnaker camera GPIO strobe control";
-    //            throw RuntimeError(ERROR_SPIN_SET_STROBE_CONTROL, ssError.str());
-    //        }
-
-    //        error = spinGetStrobe(context_, &strobeControl_spin);
-    //        if (error != SPIN_ERROR_OK)
-    //        {
-    //            std::stringstream ssError;
-    //            ssError << __PRETTY_FUNCTION__;
-    //            ssError << ": unabled to get Spinnaker camera GPIO strobe control";
-    //            throw RuntimeError(ERROR_SPIN_GET_STROBE_CONTROL, ssError.str());
-    //        }
-
-    //        //std::cout << "strobeControl_spin" << std::endl;
-    //        //std::cout << "source:   " << strobeControl_spin.source << std::endl; 
-    //        //std::cout << "onOff:    " << strobeControl_spin.onOff << std::endl; 
-    //        //std::cout << "polarity: " << strobeControl_spin.polarity << std::endl; 
-    //        //std::cout << "delay:    " << strobeControl_spin.delay << std::endl; 
-    //        //std::cout << "duration: " << strobeControl_spin.duration << std::endl; 
-    //        //std::cout << std::endl;
-
-    //        // -----------------------------------------------
-
-    //    }
+            // TODO: - setup strobe output on GPIO pin?? Is this possible?
+        }
     }
+
+
+
 
 
     void CameraDevice_spin::disconnect()
     {
         std::cout << __PRETTY_FUNCTION__ << std::endl;
+        if (connected_) 
+        {
+            // Release Camera
+            spinError error = spinCameraRelease(hCam_);
+            if (error != SPINNAKER_ERR_SUCCESS)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to get Spinnaker camera, error=" << error;
+                throw RuntimeError(ERROR_SPIN_RELEASE_CAMERA, ssError.str());
+            }
+        }
+    }
     //    if (capturing_) { stopCapture(); }
     //    if (connected_) 
     //    {
@@ -202,7 +176,6 @@ namespace bias {
     //        }
     //        connected_ = false;
     //    }
-    }
 
 
     //void CameraDevice_spin::startCapture()

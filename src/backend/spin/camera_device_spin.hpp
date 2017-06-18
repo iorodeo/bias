@@ -75,6 +75,7 @@ namespace bias {
         private:
 
             spinSystem hSystem_ = nullptr;
+            spinCamera hCam_ = nullptr;
             
             //spinCameraInfo cameraInfo_;
             //spinImage rawImage_;
