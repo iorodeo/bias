@@ -106,7 +106,7 @@ namespace bias {
                 throw RuntimeError(ERROR_SPIN_ENUMERATE_CAMERAS, ssError.str());
             }
 
-            error = spinCameraListGetBySerial(hCameraList, guid_.toString().c_str() , &hCam_);
+            error = spinCameraListGetBySerial(hCameraList, guid_.toString().c_str() , &hCamera_);
             if (error != SPINNAKER_ERR_SUCCESS)
             {
                 std::stringstream ssError;
@@ -136,7 +136,38 @@ namespace bias {
                 throw RuntimeError(ERROR_SPIN_DESTROY_CAMERA_LIST, ssError.str());
             }
 
-            // Devel: print camera infor 
+
+            // Get TLDevice node map
+            error = spinCameraGetTLDeviceNodeMap(hCamera_, &hNodeMapTLDevice_);
+            if (error != SPINNAKER_ERR_SUCCESS)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to retrieve Spinnaker TL device node map, error=" << error;
+                throw RuntimeError(ERROR_SPIN_GET_TLDEVICE_NODE_MAP, ssError.str());
+            }
+
+            // Initialize camera
+            error = spinCameraInit(hCamera_);
+            if (error != SPINNAKER_ERR_SUCCESS)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to initialize Spinnaker camera, error=" << error;
+                throw RuntimeError(ERROR_SPIN_GET_TLDEVICE_NODE_MAP, ssError.str());
+            }
+
+            // Get camera node map
+            error = spinCameraGetNodeMap(hCamera_, &hNodeMapCamera_);
+            if (error != SPINNAKER_ERR_SUCCESS)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to retrieve Spinnaker GenICam node map, error=" << error;
+                throw RuntimeError(ERROR_SPIN_GET_CAMERA_NODE_MAP, ssError.str());
+            }
+
+            // Devel: print camera information
 
 
             // TODO: - setup strobe output on GPIO pin?? Is this possible?
@@ -152,8 +183,19 @@ namespace bias {
         std::cout << __PRETTY_FUNCTION__ << std::endl;
         if (connected_) 
         {
+
+            // Deinitialize camera
+            spinError error = spinCameraDeInit(hCamera_);
+            if (error != SPINNAKER_ERR_SUCCESS)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to deinitialize Spinnaker camera, error=" << error;
+                throw RuntimeError(ERROR_SPIN_RELEASE_CAMERA, ssError.str());
+            }
+
             // Release Camera
-            spinError error = spinCameraRelease(hCam_);
+            error = spinCameraRelease(hCamera_);
             if (error != SPINNAKER_ERR_SUCCESS)
             {
                 std::stringstream ssError;

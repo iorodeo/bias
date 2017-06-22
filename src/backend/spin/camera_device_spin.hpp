@@ -12,6 +12,7 @@
 namespace bias {
 
 
+
     class CameraDevice_spin : public CameraDevice
     {
         public:
@@ -75,7 +76,9 @@ namespace bias {
         private:
 
             spinSystem hSystem_ = nullptr;
-            spinCamera hCam_ = nullptr;
+            spinCamera hCamera_ = nullptr;
+            spinNodeMapHandle hNodeMapCamera_ = nullptr;
+            spinNodeMapHandle hNodeMapTLDevice_ = nullptr;
             
             //spinCameraInfo cameraInfo_;
             //spinImage rawImage_;

@@ -134,6 +134,8 @@ namespace bias {
         ERROR_SPIN_GET_CAMERA,
         ERROR_SPIN_GET_CAMERA_GUID,
         ERROR_SPIN_RELEASE_CAMERA,
+        ERROR_SPIN_GET_CAMERA_NODE_MAP,
+        ERROR_SPIN_GET_TLDEVICE_NODE_MAP,
 
         // Video Writer Errors
         ERROR_VIDEO_WRITER_ADD_FRAME,
