@@ -1,7 +1,9 @@
 #ifdef WITH_SPIN
 #ifndef BIAS_CAMERA_INFO_SPIN_HPP
 #define BIAS_CAMERA_INFO_SPIN_HPP
+
 #include <string>
+#include "SpinnakerC.h"
 
 namespace bias {
 
@@ -11,6 +13,8 @@ namespace bias {
         public:
 
             CameraInfo_spin();
+            CameraInfo_spin(spinNodeMapHandle &hNodeMapTLDevice);
+            void retrieve(spinNodeMapHandle &hNodeMapTLDevice);
             std::string toString();
             void print();
 

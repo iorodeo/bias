@@ -168,6 +168,7 @@ namespace bias {
             }
 
             // Devel: print camera information
+            CameraInfo_spin cameraInfo(hNodeMapTLDevice_);
 
 
             // TODO: - setup strobe output on GPIO pin?? Is this possible?

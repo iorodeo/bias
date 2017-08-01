@@ -6,6 +6,7 @@
 #include <opencv2/core/core.hpp>
 #include "utils.hpp"
 #include "camera_device.hpp"
+#include "camera_info_spin.hpp"
 #include "property.hpp"
 #include "SpinnakerC.h"
 
