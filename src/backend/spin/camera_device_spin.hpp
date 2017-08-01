@@ -70,9 +70,11 @@ namespace bias {
 
             //virtual TimeStamp getImageTimeStamp();
             //
-            //virtual std::string toString();
+            virtual std::string toString();
+
             //virtual void printGuid();
-            //virtual void printInfo();
+            //
+            virtual void printInfo();
 
         private:
 
@@ -81,7 +83,7 @@ namespace bias {
             spinNodeMapHandle hNodeMapCamera_ = nullptr;
             spinNodeMapHandle hNodeMapTLDevice_ = nullptr;
             
-            //spinCameraInfo cameraInfo_;
+            CameraInfo_spin cameraInfo_;
             //spinImage rawImage_;
             //spinImage convertedImage_;
             //bool useConverted_;

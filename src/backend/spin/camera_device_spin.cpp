@@ -167,8 +167,12 @@ namespace bias {
                 throw RuntimeError(ERROR_SPIN_GET_CAMERA_NODE_MAP, ssError.str());
             }
 
+            connected_ = true;
+
             // Devel: print camera information
-            CameraInfo_spin cameraInfo(hNodeMapTLDevice_);
+            CameraInfo_spin cameraInfo_(hNodeMapTLDevice_);
+            cameraInfo_.print();
+
 
 
             // TODO: - setup strobe output on GPIO pin?? Is this possible?
@@ -907,39 +911,10 @@ namespace bias {
     //    return cameraInfo_.modelName;
     //}
 
-    //std::string CameraDevice_spin::toString()
-    //{
-    //    spinError error;
-    //    std::stringstream ss; 
-
-    //    ss << std::endl;
-    //    ss << "------------------ " << std::endl;
-    //    ss << "Camera Information " << std::endl;
-    //    ss << "------------------ " << std::endl;
-    //    ss << std::endl;
-
-    //    if ( connected_ ) { 
-    //        ss << " guid:           " << guid_ << std::endl;
-    //        ss << " serial number:  " << cameraInfo_.serialNumber << std::endl;
-    //        ss << " camera vendor:  " << cameraInfo_.vendorName << std::endl;
-    //        ss << " camera model:   " << cameraInfo_.modelName << std::endl;
-    //        ss << " sensor          " << std::endl;
-    //        ss << "   type:         " << cameraInfo_.sensorInfo << std::endl;
-    //        ss << "   resolution:   " << cameraInfo_.sensorResolution << std::endl;
-    //        ss << " firmware        " << std::endl;     
-    //        ss << "   version:      " << cameraInfo_.firmwareVersion << std::endl;
-    //        ss << "   build time:   " << cameraInfo_.firmwareBuildTime << std::endl;
-    //        ss << " color camera:   " << std::boolalpha << (bool) cameraInfo_.isColorCamera << std::endl;
-    //        ss << " interface:      " << getInterfaceTypeString_spin(cameraInfo_.interfaceType) << std::endl;
-    //        ss << std::endl;
-    //    }
-    //    else 
-    //    {
-    //        ss << " Camera not connected " << std::endl << std::endl;
-    //        
-    //    }
-    //    return ss.str();
-    //}
+    std::string CameraDevice_spin::toString()
+    {
+        return cameraInfo_.toString();
+    }
 
 
     //void CameraDevice_spin::printGuid() 
@@ -948,10 +923,10 @@ namespace bias {
     //}
 
 
-    //void CameraDevice_spin::printInfo()
-    //{
-    //    std::cout << toString();
-    //}
+    void CameraDevice_spin::printInfo()
+    {
+        std::cout << toString();
+    }
 
     //   
     //// Private methods
