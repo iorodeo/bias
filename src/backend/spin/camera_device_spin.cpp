@@ -174,7 +174,6 @@ namespace bias {
             cameraInfo_.print();
 
 
-
             // TODO: - setup strobe output on GPIO pin?? Is this possible?
         }
     }

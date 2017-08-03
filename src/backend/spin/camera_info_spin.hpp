@@ -3,6 +3,7 @@
 #define BIAS_CAMERA_INFO_SPIN_HPP
 
 #include <string>
+#include <map>
 #include "SpinnakerC.h"
 #include "basic_types.hpp"
 
@@ -30,9 +31,11 @@ namespace bias {
             std::string vendorName();
 
 
+
         protected:
 
             bool haveInfo_ = false;
+
             std::string guid_ = std::string("");
             std::string serialNumber_ = std::string("");
             std::string vendorId_ = std::string("");
@@ -40,7 +43,19 @@ namespace bias {
             std::string modelName_ = std::string("");
             std::string vendorName_ = std::string("");
 
-            void getVendorName(spinNodeMapHandle &hNodeMapTLDevice);
+            size_t numberOfNodes_ = 0;
+            std::map<std::string, std::string> nodeNameToValueMap_;
+
+            std::string retrieveVendorName(spinNodeMapHandle &hNodeMapTLDevice);
+
+            std::string retrieveGuid(spinNodeMapHandle &hNodeMapTLDevice); // NOT DONE
+
+            size_t retrieveNumberOfNodes(spinNodeMapHandle &hNodeMapTLDevice);
+            std::map<std::string, std::string> retrieveNodeNameToValueMap(spinNodeMapHandle &hNodeMapTLDevice);
+
+            void printNameToValueMap();
+
+
     };
 
 }
