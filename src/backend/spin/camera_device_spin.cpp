@@ -13,14 +13,14 @@ namespace bias {
 
     CameraDevice_spin::CameraDevice_spin() : CameraDevice()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        //std::cout << __PRETTY_FUNCTION__ << std::endl;
         initialize();
     }
 
 
     CameraDevice_spin::CameraDevice_spin(Guid guid) : CameraDevice(guid)
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        //std::cout << __PRETTY_FUNCTION__ << std::endl;
         initialize();
         spinError error = spinSystemGetInstance(&hSystem_);
         if (error != SPINNAKER_ERR_SUCCESS) 
@@ -36,7 +36,7 @@ namespace bias {
 
     void CameraDevice_spin::initialize()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        //std::cout << __PRETTY_FUNCTION__ << std::endl;
         //isFirst_ = true;
         //rawImageCreated_ = false;
         //convertedImageCreated_ = false;
@@ -49,7 +49,7 @@ namespace bias {
 
     CameraDevice_spin::~CameraDevice_spin() 
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        //std::cout << __PRETTY_FUNCTION__ << std::endl;
 
         //if (capturing_) { stopCapture(); }
 
@@ -72,14 +72,14 @@ namespace bias {
 
     CameraLib CameraDevice_spin::getCameraLib() 
     { 
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        //std::cout << __PRETTY_FUNCTION__ << std::endl;
         return guid_.getCameraLib(); 
     }
 
 
     void CameraDevice_spin::connect() 
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        //std::cout << __PRETTY_FUNCTION__ << std::endl;
 
         if (!connected_) 
         {
@@ -170,9 +170,8 @@ namespace bias {
             connected_ = true;
 
             // Devel: print camera information
-            CameraInfo_spin cameraInfo_(hNodeMapTLDevice_);
+            cameraInfo_ = CameraInfo_spin(hNodeMapTLDevice_);
             cameraInfo_.print();
-
 
             // TODO: - setup strobe output on GPIO pin?? Is this possible?
         }
@@ -184,7 +183,7 @@ namespace bias {
 
     void CameraDevice_spin::disconnect()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        // std::cout << __PRETTY_FUNCTION__ << std::endl;
         if (connected_) 
         {
 
@@ -900,15 +899,15 @@ namespace bias {
     //    return timeStamp_;
     //}
 
-    //std::string CameraDevice_spin::getVendorName()
-    //{
-    //    return cameraInfo_.vendorName;
-    //}
+    std::string CameraDevice_spin::getVendorName()
+    {
+        return cameraInfo_.vendorName();
+    }
 
-    //std::string CameraDevice_spin::getModelName()
-    //{
-    //    return cameraInfo_.modelName;
-    //}
+    std::string CameraDevice_spin::getModelName()
+    {
+       return cameraInfo_.modelName();
+    }
 
     std::string CameraDevice_spin::toString()
     {

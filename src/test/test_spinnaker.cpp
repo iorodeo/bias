@@ -10,17 +10,23 @@ int main(int argc, char *argv[])
 
     bias::GuidList guidList = camFinder.getGuidList();
 
+    std::cout << std::endl;
+
     for (auto guid : guidList) 
     {
-        std::cout << "guid:   " << guid.toString() << std::endl;
+        std::cout << "guid:       " << guid.toString() << std::endl;
         bias::CameraDevice_spin camDev(guid);
 
         bias::CameraLib camLib = camDev.getCameraLib();
-        std::cout << "camLib: "  << camLib << std::endl;
+        std::cout << "camLib:     "  << camLib << std::endl;
 
         camDev.connect();
+        std::cout << "modelName:  "  << camDev.getModelName() << std::endl;
+        std::cout << "vendorName: "  << camDev.getVendorName() << std::endl;
+
         camDev.disconnect();
 
+        std::cout << std::endl;
     };
 
 

@@ -9,7 +9,7 @@ namespace bias {
 
     CameraInfo_spin::CameraInfo_spin() 
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        //std::cout << __PRETTY_FUNCTION__ << std::endl;
     }
     
 
@@ -22,9 +22,8 @@ namespace bias {
     void CameraInfo_spin::retrieve(spinNodeMapHandle &hNodeMapTLDevice)
     {
         nodeNameToValueMap_ = retrieveNodeNameToValueMap(hNodeMapTLDevice);
+        //printNameToValueMap();
         haveInfo_ = true;
-
-        printNameToValueMap();
     }
 
     bool CameraInfo_spin::haveInfo()
@@ -61,10 +60,14 @@ namespace bias {
 
     std::string CameraInfo_spin::guid() 
     {
-        std::string guid("not available");
+        std::string guid("no information");
         if (nodeNameToValueMap_.count("DeviceID") != 0)
         {
             guid = nodeNameToValueMap_["DeviceID"];
+        }
+        else
+        {
+            guid = std::string("not available");
         }
         return guid;
     }
@@ -72,20 +75,28 @@ namespace bias {
 
     std::string CameraInfo_spin::serialNumber() 
     {
-        std::string serialNumber("not available");
+        std::string serialNumber("no information");
         if (nodeNameToValueMap_.count("DeviceSerialNumber") != 0)
         {
             serialNumber = nodeNameToValueMap_["DeviceSerialNumber"];
+        }
+        else
+        {
+            serialNumber = std::string("not available");
         }
         return serialNumber;
     }
 
     std::string CameraInfo_spin::modelName() 
     {
-        std::string modelName("not available");
+        std::string modelName("no information");
         if (nodeNameToValueMap_.count("DeviceModelName") != 0)
         {
             modelName = nodeNameToValueMap_["DeviceModelName"];
+        }
+        else
+        {
+            modelName = std::string("not available");
         }
         return modelName;
     }
@@ -93,10 +104,14 @@ namespace bias {
 
     std::string CameraInfo_spin::vendorName() 
     {
-        std::string vendorName("not available");
+        std::string vendorName("no information");
         if (nodeNameToValueMap_.count("DeviceVendorName") != 0)
         {
             vendorName = nodeNameToValueMap_["DeviceVendorName"];
+        }
+        else
+        {
+            vendorName = std::string("not available");
         }
         return vendorName;
     }
@@ -112,7 +127,8 @@ namespace bias {
 
         for (auto &kv : nodeNameToValueMap_)
         {
-            std::cout << " " << kv.first << " " << kv.second << std::endl;
+            //std::cout << " " << kv.first << " " << kv.second << std::endl;
+            std::cout << " " << kv.first << " " << kv.second << " " << nodeNameToValueMap_.count("DeviceVendorName") << std::endl;
         }
 
         std::cout << std::endl;
@@ -150,8 +166,7 @@ namespace bias {
                 continue;
             }
             std::string nodeName = std::string(nodeNameBuf);
-
-            std::cout << nodeName << std::endl;
+            //std::cout << nodeName << std::endl;
 
             bool8_t isAvailable = False;
             err = spinNodeIsAvailable(hNode, &isAvailable);
