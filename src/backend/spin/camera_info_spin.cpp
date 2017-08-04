@@ -21,13 +21,10 @@ namespace bias {
 
     void CameraInfo_spin::retrieve(spinNodeMapHandle &hNodeMapTLDevice)
     {
-        vendorName_ = retrieveVendorName(hNodeMapTLDevice);
-        numberOfNodes_ = retrieveNumberOfNodes(hNodeMapTLDevice);
         nodeNameToValueMap_ = retrieveNodeNameToValueMap(hNodeMapTLDevice);
+        haveInfo_ = true;
 
         printNameToValueMap();
-
-        haveInfo_ = true;
     }
 
     bool CameraInfo_spin::haveInfo()
@@ -46,28 +43,11 @@ namespace bias {
         ss << "------------------ " << std::endl;
         ss << std::endl;
 
-        //ss << " guid:           " << guid() << std::endl;
-        //ss << " serial number:  " << serialNumber() << std::endl;
+        ss << " guid:           " << guid() << std::endl;
+        ss << " serial number:  " << serialNumber() << std::endl;
         ss << " camera vendor:  " << vendorName() << std::endl;
-        //ss << " camera model:   " << modelName() << std::endl;
-        //ss << " sensor          " << std::endl;
-        //ss << "   type:         " << sensorInfo() << std::endl;
-        //ss << "   resolution:   " << sensorResolution() << std::endl;
-        //ss << " firmware        " << std::endl;     
-        //ss << "   version:      " << firmwareVersion() << std::endl;
-        //ss << "   build time:   " << firmwareBuildTime() << std::endl;
-        //ss << " color camera:   " << std::boolalpha << (bool) isColorCamera() << std::endl;
-        //ss << " interface:      " << getInterfaceTypeString_spin(interfaceType) << std::endl;
+        ss << " camera model:   " << modelName() << std::endl;
         ss << std::endl;
-
-        ss << "------------------ " << std::endl;
-        ss << "Debug              " << std::endl;
-        ss << "-------------------" << std::endl;
-        ss << std::endl;
-
-        ss << " numNodes:       " << numberOfNodes_ << std::endl;
-        ss << std::endl;
-
             
         return ss.str();
     }
@@ -81,112 +61,68 @@ namespace bias {
 
     std::string CameraInfo_spin::guid() 
     {
-        return guid_;
+        std::string guid("not available");
+        if (nodeNameToValueMap_.count("DeviceID") != 0)
+        {
+            guid = nodeNameToValueMap_["DeviceID"];
+        }
+        return guid;
     }
 
 
     std::string CameraInfo_spin::serialNumber() 
     {
-        return serialNumber_;
+        std::string serialNumber("not available");
+        if (nodeNameToValueMap_.count("DeviceSerialNumber") != 0)
+        {
+            serialNumber = nodeNameToValueMap_["DeviceSerialNumber"];
+        }
+        return serialNumber;
     }
-
-
-    std::string CameraInfo_spin::vendorId() 
-    {
-        return vendorId_;
-    }
-
-
-    std::string CameraInfo_spin::modelId() 
-    {
-        return modelId_;
-    }
-
 
     std::string CameraInfo_spin::modelName() 
     {
-        return modelName_;
+        std::string modelName("not available");
+        if (nodeNameToValueMap_.count("DeviceModelName") != 0)
+        {
+            modelName = nodeNameToValueMap_["DeviceModelName"];
+        }
+        return modelName;
     }
 
 
     std::string CameraInfo_spin::vendorName() 
     {
-        return vendorName_;
+        std::string vendorName("not available");
+        if (nodeNameToValueMap_.count("DeviceVendorName") != 0)
+        {
+            vendorName = nodeNameToValueMap_["DeviceVendorName"];
+        }
+        return vendorName;
     }
+
+
+    void CameraInfo_spin::printNameToValueMap() 
+    {
+        std::cout << std::endl;
+        std::cout << "------------------ " << std::endl;
+        std::cout << "nodeNameToValueMap " << std::endl;
+        std::cout << "------------------ " << std::endl;
+        std::cout << std::endl;
+
+        for (auto &kv : nodeNameToValueMap_)
+        {
+            std::cout << " " << kv.first << " " << kv.second << std::endl;
+        }
+
+        std::cout << std::endl;
+    }
+
+
 
 
     // protected methods
     // --------------------------------------------------------------------------------------------
-
-    std::string CameraInfo_spin::retrieveVendorName(spinNodeMapHandle &hNodeMapTLDevice)
-    {
-        spinError err = SPINNAKER_ERR_SUCCESS;
-        spinNodeHandle hDeviceVendorName = nullptr;
-        bool8_t deviceVendorNameIsAvailable = False;
-        bool8_t deviceVendorNameIsReadable = False;
-
-        // Retrieve vendor name node handle 
-        err = spinNodeMapGetNode(hNodeMapTLDevice, "DeviceVendorName", &hDeviceVendorName);
-        if (err != SPINNAKER_ERR_SUCCESS)
-        {
-            haveInfo_ = false;
-            std::stringstream ssError;
-            ssError << __PRETTY_FUNCTION__;
-            ssError << ": unable to retrieve vendor name node handle, error=" << err;
-            throw RuntimeError(ERROR_SPIN_RETRIEVE_VENDOR_NAME, ssError.str());
-        }
-
-        // Check vendor name availability
-        err = spinNodeIsAvailable(hDeviceVendorName, &deviceVendorNameIsAvailable);
-        if (err != SPINNAKER_ERR_SUCCESS)
-        {
-            haveInfo_ = false;
-            std::stringstream ssError;
-            ssError << __PRETTY_FUNCTION__;
-            ssError << ": unable to get vendor name availability, error=" << err;
-            throw RuntimeError(ERROR_SPIN_RETRIEVE_VENDOR_NAME, ssError.str());
-        }
-
-        // Check vendor name readability
-        err = spinNodeIsReadable(hDeviceVendorName, &deviceVendorNameIsReadable);
-        if (err != SPINNAKER_ERR_SUCCESS)
-        {
-            haveInfo_ = false;
-            std::stringstream ssError;
-            ssError << __PRETTY_FUNCTION__;
-            ssError << ": unable to get vendor name readability, error=" << err;
-            throw RuntimeError(ERROR_SPIN_RETRIEVE_VENDOR_NAME, ssError.str());
-        }
-
-        // Get vendor name 
-        std::string vendorName;
-        if (deviceVendorNameIsAvailable && deviceVendorNameIsReadable)
-        {
-            char deviceVendorName[MAX_BUF_LEN];
-            size_t lenDeviceVendorName = MAX_BUF_LEN;
-            err = spinStringGetValue(hDeviceVendorName, deviceVendorName, &lenDeviceVendorName);
-            if (err != SPINNAKER_ERR_SUCCESS)
-            {
-                haveInfo_ = false;
-                std::stringstream ssError;
-                ssError << __PRETTY_FUNCTION__;
-                ssError << ": unable to get vendor name readability, error=" << err;
-                throw RuntimeError(ERROR_SPIN_RETRIEVE_VENDOR_NAME, ssError.str());
-            }
-            vendorName = std::string(deviceVendorName);
-        }
-        else
-        {
-            vendorName = std::string("not readable");
-        }
-        return vendorName;
-    } 
-    
-    std::string CameraInfo_spin::retrieveGuid(spinNodeMapHandle &hNodeMapTLDevice)
-    {
-        std::string guid;
-        return guid;
-    }
 
     std::map<std::string, std::string> CameraInfo_spin::retrieveNodeNameToValueMap(spinNodeMapHandle &hNodeMapTLDevice)
     {
@@ -214,6 +150,8 @@ namespace bias {
                 continue;
             }
             std::string nodeName = std::string(nodeNameBuf);
+
+            std::cout << nodeName << std::endl;
 
             bool8_t isAvailable = False;
             err = spinNodeIsAvailable(hNode, &isAvailable);
@@ -263,23 +201,5 @@ namespace bias {
         }
         return numNodes;
     }
-
-    void CameraInfo_spin::printNameToValueMap() 
-    {
-
-        std::cout << std::endl;
-        std::cout << "------------------ " << std::endl;
-        std::cout << "nodeNameToValueMap " << std::endl;
-        std::cout << "------------------ " << std::endl;
-        std::cout << std::endl;
-
-        for (auto &kv : nodeNameToValueMap_)
-        {
-            std::cout << " " << kv.first << " " << kv.second << std::endl;
-        }
-
-        std::cout << std::endl;
-    }
-
 
 } // namespace bias

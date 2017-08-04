@@ -22,6 +22,7 @@ namespace bias {
 
             std::string toString();
             void print();
+            void printNameToValueMap();
 
             std::string guid();
             std::string serialNumber();
@@ -31,30 +32,13 @@ namespace bias {
             std::string vendorName();
 
 
-
         protected:
 
             bool haveInfo_ = false;
-
-            std::string guid_ = std::string("");
-            std::string serialNumber_ = std::string("");
-            std::string vendorId_ = std::string("");
-            std::string modelId_ = std::string("");
-            std::string modelName_ = std::string("");
-            std::string vendorName_ = std::string("");
-
-            size_t numberOfNodes_ = 0;
             std::map<std::string, std::string> nodeNameToValueMap_;
-
-            std::string retrieveVendorName(spinNodeMapHandle &hNodeMapTLDevice);
-
-            std::string retrieveGuid(spinNodeMapHandle &hNodeMapTLDevice); // NOT DONE
 
             size_t retrieveNumberOfNodes(spinNodeMapHandle &hNodeMapTLDevice);
             std::map<std::string, std::string> retrieveNodeNameToValueMap(spinNodeMapHandle &hNodeMapTLDevice);
-
-            void printNameToValueMap();
-
 
     };
 
