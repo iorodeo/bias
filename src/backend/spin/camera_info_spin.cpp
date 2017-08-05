@@ -1,7 +1,9 @@
+#ifdef WITH_SPIN
 #include "camera_info_spin.hpp"
 #include <iostream>
 #include <sstream>
 #include "exception.hpp"
+#include "node_map_utils.hpp"
 
 namespace bias {
 
@@ -135,86 +137,18 @@ namespace bias {
     }
 
 
-
-
     // protected methods
     // --------------------------------------------------------------------------------------------
 
     std::map<std::string, std::string> CameraInfo_spin::retrieveNodeNameToValueMap(spinNodeMapHandle &hNodeMapTLDevice)
     {
-        std::map<std::string, std::string> nodeNameToValueMap;
-        spinError err = SPINNAKER_ERR_SUCCESS;
-        size_t numberOfNodes = retrieveNumberOfNodes(hNodeMapTLDevice);
-
-        for (size_t i=0; i<numberOfNodes; i++) 
-        { 
-            // Try to get the node handle
-            spinNodeHandle hNode = nullptr;
-            err = spinNodeMapGetNodeByIndex(hNodeMapTLDevice,i,&hNode);
-            if (err != SPINNAKER_ERR_SUCCESS)
-            {
-                // Can't get this node handle - skip it. 
-                continue;
-            }
-
-            char nodeNameBuf[MAX_BUF_LEN];
-            size_t lenNodeName = MAX_BUF_LEN;
-            err = spinNodeGetName(hNode, nodeNameBuf, &lenNodeName);
-            if (err != SPINNAKER_ERR_SUCCESS)
-            {
-                // Can't get node name - skip it. 
-                continue;
-            }
-            std::string nodeName = std::string(nodeNameBuf);
-            //std::cout << nodeName << std::endl;
-
-            bool8_t isAvailable = False;
-            err = spinNodeIsAvailable(hNode, &isAvailable);
-            if (err != SPINNAKER_ERR_SUCCESS)
-            {
-                // Can't get node availability - skip it. 
-                continue;
-            }
-
-            bool8_t isReadable = False;
-            err = spinNodeIsReadable(hNode, &isReadable);
-            if (err != SPINNAKER_ERR_SUCCESS)
-            {
-                // Can't get node readability - skip it. 
-                continue;
-            }
-
-            char nodeValueBuf[MAX_BUF_LEN];
-            size_t lenValueBuf = MAX_BUF_LEN;
-            if (isAvailable && isReadable)
-            {
-                err = spinStringGetValue(hNode, nodeValueBuf, &lenValueBuf);
-                if (err != SPINNAKER_ERR_SUCCESS)
-                {
-                    // Can't get value - skip it. 
-                    continue;
-                }
-            }
-            std::string nodeValue = std::string(nodeValueBuf);
-            nodeNameToValueMap[nodeName] = nodeValue;
-        }
-
-        return nodeNameToValueMap;
+        return getNodeNameToStringValueMap(hNodeMapTLDevice);
     }
 
     size_t CameraInfo_spin::retrieveNumberOfNodes(spinNodeMapHandle &hNodeMapTLDevice)
     {
-        size_t numNodes = 0;
-        spinError err = SPINNAKER_ERR_SUCCESS;
-        err = spinNodeMapGetNumNodes(hNodeMapTLDevice,&numNodes);
-        if (err != SPINNAKER_ERR_SUCCESS)
-        {
-            std::stringstream ssError;
-            ssError << __PRETTY_FUNCTION__;
-            ssError << ": unable to get vendor name readability, error=" << err;
-            throw RuntimeError(ERROR_SPIN_RETRIEVE_VENDOR_NAME, ssError.str());
-        }
-        return numNodes;
+        return getNumberOfNodes(hNodeMapTLDevice);
     }
 
 } // namespace bias
+#endif

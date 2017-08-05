@@ -7,6 +7,10 @@
 #include <algorithm>
 #include <bitset>
 
+// Temporary ???
+#include "node_map_utils.hpp"
+#include <fstream>
+
 
 namespace bias {
 
@@ -174,11 +178,47 @@ namespace bias {
             cameraInfo_.print();
 
             // TODO: - setup strobe output on GPIO pin?? Is this possible?
+            //
+
+            // DEVEL
+            // ---------------------------------------------------------------
+            //std::ofstream fout;
+
+            //size_t numNodesTLDevice = getNumberOfNodes(hNodeMapTLDevice_);
+            //std::cout << "numNodesTLDevice: " << numNodesTLDevice << std::endl;
+
+            //fout.open("node_names_tl_device.txt");
+            //std::vector<std::string> nodeNamesTLDevice = getNodeNames(hNodeMapTLDevice_);
+            //for (auto name : nodeNamesTLDevice)
+            //{
+            //    fout << name << std::endl;
+            //    std::cout << name << std::endl;
+            //}
+            //fout.close();
+            
+            //size_t numNodesCamera = getNumberOfNodes(hNodeMapCamera_);
+            //std::cout << "numNodesCamera: " << numNodesCamera << std::endl;
+
+            //std::vector<std::string> nodeNamesCamera = getNodeNames(hNodeMapCamera_);
+            //fout.open("node_names_camera.txt");
+            //for (auto name : nodeNamesCamera)
+            //{
+            //    fout << name << std::endl;
+            //    std::cout << name << std::endl;
+            //}
+            //fout.close();
+
+            //std::map<std::string, std::string> nodeNameToValueMap = getNodeNameToStringValueMap(hNodeMapCamera_);
+            //fout.open("node_name_to_value_map_camera.txt");
+            //for (auto kv : nodeNameToValueMap)
+            //{
+            //    fout << kv.first << ",   " << kv.second << std::endl;
+            //}
+            //fout.close();
+
+            std::map<std::string, spinNodeType> nameToTypeMap = getNodeNameToTypeMap(hNodeMapTLDevice_);
         }
     }
-
-
-
 
 
     void CameraDevice_spin::disconnect()
