@@ -12,13 +12,16 @@ namespace bias
 
     size_t getNumberOfNodes(spinNodeMapHandle &hNodeMap);
 
-    std::vector<std::string> getNodeNames(spinNodeMapHandle &hNodeMap);
+    std::string getNodeTypeString(spinNodeType nodeType);
 
-    std::map<std::string, std::string> getNodeNameToStringValueMap(spinNodeMapHandle &hNodeMap);
+    std::vector<std::string> getNodeNames(spinNodeMapHandle &hNodeMap);
 
     std::map<std::string, spinNodeType> getNodeNameToTypeMap(spinNodeMapHandle &hNodeMap);
 
-    std::string getNodeTypeString(spinNodeType nodeType);
+    std::map<std::string, std::string> getStringNodeNameToValueMap(spinNodeMapHandle &hNodeMap);
+
+    std::vector<std::string> getEnumerationNodeEntryNames(spinNodeMapHandle &hNodeMap, std::string nodeName);
+
 
 } // namespace bias
 

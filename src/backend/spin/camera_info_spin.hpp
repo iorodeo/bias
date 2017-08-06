@@ -36,9 +36,7 @@ namespace bias {
 
             bool haveInfo_ = false;
             std::map<std::string, std::string> nodeNameToValueMap_;
-
             size_t retrieveNumberOfNodes(spinNodeMapHandle &hNodeMapTLDevice);
-            std::map<std::string, std::string> retrieveNodeNameToValueMap(spinNodeMapHandle &hNodeMapTLDevice);
 
     };
 

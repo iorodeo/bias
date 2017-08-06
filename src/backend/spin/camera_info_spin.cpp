@@ -23,7 +23,7 @@ namespace bias {
 
     void CameraInfo_spin::retrieve(spinNodeMapHandle &hNodeMapTLDevice)
     {
-        nodeNameToValueMap_ = retrieveNodeNameToValueMap(hNodeMapTLDevice);
+        nodeNameToValueMap_ = getStringNodeNameToValueMap(hNodeMapTLDevice);
         //printNameToValueMap();
         haveInfo_ = true;
     }
@@ -139,11 +139,6 @@ namespace bias {
 
     // protected methods
     // --------------------------------------------------------------------------------------------
-
-    std::map<std::string, std::string> CameraInfo_spin::retrieveNodeNameToValueMap(spinNodeMapHandle &hNodeMapTLDevice)
-    {
-        return getNodeNameToStringValueMap(hNodeMapTLDevice);
-    }
 
     size_t CameraInfo_spin::retrieveNumberOfNodes(spinNodeMapHandle &hNodeMapTLDevice)
     {

@@ -24,6 +24,7 @@ namespace bias
         {UnknownNode,     "UnnknownNode"}, 
     };
 
+
     size_t getNumberOfNodes(spinNodeMapHandle &hNodeMap)
     {
         size_t numNodes = 0;
@@ -38,6 +39,22 @@ namespace bias
         }
         return numNodes;
     }
+
+
+    std::string getNodeTypeString(spinNodeType nodeType)
+    {
+        std::string typeString;
+        if (NodeTypeToStringMap.count(nodeType) != 0)
+        {
+            typeString = NodeTypeToStringMap[nodeType];
+        }
+        else
+        {
+            typeString = std::string("NodeFound");
+        }
+        return typeString;
+    }
+
 
     std::vector<std::string> getNodeNames(spinNodeMapHandle &hNodeMap)
     {
@@ -73,7 +90,8 @@ namespace bias
         return nodeNameVec;
     }
 
-    std::map<std::string, std::string> getNodeNameToStringValueMap(spinNodeMapHandle &hNodeMap)
+
+    std::map<std::string, std::string> getStringNodeNameToValueMap(spinNodeMapHandle &hNodeMap)
     {
         //
         // Note: gets name to string value for nodes of string type only.
@@ -177,19 +195,78 @@ namespace bias
     }
 
 
-    std::string getNodeTypeString(spinNodeType nodeType)
+
+    std::vector<std::string> getEnumerationNodeEntryNames(spinNodeMapHandle &hNodeMap, std::string nodeName)
     {
-        std::string typeString;
-        if (NodeTypeToStringMap.count(nodeType) != 0)
+        spinError err = SPINNAKER_ERR_SUCCESS;
+
+        spinNodeHandle hNodeEnum = nullptr;
+        err = spinNodeMapGetNode(hNodeMap,nodeName.c_str(),&hNodeEnum);
+        if (err != SPINNAKER_ERR_SUCCESS)
         {
-            typeString = NodeTypeToStringMap[nodeType];
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get node handle, error=" << err;
+            throw RuntimeError(ERROR_SPIN_RETRIEVE_NODE_HANDLE, ssError.str());
         }
-        else
+
+        spinNodeType nodeType;
+        err = spinNodeGetType(hNodeEnum, &nodeType);
+        if (err != SPINNAKER_ERR_SUCCESS) 
         {
-            typeString = std::string("NodeFound");
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get node type, error=" << err;
+            throw RuntimeError(ERROR_SPIN_RETRIEVE_NODE_TYPE, ssError.str());
         }
-        return typeString;
+
+        if (nodeType  != EnumerationNode)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": incorrect node type, error =" << err;
+            throw RuntimeError(ERROR_SPIN_INCORRECT_NODE_TYPE, ssError.str());
+        }
+
+        size_t numEntries = 0;
+        err = spinEnumerationGetNumEntries(hNodeEnum, &numEntries);
+        if (err != SPINNAKER_ERR_SUCCESS) 
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get number of entries, error =" << err;
+            throw RuntimeError(ERROR_SPIN_RETRIEVE_NUM_ENTRIES, ssError.str());
+        }
+
+        std::vector<std::string> entryNamesVec;
+        for (size_t i=0; i<numEntries; i++)
+        {
+            spinNodeHandle hNodeEntry = nullptr;
+            err = spinEnumerationGetEntryByIndex(hNodeEnum, i, &hNodeEntry);
+            if (err != SPINNAKER_ERR_SUCCESS) 
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to get enumeration node entry, error = " << err;
+                throw RuntimeError(ERROR_SPIN_RETRIEVE_ENUM_ENTRY_NODE, ssError.str());
+            }
+
+            char buffer[MAX_BUF_LEN];
+            size_t lenBuffer = MAX_BUF_LEN;
+            err = spinEnumerationEntryGetSymbolic(hNodeEntry, buffer, &lenBuffer); 
+            if (err != SPINNAKER_ERR_SUCCESS) 
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to get enumeration entry symbolic name, error = " << err;
+                throw RuntimeError(ERROR_SPIN_RETRIEVE_ENUM_ENTRY_NODE, ssError.str());
+            }
+            entryNamesVec.push_back(buffer);
+        }
+
+        return entryNamesVec;
     }
+
 
 
 } // namespace bias
