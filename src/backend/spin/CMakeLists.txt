@@ -9,6 +9,7 @@ set(
     camera_device_spin.cpp
     camera_info_spin.cpp
     node_map_utils.cpp
+    node_map_spin.cpp
     )
 
 add_library(bias_backend_spin ${bias_backend_spin_SOURCE})

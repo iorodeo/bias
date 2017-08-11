@@ -9,6 +9,7 @@
 #include "camera_info_spin.hpp"
 #include "property.hpp"
 #include "SpinnakerC.h"
+#include "node_map_spin.hpp"
 
 namespace bias {
 
@@ -80,8 +81,12 @@ namespace bias {
 
             spinSystem hSystem_ = nullptr;
             spinCamera hCamera_ = nullptr;
+
             spinNodeMapHandle hNodeMapCamera_ = nullptr;
             spinNodeMapHandle hNodeMapTLDevice_ = nullptr;
+
+            NodeMap_spin nodeMapCamera_;
+            NodeMap_spin nodeMapTLDevice_;
             
             CameraInfo_spin cameraInfo_;
             //spinImage rawImage_;

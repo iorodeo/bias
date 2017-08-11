@@ -141,16 +141,6 @@ namespace bias {
             }
 
 
-            // Get TLDevice node map
-            error = spinCameraGetTLDeviceNodeMap(hCamera_, &hNodeMapTLDevice_);
-            if (error != SPINNAKER_ERR_SUCCESS)
-            {
-                std::stringstream ssError;
-                ssError << __PRETTY_FUNCTION__;
-                ssError << ": unable to retrieve Spinnaker TL device node map, error=" << error;
-                throw RuntimeError(ERROR_SPIN_GET_TLDEVICE_NODE_MAP, ssError.str());
-            }
-
             // Initialize camera
             error = spinCameraInit(hCamera_);
             if (error != SPINNAKER_ERR_SUCCESS)
@@ -160,31 +150,58 @@ namespace bias {
                 ssError << ": unable to initialize Spinnaker camera, error=" << error;
                 throw RuntimeError(ERROR_SPIN_GET_TLDEVICE_NODE_MAP, ssError.str());
             }
-
-            // Get camera node map
-            error = spinCameraGetNodeMap(hCamera_, &hNodeMapCamera_);
-            if (error != SPINNAKER_ERR_SUCCESS)
-            {
-                std::stringstream ssError;
-                ssError << __PRETTY_FUNCTION__;
-                ssError << ": unable to retrieve Spinnaker GenICam node map, error=" << error;
-                throw RuntimeError(ERROR_SPIN_GET_CAMERA_NODE_MAP, ssError.str());
-            }
-
             connected_ = true;
 
-            // Devel: print camera information
-            cameraInfo_ = CameraInfo_spin(hNodeMapTLDevice_);
-            cameraInfo_.print();
+            nodeMapTLDevice_ = NodeMapTLDevice_spin(hCamera_);
+            nodeMapCamera_ = NodeMapCamera_spin(hCamera_);
+
+            std::cout << "# TLDevice nodes: " << (nodeMapTLDevice_.numberOfNodes()) << std::endl;
+            std::cout << "# Camera nodes:   " << (nodeMapCamera_.numberOfNodes()) << std::endl;
+
+
+            std::vector<std::string> nodeNamesTLDevice = nodeMapTLDevice_.nodeNames(StringNode);
+            for (auto name : nodeNamesTLDevice) 
+            {
+                std::cout << name << std::endl;
+            }
 
             // TODO: - setup strobe output on GPIO pin?? Is this possible?
             //
+
+
+
+            //// Get TLDevice node map
+            //error = spinCameraGetTLDeviceNodeMap(hCamera_, &hNodeMapTLDevice_);
+            //if (error != SPINNAKER_ERR_SUCCESS)
+            //{
+            //    std::stringstream ssError;
+            //    ssError << __PRETTY_FUNCTION__;
+            //    ssError << ": unable to retrieve Spinnaker TL device node map, error=" << error;
+            //    throw RuntimeError(ERROR_SPIN_GET_TLDEVICE_NODE_MAP, ssError.str());
+            //}
+
+
+            //// Get camera node map
+            //error = spinCameraGetNodeMap(hCamera_, &hNodeMapCamera_);
+            //if (error != SPINNAKER_ERR_SUCCESS)
+            //{
+            //    std::stringstream ssError;
+            //    ssError << __PRETTY_FUNCTION__;
+            //    ssError << ": unable to retrieve Spinnaker GenICam node map, error=" << error;
+            //    throw RuntimeError(ERROR_SPIN_GET_CAMERA_NODE_MAP, ssError.str());
+            //}
+            //connected_ = true;
+
+            // Devel: print camera information
+            //cameraInfo_ = CameraInfo_spin(hNodeMapTLDevice_);
+            //cameraInfo_.print();
+
 
             // DEVEL
             // ---------------------------------------------------------------
             //std::ofstream fout;
 
-            //std::map<std::string, std::string> nodeNameToValueMap = getNodeNameToStringValueMap(hNodeMapCamera_);
+            //std::map<std::string, std::string> nodeNameToValueMap = getStringNodeNameToValueMap(hNodeMapCamera_);
             //fout.open("node_name_to_value_map_camera.txt");
             //for (auto kv : nodeNameToValueMap)
             //{
@@ -192,13 +209,13 @@ namespace bias {
             //}
             //fout.close();
 
-            //std::map<std::string, spinNodeType> nameToTypeMap = getNodeNameToTypeMap(hNodeMapTLDevice_);
+            ////std::map<std::string, spinNodeType> nameToTypeMap = getNodeNameToTypeMap(hNodeMapTLDevice_);
 
-            std::vector<std::string> entryNamesVec = getEnumerationNodeEntryNames(hNodeMapCamera_, "PixelFormat");
-            for (auto name : entryNamesVec) 
-            {
-                std::cout << name << std::endl;
-            }
+            //std::vector<std::string> entryNamesVec = getEnumerationNodeEntryNames(hNodeMapCamera_, "PixelFormat");
+            //for (auto name : entryNamesVec) 
+            //{
+            //    std::cout << name << std::endl;
+            //}
         }
     }
 
