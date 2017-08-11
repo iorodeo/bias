@@ -20,7 +20,11 @@ namespace bias
 
             std::vector<std::string> nodeNames();
             std::vector<std::string> nodeNames(spinNodeType nodeType);
+            std::map<std::string, spinNodeType> nodeNameToTypeMap();
 
+            //std::map<std::string, std::string> nodeNameToDisplayNameMap(); 
+            //std::map<std::string, std::string> nodeNameToTooTipMap(); 
+            //std::map<std::string, std::string> nodeNameToDescriptionMap(); 
 
             std::string getStringNodeValueByName(std::string nodeName);
             std::string getStringNodeValueByIndex(size_t index);
@@ -33,8 +37,12 @@ namespace bias
             void getNodeHandleByName(std::string nodeName, spinNodeHandle &hNode);
             void getNodeHandleByIndex(size_t index, spinNodeHandle &hNode);
 
-            std::string getNodeName(spinNodeHandle &hNode);
             spinNodeType getNodeType(spinNodeHandle &hNode);
+            std::string getNodeName(spinNodeHandle &hNode);
+            std::string getNodeDisplayName(spinNodeHandle &hNode);
+
+            std::string getNodeToolTip(spinNodeHandle &hNode);
+            std::string getNodeDescription(spinNodeHandle &hNode);
 
             bool getNodeAvailability(spinNodeHandle &hNode);
             bool getNodeReadability(spinNodeHandle &hNode);

@@ -5,7 +5,7 @@
 
 namespace bias 
 {
-    const size_t MAX_BUF_LEN = 256;
+    const size_t MAX_BUF_LEN = 512;
     // ----------------------------------------------------------------------------------
     // NodeMap_spin
     // ----------------------------------------------------------------------------------
@@ -38,7 +38,6 @@ namespace bias
 
         for (size_t i=0; i<numberOfNodes(); i++) 
         { 
-            // Try to get the node handle
             spinNodeHandle hNode = nullptr;
             try
             {
@@ -72,7 +71,6 @@ namespace bias
 
         for (size_t i=0; i<numberOfNodes(); i++) 
         { 
-            // Try to get the node handle
             spinNodeHandle hNode = nullptr;
             try
             {
@@ -112,6 +110,45 @@ namespace bias
         return nodeNameVec;
 
 
+    }
+
+
+    std::map<std::string, spinNodeType> NodeMap_spin::nodeNameToTypeMap()
+    {
+        std::map<std::string, spinNodeType> nameToType;
+        for (size_t i=0; i<numberOfNodes(); i++) 
+        {
+            spinNodeHandle hNode = nullptr;
+            try
+            {
+                getNodeHandleByIndex(i, hNode);
+            }
+            catch (RuntimeError &runtimeError)
+            {
+                continue;
+            }
+            std::string nodeName("");
+            try
+            {
+                nodeName = getNodeName(hNode);
+            }
+            catch (RuntimeError &runtimeError)
+            {
+                continue;
+            }
+
+            spinNodeType nodeType;
+            try
+            {
+                nodeType = getNodeType(hNode);
+            }
+            catch (RuntimeError &runtimeError)
+            {
+                continue;
+            }
+            nameToType[nodeName] = nodeType;
+        }
+        return nameToType;
     }
 
 
@@ -157,6 +194,24 @@ namespace bias
             throw RuntimeError(ERROR_SPIN_RETRIEVE_NODE_HANDLE, ssError.str());
         }
     }
+
+
+    spinNodeType NodeMap_spin::getNodeType(spinNodeHandle &hNode)
+    {
+        spinNodeType nodeType;
+        spinError err = spinNodeGetType(hNode, &nodeType);
+        if (err != SPINNAKER_ERR_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get node type,  error = " << err;
+            throw RuntimeError(ERROR_SPIN_RETRIEVE_NODE_TYPE, ssError.str());
+
+        }
+        return nodeType;
+    }
+
+
     std::string NodeMap_spin::getNodeName(spinNodeHandle &hNode)
     {
         char buffer[MAX_BUF_LEN];
@@ -173,19 +228,51 @@ namespace bias
     }
 
 
-    spinNodeType NodeMap_spin::getNodeType(spinNodeHandle &hNode)
+    std::string NodeMap_spin::getNodeDisplayName(spinNodeHandle &hNode)
     {
-        spinNodeType nodeType;
-        spinError err = spinNodeGetType(hNode, &nodeType);
+        char buffer[MAX_BUF_LEN];
+        size_t bufferLen = MAX_BUF_LEN;
+        spinError err = spinNodeGetDisplayName(hNode, buffer, &bufferLen);
         if (err != SPINNAKER_ERR_SUCCESS)
         {
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
-            ssError << ": unable to get node type,  error = " << err;
-            throw RuntimeError(ERROR_SPIN_RETRIEVE_NODE_TYPE, ssError.str());
-
+            ssError << ": unable to get node display name, error = " << err;
+            throw RuntimeError(ERROR_SPIN_RETRIEVE_NODE_DISPLAY_NAME, ssError.str());
         }
-        return nodeType;
+        return std::string(buffer);
+    }
+
+
+    std::string NodeMap_spin::getNodeToolTip(spinNodeHandle &hNode)
+    {
+        char buffer[MAX_BUF_LEN];
+        size_t bufferLen = MAX_BUF_LEN;
+        spinError err = spinNodeGetToolTip(hNode, buffer, &bufferLen);
+        if (err != SPINNAKER_ERR_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get node tooltip, error = " << err;
+            throw RuntimeError(ERROR_SPIN_RETRIEVE_NODE_TOOLTIP, ssError.str());
+        }
+        return std::string(buffer);
+    }
+
+
+    std::string NodeMap_spin::getNodeDescription(spinNodeHandle &hNode)
+    {
+        char buffer[MAX_BUF_LEN];
+        size_t bufferLen = MAX_BUF_LEN;
+        spinError err = spinNodeGetDescription(hNode, buffer, &bufferLen);
+        if (err != SPINNAKER_ERR_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get node description, error = " << err;
+            throw RuntimeError(ERROR_SPIN_RETRIEVE_NODE_DESCRIPTION, ssError.str());
+        }
+        return std::string(buffer);
     }
 
 
