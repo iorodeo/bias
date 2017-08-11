@@ -11,29 +11,9 @@ namespace bias {
 
     CameraInfo_spin::CameraInfo_spin() 
     {
-        //std::cout << __PRETTY_FUNCTION__ << std::endl;
+
     }
     
-
-    CameraInfo_spin::CameraInfo_spin(spinNodeMapHandle &hNodeMapTLDevice)
-    {
-        retrieve(hNodeMapTLDevice);
-    }
-
-
-    void CameraInfo_spin::retrieve(spinNodeMapHandle &hNodeMapTLDevice)
-    {
-        nodeNameToValueMap_ = getStringNodeNameToValueMap(hNodeMapTLDevice);
-        //printNameToValueMap();
-        haveInfo_ = true;
-    }
-
-    bool CameraInfo_spin::haveInfo()
-    {
-        return haveInfo_;
-    }
-
-
     std::string CameraInfo_spin::toString()
     {
         std::stringstream ss; 
@@ -60,90 +40,79 @@ namespace bias {
     }
 
 
+
     std::string CameraInfo_spin::guid() 
     {
-        std::string guid("no information");
-        if (nodeNameToValueMap_.count("DeviceID") != 0)
-        {
-            guid = nodeNameToValueMap_["DeviceID"];
-        }
-        else
-        {
-            guid = std::string("not available");
-        }
-        return guid;
+        return guid_;
+    }
+
+
+    void CameraInfo_spin::setGuid(std::string guid)
+    {
+        guid_ = guid;
     }
 
 
     std::string CameraInfo_spin::serialNumber() 
     {
-        std::string serialNumber("no information");
-        if (nodeNameToValueMap_.count("DeviceSerialNumber") != 0)
-        {
-            serialNumber = nodeNameToValueMap_["DeviceSerialNumber"];
-        }
-        else
-        {
-            serialNumber = std::string("not available");
-        }
-        return serialNumber;
+        return serialNumber_;
     }
+
+   
+    void CameraInfo_spin::setSerialNumber(std::string serialNumber)
+    {
+        serialNumber_ = serialNumber;
+    } 
+
+
+    std::string CameraInfo_spin::vendorId()
+    {
+        return vendorId_;
+    }
+
+
+    void CameraInfo_spin::setVendorId(std::string vendorId)
+    {
+        vendorId_ = vendorId;
+    }
+
+
+    std::string CameraInfo_spin::modelId()
+    {
+        return modelId_;
+    }
+
+
+    void CameraInfo_spin::setModelId(std::string modelId)
+    {
+        modelId_ = modelId;
+    }
+
 
     std::string CameraInfo_spin::modelName() 
     {
-        std::string modelName("no information");
-        if (nodeNameToValueMap_.count("DeviceModelName") != 0)
-        {
-            modelName = nodeNameToValueMap_["DeviceModelName"];
-        }
-        else
-        {
-            modelName = std::string("not available");
-        }
-        return modelName;
+        return modelName_;
+    }
+
+
+    void CameraInfo_spin::setModelName(std::string modelName)
+    {
+        modelName_ = modelName;
     }
 
 
     std::string CameraInfo_spin::vendorName() 
     {
-        std::string vendorName("no information");
-        if (nodeNameToValueMap_.count("DeviceVendorName") != 0)
-        {
-            vendorName = nodeNameToValueMap_["DeviceVendorName"];
-        }
-        else
-        {
-            vendorName = std::string("not available");
-        }
-        return vendorName;
+        return vendorName_;
     }
 
 
-    void CameraInfo_spin::printNameToValueMap() 
+    void CameraInfo_spin::setVendorName(std::string vendorName)
     {
-        std::cout << std::endl;
-        std::cout << "------------------ " << std::endl;
-        std::cout << "nodeNameToValueMap " << std::endl;
-        std::cout << "------------------ " << std::endl;
-        std::cout << std::endl;
-
-        for (auto &kv : nodeNameToValueMap_)
-        {
-            //std::cout << " " << kv.first << " " << kv.second << std::endl;
-            std::cout << " " << kv.first << " " << kv.second << " " << nodeNameToValueMap_.count("DeviceVendorName") << std::endl;
-        }
-
-        std::cout << std::endl;
+        vendorName_ = vendorName;
     }
 
 
-    // protected methods
-    // --------------------------------------------------------------------------------------------
-
-    size_t CameraInfo_spin::retrieveNumberOfNodes(spinNodeMapHandle &hNodeMapTLDevice)
-    {
-        return getNumberOfNodes(hNodeMapTLDevice);
-    }
 
 } // namespace bias
 #endif

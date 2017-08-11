@@ -14,8 +14,11 @@ namespace bias
     // NodeMap_spin - public methods
     // ----------------------------------------------------------------------------------
 
-    NodeMap_spin::NodeMap_spin(spinCamera hCamera)
-    { }
+
+    NodeMap_spin::NodeMap_spin() {}; 
+
+    NodeMap_spin::NodeMap_spin(spinCamera &hCamera) {}
+
 
     size_t NodeMap_spin::numberOfNodes()
     {
@@ -32,38 +35,6 @@ namespace bias
         return numNodes;
     }
 
-    std::vector<std::string> NodeMap_spin::nodeNames()
-    {
-        std::vector<std::string> nodeNameVec;
-
-        for (size_t i=0; i<numberOfNodes(); i++) 
-        { 
-            spinNodeHandle hNode = nullptr;
-            try
-            {
-                getNodeHandleByIndex(i, hNode);
-            }
-            catch (RuntimeError &runtimeError)
-            {
-                continue;
-            }
-
-
-            std::string nodeName("");
-            try
-            {
-                nodeName = getNodeName(hNode);
-            }
-            catch (RuntimeError &runtimeError)
-            {
-                continue;
-            }
-
-            nodeNameVec.push_back(nodeName);
-        }
-
-        return nodeNameVec;
-    }
 
     std::vector<std::string> NodeMap_spin::nodeNames(spinNodeType nodeType)
     {
@@ -91,20 +62,23 @@ namespace bias
                 continue;
             }
 
-            spinNodeType currNodeType;
-            try
+            if (nodeType != UnknownNode)
             {
-                currNodeType = getNodeType(hNode);
+                bool test = false;
+                try
+                {
+                    test = isNodeOfType(nodeType,hNode);
+                }
+                catch (RuntimeError &runtimeError)
+                {
+                    continue;
+                }
+                if (!test)
+                {
+                    continue;
+                }
             }
-            catch (RuntimeError &runtimeError)
-            {
-                continue;
-            }
-
-            if (currNodeType == nodeType)
-            {
-                nodeNameVec.push_back(nodeName);
-            }
+            nodeNameVec.push_back(nodeName);
         }
 
         return nodeNameVec;
@@ -127,6 +101,7 @@ namespace bias
             {
                 continue;
             }
+
             std::string nodeName("");
             try
             {
@@ -152,6 +127,180 @@ namespace bias
     }
 
 
+    std::map<std::string, std::string> NodeMap_spin::nodeNameToDisplayNameMap(spinNodeType nodeType) 
+    {
+        std::map<std::string, std::string> nameToDispName;
+        for (size_t i=0; i<numberOfNodes(); i++)
+        {
+            spinNodeHandle hNode = nullptr;
+            try
+            {
+                getNodeHandleByIndex(i,hNode);
+            }
+            catch (RuntimeError &runtimeError)
+            {
+                continue;
+            }
+
+            if (nodeType != UnknownNode)
+            {
+                bool test = false;
+                try
+                {
+                    test = isNodeOfType(nodeType,hNode);
+                }
+                catch (RuntimeError &runtimeError)
+                {
+                    continue;
+                }
+                if (!test)
+                {
+                    continue;
+                }
+            }
+
+            std::string nodeName("");
+            try
+            {
+                nodeName = getNodeName(hNode);
+            }
+            catch (RuntimeError &runtimeError)
+            {
+                continue;
+            }
+            
+            std::string dispName("");
+            try
+            {
+                dispName = getNodeDisplayName(hNode);
+            } 
+            catch (RuntimeError &runtimeError)
+            {
+                continue;
+            }
+
+            nameToDispName[nodeName] = dispName;
+        }
+        return nameToDispName;
+    }
+
+
+    std::map<std::string, std::string> NodeMap_spin::nodeNameToTooTipMap(spinNodeType nodeType) 
+    {
+        std::map<std::string, std::string> nameToToolTip;
+        for (size_t i=0; i<numberOfNodes(); i++)
+        {
+            spinNodeHandle hNode = nullptr;
+            try
+            {
+                getNodeHandleByIndex(i,hNode);
+            }
+            catch (RuntimeError &runtimeError)
+            {
+                continue;
+            }
+
+            if (nodeType != UnknownNode)
+            {
+                bool test = false;
+                try
+                {
+                    test = isNodeOfType(nodeType,hNode);
+                }
+                catch (RuntimeError &runtimeError)
+                {
+                    continue;
+                }
+                if (!test)
+                {
+                    continue;
+                }
+            }
+
+            std::string nodeName("");
+            try
+            {
+                nodeName = getNodeName(hNode);
+            }
+            catch (RuntimeError &runtimeError)
+            {
+                continue;
+            }
+            
+            std::string toolTip("");
+            try
+            {
+                toolTip = getNodeDisplayName(hNode);
+            } 
+            catch (RuntimeError &runtimeError)
+            {
+                continue;
+            }
+            nameToToolTip[nodeName] = toolTip;
+        }
+        return nameToToolTip;
+    }
+
+
+    std::map<std::string, std::string> NodeMap_spin::nodeNameToDescriptionMap(spinNodeType nodeType) 
+    {
+        std::map<std::string, std::string> nameToDescMap;
+        for (size_t i=0; i<numberOfNodes(); i++)
+        {
+            spinNodeHandle hNode = nullptr;
+            try
+            {
+                getNodeHandleByIndex(i,hNode);
+            }
+            catch (RuntimeError &runtimeError)
+            {
+                continue;
+            }
+
+            if (nodeType != UnknownNode)
+            {
+                bool test = false;
+                try
+                {
+                    test = isNodeOfType(nodeType,hNode);
+                }
+                catch (RuntimeError &runtimeError)
+                {
+                    continue;
+                }
+                if (!test)
+                {
+                    continue;
+                }
+            }
+            std::string nodeName("");
+            try
+            {
+                nodeName = getNodeName(hNode);
+            }
+            catch (RuntimeError &runtimeError)
+            {
+                continue;
+            }
+            
+            std::string nodeDesc("");
+            try
+            {
+                nodeDesc = getNodeDescription(hNode);
+            } 
+            catch (RuntimeError &runtimeError)
+            {
+                continue;
+            }
+            nameToDescMap[nodeName] = nodeDesc; 
+        }
+        
+        return nameToDescMap;
+    }
+
+
+    // String node public methods
+    // ----------------------------------------------------------------------------------
     std::string NodeMap_spin::getStringNodeValueByName(std::string nodeName)
     {
         spinNodeHandle hNode = nullptr;
@@ -159,11 +308,53 @@ namespace bias
         return getStringNodeValue(hNode);
     }
 
-    std::string NodeMap_spin::getStringNodeValueByIndex(size_t index)
+    std::string NodeMap_spin::getStringNodeValueByIndex(size_t nodeIndex)
     {
         spinNodeHandle hNode = nullptr;
-        getNodeHandleByIndex(index, hNode);
+        getNodeHandleByIndex(nodeIndex, hNode);
         return getStringNodeValue(hNode);
+    }
+
+    // Enum node public methods
+    // ---------------------------------------------------------------------------------
+    std::vector<std::string> NodeMap_spin::getEnumNodeEntryListByName(std::string nodeName)
+    {
+        std::vector<std::string> entries;
+        spinNodeHandle hNode = nullptr;
+        getNodeHandleByName(nodeName, hNode);
+
+        if (!isNodeOfType(EnumerationNode,hNode)) 
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": incorrect node type";
+            throw RuntimeError(ERROR_SPIN_INCORRECT_NODE_TYPE, ssError.str());
+        }
+
+
+
+        // TODO 
+
+        return entries;
+    }
+
+    std::vector<std::string> NodeMap_spin::getEnumNodeEntryListByIndex(size_t nodeIndex)
+    {
+        std::vector<std::string> entries;
+        spinNodeHandle hNode = nullptr;
+        getNodeHandleByIndex(nodeIndex, hNode);
+
+        if (!isNodeOfType(EnumerationNode,hNode))
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": incorrect node type";
+            throw RuntimeError(ERROR_SPIN_INCORRECT_NODE_TYPE, ssError.str());
+        }
+
+        // TODO
+
+        return entries;
     }
 
     // NodeMap_spin - protected methods
@@ -183,9 +374,9 @@ namespace bias
     }
 
 
-    void NodeMap_spin::getNodeHandleByIndex(size_t index, spinNodeHandle &hNode)
+    void NodeMap_spin::getNodeHandleByIndex(size_t nodeIndex, spinNodeHandle &hNode)
     {
-        spinError err = spinNodeMapGetNodeByIndex(hNodeMap_, index, &hNode);
+        spinError err = spinNodeMapGetNodeByIndex(hNodeMap_, nodeIndex, &hNode);
         if (err != SPINNAKER_ERR_SUCCESS)
         {
             std::stringstream ssError;
@@ -353,6 +544,13 @@ namespace bias
     }
 
 
+    bool NodeMap_spin::isNodeOfType(spinNodeType nodeType, spinNodeHandle &hNode)
+    {
+        spinNodeType currNodeType = getNodeType(hNode);
+        return currNodeType == nodeType;
+    }
+
+
     // ----------------------------------------------------------------------------------
     // NodeMapCamera_spin
     // ----------------------------------------------------------------------------------
@@ -361,7 +559,10 @@ namespace bias
     // NodeMapCamera_spin
     // ----------------------------------------------------------------------------------
     
-    NodeMapCamera_spin::NodeMapCamera_spin(spinCamera hCamera) : NodeMap_spin(hCamera)
+    NodeMapCamera_spin::NodeMapCamera_spin() {};
+
+
+    NodeMapCamera_spin::NodeMapCamera_spin(spinCamera &hCamera)
     {
         // Get camera node map
         spinError err = spinCameraGetNodeMap(hCamera, &hNodeMap_);
@@ -383,7 +584,11 @@ namespace bias
 
     // NodeMapTLDevice_spin
     // ----------------------------------------------------------------------------------
-    NodeMapTLDevice_spin::NodeMapTLDevice_spin(spinCamera hCamera) : NodeMap_spin(hCamera)
+    
+    NodeMapTLDevice_spin::NodeMapTLDevice_spin() {};
+
+
+    NodeMapTLDevice_spin::NodeMapTLDevice_spin(spinCamera &hCamera)
     {
         // Get TLDevice node map
         spinError err = spinCameraGetTLDeviceNodeMap(hCamera, &hNodeMap_);
@@ -395,6 +600,29 @@ namespace bias
             throw RuntimeError(ERROR_SPIN_GET_TLDEVICE_NODE_MAP, ssError.str());
         }
     }
+
+
+    CameraInfo_spin NodeMapTLDevice_spin::cameraInfo()
+    { 
+        std::string deviceId =  getStringNodeValueByName("DeviceID");
+        std::string serialNumber = getStringNodeValueByName("DeviceSerialNumber");
+        std::string modelName = getStringNodeValueByName("DeviceModelName");
+        std::string vendorName = getStringNodeValueByName("DeviceVendorName");
+
+        std::string modelId = std::string("NA");
+        std::string vendorId = std::string("NA");
+
+        CameraInfo_spin info;
+        info.setGuid(deviceId);
+        info.setSerialNumber(serialNumber);
+        info.setModelName(modelName);
+        info.setVendorName(vendorName);
+        info.setModelId(modelId);
+        info.setVendorId(vendorId);
+
+        return info;
+    }
+
 
 
 

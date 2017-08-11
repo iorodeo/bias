@@ -152,49 +152,41 @@ namespace bias {
             }
             connected_ = true;
 
+            // Setup node maps for TLDevice and camera.
             nodeMapTLDevice_ = NodeMapTLDevice_spin(hCamera_);
             nodeMapCamera_ = NodeMapCamera_spin(hCamera_);
 
+
+            // ---
+
             std::cout << "# TLDevice nodes: " << (nodeMapTLDevice_.numberOfNodes()) << std::endl;
             std::cout << "# Camera nodes:   " << (nodeMapCamera_.numberOfNodes()) << std::endl;
+            std::cout << std::endl;
 
 
-            std::vector<std::string> nodeNamesTLDevice = nodeMapTLDevice_.nodeNames(StringNode);
+            std::vector<std::string> nodeNamesTLDevice = nodeMapCamera_.nodeNames(EnumerationNode);
             for (auto name : nodeNamesTLDevice) 
             {
                 std::cout << name << std::endl;
             }
 
+            std::cout << std::endl;
+
+            //std::map<std::string, std::string> nameToMap= nodeMapTLDevice_.nodeNameToDescriptionMap(StringNode);
+            //for (auto kv : nameToMap)
+            //{
+            //    std::cout << kv.first << "  " << kv.second << std::endl;
+            //}
+
+            // --------------------------------------------------------------------
             // TODO: - setup strobe output on GPIO pin?? Is this possible?
-            //
+            // --------------------------------------------------------------------
+            
 
-
-
-            //// Get TLDevice node map
-            //error = spinCameraGetTLDeviceNodeMap(hCamera_, &hNodeMapTLDevice_);
-            //if (error != SPINNAKER_ERR_SUCCESS)
-            //{
-            //    std::stringstream ssError;
-            //    ssError << __PRETTY_FUNCTION__;
-            //    ssError << ": unable to retrieve Spinnaker TL device node map, error=" << error;
-            //    throw RuntimeError(ERROR_SPIN_GET_TLDEVICE_NODE_MAP, ssError.str());
-            //}
-
-
-            //// Get camera node map
-            //error = spinCameraGetNodeMap(hCamera_, &hNodeMapCamera_);
-            //if (error != SPINNAKER_ERR_SUCCESS)
-            //{
-            //    std::stringstream ssError;
-            //    ssError << __PRETTY_FUNCTION__;
-            //    ssError << ": unable to retrieve Spinnaker GenICam node map, error=" << error;
-            //    throw RuntimeError(ERROR_SPIN_GET_CAMERA_NODE_MAP, ssError.str());
-            //}
-            //connected_ = true;
 
             // Devel: print camera information
-            //cameraInfo_ = CameraInfo_spin(hNodeMapTLDevice_);
-            //cameraInfo_.print();
+            cameraInfo_ = nodeMapTLDevice_.cameraInfo();
+            cameraInfo_.print();
 
 
             // DEVEL

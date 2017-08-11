@@ -7,6 +7,8 @@
 #include <vector>
 #include <map>
 
+#include "camera_info_spin.hpp"
+
 namespace bias
 {
 
@@ -14,20 +16,27 @@ namespace bias
     {
         public:
 
-            NodeMap_spin(spinCamera hCamera=nullptr);
+            NodeMap_spin(); 
+            NodeMap_spin(spinCamera &hCamera);
 
             size_t numberOfNodes();
 
-            std::vector<std::string> nodeNames();
-            std::vector<std::string> nodeNames(spinNodeType nodeType);
+            // Map and vector queries
+            std::vector<std::string> nodeNames(spinNodeType nodeType=UnknownNode);
             std::map<std::string, spinNodeType> nodeNameToTypeMap();
+            std::map<std::string, std::string> nodeNameToDisplayNameMap(spinNodeType nodeType=UnknownNode); 
+            std::map<std::string, std::string> nodeNameToTooTipMap(spinNodeType nodeType=UnknownNode); 
+            std::map<std::string, std::string> nodeNameToDescriptionMap(spinNodeType nodeType=UnknownNode); 
 
-            //std::map<std::string, std::string> nodeNameToDisplayNameMap(); 
-            //std::map<std::string, std::string> nodeNameToTooTipMap(); 
-            //std::map<std::string, std::string> nodeNameToDescriptionMap(); 
-
+            // String nodes
             std::string getStringNodeValueByName(std::string nodeName);
-            std::string getStringNodeValueByIndex(size_t index);
+            std::string getStringNodeValueByIndex(size_t nodeIndex);
+
+            // Enumeration nodes
+            size_t getEnumNodeNumberOfEntriesByName(std::string nodeName);
+
+            std::vector<std::string> getEnumNodeEntryListByName(std::string nodeName);
+            std::vector<std::string> getEnumNodeEntryListByIndex(size_t nodeIndex);
 
 
         protected:
@@ -35,7 +44,7 @@ namespace bias
             spinNodeMapHandle hNodeMap_ = nullptr;
 
             void getNodeHandleByName(std::string nodeName, spinNodeHandle &hNode);
-            void getNodeHandleByIndex(size_t index, spinNodeHandle &hNode);
+            void getNodeHandleByIndex(size_t nodeIndex, spinNodeHandle &hNode);
 
             spinNodeType getNodeType(spinNodeHandle &hNode);
             std::string getNodeName(spinNodeHandle &hNode);
@@ -46,6 +55,7 @@ namespace bias
 
             bool getNodeAvailability(spinNodeHandle &hNode);
             bool getNodeReadability(spinNodeHandle &hNode);
+            bool isNodeOfType(spinNodeType nodeType, spinNodeHandle &hNode);
 
             std::string getStringNodeValue(spinNodeHandle &hNode);
 
@@ -57,7 +67,8 @@ namespace bias
     {
         public:
 
-            NodeMapCamera_spin(spinCamera hCamera=nullptr);
+            NodeMapCamera_spin();
+            NodeMapCamera_spin(spinCamera &hCamera);
 
     };
 
@@ -66,7 +77,12 @@ namespace bias
     {
         public:
 
-            NodeMapTLDevice_spin(spinCamera hCamera=nullptr);
+            NodeMapTLDevice_spin();
+            NodeMapTLDevice_spin(spinCamera &hCamera);
+            
+            CameraInfo_spin cameraInfo();
+
+
 
     };
 

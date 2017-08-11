@@ -85,8 +85,8 @@ namespace bias {
             spinNodeMapHandle hNodeMapCamera_ = nullptr;
             spinNodeMapHandle hNodeMapTLDevice_ = nullptr;
 
-            NodeMap_spin nodeMapCamera_;
-            NodeMap_spin nodeMapTLDevice_;
+            NodeMapCamera_spin nodeMapCamera_;
+            NodeMapTLDevice_spin nodeMapTLDevice_;
             
             CameraInfo_spin cameraInfo_;
             //spinImage rawImage_;

@@ -15,28 +15,38 @@ namespace bias {
         public:
 
             CameraInfo_spin();
-            CameraInfo_spin(spinNodeMapHandle &hNodeMapTLDevice);
-
-            void retrieve(spinNodeMapHandle &hNodeMapTLDevice);
-            bool haveInfo();
 
             std::string toString();
             void print();
-            void printNameToValueMap();
 
             std::string guid();
+            void setGuid(std::string guid);
+
             std::string serialNumber();
+            void setSerialNumber(std::string serialNumber);
+
             std::string vendorId();
+            void setVendorId(std::string vendorId);
+
             std::string modelId();
+            void setModelId(std::string modelId);
+
             std::string modelName();
+            void setModelName(std::string modelName);
+
             std::string vendorName();
+            void setVendorName(std::string vendorName);
 
 
         protected:
 
-            bool haveInfo_ = false;
-            std::map<std::string, std::string> nodeNameToValueMap_;
-            size_t retrieveNumberOfNodes(spinNodeMapHandle &hNodeMapTLDevice);
+            std::string guid_;
+            std::string serialNumber_;
+            std::string vendorId_;
+            std::string modelId_;
+            std::string modelName_;
+            std::string vendorName_;
+
 
     };
 
