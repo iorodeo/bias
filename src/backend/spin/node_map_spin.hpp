@@ -7,6 +7,7 @@
 #include <vector>
 #include <map>
 
+#include "base_node_spin.hpp"
 #include "camera_info_spin.hpp"
 
 namespace bias
@@ -28,6 +29,9 @@ namespace bias
             std::map<std::string, std::string> nodeNameToTooTipMap(spinNodeType nodeType=UnknownNode); 
             std::map<std::string, std::string> nodeNameToDescriptionMap(spinNodeType nodeType=UnknownNode); 
 
+            // ---------------------------------------------------------------------------------------------------
+            // Move to node classes
+
             // String nodes
             std::string getStringNodeValueByName(std::string nodeName);
             std::string getStringNodeValueByIndex(size_t nodeIndex);
@@ -38,6 +42,8 @@ namespace bias
             std::vector<std::string> getEnumNodeEntryListByName(std::string nodeName);
             std::vector<std::string> getEnumNodeEntryListByIndex(size_t nodeIndex);
 
+            // ---------------------------------------------------------------------------------------------------
+
 
         protected:
 
@@ -46,18 +52,21 @@ namespace bias
             void getNodeHandleByName(std::string nodeName, spinNodeHandle &hNode);
             void getNodeHandleByIndex(size_t nodeIndex, spinNodeHandle &hNode);
 
-            spinNodeType getNodeType(spinNodeHandle &hNode);
-            std::string getNodeName(spinNodeHandle &hNode);
-            std::string getNodeDisplayName(spinNodeHandle &hNode);
+            // ----------------------------------------------------------------------------------------------------
+            // Move to node classes
+            spinNodeType getNodeType(spinNodeHandle &hNode);   // Done
+            std::string getNodeName(spinNodeHandle &hNode);    // Done
+            std::string getNodeDisplayName(spinNodeHandle &hNode); // Done
 
-            std::string getNodeToolTip(spinNodeHandle &hNode);
-            std::string getNodeDescription(spinNodeHandle &hNode);
+            std::string getNodeToolTip(spinNodeHandle &hNode); // Done
+            std::string getNodeDescription(spinNodeHandle &hNode); // Done
 
-            bool getNodeAvailability(spinNodeHandle &hNode);
-            bool getNodeReadability(spinNodeHandle &hNode);
-            bool isNodeOfType(spinNodeType nodeType, spinNodeHandle &hNode);
+            bool getNodeAvailability(spinNodeHandle &hNode); // Done
+            bool getNodeReadability(spinNodeHandle &hNode);  // Done
+            bool isNodeOfType(spinNodeType nodeType, spinNodeHandle &hNode); // Done
 
-            std::string getStringNodeValue(spinNodeHandle &hNode);
+            std::string getStringNodeValue(spinNodeHandle &hNode); // Done
+            // -----------------------------------------------------------------------------------------------------
 
 
     };

@@ -164,12 +164,11 @@ namespace bias {
             std::cout << std::endl;
 
 
-            std::vector<std::string> nodeNamesTLDevice = nodeMapCamera_.nodeNames(EnumerationNode);
+            std::vector<std::string> nodeNamesTLDevice = nodeMapTLDevice_.nodeNames(EnumerationNode);
             for (auto name : nodeNamesTLDevice) 
             {
                 std::cout << name << std::endl;
             }
-
             std::cout << std::endl;
 
             //std::map<std::string, std::string> nameToMap= nodeMapTLDevice_.nodeNameToDescriptionMap(StringNode);

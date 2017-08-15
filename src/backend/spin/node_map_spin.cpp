@@ -2,6 +2,7 @@
 #include "basic_types.hpp"
 #include "exception.hpp"
 #include <sstream>
+#include <iostream>
 
 namespace bias 
 {
@@ -42,6 +43,7 @@ namespace bias
 
         for (size_t i=0; i<numberOfNodes(); i++) 
         { 
+
             spinNodeHandle hNode = nullptr;
             try
             {
@@ -52,10 +54,17 @@ namespace bias
                 continue;
             }
 
+            BaseNode_spin node(hNode);
+
+            // DEBUG
+            // ---------------------------------------------------------------
+            //std::cout << "node.name() = " << node.name() << std::endl;
+            // ---------------------------------------------------------------
+
             std::string nodeName("");
             try
             {
-                nodeName = getNodeName(hNode);
+                nodeName = node.name();
             }
             catch (RuntimeError &runtimeError)
             {
