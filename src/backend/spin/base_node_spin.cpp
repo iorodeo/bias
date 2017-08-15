@@ -7,15 +7,22 @@ namespace bias
 {
 
 
-
     const size_t BaseNode_spin::MAX_BUF_LEN = 512;
 
-    BaseNode_spin::BaseNode_spin(spinNodeHandle &hNode) : hNode_(hNode)
+
+    BaseNode_spin::BaseNode_spin()
+    {
+        hNode_ = nullptr;
+    }
+
+
+    BaseNode_spin::BaseNode_spin(spinNodeHandle hNode) : hNode_(hNode)
     {};
 
 
     bool BaseNode_spin::isAvailable()
     {
+        checkNodeHandle();
         bool8_t isAvailable = False;
         spinError err = spinNodeIsAvailable(hNode_, &isAvailable);
         if (err != SPINNAKER_ERR_SUCCESS)
@@ -31,6 +38,7 @@ namespace bias
 
     bool BaseNode_spin::isReadable()
     {
+        checkNodeHandle();
         bool8_t isReadable = False;
         spinError err = spinNodeIsReadable(hNode_, &isReadable);
         if (err != SPINNAKER_ERR_SUCCESS)
@@ -46,6 +54,7 @@ namespace bias
 
     spinNodeType BaseNode_spin::type()
     {
+        checkNodeHandle();
         spinNodeType nodeType;
         spinError err = spinNodeGetType(hNode_, &nodeType);
         if (err != SPINNAKER_ERR_SUCCESS)
@@ -69,6 +78,7 @@ namespace bias
 
     std::string BaseNode_spin::name()
     {
+        checkNodeHandle();
         char buffer[MAX_BUF_LEN];
         size_t bufferLen = MAX_BUF_LEN;
         spinError err = spinNodeGetName(hNode_, buffer, &bufferLen);
@@ -85,6 +95,7 @@ namespace bias
 
     std::string BaseNode_spin::displayName()
     {
+        checkNodeHandle();
         char buffer[MAX_BUF_LEN];
         size_t bufferLen = MAX_BUF_LEN;
         spinError err = spinNodeGetDisplayName(hNode_, buffer, &bufferLen);
@@ -101,6 +112,7 @@ namespace bias
 
     std::string BaseNode_spin::toolTip()
     {
+        checkNodeHandle();
         char buffer[MAX_BUF_LEN];
         size_t bufferLen = MAX_BUF_LEN;
         spinError err = spinNodeGetToolTip(hNode_, buffer, &bufferLen);
@@ -117,6 +129,7 @@ namespace bias
 
     std::string BaseNode_spin::description()
     {
+        checkNodeHandle();
         char buffer[MAX_BUF_LEN];
         size_t bufferLen = MAX_BUF_LEN;
         spinError err = spinNodeGetDescription(hNode_, buffer, &bufferLen);
@@ -128,6 +141,19 @@ namespace bias
             throw RuntimeError(ERROR_SPIN_RETRIEVE_NODE_DESCRIPTION, ssError.str());
         }
         return std::string(buffer);
+    }
+
+    // Protected methods
+    // --------------------------------------------------------------------------------------------
+    void BaseNode_spin::checkNodeHandle()
+    {
+        if (hNode_ == nullptr)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": node handle is null"; 
+            throw RuntimeError(ERROR_SPIN_NULL_HANDLE, ssError.str());
+        }
     }
 
 

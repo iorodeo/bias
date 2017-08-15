@@ -8,6 +8,7 @@
 #include <map>
 
 #include "base_node_spin.hpp"
+#include "string_node_spin.hpp"
 #include "camera_info_spin.hpp"
 
 namespace bias
@@ -33,12 +34,12 @@ namespace bias
             // Move to node classes
 
             // String nodes
-            std::string getStringNodeValueByName(std::string nodeName);
-            std::string getStringNodeValueByIndex(size_t nodeIndex);
+            StringNode_spin getStringNodeByName(std::string nodeName);
+            StringNode_spin getStringNodeByIndex(size_t nodeIndex);
+
 
             // Enumeration nodes
             size_t getEnumNodeNumberOfEntriesByName(std::string nodeName);
-
             std::vector<std::string> getEnumNodeEntryListByName(std::string nodeName);
             std::vector<std::string> getEnumNodeEntryListByIndex(size_t nodeIndex);
 

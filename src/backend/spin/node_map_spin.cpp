@@ -16,7 +16,9 @@ namespace bias
     // ----------------------------------------------------------------------------------
 
 
-    NodeMap_spin::NodeMap_spin() {}; 
+    NodeMap_spin::NodeMap_spin() 
+    {} 
+
 
     NodeMap_spin::NodeMap_spin(spinCamera &hCamera) {}
 
@@ -310,19 +312,21 @@ namespace bias
 
     // String node public methods
     // ----------------------------------------------------------------------------------
-    std::string NodeMap_spin::getStringNodeValueByName(std::string nodeName)
+    StringNode_spin NodeMap_spin::getStringNodeByName(std::string nodeName)
     {
         spinNodeHandle hNode = nullptr;
         getNodeHandleByName(nodeName, hNode);
-        return getStringNodeValue(hNode);
+        return StringNode_spin(hNode); 
     }
 
-    std::string NodeMap_spin::getStringNodeValueByIndex(size_t nodeIndex)
+
+    StringNode_spin NodeMap_spin::getStringNodeByIndex(size_t nodeIndex)
     {
         spinNodeHandle hNode = nullptr;
         getNodeHandleByIndex(nodeIndex, hNode);
-        return getStringNodeValue(hNode);
+        return StringNode_spin(hNode);
     }
+
 
     // Enum node public methods
     // ---------------------------------------------------------------------------------
@@ -613,10 +617,10 @@ namespace bias
 
     CameraInfo_spin NodeMapTLDevice_spin::cameraInfo()
     { 
-        std::string deviceId =  getStringNodeValueByName("DeviceID");
-        std::string serialNumber = getStringNodeValueByName("DeviceSerialNumber");
-        std::string modelName = getStringNodeValueByName("DeviceModelName");
-        std::string vendorName = getStringNodeValueByName("DeviceVendorName");
+        std::string deviceId =  getStringNodeByName("DeviceID").value();
+        std::string serialNumber = getStringNodeByName("DeviceSerialNumber").value();
+        std::string modelName = getStringNodeByName("DeviceModelName").value();
+        std::string vendorName = getStringNodeByName("DeviceVendorName").value();
 
         std::string modelId = std::string("NA");
         std::string vendorId = std::string("NA");

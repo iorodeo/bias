@@ -9,6 +9,7 @@
 
 // Temporary ???
 #include "node_map_utils.hpp"
+#include "string_node_spin.hpp"
 #include <fstream>
 
 
@@ -164,12 +165,16 @@ namespace bias {
             std::cout << std::endl;
 
 
-            std::vector<std::string> nodeNamesTLDevice = nodeMapTLDevice_.nodeNames(EnumerationNode);
+            std::vector<std::string> nodeNamesTLDevice = nodeMapTLDevice_.nodeNames(StringNode);
             for (auto name : nodeNamesTLDevice) 
             {
                 std::cout << name << std::endl;
             }
             std::cout << std::endl;
+
+            StringNode_spin node = nodeMapTLDevice_.getStringNodeByName("DeviceID");
+            std::cout << "node.name() = " <<  node.name() << std::endl;
+
 
             //std::map<std::string, std::string> nameToMap= nodeMapTLDevice_.nodeNameToDescriptionMap(StringNode);
             //for (auto kv : nameToMap)

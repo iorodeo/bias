@@ -13,7 +13,8 @@ namespace bias
 
             static const size_t MAX_BUF_LEN;
 
-            BaseNode_spin(spinNodeHandle &hNode_);
+            BaseNode_spin();
+            BaseNode_spin(spinNodeHandle hNode_);
 
             bool isAvailable();
             bool isReadable();
@@ -29,7 +30,8 @@ namespace bias
 
         protected:
 
-            spinNodeHandle &hNode_;
+            spinNodeHandle hNode_ = nullptr;
+            void checkNodeHandle();
 
     };
 

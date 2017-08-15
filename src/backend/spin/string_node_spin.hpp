@@ -8,7 +8,8 @@ namespace bias
     {
         public:
 
-            StringNode_spin(spinNodeHandle &hNode);
+            StringNode_spin();
+            StringNode_spin(spinNodeHandle hNode);
             std::string value();
 
     };

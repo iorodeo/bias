@@ -5,8 +5,10 @@
 
 namespace bias
 {
+    StringNode_spin::StringNode_spin() : BaseNode_spin() 
+    {}
 
-    StringNode_spin::StringNode_spin(spinNodeHandle &hNode) : BaseNode_spin(hNode)
+    StringNode_spin::StringNode_spin(spinNodeHandle hNode) : BaseNode_spin(hNode)
     {
         if (!isOfType(StringNode))
         {
