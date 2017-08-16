@@ -6,8 +6,13 @@
 namespace bias
 {
 
-
     const size_t BaseNode_spin::MAX_BUF_LEN = 512;
+
+
+    spinNodeType BaseNode_spin::ExpectedType()
+    {
+        return UnknownNode;
+    }
 
 
     BaseNode_spin::BaseNode_spin()
@@ -73,7 +78,6 @@ namespace bias
     {
         return nodeType == type();
     }
-
 
 
     std::string BaseNode_spin::name()

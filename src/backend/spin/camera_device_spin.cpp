@@ -165,27 +165,24 @@ namespace bias {
             std::cout << std::endl;
 
 
-            std::vector<std::string> nodeNamesTLDevice = nodeMapTLDevice_.nodeNames(StringNode);
-            for (auto name : nodeNamesTLDevice) 
+            std::vector<BaseNode_spin> nodeVec = nodeMapTLDevice_.nodes<BaseNode_spin>();
+            for (auto node : nodeVec)
             {
-                std::cout << name << std::endl;
+                std::cout << "node.name() = " << node.name() << std::endl;
             }
+
             std::cout << std::endl;
 
-            StringNode_spin node = nodeMapTLDevice_.getNodeByName<StringNode_spin>("DeviceID");
-            std::cout << "node.name() = " <<  node.name() << std::endl;
+            std::vector<EnumNode_spin> stringNodeVec = nodeMapTLDevice_.nodes<EnumNode_spin>();
+            for (auto node : stringNodeVec)
+            {
+                std::cout << "name: " << node.name() << ", #entries: " << node.numberOfEntries() << std::endl;
+            }
 
-
-            //std::map<std::string, std::string> nameToMap= nodeMapTLDevice_.nodeNameToDescriptionMap(StringNode);
-            //for (auto kv : nameToMap)
-            //{
-            //    std::cout << kv.first << "  " << kv.second << std::endl;
-            //}
 
             // --------------------------------------------------------------------
             // TODO: - setup strobe output on GPIO pin?? Is this possible?
             // --------------------------------------------------------------------
-            
 
 
             // Devel: print camera information

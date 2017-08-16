@@ -7,6 +7,7 @@
 #include <vector>
 #include <map>
 
+#include "exception.hpp"
 #include "base_node_spin.hpp"
 #include "string_node_spin.hpp"
 #include "enum_node_spin.hpp"
@@ -24,21 +25,20 @@ namespace bias
 
             size_t numberOfNodes();
 
-            // Map and vector queries
+            template<class T> 
+            T getNodeByName(std::string nodeName); // Get node of type T by name
+
+            template<class T>
+            T getNodeByIndex(size_t nodeIndex);    // Get node of type T by index
+
+            template<class T>
+            std::vector<T> nodes();                // Get vector of all nodes of type T
+
             std::vector<std::string> nodeNames(spinNodeType nodeType=UnknownNode);
             std::map<std::string, spinNodeType> nodeNameToTypeMap();
             std::map<std::string, std::string> nodeNameToDisplayNameMap(spinNodeType nodeType=UnknownNode); 
             std::map<std::string, std::string> nodeNameToTooTipMap(spinNodeType nodeType=UnknownNode); 
             std::map<std::string, std::string> nodeNameToDescriptionMap(spinNodeType nodeType=UnknownNode); 
-
-            //template<class T>
-            //std::vector<T> nodes();
-
-            template<class T> 
-            T getNodeByName(std::string nodeName);
-
-            template<class T>
-            T getNodeByIndex(size_t nodeIndex);
 
 
         protected:
@@ -68,6 +68,51 @@ namespace bias
     }
 
 
+    template<class T>
+    std::vector<T> NodeMap_spin::nodes()
+    {
+        std::vector<T> nodeVec;
+
+        for (size_t i=0; i<numberOfNodes(); i++) 
+        { 
+            spinNodeHandle hNode = nullptr;
+            try
+            {
+                getNodeHandleByIndex(i, hNode);
+            }
+            catch (RuntimeError &runtimeError)
+            {
+                continue;
+            }
+
+            BaseNode_spin node(hNode);
+
+            if (T::ExpectedType() != UnknownNode)
+            {
+                bool test = false;
+                try
+                {
+                    test = node.isOfType(T::ExpectedType());
+                }
+                catch (RuntimeError &runtimeError)
+                {
+                    continue;
+                }
+                if (!test)
+                {
+                    continue;
+                }
+
+            }
+
+            nodeVec.push_back(node);
+
+        } // for (size_t ...
+
+        return nodeVec;
+    }
+
+
     // NodeMapCamera_spin 
     // --------------------------------------------------------------------------------------------
 
@@ -92,7 +137,6 @@ namespace bias
             NodeMapTLDevice_spin(spinCamera &hCamera);
             
             CameraInfo_spin cameraInfo();
-
 
 
     };

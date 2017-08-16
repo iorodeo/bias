@@ -6,13 +6,19 @@
 namespace bias
 {
 
+    spinNodeType StringNode_spin::ExpectedType()
+    {
+        return StringNode;
+    }
+
+
     StringNode_spin::StringNode_spin() : BaseNode_spin() 
     {}
 
 
     StringNode_spin::StringNode_spin(spinNodeHandle hNode) : BaseNode_spin(hNode)
     {
-        if (!isOfType(StringNode))
+        if (!isOfType(ExpectedType()))
         {
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;

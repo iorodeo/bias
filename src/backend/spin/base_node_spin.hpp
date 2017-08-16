@@ -12,6 +12,8 @@ namespace bias
         public:
 
             static const size_t MAX_BUF_LEN;
+            static spinNodeType ExpectedType();
+
 
             BaseNode_spin();
             BaseNode_spin(spinNodeHandle hNode_);
@@ -22,13 +24,13 @@ namespace bias
             spinNodeType type();
             bool isOfType(spinNodeType nodeType);
 
+
             std::string name();
             std::string displayName();
             std::string toolTip();
             std::string description();
 
             spinNodeHandle handle();
-
 
         protected:
 

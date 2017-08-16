@@ -8,6 +8,8 @@ namespace bias
     {
         public:
 
+            static spinNodeType ExpectedType();
+
             StringNode_spin();
             StringNode_spin(spinNodeHandle hNode);
             StringNode_spin(BaseNode_spin node);

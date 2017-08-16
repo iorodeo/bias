@@ -5,12 +5,17 @@
 namespace bias
 {
 
-    class EnumNode_spin : BaseNode_spin
+    class EnumNode_spin : public BaseNode_spin
     {
         public:
+
+            static spinNodeType ExpectedType();
+
             EnumNode_spin();
             EnumNode_spin(spinNodeHandle hNode);
             EnumNode_spin(BaseNode_spin node);
+
+            size_t numberOfEntries();
 
     };
 
