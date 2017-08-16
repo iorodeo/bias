@@ -172,7 +172,7 @@ namespace bias {
             }
             std::cout << std::endl;
 
-            StringNode_spin node = nodeMapTLDevice_.getStringNodeByName("DeviceID");
+            StringNode_spin node = nodeMapTLDevice_.getNodeByName<StringNode_spin>("DeviceID");
             std::cout << "node.name() = " <<  node.name() << std::endl;
 
 

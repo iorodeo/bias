@@ -143,6 +143,13 @@ namespace bias
         return std::string(buffer);
     }
 
+
+    spinNodeHandle BaseNode_spin::handle()
+    {
+        return hNode_;
+    }
+
+
     // Protected methods
     // --------------------------------------------------------------------------------------------
     void BaseNode_spin::checkNodeHandle()

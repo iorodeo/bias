@@ -10,6 +10,7 @@ namespace bias
 
             StringNode_spin();
             StringNode_spin(spinNodeHandle hNode);
+            StringNode_spin(BaseNode_spin node);
             std::string value();
 
     };

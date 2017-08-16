@@ -9,6 +9,7 @@
 
 #include "base_node_spin.hpp"
 #include "string_node_spin.hpp"
+#include "enum_node_spin.hpp"
 #include "camera_info_spin.hpp"
 
 namespace bias
@@ -30,20 +31,14 @@ namespace bias
             std::map<std::string, std::string> nodeNameToTooTipMap(spinNodeType nodeType=UnknownNode); 
             std::map<std::string, std::string> nodeNameToDescriptionMap(spinNodeType nodeType=UnknownNode); 
 
-            // ---------------------------------------------------------------------------------------------------
-            // Move to node classes
+            //template<class T>
+            //std::vector<T> nodes();
 
-            // String nodes
-            StringNode_spin getStringNodeByName(std::string nodeName);
-            StringNode_spin getStringNodeByIndex(size_t nodeIndex);
+            template<class T> 
+            T getNodeByName(std::string nodeName);
 
-
-            // Enumeration nodes
-            size_t getEnumNodeNumberOfEntriesByName(std::string nodeName);
-            std::vector<std::string> getEnumNodeEntryListByName(std::string nodeName);
-            std::vector<std::string> getEnumNodeEntryListByIndex(size_t nodeIndex);
-
-            // ---------------------------------------------------------------------------------------------------
+            template<class T>
+            T getNodeByIndex(size_t nodeIndex);
 
 
         protected:
@@ -52,26 +47,29 @@ namespace bias
 
             void getNodeHandleByName(std::string nodeName, spinNodeHandle &hNode);
             void getNodeHandleByIndex(size_t nodeIndex, spinNodeHandle &hNode);
-
-            // ----------------------------------------------------------------------------------------------------
-            // Move to node classes
-            spinNodeType getNodeType(spinNodeHandle &hNode);   // Done
-            std::string getNodeName(spinNodeHandle &hNode);    // Done
-            std::string getNodeDisplayName(spinNodeHandle &hNode); // Done
-
-            std::string getNodeToolTip(spinNodeHandle &hNode); // Done
-            std::string getNodeDescription(spinNodeHandle &hNode); // Done
-
-            bool getNodeAvailability(spinNodeHandle &hNode); // Done
-            bool getNodeReadability(spinNodeHandle &hNode);  // Done
-            bool isNodeOfType(spinNodeType nodeType, spinNodeHandle &hNode); // Done
-
-            std::string getStringNodeValue(spinNodeHandle &hNode); // Done
-            // -----------------------------------------------------------------------------------------------------
-
-
     };
 
+
+    template<class T> 
+    T NodeMap_spin::getNodeByName(std::string nodeName)
+    {
+        spinNodeHandle hNode = nullptr;
+        getNodeHandleByName(nodeName, hNode);
+        return T(hNode); 
+    }
+
+
+    template<class T>
+    T NodeMap_spin::getNodeByIndex(size_t nodeIndex)
+    {
+        spinNodeHandle hNode = nullptr;
+        getNodeHandleByIndex(nodeIndex, hNode);
+        return T(hNode); 
+    }
+
+
+    // NodeMapCamera_spin 
+    // --------------------------------------------------------------------------------------------
 
     class NodeMapCamera_spin : public NodeMap_spin
     {
@@ -82,6 +80,9 @@ namespace bias
 
     };
 
+
+    // NodeMapTLDevice_spin
+    // --------------------------------------------------------------------------------------------
 
     class NodeMapTLDevice_spin : public NodeMap_spin
     {

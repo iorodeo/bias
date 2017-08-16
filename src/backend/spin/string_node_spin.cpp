@@ -5,8 +5,10 @@
 
 namespace bias
 {
+
     StringNode_spin::StringNode_spin() : BaseNode_spin() 
     {}
+
 
     StringNode_spin::StringNode_spin(spinNodeHandle hNode) : BaseNode_spin(hNode)
     {
@@ -18,6 +20,13 @@ namespace bias
             throw RuntimeError(ERROR_SPIN_INCORRECT_NODE_TYPE, ssError.str());
         }
     }
+
+
+    StringNode_spin::StringNode_spin(BaseNode_spin node)
+    {
+        hNode_ = node.handle();
+    }
+
 
     std::string StringNode_spin::value()
     {

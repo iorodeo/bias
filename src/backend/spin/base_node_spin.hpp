@@ -27,6 +27,8 @@ namespace bias
             std::string toolTip();
             std::string description();
 
+            spinNodeHandle handle();
+
 
         protected:
 
@@ -37,5 +39,6 @@ namespace bias
 
 
 } // namespace bias
+
 
 #endif
