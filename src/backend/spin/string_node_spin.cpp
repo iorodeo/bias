@@ -36,23 +36,8 @@ namespace bias
 
     std::string StringNode_spin::value()
     {
-        if (!isAvailable())
-        {
-            std::stringstream ssError;
-            ssError << __PRETTY_FUNCTION__;
-            ssError << ": node is not available";
-            throw RuntimeError(ERROR_SPIN_NODE_NOT_AVAILABLE, ssError.str());
-
-        }
-
-        if (!isReadable())
-        {
-            std::stringstream ssError;
-            ssError << __PRETTY_FUNCTION__;
-            ssError << ": node is not readable";
-            throw RuntimeError(ERROR_SPIN_NODE_NOT_READABLE, ssError.str());
-
-        }
+        checkNodeHandle();
+        checkReadableAndAvailable();
 
         char buffer[MAX_BUF_LEN];
         size_t bufferLen = MAX_BUF_LEN;

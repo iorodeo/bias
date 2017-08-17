@@ -165,18 +165,20 @@ namespace bias {
             std::cout << std::endl;
 
 
-            std::vector<BaseNode_spin> nodeVec = nodeMapTLDevice_.nodes<BaseNode_spin>();
-            for (auto node : nodeVec)
+            //std::vector<EnumNode_spin> enumNodeVec = nodeMapTLDevice_.nodes<EnumNode_spin>();
+            std::vector<EnumNode_spin> enumNodeVec = nodeMapCamera_.nodes<EnumNode_spin>();
+            for (auto enumNode : enumNodeVec)
             {
-                std::cout << "node.name() = " << node.name() << std::endl;
-            }
 
-            std::cout << std::endl;
+                std::cout << "name: " << enumNode.name() << ", numberOfEntries: " << enumNode.numberOfEntries() << std::endl;
+                std::vector<EntryNode_spin> entryNodeVec = enumNode.entries();
+                EntryNode_spin currEntryNode = enumNode.currentEntry();
+                std::cout << "  current: " << currEntryNode.name() << std::endl;
+                for (auto entryNode : entryNodeVec)
+                {
+                    std::cout << "  name:    " << entryNode.name() << ", " << entryNode.displayName() << std::endl;
+                }
 
-            std::vector<EnumNode_spin> stringNodeVec = nodeMapTLDevice_.nodes<EnumNode_spin>();
-            for (auto node : stringNodeVec)
-            {
-                std::cout << "name: " << node.name() << ", #entries: " << node.numberOfEntries() << std::endl;
             }
 
 

@@ -13,6 +13,7 @@ set(
     base_node_spin.cpp
     string_node_spin.cpp
     enum_node_spin.cpp
+    entry_node_spin.cpp
     )
 
 add_library(bias_backend_spin ${bias_backend_spin_SOURCE})

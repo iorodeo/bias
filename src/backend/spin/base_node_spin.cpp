@@ -83,6 +83,8 @@ namespace bias
     std::string BaseNode_spin::name()
     {
         checkNodeHandle();
+        checkReadableAndAvailable();
+
         char buffer[MAX_BUF_LEN];
         size_t bufferLen = MAX_BUF_LEN;
         spinError err = spinNodeGetName(hNode_, buffer, &bufferLen);
@@ -100,6 +102,8 @@ namespace bias
     std::string BaseNode_spin::displayName()
     {
         checkNodeHandle();
+        checkReadableAndAvailable();
+
         char buffer[MAX_BUF_LEN];
         size_t bufferLen = MAX_BUF_LEN;
         spinError err = spinNodeGetDisplayName(hNode_, buffer, &bufferLen);
@@ -117,6 +121,8 @@ namespace bias
     std::string BaseNode_spin::toolTip()
     {
         checkNodeHandle();
+        checkReadableAndAvailable();
+
         char buffer[MAX_BUF_LEN];
         size_t bufferLen = MAX_BUF_LEN;
         spinError err = spinNodeGetToolTip(hNode_, buffer, &bufferLen);
@@ -134,6 +140,8 @@ namespace bias
     std::string BaseNode_spin::description()
     {
         checkNodeHandle();
+        checkReadableAndAvailable();
+
         char buffer[MAX_BUF_LEN];
         size_t bufferLen = MAX_BUF_LEN;
         spinError err = spinNodeGetDescription(hNode_, buffer, &bufferLen);
@@ -165,6 +173,27 @@ namespace bias
             ssError << ": node handle is null"; 
             throw RuntimeError(ERROR_SPIN_NULL_HANDLE, ssError.str());
         }
+    }
+
+    void BaseNode_spin::checkReadableAndAvailable()
+    {
+        if (!isAvailable())
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": node is not available";
+            throw RuntimeError(ERROR_SPIN_NODE_NOT_AVAILABLE, ssError.str());
+
+        }
+
+        if (!isReadable())
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": node is not readable";
+            throw RuntimeError(ERROR_SPIN_NODE_NOT_READABLE, ssError.str());
+
+        } 
     }
 
 

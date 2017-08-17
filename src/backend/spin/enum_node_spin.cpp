@@ -35,23 +35,8 @@ namespace bias
 
     size_t EnumNode_spin::numberOfEntries()
     {
-        if (!isAvailable())
-        {
-            std::stringstream ssError;
-            ssError << __PRETTY_FUNCTION__;
-            ssError << ": node is not available";
-            throw RuntimeError(ERROR_SPIN_NODE_NOT_AVAILABLE, ssError.str());
-
-        }
-
-        if (!isReadable())
-        {
-            std::stringstream ssError;
-            ssError << __PRETTY_FUNCTION__;
-            ssError << ": node is not readable";
-            throw RuntimeError(ERROR_SPIN_NODE_NOT_READABLE, ssError.str());
-
-        }
+        checkNodeHandle();
+        checkReadableAndAvailable();
 
         size_t num = 0;
         spinError err = spinEnumerationGetNumEntries(hNode_,&num);
@@ -60,9 +45,58 @@ namespace bias
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
             ssError << ": unable to get number of entries for enumeration node, error = " << err;
-            throw RuntimeError(ERROR_SPIN_RETRIEVE_ENUM_ENTRY_NODE, ssError.str());
+            throw RuntimeError(ERROR_SPIN_RETRIEVE_NUM_ENTRIES, ssError.str());
         }
         return num;
     }
+
+
+    EntryNode_spin EnumNode_spin::currentEntry()
+    {
+        checkNodeHandle();
+        checkReadableAndAvailable();
+
+        spinNodeHandle hEntryNode;
+        spinError err = spinEnumerationGetCurrentEntry(hNode_, &hEntryNode);
+        if (err != SPINNAKER_ERR_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get current enumeration entry node, error = " << err;
+            throw RuntimeError(ERROR_SPIN_RETRIEVE_ENUM_ENTRY_NODE, ssError.str());
+        }
+        EntryNode_spin entryNode(hEntryNode);
+        return entryNode;
+    }
+
+
+    std::vector<EntryNode_spin> EnumNode_spin::entries()
+    {
+        checkNodeHandle();
+        checkReadableAndAvailable();
+
+        std::vector<EntryNode_spin> entryNodeVec;
+
+        for (size_t i=0; i<numberOfEntries(); i++)
+        {
+            spinNodeHandle hEntryNode;
+            spinError err = spinEnumerationGetEntryByIndex(hNode_, i, &hEntryNode);
+            if (err != SPINNAKER_ERR_SUCCESS)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to get enumeration entry node, error = " << err;
+                throw RuntimeError(ERROR_SPIN_RETRIEVE_ENUM_ENTRY_NODE, ssError.str());
+            }
+            EntryNode_spin entryNode(hEntryNode);
+            if (entryNode.isAvailable() and entryNode.isReadable())
+            {
+                entryNodeVec.push_back(hEntryNode);
+            }
+        }
+        return entryNodeVec;
+    }
+
+
 
 } // namespace bias

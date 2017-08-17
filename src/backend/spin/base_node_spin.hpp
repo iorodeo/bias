@@ -35,7 +35,9 @@ namespace bias
         protected:
 
             spinNodeHandle hNode_ = nullptr;
+
             void checkNodeHandle();
+            void checkReadableAndAvailable();
 
     };
 

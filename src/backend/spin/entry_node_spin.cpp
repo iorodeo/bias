@@ -1,0 +1,72 @@
+#include "entry_node_spin.hpp"
+#include "basic_types.hpp"
+#include "exception.hpp"
+#include <sstream>
+
+namespace bias
+{
+    spinNodeType EntryNode_spin::ExpectedType()
+    {
+        return EnumEntryNode;
+    }
+
+
+    EntryNode_spin::EntryNode_spin() : BaseNode_spin() 
+    {}
+
+
+    EntryNode_spin::EntryNode_spin(spinNodeHandle hNode) : BaseNode_spin(hNode)
+    {
+        if (!isOfType(ExpectedType()))
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": incorrect node type";
+            throw RuntimeError(ERROR_SPIN_INCORRECT_NODE_TYPE, ssError.str());
+        }
+    }
+
+
+    EntryNode_spin::EntryNode_spin(BaseNode_spin node)
+    {
+        hNode_ = node.handle();
+    }
+
+
+    size_t EntryNode_spin::value()
+    {
+        checkNodeHandle();
+        checkReadableAndAvailable();
+
+        size_t entryVal = 0;
+        spinError err = spinEnumerationEntryGetEnumValue(hNode_, &entryVal);
+        if (err != SPINNAKER_ERR_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get current enumeration entry value, error = " << err;
+            throw RuntimeError(ERROR_SPIN_RETRIEVE_ENUM_ENTRY_VALUE, ssError.str());
+        }
+        return entryVal;
+    }
+
+
+    int64_t EntryNode_spin::intValue()
+    {
+        checkNodeHandle();
+        checkReadableAndAvailable();
+
+        int64_t entryIntVal = 0;
+        spinError err = spinEnumerationEntryGetIntValue(hNode_, &entryIntVal);
+        if (err != SPINNAKER_ERR_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get current enumeration entry int value, error = " << err;
+            throw RuntimeError(ERROR_SPIN_RETRIEVE_ENUM_ENTRY_INT_VALUE, ssError.str());
+        }
+        return entryIntVal;
+    }
+
+
+} // namespace bias

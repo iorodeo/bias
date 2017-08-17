@@ -8,10 +8,11 @@
 #include <map>
 
 #include "exception.hpp"
+#include "camera_info_spin.hpp"
 #include "base_node_spin.hpp"
 #include "string_node_spin.hpp"
 #include "enum_node_spin.hpp"
-#include "camera_info_spin.hpp"
+#include "entry_node_spin.hpp"
 
 namespace bias
 {
@@ -86,6 +87,11 @@ namespace bias
             }
 
             BaseNode_spin node(hNode);
+
+            if ( !node.isAvailable()  || !node.isReadable() )
+            {
+                continue;
+            }
 
             if (T::ExpectedType() != UnknownNode)
             {
