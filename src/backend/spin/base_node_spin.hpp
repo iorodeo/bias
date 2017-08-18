@@ -20,6 +20,7 @@ namespace bias
 
             bool isAvailable();
             bool isReadable();
+            bool isWritable();
 
             spinNodeType type();
             bool isOfType(spinNodeType nodeType);
@@ -29,6 +30,8 @@ namespace bias
             std::string displayName();
             std::string toolTip();
             std::string description();
+            std::string valueAsString();
+            
 
             spinNodeHandle handle();
 
@@ -37,7 +40,10 @@ namespace bias
             spinNodeHandle hNode_ = nullptr;
 
             void checkNodeHandle();
+            void checkAvailable();
+            void checkReadable();
             void checkReadableAndAvailable();
+
 
     };
 

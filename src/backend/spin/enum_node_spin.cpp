@@ -36,7 +36,8 @@ namespace bias
     size_t EnumNode_spin::numberOfEntries()
     {
         checkNodeHandle();
-        checkReadableAndAvailable();
+        checkAvailable();
+        checkReadable();
 
         size_t num = 0;
         spinError err = spinEnumerationGetNumEntries(hNode_,&num);
@@ -45,7 +46,7 @@ namespace bias
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
             ssError << ": unable to get number of entries for enumeration node, error = " << err;
-            throw RuntimeError(ERROR_SPIN_RETRIEVE_NUM_ENTRIES, ssError.str());
+            throw RuntimeError(ERROR_SPIN_GET_NUM_ENTRIES, ssError.str());
         }
         return num;
     }
@@ -54,7 +55,8 @@ namespace bias
     EntryNode_spin EnumNode_spin::currentEntry()
     {
         checkNodeHandle();
-        checkReadableAndAvailable();
+        checkAvailable();
+        checkReadable();
 
         spinNodeHandle hEntryNode;
         spinError err = spinEnumerationGetCurrentEntry(hNode_, &hEntryNode);
@@ -63,7 +65,7 @@ namespace bias
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
             ssError << ": unable to get current enumeration entry node, error = " << err;
-            throw RuntimeError(ERROR_SPIN_RETRIEVE_ENUM_ENTRY_NODE, ssError.str());
+            throw RuntimeError(ERROR_SPIN_GET_ENUM_ENTRY_NODE, ssError.str());
         }
         EntryNode_spin entryNode(hEntryNode);
         return entryNode;
@@ -73,7 +75,8 @@ namespace bias
     std::vector<EntryNode_spin> EnumNode_spin::entries()
     {
         checkNodeHandle();
-        checkReadableAndAvailable();
+        checkAvailable();
+        checkReadable();
 
         std::vector<EntryNode_spin> entryNodeVec;
 
@@ -86,7 +89,7 @@ namespace bias
                 std::stringstream ssError;
                 ssError << __PRETTY_FUNCTION__;
                 ssError << ": unable to get enumeration entry node, error = " << err;
-                throw RuntimeError(ERROR_SPIN_RETRIEVE_ENUM_ENTRY_NODE, ssError.str());
+                throw RuntimeError(ERROR_SPIN_GET_ENUM_ENTRY_NODE, ssError.str());
             }
             EntryNode_spin entryNode(hEntryNode);
             if (entryNode.isAvailable() and entryNode.isReadable())

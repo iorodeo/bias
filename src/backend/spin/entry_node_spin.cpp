@@ -36,7 +36,8 @@ namespace bias
     size_t EntryNode_spin::value()
     {
         checkNodeHandle();
-        checkReadableAndAvailable();
+        checkAvailable();
+        checkReadable();
 
         size_t entryVal = 0;
         spinError err = spinEnumerationEntryGetEnumValue(hNode_, &entryVal);
@@ -45,7 +46,7 @@ namespace bias
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
             ssError << ": unable to get current enumeration entry value, error = " << err;
-            throw RuntimeError(ERROR_SPIN_RETRIEVE_ENUM_ENTRY_VALUE, ssError.str());
+            throw RuntimeError(ERROR_SPIN_GET_ENUM_ENTRY_VALUE, ssError.str());
         }
         return entryVal;
     }
@@ -54,7 +55,8 @@ namespace bias
     int64_t EntryNode_spin::intValue()
     {
         checkNodeHandle();
-        checkReadableAndAvailable();
+        checkAvailable();
+        checkReadable();
 
         int64_t entryIntVal = 0;
         spinError err = spinEnumerationEntryGetIntValue(hNode_, &entryIntVal);
@@ -63,7 +65,7 @@ namespace bias
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
             ssError << ": unable to get current enumeration entry int value, error = " << err;
-            throw RuntimeError(ERROR_SPIN_RETRIEVE_ENUM_ENTRY_INT_VALUE, ssError.str());
+            throw RuntimeError(ERROR_SPIN_GET_ENUM_ENTRY_INT_VALUE, ssError.str());
         }
         return entryIntVal;
     }

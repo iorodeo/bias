@@ -29,7 +29,7 @@ namespace bias
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
             ssError << ": unable to get number of nodes, error=" << err;
-            throw RuntimeError(ERROR_SPIN_RETRIEVE_VENDOR_NAME, ssError.str());
+            throw RuntimeError(ERROR_SPIN_GET_VENDOR_NAME, ssError.str());
         }
         return numNodes;
     }
@@ -316,7 +316,7 @@ namespace bias
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
             ssError << ": unable to get node handle, error = " << err;
-            throw RuntimeError(ERROR_SPIN_RETRIEVE_NODE_HANDLE, ssError.str());
+            throw RuntimeError(ERROR_SPIN_GET_NODE_HANDLE, ssError.str());
         }
 
     }
@@ -330,7 +330,7 @@ namespace bias
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
             ssError << ": unable to get node handle, error = " << err;
-            throw RuntimeError(ERROR_SPIN_RETRIEVE_NODE_HANDLE, ssError.str());
+            throw RuntimeError(ERROR_SPIN_GET_NODE_HANDLE, ssError.str());
         }
     }
 

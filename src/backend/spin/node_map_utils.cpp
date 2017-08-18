@@ -35,7 +35,7 @@ namespace bias
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
             ssError << ": unable to get vendor name readability, error=" << err;
-            throw RuntimeError(ERROR_SPIN_RETRIEVE_VENDOR_NAME, ssError.str());
+            throw RuntimeError(ERROR_SPIN_GET_VENDOR_NAME, ssError.str());
         }
         return numNodes;
     }
@@ -207,7 +207,7 @@ namespace bias
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
             ssError << ": unable to get node handle, error=" << err;
-            throw RuntimeError(ERROR_SPIN_RETRIEVE_NODE_HANDLE, ssError.str());
+            throw RuntimeError(ERROR_SPIN_GET_NODE_HANDLE, ssError.str());
         }
 
         spinNodeType nodeType;
@@ -217,7 +217,7 @@ namespace bias
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
             ssError << ": unable to get node type, error=" << err;
-            throw RuntimeError(ERROR_SPIN_RETRIEVE_NODE_TYPE, ssError.str());
+            throw RuntimeError(ERROR_SPIN_GET_NODE_TYPE, ssError.str());
         }
 
         if (nodeType  != EnumerationNode)
@@ -235,7 +235,7 @@ namespace bias
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
             ssError << ": unable to get number of entries, error =" << err;
-            throw RuntimeError(ERROR_SPIN_RETRIEVE_NUM_ENTRIES, ssError.str());
+            throw RuntimeError(ERROR_SPIN_GET_NUM_ENTRIES, ssError.str());
         }
 
         std::vector<std::string> entryNamesVec;
@@ -248,7 +248,7 @@ namespace bias
                 std::stringstream ssError;
                 ssError << __PRETTY_FUNCTION__;
                 ssError << ": unable to get enumeration node entry, error = " << err;
-                throw RuntimeError(ERROR_SPIN_RETRIEVE_ENUM_ENTRY_NODE, ssError.str());
+                throw RuntimeError(ERROR_SPIN_GET_ENUM_ENTRY_NODE, ssError.str());
             }
 
             char buffer[MAX_BUF_LEN];
@@ -259,7 +259,7 @@ namespace bias
                 std::stringstream ssError;
                 ssError << __PRETTY_FUNCTION__;
                 ssError << ": unable to get enumeration entry symbolic name, error = " << err;
-                throw RuntimeError(ERROR_SPIN_RETRIEVE_ENUM_ENTRY_NODE, ssError.str());
+                throw RuntimeError(ERROR_SPIN_GET_ENUM_ENTRY_NODE, ssError.str());
             }
             entryNamesVec.push_back(buffer);
         }

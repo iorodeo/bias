@@ -37,7 +37,8 @@ namespace bias
     std::string StringNode_spin::value()
     {
         checkNodeHandle();
-        checkReadableAndAvailable();
+        checkAvailable();
+        checkReadable();
 
         char buffer[MAX_BUF_LEN];
         size_t bufferLen = MAX_BUF_LEN;
@@ -48,7 +49,7 @@ namespace bias
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
             ssError << ": unable to get string node value, error = " << err;
-            throw RuntimeError(ERROR_SPIN_RETRIEVE_STRING_VALUE, ssError.str());
+            throw RuntimeError(ERROR_SPIN_GET_STRING_VALUE, ssError.str());
         }
 
         return std::string(buffer);
