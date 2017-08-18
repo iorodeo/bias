@@ -243,5 +243,17 @@ namespace bias
         } 
     }
 
+    void BaseNode_spin::checkWritable()
+    {
+        if (!isWritable())
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": node is not writable";
+            throw RuntimeError(ERROR_SPIN_NODE_NOT_WRITABLE, ssError.str());
+
+        } 
+    }
+
 
 } // namespace bias

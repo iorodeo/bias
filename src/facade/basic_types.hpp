@@ -165,6 +165,7 @@ namespace bias {
         ERROR_SPIN_GET_INTEGER_MIN_VALUE,
         ERROR_SPIN_NODE_NOT_AVAILABLE,
         ERROR_SPIN_NODE_NOT_READABLE,
+        ERROR_SPIN_NODE_NOT_WRITABLE,
 
         // Video Writer Errors
         ERROR_VIDEO_WRITER_ADD_FRAME,

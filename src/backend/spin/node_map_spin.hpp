@@ -13,6 +13,7 @@
 #include "string_node_spin.hpp"
 #include "enum_node_spin.hpp"
 #include "entry_node_spin.hpp"
+#include "float_node_spin.hpp"
 
 namespace bias
 {

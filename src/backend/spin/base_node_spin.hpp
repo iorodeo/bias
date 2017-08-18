@@ -42,6 +42,7 @@ namespace bias
             void checkNodeHandle();
             void checkAvailable();
             void checkReadable();
+            void checkWritable();
             void checkReadableAndAvailable();
 
 

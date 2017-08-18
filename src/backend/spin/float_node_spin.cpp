@@ -1,7 +1,8 @@
-#include "double_node_spin.hpp"
+#include "float_node_spin.hpp"
 #include "basic_types.hpp"
 #include "exception.hpp"
 #include <sstream>
+
 
 namespace bias
 {
@@ -66,7 +67,7 @@ namespace bias
         }
     }
 
-    double FloatNode_spin:minValue()
+    double FloatNode_spin::minValue()
     {
         checkNodeHandle();
         checkAvailable();
@@ -85,7 +86,7 @@ namespace bias
     }
 
 
-    double FloatNode_spin:maxValue()
+    double FloatNode_spin::maxValue()
     {
         checkNodeHandle();
         checkAvailable();
