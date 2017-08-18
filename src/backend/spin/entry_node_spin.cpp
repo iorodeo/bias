@@ -70,5 +70,26 @@ namespace bias
         return entryIntVal;
     }
 
+    std::string EntryNode_spin::symbolic()
+    {
+        checkNodeHandle();
+        checkAvailable();
+        checkReadable();
+
+        char buffer[MAX_BUF_LEN];
+        size_t bufferLen = MAX_BUF_LEN;
+
+        spinError err = spinEnumerationEntryGetSymbolic(hNode_,buffer,&bufferLen);
+        if (err != SPINNAKER_ERR_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get entry node symbolic, error = " << err;
+            throw RuntimeError(ERROR_SPIN_GET_ENUM_ENTRY_SYMBOLIC, ssError.str());
+        }
+
+        return std::string(buffer);
+    }
+
 
 } // namespace bias

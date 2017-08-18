@@ -52,6 +52,58 @@ namespace bias
     }
 
 
+    void EnumNode_spin::setEntryByInt(int64_t intValue)
+    {
+        checkNodeHandle();
+        checkAvailable();
+        checkWritable();
+
+        spinError err = spinEnumerationSetIntValue(hNode_,intValue);
+        if (err != SPINNAKER_ERR_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to enum node integer value, error = " << err;
+            throw RuntimeError(ERROR_SPIN_SET_ENUM_INT_VALUE, ssError.str());
+        }
+    }
+
+
+    void EnumNode_spin::setEntryByValue(size_t value)
+    {
+        checkNodeHandle();
+        checkAvailable();
+        checkWritable();
+
+        spinError err = spinEnumerationSetEnumValue(hNode_,value);
+        if (err != SPINNAKER_ERR_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to enum node integer value, error = " << err;
+            throw RuntimeError(ERROR_SPIN_SET_ENUM_VALUE, ssError.str());
+        }
+    }
+
+
+    void EnumNode_spin::setEntryByNode(EntryNode_spin entryNode)
+    {
+        setEntryByValue(entryNode.value());
+    }
+
+
+    void EnumNode_spin::setEntryByName(std::string nodeName)
+    {
+        // TODO
+    }
+
+
+    void EnumNode_spin::setEntryBySymbolic(std::string symbolic)
+    {
+        // TODO
+    }
+
+
     EntryNode_spin EnumNode_spin::currentEntry()
     {
         checkNodeHandle();
@@ -98,6 +150,21 @@ namespace bias
             }
         }
         return entryNodeVec;
+    }
+
+
+    EntryNode_spin EnumNode_spin::getEntryByName(std::string name)
+    {
+        // TODO
+        EntryNode_spin dummy;
+        return dummy;
+    }
+
+    EntryNode_spin EnumNode_spin::getEntryBySymbolic(std::string symbolic)
+    {
+        // TODO
+        EntryNode_spin dummy;
+        return dummy;
     }
 
 

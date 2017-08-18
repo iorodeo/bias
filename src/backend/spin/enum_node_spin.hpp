@@ -21,7 +21,15 @@ namespace bias
             size_t numberOfEntries();
             EntryNode_spin currentEntry();
 
+            void setEntryByInt(int64_t intValue);
+            void setEntryByValue(size_t value);
+            void setEntryByNode(EntryNode_spin entryNode);
+            void setEntryByName(std::string nodeName);
+            void setEntryBySymbolic(std::string symbolic);
+
             std::vector<EntryNode_spin> entries();
+            EntryNode_spin getEntryByName(std::string name);
+            EntryNode_spin getEntryBySymbolic(std::string symbolic);
 
 
     };

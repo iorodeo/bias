@@ -18,6 +18,7 @@ namespace bias
 
             size_t value();
             int64_t intValue();
+            std::string symbolic();
 
     };
 
