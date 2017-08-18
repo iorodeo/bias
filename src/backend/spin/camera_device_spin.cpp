@@ -9,6 +9,7 @@
 
 // Temporary ???
 #include "node_map_utils.hpp"
+#include "enum_node_spin.hpp"
 #include "string_node_spin.hpp"
 #include <fstream>
 
@@ -263,23 +264,30 @@ namespace bias {
     //    }
 
 
-    //void CameraDevice_spin::startCapture()
-    //{
-    //    if (!connected_) 
-    //    { 
-    //        std::stringstream ssError;
-    //        ssError << __PRETTY_FUNCTION__;
-    //        ssError << ": unable to start Spinnaker capture - not connected";
-    //        throw RuntimeError(ERROR_SPIN_START_CAPTURE, ssError.str());
-    //    }
+    void CameraDevice_spin::startCapture()
+    {
+        if (!connected_) 
+        { 
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to start Spinnaker capture - not connected";
+            throw RuntimeError(ERROR_SPIN_START_CAPTURE, ssError.str());
+        }
 
-    //    // DEBUG 
-    //    // ----------------------------
-    //    //printFormat7Configuration();
-    //    // ----------------------------
+        // DEBUG 
+        // ----------------------------
+        //printFormat7Configuration();
+        // ----------------------------
 
-    //    if (!capturing_) 
-    //    {
+
+        if (!capturing_) 
+        {
+
+            EnumNode_spin acquisitionMode = nodeMapCamera_.getNodeByName<EnumNode_spin>("AcquisitionMode");
+            acquisitionMode.setEntryByName("AcquisitionMode");
+
+
+
     //        createRawImage();
     //        createConvertedImage();
     //        setupTimeStamping();
@@ -294,12 +302,12 @@ namespace bias {
     //        }
     //        capturing_ = true;
     //        isFirst_ = true;
-    //    }
-    //}
+        }
+    }
 
 
-    //void CameraDevice_spin::stopCapture()
-    //{
+    void CameraDevice_spin::stopCapture()
+    {
     //    if (capturing_) 
     //    {
     //        spinError error = spinStopCapture(context_);
@@ -313,7 +321,7 @@ namespace bias {
     //        }
     //        capturing_ = false;
     //    }
-    //}
+    }
 
 
     //cv::Mat CameraDevice_spin::grabImage()

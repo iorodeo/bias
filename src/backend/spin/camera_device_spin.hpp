@@ -28,8 +28,8 @@ namespace bias {
             virtual void connect();
             virtual void disconnect();
             
-            //virtual void startCapture();
-            //virtual void stopCapture();
+            virtual void startCapture();
+            virtual void stopCapture();
             //virtual cv::Mat grabImage();
             //virtual void grabImage(cv::Mat &image);
 

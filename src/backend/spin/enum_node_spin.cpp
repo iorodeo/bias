@@ -94,13 +94,15 @@ namespace bias
 
     void EnumNode_spin::setEntryByName(std::string nodeName)
     {
-        // TODO
+        EntryNode_spin node = getEntryByName(nodeName);
+        setEntryByValue(node.value());
     }
 
 
     void EnumNode_spin::setEntryBySymbolic(std::string symbolic)
     {
-        // TODO
+        EntryNode_spin node = getEntryBySymbolic(symbolic);
+        setEntryByValue(node.value());
     }
 
 
@@ -155,16 +157,53 @@ namespace bias
 
     EntryNode_spin EnumNode_spin::getEntryByName(std::string name)
     {
-        // TODO
-        EntryNode_spin dummy;
-        return dummy;
+        std::vector<EntryNode_spin> nodeVec = entries();
+
+        EntryNode_spin nodeWithName;
+        bool found = false;
+
+        for (auto node : nodeVec)
+        {
+            if (node.name() == name)
+            {
+                found = true;
+                nodeWithName = node;
+                break;
+            }
+        }
+        if (!found)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get enumeration entry node by name";
+            throw RuntimeError(ERROR_SPIN_GET_ENUM_ENTRY_BY_NAME, ssError.str());
+        }
+        return nodeWithName;
     }
 
     EntryNode_spin EnumNode_spin::getEntryBySymbolic(std::string symbolic)
     {
-        // TODO
-        EntryNode_spin dummy;
-        return dummy;
+        std::vector<EntryNode_spin> nodeVec = entries();
+        EntryNode_spin nodeWithSymb;
+        bool found = false;
+
+        for (auto node : nodeVec)
+        {
+            if (node.symbolic() == symbolic)
+            {
+                found = true;
+                nodeWithSymb = node;
+                break;
+            }
+        }
+        if (!found)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get enumeration entry node by symbolic";
+            throw RuntimeError(ERROR_SPIN_GET_ENUM_ENTRY_BY_SYMBOLIC, ssError.str());
+        }
+        return nodeWithSymb;
     }
 
 
