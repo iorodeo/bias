@@ -1,11 +1,13 @@
 #include <iostream>
 #include <string>
+#include <opencv2/core/core.hpp>
 #include "camera_facade.hpp"
 #include "camera_device_spin.hpp"
 
 
 int main(int argc, char *argv[]) 
 {
+
     bias::CameraFinder camFinder;
 
     bias::GuidList guidList = camFinder.getGuidList();
@@ -23,6 +25,28 @@ int main(int argc, char *argv[])
         camDev.connect();
         std::cout << "modelName:  "  << camDev.getModelName() << std::endl;
         std::cout << "vendorName: "  << camDev.getVendorName() << std::endl;
+
+        camDev.startCapture();
+
+        int cnt = 0;
+        while (cnt < 100)
+        {
+
+            cv::Mat image = camDev.grabImage();
+            if (image.empty())
+            {
+                continue;
+            }
+            else
+            {
+                cnt++;
+                std::cout << "OK: cnt = " << cnt << std::endl;
+            }
+        }
+
+
+        camDev.stopCapture();
+
 
         camDev.disconnect();
 

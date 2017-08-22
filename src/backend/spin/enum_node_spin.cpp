@@ -2,6 +2,7 @@
 #include "basic_types.hpp"
 #include "exception.hpp"
 #include <sstream>
+#include <iostream>
 
 namespace bias
 {

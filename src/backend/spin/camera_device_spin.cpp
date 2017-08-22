@@ -19,58 +19,52 @@ namespace bias {
 
     CameraDevice_spin::CameraDevice_spin() : CameraDevice()
     {
-        //std::cout << __PRETTY_FUNCTION__ << std::endl;
-        initialize();
+        //initialize();
     }
 
 
     CameraDevice_spin::CameraDevice_spin(Guid guid) : CameraDevice(guid)
     {
-        //std::cout << __PRETTY_FUNCTION__ << std::endl;
-        initialize();
-        spinError error = spinSystemGetInstance(&hSystem_);
-        if (error != SPINNAKER_ERR_SUCCESS) 
+        //initialize();
+        spinError err = spinSystemGetInstance(&hSystem_);
+        if (err != SPINNAKER_ERR_SUCCESS) 
         {
-            // TODO ... shouldn't throw exception in constructor change this
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
-            ssError << ": unable to create Spinnaker context, error = " << error; 
+            ssError << ": unable to create Spinnaker context, error = " << err; 
             throw RuntimeError(ERROR_SPIN_CREATE_CONTEXT, ssError.str());
         }
     }
 
 
-    void CameraDevice_spin::initialize()
-    {
-        //std::cout << __PRETTY_FUNCTION__ << std::endl;
-        //isFirst_ = true;
-        //rawImageCreated_ = false;
-        //convertedImageCreated_ = false;
-        //haveEmbeddedTimeStamp_ = false;
-        //timeStamp_.seconds = 0;
-        //timeStamp_.microSeconds = 0;
-        //cycleSecondsLast_ = 0;
-    }
+    //void CameraDevice_spin::initialize()
+    //{
+
+    //    //std::cout << __PRETTY_FUNCTION__ << std::endl;
+    //    //isFirst_ = true;
+    //    //rawImageCreated_ = false;
+    //    //convertedImageCreated_ = false;
+    //    //haveEmbeddedTimeStamp_ = false;
+    //    //timeStamp_.seconds = 0;
+    //    //timeStamp_.microSeconds = 0;
+    //    //cycleSecondsLast_ = 0;
+    //}
 
 
     CameraDevice_spin::~CameraDevice_spin() 
     {
-        //std::cout << __PRETTY_FUNCTION__ << std::endl;
 
-        //if (capturing_) { stopCapture(); }
+        if (capturing_) { stopCapture(); }
 
-        //if (convertedImageCreated_) { destroyConvertedImage(); }
 
-        //if (rawImageCreated_) { destroyRawImage(); }
+        if (connected_) { disconnect(); }
 
-        //if (connected_) { disconnect(); }
-
-        spinError error = spinSystemReleaseInstance(hSystem_);
-        if ( error != SPINNAKER_ERR_SUCCESS ) 
+        spinError err = spinSystemReleaseInstance(hSystem_);
+        if ( err != SPINNAKER_ERR_SUCCESS ) 
         {
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
-            ssError << ": unable to destroy Spinnaker context, error = " << error;
+            ssError << ": unable to destroy Spinnaker context, error = " << err;
             throw RuntimeError(ERROR_SPIN_DESTROY_CONTEXT, ssError.str());
         }
     }
@@ -89,74 +83,77 @@ namespace bias {
 
         if (!connected_) 
         {
-            spinError error = SPINNAKER_ERR_SUCCESS;
+            spinError err = SPINNAKER_ERR_SUCCESS;
             spinCameraList hCameraList = nullptr;
 
             // Create empty camera list
-            error = spinCameraListCreateEmpty(&hCameraList);
-            if (error != SPINNAKER_ERR_SUCCESS)
+            err = spinCameraListCreateEmpty(&hCameraList);
+            if (err != SPINNAKER_ERR_SUCCESS)
             {
                 std::stringstream ssError;
                 ssError << __PRETTY_FUNCTION__;
-                ssError << ": unable to create Spinnaker empty camera list, error=" << error;
+                ssError << ": unable to create Spinnaker empty camera list, error=" << err;
                 throw RuntimeError(ERROR_SPIN_CREATE_CAMERA_LIST, ssError.str());
             }
 
             // Retrieve list of cameras from system
-            error = spinSystemGetCameras(hSystem_, hCameraList);
-            if (error != SPINNAKER_ERR_SUCCESS)
+            err = spinSystemGetCameras(hSystem_, hCameraList);
+            if (err != SPINNAKER_ERR_SUCCESS)
             {
                 std::stringstream ssError;
                 ssError << __PRETTY_FUNCTION__;
-                ssError << ": unable to enumerate Spinnaker cameras, error=" << error;
+                ssError << ": unable to enumerate Spinnaker cameras, error=" << err;
                 throw RuntimeError(ERROR_SPIN_ENUMERATE_CAMERAS, ssError.str());
             }
 
-            error = spinCameraListGetBySerial(hCameraList, guid_.toString().c_str() , &hCamera_);
-            if (error != SPINNAKER_ERR_SUCCESS)
+            err = spinCameraListGetBySerial(hCameraList, guid_.toString().c_str() , &hCamera_);
+            if (err != SPINNAKER_ERR_SUCCESS)
             {
                 std::stringstream ssError;
                 ssError << __PRETTY_FUNCTION__;
-                ssError << ": unable to get Spinnaker camera from list, error = " << error;
+                ssError << ": unable to get Spinnaker camera from list, error = " << err;
                 throw RuntimeError(ERROR_SPIN_GET_CAMERA, ssError.str());
             }
             connected_ = true;
 
             // Clear Spinnaker camera list
-            error = spinCameraListClear(hCameraList);
-            if (error != SPINNAKER_ERR_SUCCESS)
+            err = spinCameraListClear(hCameraList);
+            if (err != SPINNAKER_ERR_SUCCESS)
             {
                 std::stringstream ssError;
                 ssError << __PRETTY_FUNCTION__;
-                ssError << ": unable to clear Spinnaker camera list, error=" << error;
+                ssError << ": unable to clear Spinnaker camera list, error=" << err;
                 throw RuntimeError(ERROR_SPIN_CLEAR_CAMERA_LIST, ssError.str());
             }
 
             // Destroy Spinnaker camera list
-            error = spinCameraListDestroy(hCameraList);
-            if (error != SPINNAKER_ERR_SUCCESS)
+            err = spinCameraListDestroy(hCameraList);
+            if (err != SPINNAKER_ERR_SUCCESS)
             {
                 std::stringstream ssError;
                 ssError << __PRETTY_FUNCTION__;
-                ssError << ": unable to destroy Spinnaker camera list, error=" << error;
+                ssError << ": unable to destroy Spinnaker camera list, error=" << err;
                 throw RuntimeError(ERROR_SPIN_DESTROY_CAMERA_LIST, ssError.str());
             }
 
 
             // Initialize camera
-            error = spinCameraInit(hCamera_);
-            if (error != SPINNAKER_ERR_SUCCESS)
+            err = spinCameraInit(hCamera_);
+            if (err != SPINNAKER_ERR_SUCCESS)
             {
+                hCamera_ = nullptr;
                 std::stringstream ssError;
                 ssError << __PRETTY_FUNCTION__;
-                ssError << ": unable to initialize Spinnaker camera, error=" << error;
+                ssError << ": unable to initialize Spinnaker camera, error=" << err;
                 throw RuntimeError(ERROR_SPIN_GET_TLDEVICE_NODE_MAP, ssError.str());
             }
             connected_ = true;
 
-            // Setup node maps for TLDevice and camera.
+            // Setup node maps for TLDevice and camera and get camera info
             nodeMapTLDevice_ = NodeMapTLDevice_spin(hCamera_);
             nodeMapCamera_ = NodeMapCamera_spin(hCamera_);
+            cameraInfo_ = nodeMapTLDevice_.cameraInfo();
+            cameraInfo_.print();
 
 
             // ---
@@ -164,7 +161,6 @@ namespace bias {
             std::cout << "# TLDevice nodes: " << (nodeMapTLDevice_.numberOfNodes()) << std::endl;
             std::cout << "# Camera nodes:   " << (nodeMapCamera_.numberOfNodes()) << std::endl;
             std::cout << std::endl;
-
 
             ////std::vector<EnumNode_spin> enumNodeVec = nodeMapTLDevice_.nodes<EnumNode_spin>();
             //std::vector<EnumNode_spin> enumNodeVec = nodeMapCamera_.nodes<EnumNode_spin>();
@@ -182,21 +178,16 @@ namespace bias {
 
             //}
 
-            std::vector<BaseNode_spin> nodeVec = nodeMapTLDevice_.nodes<BaseNode_spin>();
-            for (auto node : nodeVec)
-            {
-                std::cout << node.name() << ", " << node.valueAsString() << std::endl;
-            }
+            //std::vector<BaseNode_spin> nodeVec = nodeMapTLDevice_.nodes<BaseNode_spin>();
+            //for (auto node : nodeVec)
+            //{
+            //    std::cout << node.name() << ", " << node.valueAsString() << std::endl;
+            //}
 
 
             // --------------------------------------------------------------------
             // TODO: - setup strobe output on GPIO pin?? Is this possible?
             // --------------------------------------------------------------------
-
-
-            // Devel: print camera information
-            cameraInfo_ = nodeMapTLDevice_.cameraInfo();
-            cameraInfo_.print();
 
 
             // DEVEL
@@ -211,13 +202,6 @@ namespace bias {
             //}
             //fout.close();
 
-            ////std::map<std::string, spinNodeType> nameToTypeMap = getNodeNameToTypeMap(hNodeMapTLDevice_);
-
-            //std::vector<std::string> entryNamesVec = getEnumerationNodeEntryNames(hNodeMapCamera_, "PixelFormat");
-            //for (auto name : entryNamesVec) 
-            //{
-            //    std::cout << name << std::endl;
-            //}
         }
     }
 
@@ -225,43 +209,39 @@ namespace bias {
     void CameraDevice_spin::disconnect()
     {
         // std::cout << __PRETTY_FUNCTION__ << std::endl;
+
+        if (capturing_) 
+        { 
+            stopCapture(); 
+        }
+
         if (connected_) 
         {
 
+
             // Deinitialize camera
-            spinError error = spinCameraDeInit(hCamera_);
-            if (error != SPINNAKER_ERR_SUCCESS)
+            spinError err = spinCameraDeInit(hCamera_);
+            if (err != SPINNAKER_ERR_SUCCESS)
             {
                 std::stringstream ssError;
                 ssError << __PRETTY_FUNCTION__;
-                ssError << ": unable to deinitialize Spinnaker camera, error=" << error;
+                ssError << ": unable to deinitialize Spinnaker camera, error=" << err;
                 throw RuntimeError(ERROR_SPIN_RELEASE_CAMERA, ssError.str());
             }
 
             // Release Camera
-            error = spinCameraRelease(hCamera_);
-            if (error != SPINNAKER_ERR_SUCCESS)
+            err = spinCameraRelease(hCamera_);
+            if (err != SPINNAKER_ERR_SUCCESS)
             {
                 std::stringstream ssError;
                 ssError << __PRETTY_FUNCTION__;
-                ssError << ": unable to get Spinnaker camera, error=" << error;
+                ssError << ": unable to get Spinnaker camera, error=" << err;
                 throw RuntimeError(ERROR_SPIN_RELEASE_CAMERA, ssError.str());
             }
+
+            connected_ = false;
         }
     }
-    //    if (capturing_) { stopCapture(); }
-    //    if (connected_) 
-    //    {
-    //        spinError error = spinDisconnect(context_);
-    //        if (error != SPIN_ERROR_OK) 
-    //        {
-    //            std::stringstream ssError;
-    //            ssError << __PRETTY_FUNCTION__;
-    //            ssError << ": unable to disconnect from Spinnaker device";
-    //            throw RuntimeError(ERROR_SPIN_DISCONNECT, ssError.str());
-    //        }
-    //        connected_ = false;
-    //    }
 
 
     void CameraDevice_spin::startCapture()
@@ -283,65 +263,114 @@ namespace bias {
         if (!capturing_) 
         {
 
-            EnumNode_spin acquisitionMode = nodeMapCamera_.getNodeByName<EnumNode_spin>("AcquisitionMode");
-            acquisitionMode.setEntryByName("AcquisitionMode");
+            // Set acquisition mode 
+            EnumNode_spin acqModeNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("AcquisitionMode");
+            acqModeNode.setEntryBySymbolic("Continuous");
 
+            //setupTimeStamping();
 
+            // Begin acquisition
+            spinError err = spinCameraBeginAcquisition(hCamera_);
+            if (err != SPINNAKER_ERR_SUCCESS)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to begin camera acquisition, error = " << err; 
+                throw RuntimeError(ERROR_SPIN_START_CAPTURE, ssError.str());
+            }
 
-    //        createRawImage();
-    //        createConvertedImage();
-    //        setupTimeStamping();
-
-    //        spinError error = spinStartCapture(context_);
-    //        if (error != SPIN_ERROR_OK) 
-    //        {
-    //            std::stringstream ssError;
-    //            ssError << __PRETTY_FUNCTION__;
-    //            ssError << ": unable to start Spinnaker capture";
-    //            throw RuntimeError(ERROR_SPIN_START_CAPTURE, ssError.str());
-    //        }
-    //        capturing_ = true;
-    //        isFirst_ = true;
+            capturing_ = true;
+            //isFirst_ = true;
         }
     }
 
 
     void CameraDevice_spin::stopCapture()
     {
-    //    if (capturing_) 
-    //    {
-    //        spinError error = spinStopCapture(context_);
-    //        if (error != SPIN_ERROR_OK) 
-    //        { 
-    //            std::stringstream ssError;
-    //            ssError << __PRETTY_FUNCTION__;
-    //            ssError <<": unable to stop Spinnaker capture";
-    //            throw RuntimeError(ERROR_SPIN_STOP_CAPTURE, ssError.str());
+        if (capturing_) 
+        {
+            if (!releaseSpinImage(hSpinImage_))
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to release spinImage";
+                throw RuntimeError(ERROR_SPIN_RELEASE_SPIN_IMAGE, ssError.str());
+            }
 
-    //        }
-    //        capturing_ = false;
-    //    }
+            spinError err = spinCameraEndAcquisition(hCamera_);
+            if (err != SPINNAKER_ERR_SUCCESS)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError <<": unable to stop Spinnaker capture";
+                throw RuntimeError(ERROR_SPIN_STOP_CAPTURE, ssError.str());
+            }
+            capturing_ = false;
+        }
     }
 
 
-    //cv::Mat CameraDevice_spin::grabImage()
-    //{
-    //    cv::Mat image;  
-    //    grabImage(image);
-    //    return image;
-    //}
+    cv::Mat CameraDevice_spin::grabImage()
+    {
+        cv::Mat image;  
+        grabImage(image);
+        return image;
+    }
 
 
-    //void CameraDevice_spin::grabImage(cv::Mat &image)
-    //{
+    void CameraDevice_spin::grabImage(cv::Mat &image)
+    {
+
+
+
     //    bool resize = false;
 
-    //    std::string errMsg;
-    //    bool ok = grabImageCommon(errMsg);
-    //    if (!ok)
-    //    {
-    //        return;
-    //    }
+        std::string errMsg;
+
+        bool ok = grabImageCommon(errMsg);
+        if (!ok)
+        {
+            image.release();
+            return;
+        }
+
+
+        spinError err = SPINNAKER_ERR_SUCCESS;
+        spinImage hSpinImageConv = nullptr; 
+
+        err = spinImageCreateEmpty(&hSpinImageConv);
+        if (err != SPINNAKER_ERR_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to create empty spinImage, error = " << err; 
+            throw RuntimeError(ERROR_SPIN_IMAGE_CREATE_EMPTY, ssError.str());
+        }
+        
+        err = spinImageConvert(hSpinImage_, PixelFormat_BGR8, hSpinImageConv);
+        if (err != SPINNAKER_ERR_SUCCESS) 
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to convert spinImage, error = " << err; 
+            throw RuntimeError(ERROR_SPIN_IMAGE_CONVERT, ssError.str());
+        }
+
+
+        // TEMP
+        // ----------------------------------------------------------------------------
+        image = cv::Mat::ones(10,10,CV_8UC3);
+        // ----------------------------------------------------------------------------
+
+        if (!destroySpinImage(hSpinImageConv))
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to release spinImage";
+            throw RuntimeError(ERROR_SPIN_RELEASE_SPIN_IMAGE, ssError.str());
+        }
+
+
 
     //    // Use either raw or converted image
     //    spinImage *imagePtr_spin;
@@ -373,7 +402,7 @@ namespace bias {
     //    unsigned char *pData0 = imagePtr_spin->pData;
     //    unsigned char *pData1 = imagePtr_spin->pData + imagePtr_spin->dataSize - 1;
     //    std::copy(pData0,pData1,image.data);
-    //}
+    }
 
 
     //bool CameraDevice_spin::isColor()
@@ -947,15 +976,18 @@ namespace bias {
     //    return timeStamp_;
     //}
 
+
     std::string CameraDevice_spin::getVendorName()
     {
         return cameraInfo_.vendorName();
     }
 
+    
     std::string CameraDevice_spin::getModelName()
     {
        return cameraInfo_.modelName();
     }
+
 
     std::string CameraDevice_spin::toString()
     {
@@ -963,16 +995,17 @@ namespace bias {
     }
 
 
-    //void CameraDevice_spin::printGuid() 
-    //{ 
-    //    guid_.printValue(); 
-    //}
+    void CameraDevice_spin::printGuid() 
+    { 
+        guid_.printValue(); 
+    }
 
 
     void CameraDevice_spin::printInfo()
     {
         std::cout << toString();
     }
+
 
     //   
     //// Private methods
@@ -984,60 +1017,6 @@ namespace bias {
     //}
 
 
-    //void CameraDevice_spin::createRawImage()
-    //{
-    //    if (rawImageCreated_) { destroyRawImage(); }
-
-    //    spinError error = spinCreateImage(&rawImage_);
-
-    //    if (error != SPIN_ERROR_OK) 
-    //    {
-    //        std::stringstream ssError;
-    //        ssError << __PRETTY_FUNCTION__;
-    //        ssError << ": unable to create Spinnaker image";
-    //        throw RuntimeError(ERROR_SPIN_CREATE_IMAGE, ssError.str());
-    //    }
-
-    //    rawImageCreated_ = true;
-    //}
-
-
-    //void CameraDevice_spin::createConvertedImage()
-    //{
-    //    if (convertedImageCreated_) {destroyConvertedImage();}
-
-    //    spinError error = spinCreateImage(&convertedImage_);
-
-    //    if (error != SPIN_ERROR_OK) 
-    //    {
-    //        std::stringstream ssError;
-    //        ssError << __PRETTY_FUNCTION__;
-    //        ssError << ": unable to create Spinnaker image";
-    //        throw RuntimeError(ERROR_SPIN_CREATE_IMAGE, ssError.str());
-    //    }
-
-    //    convertedImageCreated_ = true;
-    //}
-
-
-    //void CameraDevice_spin::destroyRawImage()
-    //{
-    //    if (rawImageCreated_) 
-    //    { 
-    //        spinError error = spinDestroyImage(&rawImage_);
-
-    //        if (error != SPIN_ERROR_OK) 
-    //        {
-    //            std::stringstream ssError;
-    //            ssError << __PRETTY_FUNCTION__;
-    //            ssError << ": unable to destroy Spinnaker image";
-    //            throw RuntimeError(ERROR_SPIN_DESTROY_IMAGE, ssError.str());
-    //        }
-
-    //        rawImageCreated_ = false;
-    //    }
-    //}
-    //
 
     //void CameraDevice_spin::destroyConvertedImage()
     //{
@@ -1058,62 +1037,105 @@ namespace bias {
     //}
 
 
-    //bool CameraDevice_spin::grabImageCommon(std::string &errMsg)
-    //{
-    //    spinError error;
+    bool CameraDevice_spin::grabImageCommon(std::string &errMsg)
+    {
 
-    //    if (!capturing_) 
-    //    {
-    //        std::stringstream ssError;
-    //        ssError << __PRETTY_FUNCTION__;
-    //        ssError << ": unable to grab Image - not capturing";
-    //        //throw RuntimeError(ERROR_SPIN_GRAB_IMAGE, ssError.str());
-    //        errMsg = ssError.str();
-    //        return false;
-    //    }
+        spinError err = SPINNAKER_ERR_SUCCESS;
 
-    //    // Retrieve image from buffer
-    //    error = spinRetrieveBuffer(context_, &rawImage_);
-    //    if ( error != SPIN_ERROR_OK ) 
-    //    {
-    //        std::stringstream ssError;
-    //        ssError << __PRETTY_FUNCTION__;
-    //        ssError << ": unable to retrieve image from buffer";
-    //        //throw RuntimeError(ERROR_SPIN_RETRIEVE_BUFFER, ssError.str());
-    //        errMsg = ssError.str();
-    //        return false;
-    //    }
+        if (!capturing_) 
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to grab Image - not capturing";
+            errMsg = ssError.str();
+            return false;
+        }
 
-    //    updateTimeStamp();
-    //    isFirst_ = false;
+        if (!releaseSpinImage(hSpinImage_))
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to release existing spinImage";
+            errMsg = ssError.str();
+            return false;
+        }
 
-    //    // Convert image to suitable format 
-    //    spinPixelFormat convertedFormat = getSuitablePixelFormat(rawImage_.format);
+        imageOK_ = false;
+    
+        // Get next image from camera
+		err = spinCameraGetNextImageEx(hCamera_, 0, &hSpinImage_);
+		if (err != SPINNAKER_ERR_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get next image";
+            errMsg = ssError.str();
+            return false;
+        }
 
-    //    if (rawImage_.format != convertedFormat)
-    //    {
-    //        useConverted_ = true;
-    //        error = spinConvertImageTo(
-    //                convertedFormat,
-    //                &rawImage_, 
-    //                &convertedImage_
-    //                );
-    //        if ( error != SPIN_ERROR_OK ) 
-    //        {
-    //            std::stringstream ssError;
-    //            ssError << __PRETTY_FUNCTION__;
-    //            ssError << ": unable to convert image";
-    //            //throw RuntimeError(ERROR_SPIN_CONVERT_IMAGE, ssError.str());
-    //            errMsg = ssError.str();
-    //            return false;
-    //        }
-    //    }
-    //    else
-    //    {
-    //        useConverted_ = false;
-    //    }
-    //    return true;
-    //}
+        // Check to see if image is incomplete
+		bool8_t isIncomplete = False;
+		err = spinImageIsIncomplete(hSpinImage_, &isIncomplete);
+		if (err != SPINNAKER_ERR_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to determine if image is complete";
+            errMsg = ssError.str();
+            return false;
+        }
+
+        if (isIncomplete==True)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": image is incomplete";
+            errMsg = ssError.str();
+            return false;
+        }
+
+        imageOK_ = true;
+
+        return true;
+    }
+
+
+    bool CameraDevice_spin::releaseSpinImage(spinImage &hImage)
+    {
+        bool rval = true;
+        if (hImage != nullptr)
+        {
+            spinError err = spinImageRelease(hImage);
+            if (err != SPINNAKER_ERR_SUCCESS)
+            {
+                rval = false;
+            }
+            else
+            {
+                hImage = nullptr;
+            }
+        }
+        return rval;
+    }
+
+    bool CameraDevice_spin::destroySpinImage(spinImage &hImage)
+    {
+        bool rval = true;
+        if (hImage != nullptr)
+        {
+            spinError err = spinImageDestroy(hImage);
+            if (err != SPINNAKER_ERR_SUCCESS)
+            {
+                rval = false;
+            }
+            else
+            {
+                hImage = nullptr;
+            }
+        }
+        return rval;
+    }
+
 
 
     //void CameraDevice_spin::setupTimeStamping()
@@ -1668,8 +1690,7 @@ namespace bias {
 
     //void CameraDevice_spin::printFormat7Configuration()
     //{
-    //    spinError error;
-    //    spinFormat7ImageSettings imageSettings;
+    //    spinError error; //    spinFormat7ImageSettings imageSettings;
     //    unsigned int packetSize;
     //    float percentage; 
 

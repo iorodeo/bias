@@ -30,8 +30,9 @@ namespace bias {
             
             virtual void startCapture();
             virtual void stopCapture();
-            //virtual cv::Mat grabImage();
-            //virtual void grabImage(cv::Mat &image);
+
+            virtual cv::Mat grabImage();
+            virtual void grabImage(cv::Mat &image);
 
             //virtual bool isColor();
             //virtual bool isSupported(VideoMode vidMode, FrameRate frmRate);
@@ -70,11 +71,11 @@ namespace bias {
             virtual std::string getModelName();
 
             //virtual TimeStamp getImageTimeStamp();
-            //
+            
             virtual std::string toString();
 
-            //virtual void printGuid();
-            //
+            virtual void printGuid();
+            
             virtual void printInfo();
 
         private:
@@ -89,26 +90,23 @@ namespace bias {
             NodeMapTLDevice_spin nodeMapTLDevice_;
             
             CameraInfo_spin cameraInfo_;
-            //spinImage rawImage_;
-            //spinImage convertedImage_;
-            //bool useConverted_;
 
             //TimeStamp timeStamp_;
             //unsigned int cycleSecondsLast_;   // Used with embedded timestamp only
 
             //bool isFirst_;
-            //bool rawImageCreated_;
-            //bool convertedImageCreated_;
+
             //bool haveEmbeddedTimeStamp_;
 
-            void initialize();
-            //void createRawImage();
-            //void destroyRawImage();
-            ////void grabImageCommon();
-            //bool grabImageCommon(std::string &errMsg);
+            bool imageOK_ = false;
 
-            //void createConvertedImage();
-            //void destroyConvertedImage();
+            spinImage hSpinImage_ = nullptr;
+
+            //void initialize();
+
+            bool grabImageCommon(std::string &errMsg);
+            bool releaseSpinImage(spinImage &hImage);
+            bool destroySpinImage(spinImage &hImage);
 
             ////void createPropertyMap();
 
