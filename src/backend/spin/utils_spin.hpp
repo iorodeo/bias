@@ -18,10 +18,12 @@ namespace bias
         size_t rows;
         size_t stride;
         void *dataPtr;
+        spinPixelFormatEnums pixelFormat;
     };
 
 
     ImageInfo_spin getImageInfo_spin(spinImage hImage);
+
 
 
     //// Image conversion - for mapping from Spinnaker to opencv 
@@ -100,12 +102,15 @@ namespace bias
     //void printConfiguration_spin(spinConfig &config);
 
 
+
     //// Spinnaker enumeration to string converstions
     //// ------------------------------------------------------------------------
     //
     //std::string getInterfaceTypeString_spin(spinInterfaceType ifaceType);
 
-    //std::string getPixelFormatString_spin(spinPixelFormat foramt);
+    std::string getPixelFormatString_spin(spinPixelFormatEnums foramt);
+
+    void printAllPixelFormatStrings_spin();
 
     //std::string getBayerTileFormatString_spin(spinBayerTileFormat bayerFormat);
 

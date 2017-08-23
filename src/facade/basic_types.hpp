@@ -180,6 +180,7 @@ namespace bias {
         ERROR_SPIN_IMAGE_GET_HEIGHT,
         ERROR_SPIN_IMAGE_GET_STRIDE,
         ERROR_SPIN_IMAGE_GET_DATA_PTR,
+        ERROR_SPIN_IMAGE_GET_PIXEL_FORMAT,
 
         // Video Writer Errors
         ERROR_VIDEO_WRITER_ADD_FRAME,

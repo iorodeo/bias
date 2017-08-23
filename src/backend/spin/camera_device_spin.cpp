@@ -54,10 +54,15 @@ namespace bias {
     CameraDevice_spin::~CameraDevice_spin() 
     {
 
-        if (capturing_) { stopCapture(); }
+        if (capturing_) 
+        { 
+            stopCapture(); 
+        }
 
-
-        if (connected_) { disconnect(); }
+        if (connected_) 
+        { 
+            disconnect(); 
+        }
 
         spinError err = spinSystemReleaseInstance(hSystem_);
         if ( err != SPINNAKER_ERR_SUCCESS ) 
