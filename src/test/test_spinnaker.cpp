@@ -1,6 +1,10 @@
 #include <iostream>
 #include <string>
+
 #include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+
 #include "camera_facade.hpp"
 #include "camera_device_spin.hpp"
 
@@ -27,9 +31,10 @@ int main(int argc, char *argv[])
         std::cout << "vendorName: "  << camDev.getVendorName() << std::endl;
 
         camDev.startCapture();
+        cv::namedWindow("preview", CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED); 
 
         int cnt = 0;
-        while (cnt < 100)
+        while (cnt < 1000)
         {
 
             cv::Mat image = camDev.grabImage();
@@ -39,8 +44,14 @@ int main(int argc, char *argv[])
             }
             else
             {
+                cv::imshow("preview", image);
+                cv::waitKey(1);
+    
                 cnt++;
-                std::cout << "OK: cnt = " << cnt << std::endl;
+                std::cout << "cnt:  " << cnt << std::endl;
+                std::cout << "cols: " << image.cols << std::endl;
+                std::cout << "rows: " << image.rows << std::endl;
+                std::cout << std::endl;
             }
         }
 

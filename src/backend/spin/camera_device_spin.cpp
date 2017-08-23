@@ -321,8 +321,6 @@ namespace bias {
     void CameraDevice_spin::grabImage(cv::Mat &image)
     {
 
-
-
     //    bool resize = false;
 
         std::string errMsg;
@@ -346,6 +344,16 @@ namespace bias {
             ssError << ": unable to create empty spinImage, error = " << err; 
             throw RuntimeError(ERROR_SPIN_IMAGE_CREATE_EMPTY, ssError.str());
         }
+
+        // TEMP  
+        // ----------------------------------------------------------------------------
+        // Need to test for compatible image format and preform appropriate converion. 
+        //
+        // * spinnaker getSuitableImageFormat 
+        // * opencv getCompatibleOpencvFormat
+        //
+        // ----------------------------------------------------------------------------
+
         
         err = spinImageConvert(hSpinImage_, PixelFormat_BGR8, hSpinImageConv);
         if (err != SPINNAKER_ERR_SUCCESS) 
@@ -356,10 +364,19 @@ namespace bias {
             throw RuntimeError(ERROR_SPIN_IMAGE_CONVERT, ssError.str());
         }
 
+        // Get image information and copy to opencv image
+        ImageInfo_spin imageInfo = getImageInfo_spin(hSpinImageConv);
 
-        // TEMP
-        // ----------------------------------------------------------------------------
-        image = cv::Mat::ones(10,10,CV_8UC3);
+
+        cv::Mat imageTmp = cv::Mat( 
+                imageInfo.rows+imageInfo.ypad, 
+                imageInfo.cols+imageInfo.xpad, 
+                CV_8UC3, imageInfo.dataPtr, 
+                imageInfo.stride
+                );
+
+        imageTmp.copyTo(image);
+
         // ----------------------------------------------------------------------------
 
         if (!destroySpinImage(hSpinImageConv))
@@ -370,38 +387,6 @@ namespace bias {
             throw RuntimeError(ERROR_SPIN_RELEASE_SPIN_IMAGE, ssError.str());
         }
 
-
-
-    //    // Use either raw or converted image
-    //    spinImage *imagePtr_spin;
-    //    if (useConverted_)
-    //    {
-    //        imagePtr_spin = &convertedImage_;
-    //    }
-    //    else
-    //    {
-    //        imagePtr_spin = &rawImage_;
-    //    }
-
-    //    // Check image size and type
-    //    if ((image.cols != (imagePtr_spin->cols)) | (image.rows != (imagePtr_spin->rows)))
-    //    {
-    //        resize = true;
-    //    }
-
-    //    // Check image type
-    //    int currType = CV_MAKETYPE(image.depth(),image.channels());
-    //    int compType = getCompatibleOpencvFormat(imagePtr_spin->format);
-    //    
-    //    // If size or type changed remake image
-    //    if ((resize) || (currType != compType)) {
-    //        image = cv::Mat(imagePtr_spin->rows, imagePtr_spin->cols, compType);
-    //    }
-
-    //    // Copy data -- TO DO might be able to do this without copying.
-    //    unsigned char *pData0 = imagePtr_spin->pData;
-    //    unsigned char *pData1 = imagePtr_spin->pData + imagePtr_spin->dataSize - 1;
-    //    std::copy(pData0,pData1,image.data);
     }
 
 

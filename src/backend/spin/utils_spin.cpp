@@ -10,6 +10,68 @@
 namespace bias 
 {
 
+    ImageInfo_spin getImageInfo_spin(spinImage hImage)
+    {
+        ImageInfo_spin info = {0,0,0,0,0,nullptr};
+        spinError err = SPINNAKER_ERR_SUCCESS;
+
+        err = spinImageGetPaddingX(hImage, &info.xpad);
+        if (err != SPINNAKER_ERR_SUCCESS) 
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get spinImage x padding, error = " << err; 
+            throw RuntimeError(ERROR_SPIN_IMAGE_GET_PADDING_X, ssError.str());
+        }
+
+        err = spinImageGetPaddingY(hImage, &info.ypad);
+        if (err != SPINNAKER_ERR_SUCCESS) 
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get spinImage y padding, error = " << err; 
+            throw RuntimeError(ERROR_SPIN_IMAGE_GET_PADDING_Y, ssError.str());
+        }
+
+        err = spinImageGetWidth(hImage, &info.cols);
+        if (err != SPINNAKER_ERR_SUCCESS) 
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get spinImage width, error = " << err; 
+            throw RuntimeError(ERROR_SPIN_IMAGE_GET_WIDTH, ssError.str());
+        }
+
+        err = spinImageGetHeight(hImage, &info.rows);
+        if (err != SPINNAKER_ERR_SUCCESS) 
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get spinImage width, error = " << err; 
+            throw RuntimeError(ERROR_SPIN_IMAGE_GET_HEIGHT, ssError.str());
+        }
+
+        err = spinImageGetStride(hImage, &info.stride);
+        if (err != SPINNAKER_ERR_SUCCESS) 
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get spinImage stride, error = " << err; 
+            throw RuntimeError(ERROR_SPIN_IMAGE_GET_STRIDE, ssError.str());
+        }
+
+        err = spinImageGetData(hImage,&info.dataPtr);
+        if (err != SPINNAKER_ERR_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get spinImage data pointer, error = " << err; 
+            throw RuntimeError(ERROR_SPIN_IMAGE_GET_DATA_PTR, ssError.str());
+        }
+
+        return info;
+    }
+
     //// Image conversion - for mapping from Spinnaker to opencv 
     //// -----------------------------------------------------------------------
     //

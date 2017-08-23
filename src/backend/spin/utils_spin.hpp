@@ -10,6 +10,19 @@
 
 namespace bias 
 {
+    struct ImageInfo_spin
+    {
+        size_t xpad;
+        size_t ypad;
+        size_t cols;
+        size_t rows;
+        size_t stride;
+        void *dataPtr;
+    };
+
+
+    ImageInfo_spin getImageInfo_spin(spinImage hImage);
+
 
     //// Image conversion - for mapping from Spinnaker to opencv 
     //// -----------------------------------------------------------------------
