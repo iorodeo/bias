@@ -49,7 +49,7 @@ namespace bias {
 
             //virtual Property getProperty(PropertyType propType);
             //virtual PropertyInfo getPropertyInfo(PropertyType propType);
-            //virtual ImageInfo getImageInfo();
+            virtual ImageInfo getImageInfo();
 
             //virtual void setProperty(Property prop);
             //virtual void setVideoMode(VideoMode vidMode, FrameRate frmRate);
@@ -113,8 +113,11 @@ namespace bias {
             //void setupTimeStamping();
             //void updateTimeStamp();
 
-            //// spin get methods
-            //// ---------------
+            // spin get methods
+            // ---------------
+
+            std::vector<spinPixelFormatEnums> getSupportedPixelFormats_spin();
+
             //spinPGRGuid getGuid_spin();
             //void getVideoModeAndFrameRate(spinVideoMode &vidMode, spinFrameRate &frmRate);
             //spinPropertyInfo getPropertyInfo_spin(spinPropertyType propType);

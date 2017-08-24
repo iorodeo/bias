@@ -30,33 +30,33 @@ int main(int argc, char *argv[])
         std::cout << "modelName:  "  << camDev.getModelName() << std::endl;
         std::cout << "vendorName: "  << camDev.getVendorName() << std::endl;
 
-        camDev.startCapture();
-        cv::namedWindow("preview", CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED); 
+        //camDev.startCapture();
+        //cv::namedWindow("preview", CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED); 
 
-        int cnt = 0;
-        while (cnt < 1000)
-        {
+        //int cnt = 0;
+        //while (cnt < 10)
+        //{
 
-            cv::Mat image = camDev.grabImage();
-            if (image.empty())
-            {
-                continue;
-            }
-            else
-            {
-                cv::imshow("preview", image);
-                cv::waitKey(1);
+        //    cv::Mat image = camDev.grabImage();
+        //    if (image.empty())
+        //    {
+        //        continue;
+        //    }
+        //    else
+        //    {
+        //        cv::imshow("preview", image);
+        //        cv::waitKey(1);
     
-                cnt++;
-                std::cout << "cnt:  " << cnt << std::endl;
-                std::cout << "cols: " << image.cols << std::endl;
-                std::cout << "rows: " << image.rows << std::endl;
-                std::cout << std::endl;
-            }
-        }
+        //        cnt++;
+        //        std::cout << "cnt:  " << cnt << std::endl;
+        //        std::cout << "cols: " << image.cols << std::endl;
+        //        std::cout << "rows: " << image.rows << std::endl;
+        //        std::cout << std::endl;
+        //    }
+        //}
 
 
-        camDev.stopCapture();
+        //camDev.stopCapture();
 
 
         camDev.disconnect();

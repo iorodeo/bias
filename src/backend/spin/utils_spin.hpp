@@ -17,6 +17,7 @@ namespace bias
         size_t cols;
         size_t rows;
         size_t stride;
+        size_t dataSize; 
         void *dataPtr;
         spinPixelFormatEnums pixelFormat;
     };
@@ -47,7 +48,7 @@ namespace bias
 
     //spinProperty convertProperty_to_spin(Property prop);
 
-    //spinPixelFormat convertPixelFormat_to_spin(PixelFormat pixFormat);
+    spinPixelFormatEnums convertPixelFormat_to_spin(PixelFormat pixFormat);
 
     //spinFormat7ImageSettings convertFormat7Settings_to_spin(Format7Settings settings);
 
@@ -67,7 +68,7 @@ namespace bias
 
     //PropertyInfo convertPropertyInfo_from_spin(spinPropertyInfo propInfo_spin); 
 
-    //PixelFormat convertPixelFormat_from_spin(spinPixelFormat pixFormat_spin);
+    PixelFormat convertPixelFormat_from_spin(spinPixelFormatEnums pixFormat_spin);
 
     //Format7Settings convertFormat7Settings_from_spin(spinFormat7ImageSettings settings_spin);
 
@@ -108,7 +109,7 @@ namespace bias
     //
     //std::string getInterfaceTypeString_spin(spinInterfaceType ifaceType);
 
-    std::string getPixelFormatString_spin(spinPixelFormatEnums foramt);
+    std::string getPixelFormatString_spin(spinPixelFormatEnums format);
 
     void printAllPixelFormatStrings_spin();
 

@@ -180,14 +180,12 @@ namespace bias {
             //    {
             //        std::cout << "  name:    " << entryNode.name() << ", " << entryNode.displayName() << std::endl;
             //    }
-
             //}
+            //
+            //
 
-            //std::vector<BaseNode_spin> nodeVec = nodeMapTLDevice_.nodes<BaseNode_spin>();
-            //for (auto node : nodeVec)
-            //{
-            //    std::cout << node.name() << ", " << node.valueAsString() << std::endl;
-            //}
+            std::vector<spinPixelFormatEnums> pixelFormatVec = getSupportedPixelFormats_spin();
+
 
 
             // --------------------------------------------------------------------
@@ -611,8 +609,52 @@ namespace bias {
     //}
 
    
-    //ImageInfo CameraDevice_spin::getImageInfo()
-    //{
+    ImageInfo CameraDevice_spin::getImageInfo()
+    {
+
+        // --------------------------------------------------------------------
+        // TODO
+        // --------------------------------------------------------------------
+        //TriggerType savedTrigType = getTriggerType(); 
+        //if (savedTrigType == TRIGGER_EXTERNAL) 
+        //{
+        //    // Temporarily set to internal trigger
+        //    setTriggerInternal();
+        //}
+        //---------------------------------------------------------------------
+
+        ImageInfo imgInfo;
+        
+        std::string errMsg;
+        bool ok = grabImageCommon(errMsg);
+        if (ok)
+        {
+            ImageInfo_spin imgInfo_spin = getImageInfo_spin(hSpinImage_);
+            imgInfo.rows = imgInfo_spin.rows;
+            imgInfo.cols = imgInfo_spin.cols;
+            imgInfo.stride = imgInfo_spin.stride;
+            imgInfo.dataSize = imgInfo_spin.dataSize;
+
+            // ----------------------------------------------------------------
+            // TODO
+            // ----------------------------------------------------------------
+            //imgInf.pixelFormat = ;
+            //-----------------------------------------------------------------
+        }
+
+        //---------------------------------------------------------------------
+        // TODO
+        // --------------------------------------------------------------------
+        //if (savedTrigType == TRIGGER_EXTERNAL) 
+        //{
+        //    // Return to external trigger
+        //    setTriggerExternal();
+        //}
+        //---------------------------------------------------------------------
+
+
+        return imgInfo;
+    }
     //    // Note, this method grab a frame from the camera in order
     //    // to get the image information. 
     //    ImageInfo imgInfo;
@@ -1238,8 +1280,23 @@ namespace bias {
     //}
 
 
-    //// spin get methods
-    //// ---------------
+    // spin get methods
+    // ---------------
+    
+    std::vector<spinPixelFormatEnums> CameraDevice_spin::getSupportedPixelFormats_spin()
+    {   
+        EnumNode_spin pixelFormatNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("PixelFormat");
+        std::vector<EntryNode_spin> pixelFormatEntryVec = pixelFormatNode.entries();
+
+        std::vector<spinPixelFormatEnums> pixelFormatValueVec;
+        for (auto entry: pixelFormatEntryVec)
+        {
+            std::cout << entry.symbolic() << ", " << entry.value() << std::endl;
+            pixelFormatValueVec.push_back(spinPixelFormatEnums(entry.value()));
+        }
+        return pixelFormatValueVec;
+    }
+
 
     //void CameraDevice_spin::getVideoModeAndFrameRate(
     //        spinVideoMode &vidMode, 

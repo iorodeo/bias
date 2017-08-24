@@ -13,7 +13,7 @@ namespace bias
 
     ImageInfo_spin getImageInfo_spin(spinImage hImage)
     {
-        ImageInfo_spin info = {0,0,0,0,0,nullptr,UNKNOWN_PIXELFORMAT};
+        ImageInfo_spin info = {0,0,0,0,0,0,nullptr,UNKNOWN_PIXELFORMAT};
         spinError err = SPINNAKER_ERR_SUCCESS;
 
         err = spinImageGetPaddingX(hImage, &info.xpad);
@@ -59,6 +59,15 @@ namespace bias
             ssError << __PRETTY_FUNCTION__;
             ssError << ": unable to get spinImage stride, error = " << err; 
             throw RuntimeError(ERROR_SPIN_IMAGE_GET_STRIDE, ssError.str());
+        }
+
+        err = spinImageGetSize(hImage, &info.dataSize);
+        if (err != SPINNAKER_ERR_SUCCESS) 
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get image size, error = " << err; 
+            throw RuntimeError(ERROR_SPIN_IMAGE_GET_SIZE, ssError.str());
         }
 
         err = spinImageGetData(hImage,&info.dataPtr);
@@ -374,49 +383,38 @@ namespace bias
     //    return prop_spin;
     //}
 
-    //static std::map<PixelFormat, spinPixelFormat> createPixelFormatMap_to_spin()
-    //{
-    //    std::map<PixelFormat, spinPixelFormat> map;
-    //    map[PIXEL_FORMAT_MONO8]         =   SPIN_PIXEL_FORMAT_MONO8;
-    //    map[PIXEL_FORMAT_411YUV8]       =   SPIN_PIXEL_FORMAT_411YUV8;
-    //    map[PIXEL_FORMAT_422YUV8]       =   SPIN_PIXEL_FORMAT_422YUV8;
-    //    map[PIXEL_FORMAT_444YUV8]       =   SPIN_PIXEL_FORMAT_444YUV8;
-    //    map[PIXEL_FORMAT_RGB8]          =   SPIN_PIXEL_FORMAT_RGB8;
-    //    map[PIXEL_FORMAT_MONO16]        =   SPIN_PIXEL_FORMAT_MONO16;
-    //    map[PIXEL_FORMAT_RGB16]         =   SPIN_PIXEL_FORMAT_RGB16;
-    //    map[PIXEL_FORMAT_S_MONO16]      =   SPIN_PIXEL_FORMAT_S_MONO16;
-    //    map[PIXEL_FORMAT_S_RGB16]       =   SPIN_PIXEL_FORMAT_S_RGB16;
-    //    map[PIXEL_FORMAT_RAW8]          =   SPIN_PIXEL_FORMAT_RAW8;
-    //    map[PIXEL_FORMAT_RAW16]         =   SPIN_PIXEL_FORMAT_RAW16;
-    //    map[PIXEL_FORMAT_MONO12]        =   SPIN_PIXEL_FORMAT_MONO12;
-    //    map[PIXEL_FORMAT_RAW12]         =   SPIN_PIXEL_FORMAT_RAW12;
-    //    map[PIXEL_FORMAT_BGR8]          =   SPIN_PIXEL_FORMAT_BGR;
-    //    map[PIXEL_FORMAT_BGRU]          =   SPIN_PIXEL_FORMAT_BGRU;
-    //    map[PIXEL_FORMAT_RGBU]          =   SPIN_PIXEL_FORMAT_RGBU;
-    //    map[PIXEL_FORMAT_BGR16]         =   SPIN_PIXEL_FORMAT_BGR16;
-	//    map[PIXEL_FORMAT_BGRU16]        =   SPIN_PIXEL_FORMAT_BGRU16;
-    //    map[PIXEL_FORMAT_422YUV8_JPEG]  =   SPIN_PIXEL_FORMAT_422YUV8_JPEG;
-    //    return map;
-    //};
 
-    //static std::map<PixelFormat, spinPixelFormat> pixelFormatMap_to_spin = 
-    //    createPixelFormatMap_to_spin();
+    static std::map<PixelFormat, spinPixelFormatEnums> pixelFormatMap_to_spin = 
+    {
+        {PIXEL_FORMAT_MONO8,     PixelFormat_Mono8},
+        {PIXEL_FORMAT_411YUV8,   PixelFormat_YUV411_8_UYYVYY},
+        {PIXEL_FORMAT_422YUV8,   PixelFormat_YUV422_8},
+        {PIXEL_FORMAT_444YUV8,   PixelFormat_YUV8_UYV},
+        {PIXEL_FORMAT_RGB8,      PixelFormat_RGB8},
+        {PIXEL_FORMAT_MONO16,    PixelFormat_Mono16},
+        {PIXEL_FORMAT_RGB16,     PixelFormat_RGB16},
+        {PIXEL_FORMAT_RAW8,      PixelFormat_Raw8},
+        {PIXEL_FORMAT_RAW16,     PixelFormat_Raw16},
+        {PIXEL_FORMAT_MONO12,    PixelFormat_Mono12},
+        {PIXEL_FORMAT_BGR8,      PixelFormat_BGR8},
+        {PIXEL_FORMAT_BGR16,     PixelFormat_BGR16}
+    };
 
-    //spinPixelFormat convertPixelFormat_to_spin(PixelFormat pixFormat)
-    //{
-    //    if (pixelFormatMap_to_spin.count(pixFormat) != 0)
-    //    {
-    //        return pixelFormatMap_to_spin[pixFormat];
-    //    }
-    //    else
-    //    {
-    //        std::stringstream ssError;
-    //        ssError << __PRETTY_FUNCTION__;
-    //        ssError << ": unable to convert pixel format to Spinnaker ";
-    //        ssError << "imaging mode";
-    //        throw RuntimeError(ERROR_SPIN_CONVERT_PIXEL_FORMAT, ssError.str());
-    //    }
-    //}
+    spinPixelFormatEnums convertPixelFormat_to_spin(PixelFormat pixFormat)
+    {
+        if (pixelFormatMap_to_spin.count(pixFormat) != 0)
+        {
+            return pixelFormatMap_to_spin[pixFormat];
+        }
+        else
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to convert pixel format to Spinnaker ";
+            ssError << "imaging mode";
+            throw RuntimeError(ERROR_SPIN_CONVERT_PIXEL_FORMAT, ssError.str());
+        }
+    }
 
 
     //spinFormat7ImageSettings convertFormat7Settings_to_spin(Format7Settings settings)
@@ -659,48 +657,40 @@ namespace bias
     //    return propInfo;
     //}
 
-    //static std::map<spinPixelFormat, PixelFormat> createPixelFormatMap_from_spin()
-    //{
-    //    std::map<spinPixelFormat, PixelFormat> map;
-    //    map[SPIN_PIXEL_FORMAT_MONO8]         =   PIXEL_FORMAT_MONO8;
-    //    map[SPIN_PIXEL_FORMAT_411YUV8]       =   PIXEL_FORMAT_411YUV8;
-    //    map[SPIN_PIXEL_FORMAT_422YUV8]       =   PIXEL_FORMAT_422YUV8;
-    //    map[SPIN_PIXEL_FORMAT_444YUV8]       =   PIXEL_FORMAT_444YUV8;
-    //    map[SPIN_PIXEL_FORMAT_RGB8]          =   PIXEL_FORMAT_RGB8;
-    //    map[SPIN_PIXEL_FORMAT_MONO16]        =   PIXEL_FORMAT_MONO16;
-    //    map[SPIN_PIXEL_FORMAT_RGB16]         =   PIXEL_FORMAT_RGB16;
-    //    map[SPIN_PIXEL_FORMAT_S_MONO16]      =   PIXEL_FORMAT_S_MONO16;
-    //    map[SPIN_PIXEL_FORMAT_S_RGB16]       =   PIXEL_FORMAT_S_RGB16;
-    //    map[SPIN_PIXEL_FORMAT_RAW8]          =   PIXEL_FORMAT_RAW8;
-    //    map[SPIN_PIXEL_FORMAT_RAW16]         =   PIXEL_FORMAT_RAW16;
-    //    map[SPIN_PIXEL_FORMAT_MONO12]        =   PIXEL_FORMAT_MONO12;
-    //    map[SPIN_PIXEL_FORMAT_RAW12]         =   PIXEL_FORMAT_RAW12;
-    //    map[SPIN_PIXEL_FORMAT_BGR]           =   PIXEL_FORMAT_BGR8;
-    //    map[SPIN_PIXEL_FORMAT_BGRU]          =   PIXEL_FORMAT_BGRU;
-    //    map[SPIN_PIXEL_FORMAT_RGBU]          =   PIXEL_FORMAT_RGBU;
-    //    map[SPIN_PIXEL_FORMAT_BGR16]         =   PIXEL_FORMAT_BGR16;
-	//    map[SPIN_PIXEL_FORMAT_BGRU16]        =   PIXEL_FORMAT_BGRU16;
-    //    map[SPIN_PIXEL_FORMAT_422YUV8_JPEG]  =   PIXEL_FORMAT_422YUV8_JPEG;
-    //    return map;
-    //};
 
     //static std::map<spinPixelFormat, PixelFormat> pixelFormatMap_from_spin = 
     //    createPixelFormatMap_from_spin();
 
-    //PixelFormat convertPixelFormat_from_spin(spinPixelFormat pixFormat_spin)
-    //{
-    //    if (pixelFormatMap_from_spin.count(pixFormat_spin) != 0)
-    //    {
-    //        return pixelFormatMap_from_spin[pixFormat_spin];
-    //    }
-    //    else
-    //    {
-    //        std::stringstream ssError;
-    //        ssError << __PRETTY_FUNCTION__;
-    //        ssError << ": unable to convert pixel format from FlyCaptuer2";
-    //        throw RuntimeError(ERROR_SPIN_CONVERT_PROPERTY_TYPE, ssError.str());
-    //    }
-    //}
+    static std::map<spinPixelFormatEnums, PixelFormat> pixelFormatMap_from_spin = 
+    {
+        {PixelFormat_Mono8,           PIXEL_FORMAT_MONO8},
+        {PixelFormat_YUV411_8_UYYVYY, PIXEL_FORMAT_411YUV8},
+        {PixelFormat_YUV422_8,        PIXEL_FORMAT_422YUV8},
+        {PixelFormat_YUV8_UYV,        PIXEL_FORMAT_444YUV8},
+        {PixelFormat_RGB8,            PIXEL_FORMAT_RGB8},
+        {PixelFormat_Mono16,          PIXEL_FORMAT_MONO16},
+        {PixelFormat_RGB16,           PIXEL_FORMAT_RGB16},
+        {PixelFormat_Raw8,            PIXEL_FORMAT_RAW8},
+        {PixelFormat_Raw16,           PIXEL_FORMAT_RAW16},
+        {PixelFormat_Mono12,          PIXEL_FORMAT_MONO12},
+        {PixelFormat_BGR8,            PIXEL_FORMAT_BGR8},
+        {PixelFormat_BGR16,           PIXEL_FORMAT_BGR16}
+    };
+    
+    PixelFormat convertPixelFormat_from_spin(spinPixelFormatEnums pixFormat_spin)
+    {
+        if (pixelFormatMap_from_spin.count(pixFormat_spin) != 0)
+        {
+            return pixelFormatMap_from_spin[pixFormat_spin];
+        }
+        else
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to convert pixel format from FlyCaptuer2";
+            throw RuntimeError(ERROR_SPIN_CONVERT_PIXEL_FORMAT, ssError.str());
+        }
+    }
 
 
     //Format7Settings convertFormat7Settings_from_spin(spinFormat7ImageSettings settings_spin)
