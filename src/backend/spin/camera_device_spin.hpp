@@ -34,7 +34,8 @@ namespace bias {
             virtual cv::Mat grabImage();
             virtual void grabImage(cv::Mat &image);
 
-            //virtual bool isColor();
+            virtual bool isColor();
+            
             //virtual bool isSupported(VideoMode vidMode, FrameRate frmRate);
             //virtual bool isSupported(ImageMode imgMode);
             //virtual unsigned int getNumberOfImageMode();
@@ -49,7 +50,7 @@ namespace bias {
 
             //virtual Property getProperty(PropertyType propType);
             //virtual PropertyInfo getPropertyInfo(PropertyType propType);
-            virtual ImageInfo getImageInfo();
+            //virtual ImageInfo getImageInfo();
 
             //virtual void setProperty(Property prop);
             //virtual void setVideoMode(VideoMode vidMode, FrameRate frmRate);

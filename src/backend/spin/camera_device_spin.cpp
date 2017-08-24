@@ -393,10 +393,22 @@ namespace bias {
     }
 
 
-    //bool CameraDevice_spin::isColor()
-    //{
-    //    return bool(cameraInfo_.isColorCamera);
-    //} 
+    bool CameraDevice_spin::isColor()
+    {
+        std::vector<spinPixelFormatEnums> cameraPixelFormats = getSupportedPixelFormats_spin();
+        std::vector<spinPixelFormatEnums> colorFormats = getAllowedColorPixelFormats_spin(); 
+
+        bool test = false;
+        for (auto format : cameraPixelFormats)
+        {
+            test = std::find(colorFormats.begin(), colorFormats.end(), format) != colorFormats.end();
+            if (test)
+            {
+                break;
+            }
+        }
+        return test;
+    } 
 
     //
     //VideoMode CameraDevice_spin::getVideoMode() 
@@ -609,85 +621,6 @@ namespace bias {
     //}
 
    
-    ImageInfo CameraDevice_spin::getImageInfo()
-    {
-
-        // --------------------------------------------------------------------
-        // TODO
-        // --------------------------------------------------------------------
-        //TriggerType savedTrigType = getTriggerType(); 
-        //if (savedTrigType == TRIGGER_EXTERNAL) 
-        //{
-        //    // Temporarily set to internal trigger
-        //    setTriggerInternal();
-        //}
-        //---------------------------------------------------------------------
-
-        ImageInfo imgInfo;
-        
-        std::string errMsg;
-        bool ok = grabImageCommon(errMsg);
-        if (ok)
-        {
-            ImageInfo_spin imgInfo_spin = getImageInfo_spin(hSpinImage_);
-            imgInfo.rows = imgInfo_spin.rows;
-            imgInfo.cols = imgInfo_spin.cols;
-            imgInfo.stride = imgInfo_spin.stride;
-            imgInfo.dataSize = imgInfo_spin.dataSize;
-
-            // ----------------------------------------------------------------
-            // TODO
-            // ----------------------------------------------------------------
-            //imgInf.pixelFormat = ;
-            //-----------------------------------------------------------------
-        }
-
-        //---------------------------------------------------------------------
-        // TODO
-        // --------------------------------------------------------------------
-        //if (savedTrigType == TRIGGER_EXTERNAL) 
-        //{
-        //    // Return to external trigger
-        //    setTriggerExternal();
-        //}
-        //---------------------------------------------------------------------
-
-
-        return imgInfo;
-    }
-    //    // Note, this method grab a frame from the camera in order
-    //    // to get the image information. 
-    //    ImageInfo imgInfo;
-    //    PixelFormat pixFormat;
-
-    //    TriggerType savedTrigType = getTriggerType(); 
-
-    //    if (savedTrigType == TRIGGER_EXTERNAL) 
-    //    {
-    //        // Temporarily set to internal trigger
-    //        setTriggerInternal();
-    //    }
-
-    //    std::string errMsg;
-    //    bool ok = grabImageCommon(errMsg);
-    //    if (ok)
-    //    {
-    //        imgInfo.rows = rawImage_.rows;
-    //        imgInfo.cols = rawImage_.cols;
-    //        imgInfo.stride = rawImage_.stride;
-    //        imgInfo.dataSize = rawImage_.dataSize;
-    //        pixFormat = convertPixelFormat_from_spin(rawImage_.format);
-    //        imgInfo.pixelFormat = pixFormat; 
-
-    //        if (savedTrigType == TRIGGER_EXTERNAL) 
-    //        {
-    //            // Return to external trigger
-    //            setTriggerExternal();
-    //        }
-    //    }
-    //    return imgInfo;
-    //}
-
 
     //Format7Settings CameraDevice_spin::getFormat7Settings()
     //{

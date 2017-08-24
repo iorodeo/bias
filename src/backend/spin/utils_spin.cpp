@@ -91,6 +91,56 @@ namespace bias
         return info;
     }
 
+
+
+    std::vector<spinPixelFormatEnums> getAllowedPixelFormats_spin()
+    {
+        std::vector<spinPixelFormatEnums>  formatsVec = 
+        {
+            PixelFormat_Mono8,
+            PixelFormat_YUV411_8_UYYVYY,
+            PixelFormat_YUV422_8,
+            PixelFormat_YUV8_UYV,
+            PixelFormat_RGB8,
+            PixelFormat_Mono16,
+            PixelFormat_RGB16,
+            PixelFormat_Raw8,
+            PixelFormat_Raw16,
+            PixelFormat_Mono12,
+            PixelFormat_BGR8,
+            PixelFormat_BGR16
+        };
+        return formatsVec;
+    }
+
+    std::vector<spinPixelFormatEnums> getAllowedColorPixelFormats_spin()
+    {
+        std::vector<spinPixelFormatEnums>  formatsVec = 
+        {
+            PixelFormat_YUV411_8_UYYVYY,
+            PixelFormat_YUV422_8,
+            PixelFormat_YUV8_UYV,
+            PixelFormat_RGB8,
+            PixelFormat_RGB16,
+            PixelFormat_BGR8,
+            PixelFormat_BGR16
+        };
+        return formatsVec;
+    }
+
+    std::vector<spinPixelFormatEnums> getAllowedMonoPixelFormats_spin()
+    {
+        std::vector<spinPixelFormatEnums>  formatsVec = 
+        {
+            PixelFormat_Mono8,
+            PixelFormat_Mono16,
+            PixelFormat_Raw8,
+            PixelFormat_Raw16,
+            PixelFormat_Mono12,
+        };
+        return formatsVec;
+    }
+
     //// Image conversion - for mapping from Spinnaker to opencv 
     //// -----------------------------------------------------------------------
     //

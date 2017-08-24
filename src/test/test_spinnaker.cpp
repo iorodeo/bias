@@ -30,6 +30,9 @@ int main(int argc, char *argv[])
         std::cout << "modelName:  "  << camDev.getModelName() << std::endl;
         std::cout << "vendorName: "  << camDev.getVendorName() << std::endl;
 
+
+        bool isColor = camDev.isColor();
+        std::cout << "isColor: " << isColor << std::endl;
         //camDev.startCapture();
         //cv::namedWindow("preview", CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED); 
 

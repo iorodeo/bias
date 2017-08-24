@@ -6,6 +6,7 @@
 #include "property.hpp"
 #include "format7.hpp"
 #include <string>
+#include <vector>
 #include "SpinnakerC.h"
 
 namespace bias 
@@ -24,6 +25,12 @@ namespace bias
 
 
     ImageInfo_spin getImageInfo_spin(spinImage hImage);
+
+    std::vector<spinPixelFormatEnums> getAllowedPixelFormats_spin();
+
+    std::vector<spinPixelFormatEnums> getAllowedColorPixelFormats_spin();
+
+    std::vector<spinPixelFormatEnums> getAllowedMonoPixelFormats_spin();
 
 
 
