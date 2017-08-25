@@ -242,53 +242,40 @@ namespace bias
         return convPixFormat;
     }
 
-    //    spinPixelFormat convPixFormat = SPIN_PIXEL_FORMAT_MONO8;
 
-    //    switch (pixFormat)
-    //    {
-    //        case SPIN_PIXEL_FORMAT_RAW8:
-    //            convPixFormat = SPIN_PIXEL_FORMAT_RAW8;
-    //            break;
+    int getCompatibleOpencvFormat(spinPixelFormatEnums pixFormat)
+    {
+        int opencvFormat = CV_8UC1;
 
-    //        case SPIN_PIXEL_FORMAT_MONO8:
-    //            convPixFormat = SPIN_PIXEL_FORMAT_MONO8;
-    //            break;
+        switch (pixFormat)
+        {
+            case PixelFormat_Raw8:
+            case PixelFormat_Mono8:
+                opencvFormat = CV_8UC1;
+                break;
 
-    //        case SPIN_PIXEL_FORMAT_RAW12:
-    //        case SPIN_PIXEL_FORMAT_RAW16:
-    //        case SPIN_PIXEL_FORMAT_MONO12:
-    //        case SPIN_PIXEL_FORMAT_MONO16:
-    //        case SPIN_PIXEL_FORMAT_S_MONO16:
-    //            convPixFormat = SPIN_PIXEL_FORMAT_MONO16;
-    //            break;
+            case PixelFormat_Raw16:
+            case PixelFormat_Mono16:
+                opencvFormat = CV_16UC1;
+                break;
 
-    //        case SPIN_PIXEL_FORMAT_RGB16:
-    //        case SPIN_PIXEL_FORMAT_S_RGB16:
-    //        case SPIN_PIXEL_FORMAT_BGR:
-    //        case SPIN_PIXEL_FORMAT_BGRU:
-    //        case SPIN_PIXEL_FORMAT_RGB:
-    //        case SPIN_PIXEL_FORMAT_RGBU:
-    //        case SPIN_PIXEL_FORMAT_BGR16:
-	//        case SPIN_PIXEL_FORMAT_BGRU16:
-    //        case SPIN_PIXEL_FORMAT_422YUV8_JPEG:
-    //        case SPIN_PIXEL_FORMAT_411YUV8:
-    //        case SPIN_PIXEL_FORMAT_422YUV8:
-    //        case SPIN_PIXEL_FORMAT_444YUV8:
-    //            convPixFormat = SPIN_PIXEL_FORMAT_BGR;
-    //            break;
+            case PixelFormat_BGR8:
+                opencvFormat = CV_8UC3;
+                break;
 
-    //        default:
-    //            break;
-    //    }
+            case PixelFormat_BGR16:
+                opencvFormat = CV_16UC3;
+                break;
 
-    //    return convPixFormat;
+            default:
+                std::stringstream ssError;
+                ssError << "no compatible opencv format" << std::endl;
+                throw RuntimeError(ERROR_SPIN_NO_COMPATIBLE_OPENCV_FORMAT, ssError.str());
+                break;
+        }
 
-    //}
-
-
-    //int getCompatibleOpencvFormat(spinPixelFormat pixFormat)
-    //{
-    //    int opencvFormat = CV_8UC1;
+        return opencvFormat;
+    }
 
     //    switch (pixFormat)
     //    {
