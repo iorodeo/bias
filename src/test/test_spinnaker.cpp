@@ -33,33 +33,36 @@ int main(int argc, char *argv[])
 
         bool isColor = camDev.isColor();
         std::cout << "isColor: " << isColor << std::endl;
-        //camDev.startCapture();
-        //cv::namedWindow("preview", CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED); 
 
-        //int cnt = 0;
-        //while (cnt < 10)
-        //{
+        if (true)
+        {
+            camDev.startCapture();
+            cv::namedWindow("preview", CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED); 
 
-        //    cv::Mat image = camDev.grabImage();
-        //    if (image.empty())
-        //    {
-        //        continue;
-        //    }
-        //    else
-        //    {
-        //        cv::imshow("preview", image);
-        //        cv::waitKey(1);
-    
-        //        cnt++;
-        //        std::cout << "cnt:  " << cnt << std::endl;
-        //        std::cout << "cols: " << image.cols << std::endl;
-        //        std::cout << "rows: " << image.rows << std::endl;
-        //        std::cout << std::endl;
-        //    }
-        //}
+            int cnt = 0;
+            while (cnt < 100)
+            {
 
+                cv::Mat image = camDev.grabImage();
+                if (image.empty())
+                {
+                    continue;
+                }
+                else
+                {
+                    cv::imshow("preview", image);
+                    cv::waitKey(1);
 
-        //camDev.stopCapture();
+                    cnt++;
+                    std::cout << "cnt:  " << cnt << std::endl;
+                    std::cout << "cols: " << image.cols << std::endl;
+                    std::cout << "rows: " << image.rows << std::endl;
+                    std::cout << std::endl;
+                }
+            }
+
+            camDev.stopCapture();
+        }
 
 
         camDev.disconnect();

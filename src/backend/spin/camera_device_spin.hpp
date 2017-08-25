@@ -100,7 +100,6 @@ namespace bias {
             //bool haveEmbeddedTimeStamp_;
 
             bool imageOK_ = false;
-
             spinImage hSpinImage_ = nullptr;
 
             //void initialize();

@@ -24,6 +24,8 @@ namespace bias
     };
 
 
+    spinPixelFormatEnums getImagePixelFormat_spin(spinImage hImage);
+
     ImageInfo_spin getImageInfo_spin(spinImage hImage);
 
     std::vector<spinPixelFormatEnums> getAllowedPixelFormats_spin();
@@ -34,12 +36,12 @@ namespace bias
 
 
 
-    //// Image conversion - for mapping from Spinnaker to opencv 
-    //// -----------------------------------------------------------------------
+    // Image conversion - for mapping from Spinnaker to opencv 
+    // -----------------------------------------------------------------------
 
-    //spinPixelFormat getSuitablePixelFormat(spinPixelFormat pixFormat);
+    spinPixelFormatEnums getSuitablePixelFormat(spinPixelFormatEnums pixFormat);
 
-    //int getCompatibleOpencvFormat(spinPixelFormat pixFormat);
+    //int getCompatibleOpencvFormat(spinPixelFormatEnums pixFormat);
 
 
     //// Conversion from BIAS types to Spinnaker  types

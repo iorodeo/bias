@@ -11,6 +11,21 @@ namespace bias
 {
     const size_t MAX_BUF_LEN = 256;
 
+    spinPixelFormatEnums getImagePixelFormat_spin(spinImage hImage)
+    {
+        spinPixelFormatEnums pixelFormat = UNKNOWN_PIXELFORMAT;
+        spinError err = SPINNAKER_ERR_SUCCESS;
+        err = spinImageGetPixelFormat(hImage, &pixelFormat);
+        if (err != SPINNAKER_ERR_SUCCESS) 
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to get spinImage pixel format, error = " << err; 
+            throw RuntimeError(ERROR_SPIN_IMAGE_GET_PIXEL_FORMAT, ssError.str());
+        }
+        return pixelFormat;
+    }
+
     ImageInfo_spin getImageInfo_spin(spinImage hImage)
     {
         ImageInfo_spin info = {0,0,0,0,0,0,nullptr,UNKNOWN_PIXELFORMAT};
@@ -141,11 +156,92 @@ namespace bias
         return formatsVec;
     }
 
-    //// Image conversion - for mapping from Spinnaker to opencv 
-    //// -----------------------------------------------------------------------
-    //
-    //spinPixelFormat getSuitablePixelFormat(spinPixelFormat pixFormat)
-    //{
+    // Image conversion - for mapping from Spinnaker to opencv 
+    // -----------------------------------------------------------------------
+    
+    spinPixelFormatEnums getSuitablePixelFormat(spinPixelFormatEnums pixFormat)
+    {
+        spinPixelFormatEnums convPixFormat = UNKNOWN_PIXELFORMAT;
+
+        switch (pixFormat)
+        {
+            case UNKNOWN_PIXELFORMAT:
+                convPixFormat = UNKNOWN_PIXELFORMAT;
+
+            case PixelFormat_Raw8:
+                convPixFormat = PixelFormat_Raw8;
+                break;
+
+            case PixelFormat_Mono8:
+                convPixFormat = PixelFormat_Mono8;
+                break;
+
+            case PixelFormat_Raw16:
+                convPixFormat = PixelFormat_Raw16;
+                break;
+
+            case PixelFormat_Mono16:
+                convPixFormat = PixelFormat_Mono16;
+                break;
+
+            case PixelFormat_BGR8:
+            case PixelFormat_RGB8:
+                convPixFormat = PixelFormat_BGR8;
+                break;
+
+            case PixelFormat_BGR16:
+            case PixelFormat_RGB16:
+                convPixFormat = PixelFormat_BGR16;
+                break;
+
+            case PixelFormat_Mono1p:
+            case PixelFormat_Mono2p:
+            case PixelFormat_Mono4p:
+            case PixelFormat_Mono8s:
+            case PixelFormat_R8:
+            case PixelFormat_G8:
+            case PixelFormat_B8:
+            case PixelFormat_RGB8Packed:
+                convPixFormat = PixelFormat_Mono8;
+                break;
+
+            case PixelFormat_Mono10:
+            case PixelFormat_Mono10p:
+            case PixelFormat_Mono12:
+            case PixelFormat_Mono12p:
+            case PixelFormat_Mono14:
+            case PixelFormat_R10:
+            case PixelFormat_R12:
+            case PixelFormat_R16:
+            case PixelFormat_G10:
+            case PixelFormat_G12:
+            case PixelFormat_G16:
+            case PixelFormat_B10:
+            case PixelFormat_B12:
+            case PixelFormat_B16:
+            case PixelFormat_Mono10Packed:
+            case PixelFormat_Mono12Packed:
+                convPixFormat = PixelFormat_Mono16;
+                break;
+
+            case PixelFormat_RGBa8:
+            case PixelFormat_BGRa8:
+            case PixelFormat_BayerBG8:
+            case PixelFormat_BayerGB8:
+            case PixelFormat_BayerGR8:
+            case PixelFormat_BayerRG8:
+            case PixelFormat_RGB8_Planar:
+                convPixFormat = PixelFormat_BGR8;
+                break;
+
+            default:
+                convPixFormat = PixelFormat_BGR16;
+                break;
+
+        }
+        return convPixFormat;
+    }
+
     //    spinPixelFormat convPixFormat = SPIN_PIXEL_FORMAT_MONO8;
 
     //    switch (pixFormat)
@@ -1578,5 +1674,6 @@ namespace bias
 
 
 } // namespece bias
+
 
 #endif // #ifdef WITH_SPIN

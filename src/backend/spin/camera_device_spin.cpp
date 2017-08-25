@@ -356,8 +356,11 @@ namespace bias {
         // * opencv getCompatibleOpencvFormat
         //
         // ----------------------------------------------------------------------------
-
         
+        spinPixelFormatEnums origPixelFormat = getImagePixelFormat_spin(hSpinImage_);
+        spinPixelFormatEnums convPixelFormat = getSuitablePixelFormat(origPixelFormat);
+        
+        //err = spinImageConvert(hSpinImage_, convPixelFormat, hSpinImageConv);
         err = spinImageConvert(hSpinImage_, PixelFormat_BGR8, hSpinImageConv);
         if (err != SPINNAKER_ERR_SUCCESS) 
         {
