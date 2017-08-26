@@ -167,22 +167,22 @@ namespace bias {
             std::cout << "# Camera nodes:   " << (nodeMapCamera_.numberOfNodes()) << std::endl;
             std::cout << std::endl;
 
-            ////std::vector<EnumNode_spin> enumNodeVec = nodeMapTLDevice_.nodes<EnumNode_spin>();
-            //std::vector<EnumNode_spin> enumNodeVec = nodeMapCamera_.nodes<EnumNode_spin>();
-            //for (auto enumNode : enumNodeVec)
-            //{
+            //std::vector<EnumNode_spin> enumNodeVec = nodeMapTLDevice_.nodes<EnumNode_spin>();
+            std::vector<EnumNode_spin> enumNodeVec = nodeMapCamera_.nodes<EnumNode_spin>();
+            for (auto enumNode : enumNodeVec)
+            {
 
-            //    std::cout << "name: " << enumNode.name() << ", numberOfEntries: " << enumNode.numberOfEntries() << std::endl;
-            //    std::vector<EntryNode_spin> entryNodeVec = enumNode.entries();
-            //    EntryNode_spin currEntryNode = enumNode.currentEntry();
-            //    std::cout << "  current: " << currEntryNode.name() << std::endl;
-            //    for (auto entryNode : entryNodeVec)
-            //    {
-            //        std::cout << "  name:    " << entryNode.name() << ", " << entryNode.displayName() << std::endl;
-            //    }
-            //}
-            //
-            //
+                std::cout << "name: " << enumNode.name() << ", numberOfEntries: " << enumNode.numberOfEntries() << std::endl;
+                std::vector<EntryNode_spin> entryNodeVec = enumNode.entries();
+                EntryNode_spin currEntryNode = enumNode.currentEntry();
+                std::cout << "  current: " << currEntryNode.name() << std::endl;
+                for (auto entryNode : entryNodeVec)
+                {
+                    std::cout << "  name:    " << entryNode.name() << ", " << entryNode.displayName() << std::endl;
+                }
+            }
+            
+            
 
             std::vector<spinPixelFormatEnums> pixelFormatVec = getSupportedPixelFormats_spin();
 
@@ -360,8 +360,8 @@ namespace bias {
         spinPixelFormatEnums origPixelFormat = getImagePixelFormat_spin(hSpinImage_);
         spinPixelFormatEnums convPixelFormat = getSuitablePixelFormat(origPixelFormat);
         
-        //err = spinImageConvert(hSpinImage_, convPixelFormat, hSpinImageConv);
-        err = spinImageConvert(hSpinImage_, PixelFormat_BGR8, hSpinImageConv);
+        err = spinImageConvert(hSpinImage_, convPixelFormat, hSpinImageConv);
+        //err = spinImageConvert(hSpinImage_, PixelFormat_BGR8, hSpinImageConv);
         if (err != SPINNAKER_ERR_SUCCESS) 
         {
             std::stringstream ssError;
@@ -370,14 +370,15 @@ namespace bias {
             throw RuntimeError(ERROR_SPIN_IMAGE_CONVERT, ssError.str());
         }
 
-        // Get image information and copy to opencv image
         ImageInfo_spin imageInfo = getImageInfo_spin(hSpinImageConv);
 
+        int opencvPixelFormat = getCompatibleOpencvFormat(convPixelFormat);
 
         cv::Mat imageTmp = cv::Mat( 
                 imageInfo.rows+imageInfo.ypad, 
                 imageInfo.cols+imageInfo.xpad, 
-                CV_8UC3, imageInfo.dataPtr, 
+                opencvPixelFormat, 
+                imageInfo.dataPtr, 
                 imageInfo.stride
                 );
 
@@ -449,9 +450,12 @@ namespace bias {
     //} 
 
 
-    //VideoModeList CameraDevice_spin::getAllowedVideoModes()
-    //{
-    //    VideoModeList allowedVideoModes;
+    VideoModeList CameraDevice_spin::getAllowedVideoModes()
+    {
+        VideoModeList allowedVideoModes = {VIDEOMODE_FORMAT7}; 
+        return allowedVideoModes;
+
+    }
     //    bool supported;
 
     //    // Test for non-format7 vidModes
@@ -560,7 +564,6 @@ namespace bias {
 
     //ImageModeList CameraDevice_spin::getAllowedImageModes()
     //{
-    //    ImageModeList allowedImageModes;
     //    ImageModeList allImageModes = getListOfImageModes();
     //    ImageModeList::iterator it;
     //    bool supported;
@@ -1227,7 +1230,7 @@ namespace bias {
         std::vector<spinPixelFormatEnums> pixelFormatValueVec;
         for (auto entry: pixelFormatEntryVec)
         {
-            std::cout << entry.symbolic() << ", " << entry.value() << std::endl;
+            //std::cout << entry.symbolic() << ", " << entry.value() << std::endl;
             pixelFormatValueVec.push_back(spinPixelFormatEnums(entry.value()));
         }
         return pixelFormatValueVec;

@@ -44,7 +44,7 @@ namespace bias {
             //virtual FrameRate getFrameRate();
             //virtual ImageMode getImageMode();
 
-            //virtual VideoModeList getAllowedVideoModes();
+            virtual VideoModeList getAllowedVideoModes();
             //virtual FrameRateList getAllowedFrameRates(VideoMode vidMode);
             //virtual ImageModeList getAllowedImageModes();
 

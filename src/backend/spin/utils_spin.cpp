@@ -169,17 +169,11 @@ namespace bias
                 convPixFormat = UNKNOWN_PIXELFORMAT;
 
             case PixelFormat_Raw8:
-                convPixFormat = PixelFormat_Raw8;
-                break;
-
             case PixelFormat_Mono8:
                 convPixFormat = PixelFormat_Mono8;
                 break;
 
             case PixelFormat_Raw16:
-                convPixFormat = PixelFormat_Raw16;
-                break;
-
             case PixelFormat_Mono16:
                 convPixFormat = PixelFormat_Mono16;
                 break;
@@ -277,34 +271,6 @@ namespace bias
         return opencvFormat;
     }
 
-    //    switch (pixFormat)
-    //    {
-    //        case SPIN_PIXEL_FORMAT_RAW8:
-    //        case SPIN_PIXEL_FORMAT_MONO8:
-    //            opencvFormat = CV_8UC1;
-    //            break;
-
-    //        case SPIN_PIXEL_FORMAT_MONO16:
-    //            opencvFormat = CV_16UC1;
-    //            break;
-
-    //        case SPIN_PIXEL_FORMAT_BGR:
-    //            opencvFormat = CV_8UC3;
-    //            break;
-
-    //        default:
-    //            std::stringstream ssError;
-    //            ssError << "no compatible opencv format" << std::endl;
-    //            throw RuntimeError(
-    //                    ERROR_SPIN_NO_COMPATIBLE_OPENCV_FORMAT, 
-    //                    ssError.str()
-    //                    );
-    //            break;
-
-    //    }
-    //    return opencvFormat;
-    //}
-    //
     //// Conversion from BIAS types to Spinnaker types
     //// ------------------------------------------------------------------------
 

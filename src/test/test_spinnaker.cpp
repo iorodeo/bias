@@ -34,13 +34,13 @@ int main(int argc, char *argv[])
         bool isColor = camDev.isColor();
         std::cout << "isColor: " << isColor << std::endl;
 
-        if (true)
+        if (false)
         {
             camDev.startCapture();
             cv::namedWindow("preview", CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED); 
 
             int cnt = 0;
-            while (cnt < 100)
+            while (cnt < 1000)
             {
 
                 cv::Mat image = camDev.grabImage();
