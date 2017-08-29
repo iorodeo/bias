@@ -36,17 +36,17 @@ namespace bias {
 
             virtual bool isColor();
             
-            //virtual bool isSupported(VideoMode vidMode, FrameRate frmRate);
-            //virtual bool isSupported(ImageMode imgMode);
-            //virtual unsigned int getNumberOfImageMode();
+            virtual bool isSupported(VideoMode vidMode, FrameRate frmRate);
+            virtual bool isSupported(ImageMode imgMode);
+            virtual unsigned int getNumberOfImageMode();
 
-            //virtual VideoMode getVideoMode();
-            //virtual FrameRate getFrameRate();
-            //virtual ImageMode getImageMode();
+            virtual VideoMode getVideoMode();
+            virtual FrameRate getFrameRate();
+            virtual ImageMode getImageMode();
 
             virtual VideoModeList getAllowedVideoModes();
-            //virtual FrameRateList getAllowedFrameRates(VideoMode vidMode);
-            //virtual ImageModeList getAllowedImageModes();
+            virtual FrameRateList getAllowedFrameRates(VideoMode vidMode);
+            virtual ImageModeList getAllowedImageModes();
 
             //virtual Property getProperty(PropertyType propType);
             //virtual PropertyInfo getPropertyInfo(PropertyType propType);

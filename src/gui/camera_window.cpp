@@ -3563,7 +3563,10 @@ namespace bias
     void CameraWindow::updateAllMenus()
     {
         updateFileMenu();
-        updateCameraMenu();
+        // SPIN DEVEL TEMPORARY TODO 
+        // -------------------------------------------
+        //updateCameraMenu();
+        // -------------------------------------------
         updateLoggingMenu();
         updateTimerMenu();
         updateDisplayMenu();

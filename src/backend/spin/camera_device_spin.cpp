@@ -77,15 +77,12 @@ namespace bias {
 
     CameraLib CameraDevice_spin::getCameraLib() 
     { 
-        //std::cout << __PRETTY_FUNCTION__ << std::endl;
         return guid_.getCameraLib(); 
     }
 
 
     void CameraDevice_spin::connect() 
     {
-        //std::cout << __PRETTY_FUNCTION__ << std::endl;
-
         if (!connected_) 
         {
             spinError err = SPINNAKER_ERR_SUCCESS;
@@ -168,23 +165,21 @@ namespace bias {
             std::cout << std::endl;
 
             //std::vector<EnumNode_spin> enumNodeVec = nodeMapTLDevice_.nodes<EnumNode_spin>();
-            std::vector<EnumNode_spin> enumNodeVec = nodeMapCamera_.nodes<EnumNode_spin>();
-            for (auto enumNode : enumNodeVec)
-            {
+            //std::vector<EnumNode_spin> enumNodeVec = nodeMapCamera_.nodes<EnumNode_spin>();
+            //for (auto enumNode : enumNodeVec)
+            //{
 
-                std::cout << "name: " << enumNode.name() << ", numberOfEntries: " << enumNode.numberOfEntries() << std::endl;
-                std::vector<EntryNode_spin> entryNodeVec = enumNode.entries();
-                EntryNode_spin currEntryNode = enumNode.currentEntry();
-                std::cout << "  current: " << currEntryNode.name() << std::endl;
-                for (auto entryNode : entryNodeVec)
-                {
-                    std::cout << "  name:    " << entryNode.name() << ", " << entryNode.displayName() << std::endl;
-                }
-            }
-            
-            
+            //    std::cout << "name: " << enumNode.name() << ", numberOfEntries: " << enumNode.numberOfEntries() << std::endl;
+            //    std::vector<EntryNode_spin> entryNodeVec = enumNode.entries();
+            //    EntryNode_spin currEntryNode = enumNode.currentEntry();
+            //    std::cout << "  current: " << currEntryNode.name() << std::endl;
+            //    for (auto entryNode : entryNodeVec)
+            //    {
+            //        std::cout << "  name:    " << entryNode.name() << ", " << entryNode.displayName() << std::endl;
+            //    }
+            //}
 
-            std::vector<spinPixelFormatEnums> pixelFormatVec = getSupportedPixelFormats_spin();
+            //std::vector<spinPixelFormatEnums> pixelFormatVec = getSupportedPixelFormats_spin();
 
 
 
@@ -211,8 +206,6 @@ namespace bias {
 
     void CameraDevice_spin::disconnect()
     {
-        // std::cout << __PRETTY_FUNCTION__ << std::endl;
-
         if (capturing_) 
         { 
             stopCapture(); 
@@ -220,7 +213,6 @@ namespace bias {
 
         if (connected_) 
         {
-
 
             // Deinitialize camera
             spinError err = spinCameraDeInit(hCamera_);
@@ -347,21 +339,11 @@ namespace bias {
             ssError << ": unable to create empty spinImage, error = " << err; 
             throw RuntimeError(ERROR_SPIN_IMAGE_CREATE_EMPTY, ssError.str());
         }
-
-        // TEMP  
-        // ----------------------------------------------------------------------------
-        // Need to test for compatible image format and preform appropriate converion. 
-        //
-        // * spinnaker getSuitableImageFormat 
-        // * opencv getCompatibleOpencvFormat
-        //
-        // ----------------------------------------------------------------------------
         
         spinPixelFormatEnums origPixelFormat = getImagePixelFormat_spin(hSpinImage_);
         spinPixelFormatEnums convPixelFormat = getSuitablePixelFormat(origPixelFormat);
         
         err = spinImageConvert(hSpinImage_, convPixelFormat, hSpinImageConv);
-        //err = spinImageConvert(hSpinImage_, PixelFormat_BGR8, hSpinImageConv);
         if (err != SPINNAKER_ERR_SUCCESS) 
         {
             std::stringstream ssError;
@@ -393,7 +375,6 @@ namespace bias {
             ssError << ": unable to release spinImage";
             throw RuntimeError(ERROR_SPIN_RELEASE_SPIN_IMAGE, ssError.str());
         }
-
     }
 
 
@@ -414,179 +395,90 @@ namespace bias {
         return test;
     } 
 
-    //
-    //VideoMode CameraDevice_spin::getVideoMode() 
-    //{
-    //    spinVideoMode vidMode_spin;
-    //    spinFrameRate dummy;
-    //    getVideoModeAndFrameRate(vidMode_spin, dummy);
-    //    return convertVideoMode_from_spin(vidMode_spin);
-    //} 
+    
+    VideoMode CameraDevice_spin::getVideoMode() 
+    {
+        VideoModeList allowedVideoModes = getAllowedVideoModes();
+        if (allowedVideoModes.size() != 1)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": more than one video mode supported (DEVEL)";
+            throw RuntimeError(ERROR_SPIN_VIDEOMODE_SUPPORT, ssError.str());
+        }
+        VideoMode videoMode = allowedVideoModes.front();
+        return videoMode; 
+    } 
 
 
-    //FrameRate CameraDevice_spin::getFrameRate() 
-    //{
-    //    spinVideoMode dummy;
-    //    spinFrameRate frmRate_spin;
-    //    getVideoModeAndFrameRate(dummy, frmRate_spin);
-    //    return convertFrameRate_from_spin(frmRate_spin);
-    //}
+    FrameRate CameraDevice_spin::getFrameRate() 
+    {
+        VideoMode videoMode = getVideoMode();
+        FrameRateList allowedFrameRates = getAllowedFrameRates(videoMode);
+        if (allowedFrameRates.size() != 1)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": more than one framerate supported (DEVEL)";
+            throw RuntimeError(ERROR_SPIN_FRAMERATE_SUPPORT, ssError.str());
+        }
+        FrameRate frameRate = allowedFrameRates.front();
+        return frameRate;
+    }
 
 
-    //ImageMode CameraDevice_spin::getImageMode()
-    //{
-    //    ImageMode mode = IMAGEMODE_UNSPECIFIED;
-    //    VideoMode vidMode = getVideoMode();
-    //    if (vidMode == VIDEOMODE_FORMAT7)
-    //    {
-    //        spinFormat7Configuration f7config; 
-    //        spinMode mode_spin;
-
-    //        f7config = getFormat7Configuration();
-    //        mode_spin = f7config.imageSettings.mode;
-    //        mode = convertImageMode_from_spin(mode_spin);
-    //    }
-    //    return mode;
-    //} 
+    ImageMode CameraDevice_spin::getImageMode()
+    { 
+        ImageModeList allowedModeList = getAllowedImageModes();
+        if (allowedModeList.size() != 1)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": more than one imagemode supported (DEVEL)";
+            throw RuntimeError(ERROR_SPIN_FRAMERATE_SUPPORT, ssError.str());
+        }
+        ImageMode mode = allowedModeList.front();
+        return mode;
+    }
 
 
     VideoModeList CameraDevice_spin::getAllowedVideoModes()
     {
+        // Note:
+        // --------------------------------------------------------------------
+        // Spinnaker SDK doesn't really have the same concept of VideoModes as
+        // FlyCapture2 and libdc1394 so we fake it.
+        // --------------------------------------------------------------------
+        
         VideoModeList allowedVideoModes = {VIDEOMODE_FORMAT7}; 
         return allowedVideoModes;
 
     }
-    //    bool supported;
-
-    //    // Test for non-format7 vidModes
-    //    // --------------------------------------------------------------------
-    //    VideoModeList allVideoModes = getListOfVideoModes();
-    //    VideoModeList::iterator vit;
-
-    //    for (vit=allVideoModes.begin(); vit!=allVideoModes.end(); vit++)
-    //    {
-    //        VideoMode vidMode = *vit;
-    //        if (vidMode == VIDEOMODE_FORMAT7) 
-    //        { 
-    //            // Skip format7 modes ... as we need a separate test for them.
-    //            continue; 
-    //        }
-
-    //        FrameRateList allFrameRates = getListOfFrameRates();
-    //        FrameRateList::iterator fit;
-    //        supported = false;
-
-    //        for (fit=allFrameRates.begin(); fit!=allFrameRates.end(); fit++)
-    //        {
-    //            FrameRate frmRate = *fit; 
-    //            try
-    //            {
-    //                supported |= isSupported(vidMode, frmRate);
-    //            }
-    //            catch (RuntimeError &runtimeError)
-    //            {
-    //                // Device query can sometimes fail for some combinations of 
-    //                // vidMode and frmRate - handle failure gracefully by
-    //                // continuing to examine vidMode and frmRate combinations.                      
-    //                continue;
-    //            }
-    //        } 
-    //        if (supported) 
-    //        { 
-    //            allowedVideoModes.push_back(vidMode); 
-    //        }
-    //    }
-
-    //    // Test for format7 vidMode
-    //    // --------------------------------------------------------------------
-    //    ImageModeList allImageModes = getListOfImageModes();
-    //    ImageModeList::iterator it;
-    //    supported = false;
-
-    //    for (it=allImageModes.begin(); it!=allImageModes.end(); it++)
-    //    {
-    //        ImageMode imgMode = *it;
-    //        try
-    //        {
-    //            supported |= isSupported(imgMode);
-    //        }
-    //        catch (RuntimeError &runtimeError)
-    //        {
-    //            // Fail gracefully in cases where the query for information
-    //            // from the device fails.  
-    //            continue;
-    //        }
-    //        if (supported) 
-    //        { 
-    //            // Only nee to validate support for on imageMode.
-    //            allowedVideoModes.push_back(VIDEOMODE_FORMAT7);
-    //            break; 
-    //        }
-    //    }
-    //    return allowedVideoModes;
-    //}
 
 
-    //FrameRateList CameraDevice_spin::getAllowedFrameRates(VideoMode vidMode)
-    //{
-    //    FrameRateList allowedFramesRates;
-    //    bool supported;
+    FrameRateList CameraDevice_spin::getAllowedFrameRates(VideoMode vidMode)
+    { 
+        FrameRateList allowedFrameRates = {};
+        if (vidMode == VIDEOMODE_FORMAT7)
+        {
+            allowedFrameRates.push_back(FRAMERATE_FORMAT7);
+        }
+        return allowedFrameRates;
 
-    //    if (vidMode == VIDEOMODE_FORMAT7) {
-    //        allowedFramesRates.push_back(FRAMERATE_FORMAT7);
-    //    } 
-    //    else
-    //    {
-    //        FrameRateList allFrameRates = getListOfFrameRates();
-    //        FrameRateList::iterator it;
-
-    //        for (it=allFrameRates.begin(); it!=allFrameRates.end(); it++)  
-    //        {
-    //            FrameRate frmRate = *it; 
-    //            try
-    //            {
-    //                supported = isSupported(vidMode, frmRate);
-    //            }
-    //            catch (RuntimeError &runtimeError)
-    //            {
-    //                // Continue checking even in case where device query fails
-    //                continue;
-    //            }
-    //            if (supported) 
-    //            {
-    //                allowedFramesRates.push_back(frmRate);
-    //            }
-    //        }
-    //    }
-    //    return allowedFramesRates;
-    //}
+    }
 
 
-    //ImageModeList CameraDevice_spin::getAllowedImageModes()
-    //{
-    //    ImageModeList allImageModes = getListOfImageModes();
-    //    ImageModeList::iterator it;
-    //    bool supported;
-
-    //    for (it=allImageModes.begin(); it!=allImageModes.end(); it++)
-    //    {
-    //        ImageMode imgMode = *it;
-    //        try
-    //        {
-    //            supported = isSupported(imgMode);
-    //        }
-    //        catch (RuntimeError &runtimeError)
-    //        {
-    //            // Continue checking even is case where device query fails.
-    //            continue;
-    //        }
-    //        if (supported)
-    //        {
-    //            allowedImageModes.push_back(imgMode);
-    //        }
-    //    }
-    //    return allowedImageModes;
-    //}
+    ImageModeList CameraDevice_spin::getAllowedImageModes()
+    {
+        // Note:
+        // -------------------------------------------------------------------
+        // Spinnaker SDK doesn't really have ImageModes like FlyCapture2 and 
+        // libdc1394 so we fake it. Current only support IMAGEMODE_0, but we
+        // can add synthetic image modes using binning.
+        // -------------------------------------------------------------------
+        ImageModeList allImageModes = {IMAGEMODE_0};
+        return allImageModes;
+    }
 
     //
     //Property CameraDevice_spin::getProperty(PropertyType propType)
@@ -768,78 +660,29 @@ namespace bias {
     //}
     //
 
-    //bool CameraDevice_spin::isSupported(VideoMode vidMode, FrameRate frmRate)
-    //{
-    //    spinVideoMode vidMode_spin;
-    //    spinFrameRate frmRate_spin;
-    //    BOOL supported;
-    //    spinError error;
 
-    //    try 
-    //    {
-    //        vidMode_spin = convertVideoMode_to_spin(vidMode);
-    //        frmRate_spin = convertFrameRate_to_spin(frmRate);
-    //    }
-    //    catch (RuntimeError &runtimeError)
-    //    {
-    //        // Conversion failed - combination not supported
-    //        return false;
-    //    }
-
-    //    error = spinGetVideoModeAndFrameRateInfo(
-    //            context_, 
-    //            vidMode_spin, 
-    //            frmRate_spin, 
-    //            &supported
-    //            ); 
-
-    //    if (error != SPIN_ERROR_OK)
-    //    {
-    //        std::stringstream ssError;
-    //        ssError << __PRETTY_FUNCTION__;
-    //        ssError << ": unable to get Spinnaker VideoMode and ";
-    //        ssError << "FrameRate information";
-    //        throw RuntimeError(ERROR_SPIN_GET_VIDEOMODE_FRAMERATE_INFO, ssError.str());
-    //        return false;
-    //    }
-
-    //    return (supported == TRUE ? true : false);
-    //}
+    bool CameraDevice_spin::isSupported(VideoMode vidMode, FrameRate frmRate)
+    {
+        VideoModeList allowedVideoModes = getAllowedVideoModes();
+        FrameRateList allowedFrameRates = getAllowedFrameRates(vidMode);
+        bool videoModeFound = (std::find(allowedVideoModes.begin(), allowedVideoModes.end(), vidMode) != allowedVideoModes.end());
+        bool frameRateFound = (std::find(allowedFrameRates.begin(), allowedFrameRates.end(), frmRate) != allowedFrameRates.end());
+        return (videoModeFound && frameRateFound);
+    }
 
 
-    //bool CameraDevice_spin::isSupported(ImageMode imgMode)
-    //{
-    //    spinError error;
-    //    spinMode mode_spin;
-    //    spinFormat7Info info_spin;
-    //    BOOL supported;
+    bool CameraDevice_spin::isSupported(ImageMode imgMode)
+    {
+        ImageModeList allowedModes = getAllowedImageModes();
+        bool found = (std::find(allowedModes.begin(), allowedModes.end(), imgMode) != allowedModes.end());
+        return found;
+    }
 
-    //    try 
-    //    {
-    //        mode_spin = convertImageMode_to_spin(imgMode);
-    //    }
-    //    catch (RuntimeError &runtimeError)
-    //    {
-    //        // If conversion failed - mode not supported
-    //        return false;
-    //    }
 
-    //    info_spin.mode = mode_spin;
-    //    error = spinGetFormat7Info(context_, &info_spin, &supported);
-    //    if (error != SPIN_ERROR_OK)
-    //    {   
-    //        std::stringstream ssError;
-    //        ssError << __PRETTY_FUNCTION__;
-    //        ssError << ": unable to get format7 information for given mode";
-    //        throw RuntimeError(ERROR_SPIN_GET_FORMAT7_INFO, ssError.str());
-    //    }
-    //    return (supported==TRUE ? true : false);
-    //}
-
-    //unsigned int CameraDevice_spin::getNumberOfImageMode()
-    //{
-    //    return NUMBER_OF_SPIN_IMAGEMODE;
-    //}
+    unsigned int CameraDevice_spin::getNumberOfImageMode()
+    {
+        return getAllowedImageModes().size();
+    }
 
 
     //void CameraDevice_spin::setVideoMode(VideoMode vidMode, FrameRate frmRate) 
