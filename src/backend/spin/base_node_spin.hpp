@@ -24,6 +24,7 @@ namespace bias
 
             spinNodeType type();
             bool isOfType(spinNodeType nodeType);
+            std::string typeAsString();
 
 
             std::string name();

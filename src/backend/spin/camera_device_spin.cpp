@@ -8,7 +8,6 @@
 #include <bitset>
 
 // Temporary ???
-#include "node_map_utils.hpp"
 #include "enum_node_spin.hpp"
 #include "string_node_spin.hpp"
 #include <fstream>
@@ -158,47 +157,43 @@ namespace bias {
             cameraInfo_.print();
 
 
-            // ---
+            // DEVEL
+            // ----------------------------------------------------------------------------------------------
 
             std::cout << "# TLDevice nodes: " << (nodeMapTLDevice_.numberOfNodes()) << std::endl;
             std::cout << "# Camera nodes:   " << (nodeMapCamera_.numberOfNodes()) << std::endl;
             std::cout << std::endl;
 
-            //std::vector<EnumNode_spin> enumNodeVec = nodeMapTLDevice_.nodes<EnumNode_spin>();
-            //std::vector<EnumNode_spin> enumNodeVec = nodeMapCamera_.nodes<EnumNode_spin>();
-            //for (auto enumNode : enumNodeVec)
-            //{
+            ////std::vector<EnumNode_spin> nodeVec = nodeMapTLDevice_.nodes<EnumNode_spin>();
+            ////std::vector<EnumNode_spin> nodeVec = nodeMapCamera_.nodes<EnumNode_spin>();
+            ////
+            //std::vector<BaseNode_spin> nodeVec = nodeMapCamera_.nodes<BaseNode_spin>();
 
-            //    std::cout << "name: " << enumNode.name() << ", numberOfEntries: " << enumNode.numberOfEntries() << std::endl;
-            //    std::vector<EntryNode_spin> entryNodeVec = enumNode.entries();
-            //    EntryNode_spin currEntryNode = enumNode.currentEntry();
-            //    std::cout << "  current: " << currEntryNode.name() << std::endl;
-            //    for (auto entryNode : entryNodeVec)
-            //    {
-            //        std::cout << "  name:    " << entryNode.name() << ", " << entryNode.displayName() << std::endl;
-            //    }
-            //}
-
-            //std::vector<spinPixelFormatEnums> pixelFormatVec = getSupportedPixelFormats_spin();
-
-
-
-            // --------------------------------------------------------------------
-            // TODO: - setup strobe output on GPIO pin?? Is this possible?
-            // --------------------------------------------------------------------
-
-
-            // DEVEL
-            // ---------------------------------------------------------------
             //std::ofstream fout;
+            //fout.open("camera_map_nodes.txt");
 
-            //std::map<std::string, std::string> nodeNameToValueMap = getStringNodeNameToValueMap(hNodeMapCamera_);
-            //fout.open("node_name_to_value_map_camera.txt");
-            //for (auto kv : nodeNameToValueMap)
+            //for (auto node : nodeVec)
             //{
-            //    fout << kv.first << ",   " << kv.second << std::endl;
+            //    fout <<  node.name() << ",  " << node.typeAsString() << std::endl;
+            //    std::cout << node.name() << ",  " << node.typeAsString() << std::endl;
+
+            ////    std::cout << "name: " << node.name() << ", numberOfEntries: " << node.numberOfEntries() << std::endl;
+            ////    std::vector<EntryNode_spin> entryNodeVec = node.entries();
+            ////    EntryNode_spin currEntryNode = node.currentEntry();
+            ////    std::cout << "  current: " << currEntryNode.name() << std::endl;
+            ////    for (auto entry : entryVec)
+            ////    {
+            ////        std::cout << "  name:    " << entry.name() << ", " << entry.displayName() << std::endl;
+            ////    }
             //}
+            //
             //fout.close();
+            // ----------------------------------------------------------------------------------------------
+
+
+            // ----------------------------------------------------------------------------------------------
+            // TODO: - setup strobe output on GPIO pin?? Is this possible?
+            // ----------------------------------------------------------------------------------------------
 
         }
     }
@@ -480,7 +475,7 @@ namespace bias {
         return allImageModes;
     }
 
-    //
+    
     //Property CameraDevice_spin::getProperty(PropertyType propType)
     //{
     //    spinPropertyType propType_spin;

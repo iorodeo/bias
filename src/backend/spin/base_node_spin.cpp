@@ -2,11 +2,28 @@
 #include "basic_types.hpp"
 #include "exception.hpp"
 #include <sstream>
+#include <map>
 
 namespace bias
 {
 
     const size_t BaseNode_spin::MAX_BUF_LEN = 512;
+
+    std::map<spinNodeType, std::string> NodeTypeToStringMap = { 
+        {ValueNode,       "ValueNode"},
+        {BaseNode,        "BaseNode"},
+        {IntegerNode,     "IntegerNode"},
+        {BooleanNode,     "BooleanNode"},
+        {FloatNode,       "FloatNode"},
+        {CommandNode,     "CommandNode"},
+        {StringNode,      "StringNode"},
+        {RegisterNode,    "RegisterNode"},
+        {EnumerationNode, "EnumerationNode"},
+        {EnumEntryNode,   "EnumEntryNode"},
+        {CategoryNode,    "CategoryNode"},
+        {PortNode,        "PortNode"},
+        {UnknownNode,     "UnnknownNode"}, 
+    };
 
 
     spinNodeType BaseNode_spin::ExpectedType()
@@ -94,6 +111,24 @@ namespace bias
     bool BaseNode_spin::isOfType(spinNodeType nodeType)
     {
         return nodeType == type();
+    }
+
+
+
+    std::string BaseNode_spin::typeAsString()
+    {
+        spinNodeType nodeType = type();
+
+        std::string typeString;
+        if (NodeTypeToStringMap.count(nodeType) != 0)
+        {
+            typeString = NodeTypeToStringMap[nodeType];
+        }
+        else
+        {
+            typeString = std::string("NodeFound");
+        }
+        return typeString;
     }
 
 

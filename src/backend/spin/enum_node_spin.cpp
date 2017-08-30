@@ -64,7 +64,7 @@ namespace bias
         {
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
-            ssError << ": unable to enum node integer value, error = " << err;
+            ssError << ": unable to set enum node integer value, error = " << err;
             throw RuntimeError(ERROR_SPIN_SET_ENUM_INT_VALUE, ssError.str());
         }
     }

@@ -8,13 +8,13 @@ set(
     guid_device_spin.cpp 
     camera_device_spin.cpp
     camera_info_spin.cpp
-    node_map_utils.cpp
     node_map_spin.cpp
     base_node_spin.cpp
     string_node_spin.cpp
     enum_node_spin.cpp
     entry_node_spin.cpp
     float_node_spin.cpp
+    bool_node_spin.cpp
     )
 
 add_library(bias_backend_spin ${bias_backend_spin_SOURCE})

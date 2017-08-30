@@ -50,7 +50,6 @@ namespace bias {
 
             //virtual Property getProperty(PropertyType propType);
             //virtual PropertyInfo getPropertyInfo(PropertyType propType);
-            //virtual ImageInfo getImageInfo();
 
             //virtual void setProperty(Property prop);
             //virtual void setVideoMode(VideoMode vidMode, FrameRate frmRate);

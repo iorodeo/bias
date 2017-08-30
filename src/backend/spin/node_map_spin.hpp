@@ -16,6 +16,7 @@
 #include "number_node_spin.hpp"
 #include "float_node_spin.hpp"
 #include "integer_node_spin.hpp"
+#include "bool_node_spin.hpp"
 
 namespace bias
 {
