@@ -10,13 +10,6 @@
 #include "exception.hpp"
 #include "camera_info_spin.hpp"
 #include "base_node_spin.hpp"
-#include "string_node_spin.hpp"
-#include "enum_node_spin.hpp"
-#include "entry_node_spin.hpp"
-#include "number_node_spin.hpp"
-#include "float_node_spin.hpp"
-#include "integer_node_spin.hpp"
-#include "bool_node_spin.hpp"
 
 namespace bias
 {

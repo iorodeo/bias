@@ -6,11 +6,17 @@
 #include <iostream>
 #include <algorithm>
 #include <bitset>
-
-// Temporary ???
-#include "enum_node_spin.hpp"
-#include "string_node_spin.hpp"
 #include <fstream>
+
+#include "base_node_spin.hpp"
+#include "string_node_spin.hpp"
+#include "enum_node_spin.hpp"
+#include "entry_node_spin.hpp"
+#include "number_node_spin.hpp"
+#include "float_node_spin.hpp"
+#include "integer_node_spin.hpp"
+#include "bool_node_spin.hpp"
+#include "enum_node_spin.hpp"
 
 
 namespace bias {
@@ -156,6 +162,16 @@ namespace bias {
             cameraInfo_ = nodeMapTLDevice_.cameraInfo();
             cameraInfo_.print();
 
+            // Enable chunk mode and get chunk selector node
+            BoolNode_spin chunkModeActiveNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("ChunkModeActive");
+            chunkModeActiveNode.setValue(true);
+
+            EnumNode_spin chunkSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ChunkSelector");
+
+            // Enable timestamp in chunk data
+            chunkSelectorNode.setEntryBySymbolic("Timestamp");
+            BoolNode_spin timeStampEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("ChunkEnable");
+            timeStampEnableNode.setValue(true);
 
             // DEVEL
             // ----------------------------------------------------------------------------------------------
