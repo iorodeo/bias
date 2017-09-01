@@ -40,7 +40,9 @@ namespace bias
         checkAvailable();
         checkWritable();
 
-        spinError err = spinBooleanSetValue(hNode_,bool8_t(value));
+        bool8_t value_bool8 = (value) ? True : False;
+
+        spinError err = spinBooleanSetValue(hNode_,value_bool8);
         if (err != SPINNAKER_ERR_SUCCESS)
         {
             std::stringstream ssError;
@@ -57,9 +59,9 @@ namespace bias
         checkAvailable();
         checkReadable();
 
-        bool8_t value = False;
+        bool8_t value_bool8 = False;
 
-        spinError err = spinBooleanGetValue(hNode_,&value);
+        spinError err = spinBooleanGetValue(hNode_,&value_bool8);
         if (err != SPINNAKER_ERR_SUCCESS)
         {
             std::stringstream ssError;
@@ -67,6 +69,7 @@ namespace bias
             ssError << ": unable to get boolean node  value, error = " << err;
             throw RuntimeError(ERROR_SPIN_GET_BOOLEAN_VALUE, ssError.str());
         }
+        bool value = (value_bool8==True) ? true : false;
         return bool(value);
     }
 

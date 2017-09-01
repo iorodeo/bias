@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
         bool isColor = camDev.isColor();
         std::cout << "isColor: " << isColor << std::endl;
 
-        if (false)
+        if (true)
         {
             camDev.startCapture();
             cv::namedWindow("preview", CV_WINDOW_AUTOSIZE | CV_WINDOW_KEEPRATIO | CV_GUI_EXPANDED); 

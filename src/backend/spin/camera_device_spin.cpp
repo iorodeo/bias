@@ -159,19 +159,21 @@ namespace bias {
             // Setup node maps for TLDevice and camera and get camera info
             nodeMapTLDevice_ = NodeMapTLDevice_spin(hCamera_);
             nodeMapCamera_ = NodeMapCamera_spin(hCamera_);
+
+            // Get Camera info
             cameraInfo_ = nodeMapTLDevice_.cameraInfo();
             cameraInfo_.print();
 
-            // Enable chunk mode and get chunk selector node
-            BoolNode_spin chunkModeActiveNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("ChunkModeActive");
-            chunkModeActiveNode.setValue(true);
+            //// Enable chunk mode and get chunk selector node
+            //BoolNode_spin chunkModeActiveNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("ChunkModeActive");
+            //chunkModeActiveNode.setValue(true);
 
-            EnumNode_spin chunkSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ChunkSelector");
+            //EnumNode_spin chunkSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ChunkSelector");
 
-            // Enable timestamp in chunk data
-            chunkSelectorNode.setEntryBySymbolic("Timestamp");
-            BoolNode_spin timeStampEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("ChunkEnable");
-            timeStampEnableNode.setValue(true);
+            //// Enable timestamp in chunk data
+            //chunkSelectorNode.setEntryBySymbolic("Timestamp");
+            //BoolNode_spin timeStampEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("ChunkEnable");
+            //timeStampEnableNode.setValue(true);
 
             // DEVEL
             // ----------------------------------------------------------------------------------------------
@@ -273,7 +275,7 @@ namespace bias {
             EnumNode_spin acqModeNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("AcquisitionMode");
             acqModeNode.setEntryBySymbolic("Continuous");
 
-            //setupTimeStamping();
+            setupTimeStamping();
 
             // Begin acquisition
             spinError err = spinCameraBeginAcquisition(hCamera_);
@@ -921,6 +923,11 @@ namespace bias {
 
         imageOK_ = true;
 
+        updateTimeStamp();
+        std::cout << "timeStamp_ns_           = " << timeStamp_ns_ << std::endl;
+        std::cout << "timeStamp_.seconds      = " << timeStamp_.seconds << std::endl;
+        std::cout << "timeStamp_.microSeconds = " << timeStamp_.microSeconds << std::endl;
+
         return true;
     }
 
@@ -963,50 +970,40 @@ namespace bias {
 
 
 
-    //void CameraDevice_spin::setupTimeStamping()
-    //{
-    //    spinError error;
-    //    spinEmbeddedImageInfo embeddedInfo;
+    void CameraDevice_spin::setupTimeStamping()
+    {
+        // Enable chunk mode 
+        BoolNode_spin chunkModeActiveNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("ChunkModeActive");
+        chunkModeActiveNode.setValue(true);
 
-    //    error = spinGetEmbeddedImageInfo(context_, &embeddedInfo); 
-    //    if (error != SPIN_ERROR_OK)
-    //    {
-    //        std::stringstream ssError;
-    //        ssError << __PRETTY_FUNCTION__;
-    //        ssError << ": unable to get Spinnaker embedded image info";
-    //        throw RuntimeError(ERROR_SPIN_GET_EMBEDDED_IMAGE_INFO, ssError.str());
-    //    }
+        // Get chunk mode selector and  set entry to Timestamp 
+        EnumNode_spin chunkSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ChunkSelector");
+        chunkSelectorNode.setEntryBySymbolic("Timestamp");
 
-    //    // If embedded time stamping available enable it
-    //    if (embeddedInfo.timestamp.available == TRUE)
-    //    {
-    //        haveEmbeddedTimeStamp_ = true;
-    //        embeddedInfo.timestamp.onOff = true;
-    //    }
-    //    else
-    //    {
-    //        haveEmbeddedTimeStamp_ = false;
-    //        embeddedInfo.timestamp.onOff = false;
-    //    }
-
-    //    error = spinSetEmbeddedImageInfo(context_, &embeddedInfo); 
-    //    if (error != SPIN_ERROR_OK)
-    //    {
-    //        std::stringstream ssError;
-    //        ssError << __PRETTY_FUNCTION__;
-    //        ssError << ": unable to set Spinnaker embedded image info";
-    //        throw RuntimeError(ERROR_SPIN_SET_EMBEDDED_IMAGE_INFO, ssError.str());
-    //    }
-
-    //    // Initalize time stamp data
-    //    timeStamp_.seconds = 0;
-    //    timeStamp_.microSeconds = 0;
-    //    cycleSecondsLast_ = 0;
-    //}
+        // Enable timestamping
+        BoolNode_spin timeStampEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("ChunkEnable");
+        timeStampEnableNode.setValue(true);
+    }
 
 
-    //void CameraDevice_spin::updateTimeStamp()
-    //{
+    void CameraDevice_spin::updateTimeStamp()
+    {
+        spinError err = spinImageChunkDataGetIntValue(hSpinImage_, "ChunkTimestamp", &timeStamp_ns_);
+        if (err != SPINNAKER_ERR_SUCCESS)
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": unable to timestamp from image chunk data, error = " << err; 
+            throw RuntimeError(ERROR_SPIN_CHUNKDATA_TIMESTAMP, ssError.str());
+        }
+
+        int64_t seconds = timeStamp_ns_/INT64_C(1000000000);
+        int64_t microSeconds = timeStamp_ns_/INT64_C(1000) - INT64_C(1000000)*seconds; 
+
+        timeStamp_.seconds = (unsigned long long)(seconds);
+        timeStamp_.microSeconds = (unsigned int)(microSeconds);
+    }
+
     //    spinTimeStamp timeStamp_spin = spinGetImageTimeStamp(&rawImage_);
 
     //    if (haveEmbeddedTimeStamp_)

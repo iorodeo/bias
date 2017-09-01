@@ -91,12 +91,10 @@ namespace bias {
             
             CameraInfo_spin cameraInfo_;
 
-            //TimeStamp timeStamp_;
-            //unsigned int cycleSecondsLast_;   // Used with embedded timestamp only
+            TimeStamp timeStamp_;
+            int64_t timeStamp_ns_;
 
             //bool isFirst_;
-
-            //bool haveEmbeddedTimeStamp_;
 
             bool imageOK_ = false;
             spinImage hSpinImage_ = nullptr;
@@ -109,8 +107,8 @@ namespace bias {
 
             ////void createPropertyMap();
 
-            //void setupTimeStamping();
-            //void updateTimeStamp();
+            void setupTimeStamping();
+            void updateTimeStamp();
 
             // spin get methods
             // ---------------
