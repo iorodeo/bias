@@ -96,13 +96,10 @@ namespace bias {
             void initialize();
             void createRawImage();
             void destroyRawImage();
-            //void grabImageCommon();
             bool grabImageCommon(std::string &errMsg);
 
             void createConvertedImage();
             void destroyConvertedImage();
-
-            //void createPropertyMap();
 
             void setupTimeStamping();
             void updateTimeStamp();
