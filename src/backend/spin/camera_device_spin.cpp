@@ -798,10 +798,11 @@ namespace bias {
     //    }
     //}
 
-    //TimeStamp CameraDevice_spin::getImageTimeStamp()
-    //{
-    //    return timeStamp_;
-    //}
+
+    TimeStamp CameraDevice_spin::getImageTimeStamp()
+    {
+        return timeStamp_;
+    }
 
 
     std::string CameraDevice_spin::getVendorName()

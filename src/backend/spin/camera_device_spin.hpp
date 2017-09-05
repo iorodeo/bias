@@ -70,7 +70,7 @@ namespace bias {
             virtual std::string getVendorName();
             virtual std::string getModelName();
 
-            //virtual TimeStamp getImageTimeStamp();
+            virtual TimeStamp getImageTimeStamp();
             
             virtual std::string toString();
 
