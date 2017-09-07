@@ -78,6 +78,8 @@ namespace bias {
             
             virtual void printInfo();
 
+            void develExpProps();
+
         private:
 
             spinSystem hSystem_ = nullptr;

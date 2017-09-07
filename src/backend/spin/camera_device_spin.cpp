@@ -21,6 +21,65 @@
 
 namespace bias {
 
+    void CameraDevice_spin::develExpProps()
+    {
+        if (!connected_)
+        {
+            std::cout << "camera is not connected - can't explore properties" << std::endl;
+        }
+
+
+        // Exposure (Used instead of Shutter ... what about gain, intensity, etc. ???
+        // --------------------------------------------------------------------------------------------------
+
+        EnumNode_spin exposureModeNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureMode");
+        std::vector<EntryNode_spin> exposureModeEntryVec = exposureModeNode.entries();
+
+        std::cout << "ExposureMode entries" << std::endl;
+        std::cout << "--------------------" << std::endl;
+        for (auto entry : exposureModeEntryVec)
+        {
+            std::cout << entry.symbolic() << std::endl;
+        }
+        std::cout << std::endl;
+
+        EnumNode_spin exposureAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureAuto");
+        std::vector<EntryNode_spin> exposureAutoEntryVec = exposureAutoNode.entries();
+
+        std::cout << "ExposureAuto entries" << std::endl;
+        std::cout << "--------------------" << std::endl;
+        for (auto entry : exposureAutoEntryVec)
+        {
+            std::cout << entry.symbolic() << std::endl;
+        }
+        std::cout << std::endl;
+
+        FloatNode_spin exposureTimeNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("ExposureTime");
+        std::cout << "ExposureTime float" << std::endl;
+        std::cout << "------------------" << std::endl;
+        std::cout << "value     = " << exposureTimeNode.value() << std::endl;
+        std::cout << "max value = " << exposureTimeNode.maxValue() << std::endl; 
+        std::cout << "min value = " << exposureTimeNode.minValue() << std::endl; 
+        std::cout << "unit      = " << exposureTimeNode.unit() << std::endl; 
+        std::cout << std::endl;
+
+
+        // Gain - don't understand this yet.
+        // --------------------------------------------------------------------------------------------------
+
+        EnumNode_spin gainSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("GainSelector");
+        std::vector<EntryNode_spin> gainSelectorEntryVec = gainSelectorNode.entries();
+
+        std::cout << "GainSelector entries" << std::endl;
+        std::cout << "--------------------" << std::endl;
+        for (auto entry : gainSelectorEntryVec)
+        {
+            std::cout << entry.symbolic() << std::endl;
+        }
+        std::cout << std::endl;
+
+    }
+
 
     CameraDevice_spin::CameraDevice_spin() : CameraDevice()
     {

@@ -25,7 +25,6 @@ namespace bias
 
             T minValue();
             T maxValue();
-            std::string unit();
 
         protected:
 
