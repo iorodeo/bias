@@ -4,6 +4,7 @@
 #include "base_node_spin.hpp"
 #include "basic_types.hpp"
 #include "exception.hpp"
+#include <iostream>
 #include <sstream>
 #include <typeinfo>
 #include <functional>
@@ -25,6 +26,8 @@ namespace bias
 
             T minValue();
             T maxValue();
+
+            virtual void print();
 
         protected:
 
@@ -108,6 +111,23 @@ namespace bias
         }
         return maxValue;
     }
+
+
+    template <class T>
+    void NumberNode_spin<T>::print()
+    {
+        std::cout << name() << ", number"  << std::endl;
+        std::cout << "--------------------------------------------------------" << std::endl; 
+        std::cout << "type      = " << typeAsString() << std::endl;
+        std::cout << "value     = " << value() << std::endl;
+        std::cout << "max value = " << maxValue() << std::endl; 
+        std::cout << "min value = " << minValue() << std::endl; 
+        std::cout << "available = " << isReadable() << std::endl;
+        std::cout << "readable  = " << isReadable() << std::endl;
+        std::cout << "writable  = " << isReadable() << std::endl;
+        std::cout << std::endl;
+    }
+
 
 } // namespace bias
 

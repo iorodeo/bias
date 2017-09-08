@@ -1,6 +1,7 @@
 #include "entry_node_spin.hpp"
 #include "basic_types.hpp"
 #include "exception.hpp"
+#include <iostream>
 #include <sstream>
 
 namespace bias
@@ -91,5 +92,18 @@ namespace bias
         return std::string(buffer);
     }
 
+
+    void EntryNode_spin::print()
+    {
+        std::cout << name() << ", base"  << std::endl;
+        std::cout << "--------------------------------------------------------" << std::endl; 
+        std::cout << "symbolic  = " << symbolic() << std::endl;
+        std::cout << "value     = " << value() << std::endl;
+        std::cout << "intValue  = " << intValue() << std::endl; 
+        std::cout << "available = " << isReadable() << std::endl;
+        std::cout << "readable  = " << isReadable() << std::endl;
+        std::cout << "writable  = " << isReadable() << std::endl;
+        std::cout << std::endl;
+    }
 
 } // namespace bias

@@ -14,7 +14,9 @@ namespace bias
             IntegerNode_spin();
             IntegerNode_spin(spinNodeHandle hNode);
             IntegerNode_spin(BaseNode_spin node);
-            int64_t getIncrement();
+            int64_t increment();
+
+            virtual void print();
 
         protected:
 

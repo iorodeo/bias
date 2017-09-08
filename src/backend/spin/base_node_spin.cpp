@@ -1,6 +1,7 @@
 #include "base_node_spin.hpp"
 #include "basic_types.hpp"
 #include "exception.hpp"
+#include <iostream>
 #include <sstream>
 #include <map>
 
@@ -235,6 +236,19 @@ namespace bias
     spinNodeHandle BaseNode_spin::handle()
     {
         return hNode_;
+    }
+
+
+    void BaseNode_spin::print()
+    {
+        std::cout << name() << ", base"  << std::endl;
+        std::cout << "--------------------------------------------------------" << std::endl; 
+        std::cout << "type      = " << typeAsString() << std::endl;
+        std::cout << "value     = " << valueAsString() << std::endl;
+        std::cout << "available = " << isReadable() << std::endl;
+        std::cout << "readable  = " << isReadable() << std::endl;
+        std::cout << "writable  = " << isReadable() << std::endl;
+        std::cout << std::endl;
     }
 
 

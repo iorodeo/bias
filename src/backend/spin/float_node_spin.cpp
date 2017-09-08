@@ -1,6 +1,7 @@
 #include "float_node_spin.hpp"
 #include "basic_types.hpp"
 #include "exception.hpp"
+#include <iostream>
 #include <sstream>
 
 
@@ -56,6 +57,20 @@ namespace bias
             throw RuntimeError(ERROR_SPIN_GET_NUMBER_UNIT, ssError.str());
         }
         return std::string(buffer);
+    }
+
+    void FloatNode_spin::print()
+    {
+        std::cout << name() << ", float"  << std::endl;
+        std::cout << "--------------------------------------------------------" << std::endl; 
+        std::cout << "value     = " << value() << std::endl;
+        std::cout << "max value = " << maxValue() << std::endl; 
+        std::cout << "min value = " << minValue() << std::endl; 
+        std::cout << "unit      = " << unit() << std::endl; 
+        std::cout << "available = " << isReadable() << std::endl;
+        std::cout << "readable  = " << isReadable() << std::endl;
+        std::cout << "writable  = " << isReadable() << std::endl;
+        std::cout << std::endl;
     }
 
 

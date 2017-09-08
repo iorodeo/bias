@@ -1,8 +1,8 @@
 #include "node_map_spin.hpp"
 #include "basic_types.hpp"
 #include "string_node_spin.hpp"
-#include <sstream>
 #include <iostream>
+#include <sstream>
 
 namespace bias 
 {

@@ -32,9 +32,10 @@ namespace bias
             std::string toolTip();
             std::string description();
             std::string valueAsString();
-            
 
             spinNodeHandle handle();
+
+            virtual void print();
 
         protected:
 

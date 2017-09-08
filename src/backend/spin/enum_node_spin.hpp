@@ -31,6 +31,8 @@ namespace bias
             EntryNode_spin getEntryByName(std::string name);
             EntryNode_spin getEntryBySymbolic(std::string symbolic);
 
+            virtual void print();
+
 
     };
 

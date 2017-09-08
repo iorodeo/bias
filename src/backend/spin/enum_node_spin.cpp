@@ -208,5 +208,24 @@ namespace bias
     }
 
 
+    void EnumNode_spin::print()
+    {
+        std::vector<EntryNode_spin> entryVec = entries();
+        std::cout << name() <<  ", enum,  # entries = " << numberOfEntries() << std::endl;
+        std::cout << "--------------------------------------------------------" << std::endl; 
+        std::cout << "current   = " << currentEntry().symbolic() << std::endl;
+        std::cout << "available = " << isReadable() << std::endl;
+        std::cout << "readable  = " << isReadable() << std::endl;
+        std::cout << "writable  = " << isReadable() << std::endl;
+        std::cout << std::endl;
+        std::cout << "  entries" << std::endl;
+        std::cout << "  -------" << std::endl;
+        for (auto entry : entryVec)
+        {
+            std::cout << "  " << entry.symbolic() << std::endl;
+        }
+        std::cout << std::endl;
+    }
+
 
 } // namespace bias

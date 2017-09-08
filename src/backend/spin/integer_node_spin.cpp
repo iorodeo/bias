@@ -37,7 +37,7 @@ namespace bias
         initialize();
     }
 
-    int64_t IntegerNode_spin::getIncrement()
+    int64_t IntegerNode_spin::increment()
     {
         checkNodeHandle();
         checkAvailable();
@@ -52,6 +52,21 @@ namespace bias
             throw RuntimeError(ERROR_SPIN_GET_NUMBER_UNIT, ssError.str());
         }
         return increment;
+    }
+
+
+    void IntegerNode_spin::print()
+    {
+        std::cout << name() << ", integer"  << std::endl;
+        std::cout << "--------------------------------------------------------" << std::endl; 
+        std::cout << "value     = " << value() << std::endl;
+        std::cout << "max value = " << maxValue() << std::endl; 
+        std::cout << "min value = " << minValue() << std::endl; 
+        std::cout << "increment = " << increment() << std::endl;
+        std::cout << "available = " << isReadable() << std::endl;
+        std::cout << "readable  = " << isReadable() << std::endl;
+        std::cout << "writable  = " << isReadable() << std::endl;
+        std::cout << std::endl;
     }
 
     // Protected methods

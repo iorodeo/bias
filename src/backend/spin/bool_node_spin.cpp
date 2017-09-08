@@ -53,7 +53,7 @@ namespace bias
     }
 
 
-    bool BoolNode_spin::getValue()
+    bool BoolNode_spin::value()
     {
         checkNodeHandle();
         checkAvailable();
@@ -71,6 +71,18 @@ namespace bias
         }
         bool value = (value_bool8==True) ? true : false;
         return bool(value);
+    }
+
+    
+    void BoolNode_spin::print()
+    {
+        std::cout << name() << ", boolean"  << std::endl;
+        std::cout << "--------------------------------------------------------" << std::endl; 
+        std::cout << "value     = " << value() << std::endl;
+        std::cout << "available = " << isReadable() << std::endl;
+        std::cout << "readable  = " << isReadable() << std::endl;
+        std::cout << "writable  = " << isReadable() << std::endl;
+        std::cout << std::endl;
     }
 
 

@@ -20,6 +20,8 @@ namespace bias
             int64_t intValue();
             std::string symbolic();
 
+            virtual void print();
+
     };
 
 

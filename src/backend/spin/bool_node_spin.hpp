@@ -18,7 +18,9 @@ namespace bias
             BoolNode_spin(BaseNode_spin node);
 
             void setValue(bool value);
-            bool getValue();
+            bool value();
+
+            virtual void print();
 
     };
 

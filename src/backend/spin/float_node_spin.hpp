@@ -15,6 +15,7 @@ namespace bias
             FloatNode_spin(spinNodeHandle hNode);
             FloatNode_spin(BaseNode_spin node);
             std::string unit();
+            virtual void print();
 
         protected:
 

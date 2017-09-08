@@ -33,50 +33,77 @@ namespace bias {
         // --------------------------------------------------------------------------------------------------
 
         EnumNode_spin exposureModeNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureMode");
-        std::vector<EntryNode_spin> exposureModeEntryVec = exposureModeNode.entries();
-
-        std::cout << "ExposureMode entries" << std::endl;
-        std::cout << "--------------------" << std::endl;
-        for (auto entry : exposureModeEntryVec)
-        {
-            std::cout << entry.symbolic() << std::endl;
-        }
-        std::cout << std::endl;
+        exposureModeNode.print();
 
         EnumNode_spin exposureAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureAuto");
-        std::vector<EntryNode_spin> exposureAutoEntryVec = exposureAutoNode.entries();
-
-        std::cout << "ExposureAuto entries" << std::endl;
-        std::cout << "--------------------" << std::endl;
-        for (auto entry : exposureAutoEntryVec)
-        {
-            std::cout << entry.symbolic() << std::endl;
-        }
-        std::cout << std::endl;
+        exposureAutoNode.print();
 
         FloatNode_spin exposureTimeNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("ExposureTime");
-        std::cout << "ExposureTime float" << std::endl;
-        std::cout << "------------------" << std::endl;
-        std::cout << "value     = " << exposureTimeNode.value() << std::endl;
-        std::cout << "max value = " << exposureTimeNode.maxValue() << std::endl; 
-        std::cout << "min value = " << exposureTimeNode.minValue() << std::endl; 
-        std::cout << "unit      = " << exposureTimeNode.unit() << std::endl; 
-        std::cout << std::endl;
-
+        exposureTimeNode.print();
 
         // Gain - don't understand this yet.
         // --------------------------------------------------------------------------------------------------
 
         EnumNode_spin gainSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("GainSelector");
-        std::vector<EntryNode_spin> gainSelectorEntryVec = gainSelectorNode.entries();
+        gainSelectorNode.print();
 
-        std::cout << "GainSelector entries" << std::endl;
-        std::cout << "--------------------" << std::endl;
-        for (auto entry : gainSelectorEntryVec)
-        {
-            std::cout << entry.symbolic() << std::endl;
-        }
-        std::cout << std::endl;
+        EnumNode_spin gainAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("GainAuto");
+        gainAutoNode.print();
+
+        FloatNode_spin gainNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("Gain");
+        gainNode.print();
+
+        // Trigger 
+        // --------------------------------------------------------------------------------------------------
+
+        EnumNode_spin triggerSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerSelector");
+        triggerSelectorNode.print();
+
+        EnumNode_spin triggerModeNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerMode");
+        triggerModeNode.print();
+
+        EnumNode_spin triggerSourceNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerSource");
+        triggerSourceNode.print();
+
+        EnumNode_spin triggerOverlapNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerOverlap");
+        triggerOverlapNode.print();
+
+        FloatNode_spin triggerDelayNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("TriggerDelay");
+        triggerDelayNode.print();
+
+        // FrameRate
+        // --------------------------------------------------------------------------------------------------
+
+        FloatNode_spin frameRateNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("AcquisitionFrameRate");
+        frameRateNode.print();
+
+        FloatNode_spin resFrameRateNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("AcquisitionResultingFrameRate");
+        resFrameRateNode.print();
+
+        BoolNode_spin frameRateEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("AcquisitionFrameRateEnable");
+        frameRateEnableNode.print();
+
+        // Temperature
+        //---------------------------------------------------------------------------------------------------
+        FloatNode_spin tempNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("DeviceTemperature");
+        tempNode.print();
+
+        // Blacklevel
+        // ---------------------------------------------------------------------------------------------------
+        EnumNode_spin blackLevelSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("BlackLevelSelector");
+        blackLevelSelectorNode.print();
+
+        FloatNode_spin blackLevelNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("BlackLevel");
+        blackLevelNode.print();
+
+        // Gamma
+        // ----------------------------------------------------------------------------------------------------
+        FloatNode_spin gammaNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("Gamma");
+        gammaNode.print();
+
+        BoolNode_spin gammaEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("GammaEnable");
+        gammaEnableNode.print();
+
 
     }
 
