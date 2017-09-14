@@ -49,9 +49,9 @@ namespace bias {
             virtual ImageModeList getAllowedImageModes();
 
             //virtual Property getProperty(PropertyType propType);
-            //virtual PropertyInfo getPropertyInfo(PropertyType propType);
-
+            virtual PropertyInfo getPropertyInfo(PropertyType propType);
             //virtual void setProperty(Property prop);
+            
             //virtual void setVideoMode(VideoMode vidMode, FrameRate frmRate);
             //virtual void setFormat7ImageMode(ImageMode imgMode); // TO DO //
 

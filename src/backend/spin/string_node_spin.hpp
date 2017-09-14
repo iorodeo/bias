@@ -15,6 +15,8 @@ namespace bias
             StringNode_spin(BaseNode_spin node);
             std::string value();
 
+            virtual void print();
+
     };
 
 } // namespace bias

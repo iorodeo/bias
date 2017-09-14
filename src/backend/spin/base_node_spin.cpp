@@ -245,9 +245,9 @@ namespace bias
         std::cout << "--------------------------------------------------------" << std::endl; 
         std::cout << "type      = " << typeAsString() << std::endl;
         std::cout << "value     = " << valueAsString() << std::endl;
-        std::cout << "available = " << isReadable() << std::endl;
+        std::cout << "available = " << isAvailable() << std::endl;
         std::cout << "readable  = " << isReadable() << std::endl;
-        std::cout << "writable  = " << isReadable() << std::endl;
+        std::cout << "writable  = " << isWritable() << std::endl;
         std::cout << std::endl;
     }
 

@@ -11,6 +11,7 @@ namespace bias
 {
     const size_t MAX_BUF_LEN = 256;
 
+
     spinPixelFormatEnums getImagePixelFormat_spin(spinImage hImage)
     {
         spinPixelFormatEnums pixelFormat = UNKNOWN_PIXELFORMAT;
@@ -25,6 +26,7 @@ namespace bias
         }
         return pixelFormat;
     }
+
 
     ImageInfo_spin getImageInfo_spin(spinImage hImage)
     {
@@ -128,6 +130,7 @@ namespace bias
         return formatsVec;
     }
 
+
     std::vector<spinPixelFormatEnums> getAllowedColorPixelFormats_spin()
     {
         std::vector<spinPixelFormatEnums>  formatsVec = 
@@ -143,6 +146,7 @@ namespace bias
         return formatsVec;
     }
 
+
     std::vector<spinPixelFormatEnums> getAllowedMonoPixelFormats_spin()
     {
         std::vector<spinPixelFormatEnums>  formatsVec = 
@@ -155,6 +159,25 @@ namespace bias
         };
         return formatsVec;
     }
+
+
+    std::vector<PropertyType> getSpinSupportedPropertyTypes()
+    {
+        std::vector<PropertyType> spinSupportedVec = 
+        {
+            PROPERTY_TYPE_BRIGHTNESS,       
+            PROPERTY_TYPE_GAMMA,
+            PROPERTY_TYPE_SHUTTER,
+            PROPERTY_TYPE_GAIN,
+            PROPERTY_TYPE_TRIGGER_MODE,
+            PROPERTY_TYPE_TRIGGER_DELAY,
+            PROPERTY_TYPE_FRAME_RATE,
+            PROPERTY_TYPE_TEMPERATURE,
+        };
+        return  spinSupportedVec;
+    }
+
+
 
     // Image conversion - for mapping from Spinnaker to opencv 
     // -----------------------------------------------------------------------

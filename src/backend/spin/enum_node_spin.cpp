@@ -214,9 +214,9 @@ namespace bias
         std::cout << name() <<  ", enum,  # entries = " << numberOfEntries() << std::endl;
         std::cout << "--------------------------------------------------------" << std::endl; 
         std::cout << "current   = " << currentEntry().symbolic() << std::endl;
-        std::cout << "available = " << isReadable() << std::endl;
+        std::cout << "available = " << isAvailable() << std::endl;
         std::cout << "readable  = " << isReadable() << std::endl;
-        std::cout << "writable  = " << isReadable() << std::endl;
+        std::cout << "writable  = " << isWritable() << std::endl;
         std::cout << std::endl;
         std::cout << "  entries" << std::endl;
         std::cout << "  -------" << std::endl;

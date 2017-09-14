@@ -33,9 +33,11 @@ namespace bias {
         // --------------------------------------------------------------------------------------------------
 
         EnumNode_spin exposureModeNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureMode");
+        exposureModeNode.setEntryBySymbolic("Timed");
         exposureModeNode.print();
 
         EnumNode_spin exposureAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureAuto");
+        exposureAutoNode.setEntryBySymbolic("Off");
         exposureAutoNode.print();
 
         FloatNode_spin exposureTimeNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("ExposureTime");
@@ -74,14 +76,16 @@ namespace bias {
         // FrameRate
         // --------------------------------------------------------------------------------------------------
 
+        BoolNode_spin frameRateEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("AcquisitionFrameRateEnable");
+        frameRateEnableNode.setValue(true);
+        frameRateEnableNode.print();
+
         FloatNode_spin frameRateNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("AcquisitionFrameRate");
         frameRateNode.print();
 
         FloatNode_spin resFrameRateNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("AcquisitionResultingFrameRate");
         resFrameRateNode.print();
 
-        BoolNode_spin frameRateEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("AcquisitionFrameRateEnable");
-        frameRateEnableNode.print();
 
         // Temperature
         //---------------------------------------------------------------------------------------------------
@@ -103,6 +107,8 @@ namespace bias {
 
         BoolNode_spin gammaEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("GammaEnable");
         gammaEnableNode.print();
+
+        
 
 
     }
@@ -588,7 +594,13 @@ namespace bias {
     //}
 
 
-    //PropertyInfo CameraDevice_spin::getPropertyInfo(PropertyType propType)
+    PropertyInfo CameraDevice_spin::getPropertyInfo(PropertyType propType)
+    {
+        PropertyInfo propInfo;
+
+        return propInfo;
+    }
+
     //{
     //    spinPropertyType propType_spin;
     //    spinPropertyInfo propInfo_spin;

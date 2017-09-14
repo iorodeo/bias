@@ -1,6 +1,7 @@
 #include "string_node_spin.hpp"
 #include "basic_types.hpp"
 #include "exception.hpp"
+#include <iostream>
 #include <sstream>
 
 namespace bias
@@ -53,6 +54,18 @@ namespace bias
         }
 
         return std::string(buffer);
+    }
+
+
+    void StringNode_spin::print()
+    {
+        std::cout << name() << ", string"  << std::endl;
+        std::cout << "--------------------------------------------------------" << std::endl; 
+        std::cout << "value     = " << value() << std::endl;
+        std::cout << "available = " << isAvailable() << std::endl;
+        std::cout << "readable  = " << isReadable() << std::endl;
+        std::cout << "writable  = " << isWritable() << std::endl;
+        std::cout << std::endl;
     }
 
 

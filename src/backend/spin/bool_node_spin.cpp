@@ -79,9 +79,9 @@ namespace bias
         std::cout << name() << ", boolean"  << std::endl;
         std::cout << "--------------------------------------------------------" << std::endl; 
         std::cout << "value     = " << value() << std::endl;
-        std::cout << "available = " << isReadable() << std::endl;
+        std::cout << "available = " << isAvailable() << std::endl;
         std::cout << "readable  = " << isReadable() << std::endl;
-        std::cout << "writable  = " << isReadable() << std::endl;
+        std::cout << "writable  = " << isWritable() << std::endl;
         std::cout << std::endl;
     }
 
