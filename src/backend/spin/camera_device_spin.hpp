@@ -2,10 +2,11 @@
 #ifndef BIAS_CAMERA_DEVICE_SPIN_HPP
 #define BIAS_CAMERA_DEVICE_SPIN_HPP
 
-#include <string>
 #include <map>
+#include <string>
 #include <functional>
 #include <opencv2/core/core.hpp>
+
 #include "utils.hpp"
 #include "camera_device.hpp"
 #include "camera_info_spin.hpp"
@@ -50,9 +51,9 @@ namespace bias {
             virtual FrameRateList getAllowedFrameRates(VideoMode vidMode);
             virtual ImageModeList getAllowedImageModes();
 
-            //virtual Property getProperty(PropertyType propType);
             virtual PropertyInfo getPropertyInfo(PropertyType propType);
-            //virtual void setProperty(Property prop);
+            virtual Property getProperty(PropertyType propType);
+            virtual void setProperty(Property prop);
             
             //virtual void setVideoMode(VideoMode vidMode, FrameRate frmRate);
             //virtual void setFormat7ImageMode(ImageMode imgMode); // TO DO //
@@ -115,12 +116,22 @@ namespace bias {
             void setupTimeStamping();
             void updateTimeStamp();
 
-            // spin get methods
-            // ---------------
 
-            std::vector<spinPixelFormatEnums> getSupportedPixelFormats_spin();
+            // Get Property Info methods
+            static std::map<PropertyType, std::function<PropertyInfo(CameraDevice_spin*)>> getPropertyInfoDispatchMap_; 
 
-            static std::map<PropertyType, std::mem_fun_t<Property,CameraDevice_spin>> propertyDispatchMap_; 
+            PropertyInfo getPropertyInfoBrightness();
+            PropertyInfo getPropertyInfoGamma();
+            PropertyInfo getPropertyInfoShutter();
+            PropertyInfo getPropertyInfoGain();
+            PropertyInfo getPropertyInfoTriggerMode();
+            PropertyInfo getPropertyInfoTriggerDelay();
+            PropertyInfo getPropertyInfoFrameRate();
+            PropertyInfo getPropertyInfoTemperature();
+
+            // Get property methods
+            static std::map<PropertyType, std::function<Property(CameraDevice_spin*)>> getPropertyDispatchMap_; 
+
             Property getPropertyBrightness();
             Property getPropertyGamma();
             Property getPropertyShutter();
@@ -130,6 +141,23 @@ namespace bias {
             Property getPropertyFrameRate();
             Property getPropertyTemperature();
 
+            // Set Property methods
+            bool isPropertySettable(PropertyType propType, std::string &msg);
+            static std::map<PropertyType, std::function<void(CameraDevice_spin*,Property)>> setPropertyDispatchMap_; 
+
+            void setPropertyBrightness(Property prop);
+            void setPropertyGamma(Property prop);
+            void setPropertyShutter(Property prop);
+            void setPropertyGain(Property prop);
+            void setPropertyTriggerMode(Property prop);
+            void setPropertyTriggerDelay(Property prop);
+            void setPropertyFrameRate(Property prop);
+            void setPropertyTemperature(Property prop);
+
+
+            // spin get methods
+            // ---------------
+            std::vector<spinPixelFormatEnums> getSupportedPixelFormats_spin();
 
             //spinPGRGuid getGuid_spin();
             //void getVideoModeAndFrameRate(spinVideoMode &vidMode, spinFrameRate &frmRate);

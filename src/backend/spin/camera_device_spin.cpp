@@ -21,16 +21,43 @@
 
 namespace bias {
 
-    std::map<PropertyType, std::mem_fun_t<Property,CameraDevice_spin>> CameraDevice_spin::propertyDispatchMap_ = 
+
+    std::map<PropertyType, std::function<PropertyInfo(CameraDevice_spin*)>> CameraDevice_spin::getPropertyInfoDispatchMap_ = 
     { 
-        {PROPERTY_TYPE_BRIGHTNESS,     std::mem_fun(&CameraDevice_spin::getPropertyBrightness)},
-        {PROPERTY_TYPE_GAMMA,          std::mem_fun(&CameraDevice_spin::getPropertyGamma)},
-        {PROPERTY_TYPE_SHUTTER,        std::mem_fun(&CameraDevice_spin::getPropertyShutter)},
-        {PROPERTY_TYPE_GAIN,           std::mem_fun(&CameraDevice_spin::getPropertyGain)},
-        {PROPERTY_TYPE_TRIGGER_MODE,   std::mem_fun(&CameraDevice_spin::getPropertyTriggerMode)},
-        {PROPERTY_TYPE_TRIGGER_DELAY,  std::mem_fun(&CameraDevice_spin::getPropertyTriggerDelay)},
-        {PROPERTY_TYPE_FRAME_RATE,     std::mem_fun(&CameraDevice_spin::getPropertyFrameRate)},
-        {PROPERTY_TYPE_TEMPERATURE,    std::mem_fun(&CameraDevice_spin::getPropertyTemperature)},
+        {PROPERTY_TYPE_BRIGHTNESS,     std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoBrightness)},
+        {PROPERTY_TYPE_GAMMA,          std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoGamma)},
+        {PROPERTY_TYPE_SHUTTER,        std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoShutter)},
+        {PROPERTY_TYPE_GAIN,           std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoGain)},
+        {PROPERTY_TYPE_TRIGGER_MODE,   std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoTriggerMode)},
+        {PROPERTY_TYPE_TRIGGER_DELAY,  std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoTriggerDelay)},
+        {PROPERTY_TYPE_FRAME_RATE,     std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoFrameRate)},
+        {PROPERTY_TYPE_TEMPERATURE,    std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoTemperature)},
+    };
+
+
+    std::map<PropertyType, std::function<Property(CameraDevice_spin*)>> CameraDevice_spin::getPropertyDispatchMap_ = 
+    { 
+        {PROPERTY_TYPE_BRIGHTNESS,     std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyBrightness)},
+        {PROPERTY_TYPE_GAMMA,          std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyGamma)},
+        {PROPERTY_TYPE_SHUTTER,        std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyShutter)},
+        {PROPERTY_TYPE_GAIN,           std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyGain)},
+        {PROPERTY_TYPE_TRIGGER_MODE,   std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyTriggerMode)},
+        {PROPERTY_TYPE_TRIGGER_DELAY,  std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyTriggerDelay)},
+        {PROPERTY_TYPE_FRAME_RATE,     std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyFrameRate)},
+        {PROPERTY_TYPE_TEMPERATURE,    std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyTemperature)},
+    };
+
+
+    std::map<PropertyType, std::function<void(CameraDevice_spin*,Property)>> CameraDevice_spin::setPropertyDispatchMap_ = 
+    { 
+        {PROPERTY_TYPE_BRIGHTNESS,     std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyBrightness)},
+        {PROPERTY_TYPE_GAMMA,          std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyGamma)},
+        {PROPERTY_TYPE_SHUTTER,        std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyShutter)},
+        {PROPERTY_TYPE_GAIN,           std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyGain)},
+        {PROPERTY_TYPE_TRIGGER_MODE,   std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyTriggerMode)},
+        {PROPERTY_TYPE_TRIGGER_DELAY,  std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyTriggerDelay)},
+        {PROPERTY_TYPE_FRAME_RATE,     std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyFrameRate)},
+        {PROPERTY_TYPE_TEMPERATURE,    std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyTemperature)},
     };
 
 
@@ -120,8 +147,6 @@ namespace bias {
 
         BoolNode_spin gammaEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("GammaEnable");
         gammaEnableNode.print();
-
-        
 
 
     }
@@ -587,95 +612,84 @@ namespace bias {
         return allImageModes;
     }
 
-    
-    //Property CameraDevice_spin::getProperty(PropertyType propType)
-    //{
-    //    spinPropertyType propType_spin;
-    //    spinProperty prop_spin;
-    //    Property prop;
-
-    //    propType_spin = convertPropertyType_to_spin(propType);
-    //    prop_spin = getProperty_spin(propType_spin);
-
-    //    // DEBUG
-    //    // --------------------------------------------------------------------
-    //    //printProperty_spin(prop_spin);
-    //    // --------------------------------------------------------------------
-
-    //    prop = convertProperty_from_spin(prop_spin);
-    //    return prop;
-    //}
-
-
 
     PropertyInfo CameraDevice_spin::getPropertyInfo(PropertyType propType)
     {
         PropertyInfo propInfo;
-        std::vector<PropertyType> supportedTypeVec = getSpinSupportedPropertyTypes();
+        propInfo.type = propType;
 
-        bool isSupportedType = std::find(supportedTypeVec.begin(), supportedTypeVec.end(), propType) != supportedTypeVec.end(); 
-        bool isPresent = false;
-
-        if (isSupportedType)
+        if (isSpinSupportedPropertyType(propType))
         {
-
-                
-
-            //switch (propType)
-            //{
-            //    //PROPERTY_TYPE_BRIGHTNESS,       
-            //    //PROPERTY_TYPE_GAMMA,
-            //    //PROPERTY_TYPE_SHUTTER,
-            //    //PROPERTY_TYPE_GAIN,
-            //    //PROPERTY_TYPE_TRIGGER_MODE,
-            //    //PROPERTY_TYPE_TRIGGER_DELAY,
-            //    //PROPERTY_TYPE_FRAME_RATE,
-            //    //PROPERTY_TYPE_TEMPERATURE,
-            //    //default:
-
-            //}
-        }
-
-        if (!isPresent)
-        {
-            propInfo.type = propType;
-            propInfo.present = false;
-            propInfo.autoCapable = false;
-            propInfo.manualCapable = false;
-            propInfo.absoluteCapable = false;
-            propInfo.onePushCapable = false;
-            propInfo.onOffCapable = false;
-            propInfo.readOutCapable = false;
-            propInfo.minValue = 0;
-            propInfo.maxValue = 0;
-            propInfo.minAbsoluteValue = 0.0;
-            propInfo.maxAbsoluteValue = 0.0;
-            propInfo.haveUnits = false;
-            propInfo.units = std::string("");
-            propInfo.unitsAbbr = std::string("");
+            if (getPropertyInfoDispatchMap_.count(propType) > 0)
+            {
+                propInfo = getPropertyInfoDispatchMap_[propType](this);
+            } 
         }
 
         return propInfo;
     }
 
-    //{
-    //    spinPropertyType propType_spin;
-    //    spinPropertyInfo propInfo_spin;
-    //    PropertyInfo propInfo;
 
-    //    propType_spin = convertPropertyType_to_spin(propType);
-    //    propInfo_spin = getPropertyInfo_spin(propType_spin);
+    Property CameraDevice_spin::getProperty(PropertyType propType)
+    {
+        Property prop;
+        prop.type = propType;
 
-    //    // DEBUG
-    //    // --------------------------------------------------------------------
-    //    //printPropertyInfo_spin(propInfo_spin);
-    //    // --------------------------------------------------------------------
+        if (isSpinSupportedPropertyType(propType))
+        {
+            if (getPropertyDispatchMap_.count(propType) > 0)
+            {
+                prop = getPropertyDispatchMap_[propType](this);
+            }
+        }
 
-    //    propInfo =  convertPropertyInfo_from_spin(propInfo_spin);
-    //    return propInfo;
-    //}
+        return prop;
+    }
+
+
+    void CameraDevice_spin::setProperty(Property prop)
+    {
+        std::string settableMsg("");
+        bool isSettable = isPropertySettable(prop.type, settableMsg);
+
+        if (!isSettable)
+        {
+            throw RuntimeError(ERROR_SPIN_PROPERTY_NOT_SETTABLE, settableMsg);
+        }
+
+        setPropertyDispatchMap_[prop.type](this,prop);
+    }
 
    
+
+    bool CameraDevice_spin::isPropertySettable(PropertyType propType, std::string &msg)
+    {
+        if (!isSpinSupportedPropertyType(propType))
+        {
+            msg = std::string("PropertyType is not supported by Spinnaker Backend");
+            return false;
+        }
+
+
+        if (setPropertyDispatchMap_.count(propType) <= 0)
+        {
+            msg = std::string("PropertyType is not is setter dispatch map");
+            return false;
+        }
+        
+        PropertyInfo propInfo = getPropertyInfo(propType);
+        // -------------------------------------
+        // DEBUG
+        // -------------------------------------
+        // propInfo.present = true;
+        // -------------------------------------
+        if (!propInfo.present)
+        {
+            msg = std::string("PropertyType is not present");
+            return false;
+        }
+        return true;
+    }
 
     //Format7Settings CameraDevice_spin::getFormat7Settings()
     //{
@@ -809,13 +823,6 @@ namespace bias {
     //}
 
 
-    //void CameraDevice_spin::setProperty(Property prop)
-    //{
-    //    spinProperty prop_spin;
-    //    prop_spin = convertProperty_to_spin(prop);
-    //    setProperty(prop_spin);
-    //}
-    //
 
 
     bool CameraDevice_spin::isSupported(VideoMode vidMode, FrameRate frmRate)
@@ -1149,75 +1156,200 @@ namespace bias {
         timeStamp_.microSeconds = (unsigned int)(microSeconds);
     }
 
-    //    spinTimeStamp timeStamp_spin = spinGetImageTimeStamp(&rawImage_);
+    // Get PropertyInfo methods
+    // --------------------------
 
-    //    if (haveEmbeddedTimeStamp_)
-    //    {
-    //        // DEVEL - get raw time stamp data from image 
-    //        // ----------------------------------------------------------------
-    //        //unsigned int  stamp;
-    //        //unsigned char* pStamp = (unsigned char*) &stamp;
-    //        //for (int i=0; i<4; i++)
-    //        //{
-    //        //    pStamp[i] = rawImage_.pData[3-i];
-    //        //}
-    //        // ----------------------------------------------------------------
+    PropertyInfo CameraDevice_spin::getPropertyInfoBrightness()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        PropertyInfo propInfo;
+        return propInfo;
+    }
 
-    //        if (isFirst_)
-    //        {
-    //            timeStamp_.seconds = 0;
-    //            timeStamp_.microSeconds = 0;
-    //            cycleSecondsLast_ = timeStamp_spin.cycleSeconds;
-    //        }
-    //        else
-    //        {
-    //            unsigned int cycleSeconds;
-    //            unsigned int cycleCount;
-    //            unsigned int cycleOffset;
-    //            unsigned int deltaCycleSeconds;
 
-    //            // DEVEL - convert raw time stamp data to cycleSeconds, etc.
-    //            // --------------------------------------------------------------------------
-    //            //cycleSeconds = (stamp >> 25) & 0b1111111;
-    //            //cycleCount   = (stamp >> 12) & 0b1111111111111;  
-    //            //cycleOffset  = (stamp >> 0 ) & 0b111111110000;   
-    //            //std::cout << cycleSeconds << ", " << cycleCount << ", " << cycleOffset << std::endl;
-    //            //std::cout << cycleSeconds << ", " << cycleCount << ", " << cycleOffset << std::endl;
-    //            //std::cout << std::endl;
-    //            // ---------------------------------------------------------------------------
+    PropertyInfo CameraDevice_spin::getPropertyInfoGamma()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        PropertyInfo propInfo;
+        return propInfo;
+    }
 
-    //            cycleSeconds = timeStamp_spin.cycleSeconds;
-    //            cycleCount = timeStamp_spin.cycleCount;
-    //            cycleOffset = timeStamp_spin.cycleOffset;
-    //            cycleOffset &= CYCLE_OFFSET_MASK;
-    //            if (timeStamp_spin.cycleSeconds >= cycleSecondsLast_)
-    //            {
-    //                deltaCycleSeconds = cycleSeconds; 
-    //                deltaCycleSeconds -= cycleSecondsLast_;
-    //            }
-    //            else
-    //            {
-    //                deltaCycleSeconds = MAX_CYCLE_SECONDS; 
-    //                deltaCycleSeconds += timeStamp_spin.cycleSeconds; 
-    //                deltaCycleSeconds -= cycleSecondsLast_;
-    //            }
-    //            timeStamp_.seconds += (unsigned long long)(deltaCycleSeconds);
-    //            timeStamp_.microSeconds = USEC_PER_CYCLE_COUNT*cycleCount;
-    //            timeStamp_.microSeconds += (USEC_PER_CYCLE_COUNT*cycleOffset)/MAX_CYCLE_OFFSET;
-    //            cycleSecondsLast_ = timeStamp_spin.cycleSeconds;
-    //        }
-    //    }
-    //    else
-    //    {
-    //        timeStamp_.seconds = (unsigned long long)(timeStamp_spin.seconds);
-    //        timeStamp_.microSeconds = timeStamp_spin.microSeconds;
-    //    }
-    //}
+
+    PropertyInfo CameraDevice_spin::getPropertyInfoShutter()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        PropertyInfo propInfo;
+        return propInfo;
+    }
+
+
+    PropertyInfo CameraDevice_spin::getPropertyInfoGain()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        PropertyInfo propInfo;
+        return propInfo;
+    }
+
+
+    PropertyInfo CameraDevice_spin::getPropertyInfoTriggerMode()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        PropertyInfo propInfo;
+        return propInfo;
+    }
+
+
+    PropertyInfo CameraDevice_spin::getPropertyInfoTriggerDelay()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        PropertyInfo propInfo;
+        return propInfo;
+    }
+
+
+    PropertyInfo CameraDevice_spin::getPropertyInfoFrameRate()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        PropertyInfo propInfo;
+        return propInfo;
+    }
+
+
+    PropertyInfo CameraDevice_spin::getPropertyInfoTemperature()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        PropertyInfo propInfo;
+        return propInfo;
+    }
+
+
+    // Set Property methods 
+    // ---------------------
+
+    Property CameraDevice_spin::getPropertyBrightness()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        Property prop;
+        return prop;
+    }
+
+
+    Property CameraDevice_spin::getPropertyGamma()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        Property prop;
+        return prop;
+    }
+
+
+    Property CameraDevice_spin::getPropertyShutter()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        Property prop;
+        return prop;
+    }
+
+
+    Property CameraDevice_spin::getPropertyGain()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        Property prop;
+        return prop;
+    }
+
+
+    Property CameraDevice_spin::getPropertyTriggerMode()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        Property prop;
+        return prop;
+    }
+
+
+    Property CameraDevice_spin::getPropertyTriggerDelay()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        Property prop;
+        return prop;
+    }
+
+
+    Property CameraDevice_spin::getPropertyFrameRate()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        Property prop;
+        return prop;
+    }
+
+
+    Property CameraDevice_spin::getPropertyTemperature()
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        Property prop;
+        return prop;
+    }
+
+    // Set Property methods 
+    // ---------------------
+
+    void CameraDevice_spin::setPropertyBrightness(Property prop)
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        return;
+    }
+
+
+    void CameraDevice_spin::setPropertyGamma(Property prop)
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        return;
+    }
+
+
+    void CameraDevice_spin::setPropertyShutter(Property prop)
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        return;
+    }
+
+
+    void CameraDevice_spin::setPropertyGain(Property prop)
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        return;
+    }
+
+
+    void CameraDevice_spin::setPropertyTriggerMode(Property prop)
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        return;
+    }
+
+
+    void CameraDevice_spin::setPropertyTriggerDelay(Property prop)
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        return;
+    }
+
+
+    void CameraDevice_spin::setPropertyFrameRate(Property prop)
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        return;
+    }
+
+
+    void CameraDevice_spin::setPropertyTemperature(Property prop)
+    {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        return;
+    }
 
 
     // spin get methods
     // ---------------
-    
     std::vector<spinPixelFormatEnums> CameraDevice_spin::getSupportedPixelFormats_spin()
     {   
         EnumNode_spin pixelFormatNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("PixelFormat");
@@ -1231,63 +1363,6 @@ namespace bias {
         }
         return pixelFormatValueVec;
     }
-
-
-    Property CameraDevice_spin::getPropertyBrightness()
-    {
-        Property prop;
-        return prop;
-    }
-
-
-    Property CameraDevice_spin::getPropertyGamma()
-    {
-        Property prop;
-        return prop;
-    }
-
-
-    Property CameraDevice_spin::getPropertyShutter()
-    {
-        Property prop;
-        return prop;
-    }
-
-
-    Property CameraDevice_spin::getPropertyGain()
-    {
-        Property prop;
-        return prop;
-    }
-
-
-    Property CameraDevice_spin::getPropertyTriggerMode()
-    {
-        Property prop;
-        return prop;
-    }
-
-
-    Property CameraDevice_spin::getPropertyTriggerDelay()
-    {
-        Property prop;
-        return prop;
-    }
-
-
-    Property CameraDevice_spin::getPropertyFrameRate()
-    {
-        Property prop;
-        return prop;
-    }
-
-
-    Property CameraDevice_spin::getPropertyTemperature()
-    {
-        Property prop;
-        return prop;
-    }
-
 
     //void CameraDevice_spin::getVideoModeAndFrameRate(
     //        spinVideoMode &vidMode, 

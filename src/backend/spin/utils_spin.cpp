@@ -178,6 +178,13 @@ namespace bias
     }
 
 
+    bool isSpinSupportedPropertyType(PropertyType propType)
+    { 
+        std::vector<PropertyType> supportedTypeVec = getSpinSupportedPropertyTypes();
+        return (std::find(supportedTypeVec.begin(), supportedTypeVec.end(), propType) != supportedTypeVec.end()); 
+    }
+
+
 
     // Image conversion - for mapping from Spinnaker to opencv 
     // -----------------------------------------------------------------------

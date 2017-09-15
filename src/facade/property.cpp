@@ -10,7 +10,18 @@ namespace bias
     Property::Property()
     {
         type = PROPERTY_TYPE_UNSPECIFIED;
+        present = false;
+        absoluteControl = false;
+        onePush = false;
+        on = false;
+        autoActive = false;
+        value = 0;
+        valueA = 0;
+        valueB = 0;
+        absoluteValue = 0.0;
+
     }
+
 
     void Property::print()
     {
@@ -32,7 +43,6 @@ namespace bias
         {
             ss << "value Red:        " << valueA << std::endl;
             ss << "value Blue:       " << valueB << std::endl;
-
         }
         else
         {
@@ -50,6 +60,20 @@ namespace bias
     PropertyInfo::PropertyInfo()
     {
         type = PROPERTY_TYPE_UNSPECIFIED;
+        present = false;
+        autoCapable = false;
+        manualCapable = false;
+        absoluteCapable = false;
+        onePushCapable = false;
+        onOffCapable = false;
+        readOutCapable = false;
+        minValue = 0;
+        maxValue = 0;
+        minAbsoluteValue = 0.0;
+        maxAbsoluteValue = 0.0;
+        haveUnits = false;
+        units = std::string("");
+        unitsAbbr = std::string("");
     }
 
     void PropertyInfo::print()
