@@ -21,6 +21,19 @@
 
 namespace bias {
 
+    std::map<PropertyType, std::mem_fun_t<Property,CameraDevice_spin>> CameraDevice_spin::propertyDispatchMap_ = 
+    { 
+        {PROPERTY_TYPE_BRIGHTNESS,     std::mem_fun(&CameraDevice_spin::getPropertyBrightness)},
+        {PROPERTY_TYPE_GAMMA,          std::mem_fun(&CameraDevice_spin::getPropertyGamma)},
+        {PROPERTY_TYPE_SHUTTER,        std::mem_fun(&CameraDevice_spin::getPropertyShutter)},
+        {PROPERTY_TYPE_GAIN,           std::mem_fun(&CameraDevice_spin::getPropertyGain)},
+        {PROPERTY_TYPE_TRIGGER_MODE,   std::mem_fun(&CameraDevice_spin::getPropertyTriggerMode)},
+        {PROPERTY_TYPE_TRIGGER_DELAY,  std::mem_fun(&CameraDevice_spin::getPropertyTriggerDelay)},
+        {PROPERTY_TYPE_FRAME_RATE,     std::mem_fun(&CameraDevice_spin::getPropertyFrameRate)},
+        {PROPERTY_TYPE_TEMPERATURE,    std::mem_fun(&CameraDevice_spin::getPropertyTemperature)},
+    };
+
+
     void CameraDevice_spin::develExpProps()
     {
         if (!connected_)
@@ -594,9 +607,53 @@ namespace bias {
     //}
 
 
+
     PropertyInfo CameraDevice_spin::getPropertyInfo(PropertyType propType)
     {
         PropertyInfo propInfo;
+        std::vector<PropertyType> supportedTypeVec = getSpinSupportedPropertyTypes();
+
+        bool isSupportedType = std::find(supportedTypeVec.begin(), supportedTypeVec.end(), propType) != supportedTypeVec.end(); 
+        bool isPresent = false;
+
+        if (isSupportedType)
+        {
+
+                
+
+            //switch (propType)
+            //{
+            //    //PROPERTY_TYPE_BRIGHTNESS,       
+            //    //PROPERTY_TYPE_GAMMA,
+            //    //PROPERTY_TYPE_SHUTTER,
+            //    //PROPERTY_TYPE_GAIN,
+            //    //PROPERTY_TYPE_TRIGGER_MODE,
+            //    //PROPERTY_TYPE_TRIGGER_DELAY,
+            //    //PROPERTY_TYPE_FRAME_RATE,
+            //    //PROPERTY_TYPE_TEMPERATURE,
+            //    //default:
+
+            //}
+        }
+
+        if (!isPresent)
+        {
+            propInfo.type = propType;
+            propInfo.present = false;
+            propInfo.autoCapable = false;
+            propInfo.manualCapable = false;
+            propInfo.absoluteCapable = false;
+            propInfo.onePushCapable = false;
+            propInfo.onOffCapable = false;
+            propInfo.readOutCapable = false;
+            propInfo.minValue = 0;
+            propInfo.maxValue = 0;
+            propInfo.minAbsoluteValue = 0.0;
+            propInfo.maxAbsoluteValue = 0.0;
+            propInfo.haveUnits = false;
+            propInfo.units = std::string("");
+            propInfo.unitsAbbr = std::string("");
+        }
 
         return propInfo;
     }
@@ -1173,6 +1230,62 @@ namespace bias {
             pixelFormatValueVec.push_back(spinPixelFormatEnums(entry.value()));
         }
         return pixelFormatValueVec;
+    }
+
+
+    Property CameraDevice_spin::getPropertyBrightness()
+    {
+        Property prop;
+        return prop;
+    }
+
+
+    Property CameraDevice_spin::getPropertyGamma()
+    {
+        Property prop;
+        return prop;
+    }
+
+
+    Property CameraDevice_spin::getPropertyShutter()
+    {
+        Property prop;
+        return prop;
+    }
+
+
+    Property CameraDevice_spin::getPropertyGain()
+    {
+        Property prop;
+        return prop;
+    }
+
+
+    Property CameraDevice_spin::getPropertyTriggerMode()
+    {
+        Property prop;
+        return prop;
+    }
+
+
+    Property CameraDevice_spin::getPropertyTriggerDelay()
+    {
+        Property prop;
+        return prop;
+    }
+
+
+    Property CameraDevice_spin::getPropertyFrameRate()
+    {
+        Property prop;
+        return prop;
+    }
+
+
+    Property CameraDevice_spin::getPropertyTemperature()
+    {
+        Property prop;
+        return prop;
     }
 
 

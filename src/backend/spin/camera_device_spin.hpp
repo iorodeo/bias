@@ -3,6 +3,8 @@
 #define BIAS_CAMERA_DEVICE_SPIN_HPP
 
 #include <string>
+#include <map>
+#include <functional>
 #include <opencv2/core/core.hpp>
 #include "utils.hpp"
 #include "camera_device.hpp"
@@ -80,7 +82,9 @@ namespace bias {
 
             void develExpProps();
 
+
         private:
+
 
             spinSystem hSystem_ = nullptr;
             spinCamera hCamera_ = nullptr;
@@ -96,11 +100,10 @@ namespace bias {
             TimeStamp timeStamp_;
             int64_t timeStamp_ns_;
 
-            //bool isFirst_;
-
             bool imageOK_ = false;
             spinImage hSpinImage_ = nullptr;
 
+            //bool isFirst_;
             //void initialize();
 
             bool grabImageCommon(std::string &errMsg);
@@ -116,6 +119,17 @@ namespace bias {
             // ---------------
 
             std::vector<spinPixelFormatEnums> getSupportedPixelFormats_spin();
+
+            static std::map<PropertyType, std::mem_fun_t<Property,CameraDevice_spin>> propertyDispatchMap_; 
+            Property getPropertyBrightness();
+            Property getPropertyGamma();
+            Property getPropertyShutter();
+            Property getPropertyGain();
+            Property getPropertyTriggerMode();
+            Property getPropertyTriggerDelay();
+            Property getPropertyFrameRate();
+            Property getPropertyTemperature();
+
 
             //spinPGRGuid getGuid_spin();
             //void getVideoModeAndFrameRate(spinVideoMode &vidMode, spinFrameRate &frmRate);
