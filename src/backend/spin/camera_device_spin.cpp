@@ -294,6 +294,14 @@ namespace bias {
             cameraInfo_ = nodeMapTLDevice_.cameraInfo();
             cameraInfo_.print();
 
+            // Setup exposure defaults 
+            EnumNode_spin exposureModeNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureMode");
+            exposureModeNode.setEntryBySymbolic("Timed");
+
+            EnumNode_spin exposureAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureAuto");
+            exposureAutoNode.setEntryBySymbolic("Off");
+
+
             // DEVEL
             // ----------------------------------------------------------------------------------------------
 
