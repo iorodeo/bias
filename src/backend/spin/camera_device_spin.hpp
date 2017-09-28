@@ -159,27 +159,6 @@ namespace bias {
             // ---------------
             std::vector<spinPixelFormatEnums> getSupportedPixelFormats_spin();
 
-            //spinPGRGuid getGuid_spin();
-            //void getVideoModeAndFrameRate(spinVideoMode &vidMode, spinFrameRate &frmRate);
-            //spinPropertyInfo getPropertyInfo_spin(spinPropertyType propType);
-            //spinProperty getProperty_spin(spinPropertyType propType);
-            //spinFormat7Configuration getFormat7Configuration();
-            //spinTriggerMode getTriggerMode_spin();
-            //spinTriggerModeInfo getTriggerModeInfo_spin();
-            //spinConfig getConfiguration_spin();
-
-            //// spin set methods
-            //// ---------------
-            //void setProperty(spinProperty prop);
-            //void setTriggerMode(spinTriggerMode trigMode);
-            //void setConfiguration_spin(spinConfig &config);
-
-            //// Temporary 
-            //// --------------------------------------------
-            //void setVideoModeToFormat7(ImageMode mode);
-            //void setVideoModeToFormat7(spinMode mode);
-            //void printFormat7Configuration();
-
     };
 
 

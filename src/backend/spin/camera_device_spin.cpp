@@ -22,136 +22,6 @@
 namespace bias {
 
 
-    std::map<PropertyType, std::function<PropertyInfo(CameraDevice_spin*)>> CameraDevice_spin::getPropertyInfoDispatchMap_ = 
-    { 
-        {PROPERTY_TYPE_BRIGHTNESS,     std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoBrightness)},
-        {PROPERTY_TYPE_GAMMA,          std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoGamma)},
-        {PROPERTY_TYPE_SHUTTER,        std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoShutter)},
-        {PROPERTY_TYPE_GAIN,           std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoGain)},
-        {PROPERTY_TYPE_TRIGGER_MODE,   std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoTriggerMode)},
-        {PROPERTY_TYPE_TRIGGER_DELAY,  std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoTriggerDelay)},
-        {PROPERTY_TYPE_FRAME_RATE,     std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoFrameRate)},
-        {PROPERTY_TYPE_TEMPERATURE,    std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoTemperature)},
-    };
-
-
-    std::map<PropertyType, std::function<Property(CameraDevice_spin*)>> CameraDevice_spin::getPropertyDispatchMap_ = 
-    { 
-        {PROPERTY_TYPE_BRIGHTNESS,     std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyBrightness)},
-        {PROPERTY_TYPE_GAMMA,          std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyGamma)},
-        {PROPERTY_TYPE_SHUTTER,        std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyShutter)},
-        {PROPERTY_TYPE_GAIN,           std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyGain)},
-        {PROPERTY_TYPE_TRIGGER_MODE,   std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyTriggerMode)},
-        {PROPERTY_TYPE_TRIGGER_DELAY,  std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyTriggerDelay)},
-        {PROPERTY_TYPE_FRAME_RATE,     std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyFrameRate)},
-        {PROPERTY_TYPE_TEMPERATURE,    std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyTemperature)},
-    };
-
-
-    std::map<PropertyType, std::function<void(CameraDevice_spin*,Property)>> CameraDevice_spin::setPropertyDispatchMap_ = 
-    { 
-        {PROPERTY_TYPE_BRIGHTNESS,     std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyBrightness)},
-        {PROPERTY_TYPE_GAMMA,          std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyGamma)},
-        {PROPERTY_TYPE_SHUTTER,        std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyShutter)},
-        {PROPERTY_TYPE_GAIN,           std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyGain)},
-        {PROPERTY_TYPE_TRIGGER_MODE,   std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyTriggerMode)},
-        {PROPERTY_TYPE_TRIGGER_DELAY,  std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyTriggerDelay)},
-        {PROPERTY_TYPE_FRAME_RATE,     std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyFrameRate)},
-        {PROPERTY_TYPE_TEMPERATURE,    std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyTemperature)},
-    };
-
-
-    void CameraDevice_spin::develExpProps()
-    {
-        if (!connected_)
-        {
-            std::cout << "camera is not connected - can't explore properties" << std::endl;
-        }
-
-
-        // Exposure (Used instead of Shutter ... what about gain, intensity, etc. ???
-        // --------------------------------------------------------------------------------------------------
-
-        EnumNode_spin exposureModeNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureMode");
-        exposureModeNode.setEntryBySymbolic("Timed");
-        exposureModeNode.print();
-
-        EnumNode_spin exposureAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureAuto");
-        exposureAutoNode.setEntryBySymbolic("Off");
-        exposureAutoNode.print();
-
-        FloatNode_spin exposureTimeNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("ExposureTime");
-        exposureTimeNode.print();
-
-        // Gain - don't understand this yet.
-        // --------------------------------------------------------------------------------------------------
-
-        EnumNode_spin gainSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("GainSelector");
-        gainSelectorNode.print();
-
-        EnumNode_spin gainAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("GainAuto");
-        gainAutoNode.print();
-
-        FloatNode_spin gainNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("Gain");
-        gainNode.print();
-
-        // Trigger 
-        // --------------------------------------------------------------------------------------------------
-
-        EnumNode_spin triggerSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerSelector");
-        triggerSelectorNode.print();
-
-        EnumNode_spin triggerModeNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerMode");
-        triggerModeNode.print();
-
-        EnumNode_spin triggerSourceNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerSource");
-        triggerSourceNode.print();
-
-        EnumNode_spin triggerOverlapNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerOverlap");
-        triggerOverlapNode.print();
-
-        FloatNode_spin triggerDelayNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("TriggerDelay");
-        triggerDelayNode.print();
-
-        // FrameRate
-        // --------------------------------------------------------------------------------------------------
-
-        BoolNode_spin frameRateEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("AcquisitionFrameRateEnable");
-        frameRateEnableNode.setValue(true);
-        frameRateEnableNode.print();
-
-        FloatNode_spin frameRateNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("AcquisitionFrameRate");
-        frameRateNode.print();
-
-        FloatNode_spin resFrameRateNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("AcquisitionResultingFrameRate");
-        resFrameRateNode.print();
-
-
-        // Temperature
-        //---------------------------------------------------------------------------------------------------
-        FloatNode_spin tempNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("DeviceTemperature");
-        tempNode.print();
-
-        // Blacklevel
-        // ---------------------------------------------------------------------------------------------------
-        EnumNode_spin blackLevelSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("BlackLevelSelector");
-        blackLevelSelectorNode.print();
-
-        FloatNode_spin blackLevelNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("BlackLevel");
-        blackLevelNode.print();
-
-        // Gamma
-        // ----------------------------------------------------------------------------------------------------
-        FloatNode_spin gammaNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("Gamma");
-        gammaNode.print();
-
-        BoolNode_spin gammaEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("GammaEnable");
-        gammaEnableNode.print();
-
-
-    }
-
-
     CameraDevice_spin::CameraDevice_spin() : CameraDevice()
     {
         //initialize();
@@ -294,6 +164,10 @@ namespace bias {
             cameraInfo_ = nodeMapTLDevice_.cameraInfo();
             cameraInfo_.print();
 
+
+            // Default settings - may want to test for availability before setting.
+            // ----------------------------------------------------------------------------------------------
+
             // Setup exposure defaults 
             EnumNode_spin exposureModeNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureMode");
             exposureModeNode.setEntryBySymbolic("Timed");
@@ -301,6 +175,9 @@ namespace bias {
             EnumNode_spin exposureAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureAuto");
             exposureAutoNode.setEntryBySymbolic("Off");
 
+            // Setup blacklevel defaults
+            EnumNode_spin blackLevelSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("BlackLevelSelector");
+            blackLevelSelectorNode.setEntryBySymbolic("All");
 
             // DEVEL
             // ----------------------------------------------------------------------------------------------
@@ -998,31 +875,6 @@ namespace bias {
     //// Private methods
     //// -------------------------------------------------------------------------
 
-    //spinPGRGuid CameraDevice_spin::getGuid_spin()
-    //{
-    //    return guid_.getValue_spin();
-    //}
-
-
-
-    //void CameraDevice_spin::destroyConvertedImage()
-    //{
-    //    if (convertedImageCreated_) 
-    //    {
-    //        spinError error = spinDestroyImage(&convertedImage_);
-
-    //        if (error != SPIN_ERROR_OK) 
-    //        {
-    //            std::stringstream ssError;
-    //            ssError << __PRETTY_FUNCTION__;
-    //            ssError << ": unable to destroy Spinnaker image";
-    //            throw RuntimeError(ERROR_SPIN_DESTROY_IMAGE, ssError.str());
-    //        }
-    //        
-    //        convertedImageCreated_ = false;
-    //    }
-    //}
-
 
     bool CameraDevice_spin::grabImageCommon(std::string &errMsg)
     {
@@ -1169,16 +1021,58 @@ namespace bias {
 
     PropertyInfo CameraDevice_spin::getPropertyInfoBrightness()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        FloatNode_spin blackLevelNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("BlackLevel");
+
         PropertyInfo propInfo;
+        propInfo.type = PROPERTY_TYPE_BRIGHTNESS; 
+        propInfo.present = blackLevelNode.isAvailable();
+
+        if (propInfo.present)
+        {
+            propInfo.autoCapable = false;
+            propInfo.manualCapable = true;
+            propInfo.absoluteCapable = true;
+            propInfo.onePushCapable = false;
+            propInfo.onOffCapable = false;
+            propInfo.readOutCapable = false;
+            propInfo.minValue = blackLevelNode.minIntValue();
+            propInfo.maxValue = blackLevelNode.maxIntValue();
+            propInfo.minAbsoluteValue = blackLevelNode.minValue();
+            propInfo.maxAbsoluteValue = blackLevelNode.maxValue();
+            propInfo.haveUnits = !blackLevelNode.unit().empty();
+            propInfo.units = blackLevelNode.unit();
+            propInfo.unitsAbbr = blackLevelNode.unit();
+        }
+
         return propInfo;
     }
 
-
     PropertyInfo CameraDevice_spin::getPropertyInfoGamma()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        FloatNode_spin gammaNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("Gamma");
+        BoolNode_spin gammaEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("GammaEnable");
+
         PropertyInfo propInfo;
+        propInfo.type = PROPERTY_TYPE_GAMMA;
+        propInfo.present = gammaNode.isAvailable();
+
+        if (propInfo.present)
+        {
+            propInfo.autoCapable = false;
+            propInfo.manualCapable = true;
+            propInfo.absoluteCapable = true;
+            propInfo.onePushCapable = false;
+            propInfo.onOffCapable = gammaEnableNode.isAvailable() && gammaEnableNode.isWritable();
+            propInfo.readOutCapable = false;
+            propInfo.minValue = gammaNode.minIntValue();
+            propInfo.maxValue = gammaNode.maxIntValue();
+            propInfo.minAbsoluteValue = gammaNode.minValue();
+            propInfo.maxAbsoluteValue = gammaNode.maxValue();
+            propInfo.haveUnits = !gammaNode.unit().empty();
+            propInfo.units =  gammaNode.unit();
+            propInfo.unitsAbbr = gammaNode.unit();
+        }
+        
         return propInfo;
     }
 
@@ -1186,9 +1080,41 @@ namespace bias {
     PropertyInfo CameraDevice_spin::getPropertyInfoShutter()
     {
         std::cout << __PRETTY_FUNCTION__ << std::endl;
+
+        EnumNode_spin exposureAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureAuto");
+        FloatNode_spin exposureTimeNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("ExposureTime");
+
         PropertyInfo propInfo;
+        propInfo.type = PROPERTY_TYPE_SHUTTER;
+        propInfo.present = exposureTimeNode.isAvailable();
+
+        if (propInfo.present)
+        {
+            propInfo.autoCapable = exposureAutoNode.isAvailable() && exposureAutoNode.isWritable();
+            
+
+        }
+
         return propInfo;
     }
+
+    //PropertyType type;
+    //bool present;
+    //bool autoCapable;
+    //bool manualCapable;
+    //bool absoluteCapable;
+    //bool onePushCapable;
+    //bool onOffCapable;
+    //bool readOutCapable;
+
+    //unsigned int minValue;
+    //unsigned int maxValue;
+    //float minAbsoluteValue;
+    //float maxAbsoluteValue;
+
+    //bool haveUnits;
+    //std::string units;
+    //std::string unitsAbbr;
 
 
     PropertyInfo CameraDevice_spin::getPropertyInfoGain()
@@ -1372,468 +1298,136 @@ namespace bias {
         return pixelFormatValueVec;
     }
 
-    //void CameraDevice_spin::getVideoModeAndFrameRate(
-    //        spinVideoMode &vidMode, 
-    //        spinFrameRate &frmRate
-    //        )
-    //{
-    //    spinError error = spinGetVideoModeAndFrameRate(context_, &vidMode, &frmRate);
-    //    if (error != SPIN_ERROR_OK)
-    //    {
-    //        std::stringstream ssError;
-    //        ssError << __PRETTY_FUNCTION__;
-    //        ssError << ": unable to get Spinnaker VideoMode and FrameRate";
-    //        throw RuntimeError(ERROR_SPIN_GET_VIDEOMODE_AND_FRAMERATE, ssError.str());
-    //    }
-    //}
+
+    std::map<PropertyType, std::function<PropertyInfo(CameraDevice_spin*)>> CameraDevice_spin::getPropertyInfoDispatchMap_ = 
+    { 
+        {PROPERTY_TYPE_BRIGHTNESS,     std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoBrightness)},
+        {PROPERTY_TYPE_GAMMA,          std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoGamma)},
+        {PROPERTY_TYPE_SHUTTER,        std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoShutter)},
+        {PROPERTY_TYPE_GAIN,           std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoGain)},
+        {PROPERTY_TYPE_TRIGGER_MODE,   std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoTriggerMode)},
+        {PROPERTY_TYPE_TRIGGER_DELAY,  std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoTriggerDelay)},
+        {PROPERTY_TYPE_FRAME_RATE,     std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoFrameRate)},
+        {PROPERTY_TYPE_TEMPERATURE,    std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoTemperature)},
+    };
 
 
-    //spinPropertyInfo CameraDevice_spin::getPropertyInfo_spin(spinPropertyType propType)
-    //{
-    //    spinError error;
-    //    spinPropertyInfo propInfo;
-    //    propInfo.type = propType;
-
-    //    error = spinGetPropertyInfo(context_, &propInfo);
-    //    if (error != SPIN_ERROR_OK)  
-    //    {
-    //        std::stringstream ssError;
-    //        ssError << __PRETTY_FUNCTION__;
-    //        ssError < ": unable to get Spinnaker properyInfo";
-    //        throw RuntimeError(ERROR_SPIN_GET_PROPERTY_INFO, ssError.str());
-    //    }
-    //    return propInfo;
-    //}
+    std::map<PropertyType, std::function<Property(CameraDevice_spin*)>> CameraDevice_spin::getPropertyDispatchMap_ = 
+    { 
+        {PROPERTY_TYPE_BRIGHTNESS,     std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyBrightness)},
+        {PROPERTY_TYPE_GAMMA,          std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyGamma)},
+        {PROPERTY_TYPE_SHUTTER,        std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyShutter)},
+        {PROPERTY_TYPE_GAIN,           std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyGain)},
+        {PROPERTY_TYPE_TRIGGER_MODE,   std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyTriggerMode)},
+        {PROPERTY_TYPE_TRIGGER_DELAY,  std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyTriggerDelay)},
+        {PROPERTY_TYPE_FRAME_RATE,     std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyFrameRate)},
+        {PROPERTY_TYPE_TEMPERATURE,    std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyTemperature)},
+    };
 
 
-    //spinProperty CameraDevice_spin::getProperty_spin(spinPropertyType propType)
-    //{
-    //    spinError error;
-    //    spinProperty prop;
-    //    prop.type = propType;
+    std::map<PropertyType, std::function<void(CameraDevice_spin*,Property)>> CameraDevice_spin::setPropertyDispatchMap_ = 
+    { 
+        {PROPERTY_TYPE_BRIGHTNESS,     std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyBrightness)},
+        {PROPERTY_TYPE_GAMMA,          std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyGamma)},
+        {PROPERTY_TYPE_SHUTTER,        std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyShutter)},
+        {PROPERTY_TYPE_GAIN,           std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyGain)},
+        {PROPERTY_TYPE_TRIGGER_MODE,   std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyTriggerMode)},
+        {PROPERTY_TYPE_TRIGGER_DELAY,  std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyTriggerDelay)},
+        {PROPERTY_TYPE_FRAME_RATE,     std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyFrameRate)},
+        {PROPERTY_TYPE_TEMPERATURE,    std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyTemperature)},
+    };
 
-    //    error = spinGetProperty(context_, &prop);
-    //    if (error != SPIN_ERROR_OK)
-    //    {
-    //        std::stringstream ssError;
-    //        ssError << __PRETTY_FUNCTION__;
-    //        ssError << ": unable to get Spinnaker property";
-    //        throw RuntimeError(ERROR_SPIN_GET_PROPERTY, ssError.str());
-    //    }
-    //    return prop;
-    //}
-
-
-    //spinFormat7Configuration CameraDevice_spin::getFormat7Configuration()
-    //{
-    //    spinError error;
-    //    spinFormat7Configuration config;
-    //    error = spinGetFormat7Configuration(
-    //            context_, 
-    //            &(config.imageSettings),
-    //            &(config.packetSize),
-    //            &(config.percentage)
-    //            );
-    //    if (error != SPIN_ERROR_OK)
-    //    { 
-    //        std::stringstream ssError; 
-    //        ssError << __PRETTY_FUNCTION__; 
-    //        ssError << ": unable to get Spinnaker format 7 configuration"; 
-    //        throw RuntimeError(ERROR_SPIN_GET_FORMAT7_CONFIGURATION, ssError.str());
-    //    }
-    //    return config;
-    //}
+    // DEVEL
+    // ----------------------------------------------------------------------------------------------------------------------------------
+    void CameraDevice_spin::develExpProps()
+    {
+        if (!connected_)
+        {
+            std::cout << "camera is not connected - can't explore properties" << std::endl;
+        }
 
 
-    //spinTriggerMode CameraDevice_spin::getTriggerMode_spin()
-    //{
-    //    spinError error;
-    //    spinTriggerMode triggerMode;
-    //    error = spinGetTriggerMode(context_, &triggerMode);
-    //    if (error != SPIN_ERROR_OK)
-    //    {
-    //        std::stringstream ssError;
-    //        ssError << __PRETTY_FUNCTION__;
-    //        ssError << ": unable to get Spinnaker TriggerMode";
-    //        throw RuntimeError(ERROR_SPIN_GET_TRIGGER_MODE, ssError.str());
-    //    }
-    //    return triggerMode;
-    //}
+        // Exposure (Used instead of Shutter ... what about gain, intensity, etc. ???
+        // --------------------------------------------------------------------------------------------------
+
+        EnumNode_spin exposureModeNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureMode");
+        exposureModeNode.setEntryBySymbolic("Timed");
+        exposureModeNode.print();
+
+        EnumNode_spin exposureAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureAuto");
+        exposureAutoNode.setEntryBySymbolic("Off");
+        exposureAutoNode.print();
+
+        FloatNode_spin exposureTimeNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("ExposureTime");
+        exposureTimeNode.print();
+
+        // Gain - don't understand this yet.
+        // --------------------------------------------------------------------------------------------------
+
+        EnumNode_spin gainSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("GainSelector");
+        gainSelectorNode.print();
+
+        EnumNode_spin gainAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("GainAuto");
+        gainAutoNode.print();
+
+        FloatNode_spin gainNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("Gain");
+        gainNode.print();
+
+        // Trigger 
+        // --------------------------------------------------------------------------------------------------
+
+        EnumNode_spin triggerSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerSelector");
+        triggerSelectorNode.print();
+
+        EnumNode_spin triggerModeNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerMode");
+        triggerModeNode.print();
+
+        EnumNode_spin triggerSourceNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerSource");
+        triggerSourceNode.print();
+
+        EnumNode_spin triggerOverlapNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerOverlap");
+        triggerOverlapNode.print();
+
+        FloatNode_spin triggerDelayNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("TriggerDelay");
+        triggerDelayNode.print();
+
+        // FrameRate
+        // --------------------------------------------------------------------------------------------------
+
+        BoolNode_spin frameRateEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("AcquisitionFrameRateEnable");
+        frameRateEnableNode.setValue(true);
+        frameRateEnableNode.print();
+
+        FloatNode_spin frameRateNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("AcquisitionFrameRate");
+        frameRateNode.print();
+
+        FloatNode_spin resFrameRateNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("AcquisitionResultingFrameRate");
+        resFrameRateNode.print();
 
 
-    //spinTriggerModeInfo CameraDevice_spin::getTriggerModeInfo_spin()
-    //{
-    //    spinError error;
-    //    spinTriggerModeInfo triggerModeInfo;
-    //    error = spinGetTriggerModeInfo(context_, &triggerModeInfo);
-    //    if (error != SPIN_ERROR_OK)
-    //    {
-    //        std::stringstream ssError;
-    //        ssError << __PRETTY_FUNCTION__;
-    //        ssError << ": unable to get Spinnaker TriggerModeInfo";
-    //        throw RuntimeError(ERROR_SPIN_GET_TRIGGER_MODE_INFO, ssError.str());
-    //    }
-    //}
+        // Temperature
+        //---------------------------------------------------------------------------------------------------
+        FloatNode_spin tempNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("DeviceTemperature");
+        tempNode.print();
+
+        // Blacklevel
+        // ---------------------------------------------------------------------------------------------------
+        EnumNode_spin blackLevelSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("BlackLevelSelector");
+        blackLevelSelectorNode.print();
+
+        FloatNode_spin blackLevelNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("BlackLevel");
+        blackLevelNode.print();
+
+        // Gamma
+        // ----------------------------------------------------------------------------------------------------
+        FloatNode_spin gammaNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("Gamma");
+        gammaNode.print();
+
+        BoolNode_spin gammaEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("GammaEnable");
+        gammaEnableNode.print();
 
 
-    //// spin set methods
-    //// ---------------
-
-    //void CameraDevice_spin::setProperty(spinProperty prop)
-    //{
-    //    spinError error = spinSetProperty(context_, &prop);
-    //    if (error != SPIN_ERROR_OK) 
-    //    { 
-    //        std::stringstream ssError;
-    //        ssError << __PRETTY_FUNCTION__;
-    //        ssError << ": unable to set Spinnaker prop";
-    //        throw RuntimeError(ERROR_SPIN_SET_PROPERTY, ssError.str());
-    //    }
-    //}
-
-
-    //void CameraDevice_spin::setTriggerMode(spinTriggerMode trigMode)
-    //{
-    //    spinError error = spinSetTriggerMode(context_, &trigMode);
-    //    if (error != SPIN_ERROR_OK)
-    //    {
-    //        std::stringstream ssError;
-    //        ssError << __PRETTY_FUNCTION__;
-    //        ssError << ": unable to set Spinnaker TriggerMode";
-    //        throw RuntimeError(ERROR_SPIN_SET_TRIGGER_MODE, ssError.str());
-    //    }
-    //}
-
-
-    //spinConfig CameraDevice_spin::getConfiguration_spin()
-    //{
-    //    spinConfig config;
-    //    if (connected_)
-    //    {
-    //        spinError error = spinGetConfiguration(context_,&config);
-    //        if (error != SPIN_ERROR_OK)
-    //        {
-    //            std::stringstream ssError;
-    //            ssError << __PRETTY_FUNCTION__;
-    //            ssError << ": unable to get Spinnaker config - error";
-    //            throw RuntimeError(ERROR_SPIN_GET_CONFIG, ssError.str());
-    //        }
-    //    }
-    //    else
-    //    {
-    //        std::stringstream ssError;
-    //        ssError << __PRETTY_FUNCTION__;
-    //        ssError << ": unable to get Spinnaker config - not connected";
-    //        throw RuntimeError(ERROR_SPIN_GET_CONFIG, ssError.str());
-    //    }
-    //    return config;
-    //}
-
-
-    //void CameraDevice_spin::setConfiguration_spin(spinConfig &config)
-    //{
-    //    if (connected_)
-    //    {
-    //        spinError error = spinSetConfiguration(context_, &config);
-    //        if (error != SPIN_ERROR_OK)
-    //        {
-    //            std::stringstream ssError;
-    //            ssError << __PRETTY_FUNCTION__;
-    //            ssError << ": unable to set Spinnaker config - error";
-    //            throw RuntimeError(ERROR_SPIN_GET_CONFIG, ssError.str());
-    //        }
-    //    }
-    //    else
-    //    {
-    //        std::stringstream ssError;
-    //        ssError << __PRETTY_FUNCTION__;
-    //        ssError << ": unable to set Spinnaker config - not connected";
-    //        throw RuntimeError(ERROR_SPIN_SET_CONFIG, ssError.str());
-    //    }
-    //}
-
-
-
-    //// Temporary methods
-    //// ------------------------------------------------------------------------
-
-    //void CameraDevice_spin::setVideoModeToFormat7(ImageMode mode)
-    //{
-    //    spinMode mode_spin;
-    //    mode_spin = convertImageMode_to_spin(mode);
-    //    setVideoModeToFormat7(mode_spin);
-    //}
-
-
-    //void CameraDevice_spin::setVideoModeToFormat7(spinMode mode)
-    //{
-    //    //std::cout << __PRETTY_FUNCTION__ << std::endl;
-
-    //    spinError error;
-    //    spinFormat7Info format7Info;
-    //    spinFormat7ImageSettings imageSettings;
-    //    spinFormat7PacketInfo packetInfo;
-    //    spinPixelFormat defaultPixelFormat;
-    //    unsigned int packetSize;
-    //    float percentage; 
-    //    BOOL supported;
-    //    BOOL settingsAreValid;
-
-    //    // Get the format 7 info
-    //    format7Info.mode = mode;
-    //    error = spinGetFormat7Info(context_, &format7Info, &supported);
-    //    if (error != SPIN_ERROR_OK) 
-    //    {
-    //        std::stringstream ssError; 
-    //        ssError << __PRETTY_FUNCTION__; 
-    //        ssError << ": unable to get Spinnaker format7 information"; 
-    //        throw RuntimeError(ERROR_SPIN_GET_FORMAT7_INFO, ssError.str());
-    //    }
-    //    if ( !supported )
-    //    {
-    //        std::stringstream ssError; 
-    //        ssError << __PRETTY_FUNCTION__; 
-    //        ssError << ": unsupported Spinnaker video mode, "; 
-    //        ssError << getModeString_spin(format7Info.mode);
-    //        throw RuntimeError(ERROR_SPIN_UNSUPPORTED_VIDEO_MODE, ssError.str());
-    //    }
-
-    //    if (0) // Print format7 information for selected mode
-    //    {
-    //        printFormat7Info_spin(format7Info);
-    //        unsigned int test0 = format7Info.pixelFormatBitField & SPIN_PIXEL_FORMAT_RAW8;
-    //        unsigned int test1 = format7Info.pixelFormatBitField & SPIN_PIXEL_FORMAT_MONO8;
-    //        std::cout << "SPIN_PIXEL_FORMAT_RAW8  & pixelFormatBitField = "<< std::bitset<32>(test0) << std::endl;
-    //        std::cout << "SPIN_PIXEL_FORMAT_MONO8 & pixelFormatBitField = "<< std::bitset<32>(test1) << std::endl;
-    //    }
-
-    //    //// Debug
-    //    //// ---------------------------------------------------------------
-    //    //PixelFormatList pList = getListOfSupportedPixelFormats(convertImageMode_from_spin(mode));
-    //    //PixelFormatList::iterator it;
-    //    //std::cout << std::endl;
-    //    //std::cout << "-----------------" << std::endl;
-    //    //std::cout << "Supported formats" << std::endl;
-    //    //std::cout << "-----------------" << std::endl;
-    //    //for (it=pList.begin(); it!=pList.end(); it++)
-    //    //{
-    //    //    std::cout << getPixelFormatString(*it) << std::endl;
-    //    //}
-    //    //std::cout << std::endl;
-    //    //// -----------------------------------------------------------------
-
-    //    // Select pixel format currently - this is a bit of a hack 
-    //    spinPixelFormat pixelFormat;
-    //    bool havePixelFormat = false;
-
-    //    if (isColor())
-    //    {
-    //        // Camera is color - try to find a suitable color format
-    //        //
-    //        // TEMPORARY  - this is a bit broken at the moment as it appears
-    //        // that even though a pixel format may appear to be supported via
-    //        // the bitfield you will be unable to set it to this value. So you
-    //        // really need to check that you where able to set the format.
-    //        if (format7Info.pixelFormatBitField & SPIN_PIXEL_FORMAT_RGB8)
-    //        {
-    //            pixelFormat = SPIN_PIXEL_FORMAT_RGB8;
-    //            havePixelFormat = true;
-    //        }
-    //        else if (format7Info.pixelFormatBitField & SPIN_PIXEL_FORMAT_BGRU)
-    //        {
-    //            pixelFormat = SPIN_PIXEL_FORMAT_BGRU;
-    //            havePixelFormat = true;
-    //        }
-    //        else if (format7Info.pixelFormatBitField & SPIN_PIXEL_FORMAT_RGBU)
-    //        {
-    //            pixelFormat = SPIN_PIXEL_FORMAT_RGBU;
-    //            havePixelFormat = true;
-    //        }
-    //        else if (format7Info.pixelFormatBitField & SPIN_PIXEL_FORMAT_BGR)
-    //        {
-    //            pixelFormat = SPIN_PIXEL_FORMAT_BGR;
-    //            havePixelFormat = true;
-    //        }
-    //        else if (format7Info.pixelFormatBitField & SPIN_PIXEL_FORMAT_BGRU16)
-    //        {
-    //            pixelFormat = SPIN_PIXEL_FORMAT_BGRU16;
-    //            havePixelFormat = true;
-    //        }
-    //        else if (format7Info.pixelFormatBitField & SPIN_PIXEL_FORMAT_BGR16)
-    //        {
-    //            pixelFormat = SPIN_PIXEL_FORMAT_BGR16;
-    //            havePixelFormat = true;
-    //        }
-    //        else if (format7Info.pixelFormatBitField & SPIN_PIXEL_FORMAT_RGB16)
-    //        {
-    //            pixelFormat = SPIN_PIXEL_FORMAT_RGB16;
-    //            havePixelFormat = true;
-    //        }
-    //        else if (format7Info.pixelFormatBitField & SPIN_PIXEL_FORMAT_S_RGB16)
-    //        {
-    //            pixelFormat = SPIN_PIXEL_FORMAT_S_RGB16;
-    //            havePixelFormat = true;
-    //        }
-    //        else if (format7Info.pixelFormatBitField & SPIN_PIXEL_FORMAT_411YUV8)
-    //        {
-    //            pixelFormat = SPIN_PIXEL_FORMAT_411YUV8;
-    //            havePixelFormat = true;
-    //        }
-    //        else if (format7Info.pixelFormatBitField & SPIN_PIXEL_FORMAT_422YUV8)
-    //        {
-    //            pixelFormat = SPIN_PIXEL_FORMAT_422YUV8;
-    //            havePixelFormat = true;
-    //        }
-    //        else if (format7Info.pixelFormatBitField & SPIN_PIXEL_FORMAT_444YUV8)
-    //        {
-    //            pixelFormat = SPIN_PIXEL_FORMAT_444YUV8;
-    //            havePixelFormat = true;
-    //        }
-    //        else if (format7Info.pixelFormatBitField & SPIN_PIXEL_FORMAT_422YUV8_JPEG)
-    //        {
-    //            pixelFormat = SPIN_PIXEL_FORMAT_422YUV8_JPEG;
-    //            havePixelFormat = true;
-    //        }
-    //    }
-
-
-    //    if (!havePixelFormat)
-    //    {
-    //        // This is a monochrome camera or couldn't find color pixel format which will work.
-    //        if (format7Info.pixelFormatBitField & SPIN_PIXEL_FORMAT_RAW8)
-    //        {
-    //            pixelFormat = SPIN_PIXEL_FORMAT_RAW8;
-    //        }
-    //        else if (format7Info.pixelFormatBitField & SPIN_PIXEL_FORMAT_MONO8)
-    //        {
-    //            pixelFormat = SPIN_PIXEL_FORMAT_MONO8;
-    //        }
-    //        else if (format7Info.pixelFormatBitField & SPIN_PIXEL_FORMAT_RAW16)
-    //        {
-    //            pixelFormat = SPIN_PIXEL_FORMAT_RAW16;
-    //        }
-    //        else if (format7Info.pixelFormatBitField & SPIN_PIXEL_FORMAT_MONO16)
-    //        {
-    //            pixelFormat = SPIN_PIXEL_FORMAT_MONO16;
-    //        }
-    //        else if (format7Info.pixelFormatBitField & SPIN_PIXEL_FORMAT_RAW12)
-    //        {
-    //            pixelFormat = SPIN_PIXEL_FORMAT_RAW12;
-    //        }
-    //        else if (format7Info.pixelFormatBitField & SPIN_PIXEL_FORMAT_MONO12)
-    //        {
-    //            pixelFormat = SPIN_PIXEL_FORMAT_MONO12;
-    //        }
-    //        else if (format7Info.pixelFormatBitField & SPIN_PIXEL_FORMAT_S_MONO16)
-    //        {
-    //            pixelFormat = SPIN_PIXEL_FORMAT_S_MONO16;
-    //        }
-    //        else
-    //        {
-    //            std::stringstream ssError;
-    //            ssError << __PRETTY_FUNCTION__;
-    //            ssError << ": no supported pixel formats";
-    //            throw RuntimeError(ERROR_SPIN_NO_SUPPORTED_PIXEL_FORMAT, ssError.str());
-    //        }
-    //    }
-
-    //    // Create desired format7 configuration
-    //    imageSettings.mode = format7Info.mode;
-    //    imageSettings.offsetX = 0;
-    //    imageSettings.offsetY = 0;
-    //    imageSettings.width = format7Info.maxWidth;
-    //    imageSettings.height = format7Info.maxHeight;
-    //    imageSettings.pixelFormat = pixelFormat;
-
-    //    // Check that settings are valid and get packet info
-    //    error = spinValidateFormat7Settings(
-    //            context_, 
-    //            &imageSettings, 
-    //            &settingsAreValid,
-    //            &packetInfo
-    //            );
-    //    if (error != SPIN_ERROR_OK)
-    //    {
-    //        std::stringstream ssError; 
-    //        ssError << __PRETTY_FUNCTION__; 
-    //        ssError << ": unable to validate Spinnaker format 7 settings"; 
-    //        throw RuntimeError(ERROR_SPIN_VALIDATE_FORMAT7_SETTINGS, ssError.str());
-    //    }
-    //    if (!settingsAreValid)
-    //    {
-    //        std::stringstream ssError; 
-    //        ssError << __PRETTY_FUNCTION__; 
-    //        ssError << ": Spinnaker format 7 settings invalid"; 
-    //        throw RuntimeError(ERROR_SPIN_INVALID_FORMAT7_SETTINGS, ssError.str());
-    //    }
-
-    //    if (0)  // Print packet info
-    //    {
-    //        std::cout << std::endl << "Sent - to camera" << std::endl;
-    //        printFormat7ImageSettings_spin(imageSettings);
-    //        printFormat7PacketInfo_spin(packetInfo);
-    //    }
-
-    //    // Set format 7 configuration settings
-    //    error = spinSetFormat7Configuration(context_, &imageSettings, 100.0);
-    //    if (error != SPIN_ERROR_OK)
-    //    {
-    //        std::stringstream ssError; 
-    //        ssError << __PRETTY_FUNCTION__; 
-    //        ssError << ": unable to sete Spinnaker format 7 configuration"; 
-    //        throw RuntimeError(ERROR_SPIN_SET_FORMAT7_CONFIGURATION, ssError.str());
-    //    }
-
-    //    // Get Current format7 image settings
-    //    error = spinGetFormat7Configuration(
-    //            context_, 
-    //            &imageSettings,
-    //            &packetSize,
-    //            &percentage
-    //            );
-    //    if (error != SPIN_ERROR_OK)
-    //    { 
-    //        std::stringstream ssError; 
-    //        ssError << __PRETTY_FUNCTION__; 
-    //        ssError << ": unable to get Spinnaker format 7 configuration"; 
-    //        throw RuntimeError(ERROR_SPIN_GET_FORMAT7_CONFIGURATION, ssError.str());
-    //    }
-
-    //    if (0) // Print current configuration settings
-    //    {
-    //        std::cout << "Actual - from camera" << std::endl;
-    //        printFormat7Configuration_spin(imageSettings,packetSize,percentage);
-    //    }
-
-    //    //std::cout << std::endl;
-    //}
-
-
-    //void CameraDevice_spin::printFormat7Configuration()
-    //{
-    //    spinError error; //    spinFormat7ImageSettings imageSettings;
-    //    unsigned int packetSize;
-    //    float percentage; 
-
-    //    // Get Current format7 image settings
-    //    error = spinGetFormat7Configuration(
-    //            context_, 
-    //            &imageSettings,
-    //            &packetSize,
-    //            &percentage
-    //            );
-    //    if (error != SPIN_ERROR_OK)
-    //    { 
-    //        std::stringstream ssError; 
-    //        ssError << __PRETTY_FUNCTION__; 
-    //        ssError << ": unable to get Spinnaker format 7 configuration"; 
-    //        throw RuntimeError(ERROR_SPIN_GET_FORMAT7_CONFIGURATION, ssError.str());
-    //    }
-
-    //    std::cout << "Format7Configuration" << std::endl;
-    //    std::cout << "--------------------" << std::endl;
-    //    printFormat7Configuration_spin(imageSettings,packetSize,percentage);
-    //}
+    }
 }
 #endif
 

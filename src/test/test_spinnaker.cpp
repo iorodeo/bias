@@ -34,8 +34,8 @@ int main(int argc, char *argv[])
         bool isColor = camDev.isColor();
         std::cout << "isColor: " << isColor << std::endl;
 
-        //std::cout << std::endl;
-        //camDev.develExpProps();
+        std::cout << std::endl;
+        camDev.develExpProps();
 
 
         std::cout << std::endl;
@@ -43,6 +43,7 @@ int main(int argc, char *argv[])
         for (auto propType : bias::getListOfPropertyTypes())
         {
             bias::PropertyInfo propInfo = camDev.getPropertyInfo(propType);
+            propInfo.print();
             //bias::Property prop = camDev.getProperty(propType);
             
             //try

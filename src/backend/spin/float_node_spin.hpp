@@ -10,12 +10,21 @@ namespace bias
 
         public:
 
+            static unsigned int NumberOfIntValues;
             static spinNodeType ExpectedType();
+
             FloatNode_spin();
             FloatNode_spin(spinNodeHandle hNode);
             FloatNode_spin(BaseNode_spin node);
             std::string unit();
             virtual void print();
+
+            unsigned int minIntValue();
+            unsigned int maxIntValue();
+
+            double intToFloat(unsigned int intValue);
+            unsigned int floatToInt(double floatValue);
+
 
         protected:
 

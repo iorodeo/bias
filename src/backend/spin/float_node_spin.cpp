@@ -1,12 +1,16 @@
 #include "float_node_spin.hpp"
 #include "basic_types.hpp"
 #include "exception.hpp"
+#include <algorithm>
 #include <iostream>
 #include <sstream>
 
 
 namespace bias
 {
+    unsigned int FloatNode_spin::NumberOfIntValues = 100;
+
+
     spinNodeType FloatNode_spin::ExpectedType()
     {
         return FloatNode;
@@ -71,6 +75,32 @@ namespace bias
         std::cout << "readable  = " << isReadable() << std::endl;
         std::cout << "writable  = " << isWritable() << std::endl;
         std::cout << std::endl;
+    }
+
+
+    unsigned int FloatNode_spin::minIntValue()
+    {
+        return 0;
+    }
+
+
+    unsigned int FloatNode_spin::maxIntValue()
+    {
+        return floatToInt(maxValue());
+    }
+
+
+    double FloatNode_spin::intToFloat(unsigned int intValue)
+    {
+        double floatValue =  double(intValue)/double(NumberOfIntValues) + minValue();
+        return std::max(std::min(floatValue, maxValue()), minValue());
+    }
+
+
+    unsigned int FloatNode_spin::floatToInt(double floatValue)
+    {
+       double floatValueClamped = std::max(std::min(floatValue, maxValue()), minValue());
+       return (unsigned int)(NumberOfIntValues*(floatValueClamped - minValue()));
     }
 
 
