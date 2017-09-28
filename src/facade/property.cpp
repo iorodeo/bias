@@ -97,7 +97,7 @@ namespace bias
         ss << "minValue:         " << minValue << std::endl;
         ss << "maxValue:         " << maxValue << std::endl;
         ss << "minAbsoluteValue: " << minAbsoluteValue << std::endl;
-        ss << "maxAbsoluteValeu: " << maxAbsoluteValue << std::endl;
+        ss << "maxAbsoluteValue: " << maxAbsoluteValue << std::endl;
         ss << "haveUnits:        " << haveUnits << std::endl;
         ss << "units:            " << units << std::endl;
         ss << "unitsAbbr:        " << unitsAbbr << std::endl;

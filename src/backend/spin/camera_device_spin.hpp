@@ -124,7 +124,6 @@ namespace bias {
             PropertyInfo getPropertyInfoGamma();
             PropertyInfo getPropertyInfoShutter();
             PropertyInfo getPropertyInfoGain();
-            PropertyInfo getPropertyInfoTriggerMode();
             PropertyInfo getPropertyInfoTriggerDelay();
             PropertyInfo getPropertyInfoFrameRate();
             PropertyInfo getPropertyInfoTemperature();
@@ -136,7 +135,6 @@ namespace bias {
             Property getPropertyGamma();
             Property getPropertyShutter();
             Property getPropertyGain();
-            Property getPropertyTriggerMode();
             Property getPropertyTriggerDelay();
             Property getPropertyFrameRate();
             Property getPropertyTemperature();
@@ -149,7 +147,6 @@ namespace bias {
             void setPropertyGamma(Property prop);
             void setPropertyShutter(Property prop);
             void setPropertyGain(Property prop);
-            void setPropertyTriggerMode(Property prop);
             void setPropertyTriggerDelay(Property prop);
             void setPropertyFrameRate(Property prop);
             void setPropertyTemperature(Property prop);

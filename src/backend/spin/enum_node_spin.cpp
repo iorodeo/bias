@@ -228,4 +228,35 @@ namespace bias
     }
 
 
+    bool EnumNode_spin::hasEntryName(std::string name)
+    {
+        bool rval = false;
+        std::vector<EntryNode_spin> entryVec = entries();
+        for (auto entryNode : entryVec)
+        {
+            if (entryNode.name() == name)
+            {
+                rval = true;
+            }
+        }
+        return rval;
+
+    }
+
+
+    bool EnumNode_spin::hasEntrySymbolic(std::string symbolic) 
+    {
+        bool rval = false;
+        std::vector<EntryNode_spin> entryVec = entries();
+        for (auto entryNode : entryVec)
+        {
+            if (entryNode.symbolic() == symbolic)
+            {
+                rval = true;
+            }
+        }
+        return rval;
+    }
+
+
 } // namespace bias

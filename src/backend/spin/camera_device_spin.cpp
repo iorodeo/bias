@@ -179,6 +179,26 @@ namespace bias {
             EnumNode_spin blackLevelSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("BlackLevelSelector");
             blackLevelSelectorNode.setEntryBySymbolic("All");
 
+            // Setup gain defualts
+            EnumNode_spin gainSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("GainSelector");
+            gainSelectorNode.setEntryBySymbolic("All");
+
+            EnumNode_spin gainAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("GainAuto");
+            gainAutoNode.setEntryBySymbolic("Off");
+
+            // Setup trigger defaults
+            EnumNode_spin triggerSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerSelector");
+            triggerSelectorNode.setEntryBySymbolic("FrameStart");
+
+            EnumNode_spin triggerModeNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerMode");
+            triggerModeNode.setEntryBySymbolic("Off");
+
+            EnumNode_spin triggerSourceNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerSource");
+            triggerSourceNode.setEntryBySymbolic("Software");
+
+            EnumNode_spin triggerOverlapNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerOverlap");
+            triggerOverlapNode.setEntryBySymbolic("Off");
+
             // DEVEL
             // ----------------------------------------------------------------------------------------------
 
@@ -1079,8 +1099,6 @@ namespace bias {
 
     PropertyInfo CameraDevice_spin::getPropertyInfoShutter()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-
         EnumNode_spin exposureAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureAuto");
         FloatNode_spin exposureTimeNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("ExposureTime");
 
@@ -1090,9 +1108,86 @@ namespace bias {
 
         if (propInfo.present)
         {
-            propInfo.autoCapable = exposureAutoNode.isAvailable() && exposureAutoNode.isWritable();
-            
+            if (exposureAutoNode.isAvailable() && exposureAutoNode.isReadable())
+            {
+                propInfo.autoCapable = exposureAutoNode.hasEntrySymbolic("Continuous");
+                propInfo.manualCapable = exposureAutoNode.hasEntrySymbolic("Off");
+                propInfo.onePushCapable = exposureAutoNode.hasEntrySymbolic("Once");
+            }
+            propInfo.absoluteCapable = true;
+            propInfo.onOffCapable = false;
+            propInfo.readOutCapable = false;
+            propInfo.minValue = exposureTimeNode.minIntValue();
+            propInfo.maxValue = exposureTimeNode.maxIntValue();
+            propInfo.minAbsoluteValue = exposureTimeNode.minValue();
+            propInfo.maxAbsoluteValue = exposureTimeNode.maxValue();
+            propInfo.haveUnits = !exposureTimeNode.unit().empty();
+            propInfo.units =  exposureTimeNode.unit();
+            propInfo.unitsAbbr = exposureTimeNode.unit();
+        }
 
+        return propInfo;
+    }
+
+
+
+    PropertyInfo CameraDevice_spin::getPropertyInfoGain()
+    {
+        EnumNode_spin gainAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("GainAuto");
+        FloatNode_spin gainNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("Gain");
+
+        PropertyInfo propInfo;
+        propInfo.type = PROPERTY_TYPE_GAIN;
+        propInfo.present = gainNode.isAvailable();
+
+        if (propInfo.present)
+        {
+            if (gainAutoNode.isAvailable() && gainAutoNode.isReadable())
+            {
+                propInfo.autoCapable = gainAutoNode.hasEntrySymbolic("Continuous");
+                propInfo.manualCapable = gainAutoNode.hasEntrySymbolic("Off");
+                propInfo.onePushCapable = gainAutoNode.hasEntrySymbolic("Once");
+            }
+            propInfo.absoluteCapable = true;
+            propInfo.onOffCapable = false;
+            propInfo.readOutCapable = false;
+            propInfo.minValue = gainNode.minIntValue();
+            propInfo.maxValue = gainNode.maxIntValue();
+            propInfo.minAbsoluteValue = gainNode.minValue();
+            propInfo.maxAbsoluteValue = gainNode.maxValue();
+            propInfo.haveUnits = !gainNode.unit().empty();
+            propInfo.units =  gainNode.unit();
+            propInfo.unitsAbbr = gainNode.unit();
+
+        }
+
+        return propInfo;
+    }
+
+
+    PropertyInfo CameraDevice_spin::getPropertyInfoTriggerDelay()
+    {
+        FloatNode_spin triggerDelayNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("TriggerDelay");
+
+        PropertyInfo propInfo;
+        propInfo.type = PROPERTY_TYPE_TRIGGER_DELAY;
+        propInfo.present = triggerDelayNode.isAvailable();
+
+        if (propInfo.present)
+        {
+            propInfo.autoCapable = false;
+            propInfo.manualCapable = true;
+            propInfo.absoluteCapable = true;
+            propInfo.onePushCapable = false;
+            propInfo.onOffCapable = false;
+            propInfo.readOutCapable = false;
+            propInfo.minValue = triggerDelayNode.minIntValue();
+            propInfo.maxValue = triggerDelayNode.maxIntValue();
+            propInfo.minAbsoluteValue = triggerDelayNode.minValue();
+            propInfo.maxAbsoluteValue = triggerDelayNode.maxValue();
+            propInfo.haveUnits = !triggerDelayNode.unit().empty();
+            propInfo.units =  triggerDelayNode.unit();
+            propInfo.unitsAbbr = triggerDelayNode.unit();
         }
 
         return propInfo;
@@ -1115,31 +1210,6 @@ namespace bias {
     //bool haveUnits;
     //std::string units;
     //std::string unitsAbbr;
-
-
-    PropertyInfo CameraDevice_spin::getPropertyInfoGain()
-    {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-        PropertyInfo propInfo;
-        return propInfo;
-    }
-
-
-    PropertyInfo CameraDevice_spin::getPropertyInfoTriggerMode()
-    {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-        PropertyInfo propInfo;
-        return propInfo;
-    }
-
-
-    PropertyInfo CameraDevice_spin::getPropertyInfoTriggerDelay()
-    {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-        PropertyInfo propInfo;
-        return propInfo;
-    }
-
 
     PropertyInfo CameraDevice_spin::getPropertyInfoFrameRate()
     {
@@ -1185,14 +1255,6 @@ namespace bias {
 
 
     Property CameraDevice_spin::getPropertyGain()
-    {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-        Property prop;
-        return prop;
-    }
-
-
-    Property CameraDevice_spin::getPropertyTriggerMode()
     {
         std::cout << __PRETTY_FUNCTION__ << std::endl;
         Property prop;
@@ -1254,13 +1316,6 @@ namespace bias {
     }
 
 
-    void CameraDevice_spin::setPropertyTriggerMode(Property prop)
-    {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-        return;
-    }
-
-
     void CameraDevice_spin::setPropertyTriggerDelay(Property prop)
     {
         std::cout << __PRETTY_FUNCTION__ << std::endl;
@@ -1305,7 +1360,6 @@ namespace bias {
         {PROPERTY_TYPE_GAMMA,          std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoGamma)},
         {PROPERTY_TYPE_SHUTTER,        std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoShutter)},
         {PROPERTY_TYPE_GAIN,           std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoGain)},
-        {PROPERTY_TYPE_TRIGGER_MODE,   std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoTriggerMode)},
         {PROPERTY_TYPE_TRIGGER_DELAY,  std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoTriggerDelay)},
         {PROPERTY_TYPE_FRAME_RATE,     std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoFrameRate)},
         {PROPERTY_TYPE_TEMPERATURE,    std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoTemperature)},
@@ -1318,7 +1372,6 @@ namespace bias {
         {PROPERTY_TYPE_GAMMA,          std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyGamma)},
         {PROPERTY_TYPE_SHUTTER,        std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyShutter)},
         {PROPERTY_TYPE_GAIN,           std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyGain)},
-        {PROPERTY_TYPE_TRIGGER_MODE,   std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyTriggerMode)},
         {PROPERTY_TYPE_TRIGGER_DELAY,  std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyTriggerDelay)},
         {PROPERTY_TYPE_FRAME_RATE,     std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyFrameRate)},
         {PROPERTY_TYPE_TEMPERATURE,    std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyTemperature)},
@@ -1331,7 +1384,6 @@ namespace bias {
         {PROPERTY_TYPE_GAMMA,          std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyGamma)},
         {PROPERTY_TYPE_SHUTTER,        std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyShutter)},
         {PROPERTY_TYPE_GAIN,           std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyGain)},
-        {PROPERTY_TYPE_TRIGGER_MODE,   std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyTriggerMode)},
         {PROPERTY_TYPE_TRIGGER_DELAY,  std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyTriggerDelay)},
         {PROPERTY_TYPE_FRAME_RATE,     std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyFrameRate)},
         {PROPERTY_TYPE_TEMPERATURE,    std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyTemperature)},
@@ -1361,7 +1413,7 @@ namespace bias {
         FloatNode_spin exposureTimeNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("ExposureTime");
         exposureTimeNode.print();
 
-        // Gain - don't understand this yet.
+        // Gain .
         // --------------------------------------------------------------------------------------------------
 
         EnumNode_spin gainSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("GainSelector");
