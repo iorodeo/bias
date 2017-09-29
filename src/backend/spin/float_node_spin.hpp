@@ -25,6 +25,7 @@ namespace bias
 
             double intToFloat(unsigned int intValue);
             unsigned int floatToInt(double floatValue);
+            void setValueFromInt(unsigned int intValue);
 
 
         protected:

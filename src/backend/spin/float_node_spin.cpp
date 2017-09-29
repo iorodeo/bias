@@ -111,6 +111,12 @@ namespace bias
     }
 
 
+    void FloatNode_spin::setValueFromInt(unsigned int intValue)
+    {
+        setValue(floatToInt(intValue));
+    }
+
+
     // Protected methods
     // --------------------------------------------------------------------------------------------
     void FloatNode_spin::initialize()
