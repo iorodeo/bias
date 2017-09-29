@@ -98,8 +98,8 @@ namespace bias {
             
             CameraInfo_spin cameraInfo_;
 
-            TimeStamp timeStamp_;
-            int64_t timeStamp_ns_;
+            TimeStamp timeStamp_ = {0,0};
+            int64_t timeStamp_ns_ = 0;
 
             bool imageOK_ = false;
             spinImage hSpinImage_ = nullptr;
@@ -127,6 +127,7 @@ namespace bias {
             PropertyInfo getPropertyInfoTriggerDelay();
             PropertyInfo getPropertyInfoFrameRate();
             PropertyInfo getPropertyInfoTemperature();
+            PropertyInfo getPropertyInfoTriggerMode();
 
             // Get property methods
             static std::map<PropertyType, std::function<Property(CameraDevice_spin*)>> getPropertyDispatchMap_; 
@@ -138,6 +139,7 @@ namespace bias {
             Property getPropertyTriggerDelay();
             Property getPropertyFrameRate();
             Property getPropertyTemperature();
+            Property getPropertyTriggerMode();
 
             // Set Property methods
             bool isPropertySettable(PropertyType propType, std::string &msg);
@@ -150,6 +152,7 @@ namespace bias {
             void setPropertyTriggerDelay(Property prop);
             void setPropertyFrameRate(Property prop);
             void setPropertyTemperature(Property prop);
+            void setPropertyTriggerMode(Property prop);
 
 
             // spin get methods

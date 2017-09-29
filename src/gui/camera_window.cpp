@@ -3563,10 +3563,7 @@ namespace bias
     void CameraWindow::updateAllMenus()
     {
         updateFileMenu();
-        // SPIN DEVEL TEMPORARY TODO 
-        // -------------------------------------------
-        //updateCameraMenu();
-        // -------------------------------------------
+        updateCameraMenu();
         updateLoggingMenu();
         updateTimerMenu();
         updateDisplayMenu();
@@ -3598,14 +3595,11 @@ namespace bias
 
     void CameraWindow::updateCameraMenu()
     {
-        // WBD: DEVEL
-        // ------------------------------------
         updateCameraVideoModeMenu();
         updateCameraFrameRateMenu();
         updateCameraPropertiesMenu();
         updateCameraTriggerMenu();
-        // ------------------------------------
-
+        
         if (connected_) 
         { 
             setMenuChildrenEnabled(menuCameraPtr_,true); 
@@ -3810,12 +3804,15 @@ namespace bias
         PropertyList propList;
         PropertyInfoMap propInfoMap;
 
+
         if (!connected_) 
         { 
             return; 
         }
 
+
         deleteMenuActions(menuCameraPropertiesPtr_);
+
 
         // Get list of properties from camera 
         if (cameraPtr_ -> tryLock(CAMERA_LOCK_TRY_DT))
@@ -3832,6 +3829,7 @@ namespace bias
                 errorMsg = QString::fromStdString(runtimeError.what());
             }
             cameraPtr_ -> releaseLock();
+
         }
         else
         {
@@ -3900,6 +3898,7 @@ namespace bias
         // ------------------------------------------------
         triggerModeActionPtr -> setEnabled(false);
         // ------------------------------------------------
+       
     }
 
     void CameraWindow::updateCameraTriggerMenu()

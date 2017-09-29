@@ -45,14 +45,10 @@ namespace bias {
     //void CameraDevice_spin::initialize()
     //{
 
-    //    //std::cout << __PRETTY_FUNCTION__ << std::endl;
-    //    //isFirst_ = true;
-    //    //rawImageCreated_ = false;
-    //    //convertedImageCreated_ = false;
-    //    //haveEmbeddedTimeStamp_ = false;
-    //    //timeStamp_.seconds = 0;
-    //    //timeStamp_.microSeconds = 0;
-    //    //cycleSecondsLast_ = 0;
+        //isFirst_ = true;
+        //int64_t timeStamp_ns_ =0 ;
+        //timeStamp_.seconds = 0;
+        //timeStamp_.microSeconds = 0;
     //}
 
 
@@ -960,9 +956,10 @@ namespace bias {
         imageOK_ = true;
 
         updateTimeStamp();
-        std::cout << "timeStamp_ns_           = " << timeStamp_ns_ << std::endl;
-        std::cout << "timeStamp_.seconds      = " << timeStamp_.seconds << std::endl;
-        std::cout << "timeStamp_.microSeconds = " << timeStamp_.microSeconds << std::endl;
+
+        //std::cout << "timeStamp_ns_           = " << timeStamp_ns_ << std::endl;
+        //std::cout << "timeStamp_.seconds      = " << timeStamp_.seconds << std::endl;
+        //std::cout << "timeStamp_.microSeconds = " << timeStamp_.microSeconds << std::endl;
 
         return true;
     }
@@ -1257,6 +1254,19 @@ namespace bias {
     }
 
 
+    PropertyInfo CameraDevice_spin::getPropertyInfoTriggerMode()
+    {
+        // Not implemented - dummy method
+        PropertyInfo propInfo;
+        propInfo.type = PROPERTY_TYPE_TRIGGER_MODE;
+        propInfo.present = true;
+        return propInfo;
+    }
+
+
+    // Get Property methods
+    // ------------------------
+    
     Property CameraDevice_spin::getPropertyBrightness()
     {
         FloatNode_spin blackLevelNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("BlackLevel");
@@ -1436,6 +1446,16 @@ namespace bias {
     }
 
 
+    Property CameraDevice_spin::getPropertyTriggerMode()
+    {
+        // Not implemented - dummy method
+        Property prop;
+        prop.type = PROPERTY_TYPE_TRIGGER_MODE;
+        prop.present = true;
+        return prop;
+    }
+
+
     // Set Property methods 
     // ---------------------
 
@@ -1590,6 +1610,12 @@ namespace bias {
     }
 
 
+    void CameraDevice_spin::setPropertyTriggerMode(Property prop)
+    {
+        // Do nothing
+    }
+
+
     // spin get methods
     // ---------------
     std::vector<spinPixelFormatEnums> CameraDevice_spin::getSupportedPixelFormats_spin()
@@ -1616,6 +1642,7 @@ namespace bias {
         {PROPERTY_TYPE_TRIGGER_DELAY,  std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoTriggerDelay)},
         {PROPERTY_TYPE_FRAME_RATE,     std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoFrameRate)},
         {PROPERTY_TYPE_TEMPERATURE,    std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoTemperature)},
+        {PROPERTY_TYPE_TRIGGER_MODE,   std::function<PropertyInfo(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyInfoTriggerMode)},
     };
 
 
@@ -1628,6 +1655,7 @@ namespace bias {
         {PROPERTY_TYPE_TRIGGER_DELAY,  std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyTriggerDelay)},
         {PROPERTY_TYPE_FRAME_RATE,     std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyFrameRate)},
         {PROPERTY_TYPE_TEMPERATURE,    std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyTemperature)},
+        {PROPERTY_TYPE_TRIGGER_MODE,   std::function<Property(CameraDevice_spin*)>(&CameraDevice_spin::getPropertyTriggerMode)},
     };
 
 
@@ -1640,6 +1668,7 @@ namespace bias {
         {PROPERTY_TYPE_TRIGGER_DELAY,  std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyTriggerDelay)},
         {PROPERTY_TYPE_FRAME_RATE,     std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyFrameRate)},
         {PROPERTY_TYPE_TEMPERATURE,    std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyTemperature)},
+        {PROPERTY_TYPE_TRIGGER_MODE,   std::function<void(CameraDevice_spin*, Property)>(&CameraDevice_spin::setPropertyTriggerMode)},
     };
 
     // DEVEL
