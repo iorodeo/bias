@@ -78,6 +78,12 @@ namespace bias
     }
 
 
+    unsigned int FloatNode_spin::intValue()
+    {
+        return floatToInt(value());
+    }
+
+
     unsigned int FloatNode_spin::minIntValue()
     {
         return 0;
@@ -86,21 +92,22 @@ namespace bias
 
     unsigned int FloatNode_spin::maxIntValue()
     {
-        return floatToInt(maxValue());
+        return NumberOfIntValues-1; 
     }
 
 
     double FloatNode_spin::intToFloat(unsigned int intValue)
     {
-        double floatValue =  double(intValue)/double(NumberOfIntValues) + minValue();
+        double floatValue = (maxValue() - minValue())*double(intValue)/double(NumberOfIntValues-1) + minValue();
         return std::max(std::min(floatValue, maxValue()), minValue());
     }
 
 
     unsigned int FloatNode_spin::floatToInt(double floatValue)
     {
-       double floatValueClamped = std::max(std::min(floatValue, maxValue()), minValue());
-       return (unsigned int)(NumberOfIntValues*(floatValueClamped - minValue()));
+       double value = (floatValue - minValue())*double(NumberOfIntValues-1)/(maxValue() - minValue());
+       value = std::max(std::min(value, maxValue()), minValue());
+       return (unsigned int)(value);
     }
 
 

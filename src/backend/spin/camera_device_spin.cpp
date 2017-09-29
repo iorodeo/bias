@@ -168,25 +168,25 @@ namespace bias {
             // Default settings - may want to test for availability before setting.
             // ----------------------------------------------------------------------------------------------
 
-            // Setup exposure defaults 
+            // Exposure defaults 
             EnumNode_spin exposureModeNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureMode");
             exposureModeNode.setEntryBySymbolic("Timed");
 
             EnumNode_spin exposureAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureAuto");
             exposureAutoNode.setEntryBySymbolic("Off");
 
-            // Setup blacklevel defaults
+            // Blacklevel defaults
             EnumNode_spin blackLevelSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("BlackLevelSelector");
             blackLevelSelectorNode.setEntryBySymbolic("All");
 
-            // Setup gain defualts
+            // Gain defualts
             EnumNode_spin gainSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("GainSelector");
             gainSelectorNode.setEntryBySymbolic("All");
 
             EnumNode_spin gainAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("GainAuto");
             gainAutoNode.setEntryBySymbolic("Off");
 
-            // Setup trigger defaults
+            // Trigger defaults
             EnumNode_spin triggerSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerSelector");
             triggerSelectorNode.setEntryBySymbolic("FrameStart");
 
@@ -198,6 +198,10 @@ namespace bias {
 
             EnumNode_spin triggerOverlapNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerOverlap");
             triggerOverlapNode.setEntryBySymbolic("Off");
+
+            // Framerate defaults
+            BoolNode_spin frameRateEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("AcquisitionFrameRateEnable");
+            frameRateEnableNode.setValue(true);
 
             // DEVEL
             // ----------------------------------------------------------------------------------------------
@@ -1193,81 +1197,205 @@ namespace bias {
         return propInfo;
     }
 
-    //PropertyType type;
-    //bool present;
-    //bool autoCapable;
-    //bool manualCapable;
-    //bool absoluteCapable;
-    //bool onePushCapable;
-    //bool onOffCapable;
-    //bool readOutCapable;
-
-    //unsigned int minValue;
-    //unsigned int maxValue;
-    //float minAbsoluteValue;
-    //float maxAbsoluteValue;
-
-    //bool haveUnits;
-    //std::string units;
-    //std::string unitsAbbr;
 
     PropertyInfo CameraDevice_spin::getPropertyInfoFrameRate()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        FloatNode_spin frameRateNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("AcquisitionFrameRate");
+
         PropertyInfo propInfo;
+        propInfo.type = PROPERTY_TYPE_FRAME_RATE;
+        propInfo.present = frameRateNode.isAvailable();
+
+        if (propInfo.present)
+        {
+            propInfo.autoCapable = false;
+            propInfo.manualCapable = true;
+            propInfo.absoluteCapable = true;
+            propInfo.onePushCapable = false;
+            propInfo.onOffCapable = false;
+            propInfo.readOutCapable = false;
+            propInfo.minValue = frameRateNode.minIntValue();
+            propInfo.maxValue = frameRateNode.maxIntValue();
+            propInfo.minAbsoluteValue = frameRateNode.minValue();
+            propInfo.maxAbsoluteValue = frameRateNode.maxValue();
+            propInfo.haveUnits = !frameRateNode.unit().empty();
+            propInfo.units =  frameRateNode.unit();
+            propInfo.unitsAbbr = frameRateNode.unit();
+        }
+
         return propInfo;
     }
+
 
 
     PropertyInfo CameraDevice_spin::getPropertyInfoTemperature()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        FloatNode_spin tempNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("DeviceTemperature");
+
         PropertyInfo propInfo;
+        propInfo.type = PROPERTY_TYPE_TEMPERATURE;
+        propInfo.present = tempNode.isAvailable();
+
+        if (propInfo.present)
+        {
+            propInfo.autoCapable = false;
+            propInfo.manualCapable = false;
+            propInfo.absoluteCapable = true;
+            propInfo.onePushCapable = false;
+            propInfo.onOffCapable = false;
+            propInfo.readOutCapable = false;
+            propInfo.minValue = tempNode.minIntValue();
+            propInfo.maxValue = tempNode.maxIntValue();
+            propInfo.minAbsoluteValue = tempNode.minValue();
+            propInfo.maxAbsoluteValue = tempNode.maxValue();
+            propInfo.haveUnits = !tempNode.unit().empty();
+            propInfo.units =  tempNode.unit();
+            propInfo.unitsAbbr = tempNode.unit();
+        }
+
         return propInfo;
     }
 
 
-    // Set Property methods 
-    // ---------------------
-
     Property CameraDevice_spin::getPropertyBrightness()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        FloatNode_spin blackLevelNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("BlackLevel");
+
         Property prop;
+        prop.type = PROPERTY_TYPE_BRIGHTNESS;
+        prop.present = blackLevelNode.isAvailable();
+        
+        if(prop.present)
+        {
+            prop.absoluteControl = true;
+            prop.onePush = false;
+            prop.on = true;
+            prop.autoActive = false;
+            prop.value = blackLevelNode.intValue();
+            prop.valueA = 0;
+            prop.valueB = 0;
+            prop.absoluteValue = blackLevelNode.value();
+        }
+
         return prop;
     }
 
 
     Property CameraDevice_spin::getPropertyGamma()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        FloatNode_spin gammaNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("Gamma");
+        BoolNode_spin gammaEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("GammaEnable");
+
         Property prop;
+        prop.type = PROPERTY_TYPE_GAMMA;
+        prop.present = gammaNode.isAvailable();
+
+        if (prop.present)
+        {
+            prop.absoluteControl = true;
+            prop.onePush = false;
+            prop.autoActive = false;
+            prop.value = gammaNode.intValue();
+            prop.valueA = 0;
+            prop.valueB = 0;
+            prop.absoluteValue = gammaNode.value();
+        }
+
         return prop;
     }
 
 
     Property CameraDevice_spin::getPropertyShutter()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        EnumNode_spin exposureAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureAuto");
+        FloatNode_spin exposureTimeNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("ExposureTime");
+
         Property prop;
+        prop.type = PROPERTY_TYPE_SHUTTER;
+        prop.present = exposureTimeNode.isAvailable();
+
+        if (prop.present)
+        {
+            prop.absoluteControl = true;
+            prop.onePush = false;
+            prop.autoActive = false;
+            if (exposureAutoNode.isReadable())
+            {
+                EntryNode_spin autoEntry = exposureAutoNode.currentEntry();
+                prop.autoActive = autoEntry.isSymbolicValueEqualTo("Continuous");
+            }
+            prop.value = exposureTimeNode.intValue();
+            prop.valueA = 0;
+            prop.valueB = 0;
+            prop.absoluteValue = exposureTimeNode.value();
+        }
+
         return prop;
     }
 
 
     Property CameraDevice_spin::getPropertyGain()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        EnumNode_spin gainAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("GainAuto");
+        FloatNode_spin gainNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("Gain");
+
         Property prop;
+        prop.type = PROPERTY_TYPE_GAIN;
+        prop.present = gainNode.isAvailable();
+
+        if (prop.present)
+        {
+            prop.absoluteControl = true;
+            prop.onePush = false;
+            prop.autoActive = false;
+            if (gainAutoNode.isReadable())
+            {
+                EntryNode_spin autoEntry = gainAutoNode.currentEntry();
+                prop.autoActive = autoEntry.isSymbolicValueEqualTo("Continuous");
+            }
+            prop.value = gainNode.intValue();
+            prop.valueA = 0;
+            prop.valueB = 0;
+            prop.absoluteValue = gainNode.value();
+
+        }
+
         return prop;
     }
 
 
     Property CameraDevice_spin::getPropertyTriggerDelay()
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        FloatNode_spin triggerDelayNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("TriggerDelay");
+
         Property prop;
+        prop.type = PROPERTY_TYPE_TRIGGER_DELAY;
+        prop.present = triggerDelayNode.isAvailable();
+
+        if (prop.present)
+        {
+            prop.absoluteControl = true;
+            prop.onePush = false;
+            prop.autoActive = false;
+            prop.value = triggerDelayNode.intValue();
+            prop.valueA = 0;
+            prop.valueB = 0;
+            prop.absoluteValue = triggerDelayNode.value();
+        }
+
         return prop;
     }
+
+    //PropertyType type;
+    //bool present;
+    //bool absoluteControl;
+    //bool onePush;
+    //bool on;
+    //bool autoActive;
+    //unsigned int value;
+    //unsigned int valueA;
+    //unsigned int valueB;
+    //float absoluteValue;
 
 
     Property CameraDevice_spin::getPropertyFrameRate()

@@ -20,6 +20,8 @@ namespace bias
             int64_t intValue();
             std::string symbolic();
 
+            bool isSymbolicValueEqualTo(std::string value);
+
             virtual void print();
 
     };

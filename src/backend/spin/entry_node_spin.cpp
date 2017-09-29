@@ -93,6 +93,13 @@ namespace bias
     }
 
 
+    bool EntryNode_spin::isSymbolicValueEqualTo(std::string value)
+    {
+        return (value == symbolic());
+        
+    }
+
+
     void EntryNode_spin::print()
     {
         std::cout << name() << ", base"  << std::endl;

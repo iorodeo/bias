@@ -43,8 +43,16 @@ int main(int argc, char *argv[])
         for (auto propType : bias::getListOfPropertyTypes())
         {
             bias::PropertyInfo propInfo = camDev.getPropertyInfo(propType);
-            propInfo.print();
-            //bias::Property prop = camDev.getProperty(propType);
+
+            if (propInfo.present)
+            {
+                propInfo.print();
+
+                bias::Property prop = camDev.getProperty(propType);
+                prop.print();
+
+                std::cout << "-----------------" << std::endl;
+            }
             
             //try
             //{

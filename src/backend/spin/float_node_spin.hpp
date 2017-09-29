@@ -19,6 +19,7 @@ namespace bias
             std::string unit();
             virtual void print();
 
+            unsigned int intValue();
             unsigned int minIntValue();
             unsigned int maxIntValue();
 
