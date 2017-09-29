@@ -105,15 +105,15 @@ namespace bias
 
     unsigned int FloatNode_spin::floatToInt(double floatValue)
     {
-       double value = (floatValue - minValue())*double(NumberOfIntValues-1)/(maxValue() - minValue());
-       value = std::max(std::min(value, maxValue()), minValue());
-       return (unsigned int)(value);
+       double floatValueClamp = std::max(std::min(floatValue, maxValue()), minValue());
+       return (unsigned int)((floatValueClamp - minValue())*double(NumberOfIntValues-1)/(maxValue() - minValue()));
     }
 
 
     void FloatNode_spin::setValueFromInt(unsigned int intValue)
     {
-        setValue(floatToInt(intValue));
+        double floatValue = intToFloat(intValue);
+        setValue(floatValue);
     }
 
 
