@@ -1075,7 +1075,7 @@ namespace bias {
 
         PropertyInfo propInfo;
         propInfo.type = PROPERTY_TYPE_GAMMA;
-        propInfo.present = gammaNode.isAvailable();
+        propInfo.present = gammaEnableNode.isAvailable();
 
         if (propInfo.present)
         {
@@ -1085,15 +1085,19 @@ namespace bias {
             propInfo.onePushCapable = false;
             propInfo.onOffCapable = gammaEnableNode.isAvailable() && gammaEnableNode.isWritable();
             propInfo.readOutCapable = false;
-            propInfo.minValue = gammaNode.minIntValue();
-            propInfo.maxValue = gammaNode.maxIntValue();
-            propInfo.minAbsoluteValue = gammaNode.minValue();
-            propInfo.maxAbsoluteValue = gammaNode.maxValue();
-            propInfo.haveUnits = !gammaNode.unit().empty();
-            propInfo.units =  gammaNode.unit();
-            propInfo.unitsAbbr = gammaNode.unit();
+            if (gammaNode.isAvailable())
+            {
+                propInfo.minValue = gammaNode.minIntValue();
+                propInfo.maxValue = gammaNode.maxIntValue();
+                propInfo.minAbsoluteValue = gammaNode.minValue();
+                propInfo.maxAbsoluteValue = gammaNode.maxValue();
+                propInfo.haveUnits = !gammaNode.unit().empty();
+                propInfo.units =  gammaNode.unit();
+                propInfo.unitsAbbr = gammaNode.unit();
+            }
+            
         }
-        
+
         return propInfo;
     }
 
@@ -1105,11 +1109,11 @@ namespace bias {
 
         PropertyInfo propInfo;
         propInfo.type = PROPERTY_TYPE_SHUTTER;
-        propInfo.present = exposureTimeNode.isAvailable();
+        propInfo.present = exposureAutoNode.isAvailable();
 
         if (propInfo.present)
         {
-            if (exposureAutoNode.isAvailable() && exposureAutoNode.isReadable())
+            if (exposureAutoNode.isReadable())
             {
                 propInfo.autoCapable = exposureAutoNode.hasEntrySymbolic("Continuous");
                 propInfo.manualCapable = exposureAutoNode.hasEntrySymbolic("Off");
@@ -1118,14 +1122,20 @@ namespace bias {
             propInfo.absoluteCapable = true;
             propInfo.onOffCapable = false;
             propInfo.readOutCapable = false;
-            propInfo.minValue = exposureTimeNode.minIntValue();
-            propInfo.maxValue = exposureTimeNode.maxIntValue();
-            propInfo.minAbsoluteValue = exposureTimeNode.minValue();
-            propInfo.maxAbsoluteValue = exposureTimeNode.maxValue();
-            propInfo.haveUnits = !exposureTimeNode.unit().empty();
-            propInfo.units =  exposureTimeNode.unit();
-            propInfo.unitsAbbr = exposureTimeNode.unit();
+            if (exposureTimeNode.isAvailable() && exposureTimeNode.isReadable())
+            {
+                propInfo.minValue = exposureTimeNode.minIntValue();
+                propInfo.maxValue = exposureTimeNode.maxIntValue();
+                propInfo.minAbsoluteValue = std::max(exposureTimeNode.minValue(), MinAllowedShutterUs);
+                propInfo.maxAbsoluteValue = std::min(exposureTimeNode.maxValue(), MaxAllowedShutterUs);
+                propInfo.haveUnits = !exposureTimeNode.unit().empty();
+                propInfo.units =  exposureTimeNode.unit();
+                propInfo.unitsAbbr = exposureTimeNode.unit();
+            }
         }
+
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        propInfo.print();
 
         return propInfo;
     }
@@ -1298,17 +1308,19 @@ namespace bias {
 
         Property prop;
         prop.type = PROPERTY_TYPE_GAMMA;
-        prop.present = gammaNode.isAvailable();
+        prop.present = gammaEnableNode.isAvailable();
 
         if (prop.present)
         {
             prop.absoluteControl = true;
             prop.onePush = false;
             prop.autoActive = false;
-            prop.value = gammaNode.intValue();
-            prop.valueA = 0;
-            prop.valueB = 0;
-            prop.absoluteValue = gammaNode.value();
+            prop.on = gammaEnableNode.value();
+            if (gammaNode.isAvailable())
+            {
+                prop.value = gammaNode.intValue();
+                prop.absoluteValue = gammaNode.value();
+            }
         }
 
         return prop;
@@ -1322,7 +1334,7 @@ namespace bias {
 
         Property prop;
         prop.type = PROPERTY_TYPE_SHUTTER;
-        prop.present = exposureTimeNode.isAvailable();
+        prop.present = exposureAutoNode.isAvailable();
 
         if (prop.present)
         {
@@ -1334,11 +1346,15 @@ namespace bias {
                 EntryNode_spin autoEntry = exposureAutoNode.currentEntry();
                 prop.autoActive = autoEntry.isSymbolicValueEqualTo("Continuous");
             }
-            prop.value = exposureTimeNode.intValue();
-            prop.valueA = 0;
-            prop.valueB = 0;
-            prop.absoluteValue = exposureTimeNode.value();
+            if (exposureTimeNode.isAvailable() && exposureTimeNode.isReadable())
+            {
+                prop.value = exposureTimeNode.intValueWithLimits(MinAllowedShutterUs, MaxAllowedShutterUs);
+                prop.absoluteValue = exposureTimeNode.value();
+            }
         }
+
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        prop.print();
 
         return prop;
     }
@@ -1481,12 +1497,12 @@ namespace bias {
         FloatNode_spin gammaNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("Gamma");
         BoolNode_spin gammaEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("GammaEnable");
 
-        if (gammaEnableNode.isWritable())
-        {
-            gammaEnableNode.setValue(prop.on);
-        }
 
-        if (gammaNode.isWritable())
+        if (gammaEnableNode.isAvailable() && gammaEnableNode.isWritable()) 
+        {
+                gammaEnableNode.setValue(prop.on);
+        }
+        if (gammaNode.isAvailable() && gammaNode.isReadable() && gammaNode.isWritable()) 
         {
             if (prop.absoluteControl)
             {
@@ -1501,14 +1517,22 @@ namespace bias {
 
     void CameraDevice_spin::setPropertyShutter(Property prop)
     {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        prop.print();
+
         EnumNode_spin exposureAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureAuto");
         FloatNode_spin exposureTimeNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("ExposureTime");
 
-        if (exposureAutoNode.isWritable())
+        if (exposureAutoNode.isAvailable() && exposureAutoNode.isWritable()) 
         {
             if (prop.onePush)
             {
-                exposureAutoNode.setEntryBySymbolic("Once");
+                // Seems to need to be called a couple of time to stabilize to final value.
+                // Not sure why this is.
+                for (int i=0; i<AutoOnePushSetCount; i++)
+                {
+                    exposureAutoNode.setEntryBySymbolic("Once");
+                }
                 return;
             }
 
@@ -1517,9 +1541,13 @@ namespace bias {
                 exposureAutoNode.setEntryBySymbolic("Continuous");
                 return;
             }
+            else
+            {
+                exposureAutoNode.setEntryBySymbolic("Off");
+            }
         }
 
-        if (exposureTimeNode.isWritable())
+        if (exposureTimeNode.isAvailable() && exposureTimeNode.isReadable() && exposureTimeNode.isWritable()) 
         {
             if (prop.absoluteControl)
             {
@@ -1527,7 +1555,7 @@ namespace bias {
             }
             else
             {
-                exposureTimeNode.setValue(prop.value);
+                exposureTimeNode.setValueFromIntWithLimits(prop.value, MinAllowedShutterUs, MaxAllowedShutterUs);
             }
         }
     }

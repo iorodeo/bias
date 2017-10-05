@@ -63,7 +63,11 @@ namespace bias
         checkNodeHandle();
         checkAvailable();
         checkWritable();
-        spinError err = setValFunc_(hNode_,value);
+        spinError err = SPINNAKER_ERR_SUCCESS;
+        if  ((value >= minValue()) && value <= maxValue())
+        { 
+            err = setValFunc_(hNode_,value);
+        }
         if (err != SPINNAKER_ERR_SUCCESS)
         {
             std::stringstream ssError;

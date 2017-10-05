@@ -83,8 +83,20 @@ namespace bias {
 
             void develExpProps();
 
+            // Constants
+            // --------------------------------------------------------
+            // Artificial shutter limits to make GUI more usable.
+            static constexpr double MinAllowedShutterUs = 100.0;
+            static constexpr double MaxAllowedShutterUs = 200000.0; 
+
+            // Number of times auto mode is set to "once". Seems to need to be called 
+            // more than once  in order to reach a stable value.
+            static constexpr int AutoOnePushSetCount = 10;
+
+
 
         private:
+
 
 
             spinSystem hSystem_ = nullptr;
@@ -158,6 +170,7 @@ namespace bias {
             // spin get methods
             // ---------------
             std::vector<spinPixelFormatEnums> getSupportedPixelFormats_spin();
+
 
     };
 
