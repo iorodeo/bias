@@ -1171,9 +1171,6 @@ namespace bias {
             }
         }
 
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-        propInfo.print();
-
         return propInfo;
     }
 
@@ -1386,9 +1383,6 @@ namespace bias {
 
         }
 
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-        prop.print();
-
         return prop;
     }
 
@@ -1563,9 +1557,6 @@ namespace bias {
 
     void CameraDevice_spin::setPropertyGain(Property prop)
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-        prop.print();
-
         EnumNode_spin gainAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("GainAuto");
         FloatNode_spin gainNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("Gain");
 
