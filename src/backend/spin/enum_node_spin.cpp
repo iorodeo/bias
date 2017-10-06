@@ -59,13 +59,18 @@ namespace bias
         checkAvailable();
         checkWritable();
 
-        spinError err = spinEnumerationSetIntValue(hNode_,intValue);
-        if (err != SPINNAKER_ERR_SUCCESS)
+        EntryNode_spin currEntryNode = currentEntry();
+
+        if (currEntryNode.intValue() != intValue)
         {
-            std::stringstream ssError;
-            ssError << __PRETTY_FUNCTION__;
-            ssError << ": unable to set enum node integer value, error = " << err;
-            throw RuntimeError(ERROR_SPIN_SET_ENUM_INT_VALUE, ssError.str());
+            spinError err = spinEnumerationSetIntValue(hNode_,intValue);
+            if (err != SPINNAKER_ERR_SUCCESS)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to set enum node integer value, error = " << err;
+                throw RuntimeError(ERROR_SPIN_SET_ENUM_INT_VALUE, ssError.str());
+            }
         }
     }
 
@@ -76,13 +81,18 @@ namespace bias
         checkAvailable();
         checkWritable();
 
-        spinError err = spinEnumerationSetEnumValue(hNode_,value);
-        if (err != SPINNAKER_ERR_SUCCESS)
+        EntryNode_spin currEntryNode = currentEntry();
+
+        if (currEntryNode.value() != value)
         {
-            std::stringstream ssError;
-            ssError << __PRETTY_FUNCTION__;
-            ssError << ": unable to enum node integer value, error = " << err;
-            throw RuntimeError(ERROR_SPIN_SET_ENUM_VALUE, ssError.str());
+            spinError err = spinEnumerationSetEnumValue(hNode_,value);
+            if (err != SPINNAKER_ERR_SUCCESS)
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": unable to enum node integer value, error = " << err;
+                throw RuntimeError(ERROR_SPIN_SET_ENUM_VALUE, ssError.str());
+            }
         }
     }
 

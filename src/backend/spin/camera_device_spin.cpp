@@ -1134,9 +1134,6 @@ namespace bias {
             }
         }
 
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-        propInfo.print();
-
         return propInfo;
     }
 
@@ -1149,11 +1146,11 @@ namespace bias {
 
         PropertyInfo propInfo;
         propInfo.type = PROPERTY_TYPE_GAIN;
-        propInfo.present = gainNode.isAvailable();
+        propInfo.present = gainAutoNode.isAvailable();
 
         if (propInfo.present)
         {
-            if (gainAutoNode.isAvailable() && gainAutoNode.isReadable())
+            if (gainAutoNode.isReadable())
             {
                 propInfo.autoCapable = gainAutoNode.hasEntrySymbolic("Continuous");
                 propInfo.manualCapable = gainAutoNode.hasEntrySymbolic("Off");
@@ -1162,15 +1159,20 @@ namespace bias {
             propInfo.absoluteCapable = true;
             propInfo.onOffCapable = false;
             propInfo.readOutCapable = false;
-            propInfo.minValue = gainNode.minIntValue();
-            propInfo.maxValue = gainNode.maxIntValue();
-            propInfo.minAbsoluteValue = gainNode.minValue();
-            propInfo.maxAbsoluteValue = gainNode.maxValue();
-            propInfo.haveUnits = !gainNode.unit().empty();
-            propInfo.units =  gainNode.unit();
-            propInfo.unitsAbbr = gainNode.unit();
-
+            if (gainNode.isAvailable() && gainNode.isReadable())
+            {
+                propInfo.minValue = gainNode.minIntValue();
+                propInfo.maxValue = gainNode.maxIntValue();
+                propInfo.minAbsoluteValue = gainNode.minValue();
+                propInfo.maxAbsoluteValue = gainNode.maxValue();
+                propInfo.haveUnits = !gainNode.unit().empty();
+                propInfo.units =  gainNode.unit();
+                propInfo.unitsAbbr = gainNode.unit();
+            }
         }
+
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        propInfo.print();
 
         return propInfo;
     }
@@ -1353,9 +1355,6 @@ namespace bias {
             }
         }
 
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-        prop.print();
-
         return prop;
     }
 
@@ -1367,7 +1366,7 @@ namespace bias {
 
         Property prop;
         prop.type = PROPERTY_TYPE_GAIN;
-        prop.present = gainNode.isAvailable();
+        prop.present = gainAutoNode.isAvailable();
 
         if (prop.present)
         {
@@ -1379,12 +1378,16 @@ namespace bias {
                 EntryNode_spin autoEntry = gainAutoNode.currentEntry();
                 prop.autoActive = autoEntry.isSymbolicValueEqualTo("Continuous");
             }
-            prop.value = gainNode.intValue();
-            prop.valueA = 0;
-            prop.valueB = 0;
-            prop.absoluteValue = gainNode.value();
+            if (gainNode.isAvailable() && gainNode.isReadable())
+            {
+                prop.value = gainNode.intValue();
+                prop.absoluteValue = gainNode.value();
+            }
 
         }
+
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        prop.print();
 
         return prop;
     }
@@ -1517,8 +1520,6 @@ namespace bias {
 
     void CameraDevice_spin::setPropertyShutter(Property prop)
     {
-        std::cout << __PRETTY_FUNCTION__ << std::endl;
-        prop.print();
 
         EnumNode_spin exposureAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureAuto");
         FloatNode_spin exposureTimeNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("ExposureTime");
@@ -1527,8 +1528,7 @@ namespace bias {
         {
             if (prop.onePush)
             {
-                // Seems to need to be called a couple of time to stabilize to final value.
-                // Not sure why this is.
+                // Seems to need to be called more than once for the value to stabilize - not sure why this is.
                 for (int i=0; i<AutoOnePushSetCount; i++)
                 {
                     exposureAutoNode.setEntryBySymbolic("Once");
@@ -1563,14 +1563,21 @@ namespace bias {
 
     void CameraDevice_spin::setPropertyGain(Property prop)
     {
+        std::cout << __PRETTY_FUNCTION__ << std::endl;
+        prop.print();
+
         EnumNode_spin gainAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("GainAuto");
         FloatNode_spin gainNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("Gain");
 
-        if (gainAutoNode.isWritable())
+        if (gainAutoNode.isAvailable() && gainAutoNode.isWritable())
         {
             if (prop.onePush)
             {
-                gainAutoNode.setEntryBySymbolic("Once");
+                // Seems to need to be called more than once for the value to stabilize - not sure why this is.
+                for (int i=0; i<AutoOnePushSetCount; i++)
+                {
+                    gainAutoNode.setEntryBySymbolic("Once");
+                }
                 return;
             }
 
@@ -1579,9 +1586,13 @@ namespace bias {
                 gainAutoNode.setEntryBySymbolic("Continuous");
                 return;
             }
+            else
+            {
+                gainAutoNode.setEntryBySymbolic("Off");
+            }
         }
 
-        if (gainNode.isWritable())
+        if (gainNode.isAvailable() && gainNode.isReadable() && gainNode.isWritable()) 
         {
             if (prop.absoluteControl)
             {
@@ -1589,7 +1600,7 @@ namespace bias {
             }
             else
             {
-                gainNode.setValue(prop.value);
+                gainNode.setValueFromInt(prop.value);
             }
         }
     }
