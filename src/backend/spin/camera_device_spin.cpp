@@ -889,6 +889,20 @@ namespace bias {
             throw RuntimeError(ERROR_SPIN_SET_TRIGGER_EXTERNAL, ssError.str());
         }
 
+        EnumNode_spin triggerActivationNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerActivation");
+        if (triggerActivationNode.isAvailable() && triggerActivationNode.isWritable())
+        {
+            triggerActivationNode.setEntryBySymbolic("RisingEdge");
+        }
+        else
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": triggerActivationNode is not available or writable";
+            throw RuntimeError(ERROR_SPIN_SET_TRIGGER_EXTERNAL, ssError.str());
+        }
+
+
         if (triggerModeNode.isAvailable() && triggerModeNode.isWritable())
         {
             triggerModeNode.setEntryBySymbolic("On");
@@ -1819,20 +1833,21 @@ namespace bias {
         // Trigger 
         // --------------------------------------------------------------------------------------------------
 
-        EnumNode_spin triggerSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerSelector");
-        triggerSelectorNode.print();
+        //EnumNode_spin triggerSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerSelector");
+        //triggerSelectorNode.print();
 
-        EnumNode_spin triggerModeNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerMode");
-        triggerModeNode.print();
+        //EnumNode_spin triggerModeNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerMode");
+        //triggerModeNode.print();
 
-        EnumNode_spin triggerSourceNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerSource");
-        triggerSourceNode.print();
+        //EnumNode_spin triggerSourceNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerSource");
+        //triggerSourceNode.print();
 
-        EnumNode_spin triggerOverlapNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerOverlap");
-        triggerOverlapNode.print();
+        //EnumNode_spin triggerOverlapNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerOverlap");
+        //triggerOverlapNode.print();
 
-        FloatNode_spin triggerDelayNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("TriggerDelay");
-        triggerDelayNode.print();
+        //FloatNode_spin triggerDelayNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("TriggerDelay");
+        //triggerDelayNode.print();
+
 
         //// FrameRate
         //// --------------------------------------------------------------------------------------------------
