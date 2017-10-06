@@ -166,38 +166,58 @@ namespace bias {
 
             // Exposure defaults 
             EnumNode_spin exposureModeNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureMode");
-            exposureModeNode.setEntryBySymbolic("Timed");
+            if (exposureModeNode.isAvailable() && exposureModeNode.isWritable())
+            {
+                exposureModeNode.setEntryBySymbolic("Timed");
+            }
 
             EnumNode_spin exposureAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureAuto");
-            exposureAutoNode.setEntryBySymbolic("Off");
+            if (exposureAutoNode.isAvailable() && exposureAutoNode.isWritable())
+            {
+                exposureAutoNode.setEntryBySymbolic("Off");
+            }
 
             // Blacklevel defaults
             EnumNode_spin blackLevelSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("BlackLevelSelector");
-            blackLevelSelectorNode.setEntryBySymbolic("All");
+            if (blackLevelSelectorNode.isAvailable() && blackLevelSelectorNode.isWritable())
+            {
+                blackLevelSelectorNode.setEntryBySymbolic("All");
+            }
 
             // Gain defualts
             EnumNode_spin gainSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("GainSelector");
-            gainSelectorNode.setEntryBySymbolic("All");
+            if (gainSelectorNode.isAvailable() && gainSelectorNode.isWritable())
+            {
+                gainSelectorNode.setEntryBySymbolic("All");
+            }
 
             EnumNode_spin gainAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("GainAuto");
-            gainAutoNode.setEntryBySymbolic("Off");
+            if (gainAutoNode.isAvailable() && gainAutoNode.isWritable())
+            {
+                gainAutoNode.setEntryBySymbolic("Off");
+            }
 
             // Trigger defaults
             EnumNode_spin triggerSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerSelector");
-            triggerSelectorNode.setEntryBySymbolic("FrameStart");
-
-            EnumNode_spin triggerModeNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerMode");
-            triggerModeNode.setEntryBySymbolic("Off");
-
-            EnumNode_spin triggerSourceNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerSource");
-            triggerSourceNode.setEntryBySymbolic("Software");
+            if (triggerSelectorNode.isAvailable() && triggerSelectorNode.isWritable())
+            {
+                triggerSelectorNode.setEntryBySymbolic("FrameStart");
+            }
 
             EnumNode_spin triggerOverlapNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerOverlap");
-            triggerOverlapNode.setEntryBySymbolic("Off");
+            if (triggerOverlapNode.isAvailable() && triggerOverlapNode.isWritable())
+            { 
+                triggerOverlapNode.setEntryBySymbolic("Off");
+            }
+
+            setTriggerInternal();
 
             // Framerate defaults
             BoolNode_spin frameRateEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("AcquisitionFrameRateEnable");
-            frameRateEnableNode.setValue(true);
+            if (frameRateEnableNode.isAvailable() && frameRateEnableNode.isWritable())
+            {
+                frameRateEnableNode.setValue(true);
+            }
 
             // DEVEL
             // ----------------------------------------------------------------------------------------------
@@ -236,6 +256,8 @@ namespace bias {
             // ----------------------------------------------------------------------------------------------
             // TODO: - setup strobe output on GPIO pin?? Is this possible?
             // ----------------------------------------------------------------------------------------------
+
+            develExpProps();
 
         }
     }
@@ -729,7 +751,6 @@ namespace bias {
 
 
 
-
     bool CameraDevice_spin::isSupported(VideoMode vidMode, FrameRate frmRate)
     {
         VideoModeList allowedVideoModes = getAllowedVideoModes();
@@ -798,6 +819,8 @@ namespace bias {
     //}
 
 
+
+
     //void CameraDevice_spin::setFormat7ImageMode(ImageMode imgMode) 
     //{
     //    // -------------------------------------------------
@@ -806,53 +829,109 @@ namespace bias {
     //}
 
 
-    //void CameraDevice_spin::setTriggerInternal()
-    //{
-    //    spinTriggerMode trigMode = getTriggerMode_spin();
-    //    trigMode.onOff = FALSE;
-    //    setTriggerMode(trigMode);
-    //}
-    //
+    void CameraDevice_spin::setTriggerInternal()
+    {
 
-    //void CameraDevice_spin::setTriggerExternal()
-    //{
-    //    // ------------------------------------------------
-    //    // TO DO ... not really finished yet
-    //    // ------------------------------------------------
-    //    //
-    //    // Currently only sets to mode 0, doesn't check for
-    //    // support, etc.
-    //    // ------------------------------------------------ 
-    //    spinError error = spinSetGPIOPinDirection(context_, 0, 0);
-    //    if (error != SPIN_ERROR_OK) 
-    //    {
-    //        std::stringstream ssError;
-    //        ssError << __PRETTY_FUNCTION__;
-    //        ssError << ": unable to set GPIO direction";
-    //        throw RuntimeError(ERROR_SPIN_CREATE_IMAGE, ssError.str());
-    //    }
-    //    
-    //    spinTriggerMode trigMode = getTriggerMode_spin();
-    //    trigMode.onOff = TRUE;
-    //    trigMode.mode = 0;
-    //    trigMode.source = 0;
-    //    trigMode.parameter = 0;
-    //    trigMode.polarity = 0;
-    //    setTriggerMode(trigMode);
-    //}
+        EnumNode_spin triggerModeNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerMode");
+        if (triggerModeNode.isAvailable() && triggerModeNode.isWritable())
+        {
+            triggerModeNode.setEntryBySymbolic("Off");
+        }
+        else
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": triggerModeNode is not available or writable";
+            throw RuntimeError(ERROR_SPIN_SET_TRIGGER_INTERNAL, ssError.str());
+        }
 
-    //TriggerType CameraDevice_spin::getTriggerType()
-    //{
-    //    spinTriggerMode trigMode = getTriggerMode_spin();
-    //    if ((trigMode.onOff == TRUE) && (trigMode.mode != 3)) // Note, mode 3 is frame skip
-    //    {
-    //        return TRIGGER_EXTERNAL;
-    //    }
-    //    else
-    //    {
-    //        return TRIGGER_INTERNAL;
-    //    }
-    //}
+        EnumNode_spin triggerSourceNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerSource");
+        if (triggerSourceNode.isAvailable() && triggerSourceNode.isWritable())
+        {
+            triggerSourceNode.setEntryBySymbolic("Software");
+        }
+        else
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": triggerSourceNode is not available or writable";
+            throw RuntimeError(ERROR_SPIN_SET_TRIGGER_INTERNAL, ssError.str());
+        }
+    }
+    
+
+    void CameraDevice_spin::setTriggerExternal()
+    {
+
+        EnumNode_spin triggerModeNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerMode");
+        if (triggerModeNode.isAvailable() && triggerModeNode.isWritable())
+        {
+            triggerModeNode.setEntryBySymbolic("Off");
+        }
+        else
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": triggerModeNode is not available or writable";
+            throw RuntimeError(ERROR_SPIN_SET_TRIGGER_EXTERNAL, ssError.str());
+        }
+
+        EnumNode_spin triggerSourceNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerSource");
+        if (triggerSourceNode.isAvailable() && triggerSourceNode.isWritable())
+        {
+            triggerSourceNode.setEntryBySymbolic("Line0");
+        }
+        else
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": triggerSourceNode is not available or writable";
+            throw RuntimeError(ERROR_SPIN_SET_TRIGGER_EXTERNAL, ssError.str());
+        }
+
+        if (triggerModeNode.isAvailable() && triggerModeNode.isWritable())
+        {
+            triggerModeNode.setEntryBySymbolic("On");
+        }
+        else
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": triggerModeNode is not available or writable";
+            throw RuntimeError(ERROR_SPIN_SET_TRIGGER_EXTERNAL, ssError.str());
+        }
+    }
+
+
+    TriggerType CameraDevice_spin::getTriggerType()
+    {
+        std::string modeSymb;
+        EnumNode_spin triggerModeNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("TriggerMode");
+        if (triggerModeNode.isAvailable() && triggerModeNode.isReadable())
+        {
+            EntryNode_spin entryNode = triggerModeNode.currentEntry();
+            if (entryNode.isAvailable() && entryNode.isReadable())
+            {
+                modeSymb = entryNode.symbolic();
+            }
+            else
+            {
+                std::stringstream ssError;
+                ssError << __PRETTY_FUNCTION__;
+                ssError << ": triggerModeNode current entryNode is not available or readable";
+                throw RuntimeError(ERROR_SPIN_GET_TRIGGER_TYPE, ssError.str());
+            }
+        }
+        else
+        {
+            std::stringstream ssError;
+            ssError << __PRETTY_FUNCTION__;
+            ssError << ": triggerModeNode is not available or readable";
+            throw RuntimeError(ERROR_SPIN_GET_TRIGGER_TYPE, ssError.str());
+        }
+
+        return (modeSymb == std::string("On")) ? TRIGGER_EXTERNAL : TRIGGER_INTERNAL;
+    }
 
 
     TimeStamp CameraDevice_spin::getImageTimeStamp()
@@ -1711,31 +1790,31 @@ namespace bias {
         }
 
 
-        // Exposure (Used instead of Shutter ... what about gain, intensity, etc. ???
-        // --------------------------------------------------------------------------------------------------
+        //// Exposure (Used instead of Shutter ... what about gain, intensity, etc. ???
+        //// --------------------------------------------------------------------------------------------------
 
-        EnumNode_spin exposureModeNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureMode");
-        exposureModeNode.setEntryBySymbolic("Timed");
-        exposureModeNode.print();
+        //EnumNode_spin exposureModeNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureMode");
+        //exposureModeNode.setEntryBySymbolic("Timed");
+        //exposureModeNode.print();
 
-        EnumNode_spin exposureAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureAuto");
-        exposureAutoNode.setEntryBySymbolic("Off");
-        exposureAutoNode.print();
+        //EnumNode_spin exposureAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ExposureAuto");
+        //exposureAutoNode.setEntryBySymbolic("Off");
+        //exposureAutoNode.print();
 
-        FloatNode_spin exposureTimeNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("ExposureTime");
-        exposureTimeNode.print();
+        //FloatNode_spin exposureTimeNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("ExposureTime");
+        //exposureTimeNode.print();
 
-        // Gain .
-        // --------------------------------------------------------------------------------------------------
+        //// Gain .
+        //// --------------------------------------------------------------------------------------------------
 
-        EnumNode_spin gainSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("GainSelector");
-        gainSelectorNode.print();
+        //EnumNode_spin gainSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("GainSelector");
+        //gainSelectorNode.print();
 
-        EnumNode_spin gainAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("GainAuto");
-        gainAutoNode.print();
+        //EnumNode_spin gainAutoNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("GainAuto");
+        //gainAutoNode.print();
 
-        FloatNode_spin gainNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("Gain");
-        gainNode.print();
+        //FloatNode_spin gainNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("Gain");
+        //gainNode.print();
 
         // Trigger 
         // --------------------------------------------------------------------------------------------------
@@ -1755,40 +1834,40 @@ namespace bias {
         FloatNode_spin triggerDelayNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("TriggerDelay");
         triggerDelayNode.print();
 
-        // FrameRate
-        // --------------------------------------------------------------------------------------------------
+        //// FrameRate
+        //// --------------------------------------------------------------------------------------------------
 
-        BoolNode_spin frameRateEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("AcquisitionFrameRateEnable");
-        frameRateEnableNode.setValue(true);
-        frameRateEnableNode.print();
+        //BoolNode_spin frameRateEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("AcquisitionFrameRateEnable");
+        //frameRateEnableNode.setValue(true);
+        //frameRateEnableNode.print();
 
-        FloatNode_spin frameRateNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("AcquisitionFrameRate");
-        frameRateNode.print();
+        //FloatNode_spin frameRateNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("AcquisitionFrameRate");
+        //frameRateNode.print();
 
-        FloatNode_spin resFrameRateNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("AcquisitionResultingFrameRate");
-        resFrameRateNode.print();
+        //FloatNode_spin resFrameRateNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("AcquisitionResultingFrameRate");
+        //resFrameRateNode.print();
 
 
-        // Temperature
-        //---------------------------------------------------------------------------------------------------
-        FloatNode_spin tempNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("DeviceTemperature");
-        tempNode.print();
+        //// Temperature
+        ////---------------------------------------------------------------------------------------------------
+        //FloatNode_spin tempNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("DeviceTemperature");
+        //tempNode.print();
 
-        // Blacklevel
-        // ---------------------------------------------------------------------------------------------------
-        EnumNode_spin blackLevelSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("BlackLevelSelector");
-        blackLevelSelectorNode.print();
+        //// Blacklevel
+        //// ---------------------------------------------------------------------------------------------------
+        //EnumNode_spin blackLevelSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("BlackLevelSelector");
+        //blackLevelSelectorNode.print();
 
-        FloatNode_spin blackLevelNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("BlackLevel");
-        blackLevelNode.print();
+        //FloatNode_spin blackLevelNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("BlackLevel");
+        //blackLevelNode.print();
 
-        // Gamma
-        // ----------------------------------------------------------------------------------------------------
-        FloatNode_spin gammaNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("Gamma");
-        gammaNode.print();
+        //// Gamma
+        //// ----------------------------------------------------------------------------------------------------
+        //FloatNode_spin gammaNode = nodeMapCamera_.getNodeByName<FloatNode_spin>("Gamma");
+        //gammaNode.print();
 
-        BoolNode_spin gammaEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("GammaEnable");
-        gammaEnableNode.print();
+        //BoolNode_spin gammaEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("GammaEnable");
+        //gammaEnableNode.print();
 
 
     }
