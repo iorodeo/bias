@@ -616,74 +616,35 @@ namespace bias {
     }
 
 
-    //{
-    //    spinError error_spin;
-    //    spinFormat7ImageSettings settings_spin;
-    //    unsigned int packetSize;
-    //    float percentage; 
-    //    Format7Settings settings;
 
-    //    // Get Current format7 image settings
-    //    error_spin = spinGetFormat7Configuration(
-    //            context_, 
-    //            &settings_spin,
-    //            &packetSize,
-    //            &percentage
-    //            );
-    //    if (error_spin != SPIN_ERROR_OK)
-    //    { 
-    //        std::stringstream ssError; 
-    //        ssError << __PRETTY_FUNCTION__; 
-    //        ssError << ": unable to get Spinnaker format 7 configuration"; 
-    //        throw RuntimeError(ERROR_SPIN_GET_FORMAT7_CONFIGURATION, ssError.str());
-    //    }
-    //    settings.mode = convertImageMode_from_spin(settings_spin.mode);
-    //    settings.offsetX = settings_spin.offsetX;
-    //    settings.offsetY = settings_spin.offsetY;
-    //    settings.width = settings_spin.width;
-    //    settings.height = settings_spin.height;
-    //    settings.pixelFormat = convertPixelFormat_from_spin(settings_spin.pixelFormat);
-    //    return settings;
-    //}
+    Format7Info CameraDevice_spin::getFormat7Info(ImageMode imgMode)
+    {
+        Format7Info format7Info;
+
+        format7Info.mode = imgMode;
+        format7Info.supported = isSupported(imgMode);
+
+        if (format7Info.supported)
+        {
+            IntegerNode_spin widthNode = nodeMapCamera_.getNodeByName<IntegerNode_spin>("Width");
+            format7Info.maxWidth = (unsigned int)(widthNode.maxValue());
+            format7Info.imageHStepSize = (unsigned int)(widthNode.increment());
+
+            IntegerNode_spin heightNode = nodeMapCamera_.getNodeByName<IntegerNode_spin>("Height");
+            format7Info.maxHeight = (unsigned int)(heightNode.maxValue());
+            format7Info.imageVStepSize = (unsigned int)(heightNode.increment());
+
+            IntegerNode_spin offsetXNode = nodeMapCamera_.getNodeByName<IntegerNode_spin>("OffsetX");
+            format7Info.offsetHStepSize = (unsigned int)(offsetXNode.increment());
+
+            IntegerNode_spin offsetYNode = nodeMapCamera_.getNodeByName<IntegerNode_spin>("OffsetY");
+            format7Info.offsetVStepSize = (unsigned int)(offsetYNode.increment());
+
+        }
 
 
-    //Format7Info CameraDevice_spin::getFormat7Info(ImageMode imgMode)
-    //{
-    //    spinError error_spin;
-    //    spinFormat7Info format7Info_spin;
-    //    BOOL supported;
-    //    Format7Info format7Info;
-
-    //    format7Info_spin.mode = convertImageMode_to_spin(imgMode);
-    //    error_spin = spinGetFormat7Info(context_, &format7Info_spin, &supported);
-    //    if (error_spin != SPIN_ERROR_OK) 
-    //    {
-    //        std::stringstream ssError; 
-    //        ssError << __PRETTY_FUNCTION__; 
-    //        ssError << ": unable to get Spinnaker format7 information"; 
-    //        throw RuntimeError(ERROR_SPIN_GET_FORMAT7_INFO, ssError.str());
-    //    }
-
-    //    format7Info.mode = imgMode;
-    //    format7Info.supported = supported;
-    //    if (supported) 
-    //    {
-    //        format7Info.maxWidth = format7Info_spin.maxWidth;
-    //        format7Info.maxHeight = format7Info_spin.maxHeight;
-    //        format7Info.offsetHStepSize = format7Info_spin.offsetHStepSize;
-    //        format7Info.offsetVStepSize = format7Info_spin.offsetVStepSize;
-    //        format7Info.imageHStepSize = format7Info_spin.imageHStepSize;
-    //        format7Info.imageVStepSize = format7Info_spin.imageVStepSize;
-    //        format7Info.pixelFormatBitField = format7Info_spin.pixelFormatBitField;
-    //        format7Info.vendorPixelFormatBitField = format7Info_spin.vendorPixelFormatBitField;
-    //        format7Info.packetSize = format7Info_spin.packetSize;
-    //        format7Info.minPacketSize = format7Info_spin.minPacketSize;
-    //        format7Info.maxPacketSize = format7Info_spin.maxPacketSize;
-    //        format7Info.percentage = format7Info.percentage;
-    //    }
-    //    return format7Info;
-    //}
-
+        return format7Info;
+    }
 
     //bool CameraDevice_spin::validateFormat7Settings(Format7Settings settings)
     //{

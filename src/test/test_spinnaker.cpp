@@ -40,9 +40,16 @@ int main(int argc, char *argv[])
         std::cout << std::endl;
 
         bias::Format7Settings settings = camDev.getFormat7Settings();
-        settings.print();
 
+        std::cout << "Format7 Settings" << std::endl;
+        settings.print();
         std::cout << std::endl;
+
+        std::cout << "Format7 Info" << std::endl;
+        bias::Format7Info info = camDev.getFormat7Info(bias::IMAGEMODE_0);
+        info.print();
+        std::cout << std::endl;
+
 
 
         if (false)
