@@ -43,7 +43,7 @@ namespace bias
         checkAvailable();
         checkReadable();
         int64_t increment = 0;
-        spinError err = spinIntegerGetIncr(hNode_,&increment);
+        spinError err = spinIntegerGetInc(hNode_,&increment);
         if (err != SPINNAKER_ERR_SUCCESS)
         {
             std::stringstream ssError;

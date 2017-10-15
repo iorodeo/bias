@@ -37,36 +37,44 @@ int main(int argc, char *argv[])
         std::cout << std::endl;
         camDev.develExpProps();
 
+        std::cout << std::endl;
+
+        bias::Format7Settings settings = camDev.getFormat7Settings();
+        settings.print();
 
         std::cout << std::endl;
 
-        for (auto propType : bias::getListOfPropertyTypes())
+
+        if (false)
         {
-            bias::PropertyInfo propInfo = camDev.getPropertyInfo(propType);
-
-            if (propInfo.present)
+            for (auto propType : bias::getListOfPropertyTypes())
             {
-                propInfo.print();
+                bias::PropertyInfo propInfo = camDev.getPropertyInfo(propType);
 
-                bias::Property prop = camDev.getProperty(propType);
-                prop.print();
+                if (propInfo.present)
+                {
+                    propInfo.print();
 
-                std::cout << "-----------------" << std::endl;
-            }
-            
-            //try
-            //{
-            //    bias::Property propTmp;
-            //    propTmp.type = propType;
-            //    camDev.setProperty(propTmp);
-            //}
-            //catch (...)
-            //{
-            //    std::cout << "catch" << std::endl;
-            //}
+                    bias::Property prop = camDev.getProperty(propType);
+                    prop.print();
 
-        } 
-        std::cout << std::endl;
+                    std::cout << "-----------------" << std::endl;
+                }
+
+                //try
+                //{
+                //    bias::Property propTmp;
+                //    propTmp.type = propType;
+                //    camDev.setProperty(propTmp);
+                //}
+                //catch (...)
+                //{
+                //    std::cout << "catch" << std::endl;
+                //}
+
+            } 
+            std::cout << std::endl;
+        }
 
 
         if (false)

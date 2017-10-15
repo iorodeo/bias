@@ -226,38 +226,12 @@ namespace bias {
             std::cout << "# Camera nodes:   " << (nodeMapCamera_.numberOfNodes()) << std::endl;
             std::cout << std::endl;
 
-            ////std::vector<EnumNode_spin> nodeVec = nodeMapTLDevice_.nodes<EnumNode_spin>();
-            ////std::vector<EnumNode_spin> nodeVec = nodeMapCamera_.nodes<EnumNode_spin>();
-            ////
-            //std::vector<BaseNode_spin> nodeVec = nodeMapCamera_.nodes<BaseNode_spin>();
-
-            //std::ofstream fout;
-            //fout.open("camera_map_nodes.txt");
-
-            //for (auto node : nodeVec)
-            //{
-            //    fout <<  node.name() << ",  " << node.typeAsString() << std::endl;
-            //    std::cout << node.name() << ",  " << node.typeAsString() << std::endl;
-
-            ////    std::cout << "name: " << node.name() << ", numberOfEntries: " << node.numberOfEntries() << std::endl;
-            ////    std::vector<EntryNode_spin> entryNodeVec = node.entries();
-            ////    EntryNode_spin currEntryNode = node.currentEntry();
-            ////    std::cout << "  current: " << currEntryNode.name() << std::endl;
-            ////    for (auto entry : entryVec)
-            ////    {
-            ////        std::cout << "  name:    " << entry.name() << ", " << entry.displayName() << std::endl;
-            ////    }
-            //}
-            //
-            //fout.close();
-            // ----------------------------------------------------------------------------------------------
-
 
             // ----------------------------------------------------------------------------------------------
             // TODO: - setup strobe output on GPIO pin?? Is this possible?
             // ----------------------------------------------------------------------------------------------
 
-            develExpProps();
+            //develExpProps();
 
         }
     }
@@ -618,7 +592,30 @@ namespace bias {
         return true;
     }
 
-    //Format7Settings CameraDevice_spin::getFormat7Settings()
+    Format7Settings CameraDevice_spin::getFormat7Settings()
+    {
+        Format7Settings settings;
+
+        settings.mode = getImageMode();
+
+        IntegerNode_spin offsetXNode = nodeMapCamera_.getNodeByName<IntegerNode_spin>("OffsetX");
+        settings.offsetX = (unsigned int)(offsetXNode.value());
+
+        IntegerNode_spin offsetYNode = nodeMapCamera_.getNodeByName<IntegerNode_spin>("OffsetY");
+        settings.offsetY = (unsigned int)(offsetYNode.value());
+
+        IntegerNode_spin widthNode = nodeMapCamera_.getNodeByName<IntegerNode_spin>("Width");
+        settings.width = (unsigned int)(widthNode.value());
+
+        IntegerNode_spin heightNode = nodeMapCamera_.getNodeByName<IntegerNode_spin>("Height");
+        settings.height = (unsigned int)(heightNode.value());
+
+        settings.pixelFormat = getPixelFormat();
+
+        return settings;
+    }
+
+
     //{
     //    spinError error_spin;
     //    spinFormat7ImageSettings settings_spin;
@@ -773,52 +770,6 @@ namespace bias {
     {
         return getAllowedImageModes().size();
     }
-
-
-    //void CameraDevice_spin::setVideoMode(VideoMode vidMode, FrameRate frmRate) 
-    //{
-    //    if (vidMode != VIDEOMODE_FORMAT7) 
-    //    {
-    //        // For all non-format7 video modes
-    //        spinVideoMode vidMode_spin = convertVideoMode_to_spin(vidMode);
-    //        spinFrameRate frmRate_spin = convertFrameRate_to_spin(frmRate);
-    //        spinError error = spinSetVideoModeAndFrameRate(
-    //                context_, 
-    //                vidMode_spin, 
-    //                frmRate_spin
-    //                );
-    //        if (error != SPIN_ERROR_OK)
-    //        {
-    //            std::stringstream ssError;
-    //            ssError << __PRETTY_FUNCTION__;
-    //            ssError << ": unable to set VideoMode and frame rate";
-    //            throw RuntimeError(
-    //                    ERROR_SPIN_SET_VIDEOMODE_AND_FRAMERATE, 
-    //                    ssError.str()
-    //                    );
-    //        }
-    //    }
-    //    else 
-    //    {
-    //        // For format 7 video modes ... 
-    //        //
-    //        // Temporary. TO DO uses setVideoModeFormat7 which needs to be 
-    //        // worked on to make it more flexible.
-    //        ImageModeList allowedImageModes = getAllowedImageModes();
-    //        if (allowedImageModes.empty())
-    //        {
-    //            std::stringstream ssError;
-    //            ssError << __PRETTY_FUNCTION__;
-    //            ssError << ": unable to set Format7 video mode not support imageModes";
-    //            throw RuntimeError(ERROR_SPIN_SET_VIDEOMODE_FORMAT7, ssError.str());
-    //        }
-    //        ImageMode mode = allowedImageModes.front();
-    //        setVideoModeToFormat7(mode);
-    //        //setVideoModeToFormat7(IMAGEMODE_1);
-    //    }
-    //}
-
-
 
 
     //void CameraDevice_spin::setFormat7ImageMode(ImageMode imgMode) 
@@ -1739,8 +1690,16 @@ namespace bias {
     }
 
 
+    PixelFormat CameraDevice_spin::getPixelFormat()
+    {
+        spinPixelFormatEnums currPixelFormat_spin = getPixelFormat_spin();
+        return convertPixelFormat_from_spin(currPixelFormat_spin); 
+    }
+
+
     // spin get methods
     // ---------------
+
     std::vector<spinPixelFormatEnums> CameraDevice_spin::getSupportedPixelFormats_spin()
     {   
         EnumNode_spin pixelFormatNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("PixelFormat");
@@ -1755,6 +1714,16 @@ namespace bias {
         return pixelFormatValueVec;
     }
 
+    spinPixelFormatEnums CameraDevice_spin::getPixelFormat_spin()
+    {
+        EnumNode_spin pixelFormatNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("PixelFormat");
+        EntryNode_spin currentEntry = pixelFormatNode.currentEntry();
+        return spinPixelFormatEnums(currentEntry.value());
+    }
+
+
+    // PropertyInfo, and Property dispatch maps
+    // ----------------------------------------
 
     std::map<PropertyType, std::function<PropertyInfo(CameraDevice_spin*)>> CameraDevice_spin::getPropertyInfoDispatchMap_ = 
     { 
@@ -1884,6 +1853,89 @@ namespace bias {
         //BoolNode_spin gammaEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("GammaEnable");
         //gammaEnableNode.print();
 
+
+        // Offset
+        // -------------------------------------------------------------------------------------------------------
+        IntegerNode_spin offsetXNode = nodeMapCamera_.getNodeByName<IntegerNode_spin>("OffsetX");
+        int64_t offsetXVal = offsetXNode.value();
+        int64_t offsetXInc = offsetXNode.increment();
+        int64_t offsetXMax = offsetXNode.maxValue();
+        int64_t offsetXMin = offsetXNode.minValue();
+
+        std::cout << "offsetX Val: " << offsetXVal << std::endl;
+        std::cout << "offsetX Inc: " << offsetXInc << std::endl;
+        std::cout << "offsetX min: " << offsetXMin << std::endl;
+        std::cout << "offsetX max: " << offsetXMax << std::endl;
+        std::cout << std::endl;
+
+        IntegerNode_spin offsetYNode = nodeMapCamera_.getNodeByName<IntegerNode_spin>("OffsetY");
+        int64_t offsetYVal = offsetYNode.value();
+        int64_t offsetYInc = offsetYNode.increment();
+        int64_t offsetYMax = offsetYNode.maxValue();
+        int64_t offsetYMin = offsetYNode.minValue();
+
+        std::cout << "offsetY Val: " << offsetYVal << std::endl;
+        std::cout << "offsetY Inc: " << offsetYInc << std::endl;
+        std::cout << "offsetY min: " << offsetYMin << std::endl;
+        std::cout << "offsetY max: " << offsetYMax << std::endl;
+        std::cout << std::endl;
+
+        IntegerNode_spin widthNode = nodeMapCamera_.getNodeByName<IntegerNode_spin>("Width");
+        int64_t widthVal = widthNode.value();
+        int64_t widthInc = widthNode.increment();
+        int64_t widthMax = widthNode.maxValue();
+        int64_t widthMin = widthNode.minValue();
+
+        std::cout << "width Val:   " << widthVal << std::endl;
+        std::cout << "width Inc:   " << widthInc << std::endl;
+        std::cout << "width max:   " << widthMax << std::endl;
+        std::cout << "width min:   " << widthMin << std::endl;
+        std::cout << std::endl;
+
+        IntegerNode_spin heightNode = nodeMapCamera_.getNodeByName<IntegerNode_spin>("Height");
+        int64_t heightVal = heightNode.value();
+        int64_t heightInc = heightNode.increment();
+        int64_t heightMax = heightNode.maxValue();
+        int64_t heightMin = heightNode.minValue();
+
+        std::cout << "height Val:   " << heightVal << std::endl;
+        std::cout << "height Inc:   " << heightInc << std::endl;
+        std::cout << "height max:   " << heightMax << std::endl;
+        std::cout << "height min:   " << heightMin << std::endl;
+        std::cout << std::endl;
+
+        EnumNode_spin pixelFormatNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("PixelFormat");
+        //std::vector<EntryNode_spin> pixelFormatEntryVec  = pixelFormatNode.entries();
+        pixelFormatNode.print();
+
+
+        //// -------------------------------------------------------------------------------------------------------
+
+        ////std::vector<EnumNode_spin> nodeVec = nodeMapTLDevice_.nodes<EnumNode_spin>();
+        ////std::vector<EnumNode_spin> nodeVec = nodeMapCamera_.nodes<EnumNode_spin>();
+        ////
+        //std::vector<BaseNode_spin> nodeVec = nodeMapCamera_.nodes<BaseNode_spin>();
+
+        //std::ofstream fout;
+        //fout.open("camera_map_nodes.txt");
+
+        //for (auto node : nodeVec)
+        //{
+        //    fout <<  node.name() << ",  " << node.typeAsString() << std::endl;
+        //    std::cout << node.name() << ",  " << node.typeAsString() << std::endl;
+
+        ////    std::cout << "name: " << node.name() << ", numberOfEntries: " << node.numberOfEntries() << std::endl;
+        ////    std::vector<EntryNode_spin> entryNodeVec = node.entries();
+        ////    EntryNode_spin currEntryNode = node.currentEntry();
+        ////    std::cout << "  current: " << currEntryNode.name() << std::endl;
+        ////    for (auto entry : entryVec)
+        ////    {
+        ////        std::cout << "  name:    " << entry.name() << ", " << entry.displayName() << std::endl;
+        ////    }
+        //}
+        //
+        //fout.close();
+        //// --------------------------------------------------------------------------------------------------------
 
     }
 }

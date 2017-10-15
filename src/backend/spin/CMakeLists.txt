@@ -14,6 +14,7 @@ set(
     enum_node_spin.cpp
     entry_node_spin.cpp
     float_node_spin.cpp
+    integer_node_spin.cpp
     bool_node_spin.cpp
     )
 

@@ -55,10 +55,11 @@ namespace bias {
             virtual Property getProperty(PropertyType propType);
             virtual void setProperty(Property prop);
             
-            //virtual void setVideoMode(VideoMode vidMode, FrameRate frmRate);
             //virtual void setFormat7ImageMode(ImageMode imgMode); // TO DO //
-            //virtual Format7Settings getFormat7Settings();
+
+            virtual Format7Settings getFormat7Settings();
             //virtual Format7Info getFormat7Info(ImageMode imgMode);
+            
             //virtual bool validateFormat7Settings(Format7Settings settings);
             //virtual void setFormat7Configuration(Format7Settings settings, float percentSpeed);
             //virtual PixelFormatList getListOfSupportedPixelFormats(ImageMode imgMode);
@@ -163,10 +164,14 @@ namespace bias {
             void setPropertyTemperature(Property prop);
             void setPropertyTriggerMode(Property prop);
 
+            PixelFormat getPixelFormat();
+
+
 
             // spin get methods
             // ---------------
             std::vector<spinPixelFormatEnums> getSupportedPixelFormats_spin();
+            spinPixelFormatEnums getPixelFormat_spin();
 
 
     };
