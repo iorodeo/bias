@@ -685,27 +685,22 @@ namespace bias {
     //}
 
 
-    //PixelFormatList CameraDevice_spin::getListOfSupportedPixelFormats(ImageMode imgMode)
-    //{
-    //    PixelFormatList formatList = getListOfPixelFormats();
-    //    PixelFormatList supportedList;
-
-    //    Format7Info info = getFormat7Info(imgMode);
-    //    if (info.supported)
-    //    {
-    //        PixelFormatList::iterator it;
-    //        for (it=formatList.begin(); it!=formatList.end(); it++)
-    //        {
-    //            PixelFormat format = *it;
-    //            spinPixelFormat format_spin = convertPixelFormat_to_spin(format);
-    //            if (format_spin & info.pixelFormatBitField)
-    //            {
-    //                supportedList.push_back(format);
-    //            }
-    //        }
-    //    }
-    //    return supportedList;
-    //}
+    PixelFormatList CameraDevice_spin::getListOfSupportedPixelFormats(ImageMode imgMode)
+    {
+        PixelFormatList pixelFormatList;
+        if (isSupported(imgMode))
+        {
+            std::vector<spinPixelFormatEnums> pixelFormatVec_spin = getSupportedPixelFormats_spin();
+            for (auto format_spin : pixelFormatVec_spin)
+            {
+                if (isAllowedPixelFormat_spin(format_spin))
+                {
+                    pixelFormatList.push_back(convertPixelFormat_from_spin(format_spin));
+                }
+            }
+        }
+        return pixelFormatList;
+    }
 
 
 

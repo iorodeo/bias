@@ -3,6 +3,7 @@
 #include "exception.hpp"
 #include <opencv2/core/core.hpp>
 #include <map>
+#include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <bitset>
@@ -158,6 +159,13 @@ namespace bias
             PixelFormat_Mono12,
         };
         return formatsVec;
+    }
+
+
+    bool isAllowedPixelFormat_spin(spinPixelFormatEnums pixelFormat_spin)
+    {
+        std::vector<spinPixelFormatEnums> allowedFormats_spin = getAllowedPixelFormats_spin();
+        return std::find(std::begin(allowedFormats_spin), std::end(allowedFormats_spin), pixelFormat_spin) != std::end(allowedFormats_spin);
     }
 
 
@@ -816,7 +824,7 @@ namespace bias
         {
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
-            ssError << ": unable to convert pixel format from FlyCaptuer2";
+            ssError << ": unable to convert pixel format from Spinnaker";
             throw RuntimeError(ERROR_SPIN_CONVERT_PIXEL_FORMAT, ssError.str());
         }
     }

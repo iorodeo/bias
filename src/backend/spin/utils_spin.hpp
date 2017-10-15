@@ -34,6 +34,8 @@ namespace bias
 
     std::vector<spinPixelFormatEnums> getAllowedMonoPixelFormats_spin();
 
+    bool isAllowedPixelFormat_spin(spinPixelFormatEnums pixelFormat_spin);
+
     std::vector<PropertyType> getSpinSupportedPropertyTypes();
 
     bool isSpinSupportedPropertyType(PropertyType propType);

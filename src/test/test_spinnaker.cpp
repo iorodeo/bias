@@ -50,6 +50,8 @@ int main(int argc, char *argv[])
         info.print();
         std::cout << std::endl;
 
+        bias::PixelFormatList pixelFormatList = camDev.getListOfSupportedPixelFormats(bias::IMAGEMODE_0);
+
 
 
         if (false)
