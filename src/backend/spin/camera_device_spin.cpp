@@ -22,15 +22,11 @@
 namespace bias {
 
 
-    CameraDevice_spin::CameraDevice_spin() : CameraDevice()
-    {
-        //initialize();
-    }
+    CameraDevice_spin::CameraDevice_spin() : CameraDevice() {}
 
 
     CameraDevice_spin::CameraDevice_spin(Guid guid) : CameraDevice(guid)
     {
-        //initialize();
         spinError err = spinSystemGetInstance(&hSystem_);
         if (err != SPINNAKER_ERR_SUCCESS) 
         {
@@ -40,17 +36,6 @@ namespace bias {
             throw RuntimeError(ERROR_SPIN_CREATE_CONTEXT, ssError.str());
         }
     }
-
-
-    //void CameraDevice_spin::initialize()
-    //{
-
-        //isFirst_ = true;
-        //int64_t timeStamp_ns_ =0 ;
-        //timeStamp_.seconds = 0;
-        //timeStamp_.microSeconds = 0;
-    //}
-
 
     CameraDevice_spin::~CameraDevice_spin() 
     {
@@ -612,6 +597,9 @@ namespace bias {
 
         settings.pixelFormat = getPixelFormat();
 
+        //std::cout << __PRETTY_FUNCTION__ << std::endl;
+        //settings.print();
+
         return settings;
     }
 
@@ -642,47 +630,92 @@ namespace bias {
 
         }
 
+        //std::cout << __PRETTY_FUNCTION__ << std::endl;
+        //format7Info.print();
 
         return format7Info;
     }
 
-    //bool CameraDevice_spin::validateFormat7Settings(Format7Settings settings)
-    //{
-    //    spinFormat7ImageSettings settings_spin = convertFormat7Settings_to_spin(settings);
-
-    //    BOOL settingsAreValid_spin;
-    //    spinFormat7PacketInfo packetInfo_spin;
-
-    //    spinError error_spin = spinValidateFormat7Settings(
-    //            context_, 
-    //            &settings_spin, 
-    //            &settingsAreValid_spin,
-    //            &packetInfo_spin
-    //            );
-
-    //    if (error_spin != SPIN_ERROR_OK)
-    //    {
-    //        std::stringstream ssError; 
-    //        ssError << __PRETTY_FUNCTION__; 
-    //        ssError << ": unable to validate Spinnaker format 7 settings"; 
-    //        throw RuntimeError(ERROR_SPIN_VALIDATE_FORMAT7_SETTINGS, ssError.str());
-    //    }
-    //    return bool(settingsAreValid_spin);
-    //}
 
 
-    //void CameraDevice_spin::setFormat7Configuration(Format7Settings settings, float percentSpeed)
-    //{
-    //    spinFormat7ImageSettings settings_spin = convertFormat7Settings_to_spin(settings);
-    //    spinError error_spin = spinSetFormat7Configuration(context_, &settings_spin, percentSpeed);
-    //    if (error_spin != SPIN_ERROR_OK)
-    //    {
-    //        std::stringstream ssError; 
-    //        ssError << __PRETTY_FUNCTION__; 
-    //        ssError << ": unable to set Spinnaker format 7 configuration"; 
-    //        throw RuntimeError(ERROR_SPIN_SET_FORMAT7_CONFIGURATION, ssError.str());
-    //    }
-    //}
+    bool CameraDevice_spin::validateFormat7Settings(Format7Settings settings)
+    {
+        bool ok = true;
+
+        if (!isSupported(settings.mode))
+        {
+            ok = false;
+        }
+
+        Format7Info info = getFormat7Info(settings.mode);
+
+        if ((settings.width + settings.offsetX) > info.maxWidth)
+        {
+            ok = false;
+        }
+        if ((settings.height + settings.offsetY) > info.maxHeight)
+        {
+            ok = false;
+        }
+        if (settings.width%info.imageHStepSize != 0)
+        {
+            ok = false;
+        }
+        if (settings.height%info.imageVStepSize != 0)
+        {
+            ok = false;
+        }
+        if (settings.offsetX%info.offsetHStepSize != 0)
+        {
+            ok = false;
+        }
+        if (settings.offsetY%info.offsetVStepSize != 0)
+        {
+            ok = false;
+        }
+        if (!isSupportedPixelFormat(settings.pixelFormat, settings.mode))
+        {
+            ok = false;
+        }
+
+        //std::cout << "validate ok = " << ok << std::endl;
+
+        return ok;
+    }
+
+
+    void CameraDevice_spin::setFormat7Configuration(Format7Settings settings, float percentSpeed)
+    {
+        bool ok = validateFormat7Settings(settings);
+        if (!ok)
+        {
+            return;
+        }
+
+        // -----------------------------
+        // NOT IMPLEMENTED set ImageMode
+        // -----------------------------
+       
+        EnumNode_spin pixelFormatNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("PixelFormat");
+        spinPixelFormatEnums pixelFormat_spin = convertPixelFormat_to_spin(settings.pixelFormat);
+        pixelFormatNode.setEntryByValue(pixelFormat_spin);
+
+        IntegerNode_spin widthNode = nodeMapCamera_.getNodeByName<IntegerNode_spin>("Width");
+        widthNode.setValue(int64_t(settings.width));
+
+        IntegerNode_spin heightNode = nodeMapCamera_.getNodeByName<IntegerNode_spin>("Height");
+        heightNode.setValue(int64_t(settings.height));
+
+        IntegerNode_spin offsetXNode = nodeMapCamera_.getNodeByName<IntegerNode_spin>("OffsetX");
+        offsetXNode.setValue(int64_t(settings.offsetX));
+
+        IntegerNode_spin offsetYNode = nodeMapCamera_.getNodeByName<IntegerNode_spin>("OffsetY");
+        offsetYNode.setValue(int64_t(settings.offsetY));
+
+        //std::cout << __PRETTY_FUNCTION__ << std::endl;
+        //settings.print();
+
+    }
 
 
     PixelFormatList CameraDevice_spin::getListOfSupportedPixelFormats(ImageMode imgMode)
@@ -1650,6 +1683,13 @@ namespace bias {
     {
         spinPixelFormatEnums currPixelFormat_spin = getPixelFormat_spin();
         return convertPixelFormat_from_spin(currPixelFormat_spin); 
+    }
+
+
+    bool CameraDevice_spin::isSupportedPixelFormat(PixelFormat pixelFormat, ImageMode imgMode)
+    {
+        PixelFormatList formatList = getListOfSupportedPixelFormats(imgMode);
+        return std::find(std::begin(formatList), std::end(formatList), pixelFormat) != std::end(formatList);
     }
 
 

@@ -60,8 +60,8 @@ namespace bias {
             virtual Format7Settings getFormat7Settings();
             virtual Format7Info getFormat7Info(ImageMode imgMode);
             
-            //virtual bool validateFormat7Settings(Format7Settings settings);
-            //virtual void setFormat7Configuration(Format7Settings settings, float percentSpeed);
+            virtual bool validateFormat7Settings(Format7Settings settings);
+            virtual void setFormat7Configuration(Format7Settings settings, float percentSpeed);
             
             virtual PixelFormatList getListOfSupportedPixelFormats(ImageMode imgMode);
 
@@ -93,7 +93,6 @@ namespace bias {
             static constexpr int AutoOnePushSetCount = 10;
 
 
-
         private:
 
 
@@ -115,14 +114,9 @@ namespace bias {
             bool imageOK_ = false;
             spinImage hSpinImage_ = nullptr;
 
-            //bool isFirst_;
-            //void initialize();
-
             bool grabImageCommon(std::string &errMsg);
             bool releaseSpinImage(spinImage &hImage);
             bool destroySpinImage(spinImage &hImage);
-
-            ////void createPropertyMap();
 
             void setupTimeStamping();
             void updateTimeStamp();
@@ -166,8 +160,7 @@ namespace bias {
             void setPropertyTriggerMode(Property prop);
 
             PixelFormat getPixelFormat();
-
-
+            bool isSupportedPixelFormat(PixelFormat pixelFormat, ImageMode imgMode);
 
             // spin get methods
             // ---------------
