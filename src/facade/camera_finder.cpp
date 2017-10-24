@@ -342,7 +342,7 @@ namespace bias {
                 ssError << ": unable to get GUID for Spinnaker camera, error=" << error;
                 throw RuntimeError(ERROR_SPIN_GET_CAMERA_GUID, ssError.str());
             }
-            std::string guidString = std::string(bufVec.begin(), bufVec.end());
+            std::string guidString = std::string(bufVec.data());
             guidSet_.insert(Guid(guidString));
 
             // Release Camera
