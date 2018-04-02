@@ -18,6 +18,11 @@ namespace bias
 
     EntryNode_spin::EntryNode_spin(spinNodeHandle hNode) : BaseNode_spin(hNode)
     {
+        if (hNode_ == nullptr) 
+        {
+            return;
+        }
+
         if (!isOfType(ExpectedType()))
         {
             std::stringstream ssError;

@@ -45,7 +45,11 @@ namespace bias
 
     bool BaseNode_spin::isAvailable()
     {
-        checkNodeHandle();
+        if (hNode_ == nullptr) 
+        {
+            return false;
+        }
+
         bool8_t isAvailable = False;
         spinError err = spinNodeIsAvailable(hNode_, &isAvailable);
         if (err != SPINNAKER_ERR_SUCCESS)
@@ -77,7 +81,11 @@ namespace bias
 
     bool BaseNode_spin::isWritable()
     {
-        checkNodeHandle();
+        if (hNode_ == nullptr) 
+        {
+            return false;
+        }
+        //checkNodeHandle();
         bool8_t isWritable = False;
         spinError err = spinNodeIsWritable(hNode_, &isWritable);
         if (err != SPINNAKER_ERR_SUCCESS)

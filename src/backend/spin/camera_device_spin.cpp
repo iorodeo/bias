@@ -102,7 +102,6 @@ namespace bias {
                 ssError << ": unable to get Spinnaker camera from list, error = " << err;
                 throw RuntimeError(ERROR_SPIN_GET_CAMERA, ssError.str());
             }
-            connected_ = true;
 
             // Clear Spinnaker camera list
             err = spinCameraListClear(hCameraList);
@@ -123,7 +122,6 @@ namespace bias {
                 ssError << ": unable to destroy Spinnaker camera list, error=" << err;
                 throw RuntimeError(ERROR_SPIN_DESTROY_CAMERA_LIST, ssError.str());
             }
-
 
             // Initialize camera
             err = spinCameraInit(hCamera_);
@@ -206,11 +204,9 @@ namespace bias {
 
             // DEVEL
             // ----------------------------------------------------------------------------------------------
-
             std::cout << "# TLDevice nodes: " << (nodeMapTLDevice_.numberOfNodes()) << std::endl;
             std::cout << "# Camera nodes:   " << (nodeMapCamera_.numberOfNodes()) << std::endl;
             std::cout << std::endl;
-
 
             // ----------------------------------------------------------------------------------------------
             // TODO: - setup strobe output on GPIO pin?? Is this possible?
@@ -278,8 +274,14 @@ namespace bias {
 
             // Set acquisition mode 
             EnumNode_spin acqModeNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("AcquisitionMode");
-            acqModeNode.setEntryBySymbolic("Continuous");
-
+            if (acqModeNode.isAvailable())
+            {
+                acqModeNode.setEntryBySymbolic("Continuous");
+            }
+            
+            ///////////////////////////////////////
+            // WBD DEBUG
+            ///////////////////////////////////////
             setupTimeStamping();
 
             // Begin acquisition
@@ -1038,17 +1040,48 @@ namespace bias {
 
     void CameraDevice_spin::setupTimeStamping()
     {
+        /////////////////
+        //WBD
+        /////////////////
         // Enable chunk mode 
+
+        std::cout << "ts1" << std::endl;
         BoolNode_spin chunkModeActiveNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("ChunkModeActive");
-        chunkModeActiveNode.setValue(true);
+        std::cout << "ts2" << std::endl;
+        if (chunkModeActiveNode.isAvailable()) 
+        {
+            std::cout << "fail" << std::endl;
+            chunkModeActiveNode.setValue(true);
+        }
 
         // Get chunk mode selector and  set entry to Timestamp 
+        std::cout << "ts3" << std::endl;
         EnumNode_spin chunkSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ChunkSelector");
-        chunkSelectorNode.setEntryBySymbolic("Timestamp");
+        std::cout << "ts4" << std::endl;
+        if (chunkSelectorNode.isAvailable())
+        {
+            // WBD DEBUG
+            //////////////////////////////////////////////////////////////////////////
+            //std::vector<EntryNode_spin> entry_vec = chunkSelectorNode.entries();
+            //for (auto entry : entry_vec)
+            //{
+            //    std::cout << entry.symbolic() << std::endl;
+            //}
+            ///////////////////////////////////////////////////////////////////////////
+
+            std::cout << "ts5" << std::endl;
+            chunkSelectorNode.setEntryBySymbolic("Timestamp");
+            std::cout << "ts6" << std::endl;
+        }
 
         // Enable timestamping
+        std::cout << "ts7" << std::endl;
         BoolNode_spin timeStampEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("ChunkEnable");
-        timeStampEnableNode.setValue(true);
+        std::cout << "ts8" << std::endl;
+        if (timeStampEnableNode.isAvailable())
+        {
+            timeStampEnableNode.setValue(true);
+        }
     }
 
 

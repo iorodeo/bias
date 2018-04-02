@@ -25,6 +25,11 @@ namespace bias
 
     FloatNode_spin::FloatNode_spin(spinNodeHandle hNode) : NumberNode_spin(hNode)
     {
+        if (hNode_ == nullptr) 
+        {
+            return;
+        }
+
         if (!isOfType(ExpectedType()))
         {
             std::stringstream ssError;

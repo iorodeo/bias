@@ -160,7 +160,6 @@ namespace bias
             try
             {
                 cameraPtr_ -> connect();
-
 #ifdef WITH_FC2
                 // WBD DEVEL TEMP
                 // ------------------------------------------------------------
@@ -209,11 +208,11 @@ namespace bias
         menuCameraPtr_ -> setEnabled(true);
 
         updateCameraInfoMessage();
-
         updateAllMenus();
 
         rtnStatus.success = true;
         rtnStatus.message = QString("");
+
         return rtnStatus; 
     }
 
