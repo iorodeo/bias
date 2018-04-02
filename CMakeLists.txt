@@ -13,7 +13,7 @@ option(with_fc2     "include the FlyCapture2 backend" OFF)
 option(with_dc1394  "include the libdc1394 backend"   OFF)
 option(with_spin    "include the spin backend"   ON)
 option(with_demos   "include demos" OFF)
-option(with_tests   "include tests" ON)
+option(with_tests   "include tests" OFF)
 
 message(STATUS "Option: with_fc2     = ${with_fc2}")
 message(STATUS "Option: with_dc1394  = ${with_dc1394}")
