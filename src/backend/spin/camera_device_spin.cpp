@@ -1040,44 +1040,22 @@ namespace bias {
 
     void CameraDevice_spin::setupTimeStamping()
     {
-        /////////////////
-        //WBD
-        /////////////////
         // Enable chunk mode 
-
-        std::cout << "ts1" << std::endl;
         BoolNode_spin chunkModeActiveNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("ChunkModeActive");
-        std::cout << "ts2" << std::endl;
         if (chunkModeActiveNode.isAvailable()) 
         {
-            std::cout << "fail" << std::endl;
             chunkModeActiveNode.setValue(true);
         }
 
         // Get chunk mode selector and  set entry to Timestamp 
-        std::cout << "ts3" << std::endl;
         EnumNode_spin chunkSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ChunkSelector");
-        std::cout << "ts4" << std::endl;
         if (chunkSelectorNode.isAvailable())
         {
-            // WBD DEBUG
-            //////////////////////////////////////////////////////////////////////////
-            //std::vector<EntryNode_spin> entry_vec = chunkSelectorNode.entries();
-            //for (auto entry : entry_vec)
-            //{
-            //    std::cout << entry.symbolic() << std::endl;
-            //}
-            ///////////////////////////////////////////////////////////////////////////
-
-            std::cout << "ts5" << std::endl;
             chunkSelectorNode.setEntryBySymbolic("Timestamp");
-            std::cout << "ts6" << std::endl;
         }
 
         // Enable timestamping
-        std::cout << "ts7" << std::endl;
         BoolNode_spin timeStampEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("ChunkEnable");
-        std::cout << "ts8" << std::endl;
         if (timeStampEnableNode.isAvailable())
         {
             timeStampEnableNode.setValue(true);

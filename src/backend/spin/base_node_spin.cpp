@@ -43,6 +43,12 @@ namespace bias
     {};
 
 
+    bool BaseNode_spin::isNull()
+    {
+        return (hNode_ == nullptr);
+    }
+
+
     bool BaseNode_spin::isAvailable()
     {
         if (hNode_ == nullptr) 

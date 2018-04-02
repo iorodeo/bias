@@ -18,6 +18,7 @@ namespace bias
             BaseNode_spin();
             BaseNode_spin(spinNodeHandle hNode_);
 
+            bool isNull();
             bool isAvailable();
             bool isReadable();
             bool isWritable();

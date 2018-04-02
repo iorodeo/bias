@@ -6370,7 +6370,7 @@ namespace bias
                     rtnStatus.message = errMsgText;
                     return rtnStatus;
                 }
-                videoWriterParams_.jpg.mjpgMaxFramePerFileFlag = jpgMap["maxFramePerFileFlag"].toBool();
+                videoWriterParams_.jpg.mjpgMaxFramePerFileFlag = jpgMap["mjpgMaxFramePerFileFlag"].toBool();
             }
 
 

@@ -88,7 +88,20 @@ namespace bias
 
         EntryNode_spin currEntryNode = currentEntry();
 
-        if (currEntryNode.value() != value)
+        size_t currEntryValue = 0;
+        bool haveCurrEntryValue = false;
+        try 
+        {
+            currEntryValue = currEntryNode.value();
+            haveCurrEntryValue = true;
+        }
+        catch (RuntimeError err)
+        {
+            currEntryValue = 0;
+            haveCurrEntryValue = false;
+        }
+
+        if ((!haveCurrEntryValue) || (currEntryValue != value))
         {
             spinError err = spinEnumerationSetEnumValue(hNode_,value);
             if (err != SPINNAKER_ERR_SUCCESS)
