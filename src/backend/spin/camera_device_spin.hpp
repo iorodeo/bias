@@ -114,6 +114,8 @@ namespace bias {
             bool imageOK_ = false;
             spinImage hSpinImage_ = nullptr;
 
+            TriggerType triggerType_ =  TRIGGER_TYPE_UNSPECIFIED;
+
             bool grabImageCommon(std::string &errMsg);
             bool releaseSpinImage(spinImage &hImage);
             bool destroySpinImage(spinImage &hImage);

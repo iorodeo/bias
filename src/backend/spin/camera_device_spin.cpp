@@ -193,6 +193,7 @@ namespace bias {
                 triggerOverlapNode.setEntryBySymbolic("Off");
             }
 
+            triggerType_ = getTriggerType();
             setTriggerInternal();
 
             // Framerate defaults
@@ -304,6 +305,8 @@ namespace bias {
     {
         if (capturing_) 
         {
+            destroySpinImage(hSpinImage_);
+
             if (!releaseSpinImage(hSpinImage_))
             {
                 std::stringstream ssError;
@@ -791,6 +794,7 @@ namespace bias {
         if (triggerSourceNode.isAvailable() && triggerSourceNode.isWritable())
         {
             triggerSourceNode.setEntryBySymbolic("Software");
+            triggerType_ = TRIGGER_INTERNAL;
         }
         else
         {
@@ -848,6 +852,7 @@ namespace bias {
         if (triggerModeNode.isAvailable() && triggerModeNode.isWritable())
         {
             triggerModeNode.setEntryBySymbolic("On");
+            triggerType_ = TRIGGER_EXTERNAL;
         }
         else
         {
@@ -957,9 +962,18 @@ namespace bias {
         imageOK_ = false;
     
         // Get next image from camera
-		err = spinCameraGetNextImageEx(hCamera_, 0, &hSpinImage_);
+        if (triggerType_ == TRIGGER_INTERNAL) 
+        {
+            err = spinCameraGetNextImage(hCamera_, &hSpinImage_); // This fixes memory leak ??? why??
+        }
+        else 
+        { 
+            // Note, 2nd arg > 0 to help reduce effect of slow memory leak
+            err = spinCameraGetNextImageEx(hCamera_, 1, &hSpinImage_); 
+        }
 		if (err != SPINNAKER_ERR_SUCCESS)
         {
+            //std::cout << "fail, " << (hSpinImage_ == nullptr) << std::endl;
             std::stringstream ssError;
             ssError << __PRETTY_FUNCTION__;
             ssError << ": unable to get next image";
@@ -1005,6 +1019,7 @@ namespace bias {
         bool rval = true;
         if (hImage != nullptr)
         {
+            //std::cout << "release" << std::endl;
             spinError err = spinImageRelease(hImage);
             if (err != SPINNAKER_ERR_SUCCESS)
             {
@@ -1023,15 +1038,16 @@ namespace bias {
         bool rval = true;
         if (hImage != nullptr)
         {
+            //std::cout << "destroy" << std::endl;
             spinError err = spinImageDestroy(hImage);
             if (err != SPINNAKER_ERR_SUCCESS)
             {
                 rval = false;
             }
-            else
-            {
-                hImage = nullptr;
-            }
+            //else
+            //{
+            //    hImage = nullptr;
+            //}
         }
         return rval;
     }
