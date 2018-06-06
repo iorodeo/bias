@@ -8,7 +8,7 @@ flies in a walking arena.
 
 |
 
-.. figure:: /images/bias_charlie.png
+.. figure:: https://bitbucket.org/iorodeo/bias/raw/default/images/bias_charlie.png
     :scale: 100 %
     :alt: alternate text
     :align: center
