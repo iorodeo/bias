@@ -11,7 +11,7 @@
 if (WIN32)
     message(STATUS "FindSpinnaker system is WIN232")
     set(typical_spin_dir "C:/Program Files/Point Grey Research/Spinnaker")
-    set(typical_spin_lib_dir "${typical_spin_dir}/lib64/vs2013")
+    set(typical_spin_lib_dir "${typical_spin_dir}/lib64/vs2015")
     set(typical_spin_inc_dir "${typical_spin_dir}/include/spinc")
 else()
     message(STATUS "FindSpinnaker system is not WIN232")
@@ -34,7 +34,7 @@ if(WIN32)
     message(STATUS "finding library")
     find_library(
         Spinnaker_LIBRARY 
-        NAMES "SpinnakerC_v120.lib"
+        NAMES "SpinnakerC_v140.lib"
         HINTS ${typical_spin_lib_dir} 
         )
 else() 

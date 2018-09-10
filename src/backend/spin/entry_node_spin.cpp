@@ -118,4 +118,19 @@ namespace bias
         std::cout << std::endl;
     }
 
+    std::string EntryNode_spin::toString()
+    {
+        std::stringstream ss;
+        ss << name() << ", base"  << std::endl;
+        ss << "--------------------------------------------------------" << std::endl; 
+        ss << "symbolic  = " << symbolic() << std::endl;
+        ss << "value     = " << value() << std::endl;
+        ss << "intValue  = " << intValue() << std::endl; 
+        ss << "available = " << isAvailable() << std::endl;
+        ss << "readable  = " << isReadable() << std::endl;
+        ss << "writable  = " << isWritable() << std::endl;
+        ss << std::endl;
+        return ss.str();
+    }
+
 } // namespace bias

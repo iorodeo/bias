@@ -23,6 +23,7 @@ namespace bias
             bool isSymbolicValueEqualTo(std::string value);
 
             virtual void print();
+            std::string toString();
 
     };
 

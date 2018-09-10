@@ -256,6 +256,8 @@ namespace bias {
 
     void CameraDevice_spin::startCapture()
     {
+        std::cout << "DEBUG: " << __PRETTY_FUNCTION__ << " begin" << std::endl;
+
         if (!connected_) 
         { 
             std::stringstream ssError;
@@ -273,12 +275,15 @@ namespace bias {
         if (!capturing_) 
         {
 
+            
             // Set acquisition mode 
+            std::cout << "DEBUG: set AcquisitionMode begin" << std::endl;
             EnumNode_spin acqModeNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("AcquisitionMode");
             if (acqModeNode.isAvailable())
             {
                 acqModeNode.setEntryBySymbolic("Continuous");
             }
+            std::cout << "DEBUG: set AcquisitionMode end" << std::endl;
             
             ///////////////////////////////////////
             // WBD DEBUG
@@ -297,7 +302,10 @@ namespace bias {
 
             capturing_ = true;
             //isFirst_ = true;
+            //
         }
+
+        std::cout << "DEBUG: " << __PRETTY_FUNCTION__ << " end" << std::endl;
     }
 
 
@@ -1056,6 +1064,8 @@ namespace bias {
 
     void CameraDevice_spin::setupTimeStamping()
     {
+        std::cout << "DEBUG: " << __PRETTY_FUNCTION__ << std::endl;
+
         // Enable chunk mode 
         BoolNode_spin chunkModeActiveNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("ChunkModeActive");
         if (chunkModeActiveNode.isAvailable()) 
@@ -1064,11 +1074,34 @@ namespace bias {
         }
 
         // Get chunk mode selector and  set entry to Timestamp 
+        std::cout << "DEBUG: set ChunkSelector begin " << std::endl;
+
+        std::cout << "DEBUG: get ChunkSelector node " << std::endl;
+
         EnumNode_spin chunkSelectorNode = nodeMapCamera_.getNodeByName<EnumNode_spin>("ChunkSelector");
+
+        std::cout << "DEBUG: have ChunkSelector node " << std::endl;
+
         if (chunkSelectorNode.isAvailable())
         {
+            std::cout << "DEBUG: ChunkSelector available " << std::endl;
+            std::ofstream entries_file;
+            entries_file.open("chuckselector_entries.txt");
+            entries_file << "DEBUG: ChunkSelector entries begin " << std::endl << std::endl;
+            for (auto entry : chunkSelectorNode.entries())
+            {
+                entries_file << entry.toString();
+            }
+            entries_file << "DEBUG: ChunkSelector entries end " << std::endl;
+            entries_file.close();
             chunkSelectorNode.setEntryBySymbolic("Timestamp");
         }
+        else
+        {
+            std::cout << "DEBUG: ChunkSelector not available " << std::endl;
+        }
+
+        std::cout << "DEBUG: set ChunkSelector end " << std::endl;
 
         // Enable timestamping
         BoolNode_spin timeStampEnableNode = nodeMapCamera_.getNodeByName<BoolNode_spin>("ChunkEnable");
@@ -1076,6 +1109,8 @@ namespace bias {
         {
             timeStampEnableNode.setValue(true);
         }
+
+        std::cout << "DEBUG: " << __PRETTY_FUNCTION__ << " end" << std::endl;
     }
 
 
