@@ -32,7 +32,7 @@ if(WIN32)
     message(STATUS "finding library")
     find_library(
         FlyCapture2_LIBRARY 
-        NAMES "FlyCapture2_C.lib"
+        NAMES "FlyCapture2_C_v100.lib"
         HINTS ${typical_fc2_lib_dir} 
         )
 else() 
