@@ -15,9 +15,9 @@ if (WIN32)
     set(typical_spin_inc_dir "${typical_spin_dir}/include/spinc")
 else()
     message(STATUS "FindSpinnaker system is not WIN232")
-    #set(typical_spin_dir "/usr")
-    #set(typical_spin_lib_dir "${typical_spin_dir}/lib")
-    #set(typical_spin_inc_dir "${typical_spin_dir}/include/flycapture/C")
+    set(typical_spin_dir "/usr")
+    set(typical_spin_lib_dir "${typical_spin_dir}/lib")
+    set(typical_spin_inc_dir "${typical_spin_dir}/include/spinnaker/spinc")
 endif()
 
 message(STATUS "${typical_spin_inc_dir}")
@@ -38,12 +38,12 @@ if(WIN32)
         HINTS ${typical_spin_lib_dir} 
         )
 else() 
-    #message(STATUS "finding library")
-    #find_library(
-    #    Spinnaker_LIBRARY 
-    #    NAMES "libflycapture-c.so"
-    #    HINTS ${typical_spin_lib_dir} 
-    #    )
+    message(STATUS "finding library")
+    find_library(
+        Spinnaker_LIBRARY 
+        NAMES "libSpinnaker_C.so.1"
+        HINTS ${typical_spin_lib_dir} 
+        )
 endif()
 
 
