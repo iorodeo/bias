@@ -49,7 +49,7 @@
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/contrib/contrib.hpp>
+//#include <opencv2/contrib/contrib.hpp>
 
 
 // Development
@@ -133,12 +133,13 @@ namespace bias
             Guid cameraGuid, 
             unsigned int cameraNumber, 
             unsigned int numberOfCameras, 
+            std::list<QSharedPointer<bias::CameraWindow>> cameraWindowPtrList,
             QWidget *parent
             ) : QMainWindow(parent)
     {
         setupUi(this);
         connectWidgets();
-        initialize(cameraGuid, cameraNumber, numberOfCameras);
+        initialize(cameraGuid, cameraNumber, numberOfCameras, cameraWindowPtrList);
     }
 
 
@@ -1291,6 +1292,12 @@ namespace bias
         rtnStatus.success = true;
         rtnStatus.message = QString("");
         return guidString;
+    } 
+    
+
+    std::list<QSharedPointer<bias::CameraWindow>> CameraWindow::getCameraWindowList()
+    {
+        return cameraWindowPtrList_; 
     }
 
 
@@ -1531,6 +1538,17 @@ namespace bias
             rtnStatus.message = QString("no plugin is checked");
         }
         return currentPluginName;
+    }
+
+
+    QPointer<BiasPlugin> CameraWindow::getPluginByName(QString pluginName)
+    {
+        QPointer<BiasPlugin> pluginPtr = nullptr; 
+        if (pluginMap_.contains(pluginName))
+        {
+            pluginPtr = pluginMap_[pluginName];
+        }
+       return pluginPtr; 
     }
 
 
@@ -2530,7 +2548,8 @@ namespace bias
     void CameraWindow::initialize(
             Guid guid, 
             unsigned int cameraNumber, 
-            unsigned int numberOfCameras
+            unsigned int numberOfCameras,
+            std::list<QSharedPointer<bias::CameraWindow>> cameraWindowPtrList
             )
     {
         connected_ = false;
@@ -2561,6 +2580,7 @@ namespace bias
 
         cameraNumber_ = cameraNumber;
         numberOfCameras_ = numberOfCameras;
+        cameraWindowPtrList_ = cameraWindowPtrList;
         cameraPtr_ = std::make_shared<Lockable<Camera>>(guid);
 
         threadPoolPtr_ = new QThreadPool(this);

@@ -2,6 +2,7 @@
 #define BIAS_GUI_CAMERA_WINDOW_HPP
 
 #include <memory>
+#include <list>
 #include <QDir>
 #include <QSize>
 #include <QMap>
@@ -55,6 +56,7 @@ namespace bias
                     Guid cameraGuid, 
                     unsigned int cameraNumber, 
                     unsigned int numberOfCameras, 
+                    std::list<QSharedPointer<bias::CameraWindow>> cameraWindowPtrList,
                     QWidget *parent=0
                     );
             RtnStatus connectCamera(bool showErrorDlg=true);
@@ -110,12 +112,15 @@ namespace bias
             RtnStatus setPluginEnabled(bool enabled);
             RtnStatus setCurrentPlugin(QString pluginName);
             QString getCurrentPluginName(RtnStatus &rtnStatus);
+            QPointer<BiasPlugin> getPluginByName(QString pluginName);
             RtnStatus runPluginCmd(
                     QByteArray jsonPluginCmdArray, 
                     bool showErrorDlg=true
                     );
 
             QString getCameraGuidString(RtnStatus &rtnStatus);
+            std::list<QSharedPointer<bias::CameraWindow>> getCameraWindowList();
+
             QString getVideoFileFullPath(QString autoNamingString="");
             QString getVideoFileName();
             QDir getVideoFileDir();
@@ -224,6 +229,7 @@ namespace bias
             bool skippedFramesWarning_;
             unsigned int cameraNumber_;
             unsigned int numberOfCameras_;
+            std::list<QSharedPointer<bias::CameraWindow>> cameraWindowPtrList_;
             unsigned int format7PercentSpeed_;
             int colorMapNumber_;
 
@@ -303,7 +309,8 @@ namespace bias
             void initialize(
                     Guid guid, 
                     unsigned int cameraNumber, 
-                    unsigned int numberOfCameras
+                    unsigned int numberOfCameras,
+                    std::list<QSharedPointer<bias::CameraWindow>> cameraWindowPtrList
                     );
 
 

@@ -11,8 +11,8 @@ cmake_policy(SET CMP0046 OLD)
 # -----------------------------------------------------------------------------
 option(with_qt_gui  "include image acquisition GUI"   ON) 
 option(with_fc2     "include the FlyCapture2 backend" OFF)
-option(with_dc1394  "include the libdc1394 backend"   OFF)
-option(with_spin    "include the spin backend"   ON)
+option(with_dc1394  "include the libdc1394 backend"   ON)
+option(with_spin    "include the spin backend"   OFF)
 option(with_demos   "include demos" OFF)
 option(with_tests   "include tests" OFF)
 
