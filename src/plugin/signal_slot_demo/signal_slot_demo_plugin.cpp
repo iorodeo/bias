@@ -1,5 +1,6 @@
 #include "signal_slot_demo_plugin.hpp"
 #include "image_label.hpp"
+#include "camera_window.hpp"
 #include <QtDebug>
 #include <QTimer>
 #include <QMessageBox>
@@ -86,6 +87,15 @@ namespace bias
 
     void SignalSlotDemoPlugin::initialize()
     {
+        QPointer<CameraWindow> cameraWindowPtr = getCameraWindow();
+        unsigned int cameraNumber = cameraWindowPtr -> getCameraNumber();
+        cameraNumberLabelPtr -> setText(QString("Camera #: %1").arg(cameraNumber));
+
+        // NOT Working ...
+        RtnStatus rtnStatus;
+        QString guidStr = cameraWindowPtr ->  getCameraGuidString(rtnStatus);
+        std::cout << "guidStr: " << guidStr.toStdString() << std::endl;
+        cameraGuidLabelPtr -> setText(QString("Camera GUID: %1").arg(guidStr));
     }
 
 

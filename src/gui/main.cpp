@@ -75,6 +75,16 @@ int main (int argc, char *argv[])
         }
         windowPtrList.push_back(windowPtr);
     }
+
+    // Run final setup for camera windows. This is for things which require all camera windows to 
+    // have already been created and added to the windowPtrList. For example,  creating signals/slots
+    // between plugins for different camera windows, etc.
+    for (auto windowPtr : windowPtrList)
+    {
+        windowPtr -> finalSetup();
+    }
+
+
     return app.exec();
 }
 

@@ -59,6 +59,9 @@ namespace bias
                     std::list<QSharedPointer<bias::CameraWindow>> cameraWindowPtrList,
                     QWidget *parent=0
                     );
+
+            void finalSetup();
+
             RtnStatus connectCamera(bool showErrorDlg=true);
             RtnStatus disconnectCamera(bool showErrorDlg=true);
             RtnStatus startImageCapture(bool showErrorDlg=true);
@@ -118,6 +121,7 @@ namespace bias
                     bool showErrorDlg=true
                     );
 
+            unsigned int getCameraNumber();
             QString getCameraGuidString(RtnStatus &rtnStatus);
             std::list<QSharedPointer<bias::CameraWindow>> getCameraWindowList();
 

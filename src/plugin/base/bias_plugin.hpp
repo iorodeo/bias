@@ -31,6 +31,7 @@ namespace bias
             static const QString LOG_FILE_POSTFIX;
 
             BiasPlugin(QWidget *parent=0);
+
             bool pluginsEnabled();
             void setPluginsEnabled(bool value);
 
@@ -38,6 +39,7 @@ namespace bias
             bool isActive();
             QPointer<CameraWindow> getCameraWindow();
 
+            virtual void finalSetup();
             virtual void reset();
             virtual void stop();
             virtual void setActive(bool value);

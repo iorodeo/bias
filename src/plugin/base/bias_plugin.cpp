@@ -1,4 +1,5 @@
 #include "bias_plugin.hpp"
+#include <iostream>
 #include <QtDebug>
 #include <opencv2/core/core.hpp>
 #include "camera_window.hpp"
@@ -18,6 +19,11 @@ namespace bias
     { 
         active_ = false;
         setRequireTimer(false);
+    }
+
+    void BiasPlugin::finalSetup()
+    {
+        std::cout <<  "  " << getName().toStdString() << std::endl;    
     }
 
     void BiasPlugin::reset()
