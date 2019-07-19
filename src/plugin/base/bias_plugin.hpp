@@ -37,6 +37,7 @@ namespace bias
 
             bool requireTimer();
             bool isActive();
+
             QPointer<CameraWindow> getCameraWindow();
 
             virtual void finalSetup();

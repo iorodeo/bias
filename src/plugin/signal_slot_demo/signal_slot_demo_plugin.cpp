@@ -29,6 +29,11 @@ namespace bias
         initialize();
     }
 
+    void SignalSlotDemoPlugin::finalSetup()
+    {
+        std::cout << " signal and slot demo finalSetup" << std::endl;
+    }
+
     void SignalSlotDemoPlugin::reset()
     {
     }
@@ -52,6 +57,11 @@ namespace bias
         timeStamp_ = latestFrame.timeStamp;
         frameCount_ = latestFrame.frameCount;
         releaseLock();
+
+        FrameData frameData;
+        frameData.count = frameCount_;
+
+        emit newFrameData(frameData);
 
     }
 
@@ -84,24 +94,39 @@ namespace bias
 
     }
 
+    unsigned int SignalSlotDemoPlugin::getOtherCameraNumber()
+    {
+        // Returns camera number of partner camera. For this example
+        // we just use camera 0 and 1. In another setting you might do
+        // this by GUID or something else.
+        if (cameraNumber_ == 0)
+        {
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
 
     void SignalSlotDemoPlugin::initialize()
     {
         QPointer<CameraWindow> cameraWindowPtr = getCameraWindow();
-        unsigned int cameraNumber = cameraWindowPtr -> getCameraNumber();
-        cameraNumberLabelPtr -> setText(QString("Camera #: %1").arg(cameraNumber));
+        cameraNumber_ = cameraWindowPtr -> getCameraNumber();
+        cameraGuidString_ = cameraWindowPtr ->  getCameraGuidString();
+        QString labelStr = QString("Camera #: %0,  GUID: %2").arg(cameraNumber_).arg(cameraGuidString_);
+        cameraNumberLabelPtr -> setText(labelStr);
 
-        // NOT Working ...
-        RtnStatus rtnStatus;
-        QString guidStr = cameraWindowPtr ->  getCameraGuidString(rtnStatus);
-        std::cout << "guidStr: " << guidStr.toStdString() << std::endl;
-        cameraGuidLabelPtr -> setText(QString("Camera GUID: %1").arg(guidStr));
     }
 
 
     // Private Slots
     // ------------------------------------------------------------------------
     
+    void SignalSlotDemoPlugin::onNewFrameData(FrameData data)
+    {
+    }
 
 
 }

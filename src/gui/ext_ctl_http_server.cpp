@@ -255,18 +255,10 @@ namespace bias
     QVariantMap ExtCtlHttpServer::handleGetCameraGuid()
     {
         QVariantMap cmdMap;
-        RtnStatus status; 
-        QString guid = cameraWindowPtr_ -> getCameraGuidString(status);
-        cmdMap.insert("success", status.success);
-        cmdMap.insert("message", status.message);
-        if (status.success)
-        {
-            cmdMap.insert("value", guid);
-        }
-        else
-        {
-            cmdMap.insert("value", "");
-        }
+        QString guid = cameraWindowPtr_ -> getCameraGuidString();
+        cmdMap.insert("success", true);
+        cmdMap.insert("message", "");
+        cmdMap.insert("value", guid);
         return cmdMap;
     }
 

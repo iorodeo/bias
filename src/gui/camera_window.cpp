@@ -1295,20 +1295,10 @@ namespace bias
     }
 
     
-    QString CameraWindow::getCameraGuidString(RtnStatus &rtnStatus)
+    QString CameraWindow::getCameraGuidString()
     {
-        if (!connected_)
-        {
-            rtnStatus.success = false;
-            rtnStatus.message = QString("Unable to get camera Guid: camera not connected");
-            QString emptyString;
-            return emptyString;
-        }
-
         Guid guid = cameraPtr_ -> getGuid();
         QString guidString = QString::fromStdString(guid.toString());
-        rtnStatus.success = true;
-        rtnStatus.message = QString("");
         return guidString;
     } 
     
@@ -2634,8 +2624,9 @@ namespace bias
         tabWidgetPtr_ -> setCurrentWidget(previewTabPtr_);
 
         //setCurrentPlugin(pluginMap_.firstKey());
-        setCurrentPlugin("grabDetector");
+        //setCurrentPlugin("grabDetector");
         //setCurrentPlugin("stampede");
+        setCurrentPlugin("signalSlotDemo");
         setPluginEnabled(false);
         //setPluginEnabled(true);
 

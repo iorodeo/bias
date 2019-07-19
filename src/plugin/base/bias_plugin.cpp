@@ -21,10 +21,8 @@ namespace bias
         setRequireTimer(false);
     }
 
-    void BiasPlugin::finalSetup()
-    {
-        std::cout <<  "  " << getName().toStdString() << std::endl;    
-    }
+    void BiasPlugin::finalSetup() 
+    { }
 
     void BiasPlugin::reset()
     { }

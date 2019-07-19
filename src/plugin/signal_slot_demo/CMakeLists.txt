@@ -13,6 +13,7 @@ set(
 
 set(
     signal_slot_demo_plugin_HEADERS 
+    frame_data.hpp
     signal_slot_demo_plugin.hpp
     )
 

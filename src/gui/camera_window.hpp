@@ -122,7 +122,7 @@ namespace bias
                     );
 
             unsigned int getCameraNumber();
-            QString getCameraGuidString(RtnStatus &rtnStatus);
+            QString getCameraGuidString();
             std::list<QSharedPointer<bias::CameraWindow>> getCameraWindowList();
 
             QString getVideoFileFullPath(QString autoNamingString="");
