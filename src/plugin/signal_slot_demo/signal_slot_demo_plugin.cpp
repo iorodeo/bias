@@ -31,7 +31,14 @@ namespace bias
 
     void SignalSlotDemoPlugin::finalSetup()
     {
+
         std::cout << " signal and slot demo finalSetup" << std::endl;
+        QPointer<CameraWindow> partnerCameraWindowPtr = getPartnerCameraWindowPtr();
+        if (partnerCameraWindowPtr)
+        {
+            std::cout << " have partnerCameraWindowPtr" << std::endl;
+        }
+
     }
 
     void SignalSlotDemoPlugin::reset()
@@ -94,7 +101,7 @@ namespace bias
 
     }
 
-    unsigned int SignalSlotDemoPlugin::getOtherCameraNumber()
+    unsigned int SignalSlotDemoPlugin::getPartnerCameraNumber()
     {
         // Returns camera number of partner camera. For this example
         // we just use camera 0 and 1. In another setting you might do
@@ -109,14 +116,37 @@ namespace bias
         }
     }
 
+    QPointer<CameraWindow> SignalSlotDemoPlugin::getPartnerCameraWindowPtr()
+    {
+        QPointer<CameraWindow> partnerCameraWindowPtr = nullptr;
+        if ((cameraWindowPtrList_ -> size()) > 1)
+        {
+            for (auto cameraWindowPtr : *cameraWindowPtrList_)
+            {
+                if ((cameraWindowPtr -> getCameraNumber()) == partnerCameraNumber_)
+                {
+                    partnerCameraWindowPtr = cameraWindowPtr;
+                }
+            }
+        }
+        return partnerCameraWindowPtr;
+    }
+
 
     void SignalSlotDemoPlugin::initialize()
     {
+
         QPointer<CameraWindow> cameraWindowPtr = getCameraWindow();
         cameraNumber_ = cameraWindowPtr -> getCameraNumber();
         cameraGuidString_ = cameraWindowPtr ->  getCameraGuidString();
-        QString labelStr = QString("Camera #: %0,  GUID: %2").arg(cameraNumber_).arg(cameraGuidString_);
+        cameraWindowPtrList_ = cameraWindowPtr -> getCameraWindowPtrList();
+
+
+        QString labelStr = QString("Camera #: %0,     GUID: %2").arg(cameraNumber_).arg(cameraGuidString_);
         cameraNumberLabelPtr -> setText(labelStr);
+
+        partnerCameraNumber_ = getPartnerCameraNumber();
+        connectedToPartner_ = false;
 
     }
 
@@ -126,6 +156,7 @@ namespace bias
     
     void SignalSlotDemoPlugin::onNewFrameData(FrameData data)
     {
+        std::cout << "cam " << cameraNumber_ << "got data from cam " << partnerCameraNumber_ << std::endl;
     }
 
 

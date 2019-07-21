@@ -6,6 +6,7 @@
 #include <QDir>
 #include <QSize>
 #include <QMap>
+#include <QList>
 #include <QPointer>
 #include <QDateTime>
 #include <QMainWindow>
@@ -56,7 +57,7 @@ namespace bias
                     Guid cameraGuid, 
                     unsigned int cameraNumber, 
                     unsigned int numberOfCameras, 
-                    std::list<QSharedPointer<bias::CameraWindow>> cameraWindowPtrList,
+                    QSharedPointer<QList<QPointer<CameraWindow>>> cameraWindowPtrList,
                     QWidget *parent=0
                     );
 
@@ -123,7 +124,7 @@ namespace bias
 
             unsigned int getCameraNumber();
             QString getCameraGuidString();
-            std::list<QSharedPointer<bias::CameraWindow>> getCameraWindowList();
+            QSharedPointer<QList<QPointer<CameraWindow>>> getCameraWindowPtrList();
 
             QString getVideoFileFullPath(QString autoNamingString="");
             QString getVideoFileName();
@@ -233,7 +234,7 @@ namespace bias
             bool skippedFramesWarning_;
             unsigned int cameraNumber_;
             unsigned int numberOfCameras_;
-            std::list<QSharedPointer<bias::CameraWindow>> cameraWindowPtrList_;
+            QSharedPointer<QList<QPointer<CameraWindow>>> cameraWindowPtrList_;
             unsigned int format7PercentSpeed_;
             int colorMapNumber_;
 
@@ -314,7 +315,7 @@ namespace bias
                     Guid guid, 
                     unsigned int cameraNumber, 
                     unsigned int numberOfCameras,
-                    std::list<QSharedPointer<bias::CameraWindow>> cameraWindowPtrList
+                    QSharedPointer<QList<QPointer<bias::CameraWindow>>> cameraWindowPtrList
                     );
 
 

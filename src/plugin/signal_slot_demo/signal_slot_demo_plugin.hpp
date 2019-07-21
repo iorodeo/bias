@@ -19,7 +19,7 @@ namespace bias
 {
 
     class ImageLabel;
-
+    class CameraWindow;
 
 
     class SignalSlotDemoPlugin : public BiasPlugin, public Ui::SignalSlotDemoPluginDialog
@@ -49,14 +49,19 @@ namespace bias
 
         protected:
 
-            QPointer<ImageLabel> imageLabelPtr_;
             unsigned int cameraNumber_;
+            unsigned int partnerCameraNumber_ ;
             QString cameraGuidString_;
+            bool connectedToPartner_;
+
+            QPointer<ImageLabel> imageLabelPtr_;
+            QSharedPointer<QList<QPointer<CameraWindow>>> cameraWindowPtrList_;;
             
             void connectWidgets();
             void initialize();
             
-            unsigned int getOtherCameraNumber();
+            unsigned int getPartnerCameraNumber();
+            QPointer<CameraWindow> getPartnerCameraWindowPtr();
 
         private slots:
 

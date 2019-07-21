@@ -134,7 +134,7 @@ namespace bias
             Guid cameraGuid, 
             unsigned int cameraNumber, 
             unsigned int numberOfCameras, 
-            std::list<QSharedPointer<bias::CameraWindow>> cameraWindowPtrList,
+            QSharedPointer<QList<QPointer<CameraWindow>>> cameraWindowPtrList,
             QWidget *parent
             ) : QMainWindow(parent)
     {
@@ -1303,7 +1303,7 @@ namespace bias
     } 
     
 
-    std::list<QSharedPointer<bias::CameraWindow>> CameraWindow::getCameraWindowList()
+    QSharedPointer<QList<QPointer<CameraWindow>>> CameraWindow::getCameraWindowPtrList()
     {
         return cameraWindowPtrList_; 
     }
@@ -2557,7 +2557,7 @@ namespace bias
             Guid guid, 
             unsigned int cameraNumber, 
             unsigned int numberOfCameras,
-            std::list<QSharedPointer<bias::CameraWindow>> cameraWindowPtrList
+            QSharedPointer<QList<QPointer<bias::CameraWindow>>> cameraWindowPtrList
             )
     {
         connected_ = false;
