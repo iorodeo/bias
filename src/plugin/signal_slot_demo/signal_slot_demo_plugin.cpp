@@ -34,9 +34,16 @@ namespace bias
 
         std::cout << " signal and slot demo finalSetup" << std::endl;
         QPointer<CameraWindow> partnerCameraWindowPtr = getPartnerCameraWindowPtr();
+
         if (partnerCameraWindowPtr)
         {
             std::cout << " have partnerCameraWindowPtr" << std::endl;
+
+            QPointer<BiasPlugin> partnerPluginPtr = partnerCameraWindowPtr -> getPluginByName("signalSlotDemo");
+
+            qRegisterMetaType<FrameData>("FrameData");
+            connect(partnerPluginPtr, SIGNAL(newFrameData(FrameData)), this, SLOT(onNewFrameData(FrameData)));
+
         }
 
     }
@@ -156,7 +163,7 @@ namespace bias
     
     void SignalSlotDemoPlugin::onNewFrameData(FrameData data)
     {
-        std::cout << "cam " << cameraNumber_ << "got data from cam " << partnerCameraNumber_ << std::endl;
+        std::cout << "cam " << cameraNumber_ << " received data from cam " << partnerCameraNumber_ << std::endl;
     }
 
 
