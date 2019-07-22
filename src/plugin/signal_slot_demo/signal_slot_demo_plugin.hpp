@@ -7,7 +7,6 @@
 #include <QVector>
 #include <QList>
 
-class QTimer;
 
 namespace cv
 {
