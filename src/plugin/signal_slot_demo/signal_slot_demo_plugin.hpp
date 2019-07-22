@@ -54,6 +54,10 @@ namespace bias
             QString cameraGuidString_;
             bool connectedToPartner_;
 
+            unsigned long numMessageSent_;
+            unsigned long numMessageReceived_;
+
+
             QPointer<ImageLabel> imageLabelPtr_;
             QSharedPointer<QList<QPointer<CameraWindow>>> cameraWindowPtrList_;;
             
@@ -62,6 +66,8 @@ namespace bias
             
             unsigned int getPartnerCameraNumber();
             QPointer<CameraWindow> getPartnerCameraWindowPtr();
+
+            void updateMessageLabels();
 
         private slots:
 

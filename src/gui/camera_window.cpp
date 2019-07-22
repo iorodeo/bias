@@ -147,7 +147,6 @@ namespace bias
     {
         // Run things which require all camera windows to exists and be in the cameraWindowPtrList_.
 
-        std::cout  << "finalSetup: camera #: " << cameraNumber_ << std::endl;
         for (auto pluginName : pluginMap_.keys())
         {
             pluginMap_[pluginName] -> finalSetup();

@@ -31,21 +31,14 @@ namespace bias
 
     void SignalSlotDemoPlugin::finalSetup()
     {
-
-        std::cout << " signal and slot demo finalSetup" << std::endl;
         QPointer<CameraWindow> partnerCameraWindowPtr = getPartnerCameraWindowPtr();
-
         if (partnerCameraWindowPtr)
         {
-            std::cout << " have partnerCameraWindowPtr" << std::endl;
-
             QPointer<BiasPlugin> partnerPluginPtr = partnerCameraWindowPtr -> getPluginByName("signalSlotDemo");
-
             qRegisterMetaType<FrameData>("FrameData");
             connect(partnerPluginPtr, SIGNAL(newFrameData(FrameData)), this, SLOT(onNewFrameData(FrameData)));
-
         }
-
+        updateMessageLabels();
     }
 
     void SignalSlotDemoPlugin::reset()
@@ -60,9 +53,10 @@ namespace bias
 
     void SignalSlotDemoPlugin::processFrames(QList<StampedImage> frameList)
     {
-        // --------------------------------------------------------------
-        // NOTE: called in separate thread.
-        // --------------------------------------------------------------
+        // -------------------------------------------------------------------
+        // NOTE: called in separate thread. Use lock to access data shared 
+        // with other class methods. 
+        // -------------------------------------------------------------------
         
         acquireLock();
         StampedImage latestFrame = frameList.back();
@@ -74,8 +68,11 @@ namespace bias
 
         FrameData frameData;
         frameData.count = frameCount_;
-
+        frameData.image = currentImage_;
         emit newFrameData(frameData);
+        numMessageSent_++;
+
+        updateMessageLabels();
 
     }
 
@@ -148,13 +145,25 @@ namespace bias
         cameraGuidString_ = cameraWindowPtr ->  getCameraGuidString();
         cameraWindowPtrList_ = cameraWindowPtr -> getCameraWindowPtrList();
 
-
         QString labelStr = QString("Camera #: %0,     GUID: %2").arg(cameraNumber_).arg(cameraGuidString_);
         cameraNumberLabelPtr -> setText(labelStr);
 
         partnerCameraNumber_ = getPartnerCameraNumber();
         connectedToPartner_ = false;
 
+        numMessageSent_ = 0;
+        numMessageReceived_ = 0;
+
+    }
+
+
+    void SignalSlotDemoPlugin::updateMessageLabels()
+    {
+        QString sentLabelText = QString("messages sent: %1").arg(numMessageSent_);
+        messageSentLabelPtr -> setText(sentLabelText);
+
+        QString recvLabelText = QString("messages recv: %1").arg(numMessageReceived_);
+        messageReceivedLabelPtr -> setText(recvLabelText);
     }
 
 
@@ -163,7 +172,10 @@ namespace bias
     
     void SignalSlotDemoPlugin::onNewFrameData(FrameData data)
     {
-        std::cout << "cam " << cameraNumber_ << " received data from cam " << partnerCameraNumber_ << std::endl;
+        //std::cout << "cam " << cameraNumber_ << " received data from cam " << partnerCameraNumber_ << std::endl;
+        numMessageReceived_++;
+        updateMessageLabels();
+
     }
 
 

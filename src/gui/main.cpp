@@ -49,8 +49,6 @@ int main (int argc, char *argv[])
     unsigned int numCam = guidList.size();
     bias::ThreadAffinityService::setNumberOfCameras(numCam);
 
-    std::cout << "1" << std::endl;
-
     // Open camera window for each camera 
     QRect baseGeom;
     QRect nextGeom;
@@ -79,7 +77,6 @@ int main (int argc, char *argv[])
         }
         windowPtrList -> push_back(windowPtr);
     }
-    std::cout << "2" << std::endl;
 
     // Run final setup for camera windows. This is for things which require all camera windows to 
     // have already been created and added to the windowPtrList. For example,  creating signals/slots
