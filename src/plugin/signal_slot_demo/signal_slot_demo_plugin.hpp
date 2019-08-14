@@ -1,11 +1,15 @@
 #ifndef SIGNAL_SLOT_DEMO_HPP
 #define SIGNAL_SLOT_DEMO_HPP
+
 #include "ui_signal_slot_demo_plugin.h"
 #include "bias_plugin.hpp"
 #include "frame_data.hpp"
+#include "data_consumer.hpp"
+
 #include <QPointer>
 #include <QVector>
 #include <QList>
+#include <QThreadPool>
 
 
 namespace cv
@@ -56,8 +60,10 @@ namespace bias
             unsigned long numMessageSent_;
             unsigned long numMessageReceived_;
 
-
             QPointer<ImageLabel> imageLabelPtr_;
+            QPointer<DataConsumer> dataConsumerPtr_;
+            QPointer<QThreadPool> threadPoolPtr_;
+
             QSharedPointer<QList<QPointer<CameraWindow>>> cameraWindowPtrList_;;
             
             void connectWidgets();

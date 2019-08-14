@@ -2,6 +2,9 @@
 #define FRAME_DATA_HPP
 
 #include <cv.h>
+#include <QQueue>
+#include <QSharedPointer>
+
 
 namespace bias
 {
@@ -12,9 +15,12 @@ namespace bias
 
             FrameData() {};
 
-            int count;
             cv::Mat image;
+            unsigned long count;
     };
+
+    typedef QQueue<FrameData> FrameDataQueue;
+    typedef QSharedPointer<FrameDataQueue> FrameDataQueuePtr;
 
 }
 

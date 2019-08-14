@@ -31,23 +31,39 @@ namespace bias
 
     void SignalSlotDemoPlugin::finalSetup()
     {
-        QPointer<CameraWindow> partnerCameraWindowPtr = getPartnerCameraWindowPtr();
-        if (partnerCameraWindowPtr)
+        if (cameraNumber_ == 1)
         {
-            QPointer<BiasPlugin> partnerPluginPtr = partnerCameraWindowPtr -> getPluginByName("signalSlotDemo");
-            qRegisterMetaType<FrameData>("FrameData");
-            connect(partnerPluginPtr, SIGNAL(newFrameData(FrameData)), this, SLOT(onNewFrameData(FrameData)));
+            QPointer<CameraWindow> partnerCameraWindowPtr = getPartnerCameraWindowPtr();
+            if (partnerCameraWindowPtr)
+            {
+                QPointer<BiasPlugin> partnerPluginPtr = partnerCameraWindowPtr -> getPluginByName("signalSlotDemo");
+                qRegisterMetaType<FrameData>("FrameData");
+                connect(partnerPluginPtr, SIGNAL(newFrameData(FrameData)), this, SLOT(onNewFrameData(FrameData)));
+            }
         }
         updateMessageLabels();
     }
 
     void SignalSlotDemoPlugin::reset()
     {
+        if (cameraNumber_ == 1)
+        {
+            dataConsumerPtr_ = new DataConsumer();
+            threadPoolPtr_ = new QThreadPool(this);
+            if ((threadPoolPtr_ != nullptr) && (dataConsumerPtr_ != nullptr))
+            {
+                threadPoolPtr_ -> start(dataConsumerPtr_);
+            }
+        }
     }
 
 
     void SignalSlotDemoPlugin::stop()
     {
+        if (dataConsumerPtr_ != nullptr)
+        {
+            dataConsumerPtr_ -> stop();
+        }
     }
 
 
@@ -69,7 +85,17 @@ namespace bias
         FrameData frameData;
         frameData.count = frameCount_;
         frameData.image = currentImage_;
-        emit newFrameData(frameData);
+        if (cameraNumber_ == 0)
+        {
+            emit newFrameData(frameData);
+        }
+        else
+        {
+            if (dataConsumerPtr_ != nullptr)
+            {
+                dataConsumerPtr_ -> enqueueFrameDataCamera1(frameData);
+            }
+        }
         numMessageSent_++;
 
         updateMessageLabels();
@@ -154,6 +180,9 @@ namespace bias
         numMessageSent_ = 0;
         numMessageReceived_ = 0;
 
+        dataConsumerPtr_ = nullptr;
+        threadPoolPtr_ = nullptr;
+
     }
 
 
@@ -173,8 +202,14 @@ namespace bias
     void SignalSlotDemoPlugin::onNewFrameData(FrameData data)
     {
         //std::cout << "cam " << cameraNumber_ << " received data from cam " << partnerCameraNumber_ << std::endl;
+
         numMessageReceived_++;
         updateMessageLabels();
+
+        if ((cameraNumber_ == 1) && (dataConsumerPtr_ != nullptr))
+        {
+            dataConsumerPtr_ -> enqueueFrameDataCamera0(data);
+        }
 
     }
 

@@ -14,11 +14,13 @@ set(
 set(
     signal_slot_demo_plugin_HEADERS 
     frame_data.hpp
+    data_consumer.hpp
     signal_slot_demo_plugin.hpp
     )
 
 set(
     signal_slot_demo_plugin_SOURCES 
+    data_consumer.cpp
     signal_slot_demo_plugin.cpp
     )
 
