@@ -63,6 +63,7 @@ namespace bias
         if (dataConsumerPtr_ != nullptr)
         {
             dataConsumerPtr_ -> stop();
+            threadPoolPtr_ -> waitForDone();
         }
     }
 
