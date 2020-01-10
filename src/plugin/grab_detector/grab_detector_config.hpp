@@ -14,6 +14,11 @@ namespace bias
 
         public:
 
+            enum TriggerMode {
+                TRIGGER_MODE_ONESHOT,
+                TRIGGER_MODE_CONTINUOUS 
+            };
+
             // Default device parameters 
             static const QString DEFAULT_DEVICE_PORT_NAME;
             static const bool DEFAULT_DEVICE_AUTO_CONNECT;
@@ -28,6 +33,7 @@ namespace bias
             static const QColor DEFAULT_DETECTION_BOX_COLOR;
 
             // Default trigger parameters
+            static const TriggerMode DEFAULT_TRIGGER_MODE;
             static const bool DEFAULT_TRIGGER_ENABLED; 
             static const bool DEFAULT_TRIGGER_ARMED_STATE;
             static const bool DEFAULT_TRIGGER_INVERTED;
@@ -48,6 +54,7 @@ namespace bias
             QColor detectBoxColor;
 
             // Trigger parameters
+            TriggerMode triggerMode;
             bool triggerEnabled;
             bool triggerArmedState;
             bool triggerInverted;
@@ -65,6 +72,9 @@ namespace bias
             RtnStatus fromJson(QByteArray jsonConfigArray);
             QByteArray toJson();
 
+            QString getTriggerModeString();
+            RtnStatus setTriggerMode(TriggerMode mode);
+            RtnStatus setTriggerMode(QString modeString);
 
             QString toString();
             void print();

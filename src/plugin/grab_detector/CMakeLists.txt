@@ -38,7 +38,14 @@ add_library(
 add_dependencies(grab_detector_plugin ${grab_detector_plugin_FORMS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(.)
-target_link_libraries(grab_detector_plugin ${QT_LIBRARIES} bias_plugin bias_utility bias_camera_facade qcustomplot)
+target_link_libraries(
+    grab_detector_plugin 
+    ${QT_LIBRARIES} 
+    ${bias_ext_link_LIBS}
+    bias_plugin bias_utility 
+    bias_camera_facade 
+    qcustomplot
+    )
 
 qt5_use_modules(grab_detector_plugin Core Widgets Gui PrintSupport SerialPort)
 

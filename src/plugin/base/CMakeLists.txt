@@ -29,7 +29,7 @@ add_library(
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(.)
-target_link_libraries(bias_plugin ${QT_LIBRARIES})
+target_link_libraries(bias_plugin ${QT_LIBRARIES} ${bias_ext_link_LIBS})
 
 qt5_use_modules(bias_plugin Core Widgets Gui)
 

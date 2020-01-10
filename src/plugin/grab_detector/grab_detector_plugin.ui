@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>777</width>
-    <height>331</height>
+    <width>938</width>
+    <height>371</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -32,7 +32,7 @@
          </font>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>2</number>
         </property>
         <widget class="QWidget" name="deviceTabPtr">
          <attribute name="title">
@@ -866,22 +866,45 @@
            <widget class="QWidget" name="trigEnabledWidgetPtr" native="true">
             <layout class="QHBoxLayout" name="horizontalLayout_8">
              <item>
+              <widget class="QComboBox" name="trigModeComboBoxPtr">
+               <property name="currentText">
+                <string/>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_22">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>10</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
               <widget class="QLabel" name="trigThresholdLabelPtr">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
                <property name="minimumSize">
                 <size>
-                 <width>62</width>
+                 <width>0</width>
                  <height>0</height>
                 </size>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>62</width>
+                 <width>80</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -925,7 +948,7 @@
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>15</width>
+                 <width>10</width>
                  <height>20</height>
                 </size>
                </property>
@@ -934,20 +957,20 @@
              <item>
               <widget class="QLabel" name="trigMedianFilterLabelPtr">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
                <property name="minimumSize">
                 <size>
-                 <width>72</width>
+                 <width>0</width>
                  <height>0</height>
                 </size>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>72</width>
+                 <width>85</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -994,7 +1017,7 @@
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>15</width>
+                 <width>10</width>
                  <height>20</height>
                 </size>
                </property>
@@ -1002,6 +1025,12 @@
              </item>
              <item>
               <widget class="QCheckBox" name="trigInvertedCheckBoxPtr">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="font">
                 <font>
                  <weight>50</weight>
@@ -1026,8 +1055,8 @@
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>50</width>
-                 <height>20</height>
+                 <width>10</width>
+                 <height>10</height>
                 </size>
                </property>
               </spacer>
@@ -1042,13 +1071,13 @@
                </property>
                <property name="minimumSize">
                 <size>
-                 <width>87</width>
+                 <width>100</width>
                  <height>0</height>
                 </size>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>87</width>
+                 <width>16777215</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -1062,6 +1091,22 @@
                 <string>State: Stopped</string>
                </property>
               </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_21">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
              </item>
              <item>
               <widget class="QPushButton" name="trigResetPushButtonPtr">
@@ -1098,20 +1143,20 @@
              <item>
               <widget class="QCheckBox" name="trigEnabledCheckBoxPtr">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
                <property name="minimumSize">
                 <size>
-                 <width>62</width>
+                 <width>0</width>
                  <height>0</height>
                 </size>
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>62</width>
+                 <width>1000</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -1122,7 +1167,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>enabled</string>
+                <string>Enabled</string>
                </property>
               </widget>
              </item>

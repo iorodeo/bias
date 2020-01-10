@@ -75,6 +75,7 @@ namespace bias
         signals:
 
             void triggerFired(TriggerData data); 
+            void triggerResetEvent();
 
         protected:
 
@@ -100,6 +101,7 @@ namespace bias
 
             void connectWidgets();
             void initialize();
+            void setupTriggerModeComboBox();
 
             cv::Rect getDetectionBoxCv();
             QRect getDetectionBox();
@@ -114,8 +116,8 @@ namespace bias
             void refreshPortList();
 
             void writeLogData(TriggerData data);
-
             void updateColorExampleLabel();
+            void setTriggerMode(QString modeString);
 
 
         private slots:
@@ -131,9 +133,11 @@ namespace bias
             void trigEnabledCheckBoxStateChanged(int state);
             void trigThresholdSpinBoxChanged(int value);
             void trigMedianFilterSpinBoxChanged(int value);
+            void trigModeComboBoxChanged(QString text);
             void detectionBoxChanged(QRect boxRect);
             void updateLivePlotOnTimer();
             void onTriggerFired(TriggerData data);
+            void onTriggerResetEvent();
 
     };
 }

@@ -44,7 +44,12 @@ add_library(
 add_dependencies(stampede_plugin ${stampede_plugin_FORMS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(.)
-target_link_libraries(stampede_plugin ${QT_LIBRARIES} bias_plugin bias_utility)
+target_link_libraries(
+    stampede_plugin 
+    ${QT_LIBRARIES} 
+    ${bias_ext_link_LIBS}
+    bias_plugin bias_utility
+    )
 
 qt5_use_modules(stampede_plugin Core Widgets Gui SerialPort)
 

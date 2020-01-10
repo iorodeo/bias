@@ -5,7 +5,7 @@
 #include <QMessageBox>
 #include <QThread>
 #include <cv.h>
-#include <opencv2/core/core.hpp>
+#include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <sstream>
 #include <iostream>
@@ -30,6 +30,7 @@ namespace bias
     {
         imageLabelPtr_ = imageLabelPtr;
         setupUi(this);
+        setupTriggerModeComboBox();
         connectWidgets();
         initialize();
     }
@@ -110,6 +111,15 @@ namespace bias
                     triggerData.threshold = double(threshold);
                     triggerData.signal = signalMax;
                     emit triggerFired(triggerData);
+                }
+            }
+            if (!found && !config_.triggerArmedState && config_.triggerEnabled)
+            {
+                static int count = 0;
+                if (config_.triggerMode == GrabDetectorConfig::TRIGGER_MODE_CONTINUOUS)
+                {
+                    emit triggerResetEvent();
+                    count++;
                 }
             }
             releaseLock();
@@ -675,6 +685,14 @@ namespace bias
                 SLOT(detectionBoxChanged(QRect))
                );
 
+        connect(
+                trigModeComboBoxPtr,
+                SIGNAL(currentTextChanged(QString)),
+                this,
+                SLOT(trigModeComboBoxChanged(QString))
+               );
+
+
         qRegisterMetaType<TriggerData>("TriggerData");
 
         connect(
@@ -684,6 +702,27 @@ namespace bias
                 SLOT(onTriggerFired(TriggerData))
                );
 
+        connect(
+                this,
+                SIGNAL(triggerResetEvent()),
+                this,
+                SLOT(onTriggerResetEvent())
+               );
+
+    }
+
+
+    void GrabDetectorPlugin::setupTriggerModeComboBox()
+    {
+        trigModeComboBoxPtr -> addItem("One-shot");
+        trigModeComboBoxPtr -> addItem("Continuous");
+        setTriggerMode("Continuous");
+    }
+
+    void GrabDetectorPlugin::setTriggerMode(QString modeString)
+    {
+        trigModeComboBoxPtr -> setCurrentText(modeString);
+        config_.setTriggerMode(modeString);
     }
 
 
@@ -697,6 +736,7 @@ namespace bias
         livePlotUpdateDt_ = DEFAULT_LIVEPLOT_UPDATE_DT;
         livePlotTimeWindow_ = DEFAULT_LIVEPLOT_TIME_WINDOW;
         livePlotSignalWindow_ = DEFAULT_LIVEPLOT_SIGNAL_WINDOW;
+
 
         // Setup live plot
         livePlotPtr -> addGraph();
@@ -961,6 +1001,13 @@ namespace bias
 
     }
 
+
+    void GrabDetectorPlugin::trigModeComboBoxChanged(QString text)
+    {
+        setTriggerMode(text);
+    }
+
+
     void GrabDetectorPlugin::onTriggerFired(TriggerData data)
     {
         if (config_.triggerArmedState)
@@ -977,4 +1024,10 @@ namespace bias
             updateTrigStateInfo();
         }
     }
+
+    void GrabDetectorPlugin::onTriggerResetEvent()
+    {
+        resetTrigger();
+    }
+
 }

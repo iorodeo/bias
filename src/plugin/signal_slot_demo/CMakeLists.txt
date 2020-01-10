@@ -37,7 +37,14 @@ add_library(
 add_dependencies(signal_slot_demo_plugin ${signal_slot_demo_plugin_FORMS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(.)
-target_link_libraries(signal_slot_demo_plugin ${QT_LIBRARIES} bias_plugin bias_utility bias_camera_facade )
+target_link_libraries(
+    signal_slot_demo_plugin 
+    ${QT_LIBRARIES} 
+    ${bias_ext_link_LIBS}
+    bias_plugin 
+    bias_utility 
+    bias_camera_facade 
+    )
 
 qt5_use_modules(signal_slot_demo_plugin Core Widgets Gui PrintSupport )
 

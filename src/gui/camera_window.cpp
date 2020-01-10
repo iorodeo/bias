@@ -2623,9 +2623,9 @@ namespace bias
         tabWidgetPtr_ -> setCurrentWidget(previewTabPtr_);
 
         //setCurrentPlugin(pluginMap_.firstKey());
-        //setCurrentPlugin("grabDetector");
+        setCurrentPlugin("grabDetector");
         //setCurrentPlugin("stampede");
-        setCurrentPlugin("signalSlotDemo");
+        //setCurrentPlugin("signalSlotDemo");
         setPluginEnabled(false);
         //setPluginEnabled(true);
 

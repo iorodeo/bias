@@ -21,6 +21,7 @@ namespace bias
     const QColor GrabDetectorConfig::DEFAULT_DETECTION_BOX_COLOR = QColor(255,0,0);
 
     // Trigger parameters
+    const GrabDetectorConfig::TriggerMode GrabDetectorConfig::DEFAULT_TRIGGER_MODE = TRIGGER_MODE_CONTINUOUS;
     const bool GrabDetectorConfig::DEFAULT_TRIGGER_ENABLED = true;
     const bool GrabDetectorConfig::DEFAULT_TRIGGER_ARMED_STATE = false;
     const bool GrabDetectorConfig::DEFAULT_TRIGGER_INVERTED = false; 
@@ -41,6 +42,7 @@ namespace bias
             detectBoxHeight = DEFAULT_DETECTION_BOX_HEIGHT;
             detectBoxColor = DEFAULT_DETECTION_BOX_COLOR;;
 
+            triggerMode = DEFAULT_TRIGGER_MODE;
             triggerEnabled = DEFAULT_TRIGGER_ENABLED;
             triggerArmedState = DEFAULT_TRIGGER_ARMED_STATE;
             triggerInverted = DEFAULT_TRIGGER_INVERTED;
@@ -395,6 +397,56 @@ namespace bias
             jsonConfigArray = QByteArray();
         }
         return jsonConfigArray;
+    }
+
+
+    QString GrabDetectorConfig::getTriggerModeString()
+    {
+        QString modeString;
+        switch (triggerMode)
+        {
+            case TRIGGER_MODE_ONESHOT:  
+                modeString = QString("One-shot");
+                break;
+
+            case TRIGGER_MODE_CONTINUOUS:
+                modeString = QString("Continuous");
+                break;
+
+            default:
+                modeString = QString("unknown");
+                break;
+        }
+        return modeString;
+    }
+
+
+    RtnStatus GrabDetectorConfig::setTriggerMode(TriggerMode mode)
+    {
+        RtnStatus rtnStatus;
+        triggerMode = mode;
+        return rtnStatus;
+    }
+
+
+    RtnStatus GrabDetectorConfig::setTriggerMode(QString modeString)
+    {
+        RtnStatus rtnStatus;
+
+        if (QString::compare(modeString, QString("One-shot"), Qt::CaseInsensitive)==0)
+        {
+            triggerMode = TRIGGER_MODE_ONESHOT;
+        }
+        else if (QString::compare(modeString, QString("Continuous"), Qt::CaseInsensitive)==0)
+        {
+            triggerMode = TRIGGER_MODE_CONTINUOUS;
+        }
+        else
+        {
+            rtnStatus.success = false;
+            rtnStatus.message = QString("unknown modeString: %1").arg(modeString);
+        }
+        return rtnStatus;
     }
 
 
