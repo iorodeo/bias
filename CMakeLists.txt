@@ -4,7 +4,7 @@ project(bais)
 if (POLICY CMP0020) 
     cmake_policy(SET CMP0020 NEW)
 endif()
-cmake_policy(SET CMP0046 OLD)
+#cmake_policy(SET CMP0046 OLD)
 
 
 # Options
@@ -31,7 +31,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Mod
 # Opencv library
 # -----------------------------------------------------------------------------
 #set("OpenCV_DIR" "/opt/ros/kinetic/include/opencv-3.3.1-dev")
-set("OpenCV_DIR" "/opt/ros/kinetic/lib/x86_64-linux-gnu")
+#set("OpenCV_DIR" "/opt/ros/kinetic/lib/x86_64-linux-gnu")
 find_package( OpenCV REQUIRED )
 
 if(${OpenCV_FOUND})
@@ -51,6 +51,8 @@ if(with_spin)
     find_package( Spinnaker MODULE REQUIRED )
 endif()
 
+message(STATUS "past spinnaker")
+
 # Qt library
 # ------------------------------------------------------------------------------
 if(with_qt_gui)
@@ -60,13 +62,15 @@ if(with_qt_gui)
     # ------------------------------------------------------------
     #find_package(Qt4 COMPONENTS QtCore QtGui QtNetwork REQUIRED)
     # ------------------------------------------------------------
-
+    message(STATUS "starting qt")
     find_package(Qt5Core REQUIRED) 
     find_package(Qt5Widgets REQUIRED)
     find_package(Qt5Gui REQUIRED) 
     find_package(Qt5Network REQUIRED)
+    message(STATUS "qt done")
 
 endif()
+
 
 
 # Compiler flags
@@ -122,6 +126,7 @@ if(with_dc1394)
     #link_directories("/home/wbd/local/lib")
 endif()
 
+message(STATUS "Debug 1")
 
 # External link libraries
 # -----------------------------------------------------------------------------
@@ -148,6 +153,8 @@ set(bias_ext_link_LIBS ${bias_ext_link_LIBS})
 # Output directory for executables - puts executables in build directory
 # -----------------------------------------------------------------------------
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+message(STATUS "Debug 2")
 
 # Add project subdirectories
 # -----------------------------------------------------------------------------
@@ -184,4 +191,6 @@ endif()
 if (with_tests)
     add_subdirectory("src/test")
 endif()
+
+message(STATUS "Debug 3")
 
